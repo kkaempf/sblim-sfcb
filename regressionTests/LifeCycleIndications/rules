@@ -1,0 +1,8 @@
+# $Id: rules,v 1.1 2005/03/12 00:17:56 a3schuur Exp $
+
+%.d: %.c
+	@$(RM) $@
+	$(CC) -MM $(CPPFLAGS) $< | sed 's/\($*\)\.o[ :]*/\1.o $@ : /g' > $@ 
+
+lib%.so: %.o
+	$(LINK.c) -shared $^ $(LOADLIBES) $(LDLIBS)-o $@ 
