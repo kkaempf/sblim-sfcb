@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.11 2005/04/25 22:14:25 bestorga-oss Exp $  
+# $Id: Makefile.am,v 1.12 2005/04/25 23:21:01 bestorga-oss Exp $  
 #
 #  Makefile.am
 # 
@@ -163,6 +163,8 @@ dist_pkgdata_SCRIPTS=genSslCert.sh getSchema.sh
 dist_pkgdata_DATA=default.reg
 
 nodist_bin_SCRIPTS=sfcbrepos sfcbstage sfcbunstage 
+
+dist_bin_SCRIPTS=wbemcat
 
 sfcbrepos: sfcbrepos.sh
 	sed s?$$\{prefix\}?$(prefix)?g $< > $@
