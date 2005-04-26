@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.8 2005/04/20 17:00:27 mihajlov Exp $
+# $Id: configure.ac,v 1.9 2005/04/26 13:23:55 mihajlov Exp $
 # 
 # configure.ac
 #
@@ -21,7 +21,7 @@
 
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(Small Footprint CIM Broker, 0.8.7a, schuur@de.ibm.com, sfcb)
+AC_INIT(Small Footprint CIM Broker, 0.8.8, schuur@de.ibm.com, sblim-sfcb)
 AC_CONFIG_SRCDIR([providerDrv.c])
 
 AM_INIT_AUTOMAKE
