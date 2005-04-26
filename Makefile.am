@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.13 2005/04/26 17:17:39 mihajlov Exp $  
+# $Id: Makefile.am,v 1.14 2005/04/26 21:58:46 a3schuur Exp $  
 #
 #  Makefile.am
 # 
@@ -85,7 +85,8 @@ libsfcBrokerCore_la_SOURCES = \
     queryOperation.c \
     queryStatement.c \
     cimXmlGen.c \
-    mrwlock.c
+    mrwlock.c \
+    mlog.c
 
 libsfcBrokerCore_la_CFLAGS = @SFCB_CMPI_OS@ @SFCB_CMPI_PLATFORM@ 
 
@@ -148,7 +149,7 @@ noinst_HEADERS=array.h   httpComm.h control.h    providerMgr.h \
 	constClass.h   msgqueue.h     providerRegister.h \
 	cimXmlParser.h    native.h       support.h cimXmlGen.h \
 	cimXmlRequest.h  genericlist.h  objectImpl.h   trace.h \
-	hashtable.h      utilft.h \
+	hashtable.h      utilft.h mlog.h \
 	cmpidt.h cmpift.h cmpiftx.h cmpimacs.h cmpimacsx.h cmpios.h fileRepository.h \
 	selectexp.h queryOperation.h authorizationUtil.h authorizationEnum.c \
 	sfcVersion.h mrwlock.h

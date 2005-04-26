@@ -1,5 +1,5 @@
 /*
- * $Id: mlog.c,v 1.1 2005/04/26 14:49:29 a3schuur Exp $
+ * $Id: mlog.c,v 1.2 2005/04/26 21:58:47 a3schuur Exp $
  *
  * (C) Copyright IBM Corp. 2003, 2004
  *
@@ -17,20 +17,20 @@
  *
  */
 
-const char *_mlog_id = "$Id: mlog.c,v 1.1 2005/04/26 14:49:29 a3schuur Exp $";
+const char *_mlog_id = "$Id: mlog.c,v 1.2 2005/04/26 21:58:47 a3schuur Exp $";
 
 #include "mlog.h"
 #include <syslog.h>
 #include <stdarg.h>
 #include <stdio.h>
 
-void m_start_logging(const char *name)
+void startLogging(const char *name)
 {
   openlog(name,LOG_PID,LOG_DAEMON);
   setlogmask(LOG_UPTO(LOG_INFO));
 }
 
-void m_log(int priority, int errout, const char *fmt, ...)
+void mlogf(int priority, int errout, const char *fmt, ...)
 {
   va_list ap;
   int priosysl;
