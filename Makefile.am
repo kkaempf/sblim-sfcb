@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.14 2005/04/26 21:58:46 a3schuur Exp $  
+# $Id: Makefile.am,v 1.15 2005/04/27 03:10:39 bestorga-oss Exp $  
 #
 #  Makefile.am
 # 
@@ -29,7 +29,7 @@ BUILT_SOURCES=queryParser.c queryLexer.c authorizationParser.c \
 
 AM_YFLAGS=-d
 
-AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sysconfdir)/$(PACKAGE)\" \
+AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sysconfdir)/sfcb\" \
 	-DSFCB_STATEDIR=\"$(sfcbstatedir)\"
 
 SUBDIRS=. $(MOFC_DIR)
