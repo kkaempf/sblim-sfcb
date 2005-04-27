@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.9 2005/04/26 13:23:55 mihajlov Exp $
+# $Id: configure.ac,v 1.10 2005/04/27 11:53:13 mihajlov Exp $
 # 
 # configure.ac
 #
@@ -133,5 +133,5 @@ if test -d mofc; then
    AC_SUBST(MOFC_DIR)
 fi
 
-AC_CONFIG_FILES([Makefile sfcb.spec sfcbrepos.sh sfcbstage.sh sfcbunstage.sh sfcb.cfg.pre getSchema.sh.pre])
+AC_CONFIG_FILES([Makefile sfcb.spec sfcbrepos.sh sfcbstage.sh sfcbunstage.sh sfcb.cfg.pre getSchema.sh.pre sfcb.init-redhat sfcb.init-suse sfcb.init-none])
 AC_OUTPUT

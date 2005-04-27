@@ -1,19 +1,19 @@
 #!/bin/bash
 #
-# $Id: sfcb.init-suse,v 1.4 2005/04/01 15:19:29 mihajlov Exp $
+# $Id: sfcb.init-redhat.in,v 1.1 2005/04/27 11:53:13 mihajlov Exp $
 #
-### BEGIN INIT INFO
-# Provides:          sfcb
-# Default-Start:     3 5
-# Default-Stop:      0 1 2 6
-# Short-Description: Small Footprint CIM Broker Service
-# Description:       Manage the sfcb Service
-### END INIT INFO
+# chkconfig: 35 20 80
+#
+# description: Small Footprint CIM Broker Service
+#
+# processname: sfcbd
+#
+# config: @sysconfdir@/sfcb/sfcb.cfg
 
 # Source function library.
-. /etc/rc.status
+. /etc/init.d/functions
 
-echo $PATH | grep -q @bindir@ ||PATH=@bindir@:$PATH
+echo $PATH | grep -q @sbindir@ ||PATH=@sbindir@:$PATH
 
 if [ -z "$LD_LIBRARY_PATH" ] || echo $LD_LIBRARY_PATH | grep -qv @libdir@
 then
@@ -30,20 +30,23 @@ fi
 
 start() {
 	echo -n "Starting sfcb: "
-	startproc @bindir@/sfcbd -d
-	rcstatus -v
+	daemon @sbindir@/sfcbd -d &&
+	touch /var/lock/subsys/sfcb &&
+	return 0 ||
+	return 1
 }	
 
 stop() {
 	echo -n "Shutting down sfcb: "
-	killproc sfcbd
-	rcstatus -v
+	killproc sfcbd &&
+	rm -f /var/lock/subsys/sfcb &&
+	return 0 || return 1
 }
 
 reload() {
 	echo -n "Reloading sfcb configuration: "
-	killproc -HUP sfcbd
-	rcstatus -v
+	killproc sfcbd -HUP &&
+	return 0 || return 1
 }
 
 case "$1" in
@@ -54,8 +57,7 @@ case "$1" in
 	stop
 	;;
     status)
-	checkproc sfcbd
-	rc_status -v
+	status sfcbd
 	;;
     restart)
     	stop
@@ -65,13 +67,7 @@ case "$1" in
 	reload
 	;;
     condrestart)
-	$0 status
-	if test $? = 0; then
-		$0 restart
-	else
-		rc_reset
-	fi
-	rc_status
+	[ -f /var/lock/subsys/sfcb ] && restart || :
 	;;
     *)
 	echo "Usage: sfcb {start|stop|status|reload|restart|condrestart}"

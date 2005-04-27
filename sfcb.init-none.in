@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-# $Id: sfcb.init-none,v 1.3 2005/04/01 15:19:29 mihajlov Exp $
+# $Id: sfcb.init-none.in,v 1.1 2005/04/27 11:53:13 mihajlov Exp $
 # 
 # Generic System V Init Script
 
-echo $PATH | grep -q @bindir@ ||PATH=@bindir@:$PATH
+echo $PATH | grep -q @sbindir@ ||PATH=@sbindir@:$PATH
 
 if [ -z "$LD_LIBRARY_PATH" ] || echo $LD_LIBRARY_PATH | grep -qv @libdir@
 then
@@ -21,14 +21,14 @@ fi
 
 start() {
 	echo -n "Starting sfcb: "
-	@bindir@/sfcbd -d && echo "done." && return 0 ||
+	@sbindir@/sfcbd -d && echo "done." && return 0 ||
 	echo "failed."
 	return 1
 }	
 
 stop() {
 	echo -n "Shutting down sfcb: "
-	killall -9 sfcbd && echo "done." && return 0 ||
+	killall sfcbd && echo "done." && return 0 ||
 	echo "failed."
 	return 1
 }
