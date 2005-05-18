@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.19 2005/05/02 01:35:06 bestorga-oss Exp $  
+# $Id: Makefile.am,v 1.20 2005/05/18 15:02:16 bestorga-oss Exp $  
 #
 #  Makefile.am
 # 
@@ -194,6 +194,7 @@ install-data-local:
 	test -d $(DESTDIR)$(sfcbstatedir)/stage/mofs || $(mkdir_p) $(DESTDIR)$(sfcbstatedir)/stage/mofs
 	test -d $(DESTDIR)$(sfcbstatedir)/stage/regs || $(mkdir_p) $(DESTDIR)$(sfcbstatedir)/stage/regs
 	$(INSTALL_DATA) $(srcdir)/default.reg $(DESTDIR)$(sfcbstatedir)/stage
+	$(INSTALL_DATA) $(srcdir)/interop.mof $(DESTDIR)$(sfcbstatedir)/stage
 	test -d $(DESTDIR)$(sfcbdocdir) || $(mkdir_p) $(DESTDIR)$(sfcbdocdir)
 	$(INSTALL_DATA) $(srcdir)/README $(srcdir)/AUTHORS $(srcdir)/COPYING $(DESTDIR)$(sfcbdocdir)
 	$(INSTALL_DATA) $(srcdir)/doc/sfcb.html $(DESTDIR)$(sfcbdocdir)
@@ -201,6 +202,7 @@ install-data-local:
 uninstall-local:
 	rm -f $(DESTDIR)$(sysconfdir)/sfcb/sfcb.cfg
 	rm -f $(DESTDIR)$(sfcbstatedir)/stage/default.reg
+	rm -f $(DESTDIR)$(sfcbstatedir)/stage/interop.mof
 	rm -f $(DESTDIR)$(sfcbdocdir)/*
 	-rmdir $(sysconfdir)/sfcb
 	-rmdir $(sfcbdocdir)
