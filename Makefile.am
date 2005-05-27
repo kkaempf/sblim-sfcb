@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.20 2005/05/18 15:02:16 bestorga-oss Exp $  
+# $Id: Makefile.am,v 1.21 2005/05/27 22:49:54 bestorga-oss Exp $  
 #
 #  Makefile.am
 # 
@@ -155,7 +155,7 @@ dist_sfcbdata_DATA=default.reg
 
 nodist_bin_SCRIPTS=sfcbrepos sfcbstage sfcbunstage 
 
-dist_bin_SCRIPTS=wbemcat
+dist_bin_SCRIPTS=wbemcat xmltest.sh
 
 init_SCRIPTS=sfcb
 
