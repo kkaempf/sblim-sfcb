@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.22 2005/06/02 17:23:52 bestorga-oss Exp $  
+# $Id: Makefile.am,v 1.23 2005/06/03 10:31:47 mihajlov Exp $  
 #
 #  Makefile.am
 # 
@@ -26,7 +26,7 @@ sfcbstatedir=$(localstatedir)/lib/sfcb
 sfcbdocdir=$(datadir)/doc/sfcb-$(VERSION)
 initdir=$(sysconfdir)/init.d
 
-BUILT_SOURCES=queryParser.c queryLexer.c
+BUILT_SOURCES=queryParser.c queryLexer.c sqlParser.c sqlLexer.c
 
 AM_YFLAGS=-d
 
@@ -86,9 +86,20 @@ libsfcBrokerCore_la_SOURCES = \
     queryStatement.c \
     cimXmlGen.c \
     mrwlock.c \
-    mlog.c
+    mlog.c \
+    dbpAdapter.c \
+    sqlLexer.c \
+    sqlParser.c \
+    sqlStatement.c \
+    avltree.c
 
 libsfcBrokerCore_la_CFLAGS = @SFCB_CMPI_OS@ @SFCB_CMPI_PLATFORM@ 
+
+sqlLexer.c: sqlLexer.l sqlParser.y
+	lex -t sqlLexer.l | sed -e "s/yy/sfcSql/g" > sqlLexer.c
+
+sqlParser.c: sqlLexer.l sqlParser.y
+	bison -p sfcSql -d -o sqlParser.c sqlParser.y
 
 queryLexer.c: queryLexer.l queryParser.y
 	lex -t queryLexer.l | sed -e "s/yy/sfcQuery/g" > queryLexer.c
