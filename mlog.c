@@ -1,5 +1,5 @@
 /*
- * $Id: mlog.c,v 1.2 2005/04/26 21:58:47 a3schuur Exp $
+ * $Id: mlog.c,v 1.3 2005/06/21 07:27:42 a3schuur Exp $
  *
  * (C) Copyright IBM Corp. 2003, 2004
  *
@@ -12,12 +12,13 @@
  *
  * Author:       Viktor Mihajlovski <mihajlov@de.ibm.cim>
  * Contributors: Michael Schuele <schuelem@de.ibm.com>
+ *               Anas Nashif <nashif@planux.com>
  *
- * Description: Metric Defintiona and Value data types.
+ * Description: Logger support.
  *
  */
 
-const char *_mlog_id = "$Id: mlog.c,v 1.2 2005/04/26 21:58:47 a3schuur Exp $";
+const char *_mlog_id = "$Id: mlog.c,v 1.3 2005/06/21 07:27:42 a3schuur Exp $";
 
 #include "mlog.h"
 #include <syslog.h>
@@ -32,7 +33,7 @@ void startLogging(const char *name)
 
 void mlogf(int priority, int errout, const char *fmt, ...)
 {
-  va_list ap;
+  va_list ap,apc;
   int priosysl;
 
   char buf[4096];
@@ -55,7 +56,9 @@ void mlogf(int priority, int errout, const char *fmt, ...)
   syslog(priosysl,buf);
 
   if (errout) {
-    vfprintf(stderr,fmt,ap);
+    va_start(apc,fmt);
+    vfprintf(stderr,fmt,apc);
+    va_end(apc);
   }
   va_end(ap);
 }
