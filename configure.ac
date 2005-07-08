@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.13 2005/06/07 12:52:17 mihajlov Exp $
+# $Id: configure.ac,v 1.14 2005/07/08 14:01:51 a3schuur Exp $
 # 
 # configure.ac
 #
@@ -118,7 +118,7 @@ AC_STRUCT_TM
 AC_FUNC_ALLOCA
 AC_FUNC_ERROR_AT_LINE
 AC_FUNC_FORK
-AC_FUNC_MALLOC
+#AC_FUNC_MALLOC
 AC_FUNC_MKTIME
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
