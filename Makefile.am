@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.26 2005/06/13 12:50:33 mihajlov Exp $  
+# $Id: Makefile.am,v 1.27 2005/07/13 08:41:22 mihajlov Exp $  
 #
 #  Makefile.am
 # 
@@ -203,7 +203,7 @@ noinst_HEADERS=array.h   httpComm.h control.h    providerMgr.h \
 EXTRA_DIST=sfcb.cfg.pre.in sfcb.spec sfcbrepos.sh.in sfcbstage.sh.in \
 	sfcbunstage.sh.in sfcb.init-redhat.in sfcb.init-suse.in \
 	sfcb.init-none.in \
-	regressionTests doc
+	doc
 
 sfcbconf_DATA=sfcb.cfg
 
