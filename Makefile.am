@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.27 2005/07/13 08:41:22 mihajlov Exp $  
+# $Id: Makefile.am,v 1.28 2005/07/27 16:22:22 mihajlov Exp $  
 #
 #  Makefile.am
 # 
@@ -36,6 +36,7 @@ AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sfcbconfdir)\" \
 
 SUBDIRS=. $(MOFC_DIR)
 
+if INDICATIONS
 lib_LTLIBRARIES = \
    libsfcBrokerCore.la \
    libsfcInternalProvider.la \
@@ -45,6 +46,16 @@ lib_LTLIBRARIES = \
    libsfcHttpAdapter.la \
    libsfcBasicAuthentication.la \
    libsfcIndCIMXMLHandler.la
+else
+lib_LTLIBRARIES = \
+   libsfcBrokerCore.la \
+   libsfcInternalProvider.la \
+   libsfcInteropProvider.la \
+   libsfcClassProvider.la \
+   libsfcCimXmlCodec.la \
+   libsfcHttpAdapter.la \
+   libsfcBasicAuthentication.la
+endif
 
 sbin_PROGRAMS = \
    sfcbd 
@@ -173,7 +184,7 @@ libsfcInteropProvider_la_LIBADD=-lsfcBrokerCore -lsfcInternalProvider
 libsfcIndCIMXMLHandler_la_SOURCES = \
    indCIMXMLHandler.c \
    indCIMXMLExport.c 
-libsfcIndCIMXMLHandler_la_LIBADD=-lsfcBrokerCore -lsfcInternalProvider -lsfcCimXmlCodec -lsfcHttpAdapter -lcurl
+libsfcIndCIMXMLHandler_la_LIBADD=-lsfcBrokerCore -lsfcInternalProvider -lsfcCimXmlCodec -lsfcHttpAdapter
 
 libsfcClassProvider_la_SOURCES = \
    classProvider.c
