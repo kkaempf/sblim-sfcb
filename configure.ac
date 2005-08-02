@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.16 2005/07/27 16:22:38 mihajlov Exp $
+# $Id: configure.ac,v 1.17 2005/08/02 17:40:43 a3schuur Exp $
 # 
 # configure.ac
 #
@@ -69,7 +69,7 @@ fi
 		;;
      linux*)	SFCB_CMPI_PLATFORM="-D CMPI_PLATFORM_LINUX_GENERIC_GNU"
 		SFCB_CMPI_OS="-D CMPI_OS_LINUX"
-		CFLAGS=-Wall
+		CFLAGS="-Wall -fsigned-char"
 if test "$enable_debug" != "no"; then
 		CFLAGS="-g $CFLAGS"
 fi
