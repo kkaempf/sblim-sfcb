@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.17 2005/08/02 17:40:43 a3schuur Exp $
+# $Id: configure.ac,v 1.18 2005/08/24 23:28:42 ibmpeanuts Exp $
 # 
 # configure.ac
 #
@@ -45,6 +45,8 @@ AC_ARG_ENABLE(indications,
 	[enable_indications=$enableval],
 	[enable_indications="yes"]
 	)
+
+export enable_debug=yes
 
 if test "$enable_debug" == "yes"; then
    CPPFLAGS="-D SFCB_DEBUG $CPPFLAGS"
