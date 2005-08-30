@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.18 2005/08/24 23:28:42 ibmpeanuts Exp $
+# $Id: configure.ac,v 1.19 2005/08/30 18:18:15 tyreld Exp $
 # 
 # configure.ac
 #
@@ -98,6 +98,11 @@ AC_SUBST(SFCB_CMPI_OS)
 AC_PROG_CC
 AC_PROG_LEX
 AC_CHECK_PROG(YACC,bison,[bison -y])
+if test -z "${YACC}"
+then
+	AC_MSG_ERROR([GNU bison is required to build the sfcb package.])
+fi
+
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
