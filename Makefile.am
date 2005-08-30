@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.30 2005/08/30 18:37:24 tyreld Exp $  
+# $Id: Makefile.am,v 1.31 2005/08/30 20:07:55 tyreld Exp $  
 #
 #  Makefile.am
 # 
@@ -155,14 +155,14 @@ sqlLexer.c: sqlLexer.l sqlParser.y
 	lex -t sqlLexer.l | sed -e "s/yy/sfcSql/g" > sqlLexer.c
 
 sqlParser.c: sqlLexer.l sqlParser.y
-	bison -p sfcSql -d -o sqlParser.c sqlParser.y
+	$(YACC) -p sfcSql -d -o sqlParser.c sqlParser.y
 endif
 
 queryLexer.c: queryLexer.l queryParser.y
 	lex -t queryLexer.l | sed -e "s/yy/sfcQuery/g" > queryLexer.c
 
 queryParser.c: queryLexer.l queryParser.y
-	yacc -p sfcQuery -d -o queryParser.c queryParser.y  
+	$(YACC) -p sfcQuery -d -o queryParser.c queryParser.y  
 
 libsfcHttpAdapter_la_SOURCES = \
    httpAdapter.c \
