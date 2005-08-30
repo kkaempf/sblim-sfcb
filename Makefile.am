@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.28 2005/07/27 16:22:22 mihajlov Exp $  
+# $Id: Makefile.am,v 1.29 2005/08/30 18:31:22 tyreld Exp $  
 #
 #  Makefile.am
 # 
@@ -266,7 +266,7 @@ install-data-local:
 	$(INSTALL_DATA) $(srcdir)/interop.mof $(DESTDIR)$(sfcbstatedir)/stage
 	test -d $(DESTDIR)$(sfcbdocdir) || $(mkdir_p) $(DESTDIR)$(sfcbdocdir)
 	$(INSTALL_DATA) $(srcdir)/README $(srcdir)/AUTHORS $(srcdir)/COPYING $(DESTDIR)$(sfcbdocdir)
-	$(INSTALL_DATA) $(srcdir)/doc/sfcb.html $(DESTDIR)$(sfcbdocdir)
+	$(INSTALL_DATA) $(DESTDIR)$(sfcbdocdir)
 
 uninstall-local:
 	rm -f $(DESTDIR)$(sysconfdir)/sfcb/sfcb.cfg
