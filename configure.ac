@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.20 2005/08/31 14:26:40 mihajlov Exp $
+# $Id: configure.ac,v 1.21 2005/08/31 16:04:10 mihajlov Exp $
 # 
 # configure.ac
 #
@@ -28,8 +28,11 @@ AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER([config.h])
 
 AC_ARG_ENABLE(debug,
-	[AC_HELP_STRING([--enable-debug],
-		[enable debug mode for SFCB.])])
+	[AC_HELP_STRING([--disable-debug],
+		[disable debug mode for SFCB.])],
+	[enable_debug=$enableval],
+	[enable_debug="yes"]
+	)	
 
 AC_ARG_ENABLE(ssl,
 	[AC_HELP_STRING([--enable-ssl],
@@ -45,8 +48,6 @@ AC_ARG_ENABLE(indications,
 	[enable_indications=$enableval],
 	[enable_indications="yes"]
 	)
-
-export enable_debug=yes
 
 if test "$enable_debug" == "yes"; then
    CPPFLAGS="-D SFCB_DEBUG $CPPFLAGS"
