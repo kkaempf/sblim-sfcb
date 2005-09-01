@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.21 2005/08/31 16:04:10 mihajlov Exp $
+# $Id: configure.ac,v 1.22 2005/09/01 16:12:28 mihajlov Exp $
 # 
 # configure.ac
 #
@@ -170,7 +170,10 @@ fi
 AM_CONDITIONAL(INDICATIONS,[test "$enable_indications" == "yes"]) 
 AM_CONDITIONAL(JDBC,[test "$enable_jdbc" == "yes"]) 
 
-AC_CONFIG_FILES([Makefile sfcb.spec sfcbrepos.sh sfcbstage.sh sfcbunstage.sh sfcb.cfg.pre getSchema.sh.pre sfcb.init-redhat sfcb.init-suse sfcb.init-none])
+AC_CONFIG_FILES([Makefile sfcb.spec sfcbrepos.sh sfcbstage.sh sfcbunstage.sh sfcb.cfg.pre getSchema.sh.pre 
+		 sfcb.init-redhat sfcb.init-suse sfcb.init-none man/genSslCert.1.pre  man/sfcbmof.1.pre 
+                 man/sfcbunstage.1.pre man/getSchema.1.pre   man/sfcbrepos.1.pre  man/wbemcat.1.pre
+		 man/sfcbd.1.pre man/sfcbstage.1.pre man/xmltest.1.pre ])
 AC_OUTPUT
 
 echo ======================================================
