@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.35 2005/09/01 16:12:28 mihajlov Exp $  
+# $Id: Makefile.am,v 1.36 2005/09/12 22:51:05 a3schuur Exp $  
 #
 #  Makefile.am
 # 
@@ -45,6 +45,7 @@ lib_LTLIBRARIES = \
    libsfcBrokerCore.la \
    libsfcInternalProvider.la \
    libsfcInteropProvider.la \
+   libsfcInteropServerProvider.la \
    libsfcClassProvider.la \
    libsfcCimXmlCodec.la \
    libsfcHttpAdapter.la \
@@ -55,6 +56,7 @@ lib_LTLIBRARIES = \
    libsfcBrokerCore.la \
    libsfcInternalProvider.la \
    libsfcInteropProvider.la \
+   libsfcInteropServerProvider.la \
    libsfcClassProvider.la \
    libsfcCimXmlCodec.la \
    libsfcHttpAdapter.la \
@@ -184,6 +186,10 @@ libsfcInternalProvider_la_LIBADD=-lsfcBrokerCore
 libsfcInteropProvider_la_SOURCES = \
    interopProvider.c 
 libsfcInteropProvider_la_LIBADD=-lsfcBrokerCore -lsfcInternalProvider
+
+libsfcInteropServerProvider_la_SOURCES = \
+   interopServerProvider.c 
+libsfcInteropServerProvider_la_LIBADD=-lsfcBrokerCore 
 
 libsfcIndCIMXMLHandler_la_SOURCES = \
    indCIMXMLHandler.c \
