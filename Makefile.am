@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.38 2005/10/05 14:09:16 mihajlov Exp $  
+# $Id: Makefile.am,v 1.39 2005/10/06 11:43:28 mihajlov Exp $  
 #
 #  Makefile.am
 # 
@@ -36,7 +36,8 @@ AM_YFLAGS=-d
 
 AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sfcbconfdir)\" \
 	-DSFCB_STATEDIR=\"$(sfcbstatedir)\" \
-	-DSFCB_LIBDIR=\"$(libdir)\"
+	-DSFCB_LIBDIR=\"$(libdir)\" \
+	-DSFCB_BINARY=\"$(sbindir)/sfcbd\"
 
 SUBDIRS=. $(MOFC_DIR)
 
