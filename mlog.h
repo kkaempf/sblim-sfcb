@@ -1,14 +1,14 @@
 /*
- * $Id: mlog.h,v 1.2 2005/04/26 21:58:47 a3schuur Exp $
+ * $Id: mlog.h,v 1.3 2005/11/20 17:43:54 bestorga-oss Exp $
  *
  * (C) Copyright IBM Corp. 2003, 2004
  *
- * THIS FILE IS PROVIDED UNDER THE TERMS OF THE COMMON PUBLIC LICENSE
+ * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
  * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
  * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
  *
- * You can obtain a current copy of the Common Public License from
- * http://oss.software.ibm.com/developerworks/opensource/license-cpl.html
+ * You can obtain a current copy of the Eclipse Public License from
+ * http://www.opensource.org/licenses/eclipse-1.0.php
  *
  * Author:       Viktor Mihajlovski <mihajlov@de.ibm.cim>
  * Contributors: 

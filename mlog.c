@@ -1,14 +1,14 @@
 /*
- * $Id: mlog.c,v 1.3 2005/06/21 07:27:42 a3schuur Exp $
+ * $Id: mlog.c,v 1.4 2005/11/20 17:43:54 bestorga-oss Exp $
  *
  * (C) Copyright IBM Corp. 2003, 2004
  *
- * THIS FILE IS PROVIDED UNDER THE TERMS OF THE COMMON PUBLIC LICENSE
+ * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
  * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
  * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
  *
- * You can obtain a current copy of the Common Public License from
- * http://oss.software.ibm.com/developerworks/opensource/license-cpl.html
+ * You can obtain a current copy of the Eclipse Public License from
+ * http://www.opensource.org/licenses/eclipse-1.0.php
  *
  * Author:       Viktor Mihajlovski <mihajlov@de.ibm.cim>
  * Contributors: Michael Schuele <schuelem@de.ibm.com>
@@ -18,7 +18,7 @@
  *
  */
 
-const char *_mlog_id = "$Id: mlog.c,v 1.3 2005/06/21 07:27:42 a3schuur Exp $";
+const char *_mlog_id = "$Id: mlog.c,v 1.4 2005/11/20 17:43:54 bestorga-oss Exp $";
 
 #include "mlog.h"
 #include <syslog.h>
