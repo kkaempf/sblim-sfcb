@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.40 2005/11/20 17:43:54 bestorga-oss Exp $  
+# $Id: Makefile.am,v 1.41 2005/12/13 08:56:48 mihajlov Exp $  
 #
 #  Makefile.am
 # 
@@ -222,7 +222,7 @@ noinst_HEADERS=array.h   httpComm.h control.h    providerMgr.h \
 	cimXmlRequest.h  genericlist.h  objectImpl.h   trace.h \
 	hashtable.h      utilft.h mlog.h \
 	cmpidt.h cmpift.h cmpiftx.h cmpimacs.h cmpimacsx.h cmpios.h \
-	fileRepository.h \
+	fileRepository.h internalProvider.h \
 	selectexp.h queryOperation.h \
 	sfcVersion.h mrwlock.h sqlStatement.h avltree.h
 
