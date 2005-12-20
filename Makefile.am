@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.42 2005/12/16 23:50:58 a3schuur Exp $  
+# $Id: Makefile.am,v 1.43 2005/12/20 14:33:39 mihajlov Exp $  
 #
 #  Makefile.am
 # 
@@ -206,7 +206,7 @@ libsfcIndCIMXMLHandler_la_LIBADD=-lsfcBrokerCore -lsfcInternalProvider -lsfcCimX
 
 libsfcClassProviderGz_la_SOURCES = \
    classProviderGz.c
-libsfcClassProviderGz_la_LIBADD=-lsfcBrokerCore
+libsfcClassProviderGz_la_LIBADD=-lsfcBrokerCore @SFCB_LIBZ@
 
 libsfcClassProvider_la_SOURCES = \
    classProvider.c
