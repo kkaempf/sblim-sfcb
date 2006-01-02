@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.31 2005/12/22 09:20:55 mihajlov Exp $
+# $Id: configure.ac,v 1.32 2006/01/02 15:01:37 mihajlov Exp $
 # 
 # configure.ac
 #
@@ -157,11 +157,11 @@ fi
 AC_SUBST(INIT_STYLE)
 
 # Checks for subdirectories
-if test -d test; then
+if test -d $srcdir/test; then
    AC_CONFIG_SUBDIRS([test])
 fi
 
-if test -d mofc; then
+if test -d $srcdir/mofc; then
    MOFC_DIR=mofc
    export sfcb_recursed=yes
    export with_sfcb=yes
