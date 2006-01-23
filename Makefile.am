@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.46 2006/01/17 16:22:51 a3schuur Exp $  
+# $Id: Makefile.am,v 1.47 2006/01/23 11:14:25 a3schuur Exp $  
 #
 #  Makefile.am
 # 
@@ -54,7 +54,7 @@ lib_LTLIBRARIES = \
    libsfcBasicAuthentication.la \
    libsfcCertificateAuthentication.la \
    libsfcIndCIMXMLHandler.la \
-   libsfcObjectImplSwapEndian.la
+   libsfcObjectImplSwapI32toP32.la
 else
 lib_LTLIBRARIES = \
    libsfcBrokerCore.la \
@@ -67,7 +67,7 @@ lib_LTLIBRARIES = \
    libsfcHttpAdapter.la \
    libsfcBasicAuthentication.la \
    libsfcCertificateAuthentication.la \
-   libsfcObjectImplSwapEndian.la
+   libsfcObjectImplSwapI32toP32.la
 endif
 
 sbin_PROGRAMS = \
@@ -196,9 +196,9 @@ libsfcInternalProvider_la_SOURCES = \
    fileRepository.c
 libsfcInternalProvider_la_LIBADD=-lsfcBrokerCore
 
-libsfcObjectImplSwapEndian_la_SOURCES = \
-   objectImplSwapEndian.c \
-libsfcObjectImplSwapEndian_la_LIBADD=-lsfcBrokerCore
+libsfcObjectImplSwapI32toP32_la_SOURCES = \
+   objectImplSwapI32toP32.c \
+libsfcObjectImplSwapI32toP32_la_LIBADD=-lsfcBrokerCore
 
 libsfcInteropProvider_la_SOURCES = \
    interopProvider.c 
