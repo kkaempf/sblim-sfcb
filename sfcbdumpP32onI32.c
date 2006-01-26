@@ -1,6 +1,6 @@
 
 /*
- * $Id: sfcbdumpP32onI32.c,v 1.2 2006/01/26 14:07:17 mihajlov Exp $
+ * $Id: sfcbdumpP32onI32.c,v 1.3 2006/01/26 14:18:10 mihajlov Exp $
  *
  * (C) Copyright IBM Corp. 2006
  *
@@ -199,10 +199,10 @@ int main(int argc, char * argv[])
 	  clob = (CLP32_ClObjectHdr*) fillBuf;
 	  printf("== Unspecified Record Type %d\n",clob->type);
 	  if (rc == 0) {
-	    rc = dumpStringBuffer(&clob,"   ");
+	    rc = dumpStringBuffer(clob,"   ");
 	  }	  
 	  if (rc == 0) {
-	    rc = dumpArrayBuffer(&clob,"   ");
+	    rc = dumpArrayBuffer(clob,"   ");
 	  }	  
 	  if (rc == 0) {
 	    state = REC_HDR;
