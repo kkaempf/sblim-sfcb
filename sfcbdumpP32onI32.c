@@ -1,6 +1,6 @@
 
 /*
- * $Id: sfcbdumpP32onI32.c,v 1.3 2006/01/26 14:18:10 mihajlov Exp $
+ * $Id: sfcbdumpP32onI32.c,v 1.4 2006/01/27 09:50:03 a3schuur Exp $
  *
  * (C) Copyright IBM Corp. 2006
  *
@@ -75,8 +75,8 @@ typedef struct {
     #define ClProperty_Q_EmbeddedObject 8
    #endif 
    unsigned char originId;
-   int fillP32_2;
    CLP32_ClSection qualifiers;
+   int fillP32_2;
 } CLP32_ClProperty;
 #define BINARY_NAME argv[0]
 #define SCHEMA_NAME argv[optind]
