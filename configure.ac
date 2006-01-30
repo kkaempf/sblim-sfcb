@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.35 2006/01/26 14:17:27 mihajlov Exp $
+# $Id: configure.ac,v 1.36 2006/01/30 14:53:39 mihajlov Exp $
 # 
 # configure.ac
 #
@@ -21,7 +21,7 @@
 
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(Small Footprint CIM Broker, 1.0.99, sblim-devel@lists.sourceforge.net, sblim-sfcb)
+AC_INIT(Small Footprint CIM Broker, 1.1.0, sblim-devel@lists.sourceforge.net, sblim-sfcb)
 AC_CONFIG_SRCDIR([providerDrv.c])
 
 AM_INIT_AUTOMAKE
@@ -83,6 +83,8 @@ esac
 
 case $host_cpu in
      i*86)     AC_DEFINE(SFCB_IX86,1,[Intel i386 CPU])
+	       ;;     
+     powerpc*)  CFLAGS="$CFLAGS -O0"
 	       ;;     
 esac
 
