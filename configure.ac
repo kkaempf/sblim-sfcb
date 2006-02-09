@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.37 2006/01/31 16:23:44 mihajlov Exp $
+# $Id: configure.ac,v 1.38 2006/02/09 13:44:18 mihajlov Exp $
 # 
 # configure.ac
 #
@@ -48,6 +48,8 @@ AC_ARG_ENABLE(indications,
 	[enable_indications=$enableval],
 	[enable_indications="yes"]
 	)
+
+AC_DISABLE_STATIC
 
 if test "$enable_debug" == "yes"; then
    SFCB_CPPFLAGS="-D SFCB_DEBUG $SFCB_CPPFLAGS"
@@ -103,7 +105,6 @@ if test -z "${YACC}"
 then
 	AC_MSG_ERROR([GNU bison is required to build the sfcb package.])
 fi
-
 AC_PROG_LIBTOOL
 
 # Checks for libraries.
