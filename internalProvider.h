@@ -1,6 +1,6 @@
 
 /*
- * $Id: internalProvider.h,v 1.1 2005/12/15 07:09:56 mihajlov Exp $
+ * $Id: internalProvider.h,v 1.2 2006/03/06 04:11:08 a3schuur Exp $
  *
  * (C) Copyright IBM Corp. 2005
  *
@@ -22,6 +22,9 @@
 
 #ifndef INTERNAL_PROVIDER_H
 #define INTERNAL_PROVIDER_H
+
+#include "utilft.h"
+#include "cmpidt.h"
 
 CMPIStatus InternalProviderEnumInstanceNames(CMPIInstanceMI * mi,
 					     const CMPIContext * ctx, 
