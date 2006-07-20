@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.41 2006/07/19 14:07:39 sschuetz Exp $
+# $Id: configure.ac,v 1.42 2006/07/20 10:42:54 sschuetz Exp $
 # 
 # configure.ac
 #
@@ -136,8 +136,9 @@ fi
 if test "$enable_slp"; then
 	#defined in acinclude.m4
 	CHECK_SFCC  
-	
 	AC_CHECK_LIB(cmpisfcc,cmciConnect,[],[AC_MSG_ERROR(no. Sorry cannot find libcmpisfcc.)])
+	
+	AC_CHECK_HEADERS([slp.h],[],[AC_MSG_ERROR(no. Sorry cannot find slp.h.)])
 	AC_CHECK_LIB(slp,SLPReg,[],[AC_MSG_ERROR(no. Sorry cannot find libslp.)])
 fi
 
