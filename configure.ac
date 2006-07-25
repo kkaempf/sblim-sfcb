@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.42 2006/07/20 10:42:54 sschuetz Exp $
+# $Id: configure.ac,v 1.43 2006/07/25 15:58:16 mihajlov Exp $
 # 
 # configure.ac
 #
@@ -53,6 +53,15 @@ AC_ARG_ENABLE(indications,
 	[enable_indications=$enableval],
 	[enable_indications="yes"]
 	)
+
+# Configuration Arguments
+AC_ARG_VAR([CIMSCHEMA_SOURCE],[The URL or path name of the CIM Schema ZIP File.])
+AC_ARG_VAR([CIMSCHEMA_MOF],[The file name of the top level MOF (CIMSchema.mof)])
+AC_ARG_VAR([CIMSCHEMA_SUBDIRS],[Set this to any value if the unpacked CIM Schema directory has subdirectories])
+AC_SUBST(CIMSCHEMA_SOURCE)
+AC_SUBST(CIMSCHEMA_MOF)
+AC_SUBST(CIMSCHEMA_SUBDIRS)
+
 
 AC_DISABLE_STATIC
 
