@@ -1,6 +1,6 @@
 
 /*
- * $Id: qualifierProvider.c,v 1.3 2006/09/29 14:14:43 sschuetz Exp $
+ * $Id: qualifierProvider.c,v 1.4 2006/10/06 07:44:52 sschuetz Exp $
  *
  * (C) Copyright IBM Corp. 2006
  *
@@ -25,6 +25,7 @@
 #include "cmpimacs.h"
 #include "cmpimacsx.h"
 #include "qualifier.h"
+#include "native.h"
 
 #include "trace.h"
 
