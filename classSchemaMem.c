@@ -1,6 +1,6 @@
 
 /*
- * $Id: classSchemaMem.c,v 1.2 2006/10/25 15:13:26 mihajlov Exp $
+ * $Id: classSchemaMem.c,v 1.3 2006/10/25 16:59:43 mihajlov Exp $
  *
  * (C) Copyright IBM Corp. 2006
  *
@@ -25,7 +25,7 @@
 #include "classSchemaMem.h"
 
 extern ClassSchema interop_classes;
-/* extern ClassSchema interop_classes; */
+/* extern ClassSchema cimv2_classes; */
 
 NamespaceDir sfcb_mem_namespaces[] = {
   {"root/interop", &interop_classes},
