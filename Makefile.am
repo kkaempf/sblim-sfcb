@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.56 2006/10/25 15:13:26 mihajlov Exp $  
+# $Id: Makefile.am,v 1.57 2006/10/27 11:45:41 sschuetz Exp $  
 #
 #  Makefile.am
 # 
@@ -72,6 +72,7 @@ endif
 
 lib_LTLIBRARIES = \
    libsfcUtil.la \
+   libsfcFileRepository.la \
    libsfcBrokerCore.la \
    libsfcInternalProvider.la \
    libsfcInteropProvider.la \
@@ -226,6 +227,10 @@ libcimcClientSfcbLocal_la_SOURCES = \
    cimcClientSfcbLocal.c
 libcimcClientSfcbLocal_la_LIBADD=-lsfcBrokerCore
 
+libsfcFileRepository_la_SOURCES = \
+	fileRepository.c
+libsfcFileRepository_la_LIBADD=-lsfcBrokerCore	
+
 libsfcHttpAdapter_la_SOURCES = \
    httpAdapter.c \
    httpComm.c
@@ -238,9 +243,8 @@ libsfcCertificateAuthentication_la_SOURCES = \
    sfcCertificateAuthentication.c
 
 libsfcInternalProvider_la_SOURCES = \
-   internalProvider.c \
-   fileRepository.c
-libsfcInternalProvider_la_LIBADD=-lsfcBrokerCore
+   internalProvider.c
+libsfcInternalProvider_la_LIBADD=-lsfcBrokerCore -lsfcFileRepository
 
 libsfcObjectImplSwapI32toP32_la_SOURCES = \
    objectImplSwapI32toP32.c 
@@ -289,9 +293,8 @@ endif
 
 if QUALREP
 libsfcQualifierProvider_la_SOURCES = \
-   qualifierProvider.c \
-   fileRepository.c
-libsfcQualifierProvider_la_LIBADD=-lsfcBrokerCore
+   qualifierProvider.c
+libsfcQualifierProvider_la_LIBADD=-lsfcBrokerCore -lsfcFileRepository
 endif
 
 sfcbd_SOURCES=sfcBroker.c
