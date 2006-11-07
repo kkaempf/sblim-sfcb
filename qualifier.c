@@ -1,6 +1,6 @@
 
 /*
- * $Id: qualifier.c,v 1.1 2006/09/28 11:46:10 sschuetz Exp $
+ * $Id: qualifier.c,v 1.2 2006/11/07 15:00:20 sschuetz Exp $
  *
  * (C) Copyright IBM Corp. 2006
  *
@@ -110,6 +110,8 @@ void getSerializedQualifier(CMPIQualifierDecl * q, void *area)
    memcpy(area, q, sizeof(CMPIQualifierDecl));
    ClQualifierRebuildQualifier((ClQualifierDeclaration *) q->hdl,
                        (void *) ((char *) area + sizeof(CMPIQualifierDecl)));
+   ((CMPIQualifierDecl *)(area))->hdl =
+   			(ClQualifierDeclaration *) ((char *) area + sizeof(CMPIQualifierDecl));                       
 }
 
 CMPIQualifierDecl initQualifier(ClQualifierDeclaration *qual)
