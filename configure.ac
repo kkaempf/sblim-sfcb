@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.48 2006/11/22 17:42:22 mihajlov Exp $
+# $Id: configure.ac,v 1.49 2006/11/24 14:35:42 mihajlov Exp $
 # 
 # configure.ac
 #
@@ -72,6 +72,31 @@ AC_ARG_ENABLE(optimized-enumeration,
 	[AC_HELP_STRING([--enable-optimized-enumeration],
 		[Enable enumeration call optimization for polymorphic invocations.])],
 	)
+
+# Size checks
+AC_CHECK_SIZEOF(void*)
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(short)
+
+if test "$ac_cv_sizeof_voidp" = 4
+then
+  if test "$ac_cv_sizeof_short" = 2
+  then
+     AC_DEFINE(SFCB_HALFWORD,short,[integer od half pointer size])
+  else
+   AC_ERROR([Unsupported 32-bit platform: short size is $ac_cv_sizeof_short, expected 2.])
+  fi
+elif  test "$ac_cv_sizeof_voidp" = 8
+then
+  if test "$ac_cv_sizeof_int" = 4
+  then
+     AC_DEFINE(SFCB_HALFWORD,int,[integer od half pointer size])
+  else
+   AC_ERROR([Unsupported 64-bit platform: int size is $ac_cv_sizeof_int, expected 4])
+  fi
+else
+   AC_ERROR([Unsupported platform, invalid pointer size $ac_cv_sizeof_voidp.])
+fi 
 
 # Configuration Arguments
 AC_ARG_VAR([CIMSCHEMA_SOURCE],[The URL or path name of the CIM Schema ZIP File.])
