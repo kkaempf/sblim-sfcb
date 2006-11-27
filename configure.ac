@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.49 2006/11/24 14:35:42 mihajlov Exp $
+# $Id: configure.ac,v 1.50 2006/11/27 15:59:05 mihajlov Exp $
 # 
 # configure.ac
 #
@@ -22,7 +22,7 @@
 
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(Small Footprint CIM Broker, 1.2.0pre2, sblim-devel@lists.sourceforge.net, sblim-sfcb)
+AC_INIT(Small Footprint CIM Broker, 1.2.0pre3, sblim-devel@lists.sourceforge.net, sblim-sfcb)
 AC_CONFIG_SRCDIR([providerDrv.c])
 
 AM_INIT_AUTOMAKE
@@ -181,7 +181,7 @@ AC_PROG_LEX
 AC_CHECK_PROG(YACC,bison,[bison -y])
 if test -z "${YACC}"
 then
-	AC_MSG_ERROR([GNU bison is required to build the sfcb package.])
+	AC_MSG_WARN([GNU bison is required (only for rebuilding the sfcb parser code).])
 fi
 AC_PROG_LIBTOOL
 
