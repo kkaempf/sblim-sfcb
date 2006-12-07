@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.60 2006/11/27 15:59:05 mihajlov Exp $  
+# $Id: Makefile.am,v 1.61 2006/12/07 01:22:08 mihajlov Exp $  
 #
 #  Makefile.am
 # 
@@ -127,7 +127,9 @@ libsfcUtil_la_SOURCES = \
 	sfcUtil/hashtable.c \
 	sfcUtil/utilFactory.c \
 	sfcUtil/utilHashtable.c \
-	sfcUtil/utilStringBuffer.c
+	sfcUtil/utilStringBuffer.c \
+	sfcUtil/libsfcUtil.versions
+libsfcUtil_la_LDFLAGS = -Wl,--version-script,$(srcdir)/sfcUtil/libsfcUtil.Versions
 
 libsfcBrokerCore_la_SOURCES = \
     args.c \
