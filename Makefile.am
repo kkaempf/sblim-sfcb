@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.62 2006/12/14 11:25:56 mihajlov Exp $  
+# $Id: Makefile.am,v 1.63 2006/12/14 14:18:43 sschuetz Exp $  
 #
 #  Makefile.am
 # 
@@ -109,7 +109,7 @@ cimslp_SOURCES = \
 	cimslpSLP.c \
 	cimslpUtil.c 
 
-cimslp_LDADD=-lslp -lcmpisfcc
+cimslp_LDADD=-lslp -lcmpisfcc -lsfcBrokerCore
 else
 SLP_PROGRAMFILES = 
 endif
@@ -396,4 +396,3 @@ install-cimschema: getSchema.sh
 
 postinstall: install-cimschema
 	test -f $(DESTDIR)$(sfcbstatedir)/registration/providerRegister || $(INSTALL_DATA) $(DESTDIR)$(sfcbstatedir)/stage/default.reg $(DESTDIR)$(sfcbstatedir)/registration/providerRegister 
-
