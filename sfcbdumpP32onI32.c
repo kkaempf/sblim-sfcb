@@ -1,6 +1,6 @@
 
 /*
- * $Id: sfcbdumpP32onI32.c,v 1.5 2006/01/30 13:31:39 a3schuur Exp $
+ * $Id: sfcbdumpP32onI32.c,v 1.6 2007/01/08 17:26:39 sschuetz Exp $
  *
  * (C) Copyright IBM Corp. 2006
  *
@@ -69,8 +69,6 @@ typedef struct {
    unsigned char quals;
    #ifndef SETCLPFX
     #define ClProperty_Q_Key 1
-    #define ClProperty_Q_Propagated 2
-    #define ClProperty_Q_Deprecated 4
     #define ClProperty_Q_EmbeddedObject 8
    #endif 
    unsigned char originId;
