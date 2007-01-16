@@ -1,5 +1,5 @@
 /*
- * $Id: control.h,v 1.2 2005/11/20 17:43:54 bestorga-oss Exp $
+ * $Id: control.h,v 1.3 2007/01/16 12:45:31 mihajlov Exp $
  *
  * (C) Copyright IBM Corp. 2005
  *
@@ -22,6 +22,7 @@
 #define _CONTROL_
 
 int setupControl(char *fn);
+void sunsetControl();
 int getControlChars(char *id, char **val);
 int getControlNum(char *id, long *val);
 int getControlBool(char *id, int *val);
