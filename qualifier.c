@@ -1,6 +1,6 @@
 
 /*
- * $Id: qualifier.c,v 1.3 2006/11/24 14:35:43 mihajlov Exp $
+ * $Id: qualifier.c,v 1.4 2007/01/16 12:45:32 mihajlov Exp $
  *
  * (C) Copyright IBM Corp. 2006
  *
@@ -31,9 +31,8 @@ static CMPIStatus release(CMPIQualifierDecl* q)
    CMPIStatus rc = { 0, NULL };
 
    if (q->hdl)  {
-      if (q->hdl != (void*)(q+1)) free(q->hdl);
+     ClQualifierFree(q->hdl);
    }
-   free(q);
    return rc;
 }
 
