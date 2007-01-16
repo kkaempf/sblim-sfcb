@@ -1,6 +1,6 @@
 
 /*
- * $Id: internalProvider.h,v 1.2 2006/03/06 04:11:08 a3schuur Exp $
+ * $Id: internalProvider.h,v 1.3 2007/01/16 13:00:32 sschuetz Exp $
  *
  * (C) Copyright IBM Corp. 2005
  *
@@ -42,6 +42,12 @@ CMPIStatus InternalProviderCreateInstance(CMPIInstanceMI * mi,
 					  const CMPIResult * rslt, 
 					  const CMPIObjectPath * cop, 
 					  const CMPIInstance * ci);
+CMPIStatus InternalProviderModifyInstance(CMPIInstanceMI * mi,
+					  const CMPIContext * ctx,
+					  const CMPIResult * rslt,
+					  const CMPIObjectPath * cop,
+					  const CMPIInstance * ci, 
+					  const char **properties);					  
 CMPIStatus InternalProviderGetInstance(CMPIInstanceMI * mi,
 				       const CMPIContext * ctx,
 				       const CMPIResult * rslt,
