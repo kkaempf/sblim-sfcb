@@ -1,6 +1,6 @@
 
 /*
- * $Id: internalProvider.h,v 1.3 2007/01/16 13:00:32 sschuetz Exp $
+ * $Id: internalProvider.h,v 1.4 2007/01/16 14:47:08 sschuetz Exp $
  *
  * (C) Copyright IBM Corp. 2005
  *
@@ -57,6 +57,35 @@ CMPIStatus InternalProviderDeleteInstance(CMPIInstanceMI * mi,
 					  const CMPIContext * ctx, 
 					  const CMPIResult * rslt, 
 					  const CMPIObjectPath * cop);
+CMPIStatus InternalProviderAssociatorNames(CMPIAssociationMI * mi,
+                                           const CMPIContext * ctx,
+                                           const CMPIResult * rslt,
+                                           const CMPIObjectPath * cop,
+                                           const char *assocClass,
+                                           const char *resultClass,
+                                           const char *role,
+                                           const char *resultRole);
+CMPIStatus InternalProviderAssociators(CMPIAssociationMI * mi,
+                                       const CMPIContext * ctx,
+                                       const CMPIResult * rslt,
+                                       const CMPIObjectPath * cop,
+                                       const char *assocClass,
+                                       const char *resultClass,
+                                       const char *role,
+                                       const char *resultRole,
+                                       const char **propertyList);
+CMPIStatus InternalProviderReferenceNames(CMPIAssociationMI * mi,
+                                          const CMPIContext * ctx,
+                                          const CMPIResult * rslt,
+                                          const CMPIObjectPath * cop,
+                                          const char *assocClass,
+                                          const char *role);
+CMPIStatus InternalProviderReferences(CMPIAssociationMI * mi,
+                                      const CMPIContext * ctx,
+                                      const CMPIResult * rslt,
+                                      const CMPIObjectPath * cop,
+                                      const char *assocClass,
+                                      const char *role, const char **propertyList);                                                                                                                            
 extern UtilList *SafeInternalProviderEnumInstances(CMPIInstanceMI * mi,
 						   const CMPIContext * ctx, 
 						   const CMPIObjectPath * ref, 
