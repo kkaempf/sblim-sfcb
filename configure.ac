@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.55 2007/02/15 14:07:22 mihajlov Exp $
+# $Id: configure.ac,v 1.56 2007/02/22 16:04:27 mihajlov Exp $
 # 
 # configure.ac
 #
@@ -144,11 +144,14 @@ fi
 
 if test "$enable_pam" == "yes"; then
    AC_DEFINE(HAVE_PAM,,[PAM support enabled.])
-   SFCB_CONF_BASICAUTH=sfcBasicPAMAuthentication   
+   SFCB_CONF_BASICAUTHLIB=sfcBasicPAMAuthentication   
+   SFCB_CONF_DOBASICAUTH=true
 else
-   SFCB_CONF_BASICAUTH=sfcBasicAuthentication   
+   SFCB_CONF_BASICAUTHLIB=sfcBasicAuthentication   
+   SFCB_CONF_DOBASICAUTH=false
 fi
-AC_SUBST(SFCB_CONF_BASICAUTH)
+AC_SUBST(SFCB_CONF_DOBASICAUTH)
+AC_SUBST(SFCB_CONF_BASICAUTHLIB)
 
 
 AC_CANONICAL_HOST
