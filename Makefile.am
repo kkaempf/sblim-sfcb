@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.64 2007/02/15 14:07:22 mihajlov Exp $  
+# $Id: Makefile.am,v 1.65 2007/02/22 09:46:10 sschuetz Exp $  
 #
 #  Makefile.am
 # 
@@ -241,8 +241,8 @@ libsfcObjectImplSwapI32toP32_la_DEPENDENCIES=libsfcBrokerCore.la
 
 libsfcInteropProvider_la_SOURCES = \
    interopProvider.c 
-libsfcInteropProvider_la_LIBADD=-lsfcBrokerCore -lsfcInternalProvider
-libsfcInteropProvider_la_DEPENDENCIES=libsfcBrokerCore.la libsfcInternalProvider.la
+libsfcInteropProvider_la_LIBADD=-lsfcBrokerCore
+libsfcInteropProvider_la_DEPENDENCIES=libsfcBrokerCore.la
 
 libsfcInteropServerProvider_la_SOURCES = \
    interopServerProvider.c 
