@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.65 2007/02/22 09:46:10 sschuetz Exp $  
+# $Id: Makefile.am,v 1.66 2007/02/27 11:57:04 mihajlov Exp $  
 #
 #  Makefile.am
 # 
@@ -316,8 +316,8 @@ noinst_HEADERS=array.h   httpComm.h control.h    providerMgr.h \
 	fileRepository.h internalProvider.h \
 	selectexp.h queryOperation.h \
 	sfcVersion.h mrwlock.h sqlStatement.h avltree.h \
-       cimcClientSfcbLocal.h $(QUALREP_HEADER) cmpidtx.h classSchemaMem.h
-
+        cimcClientSfcbLocal.h $(QUALREP_HEADER) cmpidtx.h classSchemaMem.h \
+        objectpath.h
 
 man_MANS=$(MANFILES)
 
