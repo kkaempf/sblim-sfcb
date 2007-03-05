@@ -1,8 +1,8 @@
 
 /*
- * subcond.p
+ * $Id: predicate.c,v 1.6 2007/03/05 18:12:14 mihajlov Exp $
  *
- * (C) Copyright IBM Corp. 2005
+ * © Copyright IBM Corp. 2005, 2007
  *
  * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
  * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
@@ -81,7 +81,8 @@ static CMPIStatus __eft_getData(const CMPIPredicate* pred, CMPIType* type,
       }
       else {
          printf("--- NOT QL_bin\n");
-         abort();
+         CMSetStatusWithString(&irc,CMPI_RC_ERR_FAILED,
+			       sfcb_native_new_CMPIString("Predicate has no a binary operator.", NULL));
       }
    }   
    return irc;
