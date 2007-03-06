@@ -10,9 +10,9 @@
 %{
 
 /*
- * queryParser.y
+ * $Id: queryParser.y,v 1.10 2007/03/06 16:02:58 mihajlov Exp $
  *
- * (C) Copyright IBM Corp. 2005
+ * © Copyright IBM Corp. 2005, 2007
  *
  * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
  * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
@@ -442,7 +442,6 @@ comparisonTerm
     | TOK_STRING
     {
        $$=newCharsQueryOperand(QS,qsStrDup(QS,$1));
-       free($1);  
     }
     | truthValue
     {
