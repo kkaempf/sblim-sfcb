@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.21 2007/03/02 05:43:37 tyreld Exp $
+ * $Id: support.c,v 1.22 2007/03/07 07:39:40 tyreld Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -19,7 +19,7 @@
  */
 
 /** @file support.c
- *  @brief Memory Managment system for providers (header file).
+ *  @brief Memory managment system and support routines for providers
  *
  *  @author Frank Scheffler
  *
