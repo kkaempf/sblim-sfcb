@@ -1,5 +1,5 @@
 #
-# $Id: sfcb.spec.in,v 1.15 2007/03/16 12:03:15 mihajlov Exp $
+# $Id: sfcb.spec.in,v 1.16 2007/03/16 13:54:44 mihajlov Exp $
 #
 # Package spec for @PACKAGE@
 #
@@ -52,7 +52,7 @@ export PATCH_GET=0
 
 %build
 
-%configure --enable-debug --enable-ssl --enable-pam
+%configure --enable-debug --enable-ssl --enable-pam --enable-ipv6
 make
 
 %install
