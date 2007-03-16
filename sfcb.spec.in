@@ -1,5 +1,5 @@
 #
-# $Id: sfcb.spec.in,v 1.14 2007/02/15 14:07:22 mihajlov Exp $
+# $Id: sfcb.spec.in,v 1.15 2007/03/16 12:03:15 mihajlov Exp $
 #
 # Package spec for @PACKAGE@
 #
@@ -18,9 +18,11 @@ Provides: cimserver
 BuildRequires: curl-devel
 BuildRequires: zlib-devel
 BuildRequires: openssl-devel
+BuildRequires: pam-devel
 Requires: curl
 Requires: zlib
 Requires: openssl
+Requires: pam
 
 %Description
 Small Footprint CIM Broker (sfcb) is a CIM server conforming to the
