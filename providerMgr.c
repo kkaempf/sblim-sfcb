@@ -1,8 +1,8 @@
 
 /*
- * providerMgr.c
+ * $Id: providerMgr.c,v 1.39 2007/03/29 12:29:48 mihajlov Exp $
  *
- * © Copyright IBM Corp. 2005, 2006
+ * © Copyright IBM Corp. 2005, 2007
  *
  * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
  * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
@@ -827,10 +827,12 @@ void processProviderMgrRequests()
 
    startUpProvider("root/interop","$ClassProvider$");
    
+#ifdef SFCB_INCL_INDICATION_SUPPORT
    if (interOpProvInfoPtr!=forceNoProvInfoPtr) {
      sleep(2);
      startUpProvider("root/interop","$InterOpProvider$");
    }   
+#endif
       
    for (;;) {
       MgrHandler hdlr; 
