@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.32 2007/03/23 09:46:47 sschuetz Exp $
+ * $Id: instance.c,v 1.33 2007/03/29 12:38:36 mihajlov Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -345,6 +345,11 @@ static CMPIStatus __ift_setPropertyFilter(CMPIInstance * instance,
    struct native_instance *i = (struct native_instance *) instance;
    struct native_instance *iNew,iTemp;
    
+   if (propertyList == NULL) {
+      /* NULL property list, no need to set filter */
+      CMReturn(CMPI_RC_OK);
+   }
+
    cop = instance->ft->getObjectPath(instance, NULL);
    if(cop) {
       newInstance = internal_new_CMPIInstance(MEM_NOT_TRACKED, cop, &st, 1);
