@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.33 2007/03/29 12:38:36 mihajlov Exp $
+ * $Id: instance.c,v 1.34 2007/04/03 13:15:47 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -745,6 +745,11 @@ int instanceCompare(CMPIInstance *inst1, CMPIInstance *inst2)
    CMPIStatus st = { CMPI_RC_OK, NULL };
    CMPIData d1, d2;
    CMPIString *propName;
+
+   /* check if we have null pointers for our instances */
+   if(inst1 == NULL && inst2 == NULL) return 0; /*identical*/
+   if(inst1 == NULL) return -1; /* inst1 is less than inst2 */
+   if(inst2 == NULL) return 1;  /* inst2 is less than inst1 */
    
    c = inst1->ft->getPropertyCount(inst1, NULL);
    
