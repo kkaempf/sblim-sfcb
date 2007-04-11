@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.39 2007/03/29 12:29:48 mihajlov Exp $
+ * $Id: providerMgr.c,v 1.40 2007/04/11 13:22:31 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -546,6 +546,8 @@ static int addAssocProviders(char *className, char *nameSpace, UtilList * provid
 static UtilList *getAssocProviders(char *className, char *nameSpace) 
 // className maybe NULL
 {
+   char *key=NULL;
+
    UtilList *lst = NULL;
    _SFCB_ENTER(TRACE_PROVIDERASSOCMGR, "getAssocProviders");
 
@@ -555,16 +557,20 @@ static UtilList *getAssocProviders(char *className, char *nameSpace)
      assocProvidersHt->ft->setReleaseFunctions(assocProvidersHt, free, NULL);
    }
 
-   if (className)
-      lst = assocProvidersHt->ft->get(assocProvidersHt, className);
+   if (className) {
+      key = malloc(strlen(className) + strlen(nameSpace) + 2);
+      sprintf(key, "%s:%s", nameSpace, className);
+      lst = assocProvidersHt->ft->get(assocProvidersHt, key);
+   }
    if (lst == NULL) {
       lst = UtilFactory->newList();
       if (addAssocProviders(className, nameSpace, lst)) {
          lst->ft->release(lst);
          _SFCB_RETURN(NULL);
       }
-      assocProvidersHt->ft->put(assocProvidersHt, strdup(className), lst);
+      assocProvidersHt->ft->put(assocProvidersHt, strdup(key), lst);
    }
+   if(key) free(key);
    _SFCB_RETURN(lst);
 }
 
