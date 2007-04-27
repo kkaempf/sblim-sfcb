@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.51 2007/03/29 12:43:44 mihajlov Exp $
+ * $Id: providerDrv.c,v 1.52 2007/04/27 09:11:08 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2172,6 +2172,10 @@ int initProvider(ProviderInfo *info, unsigned int sessionId)
      ctx->ft->addEntry(ctx,CMPIInvocationFlags,(CMPIValue*)&flgs,CMPI_uint32);
      ctx->ft->addEntry(ctx,CMPIPrincipal,(CMPIValue*)"$$",CMPI_chars);
      ctx->ft->addEntry(ctx,"CMPISessionId",(CMPIValue*)&sessionId,CMPI_uint32);
+     if (info->parms) {
+         ctx->ft->addEntry(ctx,"sfcbProviderParameters",(CMPIValue*)info->parms,CMPI_chars);
+     }
+     
      
      if (info->type & INSTANCE_PROVIDER) {
        rc |= (getInstanceMI(info, &mi, ctx) != 1);

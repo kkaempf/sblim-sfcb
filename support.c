@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.22 2007/03/07 07:39:40 tyreld Exp $
+ * $Id: support.c,v 1.23 2007/04/27 09:11:07 sschuetz Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -860,6 +860,17 @@ char *cntlGetVal(CntlVals * rv)
       *p = 0;
    }
    else rv->val = NULL;
+   return v;
+}
+
+char *cntlGetStr(CntlVals * rv)
+{
+   char *p, *v;
+   if (rv->val == NULL) {
+      return NULL;
+   }
+   cntlSkipws(&rv->val);
+   v = rv->val;
    return v;
 }
 
