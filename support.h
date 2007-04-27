@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.h,v 1.13 2007/03/02 05:43:37 tyreld Exp $
+ * $Id: support.h,v 1.14 2007/04/27 09:11:07 sschuetz Exp $
  *
  * support.h
  *
@@ -210,6 +210,7 @@ typedef struct cntlVals {
 void cntlSkipws(char **p);
 int cntlParseStmt(char *in, CntlVals * rv);
 char *cntlGetVal(CntlVals * rv);
+char *cntlGetStr(CntlVals * rv);
 
 int uninit_sfcBroker();
 void uninitGarbageCollector();
