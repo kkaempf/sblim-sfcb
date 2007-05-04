@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlParser.c,v 1.17 2007/05/04 09:01:53 sschuetz Exp $
+ * $Id: cimXmlParser.c,v 1.18 2007/05/04 10:36:58 sschuetz Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -772,9 +772,10 @@ static int procKeyValue(YYSTYPE * lvalp, ParserControl * parm)
 {
    static XmlElement elm[] = {
       {"VALUETYPE"},
+      {"TYPE"},
       {NULL}
    };
-   XmlAttr attr[1] = {
+   XmlAttr attr[2] = {
       {NULL}
    };
    char *val;
