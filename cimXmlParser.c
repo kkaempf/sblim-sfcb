@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlParser.c,v 1.16 2007/03/23 12:51:22 mihajlov Exp $
+ * $Id: cimXmlParser.c,v 1.17 2007/05/04 09:01:53 sschuetz Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -1708,23 +1708,31 @@ static void freeEnumInstances(XtokEnumInstances* op)
 
 static void freeAssociatorNames(XtokAssociatorNames* op)
 {
-  freeInstanceName(&op->objectName);
+  if(op->objNameSet) {
+    freeInstanceName(&op->objectName);
+  }
 }
 
 static void freeReferenceNames(XtokReferenceNames* op)
 {
-  freeInstanceName(&op->objectName);
+  if(op->objNameSet) {
+    freeInstanceName(&op->objectName);
+  }
 }
 
 static void freeAssociators(XtokAssociators* op)
 {
-  freeInstanceName(&op->objectName);
+  if(op->objNameSet) {
+    freeInstanceName(&op->objectName);
+  }
   freeArray(&op->propertyList);
 }
 
 static void freeReferences(XtokReferences* op)
 {
-  freeInstanceName(&op->objectName);
+  if(op->objNameSet) {
+    freeInstanceName(&op->objectName);
+  }
   freeArray(&op->propertyList);
 }
 
