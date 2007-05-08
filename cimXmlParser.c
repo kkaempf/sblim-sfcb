@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlParser.c,v 1.18 2007/05/04 10:36:58 sschuetz Exp $
+ * $Id: cimXmlParser.c,v 1.19 2007/05/08 13:44:57 sschuetz Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -1604,7 +1604,7 @@ static void freeProperty(XtokProperty *op)
   } else if ((op->valueType & CMPI_ref) == CMPI_ref) {
     freeReference(&op->val.ref);
   }
-  if(op->val.val.type==typeValue_Instance) {
+  if(op->val.val.type==typeValue_Instance && op->val.val.instance) {
     freeInstance(op->val.val.instance);
     free(op->val.val.instance);
   }
