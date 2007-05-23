@@ -1,6 +1,6 @@
 
 /*
- * $Id: indCIMXMLExport.c,v 1.7 2007/04/05 11:14:54 sschuetz Exp $
+ * $Id: indCIMXMLExport.c,v 1.8 2007/05/23 16:55:32 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -331,7 +331,7 @@ int exportIndication(char *url, char *payload, char **resp, char **msg)
    
    _SFCB_TRACE(1,("--- url: %s rc: %d %s",url,rc,msg));
    if (rc) {
-      mlogf(M_ERROR,M_SHOW,"Problem processing indication to %s. curl rc: %d %s", url,rc,msg);
+      mlogf(M_ERROR,M_SHOW,"Problem processing indication to %s. sfcb rc: %d %s\n", url,rc,*msg);
    }
    
    uninit(&cd);

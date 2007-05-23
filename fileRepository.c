@@ -1,6 +1,6 @@
 
 /*
- * $Id: fileRepository.c,v 1.12 2007/03/29 12:19:26 mihajlov Exp $
+ * $Id: fileRepository.c,v 1.13 2007/05/23 16:55:32 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -185,6 +185,7 @@ void freeBlobIndex(BlobIndex **bip, int all)
    if (all) if (bi->index)  { free(bi->index); bi->fnd=NULL; }
    bi->freed=-1;
    if (bi->fd) fclose(bi->fd);
+   if (bi->fx) fclose(bi->fx);
    free(bi);
    *bip=NULL;
 }
