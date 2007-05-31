@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.38 2007/05/04 09:01:53 sschuetz Exp $
+ * $Id: cimXmlRequest.c,v 1.39 2007/05/31 12:16:59 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1985,13 +1985,23 @@ static RespSegments invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
       closeProviderContext(&binCtx);
       resp->rc--;
       if (resp->rc == CMPI_RC_OK) {
-         out = relocateSerializedArgs(resp->object[0].data);
          sb = UtilFactory->newStrinBuffer(1024);
-         sb->ft->appendChars(sb,"<RETURNVALUE PARAMTYPE=\"");
-	 sb->ft->appendChars(sb,paramType(resp->rv.type));
-         sb->ft->appendChars(sb,"\">\n");
-         value2xml(resp->rv, sb, 1);
-         sb->ft->appendChars(sb,"</RETURNVALUE>\n");
+         if (resp->rvValue) {
+            if (resp->rv.type==CMPI_chars) {
+               resp->rv.value.chars=(long)resp->rvEnc.data+(char*)resp;
+            }
+            else if (resp->rv.type==CMPI_dateTime) {
+               resp->rv.value.dateTime=
+                  sfcb_native_new_CMPIDateTime_fromChars((long)resp->rvEnc.data
+                                                            +(char*)resp,NULL);
+            }
+            sb->ft->appendChars(sb,"<RETURNVALUE PARAMTYPE=\"");
+            sb->ft->appendChars(sb,paramType(resp->rv.type));
+            sb->ft->appendChars(sb,"\">\n");
+            value2xml(resp->rv, sb, 1);
+            sb->ft->appendChars(sb,"</RETURNVALUE>\n");
+         }
+         out = relocateSerializedArgs(resp->object[0].data);
          args2xml(out, sb);
          rsegs=methodResponse(hdr, sb);
 	 if (resp) {

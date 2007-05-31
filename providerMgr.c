@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.40 2007/04/11 13:22:31 sschuetz Exp $
+ * $Id: providerMgr.c,v 1.41 2007/05/31 12:16:59 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1117,13 +1117,7 @@ static BinResponseHdr *intInvokeProvider(BinRequestContext * ctx,ComSockets sock
       }
 
      ctx->rCount=ctx->pCount;
-     if (resp->rvValue) {
-        if (resp->rv.type==CMPI_chars)
-           resp->rv.value.chars=(long)resp->rvEnc.data+(char*)resp;
-        else if (resp->rv.type==CMPI_dateTime) 
-           resp->rv.value.dateTime=
-              sfcb_native_new_CMPIDateTime_fromChars((long)resp->rvEnc.data+(char*)resp,NULL);
-     }
+
      for (i = 0; i < resp->count; i++) {
          resp->object[i].data=(void*)((long)resp->object[i].data+(char*)resp);   
      }    
