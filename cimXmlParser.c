@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlParser.c,v 1.19 2007/05/08 13:44:57 sschuetz Exp $
+ * $Id: cimXmlParser.c,v 1.20 2007/05/31 12:16:59 sschuetz Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -1663,7 +1663,9 @@ static void freeInstance(XtokInstance *op)
 
 static void freeMethodCall(XtokMethodCall* op)
 {
-  freeInstanceName(&op->instanceName);
+  if(op->instName) {
+    freeInstanceName(&op->instanceName);
+  }
   freeParamValues(&op->paramValues);
 }
 
