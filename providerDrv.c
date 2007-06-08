@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.54 2007/05/25 17:01:09 buccella Exp $
+ * $Id: providerDrv.c,v 1.55 2007/06/08 12:22:31 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2676,6 +2676,10 @@ static void *processProviderInvocationRequestsThread(void *prms)
             pInfo->lastActivity=curProvProc->lastActivity;
             break;
          }
+      }
+      if (pInfo==NULL) {
+         mlogf(M_ERROR,M_SHOW,"-#- Serious provider id / provider process mismatch --- terminating process.\n");
+         exit(-1);
       }
       
       if (pInfo && pInfo->library==NULL) { 
