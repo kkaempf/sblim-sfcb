@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.41 2007/05/31 12:16:59 sschuetz Exp $
+ * $Id: providerMgr.c,v 1.42 2007/06/21 13:23:12 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -615,8 +615,17 @@ static void assocProviderList(int *requestor, OperationHdr * req)
       }
    }
    else {
-      spSendCtlResult(requestor, &sfcbSockets.send, MSG_X_INVALID_CLASS, 0,
-         NULL, req->options);
+      /* When there is no provider for an assocClass we do not want to produce
+       * an error message. So we return the default provider and expect it
+       * to produce a nice and empty result */
+      if((rc = forkProvider(defaultProvInfoPtr, req, &msg)) == CMPI_RC_OK) {
+         _SFCB_TRACE(1,("--- responding with  %s %p %d",
+                        defaultProvInfoPtr->providerName,
+                        defaultProvInfoPtr,count));
+         spSendCtlResult(requestor, &defaultProvInfoPtr->providerSockets.send,
+         MSG_X_PROVIDER, count--, getProvIds(defaultProvInfoPtr).ids,
+                                                       req->options);
+      }
    }
    _SFCB_EXIT();
 }
