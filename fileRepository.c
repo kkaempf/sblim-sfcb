@@ -1,6 +1,6 @@
 
 /*
- * $Id: fileRepository.c,v 1.13 2007/05/23 16:55:32 sschuetz Exp $
+ * $Id: fileRepository.c,v 1.14 2007/06/22 10:34:44 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -257,7 +257,7 @@ static void copy(FILE *o, FILE *i, int len, unsigned long ofs)
 static int adjust(BlobIndex *bi, int pos, int adj)
 {
    int dp=pos,l,o,sl;
-   char *p,*r,str[32];
+   char *p,*r = NULL,str[32];
    while (dp<bi->dSize) {
       memset(str,' ',sizeof(str)-1);
       str[sizeof(str)-1]=0;

@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.42 2007/06/21 13:23:12 sschuetz Exp $
+ * $Id: providerMgr.c,v 1.43 2007/06/22 10:34:43 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -580,7 +580,7 @@ static void assocProviderList(int *requestor, OperationHdr * req)
    char *className = (char *) req->className.data;
    char *nameSpace = (char *) req->nameSpace.data;
    UtilList *providers = NULL;
-   long count;
+   long count = 0;
    ProviderInfo *info;
    int dmy = 0, rc;
    char *msg=NULL;

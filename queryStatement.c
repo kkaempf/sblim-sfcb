@@ -1,6 +1,6 @@
 
 /*
- * $Id: queryStatement.c,v 1.13 2007/05/02 13:53:23 sschuetz Exp $
+ * $Id: queryStatement.c,v 1.14 2007/06/22 10:34:43 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -169,11 +169,11 @@ static void qsRelease(QLStatement *st)
 }
 
 static CMPIInstance* qsCloneAndFilter(QLStatement *st, CMPIInstance *ci, CMPIObjectPath *cop, 
-         const char **kNames)
+         char **kNames)
 {
    CMPIInstance *nic=CMNewInstance(Broker,cop,NULL);
    CMPICount i,c=CMGetPropertyCount(ci,NULL);
-   CMSetPropertyFilter(nic,(const char**)st->spNames,kNames);
+   CMSetPropertyFilter(nic,(const char**)st->spNames, (const char**)kNames);
    for (i=0; i<c; i++) {
       CMPIString *name;
       CMPIData d=CMGetPropertyAt(ci,i,&name,NULL);
