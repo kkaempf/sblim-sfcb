@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.40 2007/06/20 09:11:24 sschuetz Exp $
+ * $Id: cimXmlRequest.c,v 1.41 2007/06/29 12:11:10 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1600,7 +1600,7 @@ static RespSegments associatorNames(CimXmlRequestContext * ctx,
    binCtx.bHdrSize = sizeof(sreq);
    binCtx.commHndl = ctx->commHndl;
    binCtx.type=CMPI_ref;
-   binCtx.xmlAs=XML_asObj; binCtx.noResp=0;
+   binCtx.xmlAs=XML_asObjectPath; binCtx.noResp=0;
    binCtx.chunkedMode=0;
    binCtx.pAs=NULL;
 
@@ -1788,7 +1788,7 @@ static RespSegments referenceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
    binCtx.bHdrSize = sizeof(sreq);
    binCtx.commHndl = ctx->commHndl;
    binCtx.type=CMPI_ref;
-   binCtx.xmlAs=XML_asObj; binCtx.noResp=0;
+   binCtx.xmlAs=XML_asObjectPath; binCtx.noResp=0;
    binCtx.chunkedMode=0;
    binCtx.pAs=NULL;
 
