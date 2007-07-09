@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.43 2007/06/22 10:34:43 sschuetz Exp $
+ * $Id: providerMgr.c,v 1.44 2007/07/09 16:04:13 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -501,16 +501,6 @@ static ProviderInfo *getAssocProvider(char *className, char *nameSpace)
 	 CMRelease(cc);
       }
    }
-   
-   if (strcasecmp(nameSpace,"root/interop")==0 ||
-        strcasecmp(nameSpace,"root/pg_interop")==0) {
-      //_SFCB_RETURN(interOpProvInfoPtr);
-      //changed to "forceNoProvInfoPtr" because interop provider is registered via
-      //the providerRegister for the class cim_indicationsubscription now
-      _SFCB_RETURN(forceNoProvInfoPtr);
-   }     
-
-   if (interopClass(className)) _SFCB_RETURN(forceNoProvInfoPtr);
    
    _SFCB_RETURN(defaultProvInfoPtr);
 }
