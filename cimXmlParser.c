@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlParser.c,v 1.20 2007/05/31 12:16:59 sschuetz Exp $
+ * $Id: cimXmlParser.c,v 1.21 2007/07/27 11:45:20 sschuetz Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -312,6 +312,7 @@ static struct _xmlescape {
     { "&amp;", '&', 5 },
     { "&gt;", '>', 4 },
     { "&lt;", '<', 4 },
+    { "&#x20;", ' ', 6 },
 };
 
 static int xmlUnescape(char *buf, char *end)
