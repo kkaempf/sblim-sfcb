@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.42 2007/08/28 08:37:12 sschuetz Exp $
+ * $Id: cimXmlRequest.c,v 1.43 2007/08/28 08:49:58 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1822,8 +1822,8 @@ static RespSegments references(CimXmlRequestContext * ctx, RequestHdr * hdr)
    _SFCB_ENTER(TRACE_CIMXMLPROC, "references");
 
    CMPIObjectPath *path;
-   AssociatorsReq *sreq; 
-   int irc, i, m, l = 0, err = 0, sreqSize=sizeof(AssociatorsReq); //-sizeof(MsgSegment);
+   ReferencesReq *sreq; 
+   int irc, i, m, l = 0, err = 0, sreqSize=sizeof(ReferencesReq); //-sizeof(MsgSegment);
    BinResponseHdr **resp;
    BinRequestContext binCtx;
    CMPIType type;
