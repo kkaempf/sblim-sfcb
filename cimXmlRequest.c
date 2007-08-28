@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.41 2007/06/29 12:11:10 sschuetz Exp $
+ * $Id: cimXmlRequest.c,v 1.42 2007/08/28 08:37:12 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -784,7 +784,7 @@ static RespSegments createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 	d.value=str2CMPIValue(p->valueType,p->val.val,&p->val.ref,req->op.nameSpace.data);
       }       
       d.type=p->valueType;
-      propId=ClClassAddProperty(cl, p->name, d);
+      propId=ClClassAddProperty(cl, p->name, d, p->referenceClass);
      
       qs=&p->val.qualifiers;
       prop=((ClProperty*)ClObjectGetClSection(&cl->hdr,&cl->properties))+propId-1;
