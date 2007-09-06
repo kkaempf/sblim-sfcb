@@ -1,5 +1,5 @@
 /*
- * $Id: brokerUpc.c,v 1.23 2007/08/01 10:31:22 sschuetz Exp $
+ * $Id: brokerUpc.c,v 1.24 2007/09/06 13:54:25 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -127,23 +127,21 @@ static CMPIStatus deliverIndication(const CMPIBroker* mb, const CMPIContext* ctx
    
    while (se) {
      if (se->exp.ft->evaluate(&se->exp,ind,&st)) {
-         if (in==NULL) {
-            /*apply a propertyfilter in case the query is not "SELECT * FROM ..." */
-            if(se->qs->spNames && se->qs->spNames[0]) {
-               ind->ft->setPropertyFilter((CMPIInstance*)ind, (const char**)se->qs->spNames, NULL);
-            }
-            op=CMNewObjectPath(mb,"root/interop","cim_indicationsubscription",NULL);
-            in=CMNewArgs(mb,NULL);
-            CMAddArg(in,"nameSpace",ns,CMPI_chars);
-            CMAddArg(in,"indication",&ind,CMPI_instance);
-            CMAddArg(in,"filterid",&se->filterId,
+     /*apply a propertyfilter in case the query is not "SELECT * FROM ..." */
+        if(se->qs->spNames && se->qs->spNames[0]) {
+           ind->ft->setPropertyFilter((CMPIInstance*)ind, (const char**)se->qs->spNames, NULL);
+        }
+        op=CMNewObjectPath(mb,"root/interop","cim_indicationsubscription",NULL);
+        in=CMNewArgs(mb,NULL);
+        CMAddArg(in,"nameSpace",ns,CMPI_chars);
+        CMAddArg(in,"indication",&ind,CMPI_instance);
+        CMAddArg(in,"filterid",&se->filterId,
 #if SIZEOF_INT == SIZEOF_VOIDP
 		     CMPI_uint32
 #else
 		     CMPI_uint64
 #endif		     
-		     );
-         }  
+		 );
          CBInvokeMethod(mb,ctx,op,"_deliver",in,NULL,&st);
       }
       se=se->next;
