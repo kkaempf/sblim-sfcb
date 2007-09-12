@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.13 2007/06/08 12:22:31 sschuetz Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.14 2007/09/12 14:32:47 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -1660,11 +1660,11 @@ ClientEnv* _Create_SfcbLocal_Env(char *id)
       newInstance,      
       newObjectPath,
       newArgs,
+      newString,
       newArray,
       newDateTime,
       newDateTimeFromBinary,
       newDateTimeFromChars,
-      newString,
     };
    
    //    localClientMode=1;
