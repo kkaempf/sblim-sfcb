@@ -1,6 +1,6 @@
 
 /*
- * $Id: sfcbdumpP32onI32.c,v 1.6 2007/01/08 17:26:39 sschuetz Exp $
+ * $Id: sfcbdumpP32onI32.c,v 1.7 2007/09/14 12:41:34 mihajlov Exp $
  *
  * (C) Copyright IBM Corp. 2006
  *
@@ -61,6 +61,7 @@ typedef struct {
 typedef struct {
    CLP32_CMPIData data;
    CLP32_ClString id;
+   CLP32_ClString refName;
    unsigned short flags;
    #ifndef SETCLPFX
     #define ClProperty_EmbeddedObjectAsString 1
@@ -69,11 +70,14 @@ typedef struct {
    unsigned char quals;
    #ifndef SETCLPFX
     #define ClProperty_Q_Key 1
+    #define ClProperty_Q_Propagated 2
     #define ClProperty_Q_EmbeddedObject 8
    #endif 
    unsigned char originId;
    CLP32_ClSection qualifiers;
+   long            padP32;
 } CLP32_ClProperty;
+
 #define BINARY_NAME argv[0]
 #define SCHEMA_NAME argv[optind]
 

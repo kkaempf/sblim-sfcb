@@ -1,6 +1,6 @@
 
 /*
- * $Id: objectImplSwapI32toP32.c,v 1.14 2007/08/28 08:37:12 sschuetz Exp $
+ * $Id: objectImplSwapI32toP32.c,v 1.15 2007/09/14 12:41:34 mihajlov Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -84,6 +84,7 @@ typedef struct {
    #endif 
    unsigned char originId;
    CLP32_ClSection qualifiers;
+   long            padP32;
 } CLP32_ClProperty;
 
 static CLP32_CMPIData copyI32toP32Data(ClObjectHdr * hdr, CMPIData *fd)
@@ -204,6 +205,7 @@ static int copyI32toP32Properties(int ofs, char *to, CLP32_ClSection * ts,
    if (l == 0) return 0;
    
    for (i = fs->used; i > 0; i--, fp++, tp++) {
+      tp->padP32 = 0L;
       tp->id.id = bswap_32(fp->id.id);
       tp->refName.id = bswap_32(fp->refName.id);
       tp->data = copyI32toP32Data(from, &fp->data);
