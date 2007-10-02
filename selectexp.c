@@ -1,6 +1,6 @@
 
 /*
- * $Id: selectexp.c,v 1.10 2007/03/20 09:36:49 sschuetz Exp $
+ * $Id: selectexp.c,v 1.11 2007/10/02 09:02:11 mihajlov Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -84,7 +84,7 @@ CMPIBoolean __eft_evaluate(const CMPISelectExp * exp,
 CMPIString *__eft_getString(const CMPISelectExp * exp, CMPIStatus * rc)
 {
    NativeSelectExp *e = (NativeSelectExp *) exp;
-   return sfcb_native_new_CMPIString(e->queryString,rc);
+   return sfcb_native_new_CMPIString(e->queryString,rc,0);
 }
 
 

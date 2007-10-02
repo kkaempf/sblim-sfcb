@@ -1,6 +1,6 @@
 
 /*
- * $Id: qualifier.c,v 1.4 2007/01/16 12:45:32 mihajlov Exp $
+ * $Id: qualifier.c,v 1.5 2007/10/02 09:02:11 mihajlov Exp $
  *
  * (C) Copyright IBM Corp. 2006
  *
@@ -55,7 +55,7 @@ static CMPIData getQualifierDeclData(CMPIQualifierDecl * cq, CMPIStatus * rc)
    }
    if (rv.type == CMPI_chars) {
       rv.value.string = sfcb_native_new_CMPIString(ClObjectGetClString
-         (&q->hdr, (ClString *) & rv.value.chars), NULL);
+						   (&q->hdr, (ClString *) & rv.value.chars), NULL, 0);
       rv.type = CMPI_string;
    }
    if (rv.type & CMPI_ARRAY && rv.value.array) {

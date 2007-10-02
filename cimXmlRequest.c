@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.44 2007/08/30 07:15:25 sschuetz Exp $
+ * $Id: cimXmlRequest.c,v 1.45 2007/10/02 09:02:11 mihajlov Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -270,7 +270,7 @@ static char *getErrSegment(int rc, char *m)
    char *escapedMsg;
    
    if (m && *m) {
-       escapedMsg = XMLEscape(m);
+     escapedMsg = XMLEscape(m, NULL);
        snprintf(msg, sizeof(msg), "<ERROR CODE=\"%d\" DESCRIPTION=\"%s\"/>\n",
                 rc, escapedMsg);
        free(escapedMsg);
@@ -2004,11 +2004,11 @@ static RespSegments invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
                   sfcb_native_new_CMPIDateTime_fromChars((long)resp->rvEnc.data
                                                             +(char*)resp,NULL);
             }
-            sb->ft->appendChars(sb,"<RETURNVALUE PARAMTYPE=\"");
+            SFCB_APPENDCHARS_BLOCK(sb,"<RETURNVALUE PARAMTYPE=\"");
             sb->ft->appendChars(sb,paramType(resp->rv.type));
-            sb->ft->appendChars(sb,"\">\n");
+            SFCB_APPENDCHARS_BLOCK(sb,"\">\n");
             value2xml(resp->rv, sb, 1);
-            sb->ft->appendChars(sb,"</RETURNVALUE>\n");
+            SFCB_APPENDCHARS_BLOCK(sb,"</RETURNVALUE>\n");
          }
          out = relocateSerializedArgs(resp->object[0].data);
          args2xml(out, sb);

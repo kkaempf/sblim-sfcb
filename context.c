@@ -1,6 +1,6 @@
 
 /*
- * $Id: context.c,v 1.9 2007/03/16 19:57:56 mihajlov Exp $
+ * $Id: context.c,v 1.10 2007/10/02 09:02:11 mihajlov Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -240,7 +240,7 @@ static CMPIData __convert2CMPIData ( struct native_property * prop,
 
 		if ( propname ) {
 			*propname  = sfcb_native_new_CMPIString ( prop->name,
-							     NULL );
+								  NULL , 0);
 		}
 
 	} else {
@@ -275,7 +275,7 @@ static int __addProperty ( struct native_property ** prop,
 
 			type = CMPI_string;
 			v.string = sfcb_native_new_CMPIString ( (char *) value,
-							   NULL );
+								NULL, 0 );
 			value = &v;
 		}
 
@@ -334,7 +334,7 @@ static int __setProperty ( struct native_property * prop,
 
 			type = CMPI_string;
 			v.string = sfcb_native_new_CMPIString ( (char *) value,
-							   NULL );
+								NULL, 0 );
 			value = &v;
 		}
 

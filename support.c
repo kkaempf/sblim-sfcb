@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.24 2007/06/22 10:34:44 sschuetz Exp $
+ * $Id: support.c,v 1.25 2007/10/02 09:02:11 mihajlov Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -895,7 +895,7 @@ void dumpTiming(int pid)
 void setStatus(CMPIStatus *st, CMPIrc rc, char *msg)
 {
    st->rc=rc;
-   if (rc!=0 && msg) st->msg=sfcb_native_new_CMPIString(msg,NULL);
+   if (rc!=0 && msg) st->msg=sfcb_native_new_CMPIString(msg,NULL,0);
    else st->msg=NULL;
 }   
 

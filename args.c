@@ -1,6 +1,6 @@
 
 /*
- * $Id: args.c,v 1.11 2007/03/16 19:57:56 mihajlov Exp $
+ * $Id: args.c,v 1.12 2007/10/02 09:02:11 mihajlov Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -132,7 +132,7 @@ static CMPIData __aft_getArgAt(const CMPIArgs * args,
       return rv;
    }
    if (rv.type == CMPI_chars) {
-      rv.value.string = sfcb_native_new_CMPIString(rv.value.chars, NULL);
+      rv.value.string = sfcb_native_new_CMPIString(rv.value.chars, NULL, 0);
       rv.type = CMPI_string;
    }
    else if (rv.type == CMPI_ref) {
@@ -145,8 +145,7 @@ static CMPIData __aft_getArgAt(const CMPIArgs * args,
           native_make_CMPIArray((CMPIData *) rv.value.array, NULL, &ca->hdr);
    }
    if (name) {
-      *name = sfcb_native_new_CMPIString(n, NULL);
-      free(n);
+      *name = sfcb_native_new_CMPIString(n, NULL, 0);
    }
    if (rc)
       CMSetStatus(rc, CMPI_RC_OK);
@@ -260,7 +259,7 @@ MsgSegment setArgsMsgSegment(CMPIArgs * args)
 CMPIString *args2String(CMPIArgs * arg, CMPIStatus * rc)
 {
    char * argstr = ClArgsToString((ClArgs*)arg->hdl);
-   return sfcb_native_new_CMPIString(argstr, NULL);
+   return sfcb_native_new_CMPIString(argstr, NULL, 0);
 }
 
 

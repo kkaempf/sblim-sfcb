@@ -1,6 +1,6 @@
 
 /*
- * $Id: array.c,v 1.16 2007/05/31 12:16:59 sschuetz Exp $
+ * $Id: array.c,v 1.17 2007/10/02 09:02:11 mihajlov Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -153,7 +153,7 @@ static CMPIStatus setElementAt ( CMPIArray * array, CMPICount index, const CMPIV
 
       if ( type == CMPI_chars && a->type == CMPI_string ) {
 	 if (val) {
-	     v.string = sfcb_native_new_CMPIString ( (char *) val, NULL );
+	     v.string = sfcb_native_new_CMPIString ( (char *) val, NULL, 0 );
 	     type = CMPI_string;
 	     val  = &v;
 	 } else {
@@ -219,7 +219,7 @@ CMPIStatus arraySetElementNotTrackedAt(CMPIArray * array,
       CMPIValue v;
 
       if (type == CMPI_chars && a->type == CMPI_string) {
-         v.string = sfcb_native_new_CMPIString((char *) val, NULL);
+	 v.string = sfcb_native_new_CMPIString((char *) val, NULL, 0);
          type = CMPI_string;
          val = &v;
       }
