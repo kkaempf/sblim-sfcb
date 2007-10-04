@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlParser.c,v 1.22 2007/10/02 07:23:03 sschuetz Exp $
+ * $Id: cimXmlParser.c,v 1.23 2007/10/04 08:33:08 sschuetz Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -942,9 +942,10 @@ static int procXml(YYSTYPE * lvalp, ParserControl * parm)
 {
    static XmlElement elm[] = { {"version"},
    {"encoding"},
+   {"standalone"},
    {NULL}
    };
-   XmlAttr attr[2];
+   XmlAttr attr[3];
 
    memset(attr, 0, sizeof(attr));
    if (tagEquals(parm->xmb, "?xml")) {
