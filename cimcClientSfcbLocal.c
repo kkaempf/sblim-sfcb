@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.15 2007/10/12 12:10:14 sschuetz Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.16 2007/10/16 13:26:37 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -1549,6 +1549,7 @@ int localConnect(ClientEnv* ce, CMPIStatus *st)
   
    sfcbSockets.send=sfcbSocket;
    localMode=0;
+   close(sock);
    
    return sfcbSocket;
 }
