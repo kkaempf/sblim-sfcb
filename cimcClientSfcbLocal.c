@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.16 2007/10/16 13:26:37 sschuetz Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.17 2007/10/23 14:21:59 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -827,9 +827,6 @@ static CMPIEnumeration * associators(
       char **p;
       for (p=properties; *p; p++) pCount++;
    }
-   
-   sreqSize+=pCount*sizeof(MsgSegment);
-   sreq=calloc(1,sreqSize);
    
    memset(&binCtx,0,sizeof(BinRequestContext));
 
