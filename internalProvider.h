@@ -1,6 +1,6 @@
 
 /*
- * $Id: internalProvider.h,v 1.4 2007/01/16 14:47:08 sschuetz Exp $
+ * $Id: internalProvider.h,v 1.5 2007/10/23 11:14:22 sschuetz Exp $
  *
  * (C) Copyright IBM Corp. 2005
  *
@@ -86,11 +86,12 @@ CMPIStatus InternalProviderReferences(CMPIAssociationMI * mi,
                                       const CMPIObjectPath * cop,
                                       const char *assocClass,
                                       const char *role, const char **propertyList);                                                                                                                            
-extern UtilList *SafeInternalProviderEnumInstances(CMPIInstanceMI * mi,
-						   const CMPIContext * ctx, 
-						   const CMPIObjectPath * ref, 
-						   const char **properties, 
-						   CMPIStatus *st,int ignprov);
+CMPIStatus SafeInternalProviderEnumInstances(CMPIInstanceMI * mi,
+                                      const CMPIContext * ctx,
+                                      const CMPIResult * rslt,
+                                      const CMPIObjectPath * ref,
+                                      const char **properties,
+                                      int ignprov);
 extern char *internalProviderNormalizeObjectPath(const CMPIObjectPath *cop);
 
 #endif
