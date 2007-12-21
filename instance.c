@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.37 2007/10/31 15:09:45 sschuetz Exp $
+ * $Id: instance.c,v 1.38 2007/12/21 16:04:48 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -648,7 +648,7 @@ CMPIInstance *internal_new_CMPIInstance(int mode, const CMPIObjectPath * cop,
    
    else {
       j=0;
-      SFCB_ASM("int $3");
+      //SFCB_ASM("int $3");
       ns = "*NoNameSpace*";
       cn = "*NoClassName*";
       tmp1.rc=tmp2.rc=tmp3.rc=CMPI_RC_OK;
