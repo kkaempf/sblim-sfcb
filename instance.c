@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.38 2007/12/21 16:04:48 sschuetz Exp $
+ * $Id: instance.c,v 1.39 2008/01/09 00:52:38 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -332,6 +332,7 @@ static CMPIObjectPath *__ift_getObjectPath(const CMPIInstance * instance,
 	    if(rc) {
 	       CMSetStatus(rc, CMPI_RC_ERR_INVALID_CLASS);
 	    }
+	    Broker->xft->unlockMutex(*mtx);
 	    return NULL;
 	 }
       }
