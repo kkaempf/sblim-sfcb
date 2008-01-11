@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.46 2007/12/21 16:04:48 sschuetz Exp $
+ * $Id: cimXmlRequest.c,v 1.47 2008/01/11 09:25:41 sschuetz Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -191,6 +191,7 @@ static char *paramType(CMPIType type)
    switch (type & ~CMPI_ARRAY) {
    case CMPI_chars:
    case CMPI_string:
+   case CMPI_instance:
       return "string";
    case CMPI_sint64:
       return "sint64";
