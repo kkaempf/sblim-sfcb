@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.66 2008/01/08 16:43:58 buccella Exp $
+# $Id: configure.ac,v 1.67 2008/01/18 22:38:00 buccella Exp $
 # 
 # configure.ac
 #
@@ -26,7 +26,7 @@ AC_INIT(Small Footprint CIM Broker, 1.3preview, sblim-devel@lists.sourceforge.ne
 AC_CONFIG_SRCDIR([providerDrv.c])
 
 #disable "seems to ignore the --datarootdir setting" warnings
-AC_DEFUN([AC_DATAROOTDIR_CHECKED])
+#AC_DEFUN([AC_DATAROOTDIR_CHECKED])
 
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER([config.h])
