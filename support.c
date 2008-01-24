@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.25 2007/10/02 09:02:11 mihajlov Exp $
+ * $Id: support.c,v 1.26 2008/01/24 21:56:29 buccella Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -373,9 +373,9 @@ static void __cleanup_mt(void *ptr)
      mt->cleanupDone = 1;
      __flush_mt(mt);
      
-     free(mt->hc.memObjs);
-     free(mt->hc.memEncObjs);
-     free(mt);
+     if (mt->hc.memObjs) free(mt->hc.memObjs);
+     if (mt->hc.memEncObjs) free(mt->hc.memEncObjs);
+     if (mt) free(mt);
    }
    _SFCB_EXIT();
 }
