@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.46 2007/12/21 16:04:48 sschuetz Exp $
+ * $Id: providerMgr.c,v 1.47 2008/01/29 12:45:43 gdread Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1114,7 +1114,7 @@ static BinResponseHdr *intInvokeProvider(BinRequestContext * ctx,ComSockets sock
          _SFCB_TRACE(1,("--- writing chunk")); 
          ctx->chunkFncs->writeChunk(ctx, resp);
          _SFCB_TRACE(1,("--- back from writing chunk"));
-         if (resp->moreChunks) spSendAck(resultSockets.receive);
+         if (resp->moreChunks) spSendAck(sockets.receive);
          
          releaseHeap(hc);
          
