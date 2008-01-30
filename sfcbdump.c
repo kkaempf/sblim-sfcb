@@ -1,6 +1,6 @@
 
 /*
- * $Id: sfcbdump.c,v 1.3 2006/12/21 13:58:56 mihajlov Exp $
+ * $Id: sfcbdump.c,v 1.4 2008/01/30 22:44:27 buccella Exp $
  *
  * (C) Copyright IBM Corp. 2006
  *
@@ -400,6 +400,7 @@ static int dumpQualifiers(const ClClass *cls, const char *prefix)
 	  sprintf(prefixbuf,"%s -- Qualifier[%3d]:",prefix,i);
 	  dumpString(&cls->hdr,&cq[i].id,prefixbuf);
 	}
+	free(prefixbuf);
       }
     } else {
       fprintf(stderr,"%s to many qualifier entries %d\n",
