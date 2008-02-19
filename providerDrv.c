@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.56 2007/12/21 16:04:48 sschuetz Exp $
+ * $Id: providerDrv.c,v 1.57 2008/02/19 22:56:10 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2641,6 +2641,7 @@ static BinResponseHdr *loadProvider(BinRequestHdr * hdr, ProviderInfo * info, in
               info->providerName);
       mlogf(M_ERROR,M_SHOW,msg);
       resp = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
+      free(info);
       _SFCB_RETURN(resp);
    }
    case -2:  {
@@ -2649,6 +2650,7 @@ static BinResponseHdr *loadProvider(BinRequestHdr * hdr, ProviderInfo * info, in
               info->providerName);
       mlogf(M_ERROR,M_SHOW,msg);
       resp = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
+      free(info);
       _SFCB_RETURN(resp);
    }
    default:
