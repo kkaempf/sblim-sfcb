@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.47 2008/01/29 12:45:43 gdread Exp $
+ * $Id: providerMgr.c,v 1.48 2008/03/15 00:17:20 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1281,6 +1281,9 @@ CMPIConstClass *getConstClass(const char *ns, const char *cn)
    unlockUpCall(Broker);
 
    free(resp);
+   if(!localMode){
+  	close(binCtx.provA.socket);
+   }
    closeProviderContext(&binCtx);
 
    _SFCB_RETURN(ccl);
