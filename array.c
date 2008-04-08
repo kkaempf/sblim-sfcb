@@ -1,6 +1,6 @@
 
 /*
- * $Id: array.c,v 1.19 2007/11/30 15:18:45 sschuetz Exp $
+ * $Id: array.c,v 1.20 2008/04/08 20:14:01 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -386,7 +386,7 @@ CMPIArray *internal_native_make_CMPIArray(CMPIData * av, CMPIStatus * rc,
 CMPIArray *native_make_CMPIArray(CMPIData * av, CMPIStatus * rc,
                                  ClObjectHdr * hdr)
 {
-    return internal_native_make_CMPIArray(av, rc, hdr, MEM_NOT_TRACKED);
+    return internal_native_make_CMPIArray(av, rc, hdr, MEM_TRACKED);
 }
 
 CMPIStatus sfcb_simpleArrayAdd(CMPIArray * array, CMPIValue * val, CMPIType type)
