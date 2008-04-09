@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.70 2008/04/01 01:51:42 buccella Exp $  
+# $Id: Makefile.am,v 1.71 2008/04/09 18:43:14 smswehla Exp $  
 #
 #  Makefile.am
 # 
@@ -41,7 +41,8 @@ AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sfcbconfdir)\" \
 	-DSFCB_LIBDIR=\"$(libdir)\" \
 	-DSFCB_BINARY=\"$(sbindir)/sfcbd\" \
 	-I$(srcdir)/sfcUtil \
-	@SFCB_CPPFLAGS@
+	@SFCB_CPPFLAGS@ \
+        @SFCB_CMPI_PLATFORM@ 
 AM_CFLAGS=@SFCB_CFLAGS@
 AM_LDFLAGS=@SFCB_LDFLAGS@
 
@@ -180,7 +181,7 @@ libsfcBrokerCore_la_SOURCES = \
     $(JDBC_FILES) \
     $(QUALREP_FILES)
 
-libsfcBrokerCore_la_CFLAGS = $(AM_CFLAGS) @SFCB_CMPI_OS@ @SFCB_CMPI_PLATFORM@ 
+libsfcBrokerCore_la_CFLAGS = $(AM_CFLAGS) @SFCB_CMPI_OS@ 
 libsfcBrokerCore_la_LIBADD=-lsfcUtil
 libsfcBrokerCore_la_DEPENDENCIES=libsfcUtil.la
 

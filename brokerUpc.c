@@ -1,5 +1,5 @@
 /*
- * $Id: brokerUpc.c,v 1.26 2008/01/30 22:36:15 buccella Exp $
+ * $Id: brokerUpc.c,v 1.27 2008/04/09 18:43:14 smswehla Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -401,11 +401,11 @@ static CMPIEnumeration *genericEnumRequest(const CMPIBroker * broker,
                               context, result, copLocalCall, resultclass, role);
               break;
 		    case OPS_EnumerateInstances:
-		      rci = pInfo->instanceMI->ft->enumInstances(pInfo->instanceMI,
+		      rci = pInfo->instanceMI->ft->enumerateInstances(pInfo->instanceMI,
 		                      context, result, copLocalCall, props);
 		      break;
 		    case OPS_EnumerateInstanceNames:
-		      rci = pInfo->instanceMI->ft->enumInstanceNames(pInfo->instanceMI,
+		      rci = pInfo->instanceMI->ft->enumerateInstanceNames(pInfo->instanceMI,
 		                      context, result, copLocalCall);		                      
 		      break;
 		  }
