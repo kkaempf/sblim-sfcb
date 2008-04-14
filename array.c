@@ -1,6 +1,6 @@
 
 /*
- * $Id: array.c,v 1.20 2008/04/08 20:14:01 buccella Exp $
+ * $Id: array.c,v 1.21 2008/04/14 18:42:34 gdread Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -264,6 +264,7 @@ void sfcb_native_array_increase_size(const CMPIArray * array, CMPICount incremen
       a->data = (struct native_array_item *)
          realloc(a->data, a->max * sizeof(struct native_array_item));
       memset(&a->data[a->size], 0, sizeof(struct native_array_item) * increment);
+      __make_NULL(a , a->size , a->max - 1, 0);
    }
    a->size += increment;
 }
