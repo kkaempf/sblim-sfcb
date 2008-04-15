@@ -1,6 +1,6 @@
 
 /*
- * $Id: context.c,v 1.10 2007/10/02 09:02:11 mihajlov Exp $
+ * $Id: context.c,v 1.11 2008/04/15 22:06:00 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -140,7 +140,7 @@ static unsigned int __cft_getEntryCount(const CMPIContext * ctx, CMPIStatus * rc
 }
 
 
-static CMPIStatus __cft_addEntry(CMPIContext * ctx,
+static CMPIStatus __cft_addEntry(const CMPIContext * ctx,
                                  const char *name,
                                  const CMPIValue * value, CMPIType type)
 {
