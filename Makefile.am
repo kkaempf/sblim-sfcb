@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.72 2008/04/17 00:05:56 buccella Exp $  
+# $Id: Makefile.am,v 1.73 2008/04/17 00:27:35 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -326,7 +326,7 @@ noinst_HEADERS=array.h   httpComm.h control.h    providerMgr.h \
 	selectexp.h queryOperation.h \
 	sfcVersion.h mrwlock.h sqlStatement.h avltree.h \
         cimcClientSfcbLocal.h $(QUALREP_HEADER) cmpidtx.h classSchemaMem.h \
-        objectpath.h instance.h $(SLP_HEADER)
+        objectpath.h instance.h $(SLP_HEADER) sfcbenum.h
 
 man_MANS=$(MANFILES)
 
