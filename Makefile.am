@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.71 2008/04/09 18:43:14 smswehla Exp $  
+# $Id: Makefile.am,v 1.72 2008/04/17 00:05:56 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -321,7 +321,7 @@ noinst_HEADERS=array.h   httpComm.h control.h    providerMgr.h \
 	cimXmlParser.h    native.h       support.h cimXmlGen.h \
 	cimXmlRequest.h  genericlist.h  objectImpl.h   trace.h \
 	sfcUtil/hashtable.h      sfcUtil/utilft.h mlog.h \
-	cmpidt.h cmpift.h cmpiftx.h cmpimacs.h cmpimacsx.h cmpios.h \
+	cmpidt.h cmpift.h cmpiftx.h cmpimacs.h cmpimacsx.h cmpios.h cmpipl.h \
 	fileRepository.h internalProvider.h \
 	selectexp.h queryOperation.h \
 	sfcVersion.h mrwlock.h sqlStatement.h avltree.h \
