@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.58 2008/04/09 18:43:14 smswehla Exp $
+ * $Id: providerDrv.c,v 1.59 2008/04/23 18:12:49 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2868,6 +2868,18 @@ static void *processProviderInvocationRequestsThread(void *prms)
    if ((req->options & BRH_Internal) ==0) close(abs(parms->requestor));
    free(parms);
    free(req);
+
+   if ((pInfo != NULL) && (pInfo->idleThread != 0)) {
+
+     // unset provProcInuseId to indicate that the provider is done
+     // servicing the request
+     semAcquire(sfcbSem,(pInfo->provIds.procId*3)+provProcGuardId+provProcBaseId);
+     semAcquire(sfcbSem,(pInfo->provIds.procId*3)+provProcInuseId+provProcBaseId);
+     semRelease(sfcbSem,(pInfo->provIds.procId*3)+provProcGuardId+provProcBaseId);
+
+   }
+
+
   
    _SFCB_RETURN(NULL);
 }
