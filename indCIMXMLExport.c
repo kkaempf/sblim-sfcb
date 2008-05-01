@@ -1,6 +1,6 @@
 
 /*
- * $Id: indCIMXMLExport.c,v 1.9 2008/01/10 23:08:50 buccella Exp $
+ * $Id: indCIMXMLExport.c,v 1.10 2008/05/01 20:59:15 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -320,6 +320,7 @@ int exportIndication(char *url, char *payload, char **resp, char **msg)
    FILE *out;
    
    *msg=NULL;
+   *resp=NULL;
    
    _SFCB_ENTER(TRACE_INDPROVIDER, "exportIndication");
 
