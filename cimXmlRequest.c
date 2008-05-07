@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.48 2008/01/30 22:20:26 buccella Exp $
+ * $Id: cimXmlRequest.c,v 1.49 2008/05/07 22:34:41 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -50,6 +50,11 @@
 #else
 #define SFCB_ASM(x)
 #endif
+
+#ifdef LOCAL_CONNECT_ONLY_ENABLE
+// from httpAdapter.c
+int noChunking = 0;
+#endif // LOCAL_CONNECT_ONLY_ENABLE
 
 typedef struct handler {
    RespSegments(*handler) (CimXmlRequestContext *, RequestHdr * hdr);
