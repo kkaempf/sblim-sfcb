@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.40 2008/04/15 22:06:00 buccella Exp $
+ * $Id: instance.c,v 1.41 2008/05/20 14:50:22 smswehla Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -316,7 +316,8 @@ static CMPIObjectPath *__ift_getObjectPath(const CMPIInstance * instance,
       unsigned int e, m;
 
       if (mtx == NULL) {
-	 mtx = malloc(sizeof(CMPI_MUTEX_TYPE));
+         int dummy = 0;
+	 mtx = memAlloc(MEM_TRACKED, sizeof(CMPI_MUTEX_TYPE), &dummy);
 	 *mtx = Broker->xft->newMutex(0); 
       }
       Broker->xft->lockMutex(*mtx);
