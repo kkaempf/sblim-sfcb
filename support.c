@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.27 2008/05/20 14:50:22 smswehla Exp $
+ * $Id: support.c,v 1.28 2008/05/30 15:14:24 smswehla Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -469,7 +469,7 @@ void *memAlloc(int add, size_t size, int *memId)
    }
    __ALLOC_ERROR(!result);
 
-   if (add == MEM_TRACKED) {
+   if (add != MEM_TRACKED) {
       memAdd(result,memId);
    }
    _SFCB_TRACE(1, ("--- Area: %p size: %d", result, size));
