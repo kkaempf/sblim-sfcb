@@ -1,6 +1,6 @@
 
 /*
- * $Id: qualifierProvider.c,v 1.7 2008/06/10 15:59:41 smswehla Exp $
+ * $Id: qualifierProvider.c,v 1.8 2008/06/11 20:44:32 buccella Exp $
  *
  * (C) Copyright IBM Corp. 2006
  *
@@ -127,7 +127,6 @@ static CMPIStatus QualifierProviderGetQualifier(CMPIQualifierDeclMI * mi,
 		
 		retQ.dataPtr = vp;
 		CMReturnQualifier(rslt, &retQ);
-		free(q);
    }
 
    _SFCB_RETURN(st);   
@@ -238,7 +237,6 @@ static CMPIStatus QualifierProviderEnumQualifiers(CMPIQualifierDeclMI * mi,
 			
 			retQ.dataPtr = vp;
 			CMReturnQualifier(rslt, &retQ);
-			//free(q);
 		}
 		freeBlobIndex(&bi, 1);
 	} 
