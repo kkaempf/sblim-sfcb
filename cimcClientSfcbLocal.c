@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.21 2008/04/17 20:18:56 gdread Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.22 2008/06/30 22:38:11 buccella Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -1338,6 +1338,7 @@ static CMPIConstClass * getClass(
       }
       free(sreq);
       if (rc) CIMCSetStatusWithChars(rc, resp->rc, (char*)resp->object[0].data);
+      free(resp);
       _SFCB_RETURN(NULL);
    }
    else ctxErrResponse(&binCtx,rc);
