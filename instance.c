@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.41 2008/05/20 14:50:22 smswehla Exp $
+ * $Id: instance.c,v 1.42 2008/08/07 15:48:46 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -288,7 +288,6 @@ static CMPIObjectPath *__ift_getObjectPath(const CMPIInstance * instance,
    CMPIStatus tmp;
    const char *cn = ClInstanceGetClassName((ClInstance *) instance->hdl);
    const char *ns = ClInstanceGetNameSpace((ClInstance *) instance->hdl);
-   char *id;
 
    CMPIObjectPath *cop;
    cop = TrackedCMPIObjectPath(ns, cn, rc);
@@ -342,7 +341,6 @@ static CMPIObjectPath *__ift_getObjectPath(const CMPIInstance * instance,
 
       for (e = 0; e < m; e++) {
          CMPIString *n = kl->ft->getElementAt(kl, e, NULL).value.string;
-         id=CMGetCharPtr(n);
          d = __ift_getProperty(instance, CMGetCharPtr(n), &tmp);
          if (tmp.rc == CMPI_RC_OK) {
             CMAddKey(cop, CMGetCharPtr(n), &d.value, d.type);
