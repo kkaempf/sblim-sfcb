@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlParser.c,v 1.26 2008/08/07 15:35:30 buccella Exp $
+ * $Id: cimXmlParser.c,v 1.27 2008/08/09 02:23:29 buccella Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -322,6 +322,7 @@ static struct _xmlescape {
     { "&gt;", '>', 4 },
     { "&lt;", '<', 4 },
     { "&#x20;", ' ', 6 },
+    { "&#xa;", '\n', 5 },
 };
 
 static int xmlUnescape(char *buf, char *end)
