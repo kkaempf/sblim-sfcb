@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlParser.c,v 1.28 2008/08/14 00:24:54 buccella Exp $
+ * $Id: cimXmlParser.c,v 1.29 2008/08/15 19:05:13 buccella Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -342,6 +342,8 @@ static int xmlUnescape(char *buf, char *end)
 static char *getContent(XmlBuffer * xb)
 {
    char *start = xb->cur,*end, *help;
+
+    /* if this is an ending tag, return NULL (no content) */
     if (xb->eTagFound)
       return NULL;
 
@@ -1485,7 +1487,9 @@ int yylex(YYSTYPE * lvalp, ParserControl * parm)
          }
          for (i = 0, m = sizeof(tags)/sizeof(Tags); i < m; i++) {
             if (nextEquals(next, tags[i].tag) == 1) {
-               rc=tags[i].process(lvalp, parm);
+
+               // fprintf(stderr, " yylex| processing for: %.10s\n", next);
+               rc=tags[i].process(lvalp, parm); /* call a procXXX fn based on tag name */
                _SFCB_RETURN(rc);
             }
          }
