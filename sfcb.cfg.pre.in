@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.11 2008/06/27 21:30:30 buccella Exp $
+# $Id: sfcb.cfg.pre.in,v 1.12 2008/09/05 20:01:56 mchasal Exp $
 # Sample Configuration for Small Footprint CIM Broker
 httpPort:       5988
 enableHttp:     @SFCB_CONF_HTTP@
@@ -11,6 +11,7 @@ provProcs:      32
 doBasicAuth:    @SFCB_CONF_DOBASICAUTH@
 doUdsAuth:      true
 basicAuthLib:   @SFCB_CONF_BASICAUTHLIB@
+slpHostnameLib: sfcSlpHostname 
 useChunking:    true
 keepaliveTimeout: 1
 keepaliveMaxRequest: 10
