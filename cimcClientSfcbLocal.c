@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.22 2008/06/30 22:38:11 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.23 2008/10/02 21:34:59 buccella Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -1581,7 +1581,7 @@ int localConnect(ClientEnv* ce, CMPIStatus *st)
    localMode=0;
    close(sock);
    
-   return sfcbSocket;
+   return (rc < 0) ? rc : sfcbSocket;
 }
 
 static void* release(ClientEnv* ce)
