@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.23 2008/10/02 21:34:59 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.24 2008/10/03 00:24:47 buccella Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -1536,7 +1536,6 @@ int localConnect(ClientEnv* ce, CMPIStatus *st)
    } msg;
    
    if ((sock=socket(PF_UNIX, SOCK_STREAM, 0))<0) {
-      return -1;
       if (st) {
          st->rc=CMPI_RC_ERR_FAILED;
          st->msg=ce->ft->newString(ce,strerror(errno),NULL);

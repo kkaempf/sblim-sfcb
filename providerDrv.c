@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.61 2008/05/30 02:45:52 buccella Exp $
+ * $Id: providerDrv.c,v 1.62 2008/10/03 00:24:47 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1052,7 +1052,6 @@ static int sendResponse(int requestor, BinResponseHdr * hdr)
 #endif
       default:
          mlogf(M_ERROR,M_SHOW,"--- bad sendResponse request %d\n", hdr->object[i].type);
-         *((char *) (void *) 0) = 0;
          _SFCB_ABORT();
       }
    }
