@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.63 2008/10/03 18:11:19 buccella Exp $
+ * $Id: providerDrv.c,v 1.64 2008/10/03 18:34:16 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2598,7 +2598,7 @@ static int doLoadProvider(ProviderInfo *info, char *dlName)
    while (dir) {
      libraryName(dir, (char *) info->location, fullname);
      if (stat(fullname,&stbuf) == 0) {
-       info->library = dlopen(fullname, RTLD_NOW);
+       info->library = dlopen(fullname, RTLD_NOW | RTLD_GLOBAL);
        if (info->library == NULL) {
 	 mlogf(M_ERROR,M_SHOW,"*** dlopen error: %s\n",dlerror());
        } else {
