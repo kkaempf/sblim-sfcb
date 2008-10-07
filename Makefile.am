@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.76 2008/09/05 20:01:56 mchasal Exp $  
+# $Id: Makefile.am,v 1.77 2008/10/07 21:42:55 mchasal Exp $  
 #
 #  Makefile.am
 # 
@@ -46,7 +46,7 @@ AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sfcbconfdir)\" \
 AM_CFLAGS=@SFCB_CFLAGS@
 AM_LDFLAGS=@SFCB_LDFLAGS@
 
-SUBDIRS=. $(MOFC_DIR)
+SUBDIRS=. $(MOFC_DIR) test
 
 if INDICATIONS
 INDICATION_LIBS = libsfcIndCIMXMLHandler.la
