@@ -1,6 +1,6 @@
 
 /*
- * $Id: indCIMXMLExport.c,v 1.11 2008/06/13 15:05:12 smswehla Exp $
+ * $Id: indCIMXMLExport.c,v 1.12 2008/10/09 19:18:18 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -150,7 +150,7 @@ static int genRequest(CurlData *cd, char *url, char **msg)
         return 1;
     }    
     
-    if (!supportsSSL(cd) && strncasecmp(url,"https:",6)) {
+    if (!supportsSSL(cd) && (strncasecmp(url,"https:",6) == 0)) {
         *msg=strdup("This curl library does not support https urls.");
         return 2;
     }    
