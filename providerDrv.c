@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.65 2008/10/03 19:15:45 buccella Exp $
+ * $Id: providerDrv.c,v 1.66 2008/10/09 19:24:07 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1687,7 +1687,7 @@ CMPIValue queryGetValue(QLPropertySource* src, char* name, QLOpd *type)
    CMPIValue v={(long long)0};
    
    if (rc.rc==CMPI_RC_OK) {
-      if (d.type & CMPI_SINT) { 
+      if ((d.type & CMPI_SINT) == CMPI_SINT) { 
          if (d.type==CMPI_sint32) v.sint64=d.value.sint32;
          else if (d.type==CMPI_sint16) v.sint64=d.value.sint16;
          else if (d.type==CMPI_sint8) v.sint64=d.value.sint8;
