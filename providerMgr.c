@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.51 2008/05/03 01:11:45 buccella Exp $
+ * $Id: providerMgr.c,v 1.52 2008/10/16 15:53:36 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -119,22 +119,6 @@ static void notSupported(int *requestor, OperationHdr * req)
       NULL, req->options);
    free(req);
 }
-
-/*
-static void handleSigterm(int sig)
-{
-   mlogf(M_ERROR,M_SHOW, "%s: exiting due to signal %d\n", "provider", sig);
-   exit(1);
-}
-
-static void handleSigSegv(int sig)
-{
-   mlogf(M_ERROR,M_SHOW, "()%d): exiting due to a SIGSEGV signal %d - %s(%d)\n",
-           currentProc, sig, __FILE__, __LINE__);
-   abort();
-}
-*/
-
 
 /* -------------
  * ---
