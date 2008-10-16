@@ -1,5 +1,5 @@
 /*
- * $Id: mlog.c,v 1.5 2008/10/10 21:34:10 mchasal Exp $
+ * $Id: mlog.c,v 1.6 2008/10/16 15:53:36 mchasal Exp $
  *
  * (C) Copyright IBM Corp. 2003, 2004
  *
@@ -18,7 +18,7 @@
  *
  */
 
-const char *_mlog_id = "$Id: mlog.c,v 1.5 2008/10/10 21:34:10 mchasal Exp $";
+const char *_mlog_id = "$Id: mlog.c,v 1.6 2008/10/16 15:53:36 mchasal Exp $";
 
 #include "mlog.h"
 #include <syslog.h>
@@ -31,6 +31,18 @@ void startLogging(const char *name)
   setlogmask(LOG_UPTO(LOG_INFO));
 }
 
+/** \brief mlogf - Create syslog entries
+ *
+ * This should be called with a format string in fmt, with 
+ * the variables to be inserted in it as the arguments 
+ * following (...)
+ * eg
+ *  mlogf(M_ERROR,M_SHOW,"--- %s failed rc=%d\n",oper,rc);
+ * 
+ * Don't allow user input into the format string as it 
+ * is not to be trusted. No need to use sprintf to build
+ * the string before passing it to mlogf.
+ */
 void mlogf(int priority, int errout, const char *fmt, ...)
 {
   va_list ap,apc;
