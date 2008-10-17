@@ -1,6 +1,6 @@
 
 /*
- * $Id: indCIMXMLExport.c,v 1.12 2008/10/09 19:18:18 mchasal Exp $
+ * $Id: indCIMXMLExport.c,v 1.13 2008/10/17 20:20:33 smswehla Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -130,7 +130,13 @@ static void initializeHeaders(CurlData *cd)
 static size_t writeCb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
     UtilStringBuffer *sb = (UtilStringBuffer*)stream;
-    int length = size * nmemb;
+    unsigned int length = 0;
+    unsigned long long calcLength = (unsigned long)size * nmemb;
+    if(calcLength > UINT_MAX) {
+        mlogf(M_ERROR, M_SHOW, "--- Cannot allocate for %d members of size $d\n", nmemb, size);
+        return 0;
+    }
+    length = calcLength & UINT_MAX;
     char c=((char*)ptr)[length];
     ((char*)ptr)[length]=0;
     sb->ft->appendChars(sb,(char*)ptr);
