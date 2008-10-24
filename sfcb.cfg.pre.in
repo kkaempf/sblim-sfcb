@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.13 2008/09/12 23:51:32 mchasal Exp $
+# $Id: sfcb.cfg.pre.in,v 1.14 2008/10/24 15:40:07 mchasal Exp $
 # Sample Configuration for Small Footprint CIM Broker
 httpPort:       5988
 enableHttp:     @SFCB_CONF_HTTP@
@@ -20,5 +20,5 @@ sslClientTrustStore: @sysconfdir@/sfcb/client.pem
 sslClientCertificate: ignore
 certificateAuthLib:   sfcCertificateAuthentication
 registrationDir: @localstatedir@/lib/sfcb/registration
-providerDirs: @libdir@ @libdir@/cmpi
+providerDirs: @libdir@/sfcb @libdir@ @libdir@/cmpi
 enableInterOp:  true
