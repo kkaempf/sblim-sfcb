@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.78 2008/10/24 15:40:07 mchasal Exp $  
+# $Id: Makefile.am,v 1.79 2008/10/24 22:34:29 mchasal Exp $  
 #
 #  Makefile.am
 # 
@@ -498,7 +498,7 @@ if SSL
 endif
 
 footprint:
-	@flist='$(sbin_PROGRAMS) $(bin_PROGRAMS) $(lib_LTLIBRARIES) $(dist_sfcbdata_SCRIPTS) $(init_SCRIPTS) $(man1_MANS) $(dist_man1_MANS) $(dist_pam_DATA) $(dist_sfcbdata_DATA) $(sfcbconf_DATA) $(sfcbdoc_DATA) '; \
+	@flist='$(sbin_PROGRAMS) $(bin_PROGRAMS) $(sfcblib_LTLIBRARIES) $(dist_sfcbdata_SCRIPTS) $(init_SCRIPTS) $(man1_MANS) $(dist_man1_MANS) $(dist_pam_DATA) $(dist_sfcbdata_DATA) $(sfcbconf_DATA) $(sfcbdoc_DATA) '; \
 	rm -f "MANIFEST"; \
 	for p in $$flist; do \
 		f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
