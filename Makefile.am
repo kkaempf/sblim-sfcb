@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.79 2008/10/24 22:34:29 mchasal Exp $  
+# $Id: Makefile.am,v 1.80 2008/10/30 19:26:18 mchasal Exp $  
 #
 #  Makefile.am
 # 
@@ -37,7 +37,7 @@ MANFILES=man/genSslCert.1 man/getSchema.1 man/sfcbd.1 man/sfcbmof.1 \
 BUILT_SOURCES=queryParser.c queryLexer.c sqlParser.c sqlLexer.c cimXmlOps.c cimXmlParserProcessed.c $(MANFILES)
 
 AM_YFLAGS=-d
-
+ACLOCAL_AMFLAGS=-I m4
 AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sfcbconfdir)\" \
 	-DSFCB_STATEDIR=\"$(sfcbstatedir)\" \
 	-DSFCB_LIBDIR=\"$(sfcblibdir)\" \
