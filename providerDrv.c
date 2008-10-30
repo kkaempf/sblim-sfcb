@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.68 2008/10/16 15:53:36 mchasal Exp $
+ * $Id: providerDrv.c,v 1.69 2008/10/30 15:59:59 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -676,10 +676,12 @@ int forkProvider(ProviderInfo * info, OperationHdr * req, char **msg)
 
       resp = invokeProvider(&binCtx);
       resp->rc--;
-      if (resp->rc) {
-         *msg = strdup((char *) resp->object[0].data);
-      }
+      if (msg) {
+        if (resp->rc) {
+          *msg = strdup((char *) resp->object[0].data);
+        }
       else *msg = NULL;
+      }
 
       rc=resp->rc;
       _SFCB_TRACE(1, ("--- rc: %d", resp->rc));
