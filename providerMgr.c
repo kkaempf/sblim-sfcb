@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.53 2008/10/30 15:59:59 mchasal Exp $
+ * $Id: providerMgr.c,v 1.54 2008/11/03 23:44:03 smswehla Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -890,10 +890,10 @@ static void setInuseSem(void *id)
 
    ids.ids=id;
 
-   semAcquire(sfcbSem,(ids.procId*3)+provProcGuardId+provProcBaseId);
-   semAcquire(sfcbSem,(ids.procId*3)+provProcInuseId+provProcBaseId);
-   semReleaseUnDo(sfcbSem,(ids.procId*3)+provProcInuseId+provProcBaseId);
-   semRelease(sfcbSem,(ids.procId*3)+provProcGuardId+provProcBaseId);
+   semAcquire(sfcbSem,PROV_GUARD(ids.procId));
+   semAcquire(sfcbSem,PROV_INUSE(ids.procId));
+   semReleaseUnDo(sfcbSem,PROV_INUSE(ids.procId));
+   semRelease(sfcbSem,PROV_GUARD(ids.procId));
    _SFCB_EXIT();
 }
 
