@@ -1,5 +1,5 @@
 /*
- * $Id: brokerUpc.c,v 1.27 2008/04/09 18:43:14 smswehla Exp $
+ * $Id: brokerUpc.c,v 1.28 2008/11/04 01:10:45 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -500,6 +500,7 @@ static CMPIInstance *getInstance(const CMPIBroker * broker,
             r = native_result2array(result);
             if (st.rc==0) 
                inst=CMGetArrayElementAt(r, 0, NULL).value.inst;
+	    if (sreq) free(sreq);
             return inst;   
          }
       }
