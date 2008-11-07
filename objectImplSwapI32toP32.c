@@ -1,6 +1,6 @@
 
 /*
- * $Id: objectImplSwapI32toP32.c,v 1.16 2008/01/29 22:38:26 buccella Exp $
+ * $Id: objectImplSwapI32toP32.c,v 1.17 2008/11/07 17:00:44 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -262,7 +262,11 @@ static long copyI32toP32Parameters(int ofs, char *to, CLP32_ClSection * ts,
       tp->quals = bswap_16(fp->quals);
       tp->parameter.type=bswap_16(fp->parameter.type);
       tp->parameter.arraySize=bswap_32(fp->parameter.arraySize);
+#if __WORDSIZE == 64
+      tp->parameter.refName=(char*)bswap_64((unsigned long long)(fp->parameter.refName));
+#else
       tp->parameter.refName=(void*)bswap_32((int)(fp->parameter.refName));
+#endif
       if (fp->qualifiers.used)
          l += copyI32toP32Qualifiers(ofs + l, to, &tp->qualifiers, from, &fp->qualifiers);
    }                          

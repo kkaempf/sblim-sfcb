@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.24 2008/10/03 00:24:47 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.25 2008/11/07 17:00:44 mchasal Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -29,7 +29,7 @@
 
  
 #define CIMCSetStatusWithChars(st,rcp,chars) \
-      { if (st) { (st)->rc=(rcp); \
+      { if (st != NULL) { (st)->rc=(rcp); \
         (st)->msg=NewCMPIString((chars),NULL); }}
         
 #define NewCMPIString sfcb_native_new_CMPIString
