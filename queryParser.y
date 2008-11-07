@@ -10,7 +10,7 @@
 %{
 
 /*
- * $Id: queryParser.y,v 1.11 2007/03/20 09:36:49 sschuetz Exp $
+ * $Id: queryParser.y,v 1.12 2008/11/07 17:00:44 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -71,7 +71,7 @@
 #define YYLEX_PARAM parm
 #define YYERROR_VERBOSE 1 
  
-extern int yylex();
+extern int yylex(void *);
 extern void sfcQueryErr(char*,char*,char*);
 extern void yyError(char*);
 extern void yyerror(char*);
