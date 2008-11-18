@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.25 2008/11/07 17:00:44 mchasal Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.26 2008/11/18 23:56:43 mchasal Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -269,6 +269,7 @@ static void ctxErrResponse( BinRequestContext * ctx, CMPIStatus *rc)
    switch (ctx->rc) {
    case MSG_X_NOT_SUPPORTED:
       m = "Operation not supported yy";
+      r = CMPI_RC_ERR_NOT_SUPPORTED;
       break;
    case MSG_X_INVALID_CLASS:
       m = "Class not found";
