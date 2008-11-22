@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.55 2008/11/05 00:25:53 mchasal Exp $
+ * $Id: providerMgr.c,v 1.56 2008/11/22 01:52:35 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -178,6 +178,12 @@ int nameSpaceOk(ProviderInfo *info, char *nameSpace)
    _SFCB_RETURN(0);
 }
 
+/*
+ * Find the provider for className residing in nameSpace
+ * If none is found for that specific class, try the parent class
+ * If still none, return DefaultProvider
+ *
+ */
 static ProviderInfo *lookupProvider(long type, char *className, char *nameSpace, 
       CMPIStatus *st)
 {
