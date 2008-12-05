@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.31 2008/10/15 21:22:55 smswehla Exp $
+ * $Id: support.c,v 1.32 2008/12/05 19:24:40 buccella Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -774,7 +774,11 @@ char *decode64(char *din)
    unsigned char *data=(unsigned char*)din;
    int i, o = 0, len = strlen((char*)data);
    unsigned char c, c1;
-   unsigned char *ret = (unsigned char *) malloc(len * 2);
+   unsigned char *ret = NULL;
+   if (len > 0)
+   {
+      ret = (unsigned char *) malloc(len * 2);
+   }
 
  for (i = 0; i < len; ++i) {
       c = (char) find(cvt, data[i]);
@@ -801,7 +805,10 @@ char *decode64(char *din)
       }
    }
 
-   ret[o] = 0;
+   if (ret)
+   {
+      ret[o] = 0;
+   }
    return ((char*)ret);
 }
 
