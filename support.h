@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.h,v 1.14 2007/04/27 09:11:07 sschuetz Exp $
+ * $Id: support.h,v 1.15 2008/12/16 23:35:43 buccella Exp $
  *
  * support.h
  *
@@ -217,7 +217,11 @@ void uninitGarbageCollector();
 
 extern double timevalDiff(struct timeval *sv, struct timeval *ev);
 
+#if defined(__ia64__)
+#define PADDING_LEN(s) ( (s)%sizeof(void *) ? sizeof(void *) - (s)%sizeof(void *) : 0)
+#else
 #define PADDING_LEN(s) ( (s)%sizeof(int) ? sizeof(int) - (s)%sizeof(int) : 0)
+#endif
 #define PADDED_LEN(s) ((s) + PADDING_LEN(s))
 
 #endif
