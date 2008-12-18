@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.51 2008/11/18 23:56:43 mchasal Exp $
+ * $Id: cimXmlRequest.c,v 1.52 2008/12/18 21:34:33 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -779,6 +779,7 @@ static RespSegments createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
    CMPIObjectPath *path;
    CMPIConstClass cls;
    ClClass *cl;
+   ClClass *tmp;
    int irc;
    BinRequestContext binCtx;
    BinResponseHdr *resp;
@@ -892,7 +893,9 @@ static RespSegments createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
       }
    }
    
+   tmp = cl;
    cl = ClClassRebuildClass(cl,NULL); 
+   free(tmp);
    cls=initConstClass(cl);
 
    sreq.principal = setCharsMsgSegment(ctx->principal);
