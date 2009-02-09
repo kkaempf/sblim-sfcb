@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.82 2009/01/09 21:08:28 mchasal Exp $  
+# $Id: Makefile.am,v 1.83 2009/02/09 23:53:32 mchasal Exp $  
 #
 #  Makefile.am
 # 
@@ -46,10 +46,15 @@ AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sfcbconfdir)\" \
 	-I$(srcdir)/sfcUtil \
 	@SFCB_CPPFLAGS@ \
         @SFCB_CMPI_PLATFORM@ 
-AM_CFLAGS=@SFCB_CFLAGS@
 AM_LDFLAGS=@SFCB_LDFLAGS@
 
 SUBDIRS=. $(MOFC_DIR) test
+
+if GCOV
+AM_CFLAGS=@SFCB_CFLAGS@ -ftest-coverage -fprofile-arcs
+else
+AM_CFLAGS=@SFCB_CFLAGS@
+endif
 
 if INDICATIONS
 INDICATION_LIBS = libsfcIndCIMXMLHandler.la
