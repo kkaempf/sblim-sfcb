@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.83 2009/02/09 23:53:32 mchasal Exp $  
+# $Id: Makefile.am,v 1.84 2009/02/11 22:30:22 mchasal Exp $  
 #
 #  Makefile.am
 # 
@@ -69,7 +69,6 @@ else
 HTTP_ADAPTER_LIBS = libsfcHttpAdapter.la
 HTTP_ADAPTER_LIBS_LINK = -lsfcHttpAdapter
 endif
-
 
 #
 # if enable_local_connect_no_indication is set to "yes"
@@ -513,6 +512,21 @@ footprint:
 	done;\
 	./footprint.pl;
 
+testprep:
+if GCOV
+	mkdir -p ./coverage
+	lcov --zerocounters --directory .libs/
+endif
+
+testreport:
+if GCOV
+	lcov --capture --directory .libs --output-file ./coverage/lcovtest.info --ignore-errors gcov,source
+	lcov --remove ./coverage/lcovtest.info "/usr*" --output-file ./coverage/cov_stripped.info
+	genhtml --output-directory ./coverage ./coverage/cov_stripped.info
+	@echo "****** Coverage report generated in ./coverage/index.html"
+endif
+
+test: testprep check testreport
 
 postinstall: install-cimschema create-sslkeys
 	test -f $(DESTDIR)$(sfcbstatedir)/registration/providerRegister || $(INSTALL_DATA) $(DESTDIR)$(sfcbstatedir)/stage/default.reg $(DESTDIR)$(sfcbstatedir)/registration/providerRegister 
