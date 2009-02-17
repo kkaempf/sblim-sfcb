@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.84 2009/02/11 22:30:22 mchasal Exp $  
+# $Id: Makefile.am,v 1.85 2009/02/17 22:36:27 mchasal Exp $  
 #
 #  Makefile.am
 # 
@@ -512,6 +512,7 @@ footprint:
 	done;\
 	./footprint.pl;
 
+if TEST_ENABLED
 testprep:
 if GCOV
 	mkdir -p ./coverage
@@ -527,6 +528,7 @@ if GCOV
 endif
 
 test: testprep check testreport
+endif
 
 postinstall: install-cimschema create-sslkeys
 	test -f $(DESTDIR)$(sfcbstatedir)/registration/providerRegister || $(INSTALL_DATA) $(DESTDIR)$(sfcbstatedir)/stage/default.reg $(DESTDIR)$(sfcbstatedir)/registration/providerRegister 
