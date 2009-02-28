@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.27 2009/01/30 23:55:38 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.28 2009/02/28 19:12:49 buccella Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -111,7 +111,6 @@ typedef struct thrdInfo {
 	CMPIStatus * rc ;
 } thrdInfo ;
       
-void sfcb_native_array_increase_size(const CMPIArray *, CMPICount);
 static CMPIEnumeration * enumInstances(Client *,CMPIObjectPath *,	CMPIFlags,char **,CMPIStatus *);
                   void * enumInstancesThrd( thrdInfo * ) ;
 static CMPIEnumeration * enumInstanceNames(Client *,CMPIObjectPath *,CMPIStatus *);
