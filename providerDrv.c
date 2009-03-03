@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.72 2008/12/18 21:34:33 mchasal Exp $
+ * $Id: providerDrv.c,v 1.73 2009/03/03 22:31:29 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2125,7 +2125,7 @@ static BinResponseHdr *deactivateFilter(BinRequestHdr *hdr, ProviderInfo* info,
    resp->rc=1;
 
    _SFCB_TRACE(1, ("---  pid: %d activFilters %p",currentProc,activFilters));
-   if (activFilters==NULL) _SFCB_RETURN(resp); 
+   if (info->indicationMI==NULL || activFilters==NULL) _SFCB_RETURN(resp); 
 
    for (se = activFilters; se; se = se->next) {
       if (se->filterId == req->filterId) {
