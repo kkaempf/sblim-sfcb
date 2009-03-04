@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.86 2009/02/26 21:09:23 mchasal Exp $  
+# $Id: Makefile.am,v 1.87 2009/03/04 00:21:48 mchasal Exp $  
 #
 #  Makefile.am
 # 
@@ -487,9 +487,9 @@ endif
 
 clean-local:
 	rm -f sfcbrepos sfcbstage sfcbunstage sfcbuuid sfcb.cfg getSchema.sh sfcb \
-		sfcb.init-redhat sfcb.init-suse sfcb.init-none sfcb-dox.conf test/stageschema.sh\
-		$(MANFILES)
-	rm -rf doc/*
+		sfcb.init-redhat sfcb.init-suse sfcb.init-none sfcb-dox.conf \
+		*.gcno *.gcda *.gcov $(MANFILES)
+	rm -rf doc/* coverage/
 
 dist-hook:
 	test -d "$(distdir)" &&	rm -rf `find $(distdir) -type d -name CVS`
