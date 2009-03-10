@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.h,v 1.15 2008/12/16 23:35:43 buccella Exp $
+ * $Id: support.h,v 1.16 2009/03/10 19:18:19 buccella Exp $
  *
  * support.h
  *
@@ -51,37 +51,44 @@
 CMPIClassMI *loadClassMI(const char *provider,
 			 void *library,
 			 CMPIBroker * broker,
-			 CMPIContext * ctx);
+			 CMPIContext * ctx, 
+			 CMPIStatus * status); 
 
 CMPIMethodMI *loadMethodMI(const char *provider,
 			   void *library,
 			   CMPIBroker * broker, 
-			   CMPIContext * ctx);
+			   CMPIContext * ctx,
+			   CMPIStatus * status); 
 
 CMPIPropertyMI *loadPropertyMI(const char *provider,
 			       void *library,
 			       CMPIBroker * broker, 
-			       CMPIContext * ctx);
+			       CMPIContext * ctx,
+			       CMPIStatus * status); 
 
 CMPIInstanceMI *loadInstanceMI(const char *provider,
 			       void *library,
 			       CMPIBroker * broker, 
-			       CMPIContext * ctx);
+			       CMPIContext * ctx,
+			       CMPIStatus * status); 
 
 CMPIIndicationMI *loadIndicationMI(const char *provider,
 				   void *library,
 				   CMPIBroker * broker,
-				   CMPIContext * ctx);
+				   CMPIContext * ctx,
+				   CMPIStatus * status); 
 
 CMPIAssociationMI *loadAssociationMI(const char *provider,
 				     void *library,
 				     CMPIBroker * broker,
-				     CMPIContext * ctx);
+				     CMPIContext * ctx,
+				     CMPIStatus * status); 
 
 CMPIQualifierDeclMI *loadQualifierDeclMI(const char *provider,
                                          void *library,
                                          CMPIBroker * broker,
-                                         CMPIContext * ctx);                                         
+                                         CMPIContext * ctx,
+                                         CMPIStatus * status); 
 
 /** @def MEM_NOT_TRACKED
  *
@@ -216,6 +223,8 @@ int uninit_sfcBroker();
 void uninitGarbageCollector();
 
 extern double timevalDiff(struct timeval *sv, struct timeval *ev);
+
+char* sfcb_snprintf(const char* fmt, ...); 
 
 #if defined(__ia64__)
 #define PADDING_LEN(s) ( (s)%sizeof(void *) ? sizeof(void *) - (s)%sizeof(void *) : 0)
