@@ -10,7 +10,7 @@
 %{
 
 /*
- * $Id: queryParser.y,v 1.12 2008/11/07 17:00:44 mchasal Exp $
+ * $Id: queryParser.y,v 1.13 2009/03/19 23:31:49 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -144,6 +144,7 @@ extern QLOperand* newNameQueryOperand(QLStatement *qs, char* val);
 %token <intValue> TOK_SELECT
 %token <intValue> TOK_WHERE
 %token <intValue> TOK_FROM
+%token <intValue> TOK_LIKE
 
 %token <intValue> TOK_UNEXPECTED_CHAR
 
@@ -352,6 +353,14 @@ comparisonPredicate
     | comparisonTerm TOK_ISA classId
     {
        $$=newIsaOperation(QS,$1,$3);
+    }
+    | comparisonTerm TOK_LIKE comparisonTerm
+    {
+       $$=newLikeOperation(QS,$1,$3);
+    }
+    | comparisonTerm TOK_NOT TOK_LIKE comparisonTerm
+    {
+       $$=newNotLikeOperation(QS,$1,$3);
     }
 
 nullPredicate
