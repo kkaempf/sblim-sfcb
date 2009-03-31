@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.28 2009/02/28 19:12:49 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.29 2009/03/31 21:29:46 buccella Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -45,7 +45,6 @@ extern CMPIObjectPath *relocateSerializedObjectPath(void *area);
 extern CMPIInstance *relocateSerializedInstance(void *area);
 extern CMPIArgs *relocateSerializedArgs(void *area);
 
-extern CMPIString *NewCMPIString(const char*, CMPIStatus*);
 extern CMPIObjectPath *NewCMPIObjectPath(const char*ns, const char* cn, CMPIStatus*);
 extern CMPIInstance *NewCMPIInstance(CMPIObjectPath * cop, CMPIStatus * rc);
 extern CMPIArray *NewCMPIArray(CMPICount size, CMPIType type, CMPIStatus * rc);
