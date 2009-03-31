@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.75 2009/03/23 22:04:33 mchasal Exp $
+ * $Id: providerDrv.c,v 1.76 2009/03/31 21:29:46 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -129,7 +129,6 @@ extern CMPISelectExp *NewCMPISelectExp(const char *queryString, const char *lang
            const char *sns, CMPIArray ** projection, CMPIStatus * rc);
 NativeSelectExp *activFilters=NULL;
 extern void setStatus(CMPIStatus *st, CMPIrc rc, char *msg);
-extern CMPIString *NewCMPIString(const char *ptr, CMPIStatus * rc);
 
 static ProviderProcess *provProc=NULL,*curProvProc=NULL;
 static int provProcMax=0;
