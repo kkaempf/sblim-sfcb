@@ -10,7 +10,7 @@
 %{
 
 /*
- * $Id: queryParser.y,v 1.13 2009/03/19 23:31:49 mchasal Exp $
+ * $Id: queryParser.y,v 1.14 2009/04/03 21:38:34 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -360,7 +360,7 @@ comparisonPredicate
     }
     | comparisonTerm TOK_NOT TOK_LIKE comparisonTerm
     {
-       $$=newNotLikeOperation(QS,$1,$3);
+       $$=newNotLikeOperation(QS,$1,$4);
     }
 
 nullPredicate
