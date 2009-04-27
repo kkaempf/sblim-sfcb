@@ -1,6 +1,6 @@
 
 /*
- * $Id: classProviderMem.c,v 1.7 2008/01/29 22:38:26 buccella Exp $
+ * $Id: classProviderMem.c,v 1.8 2009/04/27 18:40:01 mchasal Exp $
  *
  * (C) Copyright IBM Corp. 2006
  *
@@ -535,7 +535,10 @@ static CMPIStatus ClassProviderEnumClassNames(CMPIClassMI * mi,
    ns=(char*)CMGetNameSpace(ref,NULL)->hdl;
    flgs=ctx->ft->getEntry(ctx,CMPIInvocationFlags,NULL).value.uint32;
    cni=ref->ft->getClassName(ref,NULL);
-   if (cni) cn=(char*)cni->hdl;
+   if (cni) {
+      cn=(char*)cni->hdl;
+      if (cn && *cn==0) cn=NULL;
+   }   
    cb = (ClassBase *) cReg->hdl;
 
    cReg->ft->rLock(cReg);
