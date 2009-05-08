@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.15 2008/12/23 05:45:11 mchasal Exp $
+# $Id: sfcb.cfg.pre.in,v 1.16 2009/05/08 22:51:08 buccella Exp $
 # Sample Configuration for Small Footprint CIM Broker
 httpPort:       5988
 enableHttp:     @SFCB_CONF_HTTP@
@@ -23,3 +23,9 @@ certificateAuthLib:   sfcCertificateAuthentication
 registrationDir: @localstatedir@/lib/sfcb/registration
 providerDirs: @libdir@/sfcb @libdir@ @libdir@/cmpi
 enableInterOp:  true
+
+## For an invokeMethod request, validate method parameter types against what
+## is specified in the mof, and return an error on a mismatch. Many providers 
+## will do this on their own.  Note that if one param type is not set, SFCB will
+## do validation and set the correct type, even if this option is disabled.
+#validateMethodParamTypes:  false
