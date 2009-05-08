@@ -1,6 +1,6 @@
 
 /*
- * $Id: internalProvider.h,v 1.6 2009/05/05 18:46:04 mchasal Exp $
+ * $Id: internalProvider.h,v 1.7 2009/05/08 00:04:33 mchasal Exp $
  *
  * (C) Copyright IBM Corp. 2005
  *
@@ -26,6 +26,10 @@
 #include "utilft.h"
 #include "cmpidt.h"
 
+CMPIStatus InternalProviderEnumInstanceNames(CMPIInstanceMI * mi,
+					     const CMPIContext * ctx, 
+					     const CMPIResult * rslt, 
+					     const CMPIObjectPath * ref);
 CMPIStatus InternalProviderEnumInstances(CMPIInstanceMI * mi,
 					 const CMPIContext * ctx, 
 					 const CMPIResult * rslt, 
