@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.54 2009/05/08 22:51:08 buccella Exp $
+ * $Id: cimXmlRequest.c,v 1.55 2009/06/05 19:18:24 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2244,9 +2244,14 @@ static RespSegments setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
    else {
       t = req->newVal.type;
    }
-   val = str2CMPIValue(t, req->newVal.val, &req->newVal.ref, req->op.nameSpace.data);
-   
-   CMSetProperty(inst, req->propertyName, &val, t);
+   if (t != CMPI_null) {
+      val = str2CMPIValue(t, req->newVal.val, &req->newVal.ref, req->op.nameSpace.data);
+      CMSetProperty(inst, req->propertyName, &val, t);
+   }
+   else {
+      val.string = 0;
+      CMSetProperty(inst, req->propertyName, 0, t);
+   }
 
    sreq.principal = setCharsMsgSegment(ctx->principal);
    sreq.path = setObjectPathMsgSegment(path);
