@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlParser.c,v 1.32 2009/05/01 23:00:39 mchasal Exp $
+ * $Id: cimXmlParser.c,v 1.33 2009/06/05 20:09:34 buccella Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -1828,9 +1828,18 @@ static void freeInstance(XtokInstance *op)
 
 static  void freeNewValue(XtokNewValue *op)
 {
+  switch(op->type) {
+  case typeValue_Instance:
+/* case typeValue_Class: */
     freeValue(&op->val);
+    break;
+  case CMPI_ref:
     freeReference(&op->ref);
+    break;
+  case CMPI_ARRAY:
     freeArray(&op->arr);
+    break;
+  }
 }
 
 static void freeMethodCall(XtokMethodCall* op)
