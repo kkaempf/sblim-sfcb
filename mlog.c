@@ -1,5 +1,5 @@
 /*
- * $Id: mlog.c,v 1.6 2008/10/16 15:53:36 mchasal Exp $
+ * $Id: mlog.c,v 1.7 2009/06/10 19:40:43 mchasal Exp $
  *
  * (C) Copyright IBM Corp. 2003, 2004
  *
@@ -18,17 +18,18 @@
  *
  */
 
-const char *_mlog_id = "$Id: mlog.c,v 1.6 2008/10/16 15:53:36 mchasal Exp $";
+const char *_mlog_id = "$Id: mlog.c,v 1.7 2009/06/10 19:40:43 mchasal Exp $";
 
 #include "mlog.h"
+#include "msgqueue.h"
 #include <syslog.h>
 #include <stdarg.h>
 #include <stdio.h>
 
-void startLogging(const char *name)
+void startLogging(const char *name, int level)
 {
   openlog(name,LOG_PID,LOG_DAEMON);
-  setlogmask(LOG_UPTO(LOG_INFO));
+  setlogmask(LOG_UPTO(level));
 }
 
 /** \brief mlogf - Create syslog entries
@@ -62,16 +63,16 @@ void mlogf(int priority, int errout, const char *fmt, ...)
     priosysl=LOG_ERR;
     break;
   }
+
+  semAcquire(sfcbSem,LOG_GUARD_ID);
   va_start(ap,fmt);
-  
   vsnprintf(buf,4096,fmt,ap);
   syslog(priosysl,"%s",buf);
 
   if (errout) {
-    va_start(apc,fmt);
-    vfprintf(stderr,fmt,apc);
-    va_end(apc);
+    fprintf(stderr,"%s",buf);
   }
   va_end(ap);
+  semRelease(sfcbSem,LOG_GUARD_ID);
 }
 

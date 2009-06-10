@@ -1,5 +1,5 @@
 /*
- * $Id: mlog.h,v 1.3 2005/11/20 17:43:54 bestorga-oss Exp $
+ * $Id: mlog.h,v 1.4 2009/06/10 19:40:43 mchasal Exp $
  *
  * (C) Copyright IBM Corp. 2003, 2004
  *
@@ -27,7 +27,7 @@
 #define M_SHOW  1
 #define M_QUIET 0
 
-void startLogging(const char *name);
+void startLogging(const char *name, int level);
 void mlogf(int priority, int errout, const char* fmt, ...);
 
 #endif
