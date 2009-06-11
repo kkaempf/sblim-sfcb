@@ -1,5 +1,5 @@
 /*
- * $Id: mlog.c,v 1.7 2009/06/10 19:40:43 mchasal Exp $
+ * $Id: mlog.c,v 1.8 2009/06/11 22:20:31 mchasal Exp $
  *
  * (C) Copyright IBM Corp. 2003, 2004
  *
@@ -18,18 +18,43 @@
  *
  */
 
-const char *_mlog_id = "$Id: mlog.c,v 1.7 2009/06/10 19:40:43 mchasal Exp $";
+const char *_mlog_id = "$Id: mlog.c,v 1.8 2009/06/11 22:20:31 mchasal Exp $";
+
 
 #include "mlog.h"
 #include "msgqueue.h"
 #include <syslog.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <errno.h>
+
+//semaphore
+static key_t logSemKey;
+static int logSem = -1;
+
 
 void startLogging(const char *name, int level)
 {
+   union semun sun;
+
+   logSemKey=ftok(SFCB_BINARY,'L');
+
+    // if sem exists, clear it out.
+   if ((logSem=semget(logSemKey,1, 0600))!=-1)
+      semctl(logSem,0,IPC_RMID,sun);
+
+   if ((logSem=semget(logSemKey,1,IPC_CREAT | IPC_EXCL | 0600))==-1) {
+      char *emsg=strerror(errno);
+      fprintf(stderr,"\n--- Logging semaphore create key: 0x%x failed: %s\n",logSemKey,emsg);
+      abort();
+   }
+
+   sun.val=1;
+   semctl(logSem,0,SETVAL,sun);
+
   openlog(name,LOG_PID,LOG_DAEMON);
   setlogmask(LOG_UPTO(level));
+
 }
 
 /** \brief mlogf - Create syslog entries
@@ -64,7 +89,12 @@ void mlogf(int priority, int errout, const char *fmt, ...)
     break;
   }
 
-  semAcquire(sfcbSem,LOG_GUARD_ID);
+  if (semAcquire(logSem,0)) {
+      char *emsg=strerror(errno);
+      fprintf(stderr,"\n--- Unable to acquire logging lock: %s\n",emsg);
+      // not aborting since that will kill sfcb, so try to continue
+  }
+  
   va_start(ap,fmt);
   vsnprintf(buf,4096,fmt,ap);
   syslog(priosysl,"%s",buf);
@@ -73,6 +103,10 @@ void mlogf(int priority, int errout, const char *fmt, ...)
     fprintf(stderr,"%s",buf);
   }
   va_end(ap);
-  semRelease(sfcbSem,LOG_GUARD_ID);
+  if (semRelease(logSem,0)) {
+      char *emsg=strerror(errno);
+      fprintf(stderr,"\n--- Unable to release logging lock: %s\n",emsg);
+      // not aborting since that will kill sfcb, so try to continue
+  }
 }
 
