@@ -1,5 +1,5 @@
 /*
- * $Id: mlog.c,v 1.8 2009/06/11 22:20:31 mchasal Exp $
+ * $Id: mlog.c,v 1.9 2009/06/15 20:16:33 buccella Exp $
  *
  * (C) Copyright IBM Corp. 2003, 2004
  *
@@ -18,7 +18,7 @@
  *
  */
 
-const char *_mlog_id = "$Id: mlog.c,v 1.8 2009/06/11 22:20:31 mchasal Exp $";
+const char *_mlog_id = "$Id: mlog.c,v 1.9 2009/06/15 20:16:33 buccella Exp $";
 
 
 #include "mlog.h"
@@ -71,7 +71,7 @@ void startLogging(const char *name, int level)
  */
 void mlogf(int priority, int errout, const char *fmt, ...)
 {
-  va_list ap,apc;
+  va_list ap;
   int priosysl;
 
   char buf[4096];
