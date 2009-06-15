@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.88 2009/06/02 20:58:07 smswehla Exp $
+# $Id: configure.ac,v 1.89 2009/06/15 19:09:20 buccella Exp $
 # 
 # configure.ac
 #
@@ -22,7 +22,7 @@
 
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(Small Footprint CIM Broker, 1.3.4preview, sblim-devel@lists.sourceforge.net, sblim-sfcb)
+AC_INIT(Small Footprint CIM Broker, 1.3.4, sblim-devel@lists.sourceforge.net, sblim-sfcb)
 AC_CONFIG_SRCDIR([providerDrv.c])
 
 #disable "seems to ignore the --datarootdir setting" warnings
