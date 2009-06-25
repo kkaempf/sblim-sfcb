@@ -1,6 +1,6 @@
 
 /*
- * $Id: fileRepository.c,v 1.18 2009/01/09 21:08:29 mchasal Exp $
+ * $Id: fileRepository.c,v 1.19 2009/06/25 14:37:30 smswehla Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -90,7 +90,7 @@ static int getIndexRecordCase(BlobIndex * bi, const char *key, size_t keyl, char
   int slen;
   
   /* check index range */
-  if (bi->next > bi->dSize) {
+  if (bi->next >= bi->dSize) {
     return -1;
   }
   tokenptr = bi->index + bi->next;
@@ -400,6 +400,7 @@ int getIndex(const char *ns, const char *cls, int elen, int mki, BlobIndex **bip
       bi->index=malloc(bi->aSize);
       fseek(bi->fx,0,SEEK_SET);
       fread(bi->index,bi->dSize,1,bi->fx);
+      bi->index[bi->dSize]=0;
     }
     *bip=bi;
     return 1;
