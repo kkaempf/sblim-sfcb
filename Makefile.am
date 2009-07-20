@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.89 2009/06/02 20:58:07 smswehla Exp $  
+# $Id: Makefile.am,v 1.90 2009/07/20 23:20:18 mchasal Exp $  
 #
 #  Makefile.am
 # 
@@ -133,6 +133,9 @@ if PAM
 else
     PAM_LIBS =
 endif
+
+sfcb_sharedobjects = \
+   $(sfcblibdir)/*.so
 
 sfcblib_LTLIBRARIES = \
    libsfcUtil.la \
@@ -504,7 +507,7 @@ if SSL
 endif
 
 footprint:
-	@flist='$(sbin_PROGRAMS) $(bin_PROGRAMS) $(sfcblib_LTLIBRARIES) $(dist_sfcbdata_SCRIPTS) $(init_SCRIPTS) $(man1_MANS) $(dist_man1_MANS) $(dist_pam_DATA) $(dist_sfcbdata_DATA) $(sfcbconf_DATA) $(sfcbdoc_DATA) '; \
+	@flist='$(sbin_PROGRAMS) $(bin_PROGRAMS) $(sfcblib_LTLIBRARIES) $(dist_sfcbdata_SCRIPTS) $(init_SCRIPTS) $(man1_MANS) $(dist_man1_MANS) $(dist_pam_DATA) $(dist_sfcbdata_DATA) $(sfcbconf_DATA) $(sfcbdoc_DATA) $(sfcb_sharedobjects) '; \
 	rm -f "MANIFEST"; \
 	for p in $$flist; do \
 		f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
