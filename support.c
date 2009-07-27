@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.33 2009/03/10 19:18:19 buccella Exp $
+ * $Id: support.c,v 1.34 2009/07/27 22:39:07 buccella Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -433,7 +433,7 @@ void uninitGarbageCollector()
    
    __cleanup_mt(mt);
    CMPI_BrokerExt_Ftab->setThreadSpecific(__mm_key,NULL);
-
+   CMPI_BrokerExt_Ftab->destroyThreadKey(__mm_key);
 }
 
 static managed_thread *__init_mt()
