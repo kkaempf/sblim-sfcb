@@ -1,5 +1,5 @@
 /*
- * $Id: mlog.c,v 1.9 2009/06/15 20:16:33 buccella Exp $
+ * $Id: mlog.c,v 1.10 2009/08/07 23:31:13 mchasal Exp $
  *
  * (C) Copyright IBM Corp. 2003, 2004
  *
@@ -18,7 +18,7 @@
  *
  */
 
-const char *_mlog_id = "$Id: mlog.c,v 1.9 2009/06/15 20:16:33 buccella Exp $";
+const char *_mlog_id = "$Id: mlog.c,v 1.10 2009/08/07 23:31:13 mchasal Exp $";
 
 
 #include "mlog.h"
@@ -37,7 +37,7 @@ void startLogging(const char *name, int level)
 {
    union semun sun;
 
-   logSemKey=ftok(SFCB_BINARY,'L');
+   logSemKey=ftok(SFCB_BINARY,getpid());
 
     // if sem exists, clear it out.
    if ((logSem=semget(logSemKey,1, 0600))!=-1)
@@ -55,6 +55,18 @@ void startLogging(const char *name, int level)
   openlog(name,LOG_PID,LOG_DAEMON);
   setlogmask(LOG_UPTO(level));
 
+}
+
+/** \brief closeLogging - Closes down loggin
+ *
+ * closeLogging deletes the semaphore and closes out
+ * the syslog services that are created in startLogging.
+ */
+void closeLogging ()
+{
+    union semun sun;
+    semctl(logSem,0,IPC_RMID,sun);
+    closelog();
 }
 
 /** \brief mlogf - Create syslog entries
