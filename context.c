@@ -1,6 +1,6 @@
 
 /*
- * $Id: context.c,v 1.12 2008/06/24 15:28:27 buccella Exp $
+ * $Id: context.c,v 1.13 2009/08/10 22:47:58 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -268,12 +268,16 @@ static int __addProperty ( struct native_property ** prop,
 	/* if it's new, add it to the end of the list */
 	/* if it's an update, replace it in the list */
 	if ( *prop == NULL || (strcmp ( (*prop)->name, name ) == 0) ) {
+	   struct native_property * tmp; 
 	   if (*prop == NULL) {
-		 *prop = (struct native_property *)
-			 calloc ( 1, sizeof ( struct native_property ) );
+		    *prop = (struct native_property *)
+            calloc ( 1, sizeof ( struct native_property ) );
+            (*prop)->name = strdup ( name );
+       } else {
+            sfcb_native_release_CMPIValue((*prop)->type, &((*prop)->value));
+
 	   }
-	   struct native_property * tmp = *prop; 
-		  tmp->name = strdup ( name );
+		  tmp= *prop;
 
 		  if ( type == CMPI_chars ) {
 
