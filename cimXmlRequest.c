@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.55 2009/06/05 19:18:24 buccella Exp $
+ * $Id: cimXmlRequest.c,v 1.56 2009/08/20 21:30:39 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1031,6 +1031,7 @@ static RespSegments enumClasses(CimXmlRequestContext * ctx,
 	freeResponseHeaders(resp,&binCtx);
 	_SFCB_RETURN(rs);
       }
+      freeResponseHeaders(resp,&binCtx);
       
       rs.chunkedMode=1;
       rs.rc=err;
