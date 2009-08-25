@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.18 2009/08/24 18:57:58 mchasal Exp $
+# $Id: sfcb.cfg.pre.in,v 1.19 2009/08/25 19:12:42 mchasal Exp $
 ##
 ## Sample Configuration for Small Footprint CIM Broker
 ## 
@@ -19,6 +19,15 @@ enableHttp:     @SFCB_CONF_HTTP@
 ## The HTTP port that SFCB should listen on. 
 ## Default is 5988
 httpPort:       5988
+
+## These settings control what user http is forked under. If
+## httpUserSFCB is "true" (the default), http will run under 
+## the same user as the SFCB main process. If it is "false" the username 
+## specified for httpUser will be used. This setting is used for
+## both http and https servers
+## httpUser MUST be specified if httpUserSFCB is false.
+#httpUserSFCB:true
+#httpUser: 
 
 ## Max number of HTTP processes.  
 ## Default is 8
