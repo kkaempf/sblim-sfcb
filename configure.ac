@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.91 2009/08/25 05:48:06 pratyusha Exp $
+# $Id: configure.ac,v 1.92 2009/08/26 05:19:20 pratyusha Exp $
 # 
 # configure.ac
 #
@@ -196,7 +196,10 @@ do
         commands|command|cmd|cmds)
             test_cmd=yes;;
 	slp)
-	    test_slp=yes;;
+	    if test "$enable_slp" == "yes"; then
+	       test_slp=yes
+	    fi
+	    ;;
         *)
             echo "Unknown testcase $testcase";;
     esac
