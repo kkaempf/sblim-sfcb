@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.31 2009/08/26 14:52:49 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.32 2009/09/01 18:59:06 buccella Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -814,16 +814,19 @@ static CMPIEnumeration * execQuery(
       if (err == 0) {
          enm=cpyEnumResponses(&binCtx,resp,l);
          freeResps(resp,binCtx.pCount);
+         CMRelease(path);
          _SFCB_RETURN(enm);
       }
       if (rc) CIMCSetStatusWithChars(rc, resp[err-1]->rc, 
                   (char*)resp[err-1]->object[0].data);
+      CMRelease(path);
       freeResps(resp,binCtx.pCount);
       _SFCB_RETURN(NULL);
    }
    else ctxErrResponse(&binCtx,rc);
    closeProviderContext(&binCtx);
-    
+
+   CMRelease(path);
    _SFCB_RETURN(NULL);
 }	
 	
