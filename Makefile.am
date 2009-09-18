@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.91 2009/09/18 10:07:09 pratyusha Exp $  
+# $Id: Makefile.am,v 1.92 2009/09/18 18:13:39 pratyusha Exp $  
 #
 #  Makefile.am
 # 
@@ -158,10 +158,14 @@ sfcblib_LTLIBRARIES = \
    $(SLP_LIBS) \
    $(SLP_HOSTNAME_LIBS) \
    $(INDICATION_LIBS) \
-   $(PAM_LIBS) \
+   $(PAM_LIBS) 
+
+if TEST_ENABLED 
+sfcblib_LTLIBRARIES += \
    libTestAssociationProvider.la \
    libTestMethodProvider.la \
    libTestInstanceProvider.la 
+endif
 
 if SLP_ALONE
 SLP_PROGRAMFILES = cimslp

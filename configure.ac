@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.95 2009/09/09 14:59:09 skodali Exp $
+# $Id: configure.ac,v 1.96 2009/09/18 18:13:40 pratyusha Exp $
 # 
 # configure.ac
 #
@@ -224,6 +224,8 @@ if [test "$enable_tests"]; then
     # execution order.
     TEST_SUBDIRS="."
     AC_CONFIG_FILES([test/finaltest/Makefile])
+    TEST_SUBDIRS="$TEST_SUBDIRS TestProviders/tests"
+    AC_CONFIG_FILES([test/TestProviders/tests/Makefile])
     # Enable the various tests
     if [test "$test_cmd" == "yes"]; then
         TEST_SUBDIRS="$TEST_SUBDIRS commands"
