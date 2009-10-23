@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.96 2009/10/13 19:19:11 smswehla Exp $  
+# $Id: Makefile.am,v 1.97 2009/10/23 13:57:00 pratyusha Exp $  
 #
 #  Makefile.am
 # 
@@ -166,7 +166,8 @@ sfcblib_LTLIBRARIES += \
    libTestMethodProvider.la \
    libTestInstanceProvider.la \
    libTestMiscProvider.la \
-   libTestExecQueryProvider.la
+   libTestExecQueryProvider.la \
+   libTestIndicationProvider.la
 endif
 
 if SLP_ALONE
@@ -371,6 +372,11 @@ libTestExecQueryProvider_la_SOURCES = \
    test/TestProviders/cmpiTestExecQueryProvider.c
 libTestExecQueryProvider_la_LIBADD = -lsfcBrokerCore
 libTestExecQueryProvider_la_DEPENDENCIES=libsfcBrokerCore.la
+
+libTestIndicationProvider_la_SOURCES = \
+   test/TestProviders/cmpiTestIndicationProvider.c
+libTestIndicationProvider_la_LIBADD = -lsfcBrokerCore
+libTestIndicationProvider_la_DEPENDENCIES=libsfcBrokerCore.la
 endif
 
 #
