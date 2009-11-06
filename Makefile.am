@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.97 2009/10/23 13:57:00 pratyusha Exp $  
+# $Id: Makefile.am,v 1.98 2009/11/06 23:16:14 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -581,5 +581,5 @@ endif
 postinstall: install-cimschema create-sslkeys
 	test -f $(DESTDIR)$(sfcbstatedir)/registration/providerRegister || $(INSTALL_DATA) $(DESTDIR)$(sfcbstatedir)/stage/default.reg $(DESTDIR)$(sfcbstatedir)/registration/providerRegister 
 if TEST_ENABLED
-	./test/stageschema.sh ./test/schema
+	./test/stageschema.sh -d test/schema -p $(prefix)
 endif
