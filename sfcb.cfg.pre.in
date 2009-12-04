@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.19 2009/08/25 19:12:42 mchasal Exp $
+# $Id: sfcb.cfg.pre.in,v 1.20 2009/12/04 21:41:00 buccella Exp $
 ##
 ## Sample Configuration for Small Footprint CIM Broker
 ## 
@@ -42,7 +42,7 @@ httpProcs:      8
 useChunking:    true
 
 ## Size of chunks in bytes. This has an affect even if useChunking is not 
-## enabled.
+## enabled. Also, sfcb may internally adjust this value if needed.
 ## Default is 50000
 #chunkSize: 50000
 
