@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.34 2009/07/27 22:39:07 buccella Exp $
+ * $Id: support.c,v 1.35 2009/12/12 01:48:06 buccella Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -700,9 +700,9 @@ void releaseHeap(void *hc)
 
 ProviderRegister *pReg = NULL;
 
-int init_sfcBroker(char *home)
+int init_sfcBroker()
 {
-   pReg = newProviderRegister(home);
+   pReg = newProviderRegister();
    return 0;
 }
 
