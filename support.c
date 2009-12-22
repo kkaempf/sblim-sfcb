@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.35 2009/12/12 01:48:06 buccella Exp $
+ * $Id: support.c,v 1.36 2009/12/22 00:18:29 buccella Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -916,6 +916,32 @@ char *cntlGetStr(CntlVals * rv)
    cntlSkipws(&rv->val);
    v = rv->val;
    return v;
+}
+
+char **buildArgList(char *str, char *pgm, int *argc)
+{
+    int i,l,n,f,s=0;
+    char **argv,*p,*ps;
+    for (f=1,i=0,l=strlen(str); i<l; i++) {
+        if (str[i]<=' ') { f=1; continue; }
+        if (f) { s++; f=0; }
+    }
+
+    l=((s+2)*sizeof(char*))+strlen(str)+strlen(pgm)+2;
+    argv=(char**)calloc(l,1);
+    ps=(char*)argv+(s+2)*sizeof(char*);
+    strcpy(ps,str);
+    p=ps+strlen(str)+1;
+    strcpy(p,pgm);
+    argv[0]=p;
+
+    for (f=1,n=0,i=0,l=strlen(ps); i<l; i++) {
+        if (ps[i]<=' ') { ps[i]=0; f=1; continue; }
+        if (f) { argv[++n]=ps+i; f=0; }
+    }
+
+    *argc=n+1;
+    return argv;
 }
 
 void dumpTiming(int pid)
