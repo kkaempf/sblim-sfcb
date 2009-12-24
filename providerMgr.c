@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.63 2009/12/23 23:59:44 buccella Exp $
+ * $Id: providerMgr.c,v 1.64 2009/12/24 00:07:39 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1248,7 +1248,7 @@ static BinResponseHdr *intInvokeProvider(BinRequestContext * ctx,ComSockets sock
 BinResponseHdr *invokeProvider(BinRequestContext * ctx)
 {
    ComSockets sockets;
-   _SFCB_ENTER(TRACE_PROVIDERMGR | TRACE_CIMXMLPROC, "invokeProviders");
+   _SFCB_ENTER(TRACE_PROVIDERMGR | TRACE_CIMXMLPROC, "invokeProvider");
 
    if (localMode) sockets=resultSockets;
    else sockets=getSocketPair("invokeProvider");
