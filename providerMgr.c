@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.64 2009/12/24 00:07:39 mchasal Exp $
+ * $Id: providerMgr.c,v 1.65 2009/12/24 00:19:13 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -551,10 +551,13 @@ static int addAssocProviders(char *className, char *nameSpace, UtilList * provid
    }
    else children = _getAssocClassNames(nameSpace);
 
-   if (children) for (child = children->ft->getFirst(children); child;
+   if (children) {
+     for (child = children->ft->getFirst(children); child;
            child = children->ft->getNext(children)) {
          rc = addAssocProviders(child, nameSpace, providerList);
          if (rc) _SFCB_RETURN(rc);
+     }
+     CMRelease(children);
    }
    _SFCB_RETURN(rc);
 }
