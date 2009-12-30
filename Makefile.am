@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.99 2009/12/22 00:18:29 buccella Exp $  
+# $Id: Makefile.am,v 1.100 2009/12/30 22:41:29 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -145,6 +145,7 @@ sfcblib_LTLIBRARIES = \
    libsfcInteropProvider.la \
    libsfcInteropServerProvider.la \
    libsfcProfileProvider.la \
+   libsfcElementCapabilitiesProvider.la \
    libsfcClassProvider.la \
    libsfcClassProviderGz.la \
    libsfcClassProviderSf.la \
@@ -331,6 +332,11 @@ libsfcProfileProvider_la_SOURCES = \
    profileProvider.c 
 libsfcProfileProvider_la_LIBADD=-lsfcBrokerCore
 libsfcProfileProvider_la_DEPENDENCIES=libsfcBrokerCore.la
+
+libsfcElementCapabilitiesProvider_la_SOURCES = \
+   elementCapabilitiesProvider.c 
+libsfcElementCapabilitiesProvider_la_LIBADD=-lsfcBrokerCore
+libsfcElementCapabilitiesProvider_la_DEPENDENCIES=libsfcBrokerCore.la
 
 libsfcClassProviderGz_la_SOURCES = \
    classProviderGz.c
