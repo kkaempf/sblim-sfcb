@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.56 2009/08/20 21:30:39 buccella Exp $
+ * $Id: cimXmlRequest.c,v 1.57 2010/01/15 20:58:33 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2208,8 +2208,10 @@ static RespSegments getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
       if (resp) {
     free(resp);
       }
+      CMRelease(tmpString);
       _SFCB_RETURN(rs);
    }
+   CMRelease(tmpString);
    closeProviderContext(&binCtx);
 
    _SFCB_RETURN(ctxErrResponse(hdr, &binCtx,0));
