@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.66 2010/01/18 21:22:17 buccella Exp $
+ * $Id: providerMgr.c,v 1.67 2010/01/19 16:14:50 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -468,7 +468,6 @@ static void processIndProviderList(int *requestor, OperationHdr * req)
 
 #endif
 
-
 /* -------------
  * ---
  *      Association Provider support
@@ -500,10 +499,9 @@ static ProviderInfo *getAssocProvider(char *className, char *nameSpace)
 
      for (info = pReg->ft->getProvider(pReg, cls, type); info; info=info->nextInRegister) {
        if (nameSpaceOk(info, nameSpace)) {
-	 fprintf(stderr, "provider is: %s\n", info->providerName);	  
-	 addProviderToHT(info, assocProviderHt);
-	 free(cls);
-	 _SFCB_RETURN(info);
+         addProviderToHT(info, assocProviderHt);
+         free(cls);
+         _SFCB_RETURN(info);
        }
      }
 
