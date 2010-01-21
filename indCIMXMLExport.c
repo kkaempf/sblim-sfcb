@@ -1,6 +1,6 @@
 
 /*
- * $Id: indCIMXMLExport.c,v 1.13 2008/10/17 20:20:33 smswehla Exp $
+ * $Id: indCIMXMLExport.c,v 1.14 2010/01/21 21:50:37 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -336,6 +336,10 @@ int exportIndication(char *url, char *payload, char **resp, char **msg)
          fprintf(out,"%s\n",payload);
          fprintf(out,"=========== End of Indication ===========\n");
          fclose(out);
+      } else {
+         rc=1;
+         mlogf(M_ERROR,M_SHOW,"Unable to open file to process indication: %s\n", url);
+         _SFCB_TRACE(1,("--- Unable to open file: %s",url));
       }
       _SFCB_RETURN(rc); 
    }
