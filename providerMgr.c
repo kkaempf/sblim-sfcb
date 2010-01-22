@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.67 2010/01/19 16:14:50 buccella Exp $
+ * $Id: providerMgr.c,v 1.68 2010/01/22 02:12:34 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -499,7 +499,7 @@ static ProviderInfo *getAssocProvider(char *className, char *nameSpace)
 
      for (info = pReg->ft->getProvider(pReg, cls, type); info; info=info->nextInRegister) {
        if (nameSpaceOk(info, nameSpace)) {
-         addProviderToHT(info, assocProviderHt);
+         addProviderToHT(info, assocProviderHt, 0);
          free(cls);
          _SFCB_RETURN(info);
        }
