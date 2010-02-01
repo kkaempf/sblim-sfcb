@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.102 2010/01/29 19:49:58 smswehla Exp $  
+# $Id: Makefile.am,v 1.103 2010/02/01 09:38:35 pratyusha Exp $  
 #
 #  Makefile.am
 # 
@@ -524,7 +524,9 @@ install-data-local:
 	test -d $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop || $(mkdir_p) $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop
 	test -d $(DESTDIR)$(sfcbstatedir)/stage/regs || $(mkdir_p) $(DESTDIR)$(sfcbstatedir)/stage/regs
 	$(INSTALL_DATA) ./default.reg $(DESTDIR)$(sfcbstatedir)/stage
-	test -f $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop/interop.mof && rm $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop/interop.mof
+	if test -f $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop/interop.mof; then \
+	   rm $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop/interop.mof; \
+	fi;
 	$(INSTALL_DATA) $(srcdir)/10_interop.mof $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop
 if INDICATIONS
 	$(INSTALL_DATA) $(srcdir)/20_indication.mof $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop
