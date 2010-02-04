@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.81 2010/01/28 23:15:03 smswehla Exp $
+ * $Id: providerDrv.c,v 1.82 2010/02/04 18:51:20 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2628,7 +2628,7 @@ char *opsName[] = {
 static void *processProviderInvocationRequestsThread(void *prms)
 {
    BinResponseHdr *resp=NULL;
-   ProviderInfo *pInfo, *temp;
+   ProviderInfo *pInfo;
    ProvHandler hdlr;
    Parms *parms = (Parms *) prms;
    BinRequestHdr *req = parms->req;
