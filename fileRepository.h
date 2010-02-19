@@ -17,43 +17,60 @@
  *
  * Directory/file based respository implementation.
  *
-*/
+ */
 #include <stdio.h>
 #include "sfcUtil/utilft.h"
 
 #ifndef _FILEREPOSITORY_
 #define _FILEREPOSITORY_
 
-//#define BASE "repository"
+// #define BASE "repository"
 
 typedef struct blobIndex {
-   int freed;
-   char *fnx,*fnd,*dir,*id;
-   FILE *fx,*fd;
-   char *index;
-   int dSize,aSize;
-   int pos,len,blen,bofs,next;
-   unsigned long fpos;
-   unsigned long dlen;
+  int             freed;
+  char           *fnx,
+                 *fnd,
+                 *dir,
+                 *id;
+  FILE           *fx,
+                 *fd;
+  char           *index;
+  int             dSize,
+                  aSize;
+  int             pos,
+                  len,
+                  blen,
+                  bofs,
+                  next;
+  unsigned long   fpos;
+  unsigned long   dlen;
 } BlobIndex;
 
 #define NEW(td) (td*)calloc(sizeof(td),1)
 
-extern void freeBlobIndex(BlobIndex **bi, int all);
-extern int getIndex(const char *ns, const char *cls, int elen, int mki, BlobIndex** bip);
-extern int addBlob(const char *ns, const char * cls, char *id, void *blob, int len);
-extern int deleteBlob(const char *ns, const char * cls, const char *id);
-extern void *getBlob(const char *ns, const char *cls, const char *id, int *len);
-extern int existingBlob(const char *ns, const char * cls, const char *id);
-extern int existingNameSpace(const char *ns);
-extern void* getFirst(BlobIndex *bi, int *len, char** keyb, size_t *keybl);
-extern void* getNext(BlobIndex *bi, int *len, char** keyb, size_t *keybl);
+extern void     freeBlobIndex(BlobIndex ** bi, int all);
+extern int      getIndex(const char *ns, const char *cls, int elen,
+			 int mki, BlobIndex ** bip);
+extern int      addBlob(const char *ns, const char *cls, char *id,
+			void *blob, int len);
+extern int      deleteBlob(const char *ns, const char *cls,
+			   const char *id);
+extern void    *getBlob(const char *ns, const char *cls, const char *id,
+			int *len);
+extern int      existingBlob(const char *ns, const char *cls,
+			     const char *id);
+extern int      existingNameSpace(const char *ns);
+extern void    *getFirst(BlobIndex * bi, int *len, char **keyb,
+			 size_t * keybl);
+extern void    *getNext(BlobIndex * bi, int *len, char **keyb,
+			size_t * keybl);
 
 /*
-NOTE: useAlternateRepository must be called prior to
-      calling any other functions from fileRepository.h
-*/
-// override 'repository' option from sfcb.cfg...  full path to repository dir
-extern void useAlternateRepository(const char *inAltRepos);
-    
+ * NOTE: useAlternateRepository must be called prior to calling any other
+ * functions from fileRepository.h 
+ */
+// override 'repository' option from sfcb.cfg...  full path to repository
+// dir
+extern void     useAlternateRepository(const char *inAltRepos);
+
 #endif

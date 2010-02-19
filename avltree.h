@@ -18,7 +18,7 @@
  *
  * 
  *
-*/
+ */
 
 
 #ifndef AVL_H
@@ -32,27 +32,28 @@ typedef struct avlNode AvlNode;
 
 
 struct avlNode {
-    void *item;
-    struct avlNode *left, *right;
-    signed char balance;
+  void           *item;
+  struct avlNode *left,
+                 *right;
+  signed char     balance;
 };
 
 struct avlTree {
-    AvlNode *root;
-    int n;
-    int (* compar)(const void * a, const void *b);
-    AvlNode **stack;
-    void (*free)(AvlTree **this);
-    void* (*insert)(AvlTree *this, void *item);
-    void* (*find)(AvlTree *this, void *item);
-    void* (*findMin)(AvlTree *this);
-    void* (*delete)(AvlTree *this, void *item);
-    void* (*deleteMin)(AvlTree *this);
-    signed char *pathInfo;  
+  AvlNode        *root;
+  int             n;
+  int             (*compar) (const void *a, const void *b);
+  AvlNode       **stack;
+  void            (*free) (AvlTree ** this);
+  void           *(*insert) (AvlTree * this, void *item);
+  void           *(*find) (AvlTree * this, void *item);
+  void           *(*findMin) (AvlTree * this);
+  void           *(*delete) (AvlTree * this, void *item);
+  void           *(*deleteMin) (AvlTree * this);
+  signed char    *pathInfo;
 };
 
 
-AvlTree *newAvlTree(int (* compar)(const void *, const void *));
+AvlTree        *newAvlTree(int (*compar) (const void *, const void *));
 
 
 #endif

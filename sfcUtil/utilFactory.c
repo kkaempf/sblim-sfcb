@@ -17,7 +17,7 @@
  *
  * Encapsulated utility factory implementation.
  *
-*/
+ */
 
 
 
@@ -33,11 +33,11 @@ extern UtilList *newList();
 extern UtilStringBuffer *newStringBuffer(int s);
 
 static Util_Factory_FT ift = {
-   1,
-   newHashTableDefault,
-   newHashTable,
-   newList,
-   newStringBuffer
+  1,
+  newHashTableDefault,
+  newHashTable,
+  newList,
+  newStringBuffer
 };
 
 

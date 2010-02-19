@@ -23,31 +23,31 @@
 #define MRWLOCK_H
 
 #ifdef __cplusplus
-extern "C" {
+extern          "C" {
 #endif
 
 #include <pthread.h>
 
-typedef struct _MRWLOCK {
-  pthread_mutex_t mrw_mutex;
-  pthread_cond_t  mrw_cond;
-  unsigned        mrw_rnum;
-} MRWLOCK;
+  typedef struct _MRWLOCK {
+    pthread_mutex_t mrw_mutex;
+    pthread_cond_t  mrw_cond;
+    unsigned        mrw_rnum;
+  } MRWLOCK;
 
-/* Macro for stativ MRW Lock Definition */
+  /*
+   * Macro for stativ MRW Lock Definition 
+   */
 #define MRWLOCK_DEFINE(n) MRWLOCK n={PTHREAD_MUTEX_INITIALIZER, \
                                      PTHREAD_COND_INITIALIZER, \
                                      0}
-extern int MRWInit(MRWLOCK *mrwl);
-extern int MRWTerm(MRWLOCK *mrwl);
-extern int MReadLock(MRWLOCK *mrwl);
-extern int MReadUnlock(MRWLOCK *mrwl);
-extern int MWriteLock(MRWLOCK *mrwl);
-extern int MWriteUnlock(MRWLOCK *mrwl);
+  extern int      MRWInit(MRWLOCK * mrwl);
+  extern int      MRWTerm(MRWLOCK * mrwl);
+  extern int      MReadLock(MRWLOCK * mrwl);
+  extern int      MReadUnlock(MRWLOCK * mrwl);
+  extern int      MWriteLock(MRWLOCK * mrwl);
+  extern int      MWriteUnlock(MRWLOCK * mrwl);
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif
-

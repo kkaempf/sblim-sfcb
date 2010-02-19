@@ -17,7 +17,7 @@
  *
  * CMPI extended convenious macros.
  *
-*/
+ */
 
 
 #ifndef _CMPIMACSX_H_
@@ -34,8 +34,8 @@
 #endif
 
 /*
-	-----------------  C provider factories ---------------------
-*/
+ * ----------------- C provider factories --------------------- 
+ */
 
 #ifdef DOC_ONLY
        /** This macro generates the function table and initialization stub
@@ -57,10 +57,10 @@
 		     Use CMNoHook if no further intialization is required.
 	 @return The function table of this Class provider.
       */
-   CMPIClassMI* CMClassMIStub(chars pfx, chars pn,
-         CMPIBroker *broker, statement hook);
+CMPIClassMI    *CMClassMIStub(chars pfx, chars pn,
+			      CMPIBroker * broker, statement hook);
 #else
-  #define CMClassMIStub(pfx,pn,broker,hook) \
+#define CMClassMIStub(pfx,pn,broker,hook) \
   static CMPIClassMIFT clsMIFT__={ \
    CMPICurrentVersion, \
    CMPICurrentVersion, \
@@ -105,10 +105,11 @@
 		     Use CMNoHook if no further intialization is required.
 	 @return The function table of this Qualifier provider.
       */
-   CMPIQualifierDeclMI* CMQualifierDeclMIStub(chars pfx, chars pn,
-         CMPIBroker *broker, statement hook);
+CMPIQualifierDeclMI *CMQualifierDeclMIStub(chars pfx, chars pn,
+					   CMPIBroker * broker,
+					   statement hook);
 #else
-  #define CMQualifierDeclMIStub(pfx,pn,broker,hook) \
+#define CMQualifierDeclMIStub(pfx,pn,broker,hook) \
   static CMPIQualifierDeclMIFT qualDeclMIFT__={ \
    CMPICurrentVersion, \
    CMPICurrentVersion, \
@@ -137,11 +138,12 @@
 	 @param ref Qualifier to be returned.
 	 @return Service return status.
       */
-   inline static   CMPIStatus CMReturnQualifier
-              (const CMPIResult* rslt, const CMPIValue* val)
-	{ return ((rslt)->ft->returnData((rslt),(val),(CMPI_ptr))); }
+inline static CMPIStatus CMReturnQualifier
+    (const CMPIResult * rslt, const CMPIValue * val) {
+  return ((rslt)->ft->returnData((rslt), (val), (CMPI_ptr)));
+}
 #else
-  #define CMReturnQualifier(r,o)    ((r)->ft->returnData((r),(o),(CMPI_qualifierDecl)))
+#define CMReturnQualifier(r,o)    ((r)->ft->returnData((r),(o),(CMPI_qualifierDecl)))
 #endif
 
-#endif // _CMPIMACSX_H_
+#endif				// _CMPIMACSX_H_

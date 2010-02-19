@@ -21,25 +21,28 @@
  * with a routine that uses the desired method to obtain the 
  * proper value. 
  *
-*/
+ */
 
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-extern int _sfcGetSlpHostname(char **hostname)
+extern int
+_sfcGetSlpHostname(char **hostname)
 {
-   char *sn;
-   sn = (char *) malloc((strlen("mycimom.com") + 1) * sizeof(char));
-   sn = strncpy(sn, "mycimom.com", strlen("mycimom.com") + 1);
-   if (sn == NULL)
-      return 0;
-   
-   printf("-#- Request for custom SLP service hostname: (hostname = %s)\n", sn);
-   *hostname = sn;
+  char           *sn;
+  sn = (char *) malloc((strlen("mycimom.com") + 1) * sizeof(char));
+  sn = strncpy(sn, "mycimom.com", strlen("mycimom.com") + 1);
+  if (sn == NULL)
+    return 0;
 
-   /* Return value of 1 for successs and 0 for failure. */
-   return 1;
+  printf("-#- Request for custom SLP service hostname: (hostname = %s)\n",
+	 sn);
+  *hostname = sn;
+
+  /*
+   * Return value of 1 for successs and 0 for failure. 
+   */
+  return 1;
 }
-

@@ -18,27 +18,30 @@
 
 
 
-CMPIInstance * inst;
-CMPIObjectPath * cop;
-CMPIStatus st;
-ClInstance * i;
+CMPIInstance   *inst;
+CMPIObjectPath *cop;
+CMPIStatus      st;
+ClInstance     *i;
 
-extern CMPIInstance *internal_new_CMPIInstance(int mode, const CMPIObjectPath * cop,
-                                        CMPIStatus * rc, int override);
+extern CMPIInstance *internal_new_CMPIInstance(int mode,
+					       const CMPIObjectPath * cop,
+					       CMPIStatus * rc,
+					       int override);
 
-int main(void)
+int
+main(void)
 {
-    int rc=0;
-    inst = internal_new_CMPIInstance(MEM_TRACKED, NULL, &st, 1);
-    if (st.rc != CMPI_RC_OK) {
-        printf("\tinternal_new_CMPIInstance returned: %s\n",(char *)st.rc);
-        rc=1;
-    }
-    i=(ClInstance *)inst->hdl;
-    if (i->hdr.type != 2) {
-        printf("\ttype in instance not as expected: %d\n",i->hdr.type);
-        rc=1;
-    }
+  int             rc = 0;
+  inst = internal_new_CMPIInstance(MEM_TRACKED, NULL, &st, 1);
+  if (st.rc != CMPI_RC_OK) {
+    printf("\tinternal_new_CMPIInstance returned: %s\n", (char *) st.rc);
+    rc = 1;
+  }
+  i = (ClInstance *) inst->hdl;
+  if (i->hdr.type != 2) {
+    printf("\ttype in instance not as expected: %d\n", i->hdr.type);
+    rc = 1;
+  }
 
-    return(rc);
+  return (rc);
 }

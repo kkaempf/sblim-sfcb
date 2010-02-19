@@ -16,7 +16,7 @@
  *
  * Objectpath utility functions
  *
-*/
+ */
 
 #ifndef _OBJECTPATH_H
 #define _OBJECTPATH_H
@@ -24,8 +24,9 @@
 #include "utilft.h"
 
 UtilStringBuffer *normalizeObjectPathStrBuf(const CMPIObjectPath * cop);
-char *normalizeObjectPathChars(const CMPIObjectPath *cop);
-char *normalizeObjectPathCharsDup(const CMPIObjectPath *cop);
-int objectpathCompare(const CMPIObjectPath *cop1, const CMPIObjectPath *cop2);
+char           *normalizeObjectPathChars(const CMPIObjectPath * cop);
+char           *normalizeObjectPathCharsDup(const CMPIObjectPath * cop);
+int             objectpathCompare(const CMPIObjectPath * cop1,
+				  const CMPIObjectPath * cop2);
 
 #endif

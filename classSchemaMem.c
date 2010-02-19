@@ -19,16 +19,20 @@
  * Instruction: add  extern ClassSchema declarations for all
  *              in-memory namespaces.
  *
-*/
+ */
 
 #include <stddef.h>
 #include "classSchemaMem.h"
 
 extern ClassSchema interop_classes;
-/* extern ClassSchema cimv2_classes; */
+/*
+ * extern ClassSchema cimv2_classes; 
+ */
 
-NamespaceDir sfcb_mem_namespaces[] = {
+NamespaceDir    sfcb_mem_namespaces[] = {
   {"root/interop", &interop_classes},
-  /* {"root/cimv2", &cimv2_classes}, */
-  {NULL, NULL} /* this is the end marker, don't remove */
+  /*
+   * {"root/cimv2", &cimv2_classes}, 
+   */
+  {NULL, NULL}			/* this is the end marker, don't remove */
 };

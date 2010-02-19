@@ -18,26 +18,28 @@
  *
  * CMPIArray implementation.
  *
-*/
+ */
 
 
 #ifndef array_h
 #define array_h
 
 struct native_array_item {
-   CMPIValueState state;
-   CMPIValue value;
+  CMPIValueState  state;
+  CMPIValue       value;
 };
 
 
 struct native_array {
-   CMPIArray array;
-   int refCount;
-   int mem_state;
+  CMPIArray       array;
+  int             refCount;
+  int             mem_state;
 
-   CMPICount size,max,dynamic;
-   CMPIType type;
-   struct native_array_item *data;
+  CMPICount       size,
+                  max,
+                  dynamic;
+  CMPIType        type;
+  struct native_array_item *data;
 };
 
 #endif

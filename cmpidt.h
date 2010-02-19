@@ -17,30 +17,74 @@
  *
  * CMPI data types.
  *
-*/
-/* ------------------------------------------------------------------------- */
-/*                                                                           */
-/* Copyright (c) 2006 The Open Group                                         */
-/*                                                                           */
-/* Permission is hereby granted, free of charge, to any person obtaining a   */
-/* copy of this software (the "Software"), to deal in the Software without   */
-/* restriction, including without limitation the rights to use, copy,        */
-/* modify, merge, publish, distribute, sublicense, and/or sell copies of     */
-/* the Software, and to permit persons to whom the Software is furnished     */
-/* to do so, subject to the following conditions:                            */
-/*                                                                           */
-/* The above copyright notice and this permission notice shall be included   */
-/* in all copies or substantial portions of the Software.                    */
-/*                                                                           */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS   */
-/* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.    */
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT */
-/* OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  */
-/* THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                */
-/*                                                                           */
-/* ------------------------------------------------------------------------- */
+ */
+/*
+ * ------------------------------------------------------------------------- 
+ */
+/*
+ */
+/*
+ * Copyright (c) 2006 The Open Group 
+ */
+/*
+ */
+/*
+ * Permission is hereby granted, free of charge, to any person obtaining a 
+ */
+/*
+ * copy of this software (the "Software"), to deal in the Software without 
+ */
+/*
+ * restriction, including without limitation the rights to use, copy, 
+ */
+/*
+ * modify, merge, publish, distribute, sublicense, and/or sell copies of 
+ */
+/*
+ * the Software, and to permit persons to whom the Software is furnished 
+ */
+/*
+ * to do so, subject to the following conditions: 
+ */
+/*
+ */
+/*
+ * The above copyright notice and this permission notice shall be included 
+ */
+/*
+ * in all copies or substantial portions of the Software.  
+ */
+/*
+ */
+/*
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+ */
+/*
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+ */
+/*
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * 
+ */
+/*
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
+ */
+/*
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT 
+ */
+/*
+ * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+ * OR 
+ */
+/*
+ * THE USE OR OTHER DEALINGS IN THE SOFTWARE.  
+ */
+/*
+ */
+/*
+ * ------------------------------------------------------------------------- 
+ */
 
 #ifndef _CMPIDT_H_
 #   define _CMPIDT_H_
@@ -48,31 +92,36 @@
 #   include "cmpipl.h"
 
 #   ifdef __cplusplus
-extern "C"
-{
+extern          "C" {
 #   endif
 
-// defintion of version numbers to be used by providers using CMBrokerVersion()
-// They indicate what CMPI version is supported by both the broker and its adapter
+  // defintion of version numbers to be used by providers using
+  // CMBrokerVersion()
+  // They indicate what CMPI version is supported by both the broker and
+  // its adapter
 
 #   define CMPIVersion100 100
-  //  1.00
+  // 1.00
 #   define CMPIVersion200 200
-  //  2.00
+  // 2.00
 
-// CMPI_VERSION compile switch should be used during MI compilation only.
-// It is used define minimal version support needed from Management Broker.
-// This value will be set in <mi-name>_Create<mi-type>MI.mi_version
+  // CMPI_VERSION compile switch should be used during MI compilation
+  // only.
+  // It is used define minimal version support needed from Management
+  // Broker.
+  // This value will be set in <mi-name>_Create<mi-type>MI.mi_version
 
 #   ifdef CMPI_VERSION
 #      if (CMPI_VERSION==200)
 #         define CMPI_VER_200 1
 #      elif (CMPI_VERSION==100)
 #         define CMPI_VER_100 1
-// Please note that if the CMPI implementations supports "historical" CMPI
-// levels (90, 86, etc) this would be the place to add the checks for the
-// version.
-//
+  // Please note that if the CMPI implementations supports "historical"
+  // CMPI
+  // levels (90, 86, etc) this would be the place to add the checks for
+  // the
+  // version.
+  // 
 #      else
 #         error Unsupported CMPI_VERSION defined
 #      endif
@@ -81,17 +130,19 @@ extern "C"
 #   endif
 
 
-// CMPI_VER_x switch is used by Management Broker implementations only.
+  // CMPI_VER_x switch is used by Management Broker implementations only.
 
-// It defines the CMPI version supported by the Management Broker.
-// This value must be set in the ftVersion field of all functions tables.
+  // It defines the CMPI version supported by the Management Broker.
+  // This value must be set in the ftVersion field of all functions
+  // tables.
 
-// Version definitions are cumulative.
-// A new version definition must #define all previous definitions.
+  // Version definitions are cumulative.
+  // A new version definition must #define all previous definitions.
 
-// During MI loading MBs must ensure that
-//  <mi-name>_Create<mi-type>MI.miVersion<=<mi-name>_Create<mi-type>MI.ftVersion
-// If this is not the case, the MI might require higher version MB support.
+  // During MI loading MBs must ensure that
+  // <mi-name>_Create<mi-type>MI.miVersion<=<mi-name>_Create<mi-type>MI.ftVersion
+  // If this is not the case, the MI might require higher version MB
+  // support.
 #   if defined (CMPI_VER_200) || defined(CMPI_VER_ALL)
 #      define CMPI_VER_100
 #      define CMPI_VER_90
@@ -103,11 +154,13 @@ extern "C"
 #   elif   defined (CMPI_VER_100) || defined(CMPI_VER_ALL)
 #      define CMPICurrentVersion CMPIVersion100
 
-// Please note that if the CMPI implementations supports "historical" CMPI
-// levels (90, 86, etc) this would be the place to add the checks for the
-// version.
+  // Please note that if the CMPI implementations supports "historical"
+  // CMPI
+  // levels (90, 86, etc) this would be the place to add the checks for
+  // the
+  // version.
 
-#   else                        // default version
+#   else			// default version
 #      define CMPI_VER_200
 #      define CMPI_VER_100
 #      define CMPICurrentVersion CMPIVersion200
@@ -206,55 +259,53 @@ extern "C"
   typedef unsigned __int64 CMPIUint64;
 #   endif
   typedef signed char CMPISint8;
-  typedef short CMPISint16;
+  typedef short   CMPISint16;
   typedef signed int CMPISint32;
 #   ifndef CMPI_PLATFORM_WIN32_IX86_MSVC
   typedef long long CMPISint64;
 #   else
   typedef __int64 CMPISint64;
 #   endif
-  typedef float CMPIReal32;
-  typedef double CMPIReal64;
+  typedef float   CMPIReal32;
+  typedef double  CMPIReal64;
 
-  typedef struct _CMPIValuePtr
-  {
-    void *ptr;
-    CMPICount length;
+  typedef struct _CMPIValuePtr {
+    void           *ptr;
+    CMPICount       length;
   } CMPIValuePtr;
 
 
-  typedef union _CMPIValue
-  {
-    CMPIUint64 uint64;
-    CMPIUint32 uint32;
-    CMPIUint16 uint16;
-    CMPIUint8 uint8;
-    CMPISint64 sint64;
-    CMPISint32 sint32;
-    CMPISint16 sint16;
-    CMPISint8 sint8;
-    CMPIReal64 real64;
-    CMPIReal32 real32;
-    CMPIBoolean boolean;
-    CMPIChar16 char16;
+  typedef union _CMPIValue {
+    CMPIUint64      uint64;
+    CMPIUint32      uint32;
+    CMPIUint16      uint16;
+    CMPIUint8       uint8;
+    CMPISint64      sint64;
+    CMPISint32      sint32;
+    CMPISint16      sint16;
+    CMPISint8       sint8;
+    CMPIReal64      real64;
+    CMPIReal32      real32;
+    CMPIBoolean     boolean;
+    CMPIChar16      char16;
 
-    CMPIInstance *inst;
+    CMPIInstance   *inst;
     CMPIObjectPath *ref;
-    CMPIArgs *args;
-    CMPISelectExp *filter;
+    CMPIArgs       *args;
+    CMPISelectExp  *filter;
     CMPIEnumeration *Enum;
-    CMPIArray *array;
-    CMPIString *string;
-    char *chars;
-    CMPIDateTime *dateTime;
-    CMPIValuePtr dataPtr;
+    CMPIArray      *array;
+    CMPIString     *string;
+    char           *chars;
+    CMPIDateTime   *dateTime;
+    CMPIValuePtr    dataPtr;
 
-    CMPISint8 Byte;
-    CMPISint16 Short;
-    CMPISint32 Int;
-    CMPISint64 Long;
-    CMPIReal32 Float;
-    CMPIReal64 Double;
+    CMPISint8       Byte;
+    CMPISint16      Short;
+    CMPISint32      Int;
+    CMPISint64      Long;
+    CMPIReal32      Float;
+    CMPIReal64      Double;
   } CMPIValue;
 
 
@@ -363,19 +414,18 @@ extern "C"
     components: the value, its state, and its type as defined by the schema.
     All three components are bundled into this one structure.
 */
-  typedef struct _CMPIData
-  {
+  typedef struct _CMPIData {
     /** An unsigned short representing the type of the CMPIData object */
-    CMPIType type;
+    CMPIType        type;
 	/** An unsigned short representing whether this CMPIData object is
         valid or not.
 	*/
-    CMPIValueState state;
+    CMPIValueState  state;
 	/** A union which holds the actual underlying value of the data object */
-    CMPIValue value;
+    CMPIValue       value;
   } CMPIData;
 
-  typedef CMPIData CMPIAccessor (const char *, void *parm);
+  typedef CMPIData CMPIAccessor(const char *, void *parm);
 
 #   ifndef CMPI_NO_SYNONYM_SUPPORT
 #      define CMPI_Byte    CMPI_sint8
@@ -391,10 +441,10 @@ extern "C"
 #      define CMPI_LongA   CMPI_sint64A
 #      define CMPI_FloatA  CMPI_real32A
 #      define CMPI_DoubleA CMPI_real64A
-#   endif                       // CMPI_NO_SYNONYM_SUPPORT
+#   endif			// CMPI_NO_SYNONYM_SUPPORT
 
-  typedef void* CMPIMsgFileHandle;
-  typedef void CMPIGcStat;
+  typedef void   *CMPIMsgFileHandle;
+  typedef void    CMPIGcStat;
 
 /** The CMPIFlags type is used to inform MI functions about options specified
     by the client and passed on to the MI for certain requests. CMPIFlags are
@@ -416,24 +466,35 @@ extern "C"
 #   define CMPI_FLAG_IncludeQualifiers  4
 #   define CMPI_FLAG_IncludeClassOrigin 8
 
-	/* Authenticated ID of the user requesting this MI invocation. */
+  /*
+   * Authenticated ID of the user requesting this MI invocation. 
+   */
 #   define CMPIPrincipal       "CMPIPrincipal"
-	/* CMPIFlags -  invocation flags as specified by the client. */
+  /*
+   * CMPIFlags - invocation flags as specified by the client. 
+   */
 #   define CMPIInvocationFlags "CMPIInvocationFlags"
-	/* Namespace for which the MI is started. */
+  /*
+   * Namespace for which the MI is started. 
+   */
 #   define CMPIInitNameSpace   "CMPIInitNameSpace"
-	/* The role assumed by the current authenticated user. */
+  /*
+   * The role assumed by the current authenticated user. 
+   */
 #   define CMPIRole            "CMPIRole"
-	/* The accept language from the request */
+  /*
+   * The accept language from the request 
+   */
 #   define CMPIAcceptLanguage  "CMPIAcceptLanguage"
-	/* The content language of the request */
+  /*
+   * The content language of the request 
+   */
 #   define CMPIContentLanguage "CMPIContentLanguage"
 
 /** Enum which indicates success or failure, usually accessed as part
 	of the CMPIStatus structure
 */
-  typedef enum _CMPIrc
-  {
+  typedef enum _CMPIrc {
 	/** Success */
     CMPI_RC_OK = 0,
 	/** Generic failure */
@@ -478,29 +539,34 @@ extern "C"
 		returned via a cleanup() call
 	*/
     CMPI_RC_NEVER_UNLOAD = 51,
-    /* Internal CMPI return codes. */
+    /*
+     * Internal CMPI return codes. 
+     */
     CMPI_RC_ERR_INVALID_HANDLE = 60,
     CMPI_RC_ERR_INVALID_DATA_TYPE = 61,
-    /* Hosting OS errors. */
+    /*
+     * Hosting OS errors. 
+     */
     CMPI_RC_ERROR_SYSTEM = 100,
     CMPI_RC_ERROR = 200
   } CMPIrc;
 
 /** The status structure is used to indicate success or failure of a call */
-  typedef struct _CMPIStatus
-  {
+  typedef struct _CMPIStatus {
 	  /** The CMPIrc value.
 		  @see _CMPIrc
 	  */
-    CMPIrc rc;
+    CMPIrc          rc;
 	  /** A text string representing the error message
 		  @see CMPIString
 	  */
-    CMPIString *msg;
+    CMPIString     *msg;
   } CMPIStatus;
 
 
-  /* Management Broker capabilities and feature support */
+  /*
+   * Management Broker capabilities and feature support 
+   */
 
 #   define CMPI_MB_Class_0     0x00000001
 #   define CMPI_MB_Class_1     0x00000003
@@ -529,10 +595,11 @@ extern "C"
 #   define CMPI_MB_OSEncapsulationSupport 0x00000100
 
 
-  /* Query Predicate operations */
+  /*
+   * Query Predicate operations 
+   */
 
-  typedef enum _CMPIPredOp
-  {
+  typedef enum _CMPIPredOp {
     CMPI_PredOp_Equals = 1,
     CMPI_PredOp_NotEquals = 2,
     CMPI_PredOp_LessThan = 3,
@@ -544,8 +611,8 @@ extern "C"
     CMPI_PredOp_Like = 9,
     CMPI_PredOp_NotLike = 10
 #   ifdef CMPI_VER_200
-    ,
-	CMPI_PredOp_Not_Null = 11,
+	,
+    CMPI_PredOp_Not_Null = 11,
     CMPI_PredOp_Null = 12,
     CMPI_PredOp_And = 13,
     CMPI_PredOp_Or = 14
@@ -553,8 +620,7 @@ extern "C"
   } CMPIPredOp;
 
   /** Severity levels for logging functions */
-  typedef enum _CMPISeverity
-  {
+  typedef enum _CMPISeverity {
 	/** Error */
     CMPI_SEV_ERROR = 1,
 	/** General info */
@@ -566,8 +632,7 @@ extern "C"
   } CMPISeverity;
 
   /** Logging level for trace functions*/
-  typedef enum _CMPILevel
-  {
+  typedef enum _CMPILevel {
 	/** Generic information */
     CMPI_LEV_INFO = 1,
 	/** warnings */
@@ -577,8 +642,7 @@ extern "C"
   } CMPILevel;
 
   /** Type of query expression it is normalized to. */
-  typedef enum _CMPISelectCondType
-  {
+  typedef enum _CMPISelectCondType {
 	/** Disjuntion Of Conjunctions */
     CMPI_COND_DOC = 0,
 	/** Conjuction of disjunctions */
@@ -589,7 +653,7 @@ extern "C"
 	/** Possible values an Error object can use in its type property
 	    @version 2.0
 	*/
-typedef enum _CMPIErrorType {
+  typedef enum _CMPIErrorType {
 	/** Unkown */
     UnknownErrorType = 0,
 	/** Other */
@@ -612,10 +676,10 @@ typedef enum _CMPIErrorType {
     UnavailableResourceError = 9,
 	/** Unsupported operation */
     UnsupportedOperationError = 10
-} CMPIErrorType;
+  } CMPIErrorType;
 
 /** Possible values an Error object can use to indicate severity */
-typedef enum _CMPIErrorSeverity {
+  typedef enum _CMPIErrorSeverity {
 	/** Unknown */
     ErrorSevUnknown = 0,
 	/** Low severity */
@@ -626,288 +690,296 @@ typedef enum _CMPIErrorSeverity {
     ErrorSevHigh = 4,
 	/** Fatal error */
     ErrorSevFatal = 5,
-} CMPIErrorSeverity;
+  } CMPIErrorSeverity;
 
 /** Possible values an Error object can use to indicate the probable cause */
-typedef enum _CMPIErrorProbableCause {
+  typedef enum _CMPIErrorProbableCause {
 	/** Unknown */
-	ErrorProbCauseUnknown = 0,
+    ErrorProbCauseUnknown = 0,
 	/** Other cause */
-	ErrorProbCauseOther = 1,
+    ErrorProbCauseOther = 1,
 	/** Adpater card failure */
-	Adapter_Card_Error = 2,
+    Adapter_Card_Error = 2,
 	/** Subsystem failure */
-	Application_Subsystem_Failure = 3,
+    Application_Subsystem_Failure = 3,
 	/** Reduced bandwidth */
-	Bandwidth_Reduced = 4,
+    Bandwidth_Reduced = 4,
 	/** Could not establish connection */
-	Connection_Establishment_Error = 5,
+    Connection_Establishment_Error = 5,
 	/** protocol error */
-	Communications_Protocol_Error = 6,
+    Communications_Protocol_Error = 6,
 	/** Subsystem failure */
-	Communications_Subsystem_Failure = 7,
+    Communications_Subsystem_Failure = 7,
 	/** Configuration error */
-	ConfigurationCustomization_Error = 8,
+    ConfigurationCustomization_Error = 8,
 	/** Congested */
-	Congestion = 9,
+    Congestion = 9,
 	/** Data is corrupt */
-	Corrupt_Data = 10,
+    Corrupt_Data = 10,
 	/** CPU cycles exceeded */
-	CPU_Cycles_Limit_Exceeded = 11,
-	/* Dataset modem error */
-	DatasetModem_Error = 12,
+    CPU_Cycles_Limit_Exceeded = 11,
+    /*
+     * Dataset modem error 
+     */
+    DatasetModem_Error = 12,
 	/** Degraded signal */
-	Degraded_Signal = 13,
+    Degraded_Signal = 13,
 	/** STE/DCE Interface Error */
-	DTE_DCE_Interface_Error = 14,
+    DTE_DCE_Interface_Error = 14,
 	/** Door open */
-	Enclosure_Door_Open = 15,
+    Enclosure_Door_Open = 15,
 	/** Equipment malfunction */
-	Equipment_Malfunction = 16,
+    Equipment_Malfunction = 16,
 	/** Excessive Vibration */
-	Excessive_Vibration = 17,
+    Excessive_Vibration = 17,
 	/** File format error */
-	File_Format_Error = 18,
+    File_Format_Error = 18,
 	/** Fire detected */
-	Fire_Detected = 19,
+    Fire_Detected = 19,
 	/** Flood detected */
-	Flood_Detected = 20,
+    Flood_Detected = 20,
 	/** framing error */
-	Framing_Error = 21,
+    Framing_Error = 21,
 	/** HVAC problem */
-	HVAC_Problem = 22,
-	/* Humidity unacceptable */
-	Humidity_Unacceptable = 23,
+    HVAC_Problem = 22,
+    /*
+     * Humidity unacceptable 
+     */
+    Humidity_Unacceptable = 23,
 	/** IO device error */
-	IO_Device_Error = 24,
+    IO_Device_Error = 24,
 	/** Input device error */
-	Input_Device_Error = 25,
+    Input_Device_Error = 25,
 	/** LAN Error */
-	LAN_Error = 26,
+    LAN_Error = 26,
 	/** Non-toxic leak detected */
-	Non_Toxic_Leak_Detected = 27,
-	/* Local node transmission error */
-	Local_Node_Transmission_Error = 28,
+    Non_Toxic_Leak_Detected = 27,
+    /*
+     * Local node transmission error 
+     */
+    Local_Node_Transmission_Error = 28,
 	/** loss of frame */
-	Loss_of_Frame = 29,
+    Loss_of_Frame = 29,
 	/** loss of signal */
-	Loss_of_Signal = 30,
+    Loss_of_Signal = 30,
 	/** Material supply exhausted */
-	Material_Supply_Exhausted = 31,
+    Material_Supply_Exhausted = 31,
 	/** Multiplexer problem */
-	Multiplexer_Problem = 32,
+    Multiplexer_Problem = 32,
 	/** Out of memory */
-	Out_of_Memory = 33,
+    Out_of_Memory = 33,
 	/** Output device error */
-	Output_Device_Error = 34,
+    Output_Device_Error = 34,
 	/** Performance degraded */
-	Performance_Degraded = 35,
+    Performance_Degraded = 35,
 	/** Power problem */
-	Power_Problem = 36,
+    Power_Problem = 36,
 	/** Pressure unacceptable */
-	Pressure_Unacceptable = 37,
+    Pressure_Unacceptable = 37,
 	/** Processor problem */
-	Processor_Problem = 38,
+    Processor_Problem = 38,
 	/** Pump failure */
-	Pump_Failure = 39,
+    Pump_Failure = 39,
 	/** Queue size exceeded */
-	Queue_Size_Exceeded = 40,
+    Queue_Size_Exceeded = 40,
 	/** Receive failure */
-	Receive_Failure = 41,
+    Receive_Failure = 41,
 	/** Receiver failure */
-	Receiver_Failure = 42,
+    Receiver_Failure = 42,
 	/** Remote node transmission error */
-	Remote_Node_Transmission_Error = 43,
+    Remote_Node_Transmission_Error = 43,
 	/** Resource at or nearing capacity */
-	Resource_at_or_Nearing_Capacity = 44,
+    Resource_at_or_Nearing_Capacity = 44,
 	/** Response time excessive */
-	Response_Time_Excessive = 45,
+    Response_Time_Excessive = 45,
 	/** Retransmission rate excessive */
-	Retransmission_Rate_Excessive = 46,
+    Retransmission_Rate_Excessive = 46,
 	/** Software Error */
-	Software_Error = 47,
+    Software_Error = 47,
 	/** Software terminated abnormally */
-	Software_Program_Abnormally_Terminated = 48,
+    Software_Program_Abnormally_Terminated = 48,
 	/** Program error */
-	Software_Program_Error = 49,
+    Software_Program_Error = 49,
 	/** Storage capacity problem */
-	Storage_Capacity_Problem = 50,
+    Storage_Capacity_Problem = 50,
 	/** Temperature_Unacceptable */
-	Temperature_Unacceptable = 51,
+    Temperature_Unacceptable = 51,
 	/** Threshold_Crossed */
-	Threshold_Crossed = 52,
+    Threshold_Crossed = 52,
 	/** Timing_Problem */
-	Timing_Problem = 53,
+    Timing_Problem = 53,
 	/** Toxic_Leak_Detected */
-	Toxic_Leak_Detected = 54,
+    Toxic_Leak_Detected = 54,
 	/** Transmit_Failure */
-	Transmit_Failure = 55,
+    Transmit_Failure = 55,
 	/** Transmitter_Failure */
-	Transmitter_Failure = 56,
+    Transmitter_Failure = 56,
 	/** Underlying_Resource_Unavailable */
-	Underlying_Resource_Unavailable = 57,
+    Underlying_Resource_Unavailable = 57,
 	/** Version_Mismatch */
-	Version_Mismatch = 58,
+    Version_Mismatch = 58,
 	/** Previous_Alert_Cleared */
-	Previous_Alert_Cleared = 59,
+    Previous_Alert_Cleared = 59,
 	/** Login_Attempts_Failed */
-	Login_Attempts_Failed = 60,
+    Login_Attempts_Failed = 60,
 	/** Software_Virus_Detected */
-	Software_Virus_Detected = 61,
+    Software_Virus_Detected = 61,
 	/** Hardware_Security_Breached */
-	Hardware_Security_Breached = 62,
+    Hardware_Security_Breached = 62,
 	/** Denial_of_Service_Detected */
-	Denial_of_Service_Detected = 63,
+    Denial_of_Service_Detected = 63,
 	/** Security_Credential_Mismatch */
-	Security_Credential_Mismatch = 64,
+    Security_Credential_Mismatch = 64,
 	/** Unauthorized_Access */
-	Unauthorized_Access = 65,
+    Unauthorized_Access = 65,
 	/** Alarm_Received */
-	Alarm_Received = 66,
+    Alarm_Received = 66,
 	/** Loss_of_Pointer */
-	Loss_of_Pointer = 67,
+    Loss_of_Pointer = 67,
 	/** Payload_Mismatch */
-	Payload_Mismatch = 68,
+    Payload_Mismatch = 68,
 	/** Transmission_Error */
-	Transmission_Error = 69,
+    Transmission_Error = 69,
 	/** Excessive_Error_Rate */
-	Excessive_Error_Rate = 70,
+    Excessive_Error_Rate = 70,
 	/** Trace_Problem */
-	Trace_Problem = 71,
+    Trace_Problem = 71,
 	/** Element_Unavailable */
-	Element_Unavailable = 72,
+    Element_Unavailable = 72,
 	/** Element_Missing */
-	Element_Missing = 73,
+    Element_Missing = 73,
 	/** Loss_of_Multi_Frame */
-	Loss_of_Multi_Frame = 74,
+    Loss_of_Multi_Frame = 74,
 	/** Broadcast_Channel_Failure */
-	Broadcast_Channel_Failure = 75,
+    Broadcast_Channel_Failure = 75,
 	/** Invalid_Message_Received */
-	Invalid_Message_Received = 76,
+    Invalid_Message_Received = 76,
 	/** Routing_Failure */
-	Routing_Failure = 77,
+    Routing_Failure = 77,
 	/** Backplane_Failure */
-	Backplane_Failure = 78,
+    Backplane_Failure = 78,
 	/** Identifier_Duplication */
-	Identifier_Duplication = 79,
+    Identifier_Duplication = 79,
 	/** Protection_Path_Failure */
-	Protection_Path_Failure = 80,
+    Protection_Path_Failure = 80,
 	/** Sync_Loss_or_Mismatch */
-	Sync_Loss_or_Mismatch = 81,
+    Sync_Loss_or_Mismatch = 81,
 	/** Terminal_Problem */
-	Terminal_Problem = 82,
+    Terminal_Problem = 82,
 	/** Real_Time_Clock_Failure */
-	Real_Time_Clock_Failure = 83,
+    Real_Time_Clock_Failure = 83,
 	/** Antenna_Failure */
-	Antenna_Failure = 84,
+    Antenna_Failure = 84,
 	/** Battery_Charging_Failure */
-	Battery_Charging_Failure = 85,
+    Battery_Charging_Failure = 85,
 	/** Disk_Failure */
-	Disk_Failure = 86,
+    Disk_Failure = 86,
 	/** Frequency_Hopping_Failure */
-	Frequency_Hopping_Failure = 87,
+    Frequency_Hopping_Failure = 87,
 	/** Loss_of_Redundancy */
-	Loss_of_Redundancy = 88,
+    Loss_of_Redundancy = 88,
 	/** Power_Supply_Failure */
-	Power_Supply_Failure = 89,
+    Power_Supply_Failure = 89,
 	/** Signal_Quality_Problem */
-	Signal_Quality_Problem = 90,
+    Signal_Quality_Problem = 90,
 	/** Battery_Discharging */
-	Battery_Discharging = 91,
+    Battery_Discharging = 91,
 	/** Battery_Failure */
-	Battery_Failure = 92,
+    Battery_Failure = 92,
 	/** Commercial_Power_Problem */
-	Commercial_Power_Problem = 93,
+    Commercial_Power_Problem = 93,
 	/** Fan_Failure */
-	Fan_Failure = 94,
+    Fan_Failure = 94,
 	/** Engine_Failure */
-	Engine_Failure = 95,
+    Engine_Failure = 95,
 	/** Sensor_Failure */
-	Sensor_Failure = 96,
+    Sensor_Failure = 96,
 	/** Fuse_Failure */
-	Fuse_Failure = 97,
+    Fuse_Failure = 97,
 	/** Generator_Failure */
-	Generator_Failure = 98,
+    Generator_Failure = 98,
 	/** Low_Battery */
-	Low_Battery = 99,
+    Low_Battery = 99,
 	/** Low_Fuel */
-	Low_Fuel = 100,
+    Low_Fuel = 100,
 	/** Low_Water */
-	Low_Water = 101,
+    Low_Water = 101,
 	/** Explosive_Gas */
-	Explosive_Gas = 102,
+    Explosive_Gas = 102,
 	/** High_Winds */
-	High_Winds = 103,
+    High_Winds = 103,
 	/** Ice_Buildup */
-	Ice_Buildup = 104,
+    Ice_Buildup = 104,
 	/** Smoke */
-	Smoke = 105,
+    Smoke = 105,
 	/** Memory_Mismatch */
-	Memory_Mismatch = 106,
+    Memory_Mismatch = 106,
 	/** Out_of_CPU_Cycles */
-	Out_of_CPU_Cycles = 107,
+    Out_of_CPU_Cycles = 107,
 	/** Software_Environment_Problem */
-	Software_Environment_Problem = 108,
+    Software_Environment_Problem = 108,
 	/** Software_Download_Failure */
-	Software_Download_Failure = 109,
+    Software_Download_Failure = 109,
 	/** Element_Reinitialized */
-	Element_Reinitialized = 110,
+    Element_Reinitialized = 110,
 	/** Timeout */
-	Timeout = 111,
+    Timeout = 111,
 	/** Logging_Problems */
-	Logging_Problems = 112,
+    Logging_Problems = 112,
 	/** Leak_Detected */
-	Leak_Detected_113,
+    Leak_Detected_113,
 	/** Protection_Mechanism_Failure */
-	Protection_Mechanism_Failure = 114,
+    Protection_Mechanism_Failure = 114,
 	/** Protecting_Resource_Failure */
-	Protecting_Resource_Failure = 115,
+    Protecting_Resource_Failure = 115,
 	/** Database_Inconsistency */
-	Database_Inconsistency = 116,
+    Database_Inconsistency = 116,
 	/** Authentication_Failure */
-	Authentication_Failure = 117,
+    Authentication_Failure = 117,
 	/** Breach_of_Confidentiality */
-	Breach_of_Confidentiality = 118,
+    Breach_of_Confidentiality = 118,
 	/** Cable_Tamper */
-	Cable_Tamper = 119,
+    Cable_Tamper = 119,
 	/** Delayed_Information */
-	Delayed_Information = 120,
+    Delayed_Information = 120,
 	/** Duplicate_Information */
-	Duplicate_Information = 121,
+    Duplicate_Information = 121,
 	/** Information_Missing */
-	Information_Missing = 122,
+    Information_Missing = 122,
 	/** Information_Modification */
-	Information_Modification = 123,
+    Information_Modification = 123,
 	/** Information_Out_of_Sequence */
-	Information_Out_of_Sequence = 124,
+    Information_Out_of_Sequence = 124,
 	/** Key_Expired */
-	Key_Expired = 125,
+    Key_Expired = 125,
 	/** Non_Repudiation_Failure */
-	Non_Repudiation_Failure = 126,
+    Non_Repudiation_Failure = 126,
 	/** Out_of_Hours_Activity */
-	Out_of_Hours_Activity = 127,
+    Out_of_Hours_Activity = 127,
 	/** Out_of_Service */
-	Out_of_Service = 128,
+    Out_of_Service = 128,
 	/** Procedural_Error */
-	Procedural_Error = 129,
+    Procedural_Error = 129,
 	/** Unexpected_Information */
-	Unexpected_Information = 130,
-} CMPIErrorProbableCause;
+    Unexpected_Information = 130,
+  } CMPIErrorProbableCause;
 
 /** Possible values an Error object can have for the error src format */
-typedef enum _CMPIErrorSrcFormat {
+  typedef enum _CMPIErrorSrcFormat {
 	/** Unknown source */
     CMPIErrSrcUnknown = 0,
 	/** Other source */
     CMPIErrSrcOther = 1,
-	/* Object handle */
+    /*
+     * Object handle 
+     */
     CIMObjectHandle = 2,
-} CMPIErrorSrcFormat;
+  } CMPIErrorSrcFormat;
 
-#endif /* CMPI_VER_200 */
+#endif				/* CMPI_VER_200 */
 
 #   ifdef __cplusplus
 };
 #   endif
 
-#endif // _CMPIDT_H_
+#endif				// _CMPIDT_H_

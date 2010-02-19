@@ -17,13 +17,13 @@
  *
  * CMPI data types (extended).
  *
-*/
+ */
 
 
 #ifndef CMPIDTX_H_
 #define CMPIDTX_H_
 
 
-	#define CMPI_qualifierDecl     ((16+11)<<8)
+#define CMPI_qualifierDecl     ((16+11)<<8)
 
-#endif /*CMPIDTX_H_*/
+#endif				/* CMPIDTX_H_ */

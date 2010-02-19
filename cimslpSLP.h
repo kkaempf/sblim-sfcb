@@ -17,14 +17,15 @@
  *
  * Functions for slp regs/deregs
  *
-*/
+ */
 
 #ifndef _cimslpSLP_h
 #define _cimslpSLP_h
 
-char* buildAttrString(char * name, char * value, char * attrstring);
-char* buildAttrStringFromArray(char * name, char ** value, char * attrstring);
-int registerCIMService(cimSLPService css, int slpLifeTime);
-void deregisterCIMService();
+char           *buildAttrString(char *name, char *value, char *attrstring);
+char           *buildAttrStringFromArray(char *name, char **value,
+					 char *attrstring);
+int             registerCIMService(cimSLPService css, int slpLifeTime);
+void            deregisterCIMService();
 
 #endif

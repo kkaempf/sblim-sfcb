@@ -2,28 +2,27 @@
 #define CLASSSCHEMAMEM_H
 
 #ifdef __cplusplus
-extern"C" {
+extern          "C" {
 #endif
 
-typedef struct classDir {
-   char *name;
-   void *hdr;
-} ClassDir;
+  typedef struct classDir {
+    char           *name;
+    void           *hdr;
+  } ClassDir;
 
-typedef struct classSchema {
-   void *versionRecord;
-   ClassDir *classes;
-} ClassSchema; 
+  typedef struct classSchema {
+    void           *versionRecord;
+    ClassDir       *classes;
+  } ClassSchema;
 
-typedef struct namespaceDir {
-  char *name;
-  ClassSchema *schema;
-} NamespaceDir;
+  typedef struct namespaceDir {
+    char           *name;
+    ClassSchema    *schema;
+  } NamespaceDir;
 
-extern NamespaceDir sfcb_mem_namespaces[];
+  extern NamespaceDir sfcb_mem_namespaces[];
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif

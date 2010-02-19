@@ -18,7 +18,7 @@
  *
  * hashtable implementation.
  *
-*/
+ */
 
 /*--------------------------------------------------------------------------*\
  *                   -----===== HashTable =====-----
@@ -32,32 +32,36 @@
 #ifndef _HASHTABLE_H
 #define _HASHTABLE_H
 
-/* These structs should not be accessed directly from user code.
- * All access should be via the public functions declared below. */
+/*
+ * These structs should not be accessed directly from user code. All
+ * access should be via the public functions declared below. 
+ */
 
 typedef struct KeyValuePair_struct {
-   const void *key;
-   void *value;
-   struct KeyValuePair_struct *next;
+  const void     *key;
+  void           *value;
+  struct KeyValuePair_struct *next;
 } KeyValuePair;
 
 typedef struct {
-   long numOfBuckets;
-   long numOfElements;
-   KeyValuePair **bucketArray;
-   float idealRatio, lowerRehashThreshold, upperRehashThreshold;
-   int (*keycmp) (const void *key1, const void *key2);
-   int (*valuecmp) (const void *value1, const void *value2);
-   unsigned long (*hashFunction) (const void *key);
-   void (*keyDeallocator) (void *key);
-   void (*valueDeallocator) (void *value);
+  long            numOfBuckets;
+  long            numOfElements;
+  KeyValuePair  **bucketArray;
+  float           idealRatio,
+                  lowerRehashThreshold,
+                  upperRehashThreshold;
+  int             (*keycmp) (const void *key1, const void *key2);
+  int             (*valuecmp) (const void *value1, const void *value2);
+  unsigned long   (*hashFunction) (const void *key);
+  void            (*keyDeallocator) (void *key);
+  void            (*valueDeallocator) (void *value);
 } HashTable;
 
 struct _HashTableIterator {
-   int bucket;
-   KeyValuePair *pair;
+  int             bucket;
+  KeyValuePair   *pair;
 };
 typedef struct _HashTableIterator HashTableIterator;
 
 
-#endif                          /* _HASHTABLE_H */
+#endif				/* _HASHTABLE_H */

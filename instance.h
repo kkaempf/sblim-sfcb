@@ -16,13 +16,14 @@
  *
  * instance utility functions
  *
-*/
+ */
 
 #ifndef _INSTANCE_H
 #define _INSTANCE_H
 
-int instanceCompare(CMPIInstance *inst1, CMPIInstance *inst2);
-const char *instGetClassName(CMPIInstance * ci);
-const char *instGetNameSpace(CMPIInstance * ci);
+int             instanceCompare(CMPIInstance * inst1,
+				CMPIInstance * inst2);
+const char     *instGetClassName(CMPIInstance * ci);
+const char     *instGetNameSpace(CMPIInstance * ci);
 
 #endif

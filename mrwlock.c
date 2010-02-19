@@ -18,7 +18,8 @@
 
 #include "mrwlock.h"
 
-int MReadLock(MRWLOCK *mrwl)
+int
+MReadLock(MRWLOCK * mrwl)
 {
   if (mrwl && pthread_mutex_lock(&mrwl->mrw_mutex) == 0) {
     mrwl->mrw_rnum += 1;
@@ -28,7 +29,8 @@ int MReadLock(MRWLOCK *mrwl)
   }
 }
 
-int MReadUnlock(MRWLOCK *mrwl)
+int
+MReadUnlock(MRWLOCK * mrwl)
 {
   if (mrwl && pthread_mutex_lock(&mrwl->mrw_mutex) == 0) {
     mrwl->mrw_rnum -= 1;
@@ -40,32 +42,35 @@ int MReadUnlock(MRWLOCK *mrwl)
   }
 }
 
-int MWriteLock(MRWLOCK *mrwl)
+int
+MWriteLock(MRWLOCK * mrwl)
 {
   if (mrwl && pthread_mutex_lock(&mrwl->mrw_mutex) == 0) {
-    while (mrwl->mrw_rnum) 
-      pthread_cond_wait(&mrwl->mrw_cond,&mrwl->mrw_mutex);
+    while (mrwl->mrw_rnum)
+      pthread_cond_wait(&mrwl->mrw_cond, &mrwl->mrw_mutex);
     return 0;
   } else {
     return -1;
   }
 }
 
-int MWriteUnlock(MRWLOCK *mrwl)
+int
+MWriteUnlock(MRWLOCK * mrwl)
 {
   if (mrwl && pthread_mutex_unlock(&mrwl->mrw_mutex) == 0) {
-    return 0; 
+    return 0;
   } else {
     return -1;
   }
 }
 
-int MRWInit(MRWLOCK *mrwl)
+int
+MRWInit(MRWLOCK * mrwl)
 {
-  static pthread_mutex_t mi=PTHREAD_MUTEX_INITIALIZER;
-  static pthread_cond_t ci=PTHREAD_COND_INITIALIZER;
-  mrwl->mrw_mutex=mi;
-  mrwl->mrw_cond=ci;
-  mrwl->mrw_rnum=0;
+  static pthread_mutex_t mi = PTHREAD_MUTEX_INITIALIZER;
+  static pthread_cond_t ci = PTHREAD_COND_INITIALIZER;
+  mrwl->mrw_mutex = mi;
+  mrwl->mrw_cond = ci;
+  mrwl->mrw_rnum = 0;
   return 0;
 }

@@ -18,12 +18,12 @@
  * Control functions, main if running standlone, or slpAgent
  * function if running in sfcb
  *
-*/
+ */
 
 #ifndef _cimslp_h
 #define _cimslp_h
 
-int slpAgent();
-int slppid;
+int             slpAgent();
+int             slppid;
 
 #endif

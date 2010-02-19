@@ -17,7 +17,7 @@
  * Common header file for classProvider, classProviderGz, classProviderMem,
  *                        and classProviderSf
  *
-*/
+ */
 
 #include "utilft.h"
 #include <stdio.h>
@@ -42,16 +42,18 @@
 
 static const CMPIBroker *_broker;
 
-extern char * configfile;
+extern char    *configfile;
 extern ProviderRegister *pReg;
 
 typedef struct nameSpaces {
-   int next,max,blen;
-   char *base;
-   char *names[1];
+  int             next,
+                  max,
+                  blen;
+  char           *base;
+  char           *names[1];
 } NameSpaces;
 
-static UtilHashTable *nsHt=NULL;
+static UtilHashTable *nsHt = NULL;
 static pthread_once_t nsHt_once = PTHREAD_ONCE_INIT;
 
 #define Iterator HashTableIterator*

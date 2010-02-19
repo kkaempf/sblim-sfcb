@@ -17,20 +17,21 @@
  *
  * some helper functions
  *
-*/
+ */
 
 #ifndef _cimslpUtil_h
 #define _cimslpUtil_h
 
 #include <cmci.h>
 
-/*#define freeArr(arr) \
-	{int freeStrArrN=0;if (arr) {while (arr[freeStrArrN]) free(arr[freeStrArrN++]);free(arr);}}
-*/      
+/*
+ * #define freeArr(arr) \ {int freeStrArrN=0;if (arr) {while
+ * (arr[freeStrArrN]) free(arr[freeStrArrN++]);free(arr);}} 
+ */
 #define freeStr(str) \
 	{if (str) free(str);}
 
-void freeInstArr(CMPIInstance ** arr);
-void freeArr(char ** arr);
+void            freeInstArr(CMPIInstance ** arr);
+void            freeArr(char **arr);
 
 #endif

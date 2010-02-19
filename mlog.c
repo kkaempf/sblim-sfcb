@@ -18,7 +18,8 @@
  *
  */
 
-const char *_mlog_id = "$Id: mlog.c,v 1.10 2009/08/07 23:31:13 mchasal Exp $";
+const char     *_mlog_id =
+    "$Id: mlog.c,v 1.10 2009/08/07 23:31:13 mchasal Exp $";
 
 
 #include "mlog.h"
@@ -28,31 +29,34 @@ const char *_mlog_id = "$Id: mlog.c,v 1.10 2009/08/07 23:31:13 mchasal Exp $";
 #include <stdio.h>
 #include <errno.h>
 
-//semaphore
-static key_t logSemKey;
-static int logSem = -1;
+// semaphore
+static key_t    logSemKey;
+static int      logSem = -1;
 
 
-void startLogging(const char *name, int level)
+void
+startLogging(const char *name, int level)
 {
-   union semun sun;
+  union semun     sun;
 
-   logSemKey=ftok(SFCB_BINARY,getpid());
+  logSemKey = ftok(SFCB_BINARY, getpid());
 
-    // if sem exists, clear it out.
-   if ((logSem=semget(logSemKey,1, 0600))!=-1)
-      semctl(logSem,0,IPC_RMID,sun);
+  // if sem exists, clear it out.
+  if ((logSem = semget(logSemKey, 1, 0600)) != -1)
+    semctl(logSem, 0, IPC_RMID, sun);
 
-   if ((logSem=semget(logSemKey,1,IPC_CREAT | IPC_EXCL | 0600))==-1) {
-      char *emsg=strerror(errno);
-      fprintf(stderr,"\n--- Logging semaphore create key: 0x%x failed: %s\n",logSemKey,emsg);
-      abort();
-   }
+  if ((logSem = semget(logSemKey, 1, IPC_CREAT | IPC_EXCL | 0600)) == -1) {
+    char           *emsg = strerror(errno);
+    fprintf(stderr,
+	    "\n--- Logging semaphore create key: 0x%x failed: %s\n",
+	    logSemKey, emsg);
+    abort();
+  }
 
-   sun.val=1;
-   semctl(logSem,0,SETVAL,sun);
+  sun.val = 1;
+  semctl(logSem, 0, SETVAL, sun);
 
-  openlog(name,LOG_PID,LOG_DAEMON);
+  openlog(name, LOG_PID, LOG_DAEMON);
   setlogmask(LOG_UPTO(level));
 
 }
@@ -62,11 +66,12 @@ void startLogging(const char *name, int level)
  * closeLogging deletes the semaphore and closes out
  * the syslog services that are created in startLogging.
  */
-void closeLogging ()
+void
+closeLogging()
 {
-    union semun sun;
-    semctl(logSem,0,IPC_RMID,sun);
-    closelog();
+  union semun     sun;
+  semctl(logSem, 0, IPC_RMID, sun);
+  closelog();
 }
 
 /** \brief mlogf - Create syslog entries
@@ -81,44 +86,44 @@ void closeLogging ()
  * is not to be trusted. No need to use sprintf to build
  * the string before passing it to mlogf.
  */
-void mlogf(int priority, int errout, const char *fmt, ...)
+void
+mlogf(int priority, int errout, const char *fmt, ...)
 {
-  va_list ap;
-  int priosysl;
+  va_list         ap;
+  int             priosysl;
 
-  char buf[4096];
+  char            buf[4096];
 
   switch (priority) {
   case M_DEBUG:
-    priosysl=LOG_DEBUG;
+    priosysl = LOG_DEBUG;
     break;
   case M_INFO:
-    priosysl=LOG_INFO;
+    priosysl = LOG_INFO;
     break;
   case M_ERROR:
   default:
-    priosysl=LOG_ERR;
+    priosysl = LOG_ERR;
     break;
   }
 
-  if (semAcquire(logSem,0)) {
-      char *emsg=strerror(errno);
-      fprintf(stderr,"\n--- Unable to acquire logging lock: %s\n",emsg);
-      // not aborting since that will kill sfcb, so try to continue
+  if (semAcquire(logSem, 0)) {
+    char           *emsg = strerror(errno);
+    fprintf(stderr, "\n--- Unable to acquire logging lock: %s\n", emsg);
+    // not aborting since that will kill sfcb, so try to continue
   }
-  
-  va_start(ap,fmt);
-  vsnprintf(buf,4096,fmt,ap);
-  syslog(priosysl,"%s",buf);
+
+  va_start(ap, fmt);
+  vsnprintf(buf, 4096, fmt, ap);
+  syslog(priosysl, "%s", buf);
 
   if (errout) {
-    fprintf(stderr,"%s",buf);
+    fprintf(stderr, "%s", buf);
   }
   va_end(ap);
-  if (semRelease(logSem,0)) {
-      char *emsg=strerror(errno);
-      fprintf(stderr,"\n--- Unable to release logging lock: %s\n",emsg);
-      // not aborting since that will kill sfcb, so try to continue
+  if (semRelease(logSem, 0)) {
+    char           *emsg = strerror(errno);
+    fprintf(stderr, "\n--- Unable to release logging lock: %s\n", emsg);
+    // not aborting since that will kill sfcb, so try to continue
   }
 }
-

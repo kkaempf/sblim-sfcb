@@ -17,11 +17,11 @@
  *
  * CMPISelectExp implementation.
  *
-*/
+ */
 
 
 #ifndef SELECTEXP_H
-#define SELECTEXP_H 
+#define SELECTEXP_H
 
 #include "native.h"
 #include "queryOperation.h"
@@ -29,14 +29,14 @@
 typedef struct native_selectexp NativeSelectExp;
 
 struct native_selectexp {
-   CMPISelectExp exp;
-   int mem_state;
-   NativeSelectExp *next;
-   char *queryString;
-   char *language;
-   char *sns;
-   void *filterId;
-   QLStatement *qs;
+  CMPISelectExp   exp;
+  int             mem_state;
+  NativeSelectExp *next;
+  char           *queryString;
+  char           *language;
+  char           *sns;
+  void           *filterId;
+  QLStatement    *qs;
 };
 
 #endif

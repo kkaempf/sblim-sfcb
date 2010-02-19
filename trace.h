@@ -18,7 +18,7 @@
  *
  * Trace support for sfcb.
  *
-*/
+ */
 
 #ifndef _trace_h
 #define _trace_h
@@ -69,17 +69,17 @@
 #define TRAP(n) \
       _sfcb_trap(n);
 
-extern int _sfcb_debug;
+extern int      _sfcb_debug;
 extern unsigned long _sfcb_trace_mask;
 
-extern char *_sfcb_format_trace(char *fmt, ...);
-extern void _sfcb_trace(int, char *, int, char *);
-extern void _sfcb_trace_start(int l);
-extern void _sfcb_trace_init();
-extern void _sfcb_trace_stop();
-extern void _sfcb_set_trace_mask(int n);
-extern void _sfcb_set_trace_file(char * file);
-extern void _sfcb_trap(int n);
+extern char    *_sfcb_format_trace(char *fmt, ...);
+extern void     _sfcb_trace(int, char *, int, char *);
+extern void     _sfcb_trace_start(int l);
+extern void     _sfcb_trace_init();
+extern void     _sfcb_trace_stop();
+extern void     _sfcb_set_trace_mask(int n);
+extern void     _sfcb_set_trace_file(char *file);
+extern void     _sfcb_trap(int n);
 
 #else
 #define _SFCB_TRACE_FUNCTION(n,f)
@@ -98,14 +98,16 @@ extern void _sfcb_trap(int n);
 #define TRAP(n)
 #endif
 
-extern void _sfcb_set_trace_mask(int n);
+extern void     _sfcb_set_trace_mask(int n);
 
 typedef struct traceId {
-   char *id;
-   int code;
+  char           *id;
+  int             code;
 } TraceId;
 
-/* for trace output colorization */ 
+/*
+ * for trace output colorization 
+ */
 #define RESET           0
 #define BRIGHT          1
 #define DIM             2
@@ -118,10 +120,10 @@ typedef struct traceId {
 #define MAGENTA         5
 #define CYAN            6
 #define WHITE           7
-void changeTextColor(int reset);
-int colorTrace;
+void            changeTextColor(int reset);
+int             colorTrace;
 
-#define MAX_MSG_SIZE 1024 /* max length of trace message */
+#define MAX_MSG_SIZE 1024	/* max length of trace message */
 
 #define TRACE_PROVIDERMGR       1
 #define TRACE_PROVIDERDRV       2
@@ -140,22 +142,21 @@ int colorTrace;
 #define TRACE_SOCKETS           16384
 #define TRACE_MEMORYMGR         32768
 #define TRACE_MSGQUEUE          65536
-#define TRACE_XMLPARSING        131072  
-#define TRACE_RESPONSETIMING    262144       
+#define TRACE_XMLPARSING        131072
+#define TRACE_RESPONSETIMING    262144
 #define TRACE_DBPDAEMON         524288
 #define TRACE_SLP               1048576
 
-typedef void sigHandler(int);
+typedef void    sigHandler(int);
 
 extern sigHandler *setSignal(int sn, sigHandler * sh, int flags);
 
-extern char *processName;
-extern int providerProcess;
-extern int idleThreadId;
-extern int terminating;
+extern char    *processName;
+extern int      providerProcess;
+extern int      idleThreadId;
+extern int      terminating;
 
 #endif
 #ifdef UNITTEST
-extern int trace_test();
+extern int      trace_test();
 #endif
-

@@ -17,30 +17,74 @@
  *
  * CMPI function tables.
  *
-*/
-/* ------------------------------------------------------------------------- */
-/*                                                                           */
-/* Copyright (c) 2006 The Open Group                                         */
-/*                                                                           */
-/* Permission is hereby granted, free of charge, to any person obtaining a   */
-/* copy of this software (the "Software"), to deal in the Software without   */
-/* restriction, including without limitation the rights to use, copy,        */
-/* modify, merge, publish, distribute, sublicense, and/or sell copies of     */
-/* the Software, and to permit persons to whom the Software is furnished     */
-/* to do so, subject to the following conditions:                            */
-/*                                                                           */
-/* The above copyright notice and this permission notice shall be included   */
-/* in all copies or substantial portions of the Software.                    */
-/*                                                                           */
-/* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS   */
-/* OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF                */
-/* MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.    */
-/* IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY      */
-/* CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT */
-/* OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR  */
-/* THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                */
-/*                                                                           */
-/* ------------------------------------------------------------------------- */
+ */
+/*
+ * ------------------------------------------------------------------------- 
+ */
+/*
+ */
+/*
+ * Copyright (c) 2006 The Open Group 
+ */
+/*
+ */
+/*
+ * Permission is hereby granted, free of charge, to any person obtaining a 
+ */
+/*
+ * copy of this software (the "Software"), to deal in the Software without 
+ */
+/*
+ * restriction, including without limitation the rights to use, copy, 
+ */
+/*
+ * modify, merge, publish, distribute, sublicense, and/or sell copies of 
+ */
+/*
+ * the Software, and to permit persons to whom the Software is furnished 
+ */
+/*
+ * to do so, subject to the following conditions: 
+ */
+/*
+ */
+/*
+ * The above copyright notice and this permission notice shall be included 
+ */
+/*
+ * in all copies or substantial portions of the Software.  
+ */
+/*
+ */
+/*
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+ */
+/*
+ * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+ */
+/*
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * 
+ */
+/*
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
+ */
+/*
+ * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT 
+ */
+/*
+ * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+ * OR 
+ */
+/*
+ * THE USE OR OTHER DEALINGS IN THE SOFTWARE.  
+ */
+/*
+ */
+/*
+ * ------------------------------------------------------------------------- 
+ */
 
 #ifndef _CMPIFT_H_
 #   define _CMPIFT_H_
@@ -49,16 +93,15 @@
 #   include "cmpios.h"
 
 #   ifdef __cplusplus
-extern "C"
-{
+extern          "C" {
 #   endif
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIBrokerEncFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIBrokerEncFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers to broker and factory services
@@ -66,12 +109,11 @@ extern "C"
        by the Management Broker, aka CIMOM, whenever a provider
        is loaded and initialized.
    */
-  struct _CMPIBrokerEncFT
-  {
+  struct _CMPIBrokerEncFT {
 
      /** Function table version
      */
-    int ftVersion;
+    int             ftVersion;
 
      /** Instance factory service.
          @param mb Pointer to the broker.
@@ -79,8 +121,24 @@ extern "C"
 	     @param rc Output: Service return status (suppressed when NULL).
          @return The newly created Instance.
      */
-    CMPIInstance *(*newInstance)
-      (const CMPIBroker * mb, const CMPIObjectPath * op, CMPIStatus * rc);
+    CMPIInstance   *(*newInstance)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIObjectPath * op,
+	 CMPIStatus * rc);
 
      /** ObjectPath factory service.
          @param mb Pointer to the broker.
@@ -90,15 +148,30 @@ extern "C"
          @return The newly created ObjectPath.
      */
     CMPIObjectPath *(*newObjectPath)
-      (const CMPIBroker * mb, const char *ns, const char *cn,
-       CMPIStatus * rc);
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const char *ns, const char *cn,
+	 CMPIStatus * rc);
 
      /** Args container factory service.
          @param mb Pointer to the broker.
 	     @param rc Output: Service return status (suppressed when NULL).
          @return The newly created Args container.
      */
-    CMPIArgs *(*newArgs) (const CMPIBroker * mb, CMPIStatus * rc);
+    CMPIArgs       *(*newArgs) (const CMPIBroker * mb, CMPIStatus * rc);
 
      /** String container factory service.
          @param mb Pointer to the broker.
@@ -106,8 +179,15 @@ extern "C"
 	     @param rc Output: Service return status (suppressed when NULL).
          @return The newly created String.
      */
-    CMPIString *(*newString)
-      (const CMPIBroker * mb, const char *data, CMPIStatus * rc);
+    CMPIString     *(*newString)
+     
+	
+	
+	
+	
+	
+	
+	        (const CMPIBroker * mb, const char *data, CMPIStatus * rc);
 
      /** Array container factory service.
          @param mb Pointer to the broker.
@@ -116,15 +196,32 @@ extern "C"
 	     @param rc Output: Service return status (suppressed when NULL).
          @return The newly created Array.
      */
-    CMPIArray *(*newArray)
-      (const CMPIBroker * mb, CMPICount max, CMPIType type, CMPIStatus * rc);
+    CMPIArray      *(*newArray)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, CMPICount max, CMPIType type,
+	 CMPIStatus * rc);
 
      /** DateTime factory service. Initialized with the time of day.
          @param mb Pointer to the broker.
 	     @param rc Output: Service return status (suppressed when NULL).
          @return The newly created DateTime.
      */
-    CMPIDateTime *(*newDateTime) (const CMPIBroker * mb, CMPIStatus * rc);
+    CMPIDateTime   *(*newDateTime) (const CMPIBroker * mb,
+				    CMPIStatus * rc);
 
      /** DateTime factory service. Initialized from &lt;binTime&gt;.
          @param mb Pointer to the broker.
@@ -134,9 +231,24 @@ extern "C"
 	     @param rc Output: Service return status (suppressed when NULL).
          @return The newly created DateTime.
      */
-    CMPIDateTime *(*newDateTimeFromBinary)
-      (const CMPIBroker * mb, CMPIUint64 binTime, CMPIBoolean interval,
-       CMPIStatus * rc);
+    CMPIDateTime   *(*newDateTimeFromBinary)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, CMPIUint64 binTime, CMPIBoolean interval,
+	 CMPIStatus * rc);
 
      /** DateTime factory service. Is initialized from &lt;utcTime&gt;.
          @param mb Pointer to the broker.
@@ -144,8 +256,18 @@ extern "C"
 	     @param rc Output: Service return status (suppressed when NULL).
          @return The newly created DateTime.
      */
-    CMPIDateTime *(*newDateTimeFromChars)
-      (const CMPIBroker * mb, const char *utcTime, CMPIStatus * rc);
+    CMPIDateTime   *(*newDateTimeFromChars)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	     (const CMPIBroker * mb, const char *utcTime, CMPIStatus * rc);
 
      /** SelectExp factory service.
          @param mb Pointer to the broker.
@@ -155,9 +277,24 @@ extern "C"
 	     @param rc Output: Service return status (suppressed when NULL).
          @return The newly created SelectExp.
      */
-    CMPISelectExp *(*newSelectExp)
-      (const CMPIBroker * mb, const char *query, const char *lang,
-       CMPIArray ** projection, CMPIStatus * st);
+    CMPISelectExp  *(*newSelectExp)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const char *query, const char *lang,
+	 CMPIArray ** projection, CMPIStatus * st);
 
      /** Function to determine whether a CIM class is of &lt;type&gt; or any of
          &lt;type&gt; subclasses.
@@ -167,9 +304,24 @@ extern "C"
 	     @param rc Output: Service return status (suppressed when NULL).
          @return True if test successful.
      */
-      CMPIBoolean (*classPathIsA)
-      (const CMPIBroker * mb, const CMPIObjectPath * op, const char *type,
-       CMPIStatus * rc);
+                    CMPIBoolean(*classPathIsA)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIObjectPath * op,
+	 const char *type, CMPIStatus * rc);
 
      /** Attempts to transforms an CMPI object to a broker specific string format.
          Intended for debugging purposes only.
@@ -178,8 +330,17 @@ extern "C"
 	     @param rc Output: Service return status (suppressed when NULL).
          @return String from representation of &lt;object&gt;.
      */
-    CMPIString *(*toString)
-      (const CMPIBroker * mb, const void *object, CMPIStatus * rc);
+    CMPIString     *(*toString)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	      (const CMPIBroker * mb, const void *object, CMPIStatus * rc);
 
      /** Verifies whether &lt;object&gt; is of CMPI type &lt;type&gt;.
          Intended for debugging purposes only.
@@ -190,9 +351,24 @@ extern "C"
 	     @param rc Output: Service return status (suppressed when NULL).
          @return True if test successful.
      */
-      CMPIBoolean (*isOfType)
-      (const CMPIBroker * mb, const void *object, const char *type,
-       CMPIStatus * rc);
+                    CMPIBoolean(*isOfType)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const void *object, const char *type,
+	 CMPIStatus * rc);
 
      /** Retrieves the CMPI type of &lt;object&gt;.
          Intended for debugging purposes only.
@@ -201,8 +377,17 @@ extern "C"
 	     @param rc Output: Service return status (suppressed when NULL).
          @return CMPI object type.
      */
-    CMPIString *(*getType)
-      (const CMPIBroker * mb, const void *object, CMPIStatus * rc);
+    CMPIString     *(*getType)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	      (const CMPIBroker * mb, const void *object, CMPIStatus * rc);
 
      /** Retrieves translated message.
          @param mb Pointer to the broker.
@@ -212,11 +397,26 @@ extern "C"
 	     @param count The number of message substitution values.
          @return the trabslated message.
      */
-    CMPIString *(*getMessage)
-      (const CMPIBroker * mb, const char *msgId, const char *defMsg,
-       CMPIStatus * rc, CMPICount count, ...);
+    CMPIString     *(*getMessage)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const char *msgId, const char *defMsg,
+	 CMPIStatus * rc, CMPICount count, ...);
 
-        /** Logs a diagnostic message.
+	/** Logs a diagnostic message.
 		@param mb The mb argument points to a CMPIBroker structure.
 		@param severity  The level argument describes the level of log message. Levels are defined in Section 4.9.
 		@param id The component argument, if not NULL, is the component ID.
@@ -226,11 +426,26 @@ extern "C"
 	    @return Service return status.
       */
 
-      CMPIStatus (*logMessage)
-      (const CMPIBroker *, int severity, const char *id,
-       const char *text, const CMPIString * string);
+                    CMPIStatus(*logMessage)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker *, int severity, const char *id,
+	 const char *text, const CMPIString * string);
 
-        /** Logs a trace entry. Intended for debugging purposes.
+	/** Logs a trace entry. Intended for debugging purposes.
 		@param mb The mb argument points to a CMPIBroker structure.
 		@param level  The level argument describes the level of log message. Levels are defined in Section 4.9.
 		@param component The component argument, if not NULL, is the component ID.
@@ -239,9 +454,24 @@ extern "C"
 			 ignored when text is not NULL.
 	    @return Service return status.
       */
-      CMPIStatus (*trace)
-      (const CMPIBroker *, int level, const char *component,
-       const char *text, const CMPIString * string);
+                    CMPIStatus(*trace)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker *, int level, const char *component,
+	 const char *text, const CMPIString * string);
 
 #	ifdef CMPI_VER_200
      /** Error factory service.
@@ -253,27 +483,68 @@ extern "C"
 	     @param status Service return status.
          @return The newly created Error.
      */
-	  CMPIError* (*newCMPIError)
-	  (const CMPIBroker*, const char*, const char*, const char*,
-	   const CMPIErrorSeverity, const CMPIErrorProbableCause,const CMPIrc,
-	   CMPIStatus *rc);
+    CMPIError      *(*newCMPIError)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker *, const char *, const char *, const char *,
+	 const CMPIErrorSeverity, const CMPIErrorProbableCause,
+	 const CMPIrc, CMPIStatus * rc);
      /** Opens a message file.
          @param mb Broker this pointer
          @param msgFile The message file identifier.
          @param msgFileHandle Output: The handle representing the open message file.
          @return Service return status.
      */
-     CMPIStatus (*openMessageFile)
-      (const CMPIBroker* mb, const char *msgFile,
-       CMPIMsgFileHandle* msgFileHandle);
+                    CMPIStatus(*openMessageFile)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const char *msgFile,
+	 CMPIMsgFileHandle * msgFileHandle);
 
      /** Closes a message file.
          @param mb Broker this pointer
          @param msgFileHandle The handle representing the open message file.
          @return Service return status.
      */
-     CMPIStatus (*closeMessageFile)
-      (const CMPIBroker* mb, const CMPIMsgFileHandle msgFileHandle);
+                    CMPIStatus(*closeMessageFile)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	    (const CMPIBroker * mb, const CMPIMsgFileHandle msgFileHandle);
 
      /** Retrieves translated message.
          @param mb Broker this pointer
@@ -284,40 +555,54 @@ extern "C"
          @param count The number of message substitution values.
          @return the translated message.
      */
-     CMPIString* (*getMessage2)
-      (const CMPIBroker* mb, const char *msgId,
-       const CMPIMsgFileHandle msgFileHandle, const char *defMsg,
-       CMPIStatus* rc, CMPICount count, ...);
-#	endif /* CMPI_VER_200 */
+    CMPIString     *(*getMessage2)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const char *msgId,
+	 const CMPIMsgFileHandle msgFileHandle, const char *defMsg,
+	 CMPIStatus * rc, CMPICount count, ...);
+#	endif			/* CMPI_VER_200 */
 
   };
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIBrokerFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIBrokerFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers to broker CIMOM services
        (up-calls). This table is made available by the Management Broker,
        whenever a provider is loaded and initialized.
    */
-  struct _CMPIBrokerFT
-  {
+  struct _CMPIBrokerFT {
 
      /** 32 bits describing CMPI features supported by this CIMOM.
          See CMPI_MB_Class_x and CMPI_MB_Supports_xxx flags.
      */
-    unsigned int brokerCapabilities;
+    unsigned int    brokerCapabilities;
      /** CIMOM version as defined by CIMOM
      */
-    unsigned int brokerVersion;
+    unsigned int    brokerVersion;
      /** CIMOM name
      */
-    const char *brokerName;
+    const char     *brokerName;
 
      /** This function prepares the CMPI run time system to accept
          a thread that will be using CMPI services. The returned
@@ -327,8 +612,8 @@ extern "C"
 	 @param ctx Old Context object
 	 @return New Context object to be used by thread to be attached.
      */
-    CMPIContext *(*prepareAttachThread)
-      (const CMPIBroker * mb, const CMPIContext * ctx);
+    CMPIContext    *(*prepareAttachThread)
+                    (const CMPIBroker * mb, const CMPIContext * ctx);
 
       /** This function informs the CMPI run time system that the current
          thread with Context will begin using CMPI services.
@@ -336,7 +621,14 @@ extern "C"
 	 @param ctx Context object
 	 @return Service return status.
      */
-      CMPIStatus (*attachThread) (const CMPIBroker *, const CMPIContext *);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*attachThread) (const CMPIBroker *,
+				   const CMPIContext *);
 
       /** This function informs the CMPI run time system that the current thread
          will not be using CMPI services anymore. The Context object will be
@@ -345,8 +637,8 @@ extern "C"
 	 @param ctx Context object
 	 @return Service return status.
      */
-      CMPIStatus (*detachThread)
-      (const CMPIBroker * mb, const CMPIContext * ctx);
+                    CMPIStatus(*detachThread)
+                    (const CMPIBroker * mb, const CMPIContext * ctx);
 
     // class 0 services
 
@@ -358,9 +650,24 @@ extern "C"
 	 @param ind Indication Instance
 	 @return Service return status.
      */
-      CMPIStatus (*deliverIndication)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const char *ns, const CMPIInstance * ind);
+                    CMPIStatus(*deliverIndication)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const char *ns, const CMPIInstance * ind);
     // class 1 services
 
       /** Enumerate Instance Names of the class (and subclasses) defined by &lt;op&gt;.
@@ -371,8 +678,23 @@ extern "C"
 	 @return Enumeration of ObjectPathes.
      */
     CMPIEnumeration *(*enumerateInstanceNames)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const CMPIObjectPath * op, CMPIStatus * rc);
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const CMPIObjectPath * op, CMPIStatus * rc);
 
       /** Get Instance using &lt;op&gt; as reference. Instance structure can be
          controled using the CMPIInvocationFlags entry in &lt;ctx&gt;.
@@ -385,9 +707,25 @@ extern "C"
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return The Instance.
      */
-    CMPIInstance *(*getInstance)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const CMPIObjectPath * op, const char **properties, CMPIStatus * rc);
+    CMPIInstance   *(*getInstance)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const CMPIObjectPath * op, const char **properties,
+	 CMPIStatus * rc);
 
     // class 2 services
 
@@ -400,8 +738,24 @@ extern "C"
 	 @return The assigned instance reference.
      */
     CMPIObjectPath *(*createInstance)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const CMPIObjectPath * op, const CMPIInstance * inst, CMPIStatus * rc);
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const CMPIObjectPath * op, const CMPIInstance * inst,
+	 CMPIStatus * rc);
 
       /** Replace an existing Instance from &lt;inst&gt; using &lt;op&gt; as reference.
 	 @param mb Pointer to the broker.
@@ -410,10 +764,25 @@ extern "C"
 	 @param inst Complete instance.
 	 @return Service return status.
      */
-      CMPIStatus (*modifyInstance)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const CMPIObjectPath * op, const CMPIInstance * inst,
-       const char **properties);
+                    CMPIStatus(*modifyInstance)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const CMPIObjectPath * op, const CMPIInstance * inst,
+	 const char **properties);
 
       /** Delete an existing Instance using &lt;op&gt; as reference.
 	 @param mb Pointer to the broker.
@@ -421,9 +790,24 @@ extern "C"
 	 @param op ObjectPath containing namespace, classname and key components.
 	 @return Service return status.
      */
-      CMPIStatus (*deleteInstance)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const CMPIObjectPath * op);
+                    CMPIStatus(*deleteInstance)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const CMPIObjectPath * op);
 
       /** Query the enumeration of instances of the class (and subclasses) defined
          by &lt;op&gt; using &lt;query&gt; expression.
@@ -436,9 +820,24 @@ extern "C"
 	 @return Resulting eumeration of Instances.
      */
     CMPIEnumeration *(*execQuery)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const CMPIObjectPath * op, const char *query, const char *lang,
-       CMPIStatus * rc);
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const CMPIObjectPath * op, const char *query, const char *lang,
+	 CMPIStatus * rc);
 
       /** Enumerate Instances of the class (and subclasses) defined by &lt;op&gt;.
          Instance structure and inheritance scope can be controled using the
@@ -453,8 +852,24 @@ extern "C"
 	 @return Enumeration of Instances.
      */
     CMPIEnumeration *(*enumerateInstances)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const CMPIObjectPath * op, const char **properties, CMPIStatus * rc);
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const CMPIObjectPath * op, const char **properties,
+	 CMPIStatus * rc);
 
       /** Enumerate instances associated with the Instance defined by the &lt;op&gt;.
 	 @param mb Pointer to the broker.
@@ -487,10 +902,25 @@ extern "C"
 	 @return Enumeration of Instances.
      */
     CMPIEnumeration *(*associators)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const CMPIObjectPath * op, const char *assocClass,
-       const char *resultClass, const char *role, const char *resultRole,
-       const char **properties, CMPIStatus * rc);
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const CMPIObjectPath * op, const char *assocClass,
+	 const char *resultClass, const char *role, const char *resultRole,
+	 const char **properties, CMPIStatus * rc);
 
       /** Enumerate ObjectPaths associated with the Instance defined by &lt;op&gt;.
 	 @param mb Pointer to the broker.
@@ -520,10 +950,25 @@ extern "C"
 	 @return Enumeration of ObjectPaths.
      */
     CMPIEnumeration *(*associatorNames)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const CMPIObjectPath * op, const char *assocClass,
-       const char *resultClass, const char *role, const char *resultRole,
-       CMPIStatus * rc);
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const CMPIObjectPath * op, const char *assocClass,
+	 const char *resultClass, const char *role, const char *resultRole,
+	 CMPIStatus * rc);
 
        /** Enumerates the association instances that refer to the instance defined by
            &lt;op&gt;.
@@ -547,9 +992,24 @@ extern "C"
 	 @return Enumeration of ObjectPaths.
      */
     CMPIEnumeration *(*references)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const CMPIObjectPath * op, const char *resultClass, const char *role,
-       const char **properties, CMPIStatus * rc);
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const CMPIObjectPath * op, const char *resultClass,
+	 const char *role, const char **properties, CMPIStatus * rc);
 
        /** Enumerates the association ObjectPaths that refer to the instance defined by
            &lt;op&gt;.
@@ -570,9 +1030,24 @@ extern "C"
 	 @return Enumeration of ObjectPaths.
        */
     CMPIEnumeration *(*referenceNames)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const CMPIObjectPath * op, const char *resultClass, const char *role,
-       CMPIStatus * rc);
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const CMPIObjectPath * op, const char *resultClass,
+	 const char *role, CMPIStatus * rc);
 
        /** Invoke a named, extrinsic method of an Instance
          defined by the &lt;op&gt; parameter.
@@ -585,10 +1060,25 @@ extern "C"
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Method return value.
       */
-      CMPIData (*invokeMethod)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const CMPIObjectPath * op, const char *method,
-       const CMPIArgs * in, CMPIArgs * out, CMPIStatus * rc);
+                    CMPIData(*invokeMethod)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const CMPIObjectPath * op, const char *method,
+	 const CMPIArgs * in, CMPIArgs * out, CMPIStatus * rc);
 
        /** Set the named property value of an Instance defined by the &lt;op&gt; parameter.
 	 @param mb Pointer to the broker.
@@ -599,10 +1089,25 @@ extern "C"
 	 @param type Value type.
 	 @return Service return status.
       */
-      CMPIStatus (*setProperty)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const CMPIObjectPath * op, const char *name, const CMPIValue * value,
-       CMPIType type);
+                    CMPIStatus(*setProperty)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const CMPIObjectPath * op, const char *name,
+	 const CMPIValue * value, CMPIType type);
 
        /** Get the named property value of an Instance defined by the &lt;op&gt; parameter.
 	 @param mb Pointer to the broker.
@@ -612,17 +1117,32 @@ extern "C"
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Property value.
       */
-      CMPIData (*getProperty)
-      (const CMPIBroker * mb, const CMPIContext * ctx,
-       const CMPIObjectPath * op, const char *name, CMPIStatus * rc);
+                    CMPIData(*getProperty)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIBroker * mb, const CMPIContext * ctx,
+	 const CMPIObjectPath * op, const char *name, CMPIStatus * rc);
   };
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIBrokerExtFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIBrokerExtFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
   struct timespec;
@@ -632,11 +1152,10 @@ extern "C"
        whenever a provider is loaded and initialized.
        This is an extension used by Pegasus to support platform dependencies.
    */
-  struct _CMPIBrokerExtFT
-  {
+  struct _CMPIBrokerExtFT {
      /** Function table version
      */
-    int ftVersion;
+    int             ftVersion;
 	/**
 	This function complements a generic dynamic library nameto its OS-dependent native format.
 	@param filename Pointer to the generic library name,
@@ -645,7 +1164,7 @@ extern "C"
 		 In case no storage could be obtained for the complemented library name, NULL will be
 		 returned.
 	*/
-    char *(*resolveFileName) (const char *filename);
+    char           *(*resolveFileName) (const char *filename);
 
 
        /** Start a new thread using the POSIX threading semantics.
@@ -654,111 +1173,131 @@ extern "C"
 	 @param detached If not zero, defines that the thread should run in detached mode.
 	 @return The return value is the thread ID.
 	 */
-      CMPI_THREAD_TYPE (*newThread)
-      (CMPI_THREAD_RETURN (CMPI_THREAD_CDECL * start) (void *), void *parm,
-       int detached);
+                    CMPI_THREAD_TYPE(*newThread)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPI_THREAD_RETURN(CMPI_THREAD_CDECL * start) (void *),
+	 void *parm, int detached);
 
-        /** Waits until the specified thread ends using the POSIX threading semantics.
+	/** Waits until the specified thread ends using the POSIX threading semantics.
  	@param thread The thread ID of the thread waiting for completion.
  	@param retval Pointer to the return value of the thread.
 	@return Completion code as defined by POSIX threading semantics (pthread_join)
 	*/
-    int (*joinThread) (CMPI_THREAD_TYPE thread, CMPI_THREAD_RETURN * retval);
+    int             (*joinThread) (CMPI_THREAD_TYPE thread,
+				   CMPI_THREAD_RETURN * retval);
 
-        /** Causes the current thread to exit with the passed in return code using POSIX threading semantics.
+	/** Causes the current thread to exit with the passed in return code using POSIX threading semantics.
     @param return_code Is the return code that should be used for the thread.
 	@return The function never exits.
 	*/
-    int (*exitThread) (CMPI_THREAD_RETURN return_code);
+    int             (*exitThread) (CMPI_THREAD_RETURN return_code);
 
-        /** Cancel the thread using the POSIX threading semantics.
+	/** Cancel the thread using the POSIX threading semantics.
  	 @param thread  The thread to be canceled.
 	 @return Completion code as defined by POSIX threading semantics (pthread_cancel)
 	*/
-    int (*cancelThread) (CMPI_THREAD_TYPE thread);
+    int             (*cancelThread) (CMPI_THREAD_TYPE thread);
 
-        /** Suspends the execution of the current thread for the specified duration.
+	/** Suspends the execution of the current thread for the specified duration.
      @param msec The suspend duration in milliseconds.
 	@return Completion code as defined by POSIX threading semantics (pthread_sleep)
 	*/
-    int (*threadSleep) (CMPIUint32 msec);
+    int             (*threadSleep) (CMPIUint32 msec);
 
-        /** Executes the specified function procedure only once during the lifetime of the thread.
+	/** Executes the specified function procedure only once during the lifetime of the thread.
      @param once The pointer to the counter.
      @param The function to be called
 	@return Completion code as defined by POSIX threading semantics (pthread_once)
     */
-    int (*threadOnce) (int *once, void (*init) (void));
+    int             (*threadOnce) (int *once, void (*init) (void));
 
-    /* Create a POSIX threading conformant thread key. This key can be used as a key to access the thread local store.
-       @param key The address for the key to be returned.
-       @param cleanup Function to be invoked during thread local store cleanup.
-       @return Completion code as defined by POSIX threading semantics.
+    /*
+     * Create a POSIX threading conformant thread key. This key can be
+     * used as a key to access the thread local store. @param key The
+     * address for the key to be returned. @param cleanup Function to be
+     * invoked during thread local store cleanup. @return Completion code
+     * as defined by POSIX threading semantics. 
      */
-    int (*createThreadKey)
-      (CMPI_THREAD_KEY_TYPE * key, void (*cleanup) (void *));
+    int             (*createThreadKey)
+                    (CMPI_THREAD_KEY_TYPE * key, void (*cleanup) (void *));
 
-        /** Destroy a POSIX threading conformant thread key.
+	/** Destroy a POSIX threading conformant thread key.
     @param key The key to be destroyed.
 	@return Completion code as defined by POSIX threading semantics.
 	*/
-    int (*destroyThreadKey) (CMPI_THREAD_KEY_TYPE key);
+    int             (*destroyThreadKey) (CMPI_THREAD_KEY_TYPE key);
 
-        /** Return data from the thread local store using a thread key.
+	/** Return data from the thread local store using a thread key.
     @param key The key to be used to retrieve the data.
 	@return Completion code as defined by POSIX threading semantics.
 	*/
-    void *(*getThreadSpecific) (CMPI_THREAD_KEY_TYPE key);
+    void           *(*getThreadSpecific) (CMPI_THREAD_KEY_TYPE key);
 
-        /** Set a pointer to data in the therad local store using a thread key.
+	/** Set a pointer to data in the therad local store using a thread key.
     @param key The key to be used.
 	@param value The pointer to the data.
 	@return Completion code as defined by POSIX threading semantics.
 	*/
-    int (*setThreadSpecific) (CMPI_THREAD_KEY_TYPE key, void *value);
+    int             (*setThreadSpecific) (CMPI_THREAD_KEY_TYPE key,
+					  void *value);
 
 
-        /** Create a POSIX threading conformant mutex.
+	/** Create a POSIX threading conformant mutex.
     @param opt The POSIX options. If not options are to be defined the 0 values must be used.
 	@return Handle of newly created mutex.
 	*/
-      CMPI_MUTEX_TYPE (*newMutex) (int opt);
+                    CMPI_MUTEX_TYPE(*newMutex) (int opt);
 
-        /** Destroy a POSIX threading conformant mutex.
+	/** Destroy a POSIX threading conformant mutex.
     @param mutex The mutex to be destroyed.
 	*/
-    void (*destroyMutex) (CMPI_MUTEX_TYPE mutex);
+    void            (*destroyMutex) (CMPI_MUTEX_TYPE mutex);
 
-        /** Attempt to get control of the mutex  and must wait until released when not available.
+	/** Attempt to get control of the mutex  and must wait until released when not available.
  	@param mutex The mutex to be locked.
 	*/
-    void (*lockMutex) (CMPI_MUTEX_TYPE mutex);
+    void            (*lockMutex) (CMPI_MUTEX_TYPE mutex);
 
-        /** Release control of the mutex.
+	/** Release control of the mutex.
     @param mutex The mutex to be unlocked.
     */
-    void (*unlockMutex) (CMPI_MUTEX_TYPE mutex);
+    void            (*unlockMutex) (CMPI_MUTEX_TYPE mutex);
 
-        /** Create a new POSIX threading-conformant condition variable.
+	/** Create a new POSIX threading-conformant condition variable.
     @param opt The POSIX options. If not options are to be defined the 0 values must be used.
 	@return Handle of newly created condition variable.
 	*/
-      CMPI_COND_TYPE (*newCondition) (int opt);
+                    CMPI_COND_TYPE(*newCondition) (int opt);
 
-        /** Destroy a condition variable.
+	/** Destroy a condition variable.
     @param cond The condition variable to be destroyed.
 	*/
-    void (*destroyCondition) (CMPI_COND_TYPE cond);
+    void            (*destroyCondition) (CMPI_COND_TYPE cond);
 
-        /** Wait until condition is signalled.  This function returns when condition has been
+	/** Wait until condition is signalled.  This function returns when condition has been
     signalled already and otherwise must wait for the signal and then return.
 	@param cond  The handle of the condition variable to be used.
  	@param mutex  The handle of a locked mutex guarding this condition variable.
 	@return Return value As defined by POSIX threading specifications.
 	*/
-    int (*condWait) (CMPI_COND_TYPE cond, CMPI_MUTEX_TYPE mutex);
+    int             (*condWait) (CMPI_COND_TYPE cond,
+				 CMPI_MUTEX_TYPE mutex);
 
-        /** Wait until the condition is signalled using a timeout value. This
+	/** Wait until the condition is signalled using a timeout value. This
 	function shall return when condition has been signalled already and otherwise
 	must wait for the signal and then return. The function shall return when the
 	timeout specification elapses before the condition is signalled.
@@ -767,24 +1306,40 @@ extern "C"
 	@param wait Specifies the timeout value.
 	@return As defined by POSIX threading specifications.
 	*/
-    int (*timedCondWait)
-      (CMPI_COND_TYPE cond, CMPI_MUTEX_TYPE mutex, struct timespec * wait);
+    int             (*timedCondWait)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPI_COND_TYPE cond, CMPI_MUTEX_TYPE mutex,
+	 struct timespec * wait);
 
-        /** Sends a signal to a condition variable.
+	/** Sends a signal to a condition variable.
  	@param cond Specifies the handle of the condition variable to send the signal.
 	@return As defined by POSIX threading specifications.
 	*/
-    int (*signalCondition) (CMPI_COND_TYPE cond);
+    int             (*signalCondition) (CMPI_COND_TYPE cond);
   };
 
 
 
 #   if defined (CMPI_VER_200)
-  //---------------------------------------------------
-  //--
-  //   _CMPIBroker Memory Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIBroker Memory Function Table
+  // --
+  // ---------------------------------------------------
 
       /** This structure is a table of pointers to memory specific Â CIMOM
 		  services. This table is made available by the Management Broker,
@@ -792,10 +1347,9 @@ extern "C"
 		  This is an extension used by CIMOMs to support memory management
 		enhancements.
 	*/
-  struct _CMPIBrokerMemFT
-  {
+  struct _CMPIBrokerMemFT {
 
-    const int ftVersion;
+    const int       ftVersion;
 
     /** Returns a marker. Invoking this function marks subsequent newly
 	created CMPI objects to be released when release() function is invoked.
@@ -804,15 +1358,22 @@ extern "C"
 	@param rc Output: Service return status (suppressed when NULL).
 	@return Handle to be provided to releae() function.
    */
-    CMPIGcStat *(*mark) (const CMPIBroker * mb, CMPIStatus * rc);
+    CMPIGcStat     *(*mark) (const CMPIBroker * mb, CMPIStatus * rc);
 
-        /** Release all CMPI objects created since last mark() operation
+	/** Release all CMPI objects created since last mark() operation
  	represented by the parameter. release() functions can be stacked.
  	@param mb The broker.
 	@param gc The handle returned from the mark() operation.
  	@return Service return status.
  	*/
-      CMPIStatus (*release) (const CMPIBroker * mb, const CMPIGcStat * gc);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*release) (const CMPIBroker * mb,
+			      const CMPIGcStat * gc);
 
     /** Allocates uninitalized memory of the specified size.
  	@param mb Specifies the broker.
@@ -820,7 +1381,7 @@ extern "C"
 	@return Returns a pointer to the allocated memory, or NULL if the memory
 	could not be allocated
 	*/
-    void *(*cmpiMalloc) (const CMPIBroker * mb, size_t size);
+    void           *(*cmpiMalloc) (const CMPIBroker * mb, size_t size);
 
     /** This function shall return a pointer to the allocated memory, the
 	memory will be initialized to zero.
@@ -830,7 +1391,7 @@ extern "C"
 	@return Returns a pointer to the allocated memory, or NULL if the memory
 	could not be allocated
 	*/
-    void *(*cmpiCalloc) (const CMPIBroker * mb, size_t, size_t);
+    void           *(*cmpiCalloc) (const CMPIBroker * mb, size_t, size_t);
 
     /** This function changes the size of the memory block pointed to by
 		ptr which must have been returned by a previous call to cmpiMalloc or
@@ -844,7 +1405,7 @@ extern "C"
 		if the new memory is not allcoated. If the function fals nothing is
 		done with the original ptr argument.
 	*/
-    void *(*cmpiRealloc) (const CMPIBroker * mb, void *, size_t);
+    void           *(*cmpiRealloc) (const CMPIBroker * mb, void *, size_t);
 
 
     /** This function returns a pointer to a new string which is a
@@ -854,7 +1415,7 @@ extern "C"
 		@return a pointer to the duplicated string, or NULL if insufficient
 		memory was available.
 		*/
-    char *(*cmpiStrDup) (const CMPIBroker * mb, const char *);
+    char           *(*cmpiStrDup) (const CMPIBroker * mb, const char *);
 
     /** This function frees memory allocated via the cmpiMalloc, cmpiCalloc
 		or cmpiRealloc functions.
@@ -863,7 +1424,7 @@ extern "C"
 		the cmpiMalloc, cmpiCalloc or cmpiRealloc functions.
 		@return None
 	*/
-    void (*cmpiFree) (const CMPIBroker * mb, void *);
+    void            (*cmpiFree) (const CMPIBroker * mb, void *);
 
     /**  Allows a MI to free memory associated to a CMPIinstance which was
 		 allocated via CMPIBrokerEncFT.newInstance. this function should be
@@ -873,7 +1434,8 @@ extern "C"
 		 @parma inst The instance to free.
 		 @return None
 	*/
-    void (*freeInstance) (const CMPIBroker * mb, CMPIInstance * inst);
+    void            (*freeInstance) (const CMPIBroker * mb,
+				     CMPIInstance * inst);
 
     /** Allows a MI to free memory associated to a CMPIArgs which was
 		allocated via CMPIBrokerEncFT.newArgs. this function should be called
@@ -883,7 +1445,8 @@ extern "C"
 		@param obj The object path to free.
 		@return None
 	*/
-    void (*freeObjectPath) (const CMPIBroker * mb, CMPIObjectPath * obj);
+    void            (*freeObjectPath) (const CMPIBroker * mb,
+				       CMPIObjectPath * obj);
 
     /** Allows a MI to free memory associated to a CMPIArgs which was
 		allocated via CMPIBrokerEncFT.newArgs. this function should be called
@@ -893,7 +1456,7 @@ extern "C"
 		@param args The argument to free.
 		@return None.
 	*/
-    void (*freeArgs) (const CMPIBroker * mb, CMPIArgs * args);
+    void            (*freeArgs) (const CMPIBroker * mb, CMPIArgs * args);
 
     /**  Allows a MI to free memory associated to a CMPIString which was
 		 allocated via CMPIBrokerEncFT.newString. this function should be
@@ -903,7 +1466,8 @@ extern "C"
 		 @param args The string to free.
 		 @return None.
 	*/
-    void (*freeString) (const CMPIBroker * mb, CMPIString * str);
+    void            (*freeString) (const CMPIBroker * mb,
+				   CMPIString * str);
 
     /** Allows a MI to free memory associated to a CMPIArray which was
 		allocated via CMPIBrokerEncFT.newArray. this function should be called
@@ -913,7 +1477,8 @@ extern "C"
 		@param args The string to free.
 		@return None.
 	*/
-    void (*freeArray) (const CMPIBroker * mb, CMPIArray * array);
+    void            (*freeArray) (const CMPIBroker * mb,
+				  CMPIArray * array);
 
     /** Allows a MI to free memory associated to a CMPIDateTime which was
 		allocated via CMPIBrokerEncFT.newDateTime functions. this function
@@ -923,7 +1488,8 @@ extern "C"
 		@param args The string to free.
 		@return None.
 	*/
-    void (*freeDateTime) (const CMPIBroker * mb, CMPIDateTime * date);
+    void            (*freeDateTime) (const CMPIBroker * mb,
+				     CMPIDateTime * date);
 
     /** Allows a MI to free memory associated to a CMPISelectExp which was
 		allocated via CMPIBrokerEncFT.newSelectExp functions. this function
@@ -933,30 +1499,30 @@ extern "C"
 		@param args The string to free.
 		@return None.
 	*/
-    void (*freeSelectExp) (const CMPIBroker * mb, CMPISelectExp * se);
+    void            (*freeSelectExp) (const CMPIBroker * mb,
+				      CMPISelectExp * se);
   };
 
 #   endif
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIBroker Encapsulated object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIBroker Encapsulated object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents the Management Broker (CIM Object Manager).
    */
-  struct _CMPIBroker
-  {
+  struct _CMPIBroker {
 
        /** Opaque pointer to MB specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to MB service routines function table.
        */
-    CMPIBrokerFT *bft;
+    CMPIBrokerFT   *bft;
 
        /** Pointer to MB factory service routines function table.
        */
@@ -976,36 +1542,35 @@ extern "C"
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIContext Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIContext Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to Context
        support sevices.
    */
-  struct _CMPIContextFT
-  {
+  struct _CMPIContextFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** The Context object will not be used any further and may be freed by
            CMPI run time system.
 	 @param ctx Context this pointer.
 	 @return Service return status.
       */
-      CMPIStatus (*release) (CMPIContext * ctx);
+                    CMPIStatus(*release) (CMPIContext * ctx);
 
        /** Create an independent copy of the Context object.
 	 @param ctx Context this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Pointer to copied Context object.
       */
-    CMPIContext *(*clone) (const CMPIContext * ctx, CMPIStatus * rc);
+    CMPIContext    *(*clone) (const CMPIContext * ctx, CMPIStatus * rc);
 
 
        /** Gets a named Context entry value.
@@ -1014,8 +1579,17 @@ extern "C"
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Entry value.
       */
-      CMPIData (*getEntry)
-      (const CMPIContext * ctx, const char *name, CMPIStatus * rc);
+                    CMPIData(*getEntry)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	      (const CMPIContext * ctx, const char *name, CMPIStatus * rc);
 
        /** Gets a Context entry value defined by its index.
 	 @param ctx Context this pointer.
@@ -1024,15 +1598,37 @@ extern "C"
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Entry value.
       */
-      CMPIData (*getEntryAt)
-      (const CMPIContext * ctx, CMPICount index, CMPIString ** name,
-       CMPIStatus * rc);
+                    CMPIData(*getEntryAt)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIContext * ctx, CMPICount index, CMPIString ** name,
+	 CMPIStatus * rc);
 
       /** Gets the number of entries contained in this Context.
 	 @param ctx Context this pointer.
 	 @return Number of entries.
       */
-      CMPICount (*getEntryCount) (const CMPIContext * ctx, CMPIStatus * rc);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPICount(*getEntryCount) (const CMPIContext * ctx,
+				   CMPIStatus * rc);
 
       /** Adds/replaces a named Context entry.
 	 @param ctx Context this pointer.
@@ -1041,91 +1637,103 @@ extern "C"
          @param type Value type.
 	 @return Service return status.
       */
-      CMPIStatus (*addEntry)
-      (const CMPIContext * ctx, const char *name, const CMPIValue * value,
-       const CMPIType type);
+                    CMPIStatus(*addEntry)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIContext * ctx, const char *name,
+	 const CMPIValue * value, const CMPIType type);
   };
 
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIContext Encapsulated object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIContext Encapsulated object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents the Encapsulated Context object.
    */
-  struct _CMPIContext
-  {
+  struct _CMPIContext {
 
        /** Opaque pointer to MB specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the Context Function Table.
        */
-    CMPIContextFT *ft;
+    CMPIContextFT  *ft;
   };
 
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIResult Encapsulated object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIResult Encapsulated object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents the Encapsulated Result object.
    */
-  struct _CMPIResult
-  {
+  struct _CMPIResult {
 
        /** Opaque pointer to MB specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the Result Function Table.
        */
-    CMPIResultFT *ft;
+    CMPIResultFT   *ft;
   };
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIResult Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIResult Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to Result
        support sevices. Result support services are used to explicity return
        data produced by provider functions.
    */
-  struct _CMPIResultFT
-  {
+  struct _CMPIResultFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** The Result object will not be used any further and may be freed by
            CMPI run time system.
 	 @param rslt Result this pointer.
 	 @return Service return status.
       */
-      CMPIStatus (*release) (CMPIResult * rslt);
+                    CMPIStatus(*release) (CMPIResult * rslt);
 
        /** Create an independent copy of this Result object.
 	 @param rslt Result this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Pointer to copied Result object.
       */
-    CMPIResult *(*clone) (const CMPIResult * rslt, CMPIStatus * rc);
+    CMPIResult     *(*clone) (const CMPIResult * rslt, CMPIStatus * rc);
 
        /** Return a value/type pair.
 	 @param rslt Result this pointer.
@@ -1133,30 +1741,46 @@ extern "C"
 	 @param type Type of the Value object.
 	 @return Service return status.
       */
-      CMPIStatus (*returnData)
-      (const CMPIResult * rslt, const CMPIValue * value, const CMPIType type);
+                    CMPIStatus(*returnData)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIResult * rslt, const CMPIValue * value,
+	 const CMPIType type);
 
        /** Return a Instance object.
 	 @param rslt Result this pointer.
 	 @param inst Instance to be returned.
 	 @return Service return status.
       */
-      CMPIStatus (*returnInstance)
-      (const CMPIResult * rslt, const CMPIInstance * inst);
+                    CMPIStatus(*returnInstance)
+                    (const CMPIResult * rslt, const CMPIInstance * inst);
 
        /** Return a ObjectPath object.
 	 @param rslt Result this pointer.
 	 @param ref ObjectPath to be returned.
 	 @return Service return status.
       */
-      CMPIStatus (*returnObjectPath)
-      (const CMPIResult * rslt, const CMPIObjectPath * ref);
+                    CMPIStatus(*returnObjectPath)
+                    (const CMPIResult * rslt, const CMPIObjectPath * ref);
 
        /** Indicates no further data to be returned.
 	 @param rslt Result this pointer.
 	 @return Service return status.
       */
-      CMPIStatus (*returnDone) (const CMPIResult * rslt);
+                    CMPIStatus(*returnDone) (const CMPIResult * rslt);
 
 #	ifdef CMPI_VER_200
 	  /** Return a CMPIError object instance
@@ -1164,207 +1788,288 @@ extern "C"
 	 @param er Error to be returned.
 	 @return Service return status.
 	  */
-	CMPIStatus (*returnError)(const CMPIResult* rslt,
-		const CMPIError* er);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*returnError) (const CMPIResult * rslt,
+				  const CMPIError * er);
 #	endif
   };
 
 #	ifdef CMPI_VER_200
-	struct _CMPIError {
-		void *hdl;
-		CMPIErrorFT *ft;
-	};
+  struct _CMPIError {
+    void           *hdl;
+    CMPIErrorFT    *ft;
+  };
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIErrorFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIErrorFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to Error
        support services.
    */
-struct _CMPIErrorFT {
+  struct _CMPIErrorFT {
        /** Function table version
        */
-    CMPISint32 ftVersion;
+    CMPISint32      ftVersion;
        /** The Error object will not be used any further and may be freed by
            CMPI run time system.
 	 @param er Error this pointer.
 	 @return Service return status.
       */
-    CMPIStatus (*release)(CMPIError*);
+                    CMPIStatus(*release) (CMPIError *);
        /** Create an independent copy of this Error object.
 	 @param er Error this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Pointer to copied Error object.
       */
-    CMPIError* (*clone)(const CMPIError*, CMPIStatus*);
+    CMPIError      *(*clone) (const CMPIError *, CMPIStatus *);
 	/** Gets the type of this Error
 		@param er Error this pointer
 		@param rc Output: Service return status (suppressed when NULL).
 		@return the error type this Error object conatins
 	*/
-    CMPIErrorType (*getErrorType)(const CMPIError*, CMPIStatus*);
+         
+	 
+	 
+	 
+	    CMPIErrorType(*getErrorType) (const CMPIError *, CMPIStatus *);
 	/** Returns a string which describes the alternate error type.
 		@param er Error this pointer
 		@param rc Output: Service return status (suppressed when NULL).
 		@return A string, which can be NULL
 	*/
-    CMPIString* (*getOtherErrorType)(const CMPIError*, CMPIStatus*);
+    CMPIString     *(*getOtherErrorType) (const CMPIError *, CMPIStatus *);
 	/** Returns a string which describes the owneing entity
 		@param er Error this pointer
 		@param rc Output: Service return status (suppressed when NULL).
 		@return A string, which can be NULL
 	*/
-    CMPIString* (*getOwningEntity)(const CMPIError*, CMPIStatus*);
+    CMPIString     *(*getOwningEntity) (const CMPIError *, CMPIStatus *);
 	/** Returns a string which is the message ID.
 		@param er Error this pointer
 		@param rc Output: Service return status (suppressed when NULL).
 		@return A string, which can be NULL
 	*/
-    CMPIString* (*getMessageID)(const CMPIError*, CMPIStatus*);
+    CMPIString     *(*getMessageID) (const CMPIError *, CMPIStatus *);
 	/** Returns a string comnating an error message.
 		@param er Error this pointer
 		@param rc Output: Service return status (suppressed when NULL).
 		@return A string, which can be NULL
 	*/
-    CMPIString* (*getMessage)(const CMPIError*, CMPIStatus*);
+    CMPIString     *(*getMessage) (const CMPIError *, CMPIStatus *);
 	/** Returns the perceieved severity of this error.
 		@param er Error this pointer
 		@param rc Output: Service return status (suppressed when NULL).
 		@return the perceived severity
 	*/
-    CMPIErrorSeverity (*getPerceivedSeverity)(const CMPIError*, CMPIStatus*);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIErrorSeverity(*getPerceivedSeverity) (const CMPIError *,
+						  CMPIStatus *);
 	/** Returns the probable cause of this error.
 		@param er Error this pointer
 		@param rc Output: Service return status (suppressed when NULL).
 		@return A probable cause value
 	*/
-    CMPIErrorProbableCause (*getProbableCause)(const CMPIError*, CMPIStatus*);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIErrorProbableCause(*getProbableCause) (const CMPIError *,
+						   CMPIStatus *);
 	/** Returns a string which describes the probable cause.
 		@param er Error this pointer
 		@param rc Output: Service return status (suppressed when NULL).
 		@return A string, which can be NULL
 	*/
-    CMPIString* (*getProbableCauseDescription)(const CMPIError*, CMPIStatus*);
+    CMPIString     *(*getProbableCauseDescription) (const CMPIError *,
+						    CMPIStatus *);
 	/** Returns an array of strings which describes recomended actions.
 		@param er Error this pointer
 		@param rc Output: Service return status (suppressed when NULL).
 		@return A array of strings, which can be NULL
 	*/
-    CMPIArray* (*getRecommendedActions)(const CMPIError*, CMPIStatus*);
+    CMPIArray      *(*getRecommendedActions) (const CMPIError *,
+					      CMPIStatus *);
 	/** Returns a string which describes the Error source.
 		@param er Error this pointer
 		@param rc Output: Service return status (suppressed when NULL).
 		@return A string, which can be NULL
 	*/
-    CMPIString* (*getErrorSource)(const CMPIError*, CMPIStatus*);
+    CMPIString     *(*getErrorSource) (const CMPIError *, CMPIStatus *);
 	/** Returns a the format that the error src is in.
 		@param er Error this pointer
 		@param rc Output: Service return status (suppressed when NULL).
 		@return A error source format  code
 	*/
-    CMPIErrorSrcFormat (*getErrorSourceFormat)(const CMPIError*, CMPIStatus*);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIErrorSrcFormat(*getErrorSourceFormat) (const CMPIError *,
+						   CMPIStatus *);
 	/** Returns a string which describes the 'other' format, only available if the error source is OTHER.
 		@param er Error this pointer
 		@param rc Output: Service return status (suppressed when NULL).
 		@return A string, which can be NULL
 	*/
-    CMPIString* (*getOtherErrorSourceFormat)(const CMPIError*, CMPIStatus*);
+    CMPIString     *(*getOtherErrorSourceFormat) (const CMPIError *,
+						  CMPIStatus *);
 	/** Returns the status code of this error.
 		@param er Error this pointer
 		@param rc Output: Service return status (suppressed when NULL).
 		@return A CMPI Status code
 	*/
-    CMPIrc (*getCIMStatusCode)(const CMPIError*, CMPIStatus*);
+         
+	 
+	 
+	      CMPIrc(*getCIMStatusCode) (const CMPIError *, CMPIStatus *);
 	/** Returns a string which describes the status code error.
 		@param er Error this pointer
 		@param rc Output: Service return status (suppressed when NULL).
 		@return A string, which can be NULL
 	*/
-    CMPIString* (*getCIMStatusCodeDescription)(const CMPIError*, CMPIStatus*);
+    CMPIString     *(*getCIMStatusCodeDescription) (const CMPIError *,
+						    CMPIStatus *);
 	/** Returns an array which contains the dynamic content of the message.
 		@param er The Error this pointer
 		@param rc Output: Serbice return status (surpressed when NULL)
 		@return An array of CMPIStrings which represents the dynamic values
 	*/
-	CMPIArray* (*getMessageArguments)(const CMPIError*, CMPIStatus*);
+    CMPIArray      *(*getMessageArguments) (const CMPIError *,
+					    CMPIStatus *);
 	/** Sets the error type of this error object.
 		@param er Error this pointer
 		@param et The error type
 		@return Output: Service return status
 	*/
-    CMPIStatus (*setErrorType)(CMPIError*, const CMPIErrorType);
+         
+	 
+	 
+	      CMPIStatus(*setErrorType) (CMPIError *, const CMPIErrorType);
 	/** Sets the 'other' error type of this error object.
 		@param er Error this pointer
 		@param oet A string which describes the error type, it is only valis when error type is "OTHER"
 		@return Output: Service return status
 	*/
-    CMPIStatus (*setOtherErrorType)(CMPIError*, const char *);
+         
+	 
+	        CMPIStatus(*setOtherErrorType) (CMPIError *, const char *);
 	/** Sets the description of the probable cause.
 		@param er Error this pointer
 		@param pc The probable cause string
 		@return Output: Service return status
 	*/
-    CMPIStatus (*setProbableCauseDescription)(CMPIError*, const char *);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*setProbableCauseDescription) (CMPIError *,
+						  const char *);
 	/** Sets the recomended actions array.
 		@param er Error this pointer
 		@param ar An array of strings describing actions that shoudl be taken to deal with this error
 		@return Output: Service return status
 	*/
-    CMPIStatus (*setRecommendedActions)(CMPIError*, const CMPIArray*);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*setRecommendedActions) (CMPIError *,
+					    const CMPIArray *);
 	/** Specifies a string which specifes The identifying information of the entity (i.e., the instance) generating the error..
 		@param er Error this pointer
 		@param es the string which describes the source
 		@return Output: Service return status
 	*/
-    CMPIStatus (*setErrorSource)(CMPIError*, const char*);
+         
+	          CMPIStatus(*setErrorSource) (CMPIError *, const char *);
 	/** Sets the source format of the error object
 		@param er Error this pointer
 		@param esf the string which describes the source format
 		@return Output: Service return status
 	*/
-    CMPIStatus (*setErrorSourceFormat)(CMPIError*, const CMPIErrorSrcFormat );
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*setErrorSourceFormat) (CMPIError *,
+					   const CMPIErrorSrcFormat);
 	/** specifies A string defining "Other" values for ErrorSourceFormat
 		@param er Error this pointer
 		@param oef the string which describes the other source format
 		@return Output: Service return status
 	*/
-    CMPIStatus (*setOtherErrorSourceFormat)(CMPIError*, const char*);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*setOtherErrorSourceFormat) (CMPIError *, const char *);
 	/** Sets the description of the status code.
 		@param er Error this pointer
 		@param scd A string whcih describes the status code.
 		@return Output: Service return status
 	*/
-    CMPIStatus (*setCIMStatusCodeDescription)(CMPIError*, const char*);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*setCIMStatusCodeDescription) (CMPIError *,
+						  const char *);
 	/** Sets an array of strings for the dynamic content of the message
 		@param er Error this pointer
 		@param values Specifies an array of CMPIStrings containing the dynamic
 		content of the message.
 		@return Service return status
 	*/
-	CMPIStatus (*setMessageArguments)(CMPIError*, CMPIArray*);
-};
-#	endif /* CMPI_VER_200 */
+         
+	 
+	 
+	      CMPIStatus(*setMessageArguments) (CMPIError *, CMPIArray *);
+  };
+#	endif			/* CMPI_VER_200 */
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIInstance Encapsulated object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIInstance Encapsulated object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents the Encapsulated Instance object.
    */
-  struct _CMPIInstance
-  {
+  struct _CMPIInstance {
 
        /** Opaque pointer to MB specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the Instance Function Table.
        */
@@ -1373,29 +2078,28 @@ struct _CMPIErrorFT {
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIInstance Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIInstance Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to Instance
        support sevices.
    */
-  struct _CMPIInstanceFT
-  {
+  struct _CMPIInstanceFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** The Instance object will not be used any further and may be freed by
            CMPI run time system. This will also release the contained objects.
 	 @param inst Instance this pointer.
 	 @return Service return status.
       */
-      CMPIStatus (*release) (CMPIInstance * inst);
+                    CMPIStatus(*release) (CMPIInstance * inst);
 
        /** Create an independent copy of this Instance object. The resulting
            object must be released explicitly.
@@ -1403,7 +2107,7 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Pointer to copied Instance object.
       */
-    CMPIInstance *(*clone) (const CMPIInstance * inst, CMPIStatus * rc);
+    CMPIInstance   *(*clone) (const CMPIInstance * inst, CMPIStatus * rc);
 
        /** Gets a named property value.
 	 @param inst Instance this pointer.
@@ -1411,8 +2115,19 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Property value.
       */
-      CMPIData (*getProperty)
-      (const CMPIInstance * inst, const char *name, CMPIStatus * rc);
+                    CMPIData(*getProperty)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	    (const CMPIInstance * inst, const char *name, CMPIStatus * rc);
 
        /** Gets a Property value defined by its index.
 	 @param inst Instance this pointer.
@@ -1421,16 +2136,31 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Property value.
       */
-      CMPIData (*getPropertyAt)
-      (const CMPIInstance * inst, CMPICount index, CMPIString ** name,
-       CMPIStatus * rc);
+                    CMPIData(*getPropertyAt)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIInstance * inst, CMPICount index, CMPIString ** name,
+	 CMPIStatus * rc);
       /** Gets the number of properties contained in this Instance.
 	 @param inst Instance this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Number of properties.
       */
-      CMPICount (*getPropertyCount)
-      (const CMPIInstance * inst, CMPIStatus * rc);
+                    CMPICount(*getPropertyCount)
+                    (const CMPIInstance * inst, CMPIStatus * rc);
 
       /** Adds/replaces a named Property.
 	 @param inst Instance this pointer.
@@ -1439,9 +2169,24 @@ struct _CMPIErrorFT {
          @param type Value type.
 	 @return Service return status.
       */
-      CMPIStatus (*setProperty)
-      (const CMPIInstance * inst, const char *name,
-       const CMPIValue * value, CMPIType type);
+                    CMPIStatus(*setProperty)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIInstance * inst, const char *name,
+	 const CMPIValue * value, CMPIType type);
 
       /** Generates an ObjectPath out of the namespace, classname and
 	  key propeties of this Instance.
@@ -1450,7 +2195,7 @@ struct _CMPIErrorFT {
          @return the generated ObjectPath.
       */
     CMPIObjectPath *(*getObjectPath)
-      (const CMPIInstance * inst, CMPIStatus * rc);
+                    (const CMPIInstance * inst, CMPIStatus * rc);
 
       /** Directs CMPI to ignore any setProperty operations for this
 	  instance for any properties not in this list.
@@ -1460,8 +2205,24 @@ struct _CMPIErrorFT {
 	 @param keys Deprecated, ignored by MB, maintained here for compatibility.
 	 @return Service return status.
       */
-      CMPIStatus (*setPropertyFilter)
-      (CMPIInstance * inst, const char **propertyList, const char **keys);
+                    CMPIStatus(*setPropertyFilter)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIInstance * inst, const char **propertyList,
+	 const char **keys);
 
       /** Set/replace the ObjectPath component in an instance.
 		  @param inst  The CMPIInstance structure containing a
@@ -1472,8 +2233,14 @@ struct _CMPIErrorFT {
 		  @return Service return status.
 	  */
 
-      CMPIStatus (*setObjectPath) (CMPIInstance * inst,
-                                   const CMPIObjectPath * op);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*setObjectPath) (CMPIInstance * inst,
+				    const CMPIObjectPath * op);
 #ifdef CMPI_VER_200
 	  /** add/replace a named Property value and origin
 		  @param inst is a pointer to the CMPIInstance structure.
@@ -1485,30 +2252,37 @@ struct _CMPIErrorFT {
 		  no origin is attached to  the property
 		  @return Service return status
 	  */
-	  CMPIStatus (*setPropertyWithOrigin)(const CMPIInstance*, const char*,
-	            const CMPIValue*, const CMPIType, const char*);
-#endif /* CMPI_VER_200 */
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*setPropertyWithOrigin) (const CMPIInstance *,
+					    const char *,
+					    const CMPIValue *,
+					    const CMPIType, const char *);
+#endif				/* CMPI_VER_200 */
 
   };
 
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIObjectPath Encapsulated object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIObjectPath Encapsulated object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents the Encapsulated Instance object.
    */
-  struct _CMPIObjectPath
-  {
+  struct _CMPIObjectPath {
 
        /** Opaque pointer to MB specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the ObjectPath Function Table.
        */
@@ -1517,29 +2291,28 @@ struct _CMPIErrorFT {
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIObjectPath Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIObjectPath Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to ObjectPath
        support sevices.
    */
-  struct _CMPIObjectPathFT
-  {
+  struct _CMPIObjectPathFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** The ObjectPath object will not be used any further and may be freed by
            CMPI run time system.
 	 @param op ObjectPath this pointer.
 	 @return Service return status.
       */
-      CMPIStatus (*release) (CMPIObjectPath * op);
+                    CMPIStatus(*release) (CMPIObjectPath * op);
 
        /** Create an independent copy of this ObjectPath object. The resulting
            object must be released explicitly.
@@ -1554,42 +2327,59 @@ struct _CMPIErrorFT {
 	 @param ns The namespace string
 	 @return Service return status.
       */
-      CMPIStatus (*setNameSpace) (CMPIObjectPath * op, const char *ns);
+         
+	 
+	 
+	 
+	 
+	  CMPIStatus(*setNameSpace) (CMPIObjectPath * op, const char *ns);
 
        /** Get the namespace component.
 	 @param op ObjectPath this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return The namespace component.
       */
-    CMPIString *(*getNameSpace) (const CMPIObjectPath * op, CMPIStatus * rc);
+    CMPIString     *(*getNameSpace) (const CMPIObjectPath * op,
+				     CMPIStatus * rc);
 
        /** Set/replace the hostname component.
 	 @param op ObjectPath this pointer.
 	 @param hn The hostname string
 	 @return Service return status.
       */
-      CMPIStatus (*setHostname) (CMPIObjectPath * op, const char *hn);
+         
+	 
+	 
+	 
+	    CMPIStatus(*setHostname) (CMPIObjectPath * op, const char *hn);
 
        /** Get the hostname component.
 	 @param op ObjectPath this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return The hostname component.
       */
-    CMPIString *(*getHostname) (const CMPIObjectPath * op, CMPIStatus * rc);
+    CMPIString     *(*getHostname) (const CMPIObjectPath * op,
+				    CMPIStatus * rc);
 
        /** Set/replace the classname component.
 	 @param op ObjectPath this pointer.
 	 @param cn The hostname string
 	 @return Service return status.
       */
-      CMPIStatus (*setClassName) (CMPIObjectPath * op, const char *cn);
+         
+	 
+	 
+	 
+	 
+	  CMPIStatus(*setClassName) (CMPIObjectPath * op, const char *cn);
 
        /** Get the classname component.
 	 @param op ObjectPath this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return The classname component.
       */
-    CMPIString *(*getClassName) (const CMPIObjectPath * op, CMPIStatus * rc);
+    CMPIString     *(*getClassName) (const CMPIObjectPath * op,
+				     CMPIStatus * rc);
 
       /** Adds/replaces a named key property.
 	 @param op ObjectPath this pointer.
@@ -1598,9 +2388,24 @@ struct _CMPIErrorFT {
          @param type Value type.
 	 @return Service return status.
       */
-      CMPIStatus (*addKey)
-      (CMPIObjectPath * op, const char *name,
-       const CMPIValue * value, const CMPIType type);
+                    CMPIStatus(*addKey)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIObjectPath * op, const char *name,
+	 const CMPIValue * value, const CMPIType type);
 
        /** Gets a named key property value.
 	 @param op ObjectPath this pointer.
@@ -1608,8 +2413,19 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Entry value.
       */
-      CMPIData (*getKey)
-      (const CMPIObjectPath * op, const char *name, CMPIStatus * rc);
+                    CMPIData(*getKey)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	    (const CMPIObjectPath * op, const char *name, CMPIStatus * rc);
 
        /** Gets a key property value defined by its index.
 	 @param op ObjectPath this pointer.
@@ -1618,30 +2434,52 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Data value.
       */
-      CMPIData (*getKeyAt)
-      (const CMPIObjectPath * op, CMPICount index, CMPIString ** name,
-       CMPIStatus * rc);
+                    CMPIData(*getKeyAt)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIObjectPath * op, CMPICount index, CMPIString ** name,
+	 CMPIStatus * rc);
       /** Gets the number of key properties contained in this ObjectPath.
 	 @param op ObjectPath this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Number of properties.
       */
-      CMPICount (*getKeyCount) (const CMPIObjectPath * op, CMPIStatus * rc);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPICount(*getKeyCount) (const CMPIObjectPath * op,
+				 CMPIStatus * rc);
       /** Set/replace namespace and classname components from &lt;src&gt;.
 	 @param op ObjectPath this pointer.
 	 @param src Source input.
 	 @return Service return status.
       */
-      CMPIStatus (*setNameSpaceFromObjectPath)
-      (CMPIObjectPath * op, const CMPIObjectPath * src);
+                    CMPIStatus(*setNameSpaceFromObjectPath)
+                    (CMPIObjectPath * op, const CMPIObjectPath * src);
 
       /** Set/replace hostname, namespace and classname components from &lt;src&gt;.
 	 @param op ObjectPath this pointer.
 	 @param src Source input.
 	 @return Service return status.
       */
-      CMPIStatus (*setHostAndNameSpaceFromObjectPath)
-      (CMPIObjectPath * op, const CMPIObjectPath * src);
+                    CMPIStatus(*setHostAndNameSpaceFromObjectPath)
+                    (CMPIObjectPath * op, const CMPIObjectPath * src);
 
 
 
@@ -1654,8 +2492,20 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Qualifier value.
       */
-      CMPIData (*getClassQualifier)
-      (const CMPIObjectPath * op, const char *qName, CMPIStatus * rc);
+                    CMPIData(*getClassQualifier)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	   (const CMPIObjectPath * op, const char *qName, CMPIStatus * rc);
 
        /** Get property qualifier value.
 	 @param op ObjectPath this pointer.
@@ -1664,9 +2514,24 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Qualifier value.
       */
-      CMPIData (*getPropertyQualifier)
-      (const CMPIObjectPath * op,
-       const char *pName, const char *qName, CMPIStatus * rc);
+                    CMPIData(*getPropertyQualifier)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIObjectPath * op,
+	 const char *pName, const char *qName, CMPIStatus * rc);
 
        /** Get method qualifier value.
 	 @param op ObjectPath this pointer.
@@ -1675,9 +2540,24 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Qualifier value.
       */
-      CMPIData (*getMethodQualifier)
-      (const CMPIObjectPath * op,
-       const char *methodName, const char *qName, CMPIStatus * rc);
+                    CMPIData(*getMethodQualifier)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIObjectPath * op,
+	 const char *methodName, const char *qName, CMPIStatus * rc);
 
        /** Get method parameter quailifier value.
 	 @param op ObjectPath this pointer.
@@ -1687,38 +2567,53 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Qualifier value.
       */
-      CMPIData (*getParameterQualifier)
-      (const CMPIObjectPath * op,
-       const char *mName,
-       const char *pName, const char *qName, CMPIStatus * rc);
+                    CMPIData(*getParameterQualifier)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIObjectPath * op,
+	 const char *mName,
+	 const char *pName, const char *qName, CMPIStatus * rc);
 
       /** Generates a well formed string representation of this ObjectPath
 	 @param op ObjectPath this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return String representation.
       */
-    CMPIString *(*toString) (const CMPIObjectPath * op, CMPIStatus * rc);
+    CMPIString     *(*toString) (const CMPIObjectPath * op,
+				 CMPIStatus * rc);
 
   };
 
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPISelectExp Encapsulated object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPISelectExp Encapsulated object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents the Encapsulated SelectExp object.
    */
-  struct _CMPISelectExp
-  {
+  struct _CMPISelectExp {
 
        /** Opaque pointer to MB specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the SelExp Function Table.
        */
@@ -1727,29 +2622,28 @@ struct _CMPIErrorFT {
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPISelectExpFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPISelectExpFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to SelectExp
        support sevices.
    */
-  struct _CMPISelectExpFT
-  {
+  struct _CMPISelectExpFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** The SelectExp object will not be used any further and may be freed by
            CMPI run time system.
 	 @param se SelectExp this pointer.
 	 @return Service return status.
       */
-      CMPIStatus (*release) (CMPISelectExp * se);
+                    CMPIStatus(*release) (CMPISelectExp * se);
 
        /** Create an independent copy of this SelectExp object. The resulting
            object must be released explicitly.
@@ -1757,7 +2651,7 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Pointer to copied SelectExp object.
       */
-    CMPISelectExp *(*clone) (const CMPISelectExp * se, CMPIStatus * rc);
+    CMPISelectExp  *(*clone) (const CMPISelectExp * se, CMPIStatus * rc);
 
        /** Evaluate the instance using this select expression.
 	 @param se SelectExp this pointer.
@@ -1765,15 +2659,32 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return True or false incicator.
       */
-      CMPIBoolean (*evaluate)
-      (const CMPISelectExp * se, const CMPIInstance * inst, CMPIStatus * rc);
+                    CMPIBoolean(*evaluate)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPISelectExp * se, const CMPIInstance * inst,
+	 CMPIStatus * rc);
 
        /** Return the select expression in string format.
 	 @param se SelectExp this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return The select expression.
       */
-    CMPIString *(*getString) (const CMPISelectExp * se, CMPIStatus * rc);
+    CMPIString     *(*getString) (const CMPISelectExp * se,
+				  CMPIStatus * rc);
 
        /** Return the select expression as disjunction of conjunctions.
 	 @param se SelectExp this pointer.
@@ -1796,28 +2707,42 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return True or false incicator.
       */
-      CMPIBoolean (*evaluateUsingAccessor)
-      (const CMPISelectExp * se, CMPIAccessor * accessor, void *parm,
-       CMPIStatus * rc);
+                    CMPIBoolean(*evaluateUsingAccessor)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPISelectExp * se, CMPIAccessor * accessor, void *parm,
+	 CMPIStatus * rc);
   };
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPISelectCond Encapsulated object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPISelectCond Encapsulated object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents the Encapsulated SelectCond object.
    */
-  struct _CMPISelectCond
-  {
+  struct _CMPISelectCond {
 
        /** Opaque pointer to MB specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the SelCond Function Table.
        */
@@ -1826,29 +2751,28 @@ struct _CMPIErrorFT {
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPISelectCondFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPISelectCondFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to SelectCond
        support sevices.
    */
-  struct _CMPISelectCondFT
-  {
+  struct _CMPISelectCondFT {
 
        /** Function table version
        */
-    const int ftVersion;
+    const int       ftVersion;
 
        /** The SelectCond object will not be used any further and may be freed by
            CMPI run time system.
 	 @param sc SelectCond this pointer.
 	 @return Service return status.
       */
-      CMPIStatus (*release) (CMPISelectCond * sc);
+                    CMPIStatus(*release) (CMPISelectCond * sc);
 
        /** Create an independent copy of this SelectCond object. The resulting
            object must be released explicitly.
@@ -1865,8 +2789,12 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Number of SubCond elements.
       */
-      CMPICount (*getCountAndType)
-      (const CMPISelectCond * sc, int* type, CMPIStatus * rc);
+                    CMPICount(*getCountAndType)
+     
+	
+	
+	
+	           (const CMPISelectCond * sc, int *type, CMPIStatus * rc);
 
        /** Return a SubCond element based on its index.
 	 @param sc SelectCond this pointer.
@@ -1874,59 +2802,67 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return The indexed SubCond element.
       */
-    CMPISubCond *(*getSubCondAt)
-      (const CMPISelectCond * sc, CMPICount index, CMPIStatus * rc);
+    CMPISubCond    *(*getSubCondAt)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	     (const CMPISelectCond * sc, CMPICount index, CMPIStatus * rc);
   };
 
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPISubCond Encapsulated object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPISubCond Encapsulated object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents the Encapsulated SubCond object.
    */
-  struct _CMPISubCond
-  {
+  struct _CMPISubCond {
 
        /** Opaque pointer to MB specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the SubCond Function Table.
        */
-    CMPISubCondFT *ft;
+    CMPISubCondFT  *ft;
   };
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPISubCondFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPISubCondFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to SubCond
        support sevices.
    */
-  struct _CMPISubCondFT
-  {
+  struct _CMPISubCondFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** The SubCond object will not be used any further and may be freed by
            CMPI run time system.
 	 @param sc SubCond this pointer.
 	 @return Service return status.
       */
-      CMPIStatus (*release) (CMPISubCond * sc);
+                    CMPIStatus(*release) (CMPISubCond * sc);
 
        /** Create an independent copy of this SubCond object. The resulting
            object must be released explicitly.
@@ -1934,14 +2870,18 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Pointer to copied SelectExp object.
       */
-    CMPISubCond *(*clone) (const CMPISubCond * sc, CMPIStatus * rc);
+    CMPISubCond    *(*clone) (const CMPISubCond * sc, CMPIStatus * rc);
 
        /** Return the number of predicates that are part of sub condition.
 	 @param sc SubCond this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Number of Predicate elements.
       */
-      CMPICount (*getCount) (const CMPISubCond * sc, CMPIStatus * rc);
+         
+	 
+	 
+	 
+	    CMPICount(*getCount) (const CMPISubCond * sc, CMPIStatus * rc);
 
        /** Return a Predicate element based on its index.
 	 @param sc SubCond this pointer.
@@ -1949,8 +2889,15 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return The indexed Predicate element.
       */
-    CMPIPredicate *(*getPredicateAt)
-      (const CMPISubCond * sc, CMPICount index, CMPIStatus * rc);
+    CMPIPredicate  *(*getPredicateAt)
+     
+	
+	
+	
+	
+	
+	
+	        (const CMPISubCond * sc, CMPICount index, CMPIStatus * rc);
 
        /** Return a named Predicate element.
 	 @param sc SubCond this pointer.
@@ -1958,28 +2905,35 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return The named Predicate element.
       */
-    CMPIPredicate *(*getPredicate)
-      (const CMPISubCond * sc, const char *name, CMPIStatus * rc);
+    CMPIPredicate  *(*getPredicate)
+     
+	
+	
+	
+	
+	
+	
+	
+	       (const CMPISubCond * sc, const char *name, CMPIStatus * rc);
   };
 
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIPredicate Encapsulated object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIPredicate Encapsulated object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents the Encapsulated Predicate object.
    */
-  struct _CMPIPredicate
-  {
+  struct _CMPIPredicate {
 
        /** Opaque pointer to MB specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the Predicate Function Table.
        */
@@ -1989,29 +2943,28 @@ struct _CMPIErrorFT {
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIPredicateFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIPredicateFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to SubCond
        support sevices.
    */
-  struct _CMPIPredicateFT
-  {
+  struct _CMPIPredicateFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** The Predicate object will not be used any further and may be freed by
            CMPI run time system.
 	 @param pr Predicate this pointer.
 	 @return Service return status.
       */
-      CMPIStatus (*release) (CMPIPredicate * pr);
+                    CMPIStatus(*release) (CMPIPredicate * pr);
 
        /** Create an independent copy of this Predicate object. The resulting
            object must be released explicitly.
@@ -2019,7 +2972,7 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Pointer to copied Predicate object.
       */
-    CMPIPredicate *(*clone) (const CMPIPredicate * pr, CMPIStatus * rc);
+    CMPIPredicate  *(*clone) (const CMPIPredicate * pr, CMPIStatus * rc);
 
        /** Get the predicate components.
 	 @param pr Predicate this pointer.
@@ -2029,9 +2982,24 @@ struct _CMPIErrorFT {
 	 @param rhs Right hand side of predicate.
 	 @return Service return status.
       */
-      CMPIStatus (*getData)
-      (const CMPIPredicate * pr, CMPIType * type,
-       CMPIPredOp * op, CMPIString ** lhs, CMPIString ** rhs);
+                    CMPIStatus(*getData)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIPredicate * pr, CMPIType * type,
+	 CMPIPredOp * op, CMPIString ** lhs, CMPIString ** rhs);
 
        /** Evaluate the predicate using a property data accessor function.
 	 @param pr Predicate this pointer.
@@ -2045,60 +3013,73 @@ struct _CMPIErrorFT {
 	 @return Evaluation result.
       */
 
-      CMPIBoolean (*evaluateUsingAccessor)
-      (const CMPIPredicate * pr, CMPIAccessor * accessorFnc, void *parm,
-       CMPIStatus * rc);
+                    CMPIBoolean(*evaluateUsingAccessor)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIPredicate * pr, CMPIAccessor * accessorFnc, void *parm,
+	 CMPIStatus * rc);
   };
 
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIArgs Encapsulated object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIArgs Encapsulated object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents the Encapsulated Args object.
    */
-  struct _CMPIArgs
-  {
+  struct _CMPIArgs {
 
        /** Opaque pointer to MB specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the Args Function Table.
        */
-    CMPIArgsFT *ft;
+    CMPIArgsFT     *ft;
   };
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIArgsFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIArgsFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to Args
        support sevices.
    */
-  struct _CMPIArgsFT
-  {
+  struct _CMPIArgsFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** The Args object will not be used any further and may be freed by
            CMPI run time system.
 	 @param as Args this pointer.
 	 @return Service return status.
       */
-      CMPIStatus (*release) (CMPIArgs * as);
+                    CMPIStatus(*release) (CMPIArgs * as);
 
        /** Create an independent copy of this Args object. The resulting
            object must be released explicitly.
@@ -2106,7 +3087,7 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Pointer to copied Args object.
       */
-    CMPIArgs *(*clone) (const CMPIArgs * as, CMPIStatus * rc);
+    CMPIArgs       *(*clone) (const CMPIArgs * as, CMPIStatus * rc);
 
       /** Adds/replaces a named argument.
 	 @param as Args this pointer.
@@ -2115,9 +3096,24 @@ struct _CMPIErrorFT {
          @param type Value type.
 	 @return Service return status.
       */
-      CMPIStatus (*addArg)
-      (const CMPIArgs * as, const char *name, const CMPIValue * value,
-       const CMPIType type);
+                    CMPIStatus(*addArg)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIArgs * as, const char *name, const CMPIValue * value,
+	 const CMPIType type);
 
        /** Gets a named argument value.
 	 @param as Args this pointer.
@@ -2125,8 +3121,13 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Argument value.
       */
-      CMPIData (*getArg)
-      (const CMPIArgs * as, const char *name, CMPIStatus * rc);
+                    CMPIData(*getArg)
+     
+	
+	
+	
+	
+	          (const CMPIArgs * as, const char *name, CMPIStatus * rc);
 
        /** Gets a Argument value defined by its index.
 	 @param as Args this pointer.
@@ -2135,67 +3136,84 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Argument value.
       */
-      CMPIData (*getArgAt)
-      (const CMPIArgs * as, CMPICount index, CMPIString ** name,
-       CMPIStatus * rc);
+                    CMPIData(*getArgAt)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(const CMPIArgs * as, CMPICount index, CMPIString ** name,
+	 CMPIStatus * rc);
 
       /** Gets the number of arguments contained in this Args.
 	 @param as Args this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Number of properties.
       */
-      CMPICount (*getArgCount) (const CMPIArgs * as, CMPIStatus * rc);
+         
+	 
+	 
+	 
+	    CMPICount(*getArgCount) (const CMPIArgs * as, CMPIStatus * rc);
   };
 
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIString Encapsulated object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIString Encapsulated object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents the Encapsulated String object.
    */
-  struct _CMPIString
-  {
+  struct _CMPIString {
 
        /** Opaque pointer to MB specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the String Function Table.
        */
-    CMPIStringFT *ft;
+    CMPIStringFT   *ft;
   };
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIStringFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIStringFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to String
        support sevices.
    */
-  struct _CMPIStringFT
-  {
+  struct _CMPIStringFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** The String object will not be used any further and may be freed by
            CMPI run time system.
 	 @param st String this pointer.
 	 @return Service return status.
        */
-      CMPIStatus (*release) (CMPIString * st);
+                    CMPIStatus(*release) (CMPIString * st);
 
        /** Create an independent copy of this String object. The resulting
            object must be released explicitly.
@@ -2203,65 +3221,63 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Pointer to copied String object.
       */
-    CMPIString *(*clone) (const CMPIString * st, CMPIStatus * rc);
+    CMPIString     *(*clone) (const CMPIString * st, CMPIStatus * rc);
 
        /** Get a pointer to a C char *representation of this String.
 	 @param st String this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Pointer to char *representation.
       */
-    char *(*getCharPtr) (const CMPIString * st, CMPIStatus * rc);
+    char           *(*getCharPtr) (const CMPIString * st, CMPIStatus * rc);
   };
 
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIArray Encapsulated object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIArray Encapsulated object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents the Encapsulated Array object.
    */
-  struct _CMPIArray
-  {
+  struct _CMPIArray {
 
        /** Opaque pointer to MB specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the Array Function Table.
        */
-    CMPIArrayFT *ft;
+    CMPIArrayFT    *ft;
   };
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIArrayFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIArrayFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to Array
        support sevices.
    */
-  struct _CMPIArrayFT
-  {
+  struct _CMPIArrayFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** The Array object will not be used any further and may be freed by
            CMPI run time system.
 	 @param ar Array this pointer.
 	 @return Service return status.
        */
-      CMPIStatus (*release) (CMPIArray * ar);
+                    CMPIStatus(*release) (CMPIArray * ar);
 
        /** Create an independent copy of this Array object. The resulting
            object must be released explicitly.
@@ -2269,21 +3285,29 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Pointer to copied Array object.
       */
-    CMPIArray *(*clone) (const CMPIArray * ar, CMPIStatus * rc);
+    CMPIArray      *(*clone) (const CMPIArray * ar, CMPIStatus * rc);
 
       /** Gets the number of elements contained in this Array.
 	 @param ar Array this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Number of elements.
       */
-      CMPICount (*getSize) (const CMPIArray * ar, CMPIStatus * rc);
+         
+	 
+	 
+	      CMPICount(*getSize) (const CMPIArray * ar, CMPIStatus * rc);
 
       /** Gets the element type.
 	 @param ar Array this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Number of elements.
       */
-      CMPIType (*getSimpleType) (const CMPIArray * ar, CMPIStatus * rc);
+         
+	 
+	 
+	 
+	 
+	  CMPIType(*getSimpleType) (const CMPIArray * ar, CMPIStatus * rc);
 
        /** Gets an element value defined by its index.
 	 @param ar Array this pointer.
@@ -2291,8 +3315,13 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Element value.
       */
-      CMPIData (*getElementAt)
-      (const CMPIArray * ar, CMPICount index, CMPIStatus * rc);
+                    CMPIData(*getElementAt)
+     
+	
+	
+	
+	
+	          (const CMPIArray * ar, CMPICount index, CMPIStatus * rc);
 
        /** Sets an element value defined by its index.
 	 @param ar Array this pointer.
@@ -2301,30 +3330,44 @@ struct _CMPIErrorFT {
          @param type Value type.
 	 @return Service return status.
       */
-      CMPIStatus (*setElementAt)
-      (CMPIArray * ar, CMPICount index, const CMPIValue * value,
-       CMPIType type);
+                    CMPIStatus(*setElementAt)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIArray * ar, CMPICount index, const CMPIValue * value,
+	 CMPIType type);
   };
 
 
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIEnumeration Encapsulated object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIEnumeration Encapsulated object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents the Encapsulated Enumeration object.
    */
-  struct _CMPIEnumeration
-  {
+  struct _CMPIEnumeration {
 
        /** Opaque pointer to MB specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the Enumeration Function Table.
        */
@@ -2333,29 +3376,28 @@ struct _CMPIErrorFT {
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIEnumerationFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIEnumerationFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to Enumeration
        support sevices.
    */
-  struct _CMPIEnumerationFT
-  {
+  struct _CMPIEnumerationFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** The Enumeration object will not be used any further and may be freed by
            CMPI run time system.
 	 @param en Enumeration this pointer.
 	 @return Service return status.
        */
-      CMPIStatus (*release) (CMPIEnumeration * en);
+                    CMPIStatus(*release) (CMPIEnumeration * en);
 
        /** Create an independent copy of this Enumeration object. The resulting
            object must be released explicitly.
@@ -2363,49 +3405,62 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Pointer to copied Enumeration object.
       */
-    CMPIEnumeration *(*clone) (const CMPIEnumeration * en, CMPIStatus * rc);
+    CMPIEnumeration *(*clone) (const CMPIEnumeration * en,
+			       CMPIStatus * rc);
 
        /** Get the next element of this Enumeration.
 	 @param en Enumeration this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Element value.
       */
-      CMPIData (*getNext) (const CMPIEnumeration * en, CMPIStatus * rc);
+         
+	 
+	 
+	 
+	 
+	  CMPIData(*getNext) (const CMPIEnumeration * en, CMPIStatus * rc);
 
        /** Test for any elements left in this Enumeration.
 	 @param en Enumeration this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return True or false.
       */
-      CMPIBoolean (*hasNext) (const CMPIEnumeration * en, CMPIStatus * rc);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIBoolean(*hasNext) (const CMPIEnumeration * en,
+			       CMPIStatus * rc);
 
        /** Convert this Enumeration into an Array.
 	 @param en Enumeration this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return The Array.
       */
-    CMPIArray *(*toArray) (const CMPIEnumeration * en, CMPIStatus * rc);
+    CMPIArray      *(*toArray) (const CMPIEnumeration * en,
+				CMPIStatus * rc);
   };
 
 
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIDateTime Encapsulated object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIDateTime Encapsulated object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents the DateTime object.
    */
-  struct _CMPIDateTime
-  {
+  struct _CMPIDateTime {
 
        /** Opaque pointer to MB specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the DateTime Function Table.
        */
@@ -2414,29 +3469,28 @@ struct _CMPIErrorFT {
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIDateTimeFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIDateTimeFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to DateTime
        support sevices.
    */
-  struct _CMPIDateTimeFT
-  {
+  struct _CMPIDateTimeFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** The DateTime object will not be used any further and may be freed by
            CMPI run time system.
 	 @param dt DateTime this pointer.
 	 @return Service return status.
        */
-      CMPIStatus (*release) (CMPIDateTime * dt);
+                    CMPIStatus(*release) (CMPIDateTime * dt);
 
        /** Create an independent copy of this DateTime object. The resulting
            object must be released explicitly.
@@ -2444,7 +3498,7 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return Pointer to copied DateTime object.
       */
-    CMPIDateTime *(*clone) (const CMPIDateTime * dt, CMPIStatus * rc);
+    CMPIDateTime   *(*clone) (const CMPIDateTime * dt, CMPIStatus * rc);
 
        /** Get DateTime setting in binary format (in microsecods
 	       starting since 00:00:00 GMT, Jan 1,1970).
@@ -2452,22 +3506,36 @@ struct _CMPIErrorFT {
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return DateTime in binary.
       */
-      CMPIUint64 (*getBinaryFormat) (const CMPIDateTime * dt,
-                                     CMPIStatus * rc);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIUint64(*getBinaryFormat) (const CMPIDateTime * dt,
+				      CMPIStatus * rc);
 
        /** Get DateTime setting in UTC string format.
 	 @param dt DateTime this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return DateTime as UTC string.
       */
-    CMPIString *(*getStringFormat) (const CMPIDateTime * dt, CMPIStatus * rc);
+    CMPIString     *(*getStringFormat) (const CMPIDateTime * dt,
+					CMPIStatus * rc);
 
        /** Tests whether DateTime is an interval value.
 	 @param dt DateTime this pointer.
 	 @param rc Output: Service return status (suppressed when NULL).
 	 @return True if interval value.
       */
-      CMPIBoolean (*isInterval) (const CMPIDateTime * dt, CMPIStatus * rc);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIBoolean(*isInterval) (const CMPIDateTime * dt,
+				  CMPIStatus * rc);
   };
 
 
@@ -2475,22 +3543,21 @@ struct _CMPIErrorFT {
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIInstanceMI Instance Provider object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIInstanceMI Instance Provider object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents an Instance provider.
    */
   typedef struct _CMPIInstanceMIFT CMPIInstanceMIFT;
-  typedef struct _CMPIInstanceMI
-  {
+  typedef struct _CMPIInstanceMI {
 
        /** Opaque pointer to Provider specific implementation data.
        */
-    const void *hdl;
+    const void     *hdl;
 
        /** Pointer to the Instance Provider Function Table.
        */
@@ -2499,31 +3566,30 @@ struct _CMPIErrorFT {
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIInstanceMIFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIInstanceMIFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to Instance
        provider functions. This table must be returend during initialization
        by the provider.
    */
-  struct _CMPIInstanceMIFT
-  {
+  struct _CMPIInstanceMIFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** Provider version
        */
-    int miVersion;
+    int             miVersion;
 
        /** Provider name
        */
-    const char *miName;
+    const char     *miName;
 
        /** The CMPIInstanceMIFT.cleanup() function shall perform any necessary cleanup
 	   operation prior to the unloading of the library of which this MI group is part.
@@ -2543,8 +3609,24 @@ struct _CMPIErrorFT {
 	      CMPI_RC_DO_NOT_UNLOAD Operation successful - do not unload now.
 	      CMPI_RC_NEVER_UNLOAD Operation successful -  never unload.o
       */
-      CMPIStatus (*cleanup)
-      (CMPIInstanceMI * mi, const CMPIContext * ctx, CMPIBoolean terminating);
+                    CMPIStatus(*cleanup)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIInstanceMI * mi, const CMPIContext * ctx,
+	 CMPIBoolean terminating);
 
        /** Enumerate ObjectPaths of Instances serviced by this provider.
 	 @param mi Provider this pointer.
@@ -2559,9 +3641,24 @@ struct _CMPIErrorFT {
 		CMPI_RC_ERR_ACCESS_DENIED Not authorized.
 		CMPI_RC_ERR_NOT_FOUND Instance not found.
       */
-      CMPIStatus (*enumerateInstanceNames)
-      (CMPIInstanceMI * mi, const CMPIContext * ctx, const CMPIResult * rslt,
-       const CMPIObjectPath * op);
+                    CMPIStatus(*enumerateInstanceNames)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIInstanceMI * mi, const CMPIContext * ctx,
+	 const CMPIResult * rslt, const CMPIObjectPath * op);
 
        /** Enumerate the Instances serviced by this provider.
 	 @param mi Provider this pointer.
@@ -2579,9 +3676,25 @@ struct _CMPIErrorFT {
 		CMPI_RC_ERR_ACCESS_DENIED Not authorized.
 		CMPI_RC_ERR_NOT_FOUND Instance not found.
       */
-      CMPIStatus (*enumerateInstances)
-      (CMPIInstanceMI * mi, const CMPIContext * ctx, const CMPIResult * rslt,
-       const CMPIObjectPath * op, const char **properties);
+                    CMPIStatus(*enumerateInstances)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIInstanceMI * mi, const CMPIContext * ctx,
+	 const CMPIResult * rslt, const CMPIObjectPath * op,
+	 const char **properties);
 
        /** Get the Instances defined by &lt;op&gt;.
 	 @param mi Provider this pointer.
@@ -2599,9 +3712,25 @@ struct _CMPIErrorFT {
 		CMPI_RC_ERR_ACCESS_DENIED Not authorized.
 		CMPI_RC_ERR_NOT_FOUND Instance not found.
       */
-      CMPIStatus (*getInstance)
-      (CMPIInstanceMI * mi, const CMPIContext * ctx, const CMPIResult * rslt,
-       const CMPIObjectPath * op, const char **properties);
+                    CMPIStatus(*getInstance)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIInstanceMI * mi, const CMPIContext * ctx,
+	 const CMPIResult * rslt, const CMPIObjectPath * op,
+	 const char **properties);
 
        /** Create Instance from &lt;inst&gt; using &lt;op&gt; as reference.
 	 @param mi Provider this pointer.
@@ -2616,9 +3745,25 @@ struct _CMPIErrorFT {
 		CMPI_RC_ERR_NOT_SUPPORTED Operation not supported by this MI.
 		CMPI_RC_ERR_ALREADY_EXISTS Instance already exists.
       */
-      CMPIStatus (*createInstance)
-      (CMPIInstanceMI * mi, const CMPIContext * ctx, const CMPIResult * rslt,
-       const CMPIObjectPath * op, const CMPIInstance * inst);
+                    CMPIStatus(*createInstance)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIInstanceMI * mi, const CMPIContext * ctx,
+	 const CMPIResult * rslt, const CMPIObjectPath * op,
+	 const CMPIInstance * inst);
 
        /** Replace an existing Instance from &lt;inst&gt; using &lt;op&gt; as reference.
 	 @param mi Provider this pointer.
@@ -2632,10 +3777,25 @@ struct _CMPIErrorFT {
 	     will be replaced.
 	 @return Function return status.
       */
-      CMPIStatus (*modifyInstance)
-      (CMPIInstanceMI * mi, const CMPIContext * ctx, const CMPIResult * rslt,
-       const CMPIObjectPath * op, const CMPIInstance * inst,
-       const char **properties);
+                    CMPIStatus(*modifyInstance)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIInstanceMI * mi, const CMPIContext * ctx,
+	 const CMPIResult * rslt, const CMPIObjectPath * op,
+	 const CMPIInstance * inst, const char **properties);
 
        /** Delete an existing Instance defined by &lt;op&gt;.
 	 @param mi Provider this pointer.
@@ -2650,9 +3810,24 @@ struct _CMPIErrorFT {
 		CMPI_RC_ERR_ACCESS_DENIED Not authorized.
 		CMPI_RC_ERR_NOT_FOUND Instance not found.
       */
-      CMPIStatus (*deleteInstance)
-      (CMPIInstanceMI * mi, const CMPIContext * ctx, const CMPIResult * rslt,
-       const CMPIObjectPath * op);
+                    CMPIStatus(*deleteInstance)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIInstanceMI * mi, const CMPIContext * ctx,
+	 const CMPIResult * rslt, const CMPIObjectPath * op);
 
       /** Query the enumeration of instances of the class (and subclasses) defined
          by &lt;op&gt; using &lt;query&gt; expression.
@@ -2671,9 +3846,25 @@ struct _CMPIErrorFT {
 		CMPI_RC_ERR_QUERY_LANGUAGE_NOT_SUPPORTED Query language not supported.
 		CMPI_RC_ERR_INVALID_QUERY Invalid query.
       */
-      CMPIStatus (*execQuery)
-      (CMPIInstanceMI * mi, const CMPIContext * ctx, const CMPIResult * rslt,
-       const CMPIObjectPath * op, const char *query, const char *lang);
+                    CMPIStatus(*execQuery)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIInstanceMI * mi, const CMPIContext * ctx,
+	 const CMPIResult * rslt, const CMPIObjectPath * op,
+	 const char *query, const char *lang);
   };
 
 
@@ -2681,22 +3872,21 @@ struct _CMPIErrorFT {
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIAssociationMI Association Provider object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIAssociationMI Association Provider object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents an Association provider.
    */
   typedef struct _CMPIAssociationMIFT CMPIAssociationMIFT;
-  typedef struct _CMPIAssociationMI
-  {
+  typedef struct _CMPIAssociationMI {
 
        /** Opaque pointer to Provider specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the Association Provider Function Table.
        */
@@ -2704,23 +3894,22 @@ struct _CMPIErrorFT {
   } CMPIAssociationMI;
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIAssociationMIFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIAssociationMIFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to Association
        provider functions. This table must be returend during initialization
        by the provider.
    */
-  struct _CMPIAssociationMIFT
-  {
+  struct _CMPIAssociationMIFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** Provider version
        */
@@ -2728,7 +3917,7 @@ struct _CMPIErrorFT {
 
        /** Provider name
        */
-    const char *miName;
+    const char     *miName;
 
        /** Cleanup is called prior to unloading of the provider.
 	   This function shall perform any necessary cleanup
@@ -2747,9 +3936,24 @@ struct _CMPIErrorFT {
 	    CMPI_RC_NEVER_UNLOAD Operation successful - never unload.
 
       */
-      CMPIStatus (*cleanup)
-      (CMPIAssociationMI * mi, const CMPIContext * ctx,
-       CMPIBoolean terminating);
+                    CMPIStatus(*cleanup)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIAssociationMI * mi, const CMPIContext * ctx,
+	 CMPIBoolean terminating);
 
       /** Enumerate ObjectPaths associated with the Instance defined by &lt;op&gt;.
 	 @param mi Provider this pointer.
@@ -2787,11 +3991,26 @@ struct _CMPIErrorFT {
 		CMPI_RC_ERR_ACCESS_DENIED Not authorized.
 		CMPI_RC_ERR_NOT_FOUND Instance not found.
      */
-      CMPIStatus (*associators)
-      (CMPIAssociationMI * mi, const CMPIContext * ctx,
-       const CMPIResult * rslt, const CMPIObjectPath * op,
-       const char *asscClass, const char *resultClass, const char *role,
-       const char *resultRole, const char **properties);
+                    CMPIStatus(*associators)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIAssociationMI * mi, const CMPIContext * ctx,
+	 const CMPIResult * rslt, const CMPIObjectPath * op,
+	 const char *asscClass, const char *resultClass, const char *role,
+	 const char *resultRole, const char **properties);
 
       /** Enumerate ObjectPaths associated with the Instance defined by &lt;op&gt;.
 	 @param mi Provider this pointer.
@@ -2826,11 +4045,26 @@ struct _CMPIErrorFT {
 		CMPI_RC_ERR_ACCESS_DENIED Not authorized.
 		CMPI_RC_ERR_NOT_FOUND Instance not found.
      */
-      CMPIStatus (*associatorNames)
-      (CMPIAssociationMI * mi, const CMPIContext * ctx,
-       const CMPIResult * rslt, const CMPIObjectPath * op,
-       const char *assocClass, const char *resultClass, const char *role,
-       const char *resultRole);
+                    CMPIStatus(*associatorNames)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIAssociationMI * mi, const CMPIContext * ctx,
+	 const CMPIResult * rslt, const CMPIObjectPath * op,
+	 const char *assocClass, const char *resultClass, const char *role,
+	 const char *resultRole);
 
        /** Enumerates the association instances that refer to the instance defined by
            &lt;op&gt;.
@@ -2859,10 +4093,26 @@ struct _CMPIErrorFT {
 		CMPI_RC_ERR_ACCESS_DENIED Not authorized.
 		CMPI_RC_ERR_NOT_FOUND Instance not found.
      */
-      CMPIStatus (*references)
-      (CMPIAssociationMI * mi, const CMPIContext * ctx,
-       const CMPIResult * rslt, const CMPIObjectPath * op,
-       const char *resultClass, const char *role, const char **properties);
+                    CMPIStatus(*references)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIAssociationMI * mi, const CMPIContext * ctx,
+	 const CMPIResult * rslt, const CMPIObjectPath * op,
+	 const char *resultClass, const char *role,
+	 const char **properties);
 
       /** Enumerates the association ObjectPaths that refer to the instance defined by
            &lt;op&gt;.
@@ -2888,10 +4138,25 @@ struct _CMPIErrorFT {
 		CMPI_RC_ERR_ACCESS_DENIED Not authorized.
 		CMPI_RC_ERR_NOT_FOUND Instance not found.
       */
-      CMPIStatus (*referenceNames)
-      (CMPIAssociationMI * mi, const CMPIContext * ctx,
-       const CMPIResult * rslt, const CMPIObjectPath * op,
-       const char *resultClass, const char *role);
+                    CMPIStatus(*referenceNames)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIAssociationMI * mi, const CMPIContext * ctx,
+	 const CMPIResult * rslt, const CMPIObjectPath * op,
+	 const char *resultClass, const char *role);
   };
 
 
@@ -2899,22 +4164,21 @@ struct _CMPIErrorFT {
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIMethodMI Method Provider object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIMethodMI Method Provider object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents an Method provider.
    */
   typedef struct _CMPIMethodMIFT CMPIMethodMIFT;
-  typedef struct _CMPIMethodMI
-  {
+  typedef struct _CMPIMethodMI {
 
        /** Opaque pointer to Provider specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the Method Provider Function Table.
        */
@@ -2923,31 +4187,30 @@ struct _CMPIErrorFT {
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIMethodMIFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIMethodMIFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to Method
        provider functions. This table must be returend during initialization
        by the provider.
    */
-  struct _CMPIMethodMIFT
-  {
+  struct _CMPIMethodMIFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** Provider version
        */
-    int miVersion;
+    int             miVersion;
 
        /** Provider name
        */
-    const char *miName;
+    const char     *miName;
 
        /** The CMPIMethodMIFT.cleanup() function shall perform any necessary cleanup operation
 	   prior to the unloading of the library of which this MI group is part. This function is called
@@ -2967,8 +4230,24 @@ struct _CMPIErrorFT {
 	      CMPI_RC_DO_NOT_UNLOAD Operation successful - do not unload now.
 	      CMPI_RC_NEVER_UNLOAD Operation successful - never unload.
       */
-      CMPIStatus (*cleanup)
-      (CMPIMethodMI * mi, const CMPIContext * ctx, CMPIBoolean terminating);
+                    CMPIStatus(*cleanup)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIMethodMI * mi, const CMPIContext * ctx,
+	 CMPIBoolean terminating);
 
       /** Invoke a named, extrinsic method of an Instance
          defined by the &lt;op&gt; parameter.
@@ -2988,32 +4267,46 @@ struct _CMPIErrorFT {
 		CMPI_RC_ERR_METHOD_NOT_AVAILABLE Method not available.
 		CMPI_RC_ERR_METHOD_NOT_FOUND Method not found.
       */
-      CMPIStatus (*invokeMethod)
-      (CMPIMethodMI * mi, const CMPIContext * ctx, const CMPIResult * rslt,
-       const CMPIObjectPath * op, const char *method, const CMPIArgs * in,
-       CMPIArgs * out);
+                    CMPIStatus(*invokeMethod)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIMethodMI * mi, const CMPIContext * ctx,
+	 const CMPIResult * rslt, const CMPIObjectPath * op,
+	 const char *method, const CMPIArgs * in, CMPIArgs * out);
   };
 
 
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIPropertyMI Property Provider object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIPropertyMI Property Provider object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents an Property provider.
    */
   typedef struct _CMPIPropertyMIFT CMPIPropertyMIFT;
-  typedef struct _CMPIPropertyMI
-  {
+  typedef struct _CMPIPropertyMI {
 
        /** Opaque pointer to Provider specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the Property Provider Function Table.
        */
@@ -3022,31 +4315,30 @@ struct _CMPIErrorFT {
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIPropertyMIFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIPropertyMIFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to Property
        provider functions. This table must be returend during initialization
        by the provider.
    */
-  struct _CMPIPropertyMIFT
-  {
+  struct _CMPIPropertyMIFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** Provider version
        */
-    int miVersion;
+    int             miVersion;
 
        /** Provider name
        */
-    const char *miName;
+    const char     *miName;
 
        /** Cleanup is called prior to unloading of the provider.
 	 @param mi Provider this pointer.
@@ -3063,8 +4355,24 @@ struct _CMPIErrorFT {
 	      CMPI_RC_DO_NOT_UNLOAD Operation successful - do not unload now.
 	      CMPI_RC_NEVER_UNLOAD Operation successful  -  never unload.
       */
-      CMPIStatus (*cleanup)
-      (CMPIPropertyMI * mi, const CMPIContext * ctx, CMPIBoolean terminating);
+                    CMPIStatus(*cleanup)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIPropertyMI * mi, const CMPIContext * ctx,
+	 CMPIBoolean terminating);
 
       /** Set the named property value of an Instance defined by the &lt;op&gt; parameter.
 	 @param mi Provider this pointer.
@@ -3078,9 +4386,25 @@ struct _CMPIErrorFT {
 		CMPI_RC_ERR_TYPE_MISATCH type does not correspond to class-defined type.
 		CMPI_RC_ERR_INVALID_HANDLE The inst handle is invalid.
       */
-      CMPIStatus (*setProperty)
-      (CMPIPropertyMI * mi, const CMPIContext * ctx, const CMPIResult * rslt,
-       const CMPIObjectPath * op, const char *name, const CMPIData data);
+                    CMPIStatus(*setProperty)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIPropertyMI * mi, const CMPIContext * ctx,
+	 const CMPIResult * rslt, const CMPIObjectPath * op,
+	 const char *name, const CMPIData data);
 
       /** Get the named property value of an Instance defined by the &lt;op&gt; parameter.
 	 @param mi Provider this pointer.
@@ -3099,9 +4423,24 @@ struct _CMPIErrorFT {
  		CMPI_RC_ERR_NOT_FOUND Instance not found.
  		CMPI_RC_ERR_NO_SUCH_PROPERTY Entry not found.
       */
-      CMPIStatus (*getProperty)
-      (CMPIPropertyMI *, const CMPIContext *, const CMPIResult *,
-       const CMPIObjectPath *, const char *name);
+                    CMPIStatus(*getProperty)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIPropertyMI *, const CMPIContext *, const CMPIResult *,
+	 const CMPIObjectPath *, const char *name);
 #ifdef CMPI_VER_200
 	  /** add/replace a named Property value and origin
 		  @param mi Provider this pointer.
@@ -3115,32 +4454,41 @@ struct _CMPIErrorFT {
 		  no origin is attached to  the property
 		  @return Service return status
 	  */
-	  CMPIStatus (*setPropertyWithOrigin)(CMPIPropertyMI*, const CMPIContext*,
-		  const CMPIResult*, CMPIObjectPath * op,
-          const char *name, const CMPIData data, const char*);
-#endif /* CMPI_VER_200 */
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*setPropertyWithOrigin) (CMPIPropertyMI *,
+					    const CMPIContext *,
+					    const CMPIResult *,
+					    CMPIObjectPath * op,
+					    const char *name,
+					    const CMPIData data,
+					    const char *);
+#endif				/* CMPI_VER_200 */
   };
 
 
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIIndicationMI Indication Provider object
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIIndicationMI Indication Provider object
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure represents an Indication provider.
    */
   typedef struct _CMPIIndicationMIFT CMPIIndicationMIFT;
-  typedef struct _CMPIIndicationMI
-  {
+  typedef struct _CMPIIndicationMI {
 
        /** Opaque pointer to Provider specific implementation data.
        */
-    void *hdl;
+    void           *hdl;
 
        /** Pointer to the Property Provider Function Table.
        */
@@ -3149,31 +4497,30 @@ struct _CMPIErrorFT {
 
 
 
-  //---------------------------------------------------
-  //--
-  //   _CMPIIndicationMIFT Function Table
-  //--
-  //---------------------------------------------------
+  // ---------------------------------------------------
+  // --
+  // _CMPIIndicationMIFT Function Table
+  // --
+  // ---------------------------------------------------
 
 
    /** This structure is a table of pointers providing access to Indication
        provider functions. This table must be returend during initialization
        by the provider.
    */
-  struct _CMPIIndicationMIFT
-  {
+  struct _CMPIIndicationMIFT {
 
        /** Function table version
        */
-    int ftVersion;
+    int             ftVersion;
 
        /** Provider version
        */
-    int miVersion;
+    int             miVersion;
 
        /** Provider name
        */
-    const char *miName;
+    const char     *miName;
 
        /** Cleanup is called prior to unloading of the provider.
 	   This function shall perform any necessary cleanup
@@ -3194,9 +4541,24 @@ struct _CMPIErrorFT {
 	      CMPI_RC_DO_NOT_UNLOAD Operation successful do not unload now.
 	      CMPI_RC_NEVER_UNLOAD Operation successful never unload
       */
-      CMPIStatus (*cleanup)
-      (CMPIIndicationMI * mi, const CMPIContext * ctx,
-       CMPIBoolean terminating);
+                    CMPIStatus(*cleanup)
+     
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	(CMPIIndicationMI * mi, const CMPIContext * ctx,
+	 CMPIBoolean terminating);
 
       /** Ask the provider to verify whether this filter is allowed.
 	   @param mi The mi argument is a pointer to a CMPIIndicationMI structure.
@@ -3217,13 +4579,19 @@ struct _CMPIErrorFT {
 		 CMPI_RC_ERR_ACCESS_DENIED Not authorized.
 		 CMPI_RC_ERR_INVALID_QUERY Invalid query or too complex.
   	*/
-      CMPIStatus (*authorizeFilter) (CMPIIndicationMI * mi,
-                                     const CMPIContext * ctx,
-                                     const CMPISelectExp * filter,
-                                     const char *className,
-                                     const CMPIObjectPath * op,
-                                     const char *owner);
-        /** Ask the MI whether polling mode should be used.
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*authorizeFilter) (CMPIIndicationMI * mi,
+				      const CMPIContext * ctx,
+				      const CMPISelectExp * filter,
+				      const char *className,
+				      const CMPIObjectPath * op,
+				      const char *owner);
+	/** Ask the MI whether polling mode should be used.
  		This function enables very simple MIs to support indications without
 		   providing a complete indication support implementation. When true
 		   is returned, the MB will enumerate the instances of this MI at
@@ -3245,12 +4613,19 @@ struct _CMPIErrorFT {
  		CMPI_RC_ERR_ACCESS_DENIED Not authorized.
  		CMPI_RC_ERR_INVALID_QUERY Invalid query or too complex.
 	 */
-      CMPIStatus (*mustPoll) (CMPIIndicationMI * mi, const CMPIContext * ctx,
-                              const CMPISelectExp * filter,
-                              const char *className,
-                              const CMPIObjectPath * classPath);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*mustPoll) (CMPIIndicationMI * mi,
+			       const CMPIContext * ctx,
+			       const CMPISelectExp * filter,
+			       const char *className,
+			       const CMPIObjectPath * classPath);
 
-        /** Ask the provider to begin monitoring a resource.
+	/** Ask the provider to begin monitoring a resource.
 		The function shall begin monitoring the resource according to the
 		   filter express only.
 	   @param mi The mi argument is a pointer to a CMPIIndicationMI structure.
@@ -3272,14 +4647,20 @@ struct _CMPIErrorFT {
  			CMPI_RC_ERR_ACCESS_DENIED Not authorized.
  			CMPI_RC_ERR_INVALID_QUERY Invalid query or too complex.
 		*/
-      CMPIStatus (*activateFilter) (CMPIIndicationMI * mi,
-                                    const CMPIContext * ctx,
-                                    const CMPISelectExp * filter,
-                                    const char *className,
-                                    const CMPIObjectPath * classPath,
-                                    CMPIBoolean firstActivation);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*activateFilter) (CMPIIndicationMI * mi,
+				     const CMPIContext * ctx,
+				     const CMPISelectExp * filter,
+				     const char *className,
+				     const CMPIObjectPath * classPath,
+				     CMPIBoolean firstActivation);
 
-        /** Inform the MI that monitoring using this filter should stop.
+	/** Inform the MI that monitoring using this filter should stop.
  		The function invocation mandates the MI to stop monitoring the resource
 		   using this filter.
 	   @param mi The mi argument is a pointer to a CMPIIndicationMI structure.
@@ -3301,14 +4682,20 @@ struct _CMPIErrorFT {
  		CMPI_RC_ERR_ACCESS_DENIED Not authorized.
  		CMPI_RC_ERR_INVALID_QUERY Invalid query or too complex.
 	*/
-      CMPIStatus (*deActivateFilter) (CMPIIndicationMI * mi,
-                                      const CMPIContext * ctx,
-                                      const CMPISelectExp * filter,
-                                      const char *className,
-                                      const CMPIObjectPath * classPath,
-                                      CMPIBoolean lastActiviation);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*deActivateFilter) (CMPIIndicationMI * mi,
+				       const CMPIContext * ctx,
+				       const CMPISelectExp * filter,
+				       const char *className,
+				       const CMPIObjectPath * classPath,
+				       CMPIBoolean lastActiviation);
 
-        /** Tell the MI that indications can now be generated.  The MB is now
+	/** Tell the MI that indications can now be generated.  The MB is now
 			prepared
 			to process indications. The function is normally called by the MB
 			after having done its intialization and processing of persistent
@@ -3324,9 +4711,15 @@ struct _CMPIErrorFT {
  		CMPI_RC_ERR_FAILED Unspecific error occurred.
  		CMPI_RC_ERR_NOT_SUPPORTED Operation not supported by this MI.
 	*/
-      CMPIStatus (*enableIndications) (CMPIIndicationMI * mi,
-                                       const CMPIContext *);
-        /** Tell the MI to stop generating indications.  MB will not accept any
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*enableIndications) (CMPIIndicationMI * mi,
+					const CMPIContext *);
+	/** Tell the MI to stop generating indications.  MB will not accept any
 			indications until enabled again. The function is normally called
 			when the MB is shutting down indication services either temporarily
 			or permanently.
@@ -3340,8 +4733,14 @@ struct _CMPIErrorFT {
  		CMPI_RC_ERR_FAILED Unspecific error occurred.
  		CMPI_RC_ERR_NOT_SUPPORTED Operation not supported by this MI.
 	*/
-      CMPIStatus (*disableIndications) (CMPIIndicationMI * mi,
-                                        const CMPIContext *);
+         
+	 
+	 
+	 
+	 
+	 
+	CMPIStatus(*disableIndications) (CMPIIndicationMI * mi,
+					 const CMPIContext *);
 
   };
 
@@ -3352,4 +4751,4 @@ struct _CMPIErrorFT {
 };
 #   endif
 
-#endif // _CMPIFT_H_
+#endif				// _CMPIFT_H_

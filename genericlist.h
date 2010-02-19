@@ -18,7 +18,7 @@
  *
  * list implementation.
  *
-*/
+ */
 
    /************************************************************************
    *************************************************************************
@@ -39,20 +39,22 @@
 #include "utilft.h"
 
 typedef struct GLE_struct {
-   void *pointer;
-   struct GLE_struct *previous;
-   struct GLE_struct *next;
+  void           *pointer;
+  struct GLE_struct *previous;
+  struct GLE_struct *next;
 } Generic_list_element;
 
 typedef struct {
-   Generic_list_element *current;
-   Generic_list_element pre_element, post_element, deleted_element;
-   int (*lt) (void *a, void *b);
-   unsigned int num_of_elements;
+  Generic_list_element *current;
+  Generic_list_element pre_element,
+                  post_element,
+                  deleted_element;
+  int             (*lt) (void *a, void *b);
+  unsigned int    num_of_elements;
 } Generic_list_info;
 
 typedef struct {
-   Generic_list_info *info;
+  Generic_list_info *info;
 } Generic_list;
 
 #define Generic_stack Generic_list
@@ -61,7 +63,9 @@ typedef struct {
 
 /****************************************************************************/
 
-/* Stack operations */
+/*
+ * Stack operations 
+ */
 
 #define initialize_stack initialize_list
 #define destroy_stack destroy_list
@@ -70,7 +74,9 @@ typedef struct {
 #define peek_at_top peek_at_beginning
 #define copy_stack copy_list
 
-/* Queue operations */
+/*
+ * Queue operations 
+ */
 
 #define initialize_queue initialize_list
 #define destroy_queue destroy_list
@@ -81,4 +87,4 @@ typedef struct {
 #define peek_at_tail peek_at_end
 #define copy_queue copy_list
 
-#endif                          /* GENERIC_LIST_DEFINED */
+#endif				/* GENERIC_LIST_DEFINED */

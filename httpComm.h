@@ -17,7 +17,7 @@
  *
  * http common (http(https) support
  *
-*/
+ */
 
 #ifndef HTTPCONN_H
 #define HTTPCONN_H
@@ -50,36 +50,37 @@
 #include "config.h"
 
 #if HAVE_LIBSSL
- #define USE_SSL 1
+#define USE_SSL 1
 #endif
 
 #ifdef USE_SSL
- #include <openssl/rand.h>
- #include <openssl/ssl.h>
- #include <openssl/err.h>
+#include <openssl/rand.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 
- #define intSSLerror(msg)  handleSSLerror(__FILE__, __LINE__, msg)
- void handleSSLerror(const char *file, int lineno, const char *msg);
+#define intSSLerror(msg)  handleSSLerror(__FILE__, __LINE__, msg)
+void            handleSSLerror(const char *file, int lineno,
+			       const char *msg);
 #endif
 
 
 #define SOCKBUFSZ 32768
 
 typedef struct commHndl {
-  int   socket;
-  FILE *file;
-  void *buf;
+  int             socket;
+  FILE           *file;
+  void           *buf;
 #if defined USE_SSL
-  BIO *bio;
-  SSL *ssl;
+  BIO            *bio;
+  SSL            *ssl;
 #endif
-  //  int rc;
+  // int rc;
 } CommHndl;
 
-void commInit();
-int commWrite(CommHndl to, void *data, size_t count);
-int commRead(CommHndl from, void *data, size_t count);
-void commFlush(CommHndl hdl);
-void commClose(CommHndl hdl);
+void            commInit();
+int             commWrite(CommHndl to, void *data, size_t count);
+int             commRead(CommHndl from, void *data, size_t count);
+void            commFlush(CommHndl hdl);
+void            commClose(CommHndl hdl);
 
 #endif

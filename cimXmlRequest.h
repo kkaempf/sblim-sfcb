@@ -18,7 +18,7 @@
  *
  * CIM operations request handler .
  *
-*/
+ */
 
 
 
@@ -32,36 +32,37 @@ struct commHndl;
 struct chunkFunctions;
 
 typedef struct respSegment {
-   int mode;
-   char *txt;
+  int             mode;
+  char           *txt;
 } RespSegment;
 
 typedef struct respSegments {
-   void *buffer;
-   int chunkedMode,rc;
-   char *errMsg;
-   RespSegment segments[7];
+  void           *buffer;
+  int             chunkedMode,
+                  rc;
+  char           *errMsg;
+  RespSegment     segments[7];
 } RespSegments;
 
 typedef struct expSegments {
-   RespSegment segments[7];
+  RespSegment     segments[7];
 } ExpSegments;
 
 typedef struct cimXmlRequestContext {
-   char *cimXmlDoc;
-   char *principal;
-   char *host;
-   int  teTrailers;
-   unsigned int sessionId;
-   unsigned long cimXmlDocLength;
-   struct commHndl *commHndl;
-   struct chunkFunctions *chunkFncs;
-   char *className;
-   int operation;
+  char           *cimXmlDoc;
+  char           *principal;
+  char           *host;
+  int             teTrailers;
+  unsigned int    sessionId;
+  unsigned long   cimXmlDocLength;
+  struct commHndl *commHndl;
+  struct chunkFunctions *chunkFncs;
+  char           *className;
+  int             operation;
 } CimXmlRequestContext;
 
 extern RespSegments handleCimXmlRequest(CimXmlRequestContext * ctx);
-extern int cleanupCimXmlRequest(RespSegments * rs);
+extern int      cleanupCimXmlRequest(RespSegments * rs);
 
 
 #endif
