@@ -5,8 +5,9 @@ New features:
 
 
 Bugs fixed:
-- 2955916 Pretty print
 
+- 2955916 Pretty print
+- 2949454 Memory leak in ServerProviderInitInstances()
 
 
 
