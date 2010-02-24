@@ -1,3 +1,8 @@
+2010-02-24  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* httpAdapter.c, sfcBroker.c: 
+	[ 2958167 ] Remove USE_THREADS sections of httpAdapter
+
 2009-02-23 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* indCIMXMLHandler.c:
