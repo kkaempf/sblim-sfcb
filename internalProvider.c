@@ -89,7 +89,7 @@ instifyBlob(void *blob)
 }
 
 static CMPIInstance *
-ipGetBlob(const char *ns, const char *cls, char *id, int *len)
+ipGetBlob(const char *ns, const char *cls, const char *id, int *len) 
 {
   void           *blob = getBlob(ns, cls, id, len);
   return instifyBlob(blob);
@@ -407,7 +407,7 @@ internalProviderGetInstance(const CMPIObjectPath * cop, CMPIStatus * rc)
   int             len;
   CMPIString     *cn = CMGetClassName(cop, NULL);
   CMPIString     *ns = CMGetNameSpace(cop, NULL);
-  char           *key = normalizeObjectPathChars(cop);
+  char           *key = normalizeObjectPathCharsDup(cop);
   CMPIInstance   *ci = NULL;
   const char     *nss = ns->ft->getCharPtr(ns, NULL);
   const char     *cns = cn->ft->getCharPtr(cn, NULL);
@@ -419,6 +419,7 @@ internalProviderGetInstance(const CMPIObjectPath * cop, CMPIStatus * rc)
 
   if (testNameSpace(bnss, rc) == 0) {
     _SFCB_TRACE(1, ("--- Invalid namespace %s", nss));
+    free(key);
     _SFCB_RETURN(NULL);
   }
 
@@ -430,6 +431,7 @@ internalProviderGetInstance(const CMPIObjectPath * cop, CMPIStatus * rc)
   }
 
   *rc = st;
+  free(key);
   _SFCB_RETURN(ci);
 }
 
@@ -474,7 +476,7 @@ InternalProviderCreateInstance(CMPIInstanceMI * mi,
   void           *blob;
   CMPIString     *cn = CMGetClassName(cop, NULL);
   CMPIString     *ns = CMGetNameSpace(cop, NULL);
-  char           *key = normalizeObjectPathChars(cop);
+  char           *key = normalizeObjectPathCharsDup(cop);
   const char     *nss = ns->ft->getCharPtr(ns, NULL);
   const char     *cns = cn->ft->getCharPtr(cn, NULL);
   const char     *bnss = repositoryNs(nss);
@@ -482,7 +484,8 @@ InternalProviderCreateInstance(CMPIInstanceMI * mi,
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderCreateInstance");
 
   if (testNameSpace(bnss, &st) == 0) {
-    return st;
+    free(key);
+    _SFCB_RETURN(st);
   }
 
   CMPIConstClass *cc = getConstClass(nss, cns);
@@ -491,12 +494,14 @@ InternalProviderCreateInstance(CMPIInstanceMI * mi,
    */
   if (cc != NULL && cc->ft->isAbstract(cc) != 0) {
     CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
-    return st;
+    free(key);
+    _SFCB_RETURN(st);
   }
 
   if (existingBlob(bnss, cns, key)) {
     CMPIStatus      st = { CMPI_RC_ERR_ALREADY_EXISTS, NULL };
-    return st;
+    free(key);
+    _SFCB_RETURN(st);
   }
 
   len = getInstanceSerializedSize(ci);
@@ -509,7 +514,8 @@ InternalProviderCreateInstance(CMPIInstanceMI * mi,
 	sfcb_native_new_CMPIString("Unable to write to repository", NULL,
 				   0);
     free(blob);
-    return st;
+    free(key);
+    _SFCB_RETURN(st);
   }
   free(blob);
 
@@ -530,6 +536,7 @@ InternalProviderCreateInstance(CMPIInstanceMI * mi,
     }
   }
 
+  free(key);
   _SFCB_RETURN(st);
 }
 
@@ -546,7 +553,7 @@ InternalProviderModifyInstance(CMPIInstanceMI * mi,
   void           *blob;
   CMPIString     *cn = CMGetClassName(cop, NULL);
   CMPIString     *ns = CMGetNameSpace(cop, NULL);
-  char           *key = normalizeObjectPathChars(cop);
+  char           *key = normalizeObjectPathCharsDup(cop);
   const char     *nss = ns->ft->getCharPtr(ns, NULL);
   const char     *cns = cn->ft->getCharPtr(cn, NULL);
   const char     *bnss = repositoryNs(nss);
@@ -555,12 +562,14 @@ InternalProviderModifyInstance(CMPIInstanceMI * mi,
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderSetInstance");
 
   if (testNameSpace(bnss, &st) == 0) {
-    return st;
+    free(key);
+    _SFCB_RETURN(st);
   }
 
   if (existingBlob(bnss, cns, key) == 0) {
     CMPIStatus      st = { CMPI_RC_ERR_NOT_FOUND, NULL };
-    return st;
+    free(key);
+    _SFCB_RETURN(st);
   }
 
   if (properties) {
@@ -591,6 +600,7 @@ InternalProviderModifyInstance(CMPIInstanceMI * mi,
     }
   }
 
+  free(key);
   _SFCB_RETURN(st);
 }
 
@@ -603,7 +613,7 @@ InternalProviderDeleteInstance(CMPIInstanceMI * mi,
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIString     *cn = CMGetClassName(cop, NULL);
   CMPIString     *ns = CMGetNameSpace(cop, NULL);
-  char           *key = normalizeObjectPathChars(cop);
+  char           *key = normalizeObjectPathCharsDup(cop);
   const char     *nss = ns->ft->getCharPtr(ns, NULL);
   const char     *cns = cn->ft->getCharPtr(cn, NULL);
   const char     *bnss = repositoryNs(nss);
@@ -611,12 +621,14 @@ InternalProviderDeleteInstance(CMPIInstanceMI * mi,
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderDeleteInstance");
 
   if (testNameSpace(bnss, &st) == 0) {
-    return st;
+    free(key);
+    _SFCB_RETURN(st);
   }
 
   if (existingBlob(bnss, cns, key) == 0) {
     CMPIStatus      st = { CMPI_RC_ERR_NOT_FOUND, NULL };
-    return st;
+    free(key);
+    _SFCB_RETURN(st);
   }
 
   deleteBlob(bnss, cns, key);
@@ -628,6 +640,7 @@ InternalProviderDeleteInstance(CMPIInstanceMI * mi,
   }
 #endif
 
+  free(key);
   _SFCB_RETURN(st);
 }
 
