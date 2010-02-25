@@ -19,8 +19,6 @@
  *
  */
 
-
-
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
@@ -32,9 +30,9 @@
 #include "config.h"
 
 extern CMPIArray *TrackedCMPIArray(CMPICount size, CMPIType type,
-				   CMPIStatus * rc);
-extern void     sfcb_native_array_increase_size(CMPIArray * array,
-						CMPICount increment);
+                                   CMPIStatus *rc);
+extern void     sfcb_native_array_increase_size(CMPIArray *array,
+                                                CMPICount increment);
 
 static char    *types[] = {
   "-inv-",
@@ -53,7 +51,7 @@ qsStrDup(QLStatement * qs, char *str)
   return s;
 }
 
-static CMPIValue
+static          CMPIValue
 getPropValue(QLOperand * self, QLPropertySource * src, QLOpd * type)
 {
   CMPIValue       v;
@@ -144,7 +142,7 @@ propToString(QLOperand * op)
       strcat(str, ".");
     pd = pd->nextPart;
   }
-  return str;			// str must be freed by caller.
+  return str;                   // str must be freed by caller.
 }
 
 static char    *
@@ -276,7 +274,7 @@ propCompare(QLOperand * self, QLOperand * op, QLPropertySource * src)
   case QL_PropertyName:
   case QL_Name:
     mlogf(M_ERROR, M_SHOW,
-	  "### propCompare(): (QL_PropertyName QL_Name) got a problem\n");
+          "### propCompare(): (QL_PropertyName QL_Name) got a problem\n");
     return -2;
     /*
      * abort();
@@ -298,18 +296,18 @@ propCompare(QLOperand * self, QLOperand * op, QLPropertySource * src)
      * abort();
      */
   default:
-    ;				// what should we do here ? 
+    ;                           // what should we do here ? 
   }
 
   rc = nop->ft->compare(nop, op, src);
   QL_TRACE(fprintf
-	   (stderr, "propCompare(%s) %d\n", self->propertyName->propName,
-	    rc));
+           (stderr, "propCompare(%s) %d\n", self->propertyName->propName,
+            rc));
   return rc;
 }
 
 extern int      isChild(const char *ns, const char *parent,
-			const char *child);
+                        const char *child);
 
 static int
 instCompare(QLOperand * self, QLOperand * op, QLPropertySource * src)
@@ -356,7 +354,6 @@ nameToString(QLOperand * op)
   return qsStrDup(NULL, op->charsVal);
 }
 
-
 static QLOperandFt qLintQueryOperandFt = {
   intToString,
   typeToString,
@@ -398,9 +395,6 @@ static QLOperandFt qLnameQueryOperandFt = {
   typeToString,
   nameCompare,
 };
-
-
-
 
 QLOperand      *
 newIntQueryOperand(QLStatement * qs, long long val)
@@ -475,7 +469,7 @@ newPropQueryOperand(QLStatement * qs, QLPropertyNameData * val)
 }
 
 QLOperand      *
-newInstQueryOperand(QLStatement * qs, CMPIInstance * ci)
+newInstQueryOperand(QLStatement * qs, CMPIInstance *ci)
 {
   QLOperand      *op = qsAllocNew(qs, QLOperand);
   QL_TRACE(fprintf(stderr, "--- newInstQueryOperand %p\n", ci));
@@ -488,7 +482,7 @@ newInstQueryOperand(QLStatement * qs, CMPIInstance * ci)
 
 QLOperand      *
 newFncQueryOperand(QLStatement * qs, QLFnc fnc, QLOpd argType,
-		   void *argVal)
+                   void *argVal)
 {
   QLOperand      *op = qsAllocNew(qs, QLOperand);
   QL_TRACE(fprintf(stderr, "--- newFncQueryOperand %p\n", argVal));
@@ -532,9 +526,6 @@ newFncQueryOperand(QLStatement * qs, QLFnc fnc, QLOpd argType,
   return op;
 }
 
-
-
-
 static char    *
 opnToChars(QLOperation * op, char *opr, char *rh)
 {
@@ -566,7 +557,6 @@ opnToChars(QLOperation * op, char *opr, char *rh)
 
   return str;
 }
-
 
 static int
 evaluate(QLOperation * op, QLPropertySource * source)
@@ -607,10 +597,6 @@ isBinaryOperation(QLOperation * op)
   return 0;
 }
 
-
-
-
-
 static int
 _andEvaluate(QLOperation * op, QLPropertySource * source)
 {
@@ -627,14 +613,14 @@ andToString(QLOperation * op)
   return opnToChars(op, (op->flag.invert ? "QL_OR" : "QL_AND"), NULL);
 }
 
-static QLOp
+static          QLOp
 andOperation(QLOperation * op)
 {
   return op->flag.invert ? QL_OR : QL_AND;
 }
 
 static CMPIArray *
-appendArray(CMPIArray * t, CMPIArray * f)
+appendArray(CMPIArray *t, CMPIArray *f)
 {
   int             tn = CMGetArrayCount(t, NULL),
       fm = CMGetArrayCount(f, NULL),
@@ -665,14 +651,14 @@ andGetPredicateDisjunction(QLOperation * op)
       op->rhon->ft->getPredicateDisjunction(op->rhon);
   PredicateDisjunction *rd =
       TrackedCMPIArray(CMGetArrayCount(lc, NULL) *
-		       CMGetArrayCount(rc, NULL), CMPI_ptr, NULL);
+                       CMGetArrayCount(rc, NULL), CMPI_ptr, NULL);
 
   for (i = 0, m = CMGetArrayCount(lc, NULL); i < m; i++) {
     PredicateDisjunction *lci =
-	CMGetArrayElementAt(lc, i, NULL).value.dataPtr.ptr;
+        CMGetArrayElementAt(lc, i, NULL).value.dataPtr.ptr;
     for (ii = 0, mi = CMGetArrayCount(rc, NULL); ii < mi; ii++) {
       PredicateDisjunction *rcii =
-	  CMGetArrayElementAt(rc, ii, NULL).value.dataPtr.ptr;
+          CMGetArrayElementAt(rc, ii, NULL).value.dataPtr.ptr;
       Predicates     *tc = TrackedCMPIArray(0, CMPI_ptr, NULL);
       CMPIValuePtr    rdv = { tc, 1 };
       appendArray(tc, lci);
@@ -710,19 +696,16 @@ QLOperationFt   qlAndOperationFt = {
   isBinaryOperation
 };
 
-
-
-
 static int
 _orEvaluate(QLOperation * op, QLPropertySource * source)
 {
   int             rc = 0;
   if (op->flag.invert) {
     rc = (op->lhon->ft->evaluate(op->lhon, source) &&
-	  (op->rhon ? op->rhon->ft->evaluate(op->rhon, source) : 1));
+          (op->rhon ? op->rhon->ft->evaluate(op->rhon, source) : 1));
   } else {
     rc = (op->lhon->ft->evaluate(op->lhon, source) ||
-	  (op->rhon ? op->rhon->ft->evaluate(op->rhon, source) : 1));
+          (op->rhon ? op->rhon->ft->evaluate(op->rhon, source) : 1));
   }
   // QL_TRACE(fprintf(stderr,"_orEvaluate: %d==%d: %d\n",rcl,rcr,rc));
   return rc;
@@ -735,7 +718,7 @@ orToString(QLOperation * op)
   return opnToChars(op, (op->flag.invert ? "QL_AND" : "QL_OR"), NULL);
 }
 
-static QLOp
+static          QLOp
 orOperation(QLOperation * op)
 {
   return op->flag.invert ? QL_AND : QL_OR;
@@ -772,14 +755,14 @@ orGetPredicateConjunction(QLOperation * op)
       op->rhon->ft->getPredicateConjunction(op->rhon);
   PredicateConjunction *rd =
       TrackedCMPIArray(CMGetArrayCount(lc, NULL) *
-		       CMGetArrayCount(rc, NULL), CMPI_ptr, NULL);
+                       CMGetArrayCount(rc, NULL), CMPI_ptr, NULL);
 
   for (i = 0, m = CMGetArrayCount(lc, NULL); i < m; i++) {
     PredicateConjunction *lci =
-	CMGetArrayElementAt(lc, i, NULL).value.dataPtr.ptr;
+        CMGetArrayElementAt(lc, i, NULL).value.dataPtr.ptr;
     for (ii = 0, mi = CMGetArrayCount(rc, NULL); ii < mi; ii++) {
       PredicateConjunction *rcii =
-	  CMGetArrayElementAt(rc, ii, NULL).value.dataPtr.ptr;
+          CMGetArrayElementAt(rc, ii, NULL).value.dataPtr.ptr;
       Predicates     *tc = TrackedCMPIArray(0, CMPI_ptr, NULL);
       CMPIValuePtr    rdv = { tc, 1 };
       appendArray(tc, lci);
@@ -804,9 +787,6 @@ QLOperationFt   qlOrOperationFt = {
   isBinaryOperation
 };
 
-
-
-
 static int
 _notEvaluate(QLOperation * op, QLPropertySource * source)
 {
@@ -819,7 +799,7 @@ notToString(QLOperation * op)
   return opnToChars(op, (op->flag.invert ? "QL_nop" : "QL_NOT"), NULL);
 }
 
-static QLOp
+static          QLOp
 notOperation(QLOperation * op)
 {
   return op->flag.invert ? QL_nop : QL_NOT;
@@ -849,21 +829,18 @@ QLOperationFt   qlNotOperationFt = {
   isBinaryOperation
 };
 
-
-
-
 int
 _isNullEvaluate(QLOperation * op, QLPropertySource * source)
 {
   QL_TRACE(fprintf
-	   (stderr, "--- unexpected invocation of _isNullEvaluate\n"));
+           (stderr, "--- unexpected invocation of _isNullEvaluate\n"));
   exit(16);
 }
 
 int
 isNullEvaluate(QLOperation * op, QLPropertySource * source)
 {
-  QLOperand      *opd = NULL;	// op->lhod->ft->resolveProperty(op->lhod,source);
+  QLOperand      *opd = NULL;   // op->lhod->ft->resolveProperty(op->lhod,source);
   if (opd == NULL)
     return 1;
   return 0;
@@ -873,8 +850,8 @@ char           *
 isNullToString(QLOperation * op)
 {
   return opnToChars(op,
-		    (op->flag.invert ? "QL_IS_NOT_NULL" : "QL_IS_NULL"),
-		    "---");
+                    (op->flag.invert ? "QL_IS_NOT_NULL" : "QL_IS_NULL"),
+                    "---");
 }
 
 QLOp
@@ -895,22 +872,18 @@ QLOperationFt   qlIsNullOperationFt = {
   isBinaryOperation
 };
 
-
-
-
-
 int
 _isNotNullEvaluate(QLOperation * op, QLPropertySource * source)
 {
   QL_TRACE(fprintf
-	   (stderr, "--- unexpected invocation of _isNotNullEvaluate\n"));
+           (stderr, "--- unexpected invocation of _isNotNullEvaluate\n"));
   exit(16);
 }
 
 int
 isNotNullEvaluate(QLOperation * op, QLPropertySource * source)
 {
-  QLOperand      *opd = NULL;	// op->lhod->ft->resolveProperty(op->lhod,source);
+  QLOperand      *opd = NULL;   // op->lhod->ft->resolveProperty(op->lhod,source);
   if (opd == NULL)
     return 0;
   return 1;
@@ -920,8 +893,8 @@ char           *
 isNotNullToString(QLOperation * op)
 {
   return opnToChars(op,
-		    (op->flag.invert ? "QL_IS_NULL" : "QL_IS_NOT_NULL"),
-		    "---");
+                    (op->flag.invert ? "QL_IS_NULL" : "QL_IS_NOT_NULL"),
+                    "---");
 }
 
 QLOp
@@ -942,18 +915,11 @@ QLOperationFt   qlIsNotNullOperationFt = {
   isBinaryOperation
 };
 
-
-
-
-
-
-
-
 int
 _binEvaluate(QLOperation * op, QLPropertySource * source)
 {
   QL_TRACE(fprintf
-	   (stderr, "--- unexpected invocation of _isNotNullEvaluate\n"));
+           (stderr, "--- unexpected invocation of _isNotNullEvaluate\n"));
   exit(16);
 }
 
@@ -969,8 +935,8 @@ char           *
 binToString(QLOperation * op)
 {
   return opnToChars(op,
-		    (op->flag.invert ? "QL_IS_NOT_TRUE" : "QL_IS_TRUE"),
-		    "---");
+                    (op->flag.invert ? "QL_IS_NOT_TRUE" : "QL_IS_TRUE"),
+                    "---");
 }
 
 QLOp
@@ -1034,11 +1000,6 @@ QLOperationFt   qlBinOperationFt = {
   binGetPredicateConjunction,
   binIsBinaryOperation
 };
-
-
-
-
-
 
 QLOperation    *
 newAndOperation(QLStatement * qs, QLOperation * lo, QLOperation * ro)
@@ -1109,9 +1070,6 @@ newIsNotNullOperation(QLStatement * qs, QLOperand * lo)
   return op;
 }
 
-
-
-
 static int
 _ltEvaluate(QLOperation * op, QLPropertySource * source)
 {
@@ -1151,9 +1109,6 @@ QLOperationFt   qlLtOperationFt = {
   NULL,
   binIsBinaryOperation
 };
-
-
-
 
 static int
 _gtEvaluate(QLOperation * op, QLPropertySource * source)
@@ -1195,9 +1150,6 @@ QLOperationFt   qlGtOperationFt = {
   binIsBinaryOperation
 };
 
-
-
-
 static int
 _leEvaluate(QLOperation * op, QLPropertySource * source)
 {
@@ -1237,9 +1189,6 @@ QLOperationFt   qlLeOperationFt = {
   NULL,
   binIsBinaryOperation
 };
-
-
-
 
 static int
 _geEvaluate(QLOperation * op, QLPropertySource * source)
@@ -1281,9 +1230,6 @@ QLOperationFt   qlGeOperationFt = {
   binIsBinaryOperation
 };
 
-
-
-
 static int
 _eqEvaluate(QLOperation * op, QLPropertySource * source)
 {
@@ -1324,10 +1270,6 @@ QLOperationFt   qlEqOperationFt = {
   binIsBinaryOperation
 };
 
-
-
-
-
 static int
 _neEvaluate(QLOperation * op, QLPropertySource * source)
 {
@@ -1367,9 +1309,6 @@ QLOperationFt   qlNeOperationFt = {
   NULL,
   binIsBinaryOperation
 };
-
-
-
 
 static int
 _isaEvaluate(QLOperation * op, QLPropertySource * source)
@@ -1439,9 +1378,9 @@ match_re(char *str, char *re)
        */
       char           *tmp = strstr(str, str_to_match);
       if (tmp)
-	rc = (strcmp(tmp, str_to_match) == 0 ? 1 : 0);
+        rc = (strcmp(tmp, str_to_match) == 0 ? 1 : 0);
       else
-	rc = 0;
+        rc = 0;
     }
   } else {
     strcpy(str_to_match, re);
@@ -1660,7 +1599,6 @@ newNotLikeOperation(QLStatement * qs, QLOperand * lo, QLOperand * ro)
   return op;
 }
 
-
 #ifdef UNITTEST
 int
 queryOperation_test()
@@ -1706,3 +1644,8 @@ queryOperation_test()
   return fail;
 }
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

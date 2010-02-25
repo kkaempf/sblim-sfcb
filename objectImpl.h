@@ -61,7 +61,6 @@
 
 #endif
 
-
 // The PFX macro enables one to add a prefix to the Cl structures in this
 // header file
 // This will be used to have multiple HW platform specific alignments in
@@ -69,7 +68,6 @@
 // An example of its usage is in ObjectImplSwapI32toP32.c
 // PFX prepends the string indicated by the the CLPFX preprocesor #define
 // to the Cl structure names
-
 
 #ifdef SETCLPFX
 #ifdef CLPFX
@@ -87,15 +85,17 @@ typedef struct {
   union {
     struct {
       union {
-	unsigned int    size;	// used to determine endianes - byter
-				// order in designated host order
-	unsigned char   sByte[4];
+        unsigned int    size;   // used to determine endianes - byter
+        // order in designated host order
+        unsigned char   sByte[4];
       };
-      unsigned short  zeros;	// all remaining integer fields in network 
-				// order 
+      unsigned short  zeros;    // all remaining integer fields in network 
+                                // 
+      // 
+      // order 
       unsigned short  type;
-      char            id[10];	// "sfcb-rep\0" used to determine
-				// asci/ebcdic char encoding 
+      char            id[10];   // "sfcb-rep\0" used to determine
+      // asci/ebcdic char encoding 
       unsigned short  version;
       unsigned short  level;
       unsigned short  objImplLevel;
@@ -103,13 +103,12 @@ typedef struct {
       unsigned short  flags;
       char            creationDate[32];
     };
-    struct {			// used to force 96 bytes record length
+    struct {                    // used to force 96 bytes record length
       unsigned int    fixedSize[23];
       unsigned int    lastInt;
     };
   };
 } PFX           (CLPFX, ClVersionRecord);
-
 
 typedef struct {
   char           *str;
@@ -136,7 +135,7 @@ typedef struct {
   char            buf[1];
 } PFX           (CLPFX, ClStrBuf);
 
-#ifndef CLP32			// different layout for power 32
+#ifndef CLP32                   // different layout for power 32
 typedef struct {
   unsigned short  iUsed,
                   iMax;
@@ -238,7 +237,7 @@ typedef struct {
   long            data;
 } PFX           (CLPFX, ClData);
 
-#ifndef CLP32			// different layout for power 32
+#ifndef CLP32                   // different layout for power 32
 typedef struct {
   PFX(CLPFX, ClString) id;
   PFX(CLPFX, CMPIData) data;
@@ -271,11 +270,11 @@ typedef struct {
                   PFX(CLPFX, ClSection) qualifierData;
 } PFX           (CLPFX, ClQualifierDeclaration);
 
-#ifndef CLP32			// different layout for power 32
+#ifndef CLP32                   // different layout for power 32
 typedef struct {
   PFX(CLPFX, CMPIData) data;
-  PFX(CLPFX, ClString) id;
-  PFX(CLPFX, ClString) refName;
+                  PFX(CLPFX, ClString) id;
+                  PFX(CLPFX, ClString) refName;
   unsigned short  flags;
 #ifndef SETCLPFX
 #define ClProperty_EmbeddedObjectAsString 1
@@ -315,7 +314,6 @@ typedef struct {
                   PFX(CLPFX, ClSection) qualifiers;
 } PFX           (CLPFX, ClParameter);
 
-
 #ifndef SETCLPFX
 
 inline static void *
@@ -345,8 +343,6 @@ setSectionPtr(ClSection * s, void *ptr)
   s->max |= 0x8000;
   return s->sectionPtr = ptr;
 }
-
-
 
 inline static ClStrBuf *
 getStrBufPtr(ClObjectHdr * hdr)
@@ -384,8 +380,6 @@ setStrIndexOffset(ClObjectHdr * hdr, ClStrBuf * buf, long offs)
   buf->indexPtr = (int *) (((char *) hdr) + offs);
   buf->indexOffset = offs;
 }
-
-
 
 inline static ClArrayBuf *
 getArrayBufPtr(ClObjectHdr * hdr)
@@ -425,9 +419,6 @@ setArrayIndexOffset(ClObjectHdr * hdr, ClArrayBuf * buf, long offs)
   buf->indexOffset = offs;
 }
 
-
-
-
 inline static int
 isMallocedStrBuf(ClObjectHdr * hdr)
 {
@@ -457,45 +448,45 @@ isMallocedArrayIndex(ClArrayBuf * buf)
  */
 
 extern ClVersionRecord ClBuildVersionRecord(unsigned short opt,
-					    int endianMmode, long *size);
+                                            int endianMmode, long *size);
 extern int      ClVerifyObjImplLevel(ClVersionRecord * vr);
 extern const char *ClObjectGetClString(ClObjectHdr * hdr, ClString * id);
 extern const CMPIData *ClObjectGetClArray(ClObjectHdr * hdr, ClArray * id);
 extern void    *ClObjectGetClSection(ClObjectHdr * hdr, ClSection * s);
 extern int      ClClassAddQualifierSpecial(ClObjectHdr * hdr,
-					   ClSection * qlfs,
-					   const char *id, CMPIData d,
-					   ClObjectHdr * arrHdr);
+                                           ClSection * qlfs,
+                                           const char *id, CMPIData d,
+                                           ClObjectHdr * arrHdr);
 extern int      ClClassAddQualifier(ClObjectHdr * hdr, ClSection * qlfs,
-				    const char *id, CMPIData d);
+                                    const char *id, CMPIData d);
 extern int      ClClassAddPropertyQualifierSpecial(ClObjectHdr * hdr,
-						   ClProperty * p,
-						   const char *id,
-						   CMPIData d,
-						   ClObjectHdr * arrHdr);
+                                                   ClProperty * p,
+                                                   const char *id,
+                                                   CMPIData d,
+                                                   ClObjectHdr * arrHdr);
 extern int      ClClassAddPropertyQualifier(ClObjectHdr * hdr,
-					    ClProperty * p, const char *id,
-					    CMPIData d);
+                                            ClProperty * p, const char *id,
+                                            CMPIData d);
 extern int      ClClassAddMethodQualifier(ClObjectHdr * hdr, ClMethod * m,
-					  const char *id, CMPIData d);
+                                          const char *id, CMPIData d);
 extern int      ClClassAddMethParamQualifier(ClObjectHdr * hdr,
-					     ClParameter * p,
-					     const char *id, CMPIData d);
+                                             ClParameter * p,
+                                             const char *id, CMPIData d);
 extern int      ClClassGetQualifierAt(ClClass * cls, int id,
-				      CMPIData * data, char **name);
+                                      CMPIData *data, char **name);
 extern int      ClClassGetQualifierCount(ClClass * cls);
 extern int      ClClassGetMethParameterCount(ClClass * cls, int id);
 extern int      ClClassAddMethParameter(ClObjectHdr * hdr, ClMethod * m,
-					const char *id, CMPIParameter cp);
+                                        const char *id, CMPIParameter cp);
 extern int      ClClassLocateMethod(ClObjectHdr * hdr, ClSection * mths,
-				    const char *id);
+                                    const char *id);
 extern int      ClClassGetMethQualifierCount(ClClass * cls, int id);
 extern int      ClClassGetMethParamQualifierCount(ClClass * cls,
-						  ClParameter * p);
+                                                  ClParameter * p);
 extern int      ClClassGetMethParmQualifierCount(ClClass * cls,
-						 ClMethod * m, int id);
+                                                 ClMethod * m, int id);
 extern int      ClObjectLocateProperty(ClObjectHdr * hdr, ClSection * prps,
-				       const char *id);
+                                       const char *id);
 extern void     showClHdr(void *ihdr);
 extern unsigned char ClClassAddGrandParent(ClClass * cls, char *gp);
 extern ClClass *ClClassNew(const char *cn, const char *pa);
@@ -505,29 +496,29 @@ extern void     ClClassRelocateClass(ClClass * cls);
 extern void     ClClassFreeClass(ClClass * cls);
 extern char    *ClClassToString(ClClass * cls);
 extern int      ClClassAddProperty(ClClass * cls, const char *id,
-				   CMPIData d, char *refName);
+                                   CMPIData d, char *refName);
 extern int      ClClassGetPropertyCount(ClClass * cls);
 extern int      ClClassGetPropertyAt(ClClass * cls, int id,
-				     CMPIData * data, char **name,
-				     unsigned long *quals, char **refName);
+                                     CMPIData *data, char **name,
+                                     unsigned long *quals, char **refName);
 extern int      ClClassGetPropQualifierCount(ClClass * cls, int id);
 extern int      ClClassGetPropQualifierAt(ClClass * cls, int id, int qid,
-					  CMPIData * data, char **name);
+                                          CMPIData *data, char **name);
 extern int      ClClassAddMethod(ClClass * cls, const char *id,
-				 CMPIType t);
+                                 CMPIType t);
 extern int      ClClassGetMethodCount(ClClass * cls);
-extern int      ClClassGetMethodAt(ClClass * cls, int id, CMPIType * data,
-				   char **name, unsigned long *quals);
+extern int      ClClassGetMethodAt(ClClass * cls, int id, CMPIType *data,
+                                   char **name, unsigned long *quals);
 extern int      ClClassGetMethQualifierAt(ClClass * cls, ClMethod * m,
-					  int qid, CMPIData * data,
-					  char **name);
+                                          int qid, CMPIData *data,
+                                          char **name);
 extern int      ClClassGetMethParameterAt(ClClass * cls, ClMethod * m,
-					  int pid, CMPIParameter * parm,
-					  char **name);
+                                          int pid, CMPIParameter * parm,
+                                          char **name);
 extern int      ClClassGetMethParamQualifierAt(ClClass * cls,
-					       ClParameter * parm, int id,
-					       CMPIData * d, char **name);
-extern int      isInstance(const CMPIInstance * ci);
+                                               ClParameter * parm, int id,
+                                               CMPIData *d, char **name);
+extern int      isInstance(const CMPIInstance *ci);
 extern ClInstance *ClInstanceNew(const char *ns, const char *cn);
 extern ClInstance *ClInstanceNewFromMof(const char *ns, const char *cn);
 extern unsigned long ClSizeInstance(ClInstance * inst);
@@ -537,15 +528,15 @@ extern void     ClInstanceFree(ClInstance * inst);
 extern char    *ClInstanceToString(ClInstance * inst);
 extern int      ClInstanceGetPropertyCount(ClInstance * inst);
 extern int      ClInstanceGetPropertyAt(ClInstance * inst, int id,
-					CMPIData * data, char **name,
-					unsigned long *quals);
+                                        CMPIData *data, char **name,
+                                        unsigned long *quals);
 extern int      ClInstanceAddProperty(ClInstance * inst, const char *id,
-				      CMPIData d);
+                                      CMPIData d);
 extern void     ClInstanceFilterFlagProperty(ClInstance * inst, int id);
 extern int      ClInstanceIsPropertyAtFiltered(ClInstance * inst, int id);
 extern const char *ClInstanceGetClassName(ClInstance * inst);
 extern const char *ClInstanceGetNameSpace(ClInstance * inst);
-extern const char *ClGetStringData(CMPIInstance * ci, int id);
+extern const char *ClGetStringData(CMPIInstance *ci, int id);
 extern ClObjectPath *ClObjectPathNew(const char *ns, const char *cn);
 extern unsigned long ClSizeObjectPath(ClObjectPath * op);
 extern ClObjectPath *ClObjectPathRebuild(ClObjectPath * op, void *area);
@@ -554,16 +545,16 @@ extern void     ClObjectPathFree(ClObjectPath * op);
 extern char    *ClObjectPathToString(ClObjectPath * op);
 extern int      ClObjectPathGetKeyCount(ClObjectPath * op);
 extern int      ClObjectPathGetKeyAt(ClObjectPath * op, int id,
-				     CMPIData * data, char **name);
+                                     CMPIData *data, char **name);
 extern int      ClObjectPathAddKey(ClObjectPath * op, const char *id,
-				   CMPIData d);
+                                   CMPIData d);
 extern void     ClObjectPathSetHostName(ClObjectPath * op, const char *hn);
 extern const char *ClObjectPathGetHostName(ClObjectPath * op);
 extern void     ClObjectPathSetNameSpace(ClObjectPath * op,
-					 const char *ns);
+                                         const char *ns);
 extern const char *ClObjectPathGetNameSpace(ClObjectPath * op);
 extern void     ClObjectPathSetClassName(ClObjectPath * op,
-					 const char *cn);
+                                         const char *cn);
 extern const char *ClObjectPathGetClassName(ClObjectPath * op);
 extern ClArgs  *ClArgsNew(void);
 extern unsigned long ClSizeArgs(ClArgs * arg);
@@ -572,25 +563,47 @@ extern void     ClArgsRelocateArgs(ClArgs * arg);
 extern void     ClArgsFree(ClArgs * arg);
 extern char    *ClArgsToString(ClArgs * arg);
 extern int      ClArgsGetArgCount(ClArgs * arg);
-extern int      ClArgsGetArgAt(ClArgs * arg, int id, CMPIData * data,
-			       char **name);
+extern int      ClArgsGetArgAt(ClArgs * arg, int id, CMPIData *data,
+                               char **name);
 extern int      ClArgsAddArg(ClArgs * arg, const char *id, CMPIData d);
 extern ClQualifierDeclaration *ClQualifierDeclarationNew(const char *ns,
-							 const char *name);
+                                                         const char *name);
 extern unsigned long ClSizeQualifierDeclaration(ClQualifierDeclaration *
-						q);
-extern ClQualifierDeclaration
-    *ClQualifierRebuildQualifier(ClQualifierDeclaration * q, void *area);
+                                                q);
+extern          ClQualifierDeclaration
+    * ClQualifierRebuildQualifier(ClQualifierDeclaration * q, void *area);
 extern void     ClQualifierRelocateQualifier(ClQualifierDeclaration * q);
 extern int      ClQualifierAddQualifier(ClObjectHdr * hdr,
-					ClSection * qlfs, const char *id,
-					CMPIData d);
-extern int     
+                                        ClSection * qlfs, const char *id,
+                                        CMPIData d);
+extern int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ClQualifierDeclarationGetQualifierData(ClQualifierDeclaration * q,
-				       CMPIData * data);
+                                       CMPIData *data);
 extern void     ClQualifierFree(ClQualifierDeclaration * q);
 const char     *ClObjectGetClObject(ClObjectHdr * hdr, ClString * id);
 
-#endif				// SETCLPFX
+#endif                          // SETCLPFX
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

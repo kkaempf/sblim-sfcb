@@ -19,7 +19,6 @@
  *
  */
 
-
 #include "utilft.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,8 +81,6 @@ charIcCmpFunction(const void *pointer1, const void *pointer2)
   return strcasecmp((char *) pointer1, (char *) pointer2);
 }
 
-
-
 static unsigned long
 cmpiStringIcHashFunction(const void *key)
 {
@@ -94,10 +91,8 @@ static int
 cmpiStringIcCmpFunction(const void *p1, const void *p2)
 {
   return strcasecmp((char *) ((CMPI_String *) p1)->hdl,
-		    (char *) ((CMPI_String *) p2)->hdl);
+                    (char *) ((CMPI_String *) p2)->hdl);
 }
-
-
 
 static unsigned long
 cmpiStringHashFunction(const void *key)
@@ -109,10 +104,8 @@ static int
 cmpiStringCmpFunction(const void *p1, const void *p2)
 {
   return strcmp((char *) ((CMPI_String *) p1)->hdl,
-		(char *) ((CMPI_String *) p2)->hdl);
+                (char *) ((CMPI_String *) p2)->hdl);
 }
-
-
 
 UtilHashTable  *
 newHashTableDefault(long buckets)
@@ -130,8 +123,6 @@ newHashTableDefault(long buckets)
 
   return ht;
 }
-
-
 
 UtilHashTable  *
 newHashTable(long buckets, long opt)
@@ -189,3 +180,8 @@ newHashTable(long buckets, long opt)
 
   return ht;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -19,8 +19,6 @@
  *
  */
 
-
-
 #include <string.h>
 #include <errno.h>
 #include "cmpidt.h"
@@ -32,7 +30,6 @@
 #include <unistd.h>
 #include <stddef.h>
 #include "control.h"
-
 
 extern unsigned long exFlags;
 
@@ -57,7 +54,6 @@ char           *httpPauseStr = NULL;
 
 key_t           sfcbSemKey;
 int             sfcbSem = -1;
-
 
 /*
  *              semaphore services
@@ -139,14 +135,14 @@ initSem(int https, int shttps, int provs)
 
   if ((sfcbSem =
        semget(sfcbSemKey, 4 + (provs * 3) + 3,
-	      IPC_CREAT | IPC_EXCL | 0600)) == -1) {
+              IPC_CREAT | IPC_EXCL | 0600)) == -1) {
     char           *emsg = strerror(errno);
     mlogf(M_ERROR, M_SHOW,
-	  "\n--- SFCB semaphore create key: 0x%x failed: %s\n", sfcbSemKey,
-	  emsg);
+          "\n--- SFCB semaphore create key: 0x%x failed: %s\n", sfcbSemKey,
+          emsg);
     mlogf(M_ERROR, M_SHOW,
-	  "     use \"ipcrm -S 0x%x\" to remove semaphore\n\n",
-	  sfcbSemKey);
+          "     use \"ipcrm -S 0x%x\" to remove semaphore\n\n",
+          sfcbSemKey);
     abort();
   }
 
@@ -197,11 +193,10 @@ spHandleError(int *s, char *m)
   _SFCB_ENTER(TRACE_MSGQUEUE, "handleError");
   char           *emsg = strerror(errno);
   mlogf(M_ERROR, M_SHOW, "%s %d %d-%d %s\n", m, *s, currentProc, errno,
-	emsg);
+        emsg);
   // _SFCB_ABORT();
   return -1;
 }
-
 
 /*
  *              spGetMsg
@@ -241,12 +236,12 @@ spGetMsg(int *s, int *from, void *data, unsigned length, MqgStat * mqg)
 
     if ((n = recvmsg(*s, &msg, 0)) < 0) {
       if (errno == EINTR) {
-	_SFCB_TRACE(1, (" Receive interrupted %d", currentProc));
-	if (mqg) {
-	  mqg->teintr = 1;
-	  return r;
-	}
-	continue;
+        _SFCB_TRACE(1, (" Receive interrupted %d", currentProc));
+        if (mqg) {
+          mqg->teintr = 1;
+          return r;
+        }
+        continue;
       }
       return spHandleError(s, em);
     }
@@ -258,17 +253,17 @@ spGetMsg(int *s, int *from, void *data, unsigned length, MqgStat * mqg)
       return -1;
     }
 
-    if (r == 0) {		/* true for the first time through the
-				 * loop */
+    if (r == 0) {               /* true for the first time through the
+                                 * loop */
       cmsg = CMSG_FIRSTHDR(&msg);
       if (cmsg) {
-	if (!cmsg->cmsg_type == SCM_RIGHTS) {
-	  mlogf(M_ERROR, M_SHOW,
-		"--- got control message of unknown type %d\n",
-		cmsg->cmsg_type);
-	  return -1;
-	}
-	fromfd = *(int *) CMSG_DATA(cmsg);
+        if (!cmsg->cmsg_type == SCM_RIGHTS) {
+          mlogf(M_ERROR, M_SHOW,
+                "--- got control message of unknown type %d\n",
+                cmsg->cmsg_type);
+          return -1;
+        }
+        fromfd = *(int *) CMSG_DATA(cmsg);
       }
       msg.msg_control = 0;
       msg.msg_controllen = 0;
@@ -276,8 +271,8 @@ spGetMsg(int *s, int *from, void *data, unsigned length, MqgStat * mqg)
 
     r += n;
     if (r < ol)
-      continue;			/* continue as long as bytes read is <
-				 * length */
+      continue;                 /* continue as long as bytes read is <
+                                 * length */
     break;
   }
 
@@ -287,14 +282,13 @@ spGetMsg(int *s, int *from, void *data, unsigned length, MqgStat * mqg)
   return 0;
 }
 
-
 /*
  *              spRcvMsg
  */
 
 static int
 spRcvMsg(int *s, int *from, void **data, unsigned long *length,
-	 MqgStat * mqg)
+         MqgStat * mqg)
 {
   SpMessageHdr    spMsg;
   static char    *em = "rcvMsg receiving from";
@@ -321,7 +315,6 @@ spRcvMsg(int *s, int *from, void **data, unsigned long *length,
       mqg->eintr = 1;
   } while (mqg->teintr);
 
-
   if (fromfd > 0)
     spMsg.returnS = fromfd;
   *from = spMsg.returnS;
@@ -337,8 +330,8 @@ spRcvMsg(int *s, int *from, void **data, unsigned long *length,
   // Ensure that the message length isn't excessive. 
   if (*length > maxlen) {
     mlogf(M_ERROR, M_SHOW,
-	  "--- spRcvMsg max message length exceeded, %lu bytes from %d\n",
-	  *length, *s);
+          "--- spRcvMsg max message length exceeded, %lu bytes from %d\n",
+          *length, *s);
     return -1;
   }
   if (*length) {
@@ -349,12 +342,12 @@ spRcvMsg(int *s, int *from, void **data, unsigned long *length,
     partRecvd = totalRecvd = 0;
     do {
       if ((partRecvd =
-	   spGetMsg(s, NULL, *data + totalRecvd, *length - totalRecvd,
-		    mqg)) == -1)
-	return spHandleError(s, em);
+           spGetMsg(s, NULL, *data + totalRecvd, *length - totalRecvd,
+                    mqg)) == -1)
+        return spHandleError(s, em);
       totalRecvd += partRecvd;
       if (mqg->teintr)
-	mqg->eintr = 1;
+        mqg->eintr = 1;
     } while (mqg->teintr);
     _SFCB_TRACE(1, ("--- Received data segment %d bytes", *length));
   }
@@ -370,12 +363,12 @@ spRcvMsg(int *s, int *from, void **data, unsigned long *length,
     partRecvd = totalRecvd = 0;
     do {
       if ((partRecvd =
-	   spGetMsg(s, NULL, *data + totalRecvd, *length - totalRecvd,
-		    mqg)) == -1)
-	return spHandleError(s, em);
+           spGetMsg(s, NULL, *data + totalRecvd, *length - totalRecvd,
+                    mqg)) == -1)
+        return spHandleError(s, em);
       totalRecvd += partRecvd;
       if (mqg->teintr)
-	mqg->eintr = 1;
+        mqg->eintr = 1;
     } while (mqg->teintr);
   }
 
@@ -396,7 +389,7 @@ spRcvMsg(int *s, int *from, void **data, unsigned long *length,
   default:
     *data = NULL;
     mlogf(M_ERROR, M_SHOW, "### %d ??? %ld-%d\n", currentProc, spMsg.type,
-	  spMsg.xtra);
+          spMsg.xtra);
     abort();
   }
 
@@ -405,7 +398,7 @@ spRcvMsg(int *s, int *from, void **data, unsigned long *length,
 
 int
 spRecvReq(int *s, int *from, void **data, unsigned long *length,
-	  MqgStat * mqg)
+          MqgStat * mqg)
 {
   int             rc;
   _SFCB_ENTER(TRACE_MSGQUEUE, "spRecvReq");
@@ -484,7 +477,6 @@ spSendMsg(int *to, int *from, int n, struct iovec *iov, int size)
   _SFCB_RETURN(0);
 }
 
-
 int
 spSendReq(int *to, int *from, void *data, unsigned long size, int internal)
 {
@@ -528,7 +520,7 @@ spSendResult(int *to, int *from, void *data, unsigned long size)
 
 int
 spSendResult2(int *to, int *from,
-	      void *d1, unsigned long s1, void *d2, unsigned long s2)
+              void *d1, unsigned long s1, void *d2, unsigned long s2)
 {
   int             rc,
                   n;
@@ -584,7 +576,7 @@ spSendCtl(int *to, int *from, short code, unsigned long count, void *data)
 
   _SFCB_ENTER(TRACE_MSGQUEUE, "spSendCtl");
   _SFCB_TRACE(1,
-	      ("--- Sending %d bytes to %d", sizeof(SpMessageHdr), *to));
+              ("--- Sending %d bytes to %d", sizeof(SpMessageHdr), *to));
 
   if (*from > 0) {
     msg.msg_control = ccmsg;
@@ -622,7 +614,7 @@ spSendCtl(int *to, int *from, short code, unsigned long count, void *data)
 
 int
 spSendCtlResult(int *to, int *from, short code, unsigned long count,
-		void *data, int options)
+                void *data, int options)
 {
   int             rc;
   int             f = *from;
@@ -635,12 +627,11 @@ spSendCtlResult(int *to, int *from, short code, unsigned long count,
   _SFCB_RETURN(rc);
 }
 
-
 void
 initSocketPairs(int provs, int https, int shttps)
 {
   int             i,
-                  t = (provs * 2);	// +https+shttps;
+                  t = (provs * 2);      // +https+shttps;
 
   sPairs = (ComSockets *) malloc(sizeof(ComSockets) * t);
   mlogf(M_INFO, M_SHOW, "--- initSocketPairs: %d\n", t);
@@ -660,7 +651,6 @@ uninitSocketPairs()
   free(sPairs);
 }
 
-
 unsigned long
 getInode(int fd)
 {
@@ -677,11 +667,11 @@ getSocketPair(char *by)
 
   socketpair(PF_LOCAL, SOCK_STREAM, 0, &sp.receive);
   _SFCB_TRACE(1,
-	      ("--- %s rcv: %d - %d %d", by, sp.receive,
-	       getInode(sp.receive), currentProc));
+              ("--- %s rcv: %d - %d %d", by, sp.receive,
+               getInode(sp.receive), currentProc));
   _SFCB_TRACE(1,
-	      ("--- %s snd: %d - %d %d", by, sp.send, getInode(sp.send),
-	       currentProc));
+              ("--- %s snd: %d - %d %d", by, sp.send, getInode(sp.send),
+               currentProc));
 
   _SFCB_RETURN(sp);
 }
@@ -693,15 +683,15 @@ closeSocket(ComSockets * sp, ComCloseOpt o, char *by)
 
   if ((o == cRcv || o == cAll) && sp->receive != 0) {
     _SFCB_TRACE(1,
-		("--- %s closing: %d - %d %d\n", by, sp->receive,
-		 getInode(sp->receive), currentProc));
+                ("--- %s closing: %d - %d %d\n", by, sp->receive,
+                 getInode(sp->receive), currentProc));
     close(sp->receive);
     sp->receive = 0;
   }
   if ((o == cSnd || o == cAll) && sp->send != 0) {
     _SFCB_TRACE(1,
-		("--- %s closing: %d - %d %d\n", by, sp->send,
-		 getInode(sp->send), currentProc));
+                ("--- %s closing: %d - %d %d\n", by, sp->send,
+                 getInode(sp->send), currentProc));
     close(sp->send);
     sp->send = 0;
   }
@@ -800,26 +790,26 @@ localConnectServer()
     } while ((nsocket < 0) && (errno == EINTR));
     if (nsocket < 0) {
       mlogf(M_INFO, M_QUIET,
-	    "--- localConnectServer: error accepting connection: %s",
-	    strerror(errno));
+            "--- localConnectServer: error accepting connection: %s",
+            strerror(errno));
       return;
     }
 
     read(nsocket, &msg.size, sizeof(msg.size));
     read(nsocket, &msg.oper, msg.size);
     int             maxMsgSize =
-	sizeof(struct _msg) - offsetof(struct _msg, oper);
+        sizeof(struct _msg) - offsetof(struct _msg, oper);
     if (msg.size > maxMsgSize) {
       mlogf(M_INFO, M_SHOW,
-	    "--- localConnectServer: message size %d > max %d\n",
-	    maxMsgSize);
+            "--- localConnectServer: message size %d > max %d\n",
+            maxMsgSize);
       abort();
     }
 
     if (msg.size != 0) {
       mlogf(M_INFO, M_SHOW,
-	    "--- Local Client connect - pid: %d user: %s\n", msg.pid,
-	    msg.id);
+            "--- Local Client connect - pid: %d user: %s\n", msg.pid,
+            msg.id);
       spSendCtlResult(&nsocket, &sfcbSockets.send, MSG_X_LOCAL, 0, 0, 0);
     } else
       notDone = 0;
@@ -831,3 +821,8 @@ localConnectServer()
 }
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -20,8 +20,6 @@
  *
  */
 
-
-
 #include "cmpidt.h"
 #include "cmpidtx.h"
 #include "cimXmlGen.h"
@@ -55,7 +53,7 @@
 #ifdef LOCAL_CONNECT_ONLY_ENABLE
 // from httpAdapter.c
 int             noChunking = 0;
-#endif				// LOCAL_CONNECT_ONLY_ENABLE
+#endif                          // LOCAL_CONNECT_ONLY_ENABLE
 
 typedef struct handler {
   RespSegments(*handler) (CimXmlRequestContext *, RequestHdr * hdr);
@@ -65,28 +63,28 @@ extern int      noChunking;
 
 extern CMPIBroker *Broker;
 extern UtilStringBuffer *newStringBuffer(int s);
-extern UtilStringBuffer *instanceToString(CMPIInstance * ci, char **props);
+extern UtilStringBuffer *instanceToString(CMPIInstance *ci, char **props);
 extern const char *getErrorId(int c);
-extern const char *instGetClassName(CMPIInstance * ci);
+extern const char *instGetClassName(CMPIInstance *ci);
 
 extern CMPIData opGetKeyCharsAt(CMPIObjectPath * cop, unsigned int index,
-				const char **name, CMPIStatus * rc);
+                                const char **name, CMPIStatus *rc);
 extern BinResponseHdr *invokeProvider(BinRequestContext * ctx);
 extern CMPIArgs *relocateSerializedArgs(void *area);
 extern CMPIObjectPath *relocateSerializedObjectPath(void *area);
 extern CMPIInstance *relocateSerializedInstance(void *area);
 extern CMPIConstClass *relocateSerializedConstClass(void *area);
-extern MsgSegment setInstanceMsgSegment(CMPIInstance * ci);
+extern MsgSegment setInstanceMsgSegment(CMPIInstance *ci);
 extern MsgSegment setArgsMsgSegment(CMPIArgs * args);
 extern MsgSegment setConstClassMsgSegment(CMPIConstClass * cl);
 extern void     closeProviderContext(BinRequestContext * ctx);
-extern CMPIStatus arraySetElementNotTrackedAt(CMPIArray * array,
-					      CMPICount index,
-					      CMPIValue * val,
-					      CMPIType type);
+extern CMPIStatus arraySetElementNotTrackedAt(CMPIArray *array,
+                                              CMPICount index,
+                                              CMPIValue * val,
+                                              CMPIType type);
 extern CMPIConstClass initConstClass(ClClass * cl);
 extern CMPIQualifierDecl initQualifier(ClQualifierDeclaration * qual);
-extern CMPIString *NewCMPIString(const char *ptr, CMPIStatus * rc);
+extern CMPIString *NewCMPIString(const char *ptr, CMPIStatus *rc);
 
 extern char    *opsName[];
 
@@ -135,7 +133,6 @@ static char     iResponseTrailer1[] =
     "</IRETURNVALUE>\n"
     "</IMETHODRESPONSE>\n" "</SIMPLERSP>\n" "</MESSAGE>\n" "</CIM>";
 
-
 static char     responseIntro1[] =
     "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"
     "<CIM CIMVERSION=\"2.0\" DTDVERSION=\"2.0\">\n" "<MESSAGE ID=\"";
@@ -143,7 +140,7 @@ static char     responseIntro2[] =
     "\" PROTOCOLVERSION=\"1.0\">\n"
     "<SIMPLERSP>\n" "<METHODRESPONSE NAME=\"";
 static char     responseIntro3Error[] = "\">\n";
-static char     responseIntro3[] = "\">\n";	// "<RETURNVALUE>\n";
+static char     responseIntro3[] = "\">\n";     // "<RETURNVALUE>\n";
 static char     responseTrailer1Error[] =
     "</METHODRESPONSE>\n" "</SIMPLERSP>\n" "</MESSAGE>\n" "</CIM>";
 static char     responseTrailer1[] =
@@ -161,7 +158,6 @@ static char     exportIndIntro2[] =
 static char     exportIndTrailer1[] =
     "</EXPPARAMVALUE>\n"
     "</EXPMETHODCALL>\n" "</SIMPLEEXPREQ>\n" "</MESSAGE>\n" "</CIM>";
-
 
 static char    *
 paramType(CMPIType type)
@@ -201,7 +197,7 @@ paramType(CMPIType type)
     return "reference";
   }
   mlogf(M_ERROR, M_SHOW, "%s(%d): invalid data type %d %x\n", __FILE__,
-	__LINE__, (int) type, (int) type);
+        __LINE__, (int) type, (int) type);
   SFCB_ASM("int $3");
   abort();
   return "*??*";
@@ -215,11 +211,11 @@ dumpSegments(RespSegment * rs)
     printf("[");
     for (i = 0; i < 7; i++) {
       if (rs[i].txt) {
-	if (rs[i].mode == 2) {
-	  UtilStringBuffer *sb = (UtilStringBuffer *) rs[i].txt;
-	  printf("%s", sb->ft->getCharPtr(sb));
-	} else
-	  printf("%s", rs[i].txt);
+        if (rs[i].mode == 2) {
+          UtilStringBuffer *sb = (UtilStringBuffer *) rs[i].txt;
+          printf("%s", sb->ft->getCharPtr(sb));
+        } else
+          printf("%s", rs[i].txt);
       }
     }
     printf("]\n");
@@ -235,17 +231,16 @@ segments2stringBuffer(RespSegment * rs)
   if (rs) {
     for (i = 0; i < 7; i++) {
       if (rs[i].txt) {
-	if (rs[i].mode == 2) {
-	  UtilStringBuffer *sbt = (UtilStringBuffer *) rs[i].txt;
-	  sb->ft->appendChars(sb, sbt->ft->getCharPtr(sbt));
-	} else
-	  sb->ft->appendChars(sb, rs[i].txt);
+        if (rs[i].mode == 2) {
+          UtilStringBuffer *sbt = (UtilStringBuffer *) rs[i].txt;
+          sb->ft->appendChars(sb, sbt->ft->getCharPtr(sbt));
+        } else
+          sb->ft->appendChars(sb, rs[i].txt);
       }
     }
   }
   return sb;
 }
-
 
 static char    *
 getErrSegment(int rc, char *m)
@@ -256,11 +251,11 @@ getErrSegment(int rc, char *m)
   if (m && *m) {
     escapedMsg = XMLEscape(m, NULL);
     msg = sfcb_snprintf("<ERROR CODE=\"%d\" DESCRIPTION=\"%s\"/>\n",
-			rc, escapedMsg);
+                        rc, escapedMsg);
     free(escapedMsg);
   } else if (rc > 0 && rc < 18) {
     msg = sfcb_snprintf("<ERROR CODE=\"%d\" DESCRIPTION=\"%s\"/>\n",
-			rc, cimMsg[rc]);
+                        rc, cimMsg[rc]);
   } else {
     msg = sfcb_snprintf("<ERROR CODE=\"%d\"/>\n", rc);
   }
@@ -285,9 +280,7 @@ getErrTrailer(int id, int rc, char *m)
   return msg;
 }
 
-
-
-static RespSegments
+static          RespSegments
 iMethodErrResponse(RequestHdr * hdr, char *error)
 {
   RespSegments    rs = {
@@ -305,7 +298,7 @@ iMethodErrResponse(RequestHdr * hdr, char *error)
   return rs;
 };
 
-static RespSegments
+static          RespSegments
 methodErrResponse(RequestHdr * hdr, char *error)
 {
   RespSegments    rs = {
@@ -323,7 +316,7 @@ methodErrResponse(RequestHdr * hdr, char *error)
   return rs;
 };
 
-static RespSegments
+static          RespSegments
 ctxErrResponse(RequestHdr * hdr, BinRequestContext * ctx, int meth)
 {
   MsgXctl        *xd = ctx->ctlXdata;
@@ -361,10 +354,7 @@ ctxErrResponse(RequestHdr * hdr, BinRequestContext * ctx, int meth)
   return iMethodErrResponse(hdr, getErrSegment(err, hdr->errMsg));
 };
 
-
-
-
-static RespSegments
+static          RespSegments
 iMethodGetTrailer(UtilStringBuffer * sb)
 {
   RespSegments    rs = { NULL, 0, 0, NULL,
@@ -381,7 +371,7 @@ iMethodGetTrailer(UtilStringBuffer * sb)
   _SFCB_RETURN(rs);
 }
 
-static RespSegments
+static          RespSegments
 iMethodResponse(RequestHdr * hdr, UtilStringBuffer * sb)
 {
   RespSegments    rs = { NULL, 0, 0, NULL,
@@ -397,7 +387,7 @@ iMethodResponse(RequestHdr * hdr, UtilStringBuffer * sb)
   _SFCB_RETURN(rs);
 };
 
-static RespSegments
+static          RespSegments
 methodResponse(RequestHdr * hdr, UtilStringBuffer * sb)
 {
   RespSegments    rs = { NULL, 0, 0, NULL,
@@ -415,7 +405,7 @@ methodResponse(RequestHdr * hdr, UtilStringBuffer * sb)
 };
 
 ExpSegments
-exportIndicationReq(CMPIInstance * ci, char *id)
+exportIndicationReq(CMPIInstance *ci, char *id)
 {
   UtilStringBuffer *sb = UtilFactory->newStrinBuffer(1024);
   ExpSegments     xs = {
@@ -433,10 +423,9 @@ exportIndicationReq(CMPIInstance * ci, char *id)
   _SFCB_RETURN(xs);
 };
 
-
 static UtilStringBuffer *
 genEnumResponses(BinRequestContext * binCtx,
-		 BinResponseHdr ** resp, int arrLen)
+                 BinResponseHdr ** resp, int arrLen)
 {
   int             i,
                   c,
@@ -454,15 +443,15 @@ genEnumResponses(BinRequestContext * binCtx,
   for (c = 0, i = 0; i < binCtx->rCount; i++) {
     for (j = 0; j < resp[i]->count; c++, j++) {
       if (binCtx->type == CMPI_ref)
-	object = relocateSerializedObjectPath(resp[i]->object[j].data);
+        object = relocateSerializedObjectPath(resp[i]->object[j].data);
       else if (binCtx->type == CMPI_instance)
-	object = relocateSerializedInstance(resp[i]->object[j].data);
+        object = relocateSerializedInstance(resp[i]->object[j].data);
       else if (binCtx->type == CMPI_class) {
-	object = relocateSerializedConstClass(resp[i]->object[j].data);
+        object = relocateSerializedConstClass(resp[i]->object[j].data);
       }
 
       rc = arraySetElementNotTrackedAt(ar, c, (CMPIValue *) & object,
-				       binCtx->type);
+                                       binCtx->type);
     }
   }
 
@@ -479,9 +468,9 @@ genEnumResponses(BinRequestContext * binCtx,
   _SFCB_RETURN(sb);
 }
 
-static RespSegments
+static          RespSegments
 genResponses(BinRequestContext * binCtx,
-	     BinResponseHdr ** resp, int arrlen)
+             BinResponseHdr ** resp, int arrlen)
 {
   RespSegments    rs;
   UtilStringBuffer *sb;
@@ -511,12 +500,12 @@ genResponses(BinRequestContext * binCtx,
     gettimeofday(&ev, NULL);
     getrusage(RUSAGE_SELF, &ue);
     _sfcb_trace(1, __FILE__, __LINE__,
-		_sfcb_format_trace
-		("-#- XML Enum Response Generation %.5u %s-%s real: %f user: %f sys: %f \n",
-		 binCtx->bHdr->sessionId, opsName[binCtx->bHdr->operation],
-		 binCtx->oHdr->className.data, timevalDiff(&sv, &ev),
-		 timevalDiff(&us.ru_utime, &ue.ru_utime),
-		 timevalDiff(&us.ru_stime, &ue.ru_stime)));
+                _sfcb_format_trace
+                ("-#- XML Enum Response Generation %.5u %s-%s real: %f user: %f sys: %f \n",
+                 binCtx->bHdr->sessionId, opsName[binCtx->bHdr->operation],
+                 binCtx->oHdr->className.data, timevalDiff(&sv, &ev),
+                 timevalDiff(&us.ru_utime, &ue.ru_utime),
+                 timevalDiff(&us.ru_stime, &ue.ru_stime)));
   }
 #endif
   releaseHeap(genheap);
@@ -524,9 +513,8 @@ genResponses(BinRequestContext * binCtx,
   // _SFCB_RETURN(iMethodResponse(binCtx->rHdr, sb));
 }
 
-
 #ifdef HAVE_QUALREP
-static RespSegments
+static          RespSegments
 genQualifierResponses(BinRequestContext * binCtx, BinResponseHdr * resp)
 {
   RespSegments    rs;
@@ -545,7 +533,7 @@ genQualifierResponses(BinRequestContext * binCtx, BinResponseHdr * resp)
   for (j = 0; j < resp->count; j++) {
     object = relocateSerializedQualifier(resp->object[j].data);
     rc = arraySetElementNotTrackedAt(ar, j, (CMPIValue *) & object,
-				     binCtx->type);
+                                     binCtx->type);
   }
 
   enm = sfcb_native_new_CMPIEnumeration(ar, NULL);
@@ -560,7 +548,7 @@ genQualifierResponses(BinRequestContext * binCtx, BinResponseHdr * resp)
 
 RespSegments
 genFirstChunkResponses(BinRequestContext * binCtx,
-		       BinResponseHdr ** resp, int arrlen, int moreChunks)
+                       BinResponseHdr ** resp, int arrlen, int moreChunks)
 {
   UtilStringBuffer *sb;
   RespSegments    rs;
@@ -577,7 +565,7 @@ genFirstChunkResponses(BinRequestContext * binCtx,
 
 RespSegments
 genChunkResponses(BinRequestContext * binCtx,
-		  BinResponseHdr ** resp, int arrlen)
+                  BinResponseHdr ** resp, int arrlen)
 {
   RespSegments    rs = { NULL, 0, 0, NULL,
     {{2, NULL},
@@ -596,7 +584,7 @@ genChunkResponses(BinRequestContext * binCtx,
 
 RespSegments
 genLastChunkResponses(BinRequestContext * binCtx,
-		      BinResponseHdr ** resp, int arrlen)
+                      BinResponseHdr ** resp, int arrlen)
 {
   UtilStringBuffer *sb;
   RespSegments    rs;
@@ -616,8 +604,7 @@ genFirstChunkErrorResponse(BinRequestContext * binCtx, int rc, char *msg)
   _SFCB_RETURN(iMethodErrResponse(binCtx->rHdr, getErrSegment(rc, msg)));
 }
 
-
-static RespSegments
+static          RespSegments
 getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   CMPIObjectPath *path;
@@ -625,7 +612,7 @@ getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
   UtilStringBuffer *sb;
   int             irc,
                   i,
-                  sreqSize = sizeof(GetClassReq);	// -sizeof(MsgSegment);
+                  sreqSize = sizeof(GetClassReq);       // -sizeof(MsgSegment);
   BinRequestContext binCtx;
   BinResponseHdr *resp;
   GetClassReq    *sreq;
@@ -644,14 +631,14 @@ getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   sreq->objectPath = setObjectPathMsgSegment(path);
   sreq->principal = setCharsMsgSegment(ctx->principal);
   sreq->hdr.sessionId = ctx->sessionId;
 
   for (i = 0; i < req->properties; i++)
     sreq->properties[i] =
-	setCharsMsgSegment(req->propertyList.values[i].value);
+        setCharsMsgSegment(req->propertyList.values[i].value);
 
   binCtx.oHdr = (OperationHdr *) req;
   binCtx.bHdr = &sreq->hdr;
@@ -675,14 +662,14 @@ getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
       sb = UtilFactory->newStrinBuffer(1024);
       cls2xml(cls, sb, binCtx.bHdr->flags);
       if (resp) {
-	free(resp);
+        free(resp);
       }
       free(sreq);
       _SFCB_RETURN(iMethodResponse(hdr, sb));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
-					       (char *) resp->object[0].
-					       data));
+                                               (char *) resp->object[0].
+                                               data));
     if (resp) {
       free(resp);
     }
@@ -695,7 +682,7 @@ getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   CMPIObjectPath *path;
@@ -716,7 +703,7 @@ deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   sreq.objectPath = setObjectPathMsgSegment(path);
   sreq.principal = setCharsMsgSegment(ctx->principal);
   sreq.hdr.sessionId = ctx->sessionId;
@@ -740,13 +727,13 @@ deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       if (resp) {
-	free(resp);
+        free(resp);
       }
       _SFCB_RETURN(iMethodResponse(hdr, NULL));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
-					       (char *) resp->object[0].
-					       data));
+                                               (char *) resp->object[0].
+                                               data));
     if (resp) {
       free(resp);
     }
@@ -756,7 +743,7 @@ deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "createClass");
@@ -787,10 +774,10 @@ createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
 
   cl = ClClassNew(req->op.className.data,
-		  req->superClass ? req->superClass : NULL);
+                  req->superClass ? req->superClass : NULL);
   c = &req->cls;
 
   qs = &c->qualifiers;
@@ -816,23 +803,23 @@ createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
     } else {
       d.state = CMPI_goodValue;
       d.value =
-	  str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
-			req->op.nameSpace.data);
+          str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
+                        req->op.nameSpace.data);
     }
     d.type = p->valueType;
     propId = ClClassAddProperty(cl, p->name, d, p->referenceClass);
 
     qs = &p->val.qualifiers;
     prop =
-	((ClProperty *) ClObjectGetClSection(&cl->hdr, &cl->properties)) +
-	propId - 1;
+        ((ClProperty *) ClObjectGetClSection(&cl->hdr, &cl->properties)) +
+        propId - 1;
     for (q = qs->first; q; q = q->next) {
       if (q->value.value == NULL) {
-	d.state = CMPI_nullValue;
-	d.value.uint64 = 0;
+        d.state = CMPI_nullValue;
+        d.value.uint64 = 0;
       } else {
-	d.state = CMPI_goodValue;
-	d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+        d.state = CMPI_goodValue;
+        d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
       }
       d.type = q->type;
       ClClassAddPropertyQualifier(&cl->hdr, prop, q->name, d);
@@ -848,17 +835,17 @@ createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
     methId = ClClassAddMethod(cl, m->name, m->type);
     meth =
-	((ClMethod *) ClObjectGetClSection(&cl->hdr, &cl->methods)) +
-	methId - 1;
+        ((ClMethod *) ClObjectGetClSection(&cl->hdr, &cl->methods)) +
+        methId - 1;
 
     qs = &m->qualifiers;
     for (q = qs->first; q; q = q->next) {
       if (q->value.value == NULL) {
-	d.state = CMPI_nullValue;
-	d.value.uint64 = 0;
+        d.state = CMPI_nullValue;
+        d.value.uint64 = 0;
       } else {
-	d.state = CMPI_goodValue;
-	d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+        d.state = CMPI_goodValue;
+        d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
       }
       d.type = q->type;
       ClClassAddMethodQualifier(&cl->hdr, meth, q->name, d);
@@ -870,21 +857,21 @@ createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
       pa.arraySize = (unsigned int) r->arraySize;
       pa.refName = r->refClass;
       parmId = ClClassAddMethParameter(&cl->hdr, meth, r->name, pa);
-      parm =
-	  ((ClParameter *)
-	   ClObjectGetClSection(&cl->hdr, &meth->parameters)) + methId - 1;
+      parm = ((ClParameter *)
+              ClObjectGetClSection(&cl->hdr,
+                                   &meth->parameters)) + methId - 1;
 
       qs = &r->qualifiers;
       for (q = qs->first; q; q = q->next) {
-	if (q->value.value == NULL) {
-	  d.state = CMPI_nullValue;
-	  d.value.uint64 = 0;
-	} else {
-	  d.state = CMPI_goodValue;
-	  d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
-	}
-	d.type = q->type;
-	ClClassAddMethParamQualifier(&cl->hdr, parm, q->name, d);
+        if (q->value.value == NULL) {
+          d.state = CMPI_nullValue;
+          d.value.uint64 = 0;
+        } else {
+          d.state = CMPI_goodValue;
+          d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+        }
+        d.type = q->type;
+        ClClassAddMethParamQualifier(&cl->hdr, parm, q->name, d);
       }
     }
   }
@@ -917,13 +904,13 @@ createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       if (resp) {
-	free(resp);
+        free(resp);
       }
       _SFCB_RETURN(iMethodResponse(hdr, NULL));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
-					       (char *) resp->object[0].
-					       data));
+                                               (char *) resp->object[0].
+                                               data));
     if (resp) {
       free(resp);
     }
@@ -933,7 +920,7 @@ createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 enumClassNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   CMPIObjectPath *path;
@@ -953,7 +940,7 @@ enumClassNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   sreq.objectPath = setObjectPathMsgSegment(path);
   sreq.principal = setCharsMsgSegment(ctx->principal);
   sreq.hdr.flags = req->flags;
@@ -983,9 +970,9 @@ enumClassNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
       rs = genResponses(&binCtx, resp, l);
     } else {
       rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
-						 (char *) resp[err -
-							       1]->
-						 object[0].data));
+                                                 (char *) resp[err -
+                                                               1]->object
+                                                 [0].data));
     }
     freeResponseHeaders(resp, &binCtx);
     _SFCB_RETURN(rs);
@@ -994,7 +981,7 @@ enumClassNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 enumClasses(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   CMPIObjectPath *path;
@@ -1013,7 +1000,7 @@ enumClasses(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   sreq.objectPath = setObjectPathMsgSegment(path);
   sreq.principal = setCharsMsgSegment(ctx->principal);
   sreq.hdr.flags = req->flags;
@@ -1051,12 +1038,12 @@ enumClasses(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
     if (noChunking || ctx->teTrailers == 0) {
       if (err == 0) {
-	rs = genResponses(&binCtx, resp, l);
+        rs = genResponses(&binCtx, resp, l);
       } else {
-	rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
-						   (char *) resp[err -
-								 1]->
-						   object[0].data));
+        rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
+                                                   (char *) resp[err -
+                                                                 1]->object
+                                                   [0].data));
       }
       freeResponseHeaders(resp, &binCtx);
       _SFCB_RETURN(rs);
@@ -1072,7 +1059,7 @@ enumClasses(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "getInstance");
@@ -1085,7 +1072,7 @@ getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
   int             irc,
                   i,
                   m,
-                  sreqSize = sizeof(GetInstanceReq);	// -sizeof(MsgSegment);
+                  sreqSize = sizeof(GetInstanceReq);    // -sizeof(MsgSegment);
   BinRequestContext binCtx;
   BinResponseHdr *resp;
   RespSegments    rsegs;
@@ -1103,15 +1090,15 @@ getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
     valp =
-	getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
-			   req->instanceName.bindings.keyBindings[i].value,
-			   &req->instanceName.bindings.keyBindings[i].ref,
-			   &val, &type, req->op.nameSpace.data);
+        getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
+                           req->instanceName.bindings.keyBindings[i].value,
+                           &req->instanceName.bindings.keyBindings[i].ref,
+                           &val, &type, req->op.nameSpace.data);
     CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp,
-	     type);
+             type);
   }
   sreq->objectPath = setObjectPathMsgSegment(path);
   sreq->principal = setCharsMsgSegment(ctx->principal);
@@ -1119,7 +1106,7 @@ getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   for (i = 0; i < req->properties; i++)
     sreq->properties[i] =
-	setCharsMsgSegment(req->propertyList.values[i].value);
+        setCharsMsgSegment(req->propertyList.values[i].value);
 
   binCtx.oHdr = (OperationHdr *) req;
   binCtx.bHdr = &sreq->hdr;
@@ -1145,14 +1132,14 @@ getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
       rsegs = iMethodResponse(hdr, sb);
       free(sreq);
       if (resp) {
-	free(resp);
+        free(resp);
       }
       _SFCB_RETURN(rsegs);
     }
     free(sreq);
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
-					       (char *) resp->object[0].
-					       data));
+                                               (char *) resp->object[0].
+                                               data));
     if (resp) {
       free(resp);
     }
@@ -1164,7 +1151,7 @@ getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 deleteInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "deleteInstance");
@@ -1185,15 +1172,15 @@ deleteInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
     valp =
-	getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
-			   req->instanceName.bindings.keyBindings[i].value,
-			   &req->instanceName.bindings.keyBindings[i].ref,
-			   &val, &type, req->op.nameSpace.data);
+        getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
+                           req->instanceName.bindings.keyBindings[i].value,
+                           &req->instanceName.bindings.keyBindings[i].ref,
+                           &val, &type, req->op.nameSpace.data);
     CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp,
-	     type);
+             type);
   }
   sreq.objectPath = setObjectPathMsgSegment(path);
   sreq.principal = setCharsMsgSegment(ctx->principal);
@@ -1217,13 +1204,13 @@ deleteInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       if (resp) {
-	free(resp);
+        free(resp);
       }
       _SFCB_RETURN(iMethodResponse(hdr, NULL));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
-					       (char *) resp->object[0].
-					       data));
+                                               (char *) resp->object[0].
+                                               data));
     if (resp) {
       free(resp);
     }
@@ -1233,7 +1220,7 @@ deleteInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 createInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "createInst");
@@ -1254,14 +1241,14 @@ createInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   inst = TrackedCMPIInstance(path, NULL);
 
   for (p = req->instance.properties.first; p; p = p->next) {
     if (p->val.val.value) {
       val =
-	  str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
-			req->op.nameSpace.data);
+          str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
+                        req->op.nameSpace.data);
       CMSetProperty(inst, p->name, &val, p->valueType);
     }
   }
@@ -1301,13 +1288,13 @@ createInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
       sb = UtilFactory->newStrinBuffer(1024);
       instanceName2xml(path, sb);
       if (resp) {
-	free(resp);
+        free(resp);
       }
       _SFCB_RETURN(iMethodResponse(hdr, sb));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
-					       (char *) resp->object[0].
-					       data));
+                                               (char *) resp->object[0].
+                                               data));
     if (resp) {
       free(resp);
     }
@@ -1317,7 +1304,7 @@ createInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "modifyInstance");
@@ -1329,7 +1316,7 @@ modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
   int             irc,
                   i,
                   m,
-                  sreqSize = sizeof(ModifyInstanceReq);	// -sizeof(MsgSegment);
+                  sreqSize = sizeof(ModifyInstanceReq); // -sizeof(MsgSegment);
   BinRequestContext binCtx;
   BinResponseHdr *resp;
   ModifyInstanceReq *sreq;
@@ -1349,19 +1336,19 @@ modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   for (i = 0; i < req->properties; i++) {
     sreq->properties[i] =
-	setCharsMsgSegment(req->propertyList.values[i].value);
+        setCharsMsgSegment(req->propertyList.values[i].value);
   }
   xci = &req->namedInstance.instance;
   xco = &req->namedInstance.path;
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   for (i = 0, m = xco->bindings.next; i < m; i++) {
     valp = getKeyValueTypePtr(xco->bindings.keyBindings[i].type,
-			      xco->bindings.keyBindings[i].value,
-			      &xco->bindings.keyBindings[i].ref,
-			      &val, &type, req->op.nameSpace.data);
+                              xco->bindings.keyBindings[i].value,
+                              &xco->bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
 
     CMAddKey(path, xco->bindings.keyBindings[i].name, valp, type);
   }
@@ -1370,8 +1357,8 @@ modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
   for (p = xci->properties.first; p; p = p->next) {
     if (p->val.val.value) {
       val =
-	  str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
-			req->op.nameSpace.data);
+          str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
+                        req->op.nameSpace.data);
       CMSetProperty(inst, p->name, &val, p->valueType);
     }
   }
@@ -1399,13 +1386,13 @@ modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       if (resp) {
-	free(resp);
+        free(resp);
       }
       _SFCB_RETURN(iMethodResponse(hdr, NULL));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
-					       (char *) resp->object[0].
-					       data));
+                                               (char *) resp->object[0].
+                                               data));
     if (resp) {
       free(resp);
     }
@@ -1417,8 +1404,7 @@ modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-
-static RespSegments
+static          RespSegments
 enumInstanceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "enumInstanceNames");
@@ -1438,7 +1424,7 @@ enumInstanceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   sreq.objectPath = setObjectPathMsgSegment(path);
   sreq.principal = setCharsMsgSegment(ctx->principal);
   sreq.hdr.sessionId = ctx->sessionId;
@@ -1468,9 +1454,9 @@ enumInstanceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
       rs = genResponses(&binCtx, resp, l);
     } else {
       rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
-						 (char *) resp[err -
-							       1]->
-						 object[0].data));
+                                                 (char *) resp[err -
+                                                               1]->object
+                                                 [0].data));
     }
     freeResponseHeaders(resp, &binCtx);
     _SFCB_RETURN(rs);
@@ -1479,7 +1465,7 @@ enumInstanceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "enumInstances");
@@ -1490,7 +1476,7 @@ enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
                   l = 0,
       err = 0,
       i,
-      sreqSize = sizeof(EnumInstancesReq);	// -sizeof(MsgSegment);
+      sreqSize = sizeof(EnumInstancesReq);      // -sizeof(MsgSegment);
   BinResponseHdr **resp;
   BinRequestContext binCtx;
 
@@ -1507,14 +1493,14 @@ enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   sreq->principal = setCharsMsgSegment(ctx->principal);
   sreq->objectPath = setObjectPathMsgSegment(path);
   sreq->hdr.sessionId = ctx->sessionId;
 
   for (i = 0; i < req->properties; i++) {
     sreq->properties[i] =
-	setCharsMsgSegment(req->propertyList.values[i].value);
+        setCharsMsgSegment(req->propertyList.values[i].value);
   }
 
   binCtx.oHdr = (OperationHdr *) req;
@@ -1549,12 +1535,12 @@ enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
     if (noChunking || ctx->teTrailers == 0) {
       if (err == 0) {
-	rs = genResponses(&binCtx, resp, l);
+        rs = genResponses(&binCtx, resp, l);
       } else {
-	rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
-						   (char *) resp[err -
-								 1]->
-						   object[0].data));
+        rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
+                                                   (char *) resp[err -
+                                                                 1]->object
+                                                   [0].data));
       }
       freeResponseHeaders(resp, &binCtx);
       free(sreq);
@@ -1572,7 +1558,7 @@ enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "execQuery");
@@ -1592,20 +1578,20 @@ execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
   hdr->className = req->op.className.data;
 
   qs = parseQuery(MEM_TRACKED, (char *) req->op.query.data,
-		  (char *) req->op.queryLang.data, NULL, &irc);
+                  (char *) req->op.queryLang.data, NULL, &irc);
 
   fCls = qs->ft->getFromClassList(qs);
   if (irc) {
     _SFCB_RETURN(iMethodErrResponse(hdr,
-				    getErrSegment
-				    (CMPI_RC_ERR_INVALID_QUERY,
-				     "syntax error in query.")));
+                                    getErrSegment
+                                    (CMPI_RC_ERR_INVALID_QUERY,
+                                     "syntax error in query.")));
   }
   if (fCls == NULL || *fCls == NULL) {
     _SFCB_RETURN(iMethodErrResponse(hdr,
-				    getErrSegment
-				    (CMPI_RC_ERR_INVALID_QUERY,
-				     "required from clause is missing.")));
+                                    getErrSegment
+                                    (CMPI_RC_ERR_INVALID_QUERY,
+                                     "required from clause is missing.")));
   }
   req->op.className = setCharsMsgSegment(*fCls);
 
@@ -1650,12 +1636,12 @@ execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
     if (noChunking || ctx->teTrailers == 0) {
       if (err == 0) {
-	rs = genResponses(&binCtx, resp, l);
+        rs = genResponses(&binCtx, resp, l);
       } else {
-	rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
-						   (char *) resp[err -
-								 1]->
-						   object[0].data));
+        rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
+                                                   (char *) resp[err -
+                                                                 1]->object
+                                                   [0].data));
       }
       freeResponseHeaders(resp, &binCtx);
       _SFCB_RETURN(rs);
@@ -1670,10 +1656,7 @@ execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-
-
-
-static RespSegments
+static          RespSegments
 associatorNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "associatorNames");
@@ -1696,27 +1679,27 @@ associatorNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
     valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
-			      req->objectName.bindings.keyBindings[i].
-			      value,
-			      &req->objectName.bindings.keyBindings[i].ref,
-			      &val, &type, req->op.nameSpace.data);
+                              req->objectName.bindings.keyBindings[i].
+                              value,
+                              &req->objectName.bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
     CMAddKey(path, req->objectName.bindings.keyBindings[i].name, valp,
-	     type);
+             type);
   }
 
   if (req->objectName.bindings.next == 0) {
     _SFCB_RETURN(iMethodErrResponse
-		 (hdr,
-		  getErrSegment(CMPI_RC_ERR_NOT_SUPPORTED,
-				"AssociatorNames operation for classes not supported")));
+                 (hdr,
+                  getErrSegment(CMPI_RC_ERR_NOT_SUPPORTED,
+                                "AssociatorNames operation for classes not supported")));
   }
   if (!req->objNameSet) {
     _SFCB_RETURN(iMethodErrResponse(hdr, getErrSegment
-				    (CMPI_RC_ERR_INVALID_PARAMETER,
-				     "ObjectName parameter required")));
+                                    (CMPI_RC_ERR_INVALID_PARAMETER,
+                                     "ObjectName parameter required")));
   }
 
   sreq.objectPath = setObjectPathMsgSegment(path);
@@ -1757,9 +1740,9 @@ associatorNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
       rs = genResponses(&binCtx, resp, l);
     } else {
       rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
-						 (char *) resp[err -
-							       1]->
-						 object[0].data));
+                                                 (char *) resp[err -
+                                                               1]->object
+                                                 [0].data));
     }
     freeResponseHeaders(resp, &binCtx);
     _SFCB_RETURN(rs);
@@ -1768,7 +1751,7 @@ associatorNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "associators");
@@ -1780,7 +1763,7 @@ associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
                   m,
                   l = 0,
       err = 0,
-      sreqSize = sizeof(AssociatorsReq);	// -sizeof(MsgSegment);
+      sreqSize = sizeof(AssociatorsReq);        // -sizeof(MsgSegment);
   BinResponseHdr **resp;
   BinRequestContext binCtx;
   CMPIType        type;
@@ -1799,29 +1782,29 @@ associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
     valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
-			      req->objectName.bindings.keyBindings[i].
-			      value,
-			      &req->objectName.bindings.keyBindings[i].ref,
-			      &val, &type, req->op.nameSpace.data);
+                              req->objectName.bindings.keyBindings[i].
+                              value,
+                              &req->objectName.bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
     CMAddKey(path, req->objectName.bindings.keyBindings[i].name, valp,
-	     type);
+             type);
   }
 
   if (req->objectName.bindings.next == 0) {
     free(sreq);
     _SFCB_RETURN(iMethodErrResponse
-		 (hdr,
-		  getErrSegment(CMPI_RC_ERR_NOT_SUPPORTED,
-				"Associator operation for classes not supported")));
+                 (hdr,
+                  getErrSegment(CMPI_RC_ERR_NOT_SUPPORTED,
+                                "Associator operation for classes not supported")));
   }
   if (!req->objNameSet) {
     free(sreq);
     _SFCB_RETURN(iMethodErrResponse(hdr, getErrSegment
-				    (CMPI_RC_ERR_INVALID_PARAMETER,
-				     "ObjectName parameter required")));
+                                    (CMPI_RC_ERR_INVALID_PARAMETER,
+                                     "ObjectName parameter required")));
   }
 
   sreq->objectPath = setObjectPathMsgSegment(path);
@@ -1836,7 +1819,7 @@ associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   for (i = 0; i < req->properties; i++)
     sreq->properties[i] =
-	setCharsMsgSegment(req->propertyList.values[i].value);
+        setCharsMsgSegment(req->propertyList.values[i].value);
 
   req->op.className = req->op.assocClass;
 
@@ -1873,12 +1856,12 @@ associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
     if (noChunking || ctx->teTrailers == 0) {
       if (err == 0) {
-	rs = genResponses(&binCtx, resp, l);
+        rs = genResponses(&binCtx, resp, l);
       } else {
-	rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
-						   (char *) resp[err -
-								 1]->
-						   object[0].data));
+        rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
+                                                   (char *) resp[err -
+                                                                 1]->object
+                                                   [0].data));
       }
       freeResponseHeaders(resp, &binCtx);
       free(sreq);
@@ -1898,7 +1881,7 @@ associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 referenceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "referenceNames");
@@ -1921,27 +1904,27 @@ referenceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
     valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
-			      req->objectName.bindings.keyBindings[i].
-			      value,
-			      &req->objectName.bindings.keyBindings[i].ref,
-			      &val, &type, req->op.nameSpace.data);
+                              req->objectName.bindings.keyBindings[i].
+                              value,
+                              &req->objectName.bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
     CMAddKey(path, req->objectName.bindings.keyBindings[i].name, valp,
-	     type);
+             type);
   }
 
   if (req->objectName.bindings.next == 0) {
     _SFCB_RETURN(iMethodErrResponse
-		 (hdr,
-		  getErrSegment(CMPI_RC_ERR_NOT_SUPPORTED,
-				"ReferenceNames operation for classes not supported")));
+                 (hdr,
+                  getErrSegment(CMPI_RC_ERR_NOT_SUPPORTED,
+                                "ReferenceNames operation for classes not supported")));
   }
   if (!req->objNameSet) {
     _SFCB_RETURN(iMethodErrResponse(hdr, getErrSegment
-				    (CMPI_RC_ERR_INVALID_PARAMETER,
-				     "ObjectName parameter required")));
+                                    (CMPI_RC_ERR_INVALID_PARAMETER,
+                                     "ObjectName parameter required")));
   }
 
   sreq.objectPath = setObjectPathMsgSegment(path);
@@ -1980,9 +1963,9 @@ referenceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
       rs = genResponses(&binCtx, resp, l);
     } else {
       rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
-						 (char *) resp[err -
-							       1]->
-						 object[0].data));
+                                                 (char *) resp[err -
+                                                               1]->object
+                                                 [0].data));
     }
     freeResponseHeaders(resp, &binCtx);
     _SFCB_RETURN(rs);
@@ -1991,8 +1974,7 @@ referenceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-
-static RespSegments
+static          RespSegments
 references(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "references");
@@ -2004,7 +1986,7 @@ references(CimXmlRequestContext * ctx, RequestHdr * hdr)
                   m,
                   l = 0,
       err = 0,
-      sreqSize = sizeof(ReferencesReq);	// -sizeof(MsgSegment);
+      sreqSize = sizeof(ReferencesReq); // -sizeof(MsgSegment);
   BinResponseHdr **resp;
   BinRequestContext binCtx;
   CMPIType        type;
@@ -2023,29 +2005,29 @@ references(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
     valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
-			      req->objectName.bindings.keyBindings[i].
-			      value,
-			      &req->objectName.bindings.keyBindings[i].ref,
-			      &val, &type, req->op.nameSpace.data);
+                              req->objectName.bindings.keyBindings[i].
+                              value,
+                              &req->objectName.bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
     CMAddKey(path, req->objectName.bindings.keyBindings[i].name, valp,
-	     type);
+             type);
   }
 
   if (req->objectName.bindings.next == 0) {
     free(sreq);
     _SFCB_RETURN(iMethodErrResponse
-		 (hdr,
-		  getErrSegment(CMPI_RC_ERR_NOT_SUPPORTED,
-				"References operation for classes not supported")));
+                 (hdr,
+                  getErrSegment(CMPI_RC_ERR_NOT_SUPPORTED,
+                                "References operation for classes not supported")));
   }
   if (!req->objNameSet) {
     free(sreq);
     _SFCB_RETURN(iMethodErrResponse(hdr, getErrSegment
-				    (CMPI_RC_ERR_INVALID_PARAMETER,
-				     "ObjectName parameter required")));
+                                    (CMPI_RC_ERR_INVALID_PARAMETER,
+                                     "ObjectName parameter required")));
   }
 
   sreq->objectPath = setObjectPathMsgSegment(path);
@@ -2058,7 +2040,7 @@ references(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   for (i = 0; i < req->properties; i++)
     sreq->properties[i] =
-	setCharsMsgSegment(req->propertyList.values[i].value);
+        setCharsMsgSegment(req->propertyList.values[i].value);
 
   req->op.className = req->op.resultClass;
 
@@ -2094,12 +2076,12 @@ references(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
     if (noChunking || ctx->teTrailers == 0) {
       if (err == 0) {
-	rs = genResponses(&binCtx, resp, l);
+        rs = genResponses(&binCtx, resp, l);
       } else {
-	rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
-						   (char *) resp[err -
-								 1]->
-						   object[0].data));
+        rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
+                                                   (char *) resp[err -
+                                                                 1]->object
+                                                   [0].data));
       }
       freeResponseHeaders(resp, &binCtx);
       free(sreq);
@@ -2138,7 +2120,7 @@ updateMethodParamTypes(RequestHdr * hdr)
   XtokMethodCall *req = (XtokMethodCall *) hdr->cimRequest;
   cls =
       getConstClass((char *) req->op.nameSpace.data,
-		    (char *) req->op.className.data);
+                    (char *) req->op.className.data);
   if (!cls) {
     _SFCB_RETURN(CMPI_RC_ERR_INVALID_CLASS);
   }
@@ -2174,11 +2156,10 @@ updateMethodParamTypes(RequestHdr * hdr)
       ClClassGetMethParameterAt(cl, meth, p, &pdata, &sname);
 
       if (strcasecmp(sname, ptok->name) == 0) {
-	// fprintf(stderr, "%s matches %s", sname, ptok->name);
-	param =
-	    ((ClParameter *)
-	     ClObjectGetClSection(&cl->hdr, &meth->parameters)) + p;
-	break;
+        // fprintf(stderr, "%s matches %s", sname, ptok->name);
+        param = ((ClParameter *)
+                 ClObjectGetClSection(&cl->hdr, &meth->parameters)) + p;
+        break;
       }
     }
     if (p == pm) {
@@ -2194,18 +2175,18 @@ updateMethodParamTypes(RequestHdr * hdr)
     if (param && (ptok->type & CMPI_instance)) {
       int             isEI = 0;
       int             qcount =
-	  ClClassGetMethParmQualifierCount(cl, meth, i);
+          ClClassGetMethParmQualifierCount(cl, meth, i);
       for (; qcount > 0; qcount--) {
-	char           *qname;
-	ClClassGetMethParamQualifierAt(cl, param, qcount, NULL, &qname);
-	if (strcmp(qname, "EmbeddedInstance") == 0) {
-	  // fprintf(stderr, " is EmbeddedInstance\n");
-	  isEI = 1;
-	  break;
-	}
+        char           *qname;
+        ClClassGetMethParamQualifierAt(cl, param, qcount, NULL, &qname);
+        if (strcmp(qname, "EmbeddedInstance") == 0) {
+          // fprintf(stderr, " is EmbeddedInstance\n");
+          isEI = 1;
+          break;
+        }
       }
       if (isEI)
-	continue;
+        continue;
     }
 
     if (ptok->type == 0) {
@@ -2225,7 +2206,7 @@ updateMethodParamTypes(RequestHdr * hdr)
   _SFCB_RETURN(CMPI_RC_OK);
 }
 
-static RespSegments
+static          RespSegments
 invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "invokeMethod");
@@ -2253,18 +2234,18 @@ invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			    NULL);
+                            NULL);
   if (req->instName)
     for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
       valp =
-	  getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].
-			     type,
-			     req->instanceName.bindings.keyBindings[i].
-			     value,
-			     &req->instanceName.bindings.keyBindings[i].
-			     ref, &val, &type, req->op.nameSpace.data);
+          getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].
+                             type,
+                             req->instanceName.bindings.keyBindings[i].
+                             value,
+                             &req->instanceName.bindings.keyBindings[i].
+                             ref, &val, &type, req->op.nameSpace.data);
       CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp,
-	       type);
+               type);
     }
   sreq.objectPath = setObjectPathMsgSegment(path);
   sreq.principal = setCharsMsgSegment(ctx->principal);
@@ -2282,15 +2263,14 @@ invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
       rc = updateMethodParamTypes(hdr);
 
       if (rc != CMPI_RC_OK) {
-	rsegs = methodErrResponse(hdr, getErrSegment(rc, NULL));
-	_SFCB_RETURN(rsegs);
+        rsegs = methodErrResponse(hdr, getErrSegment(rc, NULL));
+        _SFCB_RETURN(rsegs);
       }
     }
 
     if (p->value.value) {
-      CMPIValue       val =
-	  str2CMPIValue(p->type, p->value, &p->valueRef,
-			req->op.nameSpace.data);
+      CMPIValue       val = str2CMPIValue(p->type, p->value, &p->valueRef,
+                                          req->op.nameSpace.data);
       CMAddArg(in, p->name, &val, p->type);
     }
   }
@@ -2319,31 +2299,31 @@ invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
     if (resp->rc == CMPI_RC_OK) {
       sb = UtilFactory->newStrinBuffer(1024);
       if (resp->rvValue) {
-	if (resp->rv.type == CMPI_chars) {
-	  resp->rv.value.chars = (long) resp->rvEnc.data + (char *) resp;
-	} else if (resp->rv.type == CMPI_dateTime) {
-	  resp->rv.value.dateTime =
-	      sfcb_native_new_CMPIDateTime_fromChars((long) resp->rvEnc.
-						     data + (char *) resp,
-						     NULL);
-	}
-	SFCB_APPENDCHARS_BLOCK(sb, "<RETURNVALUE PARAMTYPE=\"");
-	sb->ft->appendChars(sb, paramType(resp->rv.type));
-	SFCB_APPENDCHARS_BLOCK(sb, "\">\n");
-	value2xml(resp->rv, sb, 1);
-	SFCB_APPENDCHARS_BLOCK(sb, "</RETURNVALUE>\n");
+        if (resp->rv.type == CMPI_chars) {
+          resp->rv.value.chars = (long) resp->rvEnc.data + (char *) resp;
+        } else if (resp->rv.type == CMPI_dateTime) {
+          resp->rv.value.dateTime =
+              sfcb_native_new_CMPIDateTime_fromChars((long) resp->rvEnc.
+                                                     data + (char *) resp,
+                                                     NULL);
+        }
+        SFCB_APPENDCHARS_BLOCK(sb, "<RETURNVALUE PARAMTYPE=\"");
+        sb->ft->appendChars(sb, paramType(resp->rv.type));
+        SFCB_APPENDCHARS_BLOCK(sb, "\">\n");
+        value2xml(resp->rv, sb, 1);
+        SFCB_APPENDCHARS_BLOCK(sb, "</RETURNVALUE>\n");
       }
       out = relocateSerializedArgs(resp->object[0].data);
       args2xml(out, sb);
       rsegs = methodResponse(hdr, sb);
       if (resp) {
-	free(resp);
+        free(resp);
       }
       _SFCB_RETURN(rsegs);
     }
     rs = methodErrResponse(hdr, getErrSegment(resp->rc,
-					      (char *) resp->object[0].
-					      data));
+                                              (char *) resp->object[0].
+                                              data));
     if (resp) {
       free(resp);
     }
@@ -2354,7 +2334,7 @@ invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 1));
 }
 
-static RespSegments
+static          RespSegments
 getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "getProperty");
@@ -2376,7 +2356,7 @@ getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data,
-			    req->instanceName.className, &rc);
+                            req->instanceName.className, &rc);
 
   sreq.principal = setCharsMsgSegment(ctx->principal);
   sreq.path = setObjectPathMsgSegment(path);
@@ -2404,17 +2384,17 @@ getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
       sb = UtilFactory->newStrinBuffer(1024);
       data = inst->ft->getProperty(inst, req->name, NULL);
       data2xml(&data, NULL, tmpString, NULL, NULL, 0, NULL, 0, sb, NULL, 0,
-	       0);
+               0);
       CMRelease(tmpString);
       rsegs = iMethodResponse(hdr, sb);
       if (resp) {
-	free(resp);
+        free(resp);
       }
       _SFCB_RETURN(rsegs);
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
-					       (char *) resp->object[0].
-					       data));
+                                               (char *) resp->object[0].
+                                               data));
     if (resp) {
       free(resp);
     }
@@ -2427,7 +2407,7 @@ getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "setProperty");
@@ -2447,7 +2427,7 @@ setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data,
-			    req->instanceName.className, &rc);
+                            req->instanceName.className, &rc);
 
   inst = internal_new_CMPIInstance(MEM_TRACKED, NULL, NULL, 1);
 
@@ -2460,8 +2440,8 @@ setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
   }
   if (t != CMPI_null) {
     val =
-	str2CMPIValue(t, req->newVal.val, &req->newVal.ref,
-		      req->op.nameSpace.data);
+        str2CMPIValue(t, req->newVal.val, &req->newVal.ref,
+                      req->op.nameSpace.data);
     CMSetProperty(inst, req->propertyName, &val, t);
   } else {
     val.string = 0;
@@ -2492,13 +2472,13 @@ setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       if (resp) {
-	free(resp);
+        free(resp);
       }
       _SFCB_RETURN(iMethodResponse(hdr, NULL));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
-					       (char *) resp->object[0].
-					       data));
+                                               (char *) resp->object[0].
+                                               data));
     if (resp) {
       free(resp);
     }
@@ -2509,7 +2489,7 @@ setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 #ifdef HAVE_QUALREP
-static RespSegments
+static          RespSegments
 enumQualifiers(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   CMPIObjectPath *path;
@@ -2553,8 +2533,8 @@ enumQualifiers(CimXmlRequestContext * ctx, RequestHdr * hdr)
       rs = genQualifierResponses(&binCtx, resp);
     } else {
       rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
-						 (char *) resp->object[0].
-						 data));
+                                                 (char *) resp->object[0].
+                                                 data));
     }
     if (resp) {
       free(resp);
@@ -2565,7 +2545,7 @@ enumQualifiers(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 getQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "getQualifier");
@@ -2583,11 +2563,13 @@ getQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
   XtokGetQualifier *req = (XtokGetQualifier *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
-  path = TrackedCMPIObjectPath(req->op.nameSpace.data, req->name, &rc);	// abuse 
-									// classname 
-									// for 
-									// qualifier 
-									// name
+  path = TrackedCMPIObjectPath(req->op.nameSpace.data, req->name, &rc); // abuse 
+                                                                        // 
+  // 
+  // classname 
+  // for 
+  // qualifier 
+  // name
 
   sreq.principal = setCharsMsgSegment(ctx->principal);
   sreq.path = setObjectPathMsgSegment(path);
@@ -2615,13 +2597,13 @@ getQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
       qualifierDeclaration2xml(qual, sb);
       rsegs = iMethodResponse(hdr, sb);
       if (resp) {
-	free(resp);
+        free(resp);
       }
       _SFCB_RETURN(rsegs);
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
-					       (char *) resp->object[0].
-					       data));
+                                               (char *) resp->object[0].
+                                               data));
     if (resp) {
       free(resp);
     }
@@ -2632,7 +2614,7 @@ getQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 deleteQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "deleteQualifier");
@@ -2647,11 +2629,13 @@ deleteQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
   XtokDeleteQualifier *req = (XtokDeleteQualifier *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
-  path = TrackedCMPIObjectPath(req->op.nameSpace.data, req->name, &rc);	// abuse 
-									// classname 
-									// for 
-									// qualifier 
-									// name
+  path = TrackedCMPIObjectPath(req->op.nameSpace.data, req->name, &rc); // abuse 
+                                                                        // 
+  // 
+  // classname 
+  // for 
+  // qualifier 
+  // name
 
   sreq.principal = setCharsMsgSegment(ctx->principal);
   sreq.path = setObjectPathMsgSegment(path);
@@ -2675,13 +2659,13 @@ deleteQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       if (resp) {
-	free(resp);
+        free(resp);
       }
       _SFCB_RETURN(iMethodResponse(hdr, NULL));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
-					       (char *) resp->object[0].
-					       data));
+                                               (char *) resp->object[0].
+                                               data));
     if (resp) {
       free(resp);
     }
@@ -2692,7 +2676,7 @@ deleteQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
 }
 
-static RespSegments
+static          RespSegments
 setQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "setQualifier");
@@ -2710,7 +2694,7 @@ setQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   path = TrackedCMPIObjectPath(req->op.nameSpace.data, NULL, NULL);
   q = ClQualifierDeclarationNew(req->op.nameSpace.data,
-				req->qualifierdeclaration.name);
+                                req->qualifierdeclaration.name);
 
   if (req->qualifierdeclaration.overridable)
     q->flavor |= ClQual_F_Overridable;
@@ -2742,28 +2726,29 @@ setQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
     q->scope |= ClQual_S_Indication;
   q->arraySize = req->qualifierdeclaration.arraySize;
 
-  if (req->qualifierdeclaration.data.value.value) {	// default value
-							// is set
+  if (req->qualifierdeclaration.data.value.value) {     // default value
+    // is set
     d.state = CMPI_goodValue;
-    d.type = q->type;		// "specified" type
-    d.type |= req->qualifierdeclaration.data.type;	// actual type
+    d.type = q->type;           // "specified" type
+    d.type |= req->qualifierdeclaration.data.type;      // actual type
 
     // default value declared - isarray attribute must match, if set
     if (req->qualifierdeclaration.isarrayIsSet)
       if (!req->qualifierdeclaration.
-	  isarray ^ !(req->qualifierdeclaration.data.type & CMPI_ARRAY))
-	_SFCB_RETURN(iMethodErrResponse
-		     (hdr,
-		      getErrSegment(CMPI_RC_ERROR,
-				    "ISARRAY attribute and default value conflict")));
+          isarray ^ !(req->qualifierdeclaration.data.type & CMPI_ARRAY))
+        _SFCB_RETURN(iMethodErrResponse
+                     (hdr,
+                      getErrSegment(CMPI_RC_ERROR,
+                                    "ISARRAY attribute and default value conflict")));
 
     d.value = str2CMPIValue(d.type, req->qualifierdeclaration.data.value,
-			    (XtokValueReference *) & req->
-			    qualifierdeclaration.data.valueArray, NULL);
+                            (XtokValueReference *) &
+                            req->qualifierdeclaration.data.valueArray,
+                            NULL);
     ClQualifierAddQualifier(&q->hdr, &q->qualifierData,
-			    req->qualifierdeclaration.name, d);
-  } else {			// no default value - rely on ISARRAY
-				// attr, check if it's set
+                            req->qualifierdeclaration.name, d);
+  } else {                      // no default value - rely on ISARRAY
+    // attr, check if it's set
     /*
      * if(!req->qualifierdeclaration.isarrayIsSet)
      * _SFCB_RETURN(iMethodErrResponse(hdr, getErrSegment(CMPI_RC_ERROR,
@@ -2802,13 +2787,13 @@ setQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       if (resp) {
-	free(resp);
+        free(resp);
       }
       _SFCB_RETURN(iMethodResponse(hdr, NULL));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
-					       (char *) resp->object[0].
-					       data));
+                                               (char *) resp->object[0].
+                                               data));
     if (resp) {
       free(resp);
     }
@@ -2820,47 +2805,46 @@ setQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 #endif
 
-static RespSegments
+static          RespSegments
 notSupported(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   return iMethodErrResponse(hdr, strdup
-			    ("<ERROR CODE=\"7\" DESCRIPTION=\"Operation not supported xx\"/>\n"));
+                            ("<ERROR CODE=\"7\" DESCRIPTION=\"Operation not supported xx\"/>\n"));
 }
 
-
 static Handler  handlers[] = {
-  {notSupported},		// dummy
-  {getClass},			// OPS_GetClass 1
-  {getInstance},		// OPS_GetInstance 2
-  {deleteClass},		// OPS_DeleteClass 3
-  {deleteInstance},		// OPS_DeleteInstance 4
-  {createClass},		// OPS_CreateClass 5
-  {createInstance},		// OPS_CreateInstance 6
-  {notSupported},		// OPS_ModifyClass 7
-  {modifyInstance},		// OPS_ModifyInstance 8
-  {enumClasses},		// OPS_EnumerateClasses 9
-  {enumClassNames},		// OPS_EnumerateClassNames 10
-  {enumInstances},		// OPS_EnumerateInstances 11
-  {enumInstanceNames},		// OPS_EnumerateInstanceNames 12
-  {execQuery},			// OPS_ExecQuery 13
-  {associators},		// OPS_Associators 14
-  {associatorNames},		// OPS_AssociatorNames 15
-  {references},			// OPS_References 16
-  {referenceNames},		// OPS_ReferenceNames 17
-  {getProperty},		// OPS_GetProperty 18
-  {setProperty},		// OPS_SetProperty 19
+  {notSupported},               // dummy
+  {getClass},                   // OPS_GetClass 1
+  {getInstance},                // OPS_GetInstance 2
+  {deleteClass},                // OPS_DeleteClass 3
+  {deleteInstance},             // OPS_DeleteInstance 4
+  {createClass},                // OPS_CreateClass 5
+  {createInstance},             // OPS_CreateInstance 6
+  {notSupported},               // OPS_ModifyClass 7
+  {modifyInstance},             // OPS_ModifyInstance 8
+  {enumClasses},                // OPS_EnumerateClasses 9
+  {enumClassNames},             // OPS_EnumerateClassNames 10
+  {enumInstances},              // OPS_EnumerateInstances 11
+  {enumInstanceNames},          // OPS_EnumerateInstanceNames 12
+  {execQuery},                  // OPS_ExecQuery 13
+  {associators},                // OPS_Associators 14
+  {associatorNames},            // OPS_AssociatorNames 15
+  {references},                 // OPS_References 16
+  {referenceNames},             // OPS_ReferenceNames 17
+  {getProperty},                // OPS_GetProperty 18
+  {setProperty},                // OPS_SetProperty 19
 #ifdef HAVE_QUALREP
-  {getQualifier},		// OPS_GetQualifier 20
-  {setQualifier},		// OPS_SetQualifier 21
-  {deleteQualifier},		// OPS_DeleteQualifier 22
-  {enumQualifiers},		// OPS_EnumerateQualifiers 23
+  {getQualifier},               // OPS_GetQualifier 20
+  {setQualifier},               // OPS_SetQualifier 21
+  {deleteQualifier},            // OPS_DeleteQualifier 22
+  {enumQualifiers},             // OPS_EnumerateQualifiers 23
 #else
-  {notSupported},		// OPS_GetQualifier 20
-  {notSupported},		// OPS_SetQualifier 21
-  {notSupported},		// OPS_DeleteQualifier 22
-  {notSupported},		// OPS_EnumerateQualifiers 23
+  {notSupported},               // OPS_GetQualifier 20
+  {notSupported},               // OPS_SetQualifier 21
+  {notSupported},               // OPS_DeleteQualifier 22
+  {notSupported},               // OPS_EnumerateQualifiers 23
 #endif
-  {invokeMethod},		// OPS_InvokeMethod 24
+  {invokeMethod},               // OPS_InvokeMethod 24
 };
 
 RespSegments
@@ -2889,22 +2873,22 @@ handleCimXmlRequest(CimXmlRequestContext * ctx)
     gettimeofday(&ev, NULL);
     getrusage(RUSAGE_SELF, &ue);
     _sfcb_trace(1, __FILE__, __LINE__,
-		_sfcb_format_trace
-		("-#- XML Parsing %.5u %s-%s real: %f user: %f sys: %f \n",
-		 ctx->sessionId, opsName[hdr.opType], "n/a",
-		 timevalDiff(&sv, &ev), timevalDiff(&us.ru_utime,
-						    &ue.ru_utime),
-		 timevalDiff(&us.ru_stime, &ue.ru_stime)));
+                _sfcb_format_trace
+                ("-#- XML Parsing %.5u %s-%s real: %f user: %f sys: %f \n",
+                 ctx->sessionId, opsName[hdr.opType], "n/a",
+                 timevalDiff(&sv, &ev), timevalDiff(&us.ru_utime,
+                                                    &ue.ru_utime),
+                 timevalDiff(&us.ru_stime, &ue.ru_stime)));
   }
 #endif
 
   if (hdr.rc) {
     if (hdr.methodCall) {
       rs = methodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
-						 "invalid methodcall XML"));
+                                                 "invalid methodcall XML"));
     } else {
       rs = iMethodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
-						  "invalid imethodcall XML"));
+                                                  "invalid imethodcall XML"));
     }
   } else {
     hc = markHeap();
@@ -2922,7 +2906,6 @@ handleCimXmlRequest(CimXmlRequestContext * ctx)
   return rs;
 }
 
-
 int
 cleanupCimXmlRequest(RespSegments * rs)
 {
@@ -2931,3 +2914,8 @@ cleanupCimXmlRequest(RespSegments * rs)
   free(xmb);
   return 0;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

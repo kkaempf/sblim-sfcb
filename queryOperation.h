@@ -19,7 +19,6 @@
  *
  */
 
-
 #ifndef qlOperation_h
 #define qlOperation_h
 
@@ -98,7 +97,7 @@ struct qlOperandFt {
   char           *(*toString) (QLOperand *);
   char           *(*type) (QLOperand *);
   int             (*compare) (QLOperand *, QLOperand *,
-			      QLPropertySource *);
+                              QLPropertySource *);
 };
 
 struct qLqueryOperand {
@@ -123,9 +122,9 @@ QLOperand      *newIntQueryOperand(QLStatement *, long long val);
 QLOperand      *newDoubleQueryOperand(QLStatement *, double val);
 QLOperand      *newBooleanQueryOperand(QLStatement *, unsigned char val);
 QLOperand      *newCharsQueryOperand(QLStatement *, char *val);
-QLOperand      *newInstQueryOperand(QLStatement *, CMPIInstance * val);
+QLOperand      *newInstQueryOperand(QLStatement *, CMPIInstance *val);
 QLOperand      *newPropQueryOperand(QLStatement *,
-				    QLPropertyNameData * val);
+                                    QLPropertyNameData * val);
 QLPropertyNameData *newPropertyNameData(QLStatement *);
 
 typedef enum qlOp {
@@ -151,7 +150,6 @@ typedef enum qlOp {
   QL_nop,
   QL_bin
 } QLOp;
-
 
 struct qlOperationFt;
 typedef struct qlOperationFt QLOperationFt;
@@ -192,39 +190,38 @@ struct qlOperation {
 };
 
 QLOperation    *newLtOperation(QLStatement *, QLOperand * lo,
-			       QLOperand * ro);
+                               QLOperand * ro);
 QLOperation    *newGtOperation(QLStatement *, QLOperand * lo,
-			       QLOperand * ro);
+                               QLOperand * ro);
 QLOperation    *newLeOperation(QLStatement *, QLOperand * lo,
-			       QLOperand * ro);
+                               QLOperand * ro);
 QLOperation    *newGeOperation(QLStatement *, QLOperand * lo,
-			       QLOperand * ro);
+                               QLOperand * ro);
 QLOperation    *newEqOperation(QLStatement *, QLOperand * lo,
-			       QLOperand * ro);
+                               QLOperand * ro);
 QLOperation    *newNeOperation(QLStatement *, QLOperand * lo,
-			       QLOperand * ro);
+                               QLOperand * ro);
 QLOperation    *newIsaOperation(QLStatement *, QLOperand * lo,
-				QLOperand * ro);
+                                QLOperand * ro);
 QLOperation    *newLikeOperation(QLStatement *, QLOperand * lo,
-				 QLOperand * ro);
+                                 QLOperand * ro);
 QLOperation    *newNotLikeOperation(QLStatement *, QLOperand * lo,
-				    QLOperand * ro);
+                                    QLOperand * ro);
 
 QLOperation    *newAndOperation(QLStatement *, QLOperation * lo,
-				QLOperation * ro);
+                                QLOperation * ro);
 QLOperation    *newOrOperation(QLStatement *, QLOperation * lo,
-			       QLOperation * ro);
+                               QLOperation * ro);
 QLOperation    *newNotOperation(QLStatement *, QLOperation * lo);
 QLOperation    *newBinaryOperation(QLStatement *, QLOperation * lo);
 
 QLOperation    *newIsNullOperation(QLStatement *, QLOperand * lo);
 QLOperation    *newIsNotNullOperation(QLStatement *, QLOperand * lo);
 
-
-
 struct qlPropertySource {
   void           *data;
   char           *sns;
+
        
        
        
@@ -234,14 +231,10 @@ struct qlPropertySource {
       CMPIValue(*getValue) (QLPropertySource *, char *name, QLOpd * type);
 };
 
-
-
-
-
 struct qlStatementFt {
   void            (*release) (QLStatement *);
   CMPIInstance   *(*cloneAndFilter) (QLStatement *, CMPIInstance *,
-				     CMPIObjectPath *, char **);
+                                     CMPIObjectPath *, char **);
   void            (*setAllProperties) (QLStatement *, int allProperties);
   void            (*appendSelectPropertyName) (QLStatement *, char *name);
   void            (*addFromClass) (QLStatement *, char *cn, char *ca);
@@ -283,7 +276,7 @@ struct qlStatement {
 struct qlCollector {
   void            (*clear) (QLCollector * qc);
   void            (*addPropIdentifier) (QLCollector * qc, QLStatement * qs,
-					char *cls, char *prop, int index);
+                                        char *cls, char *prop, int index);
   QLPropertyNameData *propName;
 };
 
@@ -293,10 +286,15 @@ struct qlControl {
 };
 
 extern QLStatement *parseQuery(int mode, const char *query,
-			       const char *lang, const char *sns, int *rc);
+                               const char *lang, const char *sns, int *rc);
 
 #endif
 
 #ifdef UNITTEST
 extern int      queryOperation_test();
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -46,10 +46,10 @@
 #endif
 
 int             collectStat = 0;
-			      /**< flag determining whether statistic collection is enabled */
+                              /**< flag determining whether statistic collection is enabled */
 unsigned long   exFlags = 0;  /**< flag determining whether extra options are enabled (currently only determines interop support) */
 int             localClientMode = 0;
-			      /**< flag determining whether local client connections are enabled */
+                              /**< flag determining whether local client connections are enabled */
 
 void           *
 loadLibib(const char *libname)
@@ -58,7 +58,6 @@ loadLibib(const char *libname)
   snprintf(filename, 255, "lib%s.so", libname);
   return dlopen(filename, RTLD_LAZY);
 }
-
 
 static void    *
 getGenericEntryPoint(void *library, const char *ptype)
@@ -70,7 +69,6 @@ getGenericEntryPoint(void *library, const char *ptype)
   return sym;
 }
 
-
 static void    *
 getFixedEntryPoint(const char *provider, void *library, const char *ptype)
 {
@@ -81,19 +79,17 @@ getFixedEntryPoint(const char *provider, void *library, const char *ptype)
   return sym;
 }
 
-
 typedef CMPIInstanceMI *(*GENERIC_InstanceMI) (CMPIBroker * broker,
-					       CMPIContext * ctx,
-					       const char *provider,
-					       CMPIStatus * status);
+                                               CMPIContext *ctx,
+                                               const char *provider,
+                                               CMPIStatus *status);
 typedef CMPIInstanceMI *(*FIXED_InstanceMI) (CMPIBroker * broker,
-					     CMPIContext * ctx,
-					     CMPIStatus * status);
-
+                                             CMPIContext *ctx,
+                                             CMPIStatus *status);
 
 CMPIInstanceMI *
 loadInstanceMI(const char *provider, void *library,
-	       CMPIBroker * broker, CMPIContext * ctx, CMPIStatus * status)
+               CMPIBroker * broker, CMPIContext *ctx, CMPIStatus *status)
 {
   CMPIInstanceMI *mi;
 
@@ -103,13 +99,13 @@ loadInstanceMI(const char *provider, void *library,
       getGenericEntryPoint(library, "Instance");
   if (g == NULL) {
     FIXED_InstanceMI f = (FIXED_InstanceMI)
-	getFixedEntryPoint(provider, library, "Instance");
+        getFixedEntryPoint(provider, library, "Instance");
     if (f == NULL)
       _SFCB_RETURN(NULL);
     if (broker) {
       mi = (f) (broker, ctx, status);
       if (mi && status->rc == CMPI_RC_OK)
-	_SFCB_RETURN(mi);
+        _SFCB_RETURN(mi);
     }
     _SFCB_RETURN(NULL);
   }
@@ -121,21 +117,19 @@ loadInstanceMI(const char *provider, void *library,
   _SFCB_RETURN(NULL);
 };
 
-
 typedef CMPIAssociationMI *(*GENERIC_AssociationMI) (CMPIBroker * broker,
-						     CMPIContext * ctx,
-						     const char *provider,
-						     CMPIStatus * status);
+                                                     CMPIContext *ctx,
+                                                     const char *provider,
+                                                     CMPIStatus *status);
 typedef CMPIAssociationMI *(*FIXED_AssociationMI) (CMPIBroker * broker,
-						   CMPIContext * ctx,
-						   CMPIStatus * status);
-
+                                                   CMPIContext *ctx,
+                                                   CMPIStatus *status);
 
 CMPIAssociationMI *
 loadAssociationMI(const char *provider,
-		  void *library,
-		  CMPIBroker * broker,
-		  CMPIContext * ctx, CMPIStatus * status)
+                  void *library,
+                  CMPIBroker * broker,
+                  CMPIContext *ctx, CMPIStatus *status)
 {
   CMPIAssociationMI *mi;
 
@@ -146,13 +140,13 @@ loadAssociationMI(const char *provider,
 
   if (g == NULL) {
     FIXED_AssociationMI f = (FIXED_AssociationMI)
-	getFixedEntryPoint(provider, library, "Association");
+        getFixedEntryPoint(provider, library, "Association");
     if (f == NULL)
       _SFCB_RETURN(NULL);
     if (broker) {
       mi = (f) (broker, ctx, status);
       if (mi && status->rc == CMPI_RC_OK)
-	_SFCB_RETURN(mi);
+        _SFCB_RETURN(mi);
     }
     _SFCB_RETURN(NULL);
   }
@@ -164,19 +158,17 @@ loadAssociationMI(const char *provider,
   _SFCB_RETURN(NULL);
 };
 
-
 typedef CMPIMethodMI *(*GENERIC_MethodMI) (CMPIBroker * broker,
-					   CMPIContext * ctelsex,
-					   const char *provider,
-					   CMPIStatus * status);
+                                           CMPIContext *ctelsex,
+                                           const char *provider,
+                                           CMPIStatus *status);
 typedef CMPIMethodMI *(*FIXED_MethodMI) (CMPIBroker * broker,
-					 CMPIContext * ctx,
-					 CMPIStatus * status);
-
+                                         CMPIContext *ctx,
+                                         CMPIStatus *status);
 
 CMPIMethodMI   *
 loadMethodMI(const char *provider, void *library,
-	     CMPIBroker * broker, CMPIContext * ctx, CMPIStatus * status)
+             CMPIBroker * broker, CMPIContext *ctx, CMPIStatus *status)
 {
   CMPIMethodMI   *mi;
 
@@ -186,13 +178,13 @@ loadMethodMI(const char *provider, void *library,
       (GENERIC_MethodMI) getGenericEntryPoint(library, "Method");
   if (g == NULL) {
     FIXED_MethodMI  f =
-	(FIXED_MethodMI) getFixedEntryPoint(provider, library, "Method");
+        (FIXED_MethodMI) getFixedEntryPoint(provider, library, "Method");
     if (f == NULL)
       _SFCB_RETURN(NULL);
     if (broker) {
       mi = (f) (broker, ctx, status);
       if (mi && status->rc == CMPI_RC_OK)
-	_SFCB_RETURN(mi);
+        _SFCB_RETURN(mi);
     }
     _SFCB_RETURN(NULL);
   }
@@ -204,18 +196,17 @@ loadMethodMI(const char *provider, void *library,
   _SFCB_RETURN(NULL);
 }
 
-
 typedef CMPIPropertyMI *(*GENERIC_PropertyMI) (CMPIBroker * broker,
-					       CMPIContext * ctx,
-					       const char *provider,
-					       CMPIStatus * status);
+                                               CMPIContext *ctx,
+                                               const char *provider,
+                                               CMPIStatus *status);
 typedef CMPIPropertyMI *(*FIXED_PropertyMI) (CMPIBroker * broker,
-					     CMPIContext * ctx,
-					     CMPIStatus * status);
+                                             CMPIContext *ctx,
+                                             CMPIStatus *status);
 
 CMPIPropertyMI *
 loadPropertyMI(const char *provider, void *library,
-	       CMPIBroker * broker, CMPIContext * ctx, CMPIStatus * status)
+               CMPIBroker * broker, CMPIContext *ctx, CMPIStatus *status)
 {
   CMPIPropertyMI *mi;
 
@@ -225,14 +216,14 @@ loadPropertyMI(const char *provider, void *library,
       (GENERIC_PropertyMI) getGenericEntryPoint(library, "Property");
   if (g == NULL) {
     FIXED_PropertyMI f =
-	(FIXED_PropertyMI) getFixedEntryPoint(provider, library,
-					      "Property");
+        (FIXED_PropertyMI) getFixedEntryPoint(provider, library,
+                                              "Property");
     if (f == NULL)
       _SFCB_RETURN(NULL);
     if (broker) {
       mi = (f) (broker, ctx, status);
       if (mi && status->rc == CMPI_RC_OK)
-	_SFCB_RETURN(mi);
+        _SFCB_RETURN(mi);
     }
     _SFCB_RETURN(NULL);
   }
@@ -245,21 +236,18 @@ loadPropertyMI(const char *provider, void *library,
   _SFCB_RETURN(NULL);
 };
 
-
 typedef CMPIIndicationMI *(*GENERIC_IndicationMI) (CMPIBroker * broker,
-						   CMPIContext * ctx,
-						   const char *provider,
-						   CMPIStatus * status);
+                                                   CMPIContext *ctx,
+                                                   const char *provider,
+                                                   CMPIStatus *status);
 typedef CMPIIndicationMI *(*FIXED_IndicationMI) (CMPIBroker * broker,
-						 CMPIContext * ctx,
-						 CMPIStatus * status);
-
+                                                 CMPIContext *ctx,
+                                                 CMPIStatus *status);
 
 CMPIIndicationMI *
 loadIndicationMI(const char *provider,
-		 void *library,
-		 CMPIBroker * broker, CMPIContext * ctx,
-		 CMPIStatus * status)
+                 void *library,
+                 CMPIBroker * broker, CMPIContext *ctx, CMPIStatus *status)
 {
   CMPIIndicationMI *mi;
 
@@ -267,17 +255,17 @@ loadIndicationMI(const char *provider,
 
   GENERIC_IndicationMI g =
       (GENERIC_IndicationMI) getGenericEntryPoint(library,
-						  "Indication");
+                                                  "Indication");
   if (g == NULL) {
     FIXED_IndicationMI f =
-	(FIXED_IndicationMI) getFixedEntryPoint(provider, library,
-						"Indication");
+        (FIXED_IndicationMI) getFixedEntryPoint(provider, library,
+                                                "Indication");
     if (f == NULL)
       _SFCB_RETURN(NULL);
     if (broker) {
       mi = (f) (broker, ctx, status);
       if (mi && status->rc == CMPI_RC_OK)
-	_SFCB_RETURN(mi);
+        _SFCB_RETURN(mi);
     }
     _SFCB_RETURN(NULL);
   }
@@ -290,22 +278,20 @@ loadIndicationMI(const char *provider,
   _SFCB_RETURN(NULL);
 };
 
-
-
 typedef CMPIClassMI *(*FIXED_ClassMI) (CMPIBroker * broker,
-				       CMPIContext * ctx,
-				       CMPIStatus * status);
+                                       CMPIContext *ctx,
+                                       CMPIStatus *status);
 
 CMPIClassMI    *
 loadClassMI(const char *provider,
-	    void *library,
-	    CMPIBroker * broker, CMPIContext * ctx, CMPIStatus * status)
+            void *library,
+            CMPIBroker * broker, CMPIContext *ctx, CMPIStatus *status)
 {
   CMPIClassMI    *mi;
 
   _SFCB_ENTER(TRACE_PROVIDERDRV, "loadClassMI");
   FIXED_ClassMI   f = (FIXED_ClassMI) getFixedEntryPoint(provider, library,
-							 "Class");
+                                                         "Class");
   if (f == NULL)
     _SFCB_RETURN(NULL);
 
@@ -318,22 +304,21 @@ loadClassMI(const char *provider,
 };
 
 typedef CMPIQualifierDeclMI *(*FIXED_QualifierDeclMI) (CMPIBroker * broker,
-						       CMPIContext * ctx,
-						       CMPIStatus *
-						       status);
+                                                       CMPIContext *ctx,
+                                                       CMPIStatus *status);
 
 CMPIQualifierDeclMI *
 loadQualifierDeclMI(const char *provider,
-		    void *library,
-		    CMPIBroker * broker, CMPIContext * ctx,
-		    CMPIStatus * status)
+                    void *library,
+                    CMPIBroker * broker, CMPIContext *ctx,
+                    CMPIStatus *status)
 {
   CMPIQualifierDeclMI *mi;
 
   _SFCB_ENTER(TRACE_PROVIDERDRV, "loadQualifierDeclMI");
   FIXED_QualifierDeclMI f =
       (FIXED_QualifierDeclMI) getFixedEntryPoint(provider, library,
-						 "QualifierDecl");
+                                                 "QualifierDecl");
   if (f == NULL)
     _SFCB_RETURN(NULL);
 
@@ -347,8 +332,6 @@ loadQualifierDeclMI(const char *provider,
 
 /****************************************************************************/
 
-
-
 /** Exits the program with a memory allocation error message in case the given 
  *  condition holds.
  */
@@ -357,7 +340,6 @@ loadQualifierDeclMI(const char *provider,
     error_at_line ( -1, errno, __FILE__, __LINE__, \
 		    "unable to allocate requested memory." ); \
   }
-
 
 /**
  * flag to ensure MM is initialized only once
@@ -373,8 +355,6 @@ void            tool_mm_set_broker(void *broker, void *ctx);
 void           *tool_mm_get_broker(void **ctx);
 void           *memAddEncObj(int mode, void *ptr, size_t size, int *memId);
 int             memAdd(void *ptr, int *memId);
-
-
 
 void           *
 tool_mm_load_lib(const char *libname)
@@ -399,16 +379,16 @@ __flush_mt(managed_thread * mt)
   while (mt->hc.memEncUsed) {
     --mt->hc.memEncUsed;
     _SFCB_TRACE(1,
-		("memEnc %d %d %p\n", currentProc, mt->hc.memEncUsed,
-		 mt->hc.memEncObjs[mt->hc.memEncUsed]))
-	if (mt->hc.memEncObjs[mt->hc.memEncUsed]) {
+                ("memEnc %d %d %p\n", currentProc, mt->hc.memEncUsed,
+                 mt->hc.memEncObjs[mt->hc.memEncUsed]))
+        if (mt->hc.memEncObjs[mt->hc.memEncUsed]) {
       if (mt->hc.memEncObjs[mt->hc.memEncUsed]->ft == NULL) {
-	fprintf(stderr, "***** NULL ft in enc obj record *****\n");
-	abort();
+        fprintf(stderr, "***** NULL ft in enc obj record *****\n");
+        abort();
       }
       mt->hc.memEncObjs[mt->hc.memEncUsed]->ft->release(mt->hc.
-							memEncObjs[mt->hc.
-								   memEncUsed]);
+                                                        memEncObjs[mt->hc.
+                                                                   memEncUsed]);
     }
     mt->hc.memEncObjs[mt->hc.memEncUsed] = NULL;
   };
@@ -520,7 +500,6 @@ __memInit(int dontforce)
   return mt;
 }
 
-
 /**
  * Allocates zeroed memory and eventually puts it under memory mangement.
  *
@@ -538,7 +517,7 @@ memAlloc(int add, size_t size, int *memId)
   void           *result = calloc(1, size);
   if (!result) {
     _SFCB_TRACE(1, ("--- memAlloc %u %d\n", size, currentProc))
-	abort();
+        abort();
   }
   __ALLOC_ERROR(!result);
 
@@ -548,8 +527,6 @@ memAlloc(int add, size_t size, int *memId)
   _SFCB_TRACE(1, ("--- Area: %p size: %d", result, size));
   _SFCB_RETURN(result);
 }
-
-
 
 /**
  * Adds ptr to the list of managed objects for the current thread.
@@ -576,7 +553,7 @@ memAdd(void *ptr, int *memId)
   if (mt->hc.memUsed == mt->hc.memSize) {
     mt->hc.memSize += MT_SIZE_STEP;
     mt->hc.memObjs =
-	(void **) realloc(mt->hc.memObjs, mt->hc.memSize * sizeof(void *));
+        (void **) realloc(mt->hc.memObjs, mt->hc.memSize * sizeof(void *));
     __ALLOC_ERROR(!mt->hc.memObjs);
   }
 
@@ -608,8 +585,8 @@ memAddEncObj(int mode, void *ptr, size_t size, int *memId)
   if (mt->hc.memEncUsed == mt->hc.memEncSize) {
     mt->hc.memEncSize += MT_SIZE_STEP;
     mt->hc.memEncObjs =
-	(Object **) realloc(mt->hc.memEncObjs,
-			    mt->hc.memEncSize * sizeof(void *));
+        (Object **) realloc(mt->hc.memEncObjs,
+                            mt->hc.memEncSize * sizeof(void *));
     __ALLOC_ERROR(!mt->hc.memEncObjs);
   }
 
@@ -630,8 +607,8 @@ memLinkEncObj(void *object, int *memId)
   if (mt->hc.memEncUsed == mt->hc.memEncSize) {
     mt->hc.memEncSize += MT_SIZE_STEP;
     mt->hc.memEncObjs =
-	(Object **) realloc(mt->hc.memEncObjs,
-			    mt->hc.memEncSize * sizeof(void *));
+        (Object **) realloc(mt->hc.memEncObjs,
+                            mt->hc.memEncSize * sizeof(void *));
     __ALLOC_ERROR(!mt->hc.memEncObjs);
   }
 
@@ -643,15 +620,12 @@ memUnlinkEncObj(int memId)
 {
   if (localClientMode)
     return;
-  managed_thread *mt = __memInit(1);	/* if none found we shouldn't
-					 * delete */
+  managed_thread *mt = __memInit(1);    /* if none found we shouldn't
+                                         * delete */
 
   if (mt && memId != MEM_RELEASED && memId != MEM_NOT_TRACKED)
     mt->hc.memEncObjs[memId - 1] = NULL;
 }
-
-
-
 
 void
 tool_mm_flush()
@@ -669,9 +643,6 @@ tool_mm_flush()
   }
   _SFCB_EXIT();
 }
-
-
-
 
 void
 tool_mm_set_broker(void *broker, void *ctx)
@@ -694,7 +665,6 @@ tool_mm_get_broker(void **ctx)
     *ctx = mt->ctx;
   _SFCB_RETURN(mt->broker);
 }
-
 
 void           *
 getThreadDataSlot()
@@ -750,8 +720,6 @@ releaseHeap(void *hc)
   _SFCB_EXIT();
 }
 
-
-
 #include "utilft.h"
 #include "providerRegister.h"
 
@@ -763,7 +731,6 @@ init_sfcBroker()
   pReg = newProviderRegister();
   return 0;
 }
-
 
 int
 uninit_sfcBroker()
@@ -805,7 +772,7 @@ encode64(char *data)
     if (i < len) {
       c = (data[i] << 2) & 0x3f;
       if (++i < len)
-	c |= (data[i] >> 6) & 0x03;
+        c |= (data[i] >> 6) & 0x03;
 
       ret[o++] = cvt[(int) c];
     } else {
@@ -853,7 +820,7 @@ decode64(char *din)
     if (++i < len) {
       c = data[i];
       if ('=' == c)
-	break;
+        break;
       c = (char) find(cvt, c);
       c1 = ((c1 << 4) & 0xf0) | ((c >> 2) & 0xf);
       ret[o++] = c1;
@@ -862,7 +829,7 @@ decode64(char *din)
     if (++i < len) {
       c1 = data[i];
       if ('=' == c1)
-	break;
+        break;
       c1 = (char) find(cvt, c1);
       c = ((c << 6) & 0xc0) | c1;
       ret[o++] = c;
@@ -899,10 +866,10 @@ dump(char *msg, void *a, int len)
     if (k == 8) {
       printf(" *");
       for (l = 0; l < 32; l++) {
-	if (bb[l] >= ' ' && bb[l] <= 'z')
-	  printf("%c", bb[l]);
-	else
-	  printf(".");
+        if (bb[l] >= ' ' && bb[l] <= 'z')
+          printf("%c", bb[l]);
+        else
+          printf(".");
       }
       bb = &bb[32];
       k = 0;
@@ -912,13 +879,11 @@ dump(char *msg, void *a, int len)
   printf("\n");
 }
 
-
 /*
  * -------------------------------------------- ------ -- Sfcb control
  * statement scanner support ------
  * -------------------------------------------- 
  */
-
 
 void
 cntlSkipws(char **p)
@@ -1055,7 +1020,7 @@ dumpTiming(int pid)
 }
 
 void
-setStatus(CMPIStatus * st, CMPIrc rc, char *msg)
+setStatus(CMPIStatus *st, CMPIrc rc, char *msg)
 {
   st->rc = rc;
   if (rc != 0 && msg)
@@ -1065,7 +1030,7 @@ setStatus(CMPIStatus * st, CMPIrc rc, char *msg)
 }
 
 void
-showStatus(CMPIStatus * st, char *msg)
+showStatus(CMPIStatus *st, char *msg)
 {
   char           *m = NULL;
   if (st->msg)
@@ -1108,3 +1073,8 @@ sfcb_snprintf(const char *fmt, ...)
   va_end(ap);
   return str;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

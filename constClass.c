@@ -19,9 +19,6 @@
  *
  */
 
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,12 +30,12 @@
 // #define DEB(x) x
 #define DEB(x)
 
-extern CMPIArray *native_make_CMPIArray(CMPIData * av, CMPIStatus * rc,
-					ClObjectHdr * hdr);
+extern CMPIArray *native_make_CMPIArray(CMPIData *av, CMPIStatus *rc,
+                                        ClObjectHdr * hdr);
 extern CMPIObjectPath *getObjectPath(char *path, char **msg);
 
 unsigned long   getConstClassSerializedSize(CMPIConstClass * cl);
-static CMPIConstClass *cls_clone(CMPIConstClass * cc, CMPIStatus * rc);
+static CMPIConstClass *cls_clone(CMPIConstClass * cc, CMPIStatus *rc);
 
 static CMPIStatus
 release(CMPIConstClass * cc)
@@ -48,7 +45,7 @@ release(CMPIConstClass * cc)
   if (cc->refCount == 0) {
     if (cc->hdl) {
       if (cc->hdl != (void *) (cc + 1))
-	ClClassFreeClass(cc->hdl);
+        ClClassFreeClass(cc->hdl);
     }
     free(cc);
   }
@@ -71,7 +68,7 @@ getCharClassName(CMPIConstClass * cc)
 }
 
 static CMPIString *
-getClassName(CMPIConstClass * cc, CMPIStatus * rc)
+getClassName(CMPIConstClass * cc, CMPIStatus *rc)
 {
   const char     *cn = getCharClassName(cc);
   return sfcb_native_new_CMPIString(cn, rc, 0);
@@ -87,7 +84,7 @@ getCharSuperClassName(CMPIConstClass * cc)
 }
 
 static CMPIString *
-getSuperClassName(CMPIConstClass * cc, CMPIStatus * rc)
+getSuperClassName(CMPIConstClass * cc, CMPIStatus *rc)
 {
   const char     *cn = getCharSuperClassName(cc);
   return sfcb_native_new_CMPIString(cn, rc, 0);
@@ -122,7 +119,7 @@ toString(CMPIConstClass * cc)
 }
 
 static CMPICount
-getPropertyCount(CMPIConstClass * cc, CMPIStatus * rc)
+getPropertyCount(CMPIConstClass * cc, CMPIStatus *rc)
 {
   ClClass        *cls = (ClClass *) cc->hdl;
   if (rc)
@@ -131,9 +128,9 @@ getPropertyCount(CMPIConstClass * cc, CMPIStatus * rc)
 }
 
 CMPIData
-getPropertyQualsAt(CMPIConstClass * cc, CMPICount i, CMPIString ** name,
-		   unsigned long *quals, CMPIString ** refName,
-		   CMPIStatus * rc)
+getPropertyQualsAt(CMPIConstClass * cc, CMPICount i, CMPIString **name,
+                   unsigned long *quals, CMPIString **refName,
+                   CMPIStatus *rc)
 {
   ClClass        *cls = (ClClass *) cc->hdl;
   char           *n;
@@ -151,14 +148,15 @@ getPropertyQualsAt(CMPIConstClass * cc, CMPICount i, CMPIString ** name,
     char           *msg;
     if ((rv.state & CMPI_nullValue) == 0)
       rv.value.ref = getObjectPath((char *)
-				   ClObjectGetClString(&cls->hdr,
-						       (ClString *) & rv.
-						       value.chars), &msg);
+                                   ClObjectGetClString(&cls->hdr,
+                                                       (ClString *) &
+                                                       rv.value.chars),
+                                   &msg);
   }
   if (rv.type & CMPI_ARRAY && rv.value.array) {
     rv.value.array =
-	native_make_CMPIArray((CMPIData *) rv.value.array, NULL,
-			      &cls->hdr);
+        native_make_CMPIArray((CMPIData *) rv.value.array, NULL,
+                              &cls->hdr);
   }
   if (name) {
     *name = sfcb_native_new_CMPIString(n, NULL, 0);
@@ -176,14 +174,14 @@ getPropertyQualsAt(CMPIConstClass * cc, CMPICount i, CMPIString ** name,
 }
 
 static CMPIData
-getPropertyAt(CMPIConstClass * cc, CMPICount i, CMPIString ** name,
-	      CMPIStatus * rc)
+getPropertyAt(CMPIConstClass * cc, CMPICount i, CMPIString **name,
+              CMPIStatus *rc)
 {
   return getPropertyQualsAt(cc, i, name, NULL, NULL, rc);
 }
 
 static CMPIData
-getQualifier(CMPIConstClass * cc, const char *name, CMPIStatus * rc)
+getQualifier(CMPIConstClass * cc, const char *name, CMPIStatus *rc)
 {
   ClClass        *cls = (ClClass *) cc->hdl;
   CMPIData        rv_notfound = { 0, CMPI_notFound, {0} };
@@ -195,24 +193,24 @@ getQualifier(CMPIConstClass * cc, const char *name, CMPIStatus * rc)
   for (i = 0; i < cnt; i++) {
     if (ClClassGetQualifierAt(cls, i, &rv, &qname)) {
       if (rc)
-	CMSetStatus(rc, CMPI_RC_ERR_NOT_FOUND);
+        CMSetStatus(rc, CMPI_RC_ERR_NOT_FOUND);
       return rv_notfound;
     }
     if (strcasecmp(name, qname) == 0) {
       if (rv.type == CMPI_chars) {
-	rv.value.string = sfcb_native_new_CMPIString(ClObjectGetClString
-						     (&cls->hdr,
-						      (ClString *) & rv.
-						      value.chars), NULL,
-						     0);
-	rv.type = CMPI_string;
+        rv.value.string = sfcb_native_new_CMPIString(ClObjectGetClString
+                                                     (&cls->hdr,
+                                                      (ClString *) &
+                                                      rv.value.chars),
+                                                     NULL, 0);
+        rv.type = CMPI_string;
       }
       if (rv.type & CMPI_ARRAY && rv.value.array) {
-	rv.value.array = native_make_CMPIArray((CMPIData *) rv.value.array,
-					       NULL, &cls->hdr);
+        rv.value.array = native_make_CMPIArray((CMPIData *) rv.value.array,
+                                               NULL, &cls->hdr);
       }
       if (rc)
-	CMSetStatus(rc, CMPI_RC_OK);
+        CMSetStatus(rc, CMPI_RC_OK);
       return rv;
     };
   }
@@ -222,8 +220,8 @@ getQualifier(CMPIConstClass * cc, const char *name, CMPIStatus * rc)
 }
 
 static CMPIData
-getQualifierAt(CMPIConstClass * cc, CMPICount i, CMPIString ** name,
-	       CMPIStatus * rc)
+getQualifierAt(CMPIConstClass * cc, CMPICount i, CMPIString **name,
+               CMPIStatus *rc)
 {
   ClClass        *cls = (ClClass *) cc->hdl;
   char           *n;
@@ -235,14 +233,14 @@ getQualifierAt(CMPIConstClass * cc, CMPICount i, CMPIString ** name,
   }
   if (rv.type == CMPI_chars) {
     rv.value.string = sfcb_native_new_CMPIString(ClObjectGetClString
-						 (&cls->hdr,
-						  (ClString *) & rv.value.
-						  chars), NULL, 0);
+                                                 (&cls->hdr,
+                                                  (ClString *) & rv.value.
+                                                  chars), NULL, 0);
     rv.type = CMPI_string;
   }
   if (rv.type & CMPI_ARRAY && rv.value.array) {
     rv.value.array = native_make_CMPIArray((CMPIData *) rv.value.array,
-					   NULL, &cls->hdr);
+                                           NULL, &cls->hdr);
   }
   if (name) {
     *name = sfcb_native_new_CMPIString(n, NULL, 0);
@@ -253,7 +251,7 @@ getQualifierAt(CMPIConstClass * cc, CMPICount i, CMPIString ** name,
 }
 
 static CMPICount
-getQualifierCount(CMPIConstClass * cc, CMPIStatus * rc)
+getQualifierCount(CMPIConstClass * cc, CMPIStatus *rc)
 {
   ClClass        *cls = (ClClass *) cc->hdl;
   if (rc)
@@ -263,7 +261,7 @@ getQualifierCount(CMPIConstClass * cc, CMPIStatus * rc)
 
 CMPIData
 internalGetPropQualAt(CMPIConstClass * cc, CMPICount p, CMPICount i,
-		      CMPIString ** name, CMPIStatus * rc)
+                      CMPIString **name, CMPIStatus *rc)
 {
   ClClass        *cls = (ClClass *) cc->hdl;
   char           *n;
@@ -278,15 +276,15 @@ internalGetPropQualAt(CMPIConstClass * cc, CMPICount p, CMPICount i,
   }
   if (rv.type == CMPI_chars) {
     rv.value.string = sfcb_native_new_CMPIString(ClObjectGetClString
-						 (&cls->hdr,
-						  (ClString *) & rv.value.
-						  chars), NULL, 0);
+                                                 (&cls->hdr,
+                                                  (ClString *) & rv.value.
+                                                  chars), NULL, 0);
     rv.type = CMPI_string;
   }
   if (rv.type & CMPI_ARRAY && rv.value.dataPtr.ptr) {
     rv.value.array =
-	native_make_CMPIArray((CMPIData *) rv.value.dataPtr.ptr, NULL,
-			      &cls->hdr);
+        native_make_CMPIArray((CMPIData *) rv.value.dataPtr.ptr, NULL,
+                              &cls->hdr);
   }
   if (name) {
     *name = sfcb_native_new_CMPIString(n, NULL, 0);
@@ -298,7 +296,7 @@ internalGetPropQualAt(CMPIConstClass * cc, CMPICount p, CMPICount i,
 
 static CMPIData
 getPropQualifierAt(CMPIConstClass * cc, const char *cp, CMPICount i,
-		   CMPIString ** name, CMPIStatus * rc)
+                   CMPIString **name, CMPIStatus *rc)
 {
   ClClass        *cls = (ClClass *) cc->hdl;
   ClSection      *prps = &cls->properties;
@@ -308,7 +306,7 @@ getPropQualifierAt(CMPIConstClass * cc, const char *cp, CMPICount i,
 
 static CMPIData
 getPropQualifier(CMPIConstClass * cc, const char *cp, const char *cpq,
-		 CMPIStatus * rc)
+                 CMPIStatus *rc)
 {
   ClClass        *cls = (ClClass *) cc->hdl;
   ClSection      *prps = &cls->properties;
@@ -318,7 +316,6 @@ getPropQualifier(CMPIConstClass * cc, const char *cp, const char *cpq,
   CMPICount       p = ClObjectLocateProperty(&cls->hdr, prps, cp);
   CMPICount       num = ClClassGetPropQualifierCount(cls, p - 1);
   CMPICount       i;
-
 
   /*
    * special qualifier handling 
@@ -338,21 +335,21 @@ getPropQualifier(CMPIConstClass * cc, const char *cp, const char *cpq,
 
   for (i = 0; i < num; i++) {
     if (ClClassGetPropQualifierAt(cls, p - 1, i, &rv, &n) == 0
-	&& strcasecmp(cpq, n) == 0) {
+        && strcasecmp(cpq, n) == 0) {
       if (rv.type == CMPI_chars) {
-	rv.value.string = sfcb_native_new_CMPIString(ClObjectGetClString
-						     (&cls->hdr,
-						      (ClString *) & rv.
-						      value.chars), NULL,
-						     0);
-	rv.type = CMPI_string;
+        rv.value.string = sfcb_native_new_CMPIString(ClObjectGetClString
+                                                     (&cls->hdr,
+                                                      (ClString *) &
+                                                      rv.value.chars),
+                                                     NULL, 0);
+        rv.type = CMPI_string;
       } else if ((rv.type & CMPI_ARRAY) && rv.value.dataPtr.ptr) {
-	rv.value.array =
-	    native_make_CMPIArray((CMPIData *) rv.value.dataPtr.ptr, NULL,
-				  &cls->hdr);
+        rv.value.array =
+            native_make_CMPIArray((CMPIData *) rv.value.dataPtr.ptr, NULL,
+                                  &cls->hdr);
       }
       if (rc)
-	CMSetStatus(rc, CMPI_RC_OK);
+        CMSetStatus(rc, CMPI_RC_OK);
       return rv;
     }
     if (n && isMallocedStrBuf(&cls->hdr)) {
@@ -367,7 +364,7 @@ getPropQualifier(CMPIConstClass * cc, const char *cp, const char *cpq,
 
 static CMPICount
 getPropQualifierCount(CMPIConstClass * cc, const char *prop,
-		      CMPIStatus * rc)
+                      CMPIStatus *rc)
 {
   ClClass        *cls = (ClClass *) cc->hdl;
   ClSection      *prps = &cls->properties;
@@ -377,10 +374,9 @@ getPropQualifierCount(CMPIConstClass * cc, const char *prop,
   return ClClassGetPropQualifierCount(cls, p - 1);
 }
 
-
 CMPIData
 getPropertyQuals(CMPIConstClass * cc, const char *id, unsigned long *quals,
-		 CMPIStatus * rc)
+                 CMPIStatus *rc)
 {
   ClClass        *cls = (ClClass *) cc->hdl;
   ClSection      *prps = &cls->properties;
@@ -397,7 +393,7 @@ getPropertyQuals(CMPIConstClass * cc, const char *id, unsigned long *quals,
 }
 
 static CMPIData
-getProperty(CMPIConstClass * cc, const char *id, CMPIStatus * rc)
+getProperty(CMPIConstClass * cc, const char *id, CMPIStatus *rc)
 {
   return getPropertyQuals(cc, id, NULL, rc);
 }
@@ -457,7 +453,7 @@ struct _CMPIConstClass_FT ift = {
 CMPIConstClass_FT *CMPIConstClassFT = &ift;
 
 static CMPIConstClass *
-cls_clone(CMPIConstClass * cc, CMPIStatus * rc)
+cls_clone(CMPIConstClass * cc, CMPIStatus *rc)
 {
   CMPIConstClass *cl =
       (CMPIConstClass *) malloc(getConstClassSerializedSize(cc));
@@ -482,7 +478,7 @@ getSerializedConstClass(CMPIConstClass * cl, void *area)
 {
   memcpy(area, cl, sizeof(CMPIConstClass));
   ClClassRebuildClass((ClClass *) cl->hdl,
-		      (void *) ((char *) area + sizeof(CMPIConstClass)));
+                      (void *) ((char *) area + sizeof(CMPIConstClass)));
 }
 
 CMPIConstClass *
@@ -491,7 +487,7 @@ relocateSerializedConstClass(void *area)
   CMPIConstClass *cl = (CMPIConstClass *) area;
   cl->hdl = cl + 1;
   cl->ft = &ift;
-  cl->refCount = 1;		/* this is a kludge: disallow double free */
+  cl->refCount = 1;             /* this is a kludge: disallow double free */
   ClClassRelocateClass((ClClass *) cl->hdl);
   return (CMPIConstClass *) cl;
 }
@@ -528,3 +524,8 @@ initConstClass(ClClass * cl)
   c.refCount = 0;
   return c;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

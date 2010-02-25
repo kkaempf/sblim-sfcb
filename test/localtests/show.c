@@ -29,13 +29,13 @@ showObjectPath(CMPIObjectPath * objectpath)
     for (i = 0; i < numkeys; i++) {
       CMPIString     *keyname;
       CMPIData        data = objectpath->ft->getKeyAt(objectpath, i,
-						      &keyname, NULL);
+                                                      &keyname, NULL);
       printf("\t%s=%s\n", (char *) keyname->hdl,
-	     cv = value2Chars(data.type, &data.value));
+             cv = value2Chars(data.type, &data.value));
       if (cv)
-	free(cv);
+        free(cv);
       if (keyname)
-	CMRelease(keyname);
+        CMRelease(keyname);
     }
   }
 
@@ -92,16 +92,16 @@ showProperty(CMPIData data, char *name)
                       n;
       n = CMGetArrayCount(arr, NULL);
       for (j = 0; j < n; ++j) {
-	CMPIData        ele = CMGetArrayElementAt(arr, j, NULL);
-	valuestr = value2Chars(eletyp, &ele.value);
-	printf("\t%s[%d]=%s\n", name, j, valuestr);
-	free(valuestr);
+        CMPIData        ele = CMGetArrayElementAt(arr, j, NULL);
+        valuestr = value2Chars(eletyp, &ele.value);
+        printf("\t%s[%d]=%s\n", name, j, valuestr);
+        free(valuestr);
       }
     } else {
       if (state == CMPI_goodValue) {
-	valuestr = value2Chars(data.type, &data.value);
-	printf("\t%s=%s\n", name, valuestr);
-	free(valuestr);
+        valuestr = value2Chars(data.type, &data.value);
+        printf("\t%s=%s\n", name, valuestr);
+        free(valuestr);
       }
     }
   } else {
@@ -110,7 +110,7 @@ showProperty(CMPIData data, char *name)
 }
 
 void
-showInstance(CMPIInstance * instance)
+showInstance(CMPIInstance *instance)
 {
   CMPIObjectPath *objectpath = instance->ft->getObjectPath(instance, NULL);
   CMPIString     *objectpathname =
@@ -141,13 +141,13 @@ showInstance(CMPIInstance * instance)
     for (i = 0; i < numkeys; i++) {
       CMPIString     *keyname;
       CMPIData        data = objectpath->ft->getKeyAt(objectpath, i,
-						      &keyname, NULL);
+                                                      &keyname, NULL);
       char           *ptr = NULL;
       printf("\t%s=%s\n", (char *) keyname->hdl,
-	     (ptr = value2Chars(data.type, &data.value)));
+             (ptr = value2Chars(data.type, &data.value)));
       free(ptr);
       if (keyname)
-	CMRelease(keyname);
+        CMRelease(keyname);
     }
   } else {
     printf("No keys!\n");
@@ -158,8 +158,8 @@ showInstance(CMPIInstance * instance)
     for (i = 0; i < numproperties; i++) {
       CMPIString     *propertyname;
       CMPIData        data = instance->ft->getPropertyAt(instance, i,
-							 &propertyname,
-							 NULL);
+                                                         &propertyname,
+                                                         NULL);
       showProperty(data, (char *) propertyname->hdl);
       CMRelease(propertyname);
     }
@@ -176,7 +176,6 @@ showInstance(CMPIInstance * instance)
   if (objectpath)
     CMRelease(objectpath);
 }
-
 
 void
 showClass(CMPIConstClass * class)
@@ -195,25 +194,26 @@ showClass(CMPIConstClass * class)
     for (i = 0; i < numproperties; i++) {
       CMPIString     *propertyname;
       CMPIData        data = class->ft->getPropertyAt(class, i,
-						      &propertyname, NULL);
+                                                      &propertyname, NULL);
       if (propertyname) {
-	CMPIData        data =
-	    class->ft->getPropertyQualifier(class,
-					    (char *) propertyname->hdl,
-					    "KEY", NULL);
-	if (data.state != CMPI_nullValue && data.value.boolean) {
-	  printf("[KEY]");
-	}
+        CMPIData        data = class->ft->getPropertyQualifier(class,
+                                                               (char *)
+                                                               propertyname->hdl,
+                                                               "KEY",
+                                                               NULL);
+        if (data.state != CMPI_nullValue && data.value.boolean) {
+          printf("[KEY]");
+        }
       }
       if (data.state == 0) {
-	printf("\t%s=%s\n", (char *) propertyname->hdl,
-	       cv = value2Chars(data.type, &data.value));
-	if (cv)
-	  free(cv);
+        printf("\t%s=%s\n", (char *) propertyname->hdl,
+               cv = value2Chars(data.type, &data.value));
+        if (cv)
+          free(cv);
       } else
-	printf("\t%s=NIL\n", (char *) propertyname->hdl);
+        printf("\t%s=NIL\n", (char *) propertyname->hdl);
       if (propertyname) {
-	CMRelease(propertyname);
+        CMRelease(propertyname);
       }
     }
   }
@@ -221,3 +221,8 @@ showClass(CMPIConstClass * class)
   if (classname)
     CMRelease(classname);
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

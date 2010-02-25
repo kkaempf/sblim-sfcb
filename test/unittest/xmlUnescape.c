@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #define CMPI_PLATFORM_LINUX_GENERIC_GNU
 
 #include <cimXmlParser.h>
@@ -40,11 +39,16 @@ main(void)
   rval = strcmp(results.xmlBuffer->base, expectedResults);
   if (rval) {
     printf
-	("xmlUnescape Failed...\n\nEXPECTED:    [%s]\n\nRECEIVED:    [%s]\n",
-	 expectedResults, results.xmlBuffer->base);
+        ("xmlUnescape Failed...\n\nEXPECTED:    [%s]\n\nRECEIVED:    [%s]\n",
+         expectedResults, results.xmlBuffer->base);
     printf("  buffer.last: %s\n", results.xmlBuffer->last);
     printf("  buffer.cur: %s\n", results.xmlBuffer->cur);
 
   }
   return rval;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

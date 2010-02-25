@@ -35,11 +35,9 @@ static const CMPIBroker *_broker;
  * ---------------------------------------------------------------------------
  */
 
-
-
 CMPIObjectPath *
 make_ObjectPath(const CMPIBroker * broker,
-		const char *ns, const char *className)
+                const char *ns, const char *className)
 {
   CMPIObjectPath *objPath = NULL;
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
@@ -68,7 +66,7 @@ _CMGetMessage(char **result)
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   str =
       CMGetMessage(_broker, "Common.CIMStatusCode.CIM_ERR_SUCCESS",
-		   "CIM_ERR_SUCCESS: Successful.", &rc, 0);
+                   "CIM_ERR_SUCCESS: Successful.", &rc, 0);
   if (str) {
     *result = strdup(CMGetCharsPtr(str, NULL));
   }
@@ -115,49 +113,49 @@ _testArrayTypes()
   } types_arr[] = {
     {
     CMPI_uint32,
-	  CMPI_uint32A,
-	  "CMPI_uint32", "CMPI_uint32A", "CMPI_uint32_array"}, {
+          CMPI_uint32A,
+          "CMPI_uint32", "CMPI_uint32A", "CMPI_uint32_array"}, {
     CMPI_uint16,
-	  CMPI_uint16A,
-	  "CMPI_uint16", "CMPI_uint16A", "CMPI_uint16_array"}, {
+          CMPI_uint16A,
+          "CMPI_uint16", "CMPI_uint16A", "CMPI_uint16_array"}, {
     CMPI_uint8,
-	  CMPI_uint8A, "CMPI_uint8", "CMPI_uint8A", "CMPI_uint8_array"}, {
+          CMPI_uint8A, "CMPI_uint8", "CMPI_uint8A", "CMPI_uint8_array"}, {
     CMPI_uint64,
-	  CMPI_uint64A,
-	  "CMPI_uint64", "CMPI_uint64A", "CMPI_uint64_array"}, {
+          CMPI_uint64A,
+          "CMPI_uint64", "CMPI_uint64A", "CMPI_uint64_array"}, {
     CMPI_sint32,
-	  CMPI_sint32A,
-	  "CMPI_sint32", "CMPI_sint32A", "CMPI_sint32_array"}, {
+          CMPI_sint32A,
+          "CMPI_sint32", "CMPI_sint32A", "CMPI_sint32_array"}, {
     CMPI_sint16,
-	  CMPI_sint16A,
-	  "CMPI_sint16", "CMPI_sint16A", "CMPI_sint16_array"}, {
+          CMPI_sint16A,
+          "CMPI_sint16", "CMPI_sint16A", "CMPI_sint16_array"}, {
     CMPI_sint8,
-	  CMPI_sint8A, "CMPI_sint8", "CMPI_sint8A", "CMPI_sint8_array"}, {
+          CMPI_sint8A, "CMPI_sint8", "CMPI_sint8A", "CMPI_sint8_array"}, {
     CMPI_sint64,
-	  CMPI_sint64A,
-	  "CMPI_sint64", "CMPI_sint64A", "CMPI_sint64_array"}, {
+          CMPI_sint64A,
+          "CMPI_sint64", "CMPI_sint64A", "CMPI_sint64_array"}, {
     CMPI_real32,
-	  CMPI_real32A,
-	  "CMPI_real32", "CMPI_real32A", "CMPI_real32_array"}, {
+          CMPI_real32A,
+          "CMPI_real32", "CMPI_real32A", "CMPI_real32_array"}, {
     CMPI_real64,
-	  CMPI_real64A,
-	  "CMPI_real64", "CMPI_real64A", "CMPI_real64_array"}, {
+          CMPI_real64A,
+          "CMPI_real64", "CMPI_real64A", "CMPI_real64_array"}, {
     CMPI_char16,
-	  CMPI_char16A,
-	  "CMPI_char16", "CMPI_char16A", "CMPI_char16_array"}, {
+          CMPI_char16A,
+          "CMPI_char16", "CMPI_char16A", "CMPI_char16_array"}, {
     CMPI_boolean,
-	  CMPI_booleanA,
-	  "CMPI_boolean", "CMPI_booleanA", "CMPI_boolean_array"}, {
+          CMPI_booleanA,
+          "CMPI_boolean", "CMPI_booleanA", "CMPI_boolean_array"}, {
     CMPI_string,
-	  CMPI_stringA,
-	  "CMPI_string", "CMPI_stringA", "CMPI_string_array"}, {
+          CMPI_stringA,
+          "CMPI_string", "CMPI_stringA", "CMPI_string_array"}, {
     CMPI_dateTime,
-	  CMPI_dateTimeA,
-	  "CMPI_dateTime", "CMPI_dateTimeA", "CMPI_dateTime_array"}, {
+          CMPI_dateTimeA,
+          "CMPI_dateTime", "CMPI_dateTimeA", "CMPI_dateTime_array"}, {
     CMPI_ref, CMPI_refA, "CMPI_ref", "CMPI_refA", "CMPI_ref_array"}, {
     CMPI_instance,
-	  CMPI_instanceA,
-	  "CMPI_instance", "CMPI_instanceA", "CMPI_instance_array"}, {
+          CMPI_instanceA,
+          "CMPI_instance", "CMPI_instanceA", "CMPI_instance_array"}, {
   CMPI_null, CMPI_ARRAY, "Invalid", "InvalidArray", "Invalid_array"}};
 
   int             i,
@@ -176,8 +174,8 @@ _testArrayTypes()
   CMPIData        retDataInst;
   CMPIArgs       *args_ptr = NULL;
   CMPIObjectPath *objPath = make_ObjectPath(_broker,
-					    _Namespace,
-					    _ClassName);
+                                            _Namespace,
+                                            _ClassName);
   CMPIUint64      datetime1,
                   datetime2;
   const char     *str1;
@@ -220,7 +218,7 @@ _testArrayTypes()
       break;
 
     case CMPI_real32:
-      value.real32 = (CMPIReal32) - 32.78;
+      value.real32 = (CMPIReal32) -32.78;
       break;
 
     case CMPI_real64:
@@ -245,7 +243,7 @@ _testArrayTypes()
 
     case CMPI_ref:
       value.ref = CMNewObjectPath(_broker,
-				  "root/cimv2", "Sample_Instance", &rc);
+                                  "root/cimv2", "Sample_Instance", &rc);
       break;
 
     case CMPI_null:
@@ -261,14 +259,14 @@ _testArrayTypes()
 
     arr = NULL;
     rc = CMAddArg(args_ptr,
-		  "EmptyArray", (CMPIValue *) & arr, types_arr[i].typeA);
+                  "EmptyArray", (CMPIValue *) & arr, types_arr[i].typeA);
     arr = CMNewArray(_broker, 1, types_arr[i].element_type, &rc);
 
     rc = CMSetArrayElementAt(arr, 0, &value, types_arr[i].element_type);
 
     rc = CMAddArg(args_ptr,
-		  types_arr[i].args_name,
-		  (CMPIValue *) & arr, types_arr[i].typeA);
+                  types_arr[i].args_name,
+                  (CMPIValue *) & arr, types_arr[i].typeA);
 
     flag = 1;
     if ((types_arr[i].element_type) != CMPI_null) {
@@ -278,124 +276,124 @@ _testArrayTypes()
 
       switch (types_arr[i].element_type) {
       case CMPI_uint32:
-	if (arr_data.value.uint32 != value.uint32) {
-	  flag = 0;
-	}
-	break;
+        if (arr_data.value.uint32 != value.uint32) {
+          flag = 0;
+        }
+        break;
 
       case CMPI_uint16:
-	if (arr_data.value.uint16 != value.uint16) {
-	  flag = 0;
-	}
-	break;
+        if (arr_data.value.uint16 != value.uint16) {
+          flag = 0;
+        }
+        break;
 
       case CMPI_uint8:
-	if (arr_data.value.uint8 != value.uint8) {
-	  flag = 0;
-	}
-	break;
+        if (arr_data.value.uint8 != value.uint8) {
+          flag = 0;
+        }
+        break;
 
       case CMPI_uint64:
-	if (arr_data.value.uint64 != value.uint64) {
-	  flag = 0;
-	}
-	break;
+        if (arr_data.value.uint64 != value.uint64) {
+          flag = 0;
+        }
+        break;
 
       case CMPI_sint32:
-	if (arr_data.value.sint32 != value.sint32) {
-	  flag = 0;
-	}
-	break;
+        if (arr_data.value.sint32 != value.sint32) {
+          flag = 0;
+        }
+        break;
 
       case CMPI_sint16:
-	if (arr_data.value.sint16 != value.sint16) {
-	  flag = 0;
-	}
-	break;
+        if (arr_data.value.sint16 != value.sint16) {
+          flag = 0;
+        }
+        break;
 
       case CMPI_sint8:
-	if (arr_data.value.sint8 != value.sint8) {
-	  flag = 0;
-	}
-	break;
+        if (arr_data.value.sint8 != value.sint8) {
+          flag = 0;
+        }
+        break;
 
       case CMPI_sint64:
-	if (arr_data.value.sint64 != value.sint64) {
-	  flag = 0;
-	}
-	break;
+        if (arr_data.value.sint64 != value.sint64) {
+          flag = 0;
+        }
+        break;
 
       case CMPI_real32:
-	if (arr_data.value.real32 != value.real32) {
-	  flag = 0;
-	}
-	break;
+        if (arr_data.value.real32 != value.real32) {
+          flag = 0;
+        }
+        break;
 
       case CMPI_real64:
-	if (arr_data.value.real64 != value.real64) {
-	  flag = 0;
-	}
-	break;
+        if (arr_data.value.real64 != value.real64) {
+          flag = 0;
+        }
+        break;
 
       case CMPI_char16:
-	if (arr_data.value.char16 != value.char16) {
-	  flag = 0;
-	}
-	break;
+        if (arr_data.value.char16 != value.char16) {
+          flag = 0;
+        }
+        break;
 
       case CMPI_string:
-	str1 = CMGetCharsPtr(arr_data.value.string, &rc);
-	str2 = CMGetCharsPtr(value.string, &rc1);
-	if ((rc.rc != CMPI_RC_OK) ||
-	    (rc1.rc != CMPI_RC_OK) || strcmp(str1, str2)) {
-	  flag = 0;
-	}
-	break;
+        str1 = CMGetCharsPtr(arr_data.value.string, &rc);
+        str2 = CMGetCharsPtr(value.string, &rc1);
+        if ((rc.rc != CMPI_RC_OK) ||
+            (rc1.rc != CMPI_RC_OK) || strcmp(str1, str2)) {
+          flag = 0;
+        }
+        break;
 
       case CMPI_boolean:
-	if (arr_data.value.boolean != value.boolean) {
-	  flag = 0;
-	}
-	break;
+        if (arr_data.value.boolean != value.boolean) {
+          flag = 0;
+        }
+        break;
 
       case CMPI_dateTime:
-	datetime1 = CMGetBinaryFormat(arr_data.value.dateTime, &rc);
-	datetime2 = CMGetBinaryFormat(value.dateTime, &rc1);
-	if ((rc.rc != CMPI_RC_OK) ||
-	    (rc1.rc != CMPI_RC_OK) || (datetime1 != datetime2)) {
-	  flag = 0;
-	}
-	rc = CMRelease(value.dateTime);
-	break;
+        datetime1 = CMGetBinaryFormat(arr_data.value.dateTime, &rc);
+        datetime2 = CMGetBinaryFormat(value.dateTime, &rc1);
+        if ((rc.rc != CMPI_RC_OK) ||
+            (rc1.rc != CMPI_RC_OK) || (datetime1 != datetime2)) {
+          flag = 0;
+        }
+        rc = CMRelease(value.dateTime);
+        break;
 
       case CMPI_ref:
-	retNamespace = CMGetNameSpace(arr_data.value.ref, &rc);
-	retClassname = CMGetClassName(arr_data.value.ref, &rc1);
-	if ((rc.rc == CMPI_RC_OK) && (rc1.rc == CMPI_RC_OK)) {
-	  str1 = CMGetCharsPtr(retNamespace, &rc);
-	  str2 = CMGetCharsPtr(retClassname, &rc1);
-	  if ((rc.rc == CMPI_RC_OK) && (rc1.rc == CMPI_RC_OK)) {
-	    if ((strcmp(str1, "root/cimv2")) ||
-		(strcmp(str2, "TestCMPI_Instance"))) {
-	      flag = 0;
-	    }
-	  } else {
-	    flag = 0;
-	  }
-	} else {
-	  flag = 0;
-	}
-	rc = CMRelease(value.ref);
-	break;
+        retNamespace = CMGetNameSpace(arr_data.value.ref, &rc);
+        retClassname = CMGetClassName(arr_data.value.ref, &rc1);
+        if ((rc.rc == CMPI_RC_OK) && (rc1.rc == CMPI_RC_OK)) {
+          str1 = CMGetCharsPtr(retNamespace, &rc);
+          str2 = CMGetCharsPtr(retClassname, &rc1);
+          if ((rc.rc == CMPI_RC_OK) && (rc1.rc == CMPI_RC_OK)) {
+            if ((strcmp(str1, "root/cimv2")) ||
+                (strcmp(str2, "TestCMPI_Instance"))) {
+              flag = 0;
+            }
+          } else {
+            flag = 0;
+          }
+        } else {
+          flag = 0;
+        }
+        rc = CMRelease(value.ref);
+        break;
 
       case CMPI_instance:
-	retDataInst = CMGetProperty(arr_data.value.inst, "Property1", &rc);
-	dataInst = CMGetProperty(value.inst, "Property1", &rc);
-	if (retDataInst.value.uint32 != dataInst.value.uint32) {
-	  flag = 0;
-	}
-	rc = CMRelease(value.inst);
-	break;
+        retDataInst = CMGetProperty(arr_data.value.inst, "Property1", &rc);
+        dataInst = CMGetProperty(value.inst, "Property1", &rc);
+        if (retDataInst.value.uint32 != dataInst.value.uint32) {
+          flag = 0;
+        }
+        rc = CMRelease(value.inst);
+        break;
       }
       if (data.type == types_arr[i].typeA && flag) {
       }
@@ -423,8 +421,8 @@ _testSimpleTypes()
   CMPIString     *retNamespace = NULL;
   CMPIString     *retClassname = NULL;
   CMPIObjectPath *objPath = make_ObjectPath(_broker,
-					    _Namespace,
-					    _ClassName);
+                                            _Namespace,
+                                            _ClassName);
   const char     *str1;
   const char     *str2;
 
@@ -447,7 +445,7 @@ _testSimpleTypes()
     switch (types_arr[i].element_type) {
     case CMPI_ref:
       value.ref = CMNewObjectPath(_broker,
-				  "root/cimv2", "Sample_Instance", &rc);
+                                  "root/cimv2", "Sample_Instance", &rc);
       break;
 
     case CMPI_instance:
@@ -457,8 +455,8 @@ _testSimpleTypes()
       break;
     }
     rc = CMAddArg(args_ptr,
-		  types_arr[i].args_name,
-		  (CMPIValue *) & value, types_arr[i].element_type);
+                  types_arr[i].args_name,
+                  (CMPIValue *) & value, types_arr[i].element_type);
 
     data = CMGetArg(args_ptr, types_arr[i].args_name, &rc);
 
@@ -468,18 +466,18 @@ _testSimpleTypes()
       retClassname = CMGetClassName(data.value.ref, &rc1);
 
       if ((rc.rc == CMPI_RC_OK) && (rc1.rc == CMPI_RC_OK)) {
-	str1 = CMGetCharsPtr(retNamespace, &rc);
-	str2 = CMGetCharsPtr(retClassname, &rc1);
-	if ((rc.rc == CMPI_RC_OK) && (rc1.rc == CMPI_RC_OK)) {
-	  if ((strcmp(str1, "root/cimv2")) ||
-	      (strcmp(str2, "Sample_Instance"))) {
-	    flag = 0;
-	  }
-	} else {
-	  flag = 0;
-	}
+        str1 = CMGetCharsPtr(retNamespace, &rc);
+        str2 = CMGetCharsPtr(retClassname, &rc1);
+        if ((rc.rc == CMPI_RC_OK) && (rc1.rc == CMPI_RC_OK)) {
+          if ((strcmp(str1, "root/cimv2")) ||
+              (strcmp(str2, "Sample_Instance"))) {
+            flag = 0;
+          }
+        } else {
+          flag = 0;
+        }
       } else {
-	flag = 0;
+        flag = 0;
       }
       rc = CMRelease(value.ref);
       break;
@@ -488,7 +486,7 @@ _testSimpleTypes()
       retDataInst = CMGetProperty(data.value.inst, "Property1", &rc);
       dataInst = CMGetProperty(value.inst, "Property1", &rc);
       if (retDataInst.value.uint32 != dataInst.value.uint32) {
-	flag = 0;
+        flag = 0;
       }
       rc = CMRelease(value.inst);
       break;
@@ -510,12 +508,12 @@ _testErrorPaths()
   value.inst = NULL;
   args_ptr = CMNewArgs(_broker, &rc);
   rc = CMAddArg(args_ptr,
-		"EmptyInstance", (CMPIValue *) & value, CMPI_instance);
+                "EmptyInstance", (CMPIValue *) & value, CMPI_instance);
   value.ref = NULL;
   rc = CMAddArg(args_ptr, "EmptyRef", (CMPIValue *) & value, CMPI_ref);
   value.dateTime = NULL;
   rc = CMAddArg(args_ptr,
-		"EmptyDatetime", (CMPIValue *) & value, CMPI_dateTime);
+                "EmptyDatetime", (CMPIValue *) & value, CMPI_dateTime);
   rc = CMAddArg(args_ptr, "EmptyChars", (CMPIValue *) str, CMPI_chars);
   rc = CMAddArg(args_ptr, "EmptyCharsPtrA", NULL, CMPI_charsptrA);
 
@@ -529,9 +527,8 @@ _testErrorPaths()
   return 1;
 }
 
-
 static int
-_testCMPIEnumeration(const CMPIContext * ctx)
+_testCMPIEnumeration(const CMPIContext *ctx)
 {
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   CMPIEnumeration *enum_ptr = NULL;
@@ -698,7 +695,7 @@ _testCMPIArray()
 }
 
 static int
-_testCMPIcontext(const CMPIContext * ctx)
+_testCMPIcontext(const CMPIContext *ctx)
 {
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   CMPIValue       value;
@@ -948,11 +945,11 @@ _testCMPIObjectPath()
     cloneSuccessful = 0;
   }
   fakeObjPath = CMNewObjectPath(_broker, "root#cimv2",
-				"Sample_Instance", &rc);
+                                "Sample_Instance", &rc);
   rc = CMAddKey(fakeObjPath, "ElementName",
-		(CMPIValue *) "Fake", CMPI_chars);
+                (CMPIValue *) "Fake", CMPI_chars);
   rc = CMAddKey(otherObjPath, "ElementName1",
-		(CMPIValue *) "otherObjPath", CMPI_chars);
+                (CMPIValue *) "otherObjPath", CMPI_chars);
   data = CMGetKey(fakeObjPath, "ElementName", &rc);
   if (strcmp(CMGetCharsPtr(data.value.string, &rc), "Fake") == 0) {
     getKeySuccessful = 1;
@@ -967,15 +964,15 @@ _testCMPIObjectPath()
   }
   value.uint16 = 67;
   rc = CMAddKey(fakeObjPath, "Numeric_key_unsigned",
-		(CMPIValue *) & value, CMPI_uint16);
+                (CMPIValue *) & value, CMPI_uint16);
   data = CMGetKey(fakeObjPath, "Numeric_key_unsigned", &rc);
   value.sint16 = -67;
   rc = CMAddKey(fakeObjPath, "Numeric_key_signed",
-		(CMPIValue *) & value, CMPI_sint16);
+                (CMPIValue *) & value, CMPI_sint16);
   data = CMGetKey(fakeObjPath, "Numeric_key_signed", &rc);
   value.boolean = 1;
   rc = CMAddKey(fakeObjPath, "Boolean_key",
-		(CMPIValue *) & value, CMPI_boolean);
+                (CMPIValue *) & value, CMPI_boolean);
   data = CMGetKey(fakeObjPath, "Boolean_key", &rc);
   CMGetKeyAt(objPath, 500, NULL, &rc);
   if (rc.rc != CMPI_RC_ERR_NO_SUCH_PROPERTY) {
@@ -987,7 +984,7 @@ _testCMPIObjectPath()
 }
 
 static int
-_testCMPIResult(const CMPIResult * rslt)
+_testCMPIResult(const CMPIResult *rslt)
 {
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
 
@@ -1106,19 +1103,19 @@ _testCMPIArgs()
  * ---------------------------------------------------------------------------
  */
 CMPIStatus
-TestMiscProviderMethodCleanup(CMPIMethodMI * mi, const CMPIContext * ctx,
-			      CMPIBoolean terminate)
+TestMiscProviderMethodCleanup(CMPIMethodMI * mi, const CMPIContext *ctx,
+                              CMPIBoolean terminate)
 {
   CMReturn(CMPI_RC_OK);
 }
 
 CMPIStatus
 TestMiscProviderInvokeMethod(CMPIMethodMI * mi,
-			     const CMPIContext * ctx,
-			     const CMPIResult * rslt,
-			     const CMPIObjectPath * ref,
-			     const char *methodName,
-			     const CMPIArgs * in, CMPIArgs * out)
+                             const CMPIContext *ctx,
+                             const CMPIResult *rslt,
+                             const CMPIObjectPath * ref,
+                             const char *methodName,
+                             const CMPIArgs * in, CMPIArgs * out)
 {
   CMPIString     *class = NULL;
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
@@ -1135,9 +1132,9 @@ TestMiscProviderInvokeMethod(CMPIMethodMI * mi,
 
   class = CMGetClassName(ref, &rc);
   if (strncmp(CMGetCharsPtr(class, NULL),
-	      _ClassName, strlen(_ClassName)) == 0) {
+              _ClassName, strlen(_ClassName)) == 0) {
     if (strncmp("TestCMPIBroker", methodName, strlen("TestCMPIBroker")) ==
-	0) {
+        0) {
       // Parse the CMPIArgs in to figure out which operation it is.
       // There are six of them:
       // ValueMap { "1", "2", "3"},
@@ -1147,81 +1144,81 @@ TestMiscProviderInvokeMethod(CMPIMethodMI * mi,
       data = CMGetArg(in, "Operation", &rc);
 
       if (data.type == CMPI_uint32) {
-	switch (data.value.uint32) {
-	case 1:
-	  value.uint32 = _CMGetMessage(&result);
-	  break;
-	case 2:
-	  value.uint32 = _CMLogMessage(&result);
-	  break;
-	case 3:
-	  value.uint32 = _CMTraceMessage(&result);
-	  break;
-	case 4:
-	  value.uint32 = _testCMPIEnumeration(ctx);
-	  result = strdup("_testCMPIEnumeration ");
-	  break;
-	case 5:
-	  value.uint32 = _testCMPIArray();
-	  result = strdup("_testCMPIArray ");
-	  break;
-	case 6:
-	  value.uint32 = _testCMPIcontext(ctx);
-	  result = strdup("_testCMPIContext ");
-	  break;
-	case 7:
-	  value.uint32 = _testCMPIDateTime();
-	  result = strdup("_testCMPIDateTime ");
-	  break;
-	case 8:
-	  value.uint32 = _testCMPIInstance();
-	  result = strdup("_testCMPIInstance ");
-	  break;
-	case 9:
-	  value.uint32 = _testCMPIObjectPath();
-	  result = strdup("_testCMPIObjectPath ");
-	  break;
-	case 10:
-	  value.uint32 = _testCMPIResult(rslt);
-	  result = strdup("_testCMPIResult ");
-	  break;
-	case 11:
-	  value.uint32 = _testCMPIString();
-	  result = strdup("_testCMPIString ");
-	  break;
-	case 12:
-	  value.uint32 = _testCMPIArgs();
-	  result = strdup("_testCMPIArgs ");
-	  break;
-	default:
-	  break;
-	}
-	CMReturnData(rslt, &value, CMPI_uint32);
-	CMReturnDone(rslt);
-	rc = CMAddArg(out, "Result", (CMPIValue *) result, CMPI_chars);
-	free(result);
+        switch (data.value.uint32) {
+        case 1:
+          value.uint32 = _CMGetMessage(&result);
+          break;
+        case 2:
+          value.uint32 = _CMLogMessage(&result);
+          break;
+        case 3:
+          value.uint32 = _CMTraceMessage(&result);
+          break;
+        case 4:
+          value.uint32 = _testCMPIEnumeration(ctx);
+          result = strdup("_testCMPIEnumeration ");
+          break;
+        case 5:
+          value.uint32 = _testCMPIArray();
+          result = strdup("_testCMPIArray ");
+          break;
+        case 6:
+          value.uint32 = _testCMPIcontext(ctx);
+          result = strdup("_testCMPIContext ");
+          break;
+        case 7:
+          value.uint32 = _testCMPIDateTime();
+          result = strdup("_testCMPIDateTime ");
+          break;
+        case 8:
+          value.uint32 = _testCMPIInstance();
+          result = strdup("_testCMPIInstance ");
+          break;
+        case 9:
+          value.uint32 = _testCMPIObjectPath();
+          result = strdup("_testCMPIObjectPath ");
+          break;
+        case 10:
+          value.uint32 = _testCMPIResult(rslt);
+          result = strdup("_testCMPIResult ");
+          break;
+        case 11:
+          value.uint32 = _testCMPIString();
+          result = strdup("_testCMPIString ");
+          break;
+        case 12:
+          value.uint32 = _testCMPIArgs();
+          result = strdup("_testCMPIArgs ");
+          break;
+        default:
+          break;
+        }
+        CMReturnData(rslt, &value, CMPI_uint32);
+        CMReturnDone(rslt);
+        rc = CMAddArg(out, "Result", (CMPIValue *) result, CMPI_chars);
+        free(result);
       } else {
-	value.uint32 = 1;
-	CMReturnData(rslt, &value, CMPI_uint32);
-	CMReturnDone(rslt);
+        value.uint32 = 1;
+        CMReturnData(rslt, &value, CMPI_uint32);
+        CMReturnDone(rslt);
       }
     }
 
     else if (strncmp("returnString", methodName, strlen("returnString"))
-	     == 0) {
+             == 0) {
       result = strdup("Returning string");
       CMReturnData(rslt, (CMPIValue *) result, CMPI_chars);
       CMReturnDone(rslt);
       free(result);
     } else if (strncmp("returnUint32", methodName, strlen("returnUint32"))
-	       == 0) {
+               == 0) {
       value.uint32 = 42;
 
       CMReturnData(rslt, &value, CMPI_uint32);
       CMReturnDone(rslt);
     } else
-	if (strncmp("returnDateTime", methodName, strlen("returnDateTime"))
-	    == 0) {
+        if (strncmp("returnDateTime", methodName, strlen("returnDateTime"))
+            == 0) {
       CMPIUint64      ret_val = 0;
       CMPIStatus      dateTimeRc = { CMPI_RC_OK, NULL };
 
@@ -1234,33 +1231,33 @@ TestMiscProviderInvokeMethod(CMPIMethodMI * mi,
       CMReturnData(rslt, (CMPIValue *) & dateTime, CMPI_dateTime);
       CMReturnDone(rslt);
     } else
-	if (strncmp("testArrayTypes", methodName, strlen("testArrayTypes"))
-	    == 0) {
+        if (strncmp("testArrayTypes", methodName, strlen("testArrayTypes"))
+            == 0) {
       value.uint32 = _testArrayTypes();
       CMReturnData(rslt, &value, CMPI_uint32);
       CMReturnDone(rslt);
     } else
-	if (strncmp("testErrorPaths", methodName, strlen("testErrorPaths"))
-	    == 0) {
+        if (strncmp("testErrorPaths", methodName, strlen("testErrorPaths"))
+            == 0) {
       value.uint32 = _testErrorPaths();
       CMReturnData(rslt, &value, CMPI_uint32);
       CMReturnDone(rslt);
     } else
-	if (strncmp
-	    ("testSimpleTypes", methodName,
-	     strlen("testSimpleTypes")) == 0) {
+        if (strncmp
+            ("testSimpleTypes", methodName,
+             strlen("testSimpleTypes")) == 0) {
       value.uint32 = _testSimpleTypes();
       CMReturnData(rslt, &value, CMPI_uint32);
       CMReturnDone(rslt);
     } else
-	if (strncmp("methodNotInMof", methodName, strlen("methodNotInMof"))
-	    == 0) {
+        if (strncmp("methodNotInMof", methodName, strlen("methodNotInMof"))
+            == 0) {
       value.uint32 = 42;
       CMReturnData(rslt, &value, CMPI_uint32);
       CMReturnDone(rslt);
     } else {
       CMSetStatusWithChars(_broker, &rc,
-			   CMPI_RC_ERR_NOT_FOUND, methodName);
+                           CMPI_RC_ERR_NOT_FOUND, methodName);
     }
   }
   return rc;
@@ -1276,7 +1273,6 @@ TestMiscProviderInvokeMethod(CMPIMethodMI * mi,
  * ---------------------------------------------------------------------------
  */
 
-
 CMMethodMIStub(TestMiscProvider, TestMiscProvider, _broker, CMNoHook)
 
     /*
@@ -1288,3 +1284,8 @@ CMMethodMIStub(TestMiscProvider, TestMiscProvider, _broker, CMNoHook)
     /*
      * ---------------------------------------------------------------------------
      */
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

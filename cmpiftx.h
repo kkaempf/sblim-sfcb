@@ -37,7 +37,6 @@ extern          "C" {
   // --
   // ---------------------------------------------------
 
-
    /** This structure represents a Class provider.
    */
   typedef struct _CMPIClassMIFT CMPIClassMIFT;
@@ -52,14 +51,11 @@ extern          "C" {
     CMPIClassMIFT  *ft;
   } CMPIClassMI;
 
-
-
   // ---------------------------------------------------
   // --
   // _CMPIClassMIFT Function Table
   // --
   // ---------------------------------------------------
-
 
    /** This structure is a table of pointers providing access to Class
        provider functions. This table must be returend during initialization
@@ -84,8 +80,8 @@ extern          "C" {
 	 @param ctx Invocation Context
 	 @return Function return status.
       */
-                    CMPIStatus(*cleanup)
-                    (CMPIClassMI * mi, CMPIContext * ctx);
+    CMPIStatus      (*cleanup)
+                    (CMPIClassMI * mi, CMPIContext *ctx);
 
        /** Enumerate ObjectPaths of Classes serviced by this provider.
 	 @param mi Provider this pointer.
@@ -94,24 +90,25 @@ extern          "C" {
 	 @param op ObjectPath containing namespace and classname components.
 	 @return Function return status.
       */
-                    CMPIStatus(*enumClassNames)
+    CMPIStatus      (*enumClassNames)
+
      
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(CMPIClassMI * mi, CMPIContext * ctx, CMPIResult * rslt,
-	 CMPIObjectPath * op);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
+         CMPIObjectPath * op);
 
        /** Enumerate the Classes serviced by this provider.
 	 @param mi Provider this pointer.
@@ -120,24 +117,25 @@ extern          "C" {
 	 @param op ObjectPath containing namespace and classname components.
 	 @return Function return status.
       */
-                    CMPIStatus(*enumClasses)
+    CMPIStatus      (*enumClasses)
+
      
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(CMPIClassMI * mi, CMPIContext * ctx, CMPIResult * rslt,
-	 CMPIObjectPath * op);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
+         CMPIObjectPath * op);
 
        /** Get the Class defined by &lt;op&gt;.
 	 @param mi Provider this pointer.
@@ -149,24 +147,25 @@ extern          "C" {
 	     for any Properties missing from this list.
 	 @return Function return status.
       */
-                    CMPIStatus(*getClass)
+    CMPIStatus      (*getClass)
+
      
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(CMPIClassMI * mi, CMPIContext * ctx, CMPIResult * rslt,
-	 CMPIObjectPath * op, char **properties);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
+         CMPIObjectPath * op, char **properties);
 
        /** Create Class from &lt;cls&gt; using &lt;op&gt; as reference.
 	 @param mi Provider this pointer.
@@ -176,24 +175,25 @@ extern          "C" {
 	 @param cls The Class.
 	 @return Function return status.
       */
-                    CMPIStatus(*createClass)
+    CMPIStatus      (*createClass)
+
      
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(CMPIClassMI * mi, CMPIContext * ctx, CMPIResult * rslt,
-	 CMPIObjectPath * op, CMPIConstClass * cls);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
+         CMPIObjectPath * op, CMPIConstClass * cls);
 
        /** Replace an existing Class from &lt;cls&gt; using &lt;op&gt; as reference.
 	 @param mi Provider this pointer.
@@ -203,24 +203,25 @@ extern          "C" {
 	 @param cls The Class.
 	 @return Function return status.
       */
-                    CMPIStatus(*setClass)
+    CMPIStatus      (*setClass)
+
      
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(CMPIClassMI * mi, CMPIContext * ctx, CMPIResult * rslt,
-	 CMPIObjectPath * op, CMPIConstClass * cls);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
+         CMPIObjectPath * op, CMPIConstClass * cls);
 
        /** Delete an existing Class defined by &lt;op&gt;.
 	 @param mi Provider this pointer.
@@ -229,33 +230,32 @@ extern          "C" {
 	 @param op ObjectPath containing namespace and classname components.
 	 @return Function return status.
       */
-                    CMPIStatus(*deleteClass)
-     
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(CMPIClassMI * mi, CMPIContext * ctx, CMPIResult * rslt,
-	 CMPIObjectPath * op);
-  };
+    CMPIStatus      (*deleteClass)
 
+     
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
+         CMPIObjectPath * op);
+  };
 
   // ---------------------------------------------------
   // --
   // _CMPIQualifierMI Qualifier Provider object
   // --
   // ---------------------------------------------------
-
 
    /** This structure represents a Qualifier provider.
    */
@@ -271,14 +271,11 @@ extern          "C" {
     CMPIQualifierDeclMIFT *ft;
   } CMPIQualifierDeclMI;
 
-
-
   // ---------------------------------------------------
   // --
   // _CMPIQualifierMIFT Function Table
   // --
   // ---------------------------------------------------
-
 
    /** This structure is a table of pointers providing access to Qualifier
        provider functions. This table must be returend during initialization
@@ -303,8 +300,8 @@ extern          "C" {
 	 @param ctx Invocation Context
 	 @return Function return status.
       */
-                    CMPIStatus(*cleanup)
-                    (CMPIQualifierDeclMI * mi, CMPIContext * ctx);
+    CMPIStatus      (*cleanup)
+                    (CMPIQualifierDeclMI * mi, CMPIContext *ctx);
 
        /** Enumerate Qualifiers serviced by this provider.
 	 @param mi Provider this pointer.
@@ -313,24 +310,25 @@ extern          "C" {
 	 @param op ObjectPath containing namespace.
 	 @return Function return status.
       */
-                    CMPIStatus(*enumQualifiers)
+    CMPIStatus      (*enumQualifiers)
+
      
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(CMPIQualifierDeclMI * mi, CMPIContext * ctx, CMPIResult * rslt,
-	 CMPIObjectPath * op);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (CMPIQualifierDeclMI * mi, CMPIContext *ctx, CMPIResult *rslt,
+         CMPIObjectPath * op);
 
        /** Get a Qualifier defined in the specified namespace.
 	 @param mi Provider this pointer.
@@ -340,24 +338,25 @@ extern          "C" {
 	 @param name Name of the qualifier to be returned
 	 @return Function return status.
       */
-                    CMPIStatus(*getQualifier)
+    CMPIStatus      (*getQualifier)
+
      
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(CMPIQualifierDeclMI * mi, CMPIContext * ctx, CMPIResult * rslt,
-	 CMPIObjectPath * op);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (CMPIQualifierDeclMI * mi, CMPIContext *ctx, CMPIResult *rslt,
+         CMPIObjectPath * op);
 
        /** Create or modify Qualifier
 	 @param mi Provider this pointer.
@@ -367,25 +366,25 @@ extern          "C" {
 	 @param qualifier the qualifier
 	 @return Function return status.
       */
-                    CMPIStatus(*setQualifier)
-     
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(CMPIQualifierDeclMI * mi, CMPIContext * ctx, CMPIResult * rslt,
-	 CMPIObjectPath * op, CMPIQualifierDecl * qualifier);
+    CMPIStatus      (*setQualifier)
 
+     
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (CMPIQualifierDeclMI * mi, CMPIContext *ctx, CMPIResult *rslt,
+         CMPIObjectPath * op, CMPIQualifierDecl * qualifier);
 
        /** Delete an existing Qualifier
 	 @param mi Provider this pointer.
@@ -395,28 +394,34 @@ extern          "C" {
 	 @param name Name of the qualifier to be deleted.
 	 @return Function return status.
       */
-                    CMPIStatus(*deleteQualifier)
+    CMPIStatus      (*deleteQualifier)
+
      
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(CMPIQualifierDeclMI * mi, CMPIContext * ctx, CMPIResult * rslt,
-	 CMPIObjectPath * op);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (CMPIQualifierDeclMI * mi, CMPIContext *ctx, CMPIResult *rslt,
+         CMPIObjectPath * op);
   };
 
 #ifdef __cplusplus
 };
 #endif
 
-#endif				// _CMPIFTX_H_
+#endif                          // _CMPIFTX_H_
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

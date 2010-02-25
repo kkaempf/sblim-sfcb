@@ -20,7 +20,6 @@
  *
  */
 
-
 #ifndef _ProviderRegister_h_
 #define _ProviderRegister_h_
 
@@ -63,11 +62,11 @@ extern          "C" {
     time_t          lastActivity;
     int             startSeq;
     struct _ProviderInfo *next;
-    struct _ProviderInfo *nextInRegister;	/* not actually next in
-						 * Register,but pointer to 
-						 * the next provider
-						 * serving the same class
-						 * (for indications) */
+    struct _ProviderInfo *nextInRegister;       /* not actually next in
+                                                 * Register,but pointer to 
+                                                 * * * the next provider
+                                                 * serving the same class
+                                                 * (for indications) */
     struct providerProcess *proc;
     struct providerThread *thread;
     CMPIInstanceMI *instanceMI;
@@ -127,15 +126,15 @@ extern          "C" {
     void            (*release) (ProviderRegister * br);
     ProviderRegister *(*clone) (ProviderRegister * br);
     ProviderInfo   *(*getProvider) (ProviderRegister * br,
-				    const char *clsName,
-				    unsigned long type);
+                                    const char *clsName,
+                                    unsigned long type);
     int             (*putProvider) (ProviderRegister * br,
-				    const char *clsName,
-				    ProviderInfo * info);
+                                    const char *clsName,
+                                    ProviderInfo * info);
     void            (*removeProvider) (ProviderRegister * br,
-				       const char *clsName);
+                                       const char *clsName);
     ProviderInfo   *(*locateProvider) (ProviderRegister * br,
-				       const char *provName);
+                                       const char *provName);
     void            (*resetProvider) (ProviderRegister * br, int pid);
   };
 
@@ -147,4 +146,9 @@ extern          "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif				// _ProviderRegister_h_
+#endif                          // _ProviderRegister_h_
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

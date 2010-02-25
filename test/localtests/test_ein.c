@@ -45,25 +45,25 @@ main()
   printf(" Testing enumerateInstanceNames \n");
 
   printf(" using SfcbLocal interface : host = %s userid = %s\n",
-	 cim_host, cim_host_userid);
+         cim_host, cim_host_userid);
   ce = NewCIMCEnv("SfcbLocal", 0, &rc, &msg);
 
   if (ce == NULL) {
     printf(" local connect failed call to NewCIMCEnv message = [%s] \n",
-	   msg);
+           msg);
     return 1;
   }
   printf("do connect \n");
   client =
       ce->ft->connect(ce, cim_host, "http", cim_host_port, cim_host_userid,
-		      cim_host_passwd, &status);
+                      cim_host_passwd, &status);
   if (client == NULL) {
     printf(" failed the call to connect \n");
   }
 
   printf("do newObjectPath \n");
   op = (CMPIObjectPath *) ce->ft->newObjectPath(ce, "root/cimv2",
-						"TEST_Person", &status);
+                                                "TEST_Person", &status);
   if (op == NULL) {
     printf(" failed the call to newObjectPath \n");
   }
@@ -71,7 +71,7 @@ main()
   printf("do enumInstances \n");
   enm =
       client->ft->enumInstanceNames(client, (CIMCObjectPath *) op,
-				    &status);
+                                    &status);
   if (enm == NULL) {
     printf(" failed the call to client->ft->enumInstances \n");
   }
@@ -92,7 +92,7 @@ main()
     }
   } else {
     printf("  ERROR received from enumInstanceNames  status.rc = %d\n",
-	   status.rc);
+           status.rc);
     if (msg)
       printf("  ERROR msg = %s\n", msg);
   }
@@ -110,3 +110,8 @@ main()
 
   return 0;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

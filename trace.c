@@ -20,7 +20,6 @@
  *
  */
 
-
 #include "trace.h"
 #include <errno.h>
 #include "native.h"
@@ -169,8 +168,8 @@ _sfcb_trace(int level, char *file, int line, char *msg)
       mlogf(M_ERROR, M_SHOW, "--- Couldn't open trace file");
       return;
     }
-    colorTrace = 0;		/* prevents escape chars from getting into 
-				 * the file */
+    colorTrace = 0;             /* prevents escape chars from getting into 
+                                 * the file */
   } else {
     ferr = stderr;
   }
@@ -187,11 +186,11 @@ _sfcb_trace(int level, char *file, int line, char *msg)
   if (colorTrace) {
     changeTextColor(0);
     fprintf(ferr, "[%i] [%s] %d/%p --- %s(%i) : %s\n", level, tm,
-	    currentProc, (void *) pthread_self(), file, line, msg);
+            currentProc, (void *) pthread_self(), file, line, msg);
     changeTextColor(1);
   } else {
     fprintf(ferr, "[%i] [%s] %d/%p --- %s(%i) : %s\n", level, tm,
-	    currentProc, (void *) pthread_self(), file, line, msg);
+            currentProc, (void *) pthread_self(), file, line, msg);
   }
 
   if ((_SFCB_TRACE_FILE != NULL)) {
@@ -283,7 +282,11 @@ trace_test()
     fail = 1;
   }
 
-
   return fail;
 }
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

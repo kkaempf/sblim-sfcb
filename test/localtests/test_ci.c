@@ -50,35 +50,35 @@ main()
 
   printf(" Testing CreateInstance \n");
   printf(" using SfcbLocal interface : host = %s userid = %s\n",
-	 cim_host, cim_host_userid);
+         cim_host, cim_host_userid);
   ce = NewCIMCEnv("SfcbLocal", 0, &rc, &msg);
 
   if (ce == NULL) {
     printf
-	(" local connect failed call to NewCIMCEnv rc = %d , message = [%s] \n",
-	 retc, msg);
+        (" local connect failed call to NewCIMCEnv rc = %d , message = [%s] \n",
+         retc, msg);
     return 1;
   }
 
   client =
       ce->ft->connect(ce, cim_host, "http", cim_host_port, cim_host_userid,
-		      cim_host_passwd, &status);
+                      cim_host_passwd, &status);
 
   op = ce->ft->newObjectPath(ce, "root/cimv2", "TEST_LabeledLineage",
-			     &status);
+                             &status);
 
   instance = ce->ft->newInstance(ce, op, NULL);
   CMSetProperty(instance, "label", "Mitchelle", CMPI_chars);
 
   objectpath_r =
       (CIMCObjectPath *) client->ft->createInstance(client, op, instance,
-						    &status);
+                                                    &status);
 
   /*
    * Print the results 
    */
   printf("createInstance() rc=%d, msg=%s\n",
-	 status.rc, (status.msg) ? (char *) status.msg->hdl : NULL);
+         status.rc, (status.msg) ? (char *) status.msg->hdl : NULL);
   if (!status.rc) {
     printf("result:\n");
     showObjectPath(objectpath_r);
@@ -95,3 +95,8 @@ main()
 
   return 0;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

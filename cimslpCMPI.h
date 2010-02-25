@@ -45,7 +45,7 @@ typedef struct {
 } cimSLPService;
 
 typedef struct {
-  char           *commScheme;	// http or https
+  char           *commScheme;   // http or https
   char           *cimhost;
   char           *port;
   char           *cimuser;
@@ -59,21 +59,26 @@ extern char    *value2Chars(CMPIType type, CMPIValue * value);
 
 void            initializeService(cimSLPService * rs);
 cimSLPService   getSLPData(cimomConfig cfg);
-char           *myGetProperty(CMPIInstance * instance, char *propertyName);
-char          **myGetPropertyArray(CMPIInstance * instance,
-				   char *propertyName);
-char          **myGetPropertyArrayFromArray(CMPIInstance ** instances,
-					    char *propertyName);
+char           *myGetProperty(CMPIInstance *instance, char *propertyName);
+char          **myGetPropertyArray(CMPIInstance *instance,
+                                   char *propertyName);
+char          **myGetPropertyArrayFromArray(CMPIInstance **instances,
+                                            char *propertyName);
 CMPIInstance  **myGetInstances(CMCIClient * cc, char *path,
-			       char *objectname);
+                               char *objectname);
 CMPIConstClass *myGetClass(CMCIClient * cc, char *path, char *objectname);
 char           *transformValue(char *cssf, CMPIConstClass * ccls,
-			       char *propertyName);
+                               char *propertyName);
 char          **transformValueArray(char **cssf, CMPIConstClass * ccls,
-				    char *propertyName);
-char          **myGetRegProfiles(CMPIInstance ** instances,
-				 CMCIClient * cc);
+                                    char *propertyName);
+char          **myGetRegProfiles(CMPIInstance **instances,
+                                 CMCIClient * cc);
 char          **getInterOpNS();
 char           *getUrlSyntax(char *sn, char *cs, char *port);
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

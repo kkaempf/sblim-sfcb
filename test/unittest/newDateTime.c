@@ -9,7 +9,6 @@
 #include "support.h"
 #include "objectImpl.h"
 
-
 #ifdef SFCB_IX86
 #define SFCB_ASM(x) asm(x)
 #else
@@ -24,7 +23,6 @@ CMPIStatus      st,
                 st2,
                 st3;
 
-
 int
 main(void)
 {
@@ -35,7 +33,7 @@ main(void)
   printf("Done dt \n");
   dt1 =
       (CMPIDateTime *) NewCMPIDateTimeFromBinary((CMPIUint64) 1000000,
-						 TRUE, &st1);
+                                                 TRUE, &st1);
   printf("Done dt1 \n");
   dt2 = (CMPIDateTime *) NewCMPIDateTimeFromChars(str, &st2);
   printf("Done dt2 \n");
@@ -60,3 +58,8 @@ main(void)
 
   return (rc);
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

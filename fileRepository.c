@@ -19,7 +19,6 @@
  *
  */
 
-
 // #define CMPI_VERSION 90
 
 #include <stdio.h>
@@ -82,7 +81,7 @@ getRepDir()
 
 static int
 getIndexRecordCase(BlobIndex * bi, const char *key, size_t keyl,
-		   char **keyb, size_t * keybl, short ignorecase)
+                   char **keyb, size_t * keybl, short ignorecase)
 /*
  * returns -1 failure, 0 OK, 1 not found (only with key) 
  */
@@ -224,17 +223,17 @@ getIndexRecordCase(BlobIndex * bi, const char *key, size_t keyl,
   if (keyl > 0) {
     if (ignorecase) {
       if (keyl != ekl || strncasecmp(kbptr, key, keyl)) {
-	/*
-	 * mismatch 
-	 */
-	return 1;
+        /*
+         * mismatch 
+         */
+        return 1;
       }
     } else {
       if (keyl != ekl || strncmp(kbptr, key, keyl)) {
-	/*
-	 * mismatch 
-	 */
-	return 1;
+        /*
+         * mismatch 
+         */
+        return 1;
       }
     }
   }
@@ -250,7 +249,7 @@ getIndexRecordCase(BlobIndex * bi, const char *key, size_t keyl,
 
 static int
 getIndexRecord(BlobIndex * bi, char *key, size_t keyl, char **keyb,
-	       size_t * keybl)
+               size_t * keybl)
 {
   // use case-sensitive compare on the key
   return getIndexRecordCase(bi, key, keyl, keyb, keybl, 0);
@@ -395,7 +394,7 @@ adjust(BlobIndex * bi, int pos, int adj)
     l = atoi(bi->index + dp);
     for (p = bi->index + dp + l - 2; *p != ' '; p--)
       if (*p == '\r')
-	r = p;
+        r = p;
     o = atoi(++p);
     o -= adj;
     sl = sprintf(str + (r - p), "%d", o);
@@ -466,7 +465,7 @@ rebuild(BlobIndex * bi, const char *id, void *blob, int blen)
 
 int
 getIndex(const char *ns, const char *cls, int elen, int mki,
-	 BlobIndex ** bip)
+         BlobIndex ** bip)
 {
   BlobIndex      *bi;
   char           *fn;
@@ -568,25 +567,25 @@ addBlob(const char *ns, const char *cls, char *id, void *blob, int len)
     if (indxLocate(bi, id)) {
       bi->fd = fopen(bi->fnd, "rb");
       if (bi->fd == NULL) {
-	fdHandleError(bi);
-	return -1;
+        fdHandleError(bi);
+        return -1;
       } else {
-	fseek(bi->fd, 0, SEEK_END);
-	bi->dlen = ftell(bi->fd);
-	es = sprintf(idxe, "    %zd %s %d %lu\r\n", strlen(id), id, len,
-		     bi->dlen);
-	ep = sprintf(idxe, "%d", es);
-	idxe[ep] = ' ';
-	memcpy(bi->index + bi->dSize, idxe, es);
-	bi->dSize += es;
-	rebuild(bi, id, blob, len);
+        fseek(bi->fd, 0, SEEK_END);
+        bi->dlen = ftell(bi->fd);
+        es = sprintf(idxe, "    %zd %s %d %lu\r\n", strlen(id), id, len,
+                     bi->dlen);
+        ep = sprintf(idxe, "%d", es);
+        idxe[ep] = ' ';
+        memcpy(bi->index + bi->dSize, idxe, es);
+        bi->dSize += es;
+        rebuild(bi, id, blob, len);
       }
     }
 
     else {
       bi->fd = fopen(bi->fnd, "ab+");
       if (bi->fd == NULL)
-	bi->fd = fopen(bi->fnd, "wb+");
+        bi->fd = fopen(bi->fnd, "wb+");
       fseek(bi->fd, 0, SEEK_END);
       bi->fpos = ftell(bi->fd);
       fwrite(blob, len, 1, bi->fd);
@@ -594,7 +593,7 @@ addBlob(const char *ns, const char *cls, char *id, void *blob, int len)
       bi->fd = NULL;
 
       es = sprintf(idxe, "    %zd %s %d %lu\r\n", strlen(id), id, len,
-		   bi->fpos);
+                   bi->fpos);
       ep = sprintf(idxe, "%d", es);
       idxe[ep] = ' ';
 
@@ -624,14 +623,14 @@ deleteBlob(const char *ns, const char *cls, const char *id)
     if (indxLocate(bi, id)) {
       bi->fd = fopen(bi->fnd, "rb");
       if (bi->fd == NULL) {
-	fdHandleError(bi);
-	return -1;
+        fdHandleError(bi);
+        return -1;
       } else {
-	fseek(bi->fd, 0, SEEK_END);
-	bi->dlen = ftell(bi->fd);
-	rebuild(bi, id, NULL, 0);
-	freeBlobIndex(&bi, 1);
-	return 0;
+        fseek(bi->fd, 0, SEEK_END);
+        bi->dlen = ftell(bi->fd);
+        rebuild(bi, id, NULL, 0);
+        freeBlobIndex(&bi, 1);
+        return 0;
       }
     }
   }
@@ -676,16 +675,16 @@ getBlob(const char *ns, const char *cls, const char *id, int *len)
     if (indxLocateCase(bi, id, ignorecase)) {
       bi->fd = fopen(bi->fnd, "rb");
       if (bi->fd == NULL) {
-	fdHandleError(bi);
-	char           *emsg = strerror(errno);
-	mlogf(M_ERROR, M_SHOW, "Repository error: %s\n", emsg);
-	exit(5);
+        fdHandleError(bi);
+        char           *emsg = strerror(errno);
+        mlogf(M_ERROR, M_SHOW, "Repository error: %s\n", emsg);
+        exit(5);
       }
       fseek(bi->fd, bi->bofs, SEEK_SET);
       buf = (char *) malloc(bi->blen + 8);
       fread(buf, bi->blen, 1, bi->fd);
       if (len)
-	*len = bi->blen;
+        *len = bi->blen;
       buf[bi->blen] = 0;
       freeBlobIndex(&bi, 1);
       return (void *) buf;
@@ -730,7 +729,6 @@ existingNameSpace(const char *ns)
   return 1;
 }
 
-
 #ifdef __MAIN__
 
 char           *o1 = "first-object";
@@ -759,3 +757,8 @@ main()
 }
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -26,15 +26,14 @@ static char     altRepositoryDir[1024] = { 0 };
 static char    *valid_options = "n:c:g:o:r:tphvVmM";
 #define dbg(x) if(opt_verbose) {x;}
 
-
-extern char    *sfcb_pathToChars(CMPIObjectPath * cop, CMPIStatus * rc,
-				 char *str);
+extern char    *sfcb_pathToChars(CMPIObjectPath * cop, CMPIStatus *rc,
+                                 char *str);
 extern CMPIObjectPath *getObjectPath(char *path, char **msg);
-extern CMPIData __ift_getPropertyAt(const CMPIInstance * ci, CMPICount i,
-				    CMPIString ** name, CMPIStatus * rc);
+extern CMPIData __ift_getPropertyAt(const CMPIInstance *ci, CMPICount i,
+                                    CMPIString **name, CMPIStatus *rc);
 
 static char    *
-datatypeToString(CMPIData * d, int *isarray)
+datatypeToString(CMPIData *d, int *isarray)
 {
   if (isarray != NULL)
     *isarray = (d->type & CMPI_ARRAY);
@@ -90,8 +89,8 @@ escapeQuotes(char *in)
   if (in == NULL)
     return (NULL);
   l = strlen(in);
-  out = (char *) malloc((l * 2) + 1);	// worst case scenario - it's all
-					// quotes
+  out = (char *) malloc((l * 2) + 1);   // worst case scenario - it's all
+  // quotes
 
   for (i = 0, o = 0; i < l; i++) {
     if (in[i] == '\"') {
@@ -106,11 +105,11 @@ escapeQuotes(char *in)
 }
 
 UtilStringBuffer *
-dataValueToStringBuf(CMPIData d, CMPIInstance * inst)
+dataValueToStringBuf(CMPIData d, CMPIInstance *inst)
 {
   UtilStringBuffer *sb = UtilFactory->newStrinBuffer(64);
-  char            str[256] = { 0 };	// for string, we'll redirect the
-					// sp pointer,
+  char            str[256] = { 0 };     // for string, we'll redirect the
+  // sp pointer,
   // all other types should fit in this char-array
   char           *sp = str;
   int             needsQuotes = 0;
@@ -123,7 +122,7 @@ dataValueToStringBuf(CMPIData d, CMPIInstance * inst)
     int             i = 0;
     for (i = 0; i < na->size; i++) {
       if (i != 0)
-	sb->ft->appendChars(sb, ",");
+        sb->ft->appendChars(sb, ",");
       CMPIData        dd;
       dd.type = d.type & ~CMPI_ARRAY;
       dd.state = na->data[i].state;
@@ -218,9 +217,8 @@ dataValueToStringBuf(CMPIData d, CMPIInstance * inst)
   return sb;
 }
 
-
 UtilStringBuffer *
-instanceToMofWithType(CMPIInstance * ci, int withType)
+instanceToMofWithType(CMPIInstance *ci, int withType)
 {
   unsigned int    i,
                   m;
@@ -238,19 +236,19 @@ instanceToMofWithType(CMPIInstance * ci, int withType)
     CMPIData        d = __ift_getPropertyAt(ci, i, &name, &rc);
     if (rc.rc == CMPI_RC_OK) {
       if (!(d.state & CMPI_nullValue)) {
-	SFCB_APPENDCHARS_BLOCK(sb, "   ");
-	if (withType) {
-	  int             isarray = 0;
-	  sb->ft->appendChars(sb, datatypeToString(&d, &isarray));
-	  if (isarray)
-	    SFCB_APPENDCHARS_BLOCK(sb, "[]");
-	  SFCB_APPENDCHARS_BLOCK(sb, " ");
-	}
-	sb->ft->appendChars(sb, name->hdl);
-	SFCB_APPENDCHARS_BLOCK(sb, " = ");
-	UtilStringBuffer *buff = dataValueToStringBuf(d, ci);
-	sb->ft->appendChars(sb, buff->ft->getCharPtr(buff));
-	SFCB_APPENDCHARS_BLOCK(sb, ";\n");
+        SFCB_APPENDCHARS_BLOCK(sb, "   ");
+        if (withType) {
+          int             isarray = 0;
+          sb->ft->appendChars(sb, datatypeToString(&d, &isarray));
+          if (isarray)
+            SFCB_APPENDCHARS_BLOCK(sb, "[]");
+          SFCB_APPENDCHARS_BLOCK(sb, " ");
+        }
+        sb->ft->appendChars(sb, name->hdl);
+        SFCB_APPENDCHARS_BLOCK(sb, " = ");
+        UtilStringBuffer *buff = dataValueToStringBuf(d, ci);
+        sb->ft->appendChars(sb, buff->ft->getCharPtr(buff));
+        SFCB_APPENDCHARS_BLOCK(sb, ";\n");
       }
     }
   }
@@ -259,13 +257,11 @@ instanceToMofWithType(CMPIInstance * ci, int withType)
   return sb;
 }
 
-
 UtilStringBuffer *
-instanceToMof(CMPIInstance * ci)
+instanceToMof(CMPIInstance *ci)
 {
   return instanceToMofWithType(ci, 0);
 }
-
 
 static CMPIInstance *
 instifyBlob(void *blob)
@@ -282,7 +278,6 @@ instifyBlob(void *blob)
   }
 }
 
-
 static BlobIndex *
 _getIndex(const char *ns, const char *cn)
 {
@@ -292,7 +287,6 @@ _getIndex(const char *ns, const char *cn)
   else
     return NULL;
 }
-
 
 static CMPIInstance *
 ipGetFirst(BlobIndex * bi, int *len, char **keyb, size_t * keybl)
@@ -308,23 +302,21 @@ ipGetNext(BlobIndex * bi, int *len, char **keyb, size_t * keybl)
   return instifyBlob(blob);
 }
 
-
-
 static int
 parse_options(int argc, char *argv[])
 {
   int             opt;
   while ((opt = getopt(argc, argv, valid_options)) != -1) {
     switch (opt) {
-    case 'n':			// namespace, required
+    case 'n':                  // namespace, required
       strncpy(namespace, optarg, sizeof(namespace));
       break;
-    case 'c':			// classname, required
+    case 'c':                  // classname, required
       strncpy(classname, optarg, sizeof(classname));
       break;
-    case 'g':			// sfcb configuration - default =
-				// SFCB_CONFIR =
-				// (/usr/local)/etc/sfcb/sfcb.cfg
+    case 'g':                  // sfcb configuration - default =
+      // SFCB_CONFIR =
+      // (/usr/local)/etc/sfcb/sfcb.cfg
       // this configuration specifies the repository directory
       strncpy(sfcbcfg, optarg, sizeof(sfcbcfg));
       break;
@@ -334,7 +326,7 @@ parse_options(int argc, char *argv[])
     case 'r':
       strncpy(altRepositoryDir, optarg, sizeof(altRepositoryDir));
       break;
-    case 't':			// default is append, not truncate
+    case 't':                  // default is append, not truncate
       opt_truncate = 1;
       break;
     case 'm':
@@ -359,12 +351,11 @@ parse_options(int argc, char *argv[])
   return optind;
 }
 
-
 static void
 version(char *name)
 {
   printf("%s - Version %s  -  Dump static instances to mof\n", name,
-	 VERSION);
+         VERSION);
 }
 
 static void
@@ -400,7 +391,6 @@ help(char *name)
        SFCB_STATEDIR);
 }
 
-
 int
 main(int argc, char *argv[])
 {
@@ -420,7 +410,7 @@ main(int argc, char *argv[])
   if (opt_verbose) {
     version(argv[0]);
     printf("Parsing %s for instances, output to %s\n", classname,
-	   *outfilepath ? outfilepath : "stdout");
+           *outfilepath ? outfilepath : "stdout");
     if (opt_only_from_mof) {
       printf("  Dumping only instances created in MOF\n");
     } else if (opt_from_mof) {
@@ -435,7 +425,6 @@ main(int argc, char *argv[])
     help(argv[0]);
     return 0;
   }
-
   // now let's get to work
   char           *ns = namespace;
   char           *clsname = classname;
@@ -457,7 +446,7 @@ main(int argc, char *argv[])
       strcat(altRepositoryDir, "/");
     useAlternateRepository(altRepositoryDir);
     dbg(printf
-	("> Using alternate repository dir: %s\n", altRepositoryDir));
+        ("> Using alternate repository dir: %s\n", altRepositoryDir));
   }
 
   dbg(printf("> NS: %s\n", ns));
@@ -468,67 +457,72 @@ main(int argc, char *argv[])
     if (inst) {
       FILE           *fp = NULL;
       if (*outfilepath) {
-	if (opt_truncate)
-	  fp = fopen(outfilepath, "w");
-	else
-	  fp = fopen(outfilepath, "a");
+        if (opt_truncate)
+          fp = fopen(outfilepath, "w");
+        else
+          fp = fopen(outfilepath, "a");
       }
 
       while (1) {
-	dbg(printf("> got instance\n"));
+        dbg(printf("> got instance\n"));
 
-	strcpy(copKey, ns);
-	strcat(copKey, ":");
-	strcat(copKey, clsname);
-	strcat(copKey, ".");
-	strncat(copKey, kp, ekl);
+        strcpy(copKey, ns);
+        strcat(copKey, ":");
+        strcat(copKey, clsname);
+        strcat(copKey, ".");
+        strncat(copKey, kp, ekl);
 
-	cop = (CMPIObjectPath *) getObjectPath(copKey, &msg);
-	if (msg)
-	  dbg(printf(" ! got error msg getting cop: %s\n", msg));
-	if (cop) {
-	  int             fromMof = 0;
-	  char            copstr[4096] = { 0 };
-	  dbg(printf
-	      ("> > got cop: %s\n", sfcb_pathToChars(cop, NULL, copstr)));
-	  ClInstance     *cli = (ClInstance *) (inst->hdl);
-	  dbg(showClHdr((void *) &cli));
-	  if (cli->hdr.flags & HDR_FromMof) {
-	    fromMof = 1;
-	    dbg(printf("> > Instance is from Mof\n"));
-	  } else {
-	    fromMof = 0;
-	    dbg(printf("> > Instance is Not from Mof\n"));
-	  }
+        cop = (CMPIObjectPath *) getObjectPath(copKey, &msg);
+        if (msg)
+          dbg(printf(" ! got error msg getting cop: %s\n", msg));
+        if (cop) {
+          int             fromMof = 0;
+          char            copstr[4096] = { 0 };
+          dbg(printf
+              ("> > got cop: %s\n", sfcb_pathToChars(cop, NULL, copstr)));
+          ClInstance     *cli = (ClInstance *) (inst->hdl);
+          dbg(showClHdr((void *) &cli));
+          if (cli->hdr.flags & HDR_FromMof) {
+            fromMof = 1;
+            dbg(printf("> > Instance is from Mof\n"));
+          } else {
+            fromMof = 0;
+            dbg(printf("> > Instance is Not from Mof\n"));
+          }
 
-	  if ((!fromMof && (!opt_only_from_mof)) ||
-	      (fromMof && (opt_from_mof || opt_only_from_mof))) {
-	    dbg(printf("> > Including instance in output.\n"));
-	    UtilStringBuffer *sb = instanceToMof(inst);
+          if ((!fromMof && (!opt_only_from_mof)) ||
+              (fromMof && (opt_from_mof || opt_only_from_mof))) {
+            dbg(printf("> > Including instance in output.\n"));
+            UtilStringBuffer *sb = instanceToMof(inst);
 
-	    char           *str = (char *) sb->ft->getCharPtr(sb);
-	    if (fp) {
-	      fputs((const char *) str, fp);
-	      fputs("\n\n", fp);
-	    } else {
-	      printf("%s", (const char *) str);
-	      printf("\n\n");
-	    }
-	  }
-	} else {
-	  return -1;
-	}
-	if ((bi->next < bi->dSize)
-	    && (inst = ipGetNext(bi, NULL, &kp, &ekl))) {
-	  continue;
-	}
-	break;
+            char           *str = (char *) sb->ft->getCharPtr(sb);
+            if (fp) {
+              fputs((const char *) str, fp);
+              fputs("\n\n", fp);
+            } else {
+              printf("%s", (const char *) str);
+              printf("\n\n");
+            }
+          }
+        } else {
+          return -1;
+        }
+        if ((bi->next < bi->dSize)
+            && (inst = ipGetNext(bi, NULL, &kp, &ekl))) {
+          continue;
+        }
+        break;
       }
       if (fp)
-	fclose(fp);
+        fclose(fp);
     }
   }
   freeBlobIndex(&bi, 1);
 
   return 0;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -1,0 +1,107 @@
+-nbad
+-nbap
+-bbo
+-bc
+-br
+-brs
+-c33
+-cd33
+-cdb
+-ce
+-ci4
+-cli0
+-cp33
+-di16
+-fc1
+-fca
+-hnl
+-i2
+-ip4
+-l75
+-lp
+-npcs
+-nprs
+-psl
+-saf
+-sai
+-saw
+-sc
+-sob
+-nss
+-ts8
+-nut
+-cdw
+-T Iterator
+-T CMPIData
+-T CMPIStatus
+-T CMPIEnumeration
+-T CMPIInstance
+-T CMPIResult
+-T CMPIBoolean
+-T CMPI_THREAD_TYPE
+-T CMPIBoolean
+-T CMPIUint64
+-T CMPIType
+-T CMPICount
+-T CMPIErrorType
+-T CMPIErrorSeverity
+-T CMPIErrorProbableCause
+-T CMPIErrorSrcFormat
+-T CMPIrc
+-T AvlTree
+-T AvlNode
+-T ClientEnv
+-T ClientEnc
+-T ClientConnection
+-T CMPIBroker;
+-T CMPIInstance;
+-T CMPIObjectPath;
+-T CMPIArgs;
+-T CMPISelectExp
+-T CMPISelectCond
+-T CMPISubCond
+-T CMPIPredicate
+-T CMPIEnumeration
+-T CMPIArray
+-T CMPIString
+-T CMPIResult
+-T CMPIContext
+-T CMPIDateTime
+-T CMPIError
+-T CMPIBrokerMemFT
+-T CMPIErrorFT
+-T CMPIBrokerFT
+-T CMPIBrokerEncFT
+-T CMPIBrokerExtFT
+-T CMPIInstanceFT
+-T CMPIObjectPathFT
+-T CMPIArgsFT
+-T CMPISelectExpFT
+-T CMPISelectCondFT
+-T CMPISubCondFT
+-T CMPIPredicateFT
+-T CMPIEnumerationFT
+-T CMPIArrayFT
+-T CMPIStringFT
+-T CMPIResultFT
+-T CMPIContextFT
+-T CMPIDateTimeFT
+-T CMPIBoolean
+-T CMPIChar16
+-T CMPIUint8
+-T CMPIUint16
+-T CMPIUint32
+-T CMPIUint64
+-T CMPIUint64
+-T CMPISint8
+-T CMPISint16
+-T CMPISint32
+-T CMPISint64
+-T CMPISint64
+-T CMPIReal32
+-T CMPIReal64
+-T CMPIType
+-T CMPIValueState
+-T CMPIMsgFileHandle
+-T CMPIGcStat
+-T CMPIFlags

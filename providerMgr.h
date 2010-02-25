@@ -20,7 +20,6 @@
  *
  */
 
-
 #ifndef providerMgr_h
 #define providerMgr_h
 
@@ -68,7 +67,7 @@ typedef struct operationHdr {
   unsigned short  type;
   unsigned short  options;
 #define OH_Internal 2
-  unsigned long   count;	// maps to MsgList
+  unsigned long   count;        // maps to MsgList
   MsgSegment      nameSpace;
   MsgSegment      className;
   union {
@@ -92,18 +91,18 @@ typedef struct binRequestHdr {
   void           *provId;
   unsigned int    sessionId;
   unsigned int    flags;
-  unsigned long   count;	// maps to MsgList
+  unsigned long   count;        // maps to MsgList
   MsgSegment      object[0];
 } BinRequestHdr;
 
 typedef struct binResponseHdr {
   long            rc;
-  CMPIData        rv;		// need to check for string returns
+  CMPIData        rv;           // need to check for string returns
   MsgSegment      rvEnc;
   unsigned char   rvValue,
                   chunkedMode,
                   moreChunks;
-  unsigned long   count;	// maps to MsgList
+  unsigned long   count;        // maps to MsgList
   MsgSegment      object[1];
 } BinResponseHdr;
 
@@ -157,7 +156,6 @@ typedef struct binRequestContext {
 typedef struct chunkFunctions {
   void            (*writeChunk) (BinRequestContext *, BinResponseHdr *);
 } ChunkFunctions;
-
 
 typedef struct getClassReq {
   BinRequestHdr   hdr;
@@ -343,17 +341,22 @@ typedef struct setPropertyReq {
   BinRequestHdr   hdr;
   MsgSegment      principal;
   MsgSegment      path;
-  MsgSegment      inst;		/* we abuse an instance with a single
-				 * property, so we do not have to create
-				 * a property msg segment */
+  MsgSegment      inst;         /* we abuse an instance with a single
+                                 * property, so we do not have to create a 
+                                 * * property msg segment */
 } SetPropertyReq;
 
 int             getProviderContext(BinRequestContext * ctx,
-				   OperationHdr * ohdr);
+                                   OperationHdr * ohdr);
 BinResponseHdr **invokeProviders(BinRequestContext * binCtx, int *err,
-				 int *count);
+                                 int *count);
 BinResponseHdr *invokeProvider(BinRequestContext * ctx);
 void            freeResponseHeaders(BinResponseHdr ** resp,
-				    BinRequestContext * ctx);
+                                    BinRequestContext * ctx);
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

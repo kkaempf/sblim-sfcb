@@ -39,7 +39,6 @@
 #include "control.h"
 #endif
 
-
 extern void     addStartedAdapter(int pid);
 
 void
@@ -157,8 +156,8 @@ slpAgent()
   if (!getControlBool("enableHttp", &enableHttp)) {
     getControlNum("httpPort", &i);
     free(cfgHttp.port);
-    cfgHttp.port = malloc(6 * sizeof(char));	// portnumber has max. 5
-						// digits
+    cfgHttp.port = malloc(6 * sizeof(char));    // portnumber has max. 5
+    // digits
     sprintf(cfgHttp.port, "%d", (int) i);
   }
   if (!getControlBool("enableHttps", &enableHttps)) {
@@ -166,8 +165,8 @@ slpAgent()
     cfgHttps.commScheme = strdup("https");
     getControlNum("httpsPort", &i);
     free(cfgHttps.port);
-    cfgHttps.port = malloc(6 * sizeof(char));	// portnumber has max. 5
-						// digits 
+    cfgHttps.port = malloc(6 * sizeof(char));   // portnumber has max. 5
+    // digits 
     sprintf(cfgHttps.port, "%d", (int) i);
     getControlChars("sslClientTrustStore", &cfgHttps.trustStore);
     getControlChars("sslCertificateFilePath:", &cfgHttps.certFile);
@@ -197,13 +196,11 @@ main(int argc, char *argv[])
                   j;
   int             slpLifeTime = SLP_LIFETIME_DEFAULT;
   int             sleepTime;
-  cimSLPService   as;		// Service which is going to be advertised
+  cimSLPService   as;           // Service which is going to be advertised
 
   cimomConfig     cfg;
 
   setUpDefaults(&cfg);
-
-
 
   static const char *help[] = {
     "Options:",
@@ -217,8 +214,6 @@ main(int argc, char *argv[])
     NULL
   };
 
-
-
   static struct option const long_options[] = {
     {"cimhost", required_argument, 0, 'c'},
     {"hostport", required_argument, 0, 'n'},
@@ -231,8 +226,8 @@ main(int argc, char *argv[])
   };
 
   while ((c =
-	  getopt_long(argc, argv, "c:n:u:p:s:l:h", long_options,
-		      0)) != -1) {
+          getopt_long(argc, argv, "c:n:u:p:s:l:h", long_options,
+                      0)) != -1) {
     switch (c) {
     case 0:
       break;
@@ -261,12 +256,12 @@ main(int argc, char *argv[])
       break;
     case 'h':
       for (j = 0; help[j] != NULL; j++) {
-	printf("%s\n", help[j]);
+        printf("%s\n", help[j]);
       }
       exit(0);
     default:
       for (j = 0; help[j] != NULL; j++) {
-	printf("%s\n", help[j]);
+        printf("%s\n", help[j]);
       }
       exit(0);
       break;
@@ -281,12 +276,12 @@ main(int argc, char *argv[])
     rt = registerCIMService(as, slpLifeTime);
     if (rt == 1) {
       printf
-	  ("No url-string could be constructed. This is usually due to a lacking CIM_ObjectManager instance.\n");
+          ("No url-string could be constructed. This is usually due to a lacking CIM_ObjectManager instance.\n");
       exit(0);
     }
     if (rt < 0) {
       printf
-	  ("Error registering with slpd ... I will try again next interval.\n");
+          ("Error registering with slpd ... I will try again next interval.\n");
     }
     sleep(sleepTime);
   }
@@ -295,3 +290,8 @@ main(int argc, char *argv[])
   // return 0;
 }
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

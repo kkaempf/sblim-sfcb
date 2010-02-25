@@ -30,7 +30,6 @@
 #include "cimslpUtil.h"
 #include "trace.h"
 
-
 #define SIZE 1024
 
 int             size;
@@ -68,7 +67,6 @@ onErrorFnc(SLPHandle hslp, SLPError errcode, void *cookie)
   }
 }
 
-
 char           *
 buildAttrString(char *name, char *value, char *attrstring)
 {
@@ -98,14 +96,12 @@ buildAttrString(char *name, char *value, char *attrstring)
 
 }
 
-
 char           *
 buildAttrStringFromArray(char *name, char **value, char *attrstring)
 {
   int             length = 0;
   int             i;
   int             finalAttrLen = 0;
-
 
   if (value == NULL) {
     return attrstring;
@@ -118,6 +114,8 @@ buildAttrStringFromArray(char *name, char **value, char *attrstring)
   // Account for the comma delimiters which will be inserted into the
   // string between
   // each element in the array, one per value array entry. Err on the side 
+  // 
+  // 
   // of caution
   // and still count the trailing comma, though it will be clobbered by
   // the final ")"
@@ -154,10 +152,12 @@ buildAttrStringFromArray(char *name, char **value, char *attrstring)
 
   if (finalAttrLen + 1 > size) {
     // buffer overrun. Better to abort here rather than discovering a heap 
+    // 
+    // 
     // curruption later
     printf
-	("--- Error:  Buffer overrun in %s. Content size: %d  Buffer size: %d\n",
-	 "buildAttrStringFromArray", finalAttrLen + 1, size);
+        ("--- Error:  Buffer overrun in %s. Content size: %d  Buffer size: %d\n",
+         "buildAttrStringFromArray", finalAttrLen + 1, size);
     abort();
   }
 
@@ -179,8 +179,8 @@ deregisterCIMService()
   err = SLPDereg(hslp, urlsyntax, onErrorFnc, &callbackerr);
   if ((err != SLP_OK) || (callbackerr != SLP_OK)) {
     printf
-	("--- Error deregistering service with slp (%i) ... it will now timeout\n",
-	 err);
+        ("--- Error deregistering service with slp (%i) ... it will now timeout\n",
+         err);
   }
   SLPClose(hslp);
 }
@@ -210,9 +210,11 @@ registerCIMService(cimSLPService css, int slpLifeTime)
      *  service:wbem:http://somehost:someport
      */
     freeStr(urlsyntax);
-    urlsyntax = (char *) malloc(strlen(css.url_syntax) + 14);	// ("service:wbem:" 
-								// = 13) + 
-								// \0
+    urlsyntax = (char *) malloc(strlen(css.url_syntax) + 14);   // ("service:wbem:" 
+                                                                // 
+    // 
+    // = 13) + 
+    // \0
     sprintf(urlsyntax, "service:wbem:%s", css.url_syntax);
   }
 
@@ -222,53 +224,53 @@ registerCIMService(cimSLPService css, int slpLifeTime)
   attrstring = buildAttrString("template-type", "wbem", attrstring);
   attrstring = buildAttrString("template-version", "1.0", attrstring);
   attrstring = buildAttrString("template-description",
-			       "This template describes the attributes used for advertising WBEM Servers.",
-			       attrstring);
+                               "This template describes the attributes used for advertising WBEM Servers.",
+                               attrstring);
   attrstring =
       buildAttrString("template-url-syntax", css.url_syntax, attrstring);
   attrstring =
       buildAttrString("service-hi-name", css.service_hi_name, attrstring);
   attrstring =
       buildAttrString("service-hi-description", css.service_hi_description,
-		      attrstring);
+                      attrstring);
   attrstring = buildAttrString("service-id", css.service_id, attrstring);
   attrstring = buildAttrString("CommunicationMechanism",
-			       css.CommunicationMechanism, attrstring);
+                               css.CommunicationMechanism, attrstring);
   attrstring = buildAttrString("OtherCommunicationMechanismDescription",
-			       css.OtherCommunicationMechanismDescription,
-			       attrstring);
+                               css.OtherCommunicationMechanismDescription,
+                               attrstring);
   attrstring =
       buildAttrStringFromArray("InteropSchemaNamespace",
-			       css.InteropSchemaNamespace, attrstring);
+                               css.InteropSchemaNamespace, attrstring);
   attrstring =
       buildAttrString("ProtocolVersion", css.ProtocolVersion, attrstring);
   attrstring =
       buildAttrStringFromArray("FunctionalProfilesSupported",
-			       css.FunctionalProfilesSupported,
-			       attrstring);
+                               css.FunctionalProfilesSupported,
+                               attrstring);
   attrstring =
       buildAttrStringFromArray("FunctionalProfileDescriptions",
-			       css.FunctionalProfileDescriptions,
-			       attrstring);
+                               css.FunctionalProfileDescriptions,
+                               attrstring);
   attrstring =
       buildAttrString("MultipleOperationsSupported",
-		      css.MultipleOperationsSupported, attrstring);
+                      css.MultipleOperationsSupported, attrstring);
   attrstring =
       buildAttrStringFromArray("AuthenticationMechanismsSupported",
-			       css.AuthenticationMechanismsSupported,
-			       attrstring);
+                               css.AuthenticationMechanismsSupported,
+                               attrstring);
   attrstring =
       buildAttrStringFromArray("AuthenticationMechansimDescriptions",
-			       css.AuthenticationMechansimDescriptions,
-			       attrstring);
+                               css.AuthenticationMechansimDescriptions,
+                               attrstring);
   attrstring =
       buildAttrStringFromArray("Namespace", css.Namespace, attrstring);
   attrstring =
       buildAttrStringFromArray("Classinfo", css.Classinfo, attrstring);
   attrstring =
       buildAttrStringFromArray("RegisteredProfilesSupported",
-			       css.RegisteredProfilesSupported,
-			       attrstring);
+                               css.RegisteredProfilesSupported,
+                               attrstring);
 
   err = SLPOpen("", SLP_FALSE, &hslp);
   if (err != SLP_OK) {
@@ -292,9 +294,9 @@ registerCIMService(cimSLPService css, int slpLifeTime)
     }
   }
   err = SLPReg(hslp,
-	       urlsyntax,
-	       slpLifeTime,
-	       NULL, attrstring, SLP_TRUE, onErrorFnc, &callbackerr);
+               urlsyntax,
+               slpLifeTime,
+               NULL, attrstring, SLP_TRUE, onErrorFnc, &callbackerr);
 
 #ifdef HAVE_SLP_ALONE
   printf("url_syntax: %s\n", css.url_syntax);
@@ -322,3 +324,8 @@ registerCIMService(cimSLPService css, int slpLifeTime)
 
   _SFCB_RETURN(retCode);
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

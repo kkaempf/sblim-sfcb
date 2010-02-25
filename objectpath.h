@@ -27,6 +27,11 @@ UtilStringBuffer *normalizeObjectPathStrBuf(const CMPIObjectPath * cop);
 char           *normalizeObjectPathChars(const CMPIObjectPath * cop);
 char           *normalizeObjectPathCharsDup(const CMPIObjectPath * cop);
 int             objectpathCompare(const CMPIObjectPath * cop1,
-				  const CMPIObjectPath * cop2);
+                                  const CMPIObjectPath * cop2);
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

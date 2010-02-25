@@ -49,12 +49,11 @@
 #include "cmpimacs.h"
 #include "cmpimacsx.h"
 
-
 static const CMPIBroker *_broker;
 static CMPIStatus okSt = { CMPI_RC_OK, NULL };
 
 void
-ElementCapabilitiesInitInstances(const CMPIContext * ctx)
+ElementCapabilitiesInitInstances(const CMPIContext *ctx)
 {
   CMPIObjectPath *op = NULL,
       *opLeft = NULL,
@@ -71,17 +70,17 @@ ElementCapabilitiesInitInstances(const CMPIContext * ctx)
   ctxLocal->ft->addEntry(ctxLocal, "rerouteToProvider", &val, CMPI_string);
 
   op = CMNewObjectPath(_broker, "root/interop", "SFCB_ElementCapabilities",
-		       NULL);
+                       NULL);
   ci = CMNewInstance(_broker, op, NULL);
 
   opLeft =
       CMNewObjectPath(_broker, "root/interop", "CIM_IndicationService",
-		      NULL);
+                      NULL);
   enm = CBEnumInstanceNames(_broker, ctx, opLeft, NULL);
   left = CMGetNext(enm, NULL).value.ref;
   opRight =
       CMNewObjectPath(_broker, "root/interop",
-		      "SFCB_IndicationServiceCapabilities", NULL);
+                      "SFCB_IndicationServiceCapabilities", NULL);
   enm = CBEnumInstanceNames(_broker, ctx, opRight, NULL);
   right = CMGetNext(enm, NULL).value.ref;
 
@@ -95,57 +94,57 @@ ElementCapabilitiesInitInstances(const CMPIContext * ctx)
 
 CMPIStatus
 ElementCapabilitiesAssociators(CMPIAssociationMI * mi,
-			       const CMPIContext * ctx,
-			       const CMPIResult * rslt,
-			       const CMPIObjectPath * cop,
-			       const char *assocClass,
-			       const char *resultClass,
-			       const char *role,
-			       const char *resultRole,
-			       const char **propertyList)
+                               const CMPIContext *ctx,
+                               const CMPIResult *rslt,
+                               const CMPIObjectPath * cop,
+                               const char *assocClass,
+                               const char *resultClass,
+                               const char *role,
+                               const char *resultRole,
+                               const char **propertyList)
 {
   return okSt;
 }
 
 CMPIStatus
 ElementCapabilitiesAssociatorNames(CMPIAssociationMI * mi,
-				   const CMPIContext * ctx,
-				   const CMPIResult * rslt,
-				   const CMPIObjectPath * cop,
-				   const char *assocClass,
-				   const char *resultClass,
-				   const char *role,
-				   const char *resultRole)
+                                   const CMPIContext *ctx,
+                                   const CMPIResult *rslt,
+                                   const CMPIObjectPath * cop,
+                                   const char *assocClass,
+                                   const char *resultClass,
+                                   const char *role,
+                                   const char *resultRole)
 {
   return okSt;
 }
 
 CMPIStatus
 ElementCapabilitiesReferences(CMPIAssociationMI * mi,
-			      const CMPIContext * ctx,
-			      const CMPIResult * rslt,
-			      const CMPIObjectPath * cop,
-			      const char *resultClass,
-			      const char *role, const char **propertyList)
+                              const CMPIContext *ctx,
+                              const CMPIResult *rslt,
+                              const CMPIObjectPath * cop,
+                              const char *resultClass,
+                              const char *role, const char **propertyList)
 {
   return okSt;
 }
 
 CMPIStatus
 ElementCapabilitiesReferenceNames(CMPIAssociationMI * mi,
-				  const CMPIContext * ctx,
-				  const CMPIResult * rslt,
-				  const CMPIObjectPath * cop,
-				  const char *resultClass,
-				  const char *role)
+                                  const CMPIContext *ctx,
+                                  const CMPIResult *rslt,
+                                  const CMPIObjectPath * cop,
+                                  const char *resultClass,
+                                  const char *role)
 {
   return okSt;
 }
 
 CMPIStatus
 ElementCapabilitiesAssociationCleanup(CMPIAssociationMI * mi,
-				      const CMPIContext * ctx,
-				      CMPIBoolean terminate)
+                                      const CMPIContext *ctx,
+                                      CMPIBoolean terminate)
 {
   return okSt;
 }
@@ -163,8 +162,8 @@ static CMPIAssociationMIFT assocMIFT__ElementCapabilities = {
 CMPI_EXTERN_C
     CMPIAssociationMI *
 ElementCapabilities_Create_AssociationMI(const CMPIBroker * brkr,
-					 const CMPIContext * ctx,
-					 CMPIStatus * rc)
+                                         const CMPIContext *ctx,
+                                         CMPIStatus *rc)
 {
   static CMPIAssociationMI mi = {
     NULL,
@@ -174,3 +173,8 @@ ElementCapabilities_Create_AssociationMI(const CMPIBroker * brkr,
   ElementCapabilitiesInitInstances(ctx);
   return &mi;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -20,17 +20,14 @@
  *
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "native.h"
 
-
 // ! Forward declaration for anonymous struct.
 struct native_property;
-
 
 // ! Function table for native_property handling functions.
 /*
@@ -43,51 +40,34 @@ struct native_propertyFT {
 
   // ! Adds a new native_property to a list.
   int             (*addProperty) (struct native_property **,
-				  int,
-				  const char *, CMPIType, CMPIValueState,
-				  const CMPIValue *);
+                                  int,
+                                  const char *, CMPIType, CMPIValueState,
+                                  const CMPIValue *);
 
   // ! Resets the values of an existing native_property, if existant.
   int             (*setProperty) (struct native_property *,
-				  int, const char *, CMPIType,
-				  CMPIValue *);
+                                  int, const char *, CMPIType,
+                                  CMPIValue *);
 
   // ! Looks up a specifix native_property in CMPIData format.
-       
-       
-       
-       
-       
-       
-      CMPIData(*getDataProperty) (struct native_property *,
-				  const char *, CMPIStatus *);
+
+  CMPIData        (*getDataProperty) (struct native_property *,
+                                      const char *, CMPIStatus *);
 
   // ! Extract an indexed native_property in CMPIData format.
-       
-       
-       
-       
-       
-       
-      CMPIData(*getDataPropertyAt) (struct native_property *,
-				    unsigned int, CMPIString **,
-				    CMPIStatus *);
+
+  CMPIData        (*getDataPropertyAt) (struct native_property *,
+                                        unsigned int, CMPIString **,
+                                        CMPIStatus *);
 
   // ! Yields the number of native_property items in a list.
-       
-       
-       
-       
-       
-       
-      CMPICount(*getPropertyCount) (struct native_property *,
-				    CMPIStatus *);
+
+  CMPICount       (*getPropertyCount) (struct native_property *,
+                                       CMPIStatus *);
 
   // ! Releases a complete list of native_property items.
   void            (*release) (struct native_property *);
 };
-
-
 
 static struct native_propertyFT propertyFT;
 
@@ -97,24 +77,21 @@ static struct native_propertyFT propertyFT;
  * for CMPI providers. 
  */
 struct native_context {
-  CMPIContext     ctx;		/* !< the inheriting data structure */
-  int             mem_state;	/* !< states, whether this object is
-				 * registered within the memory
-				 * mangagement or represents a cloned
-				 * object */
-  struct native_property *entries;	/* !< context content */
+  CMPIContext     ctx;          /* !< the inheriting data structure */
+  int             mem_state;    /* !< states, whether this object is
+                                 * registered within the memory
+                                 * mangagement or represents a cloned
+                                 * object */
+  struct native_property *entries;      /* !< context content */
   void           *data;
 };
 
-
 static struct native_context *__new_empty_context(int);
-
 
 /****************************************************************************/
 
-
 static CMPIStatus
-__cft_release(CMPIContext * ctx)
+__cft_release(CMPIContext *ctx)
 {
   struct native_context *c = (struct native_context *) ctx;
 
@@ -128,59 +105,53 @@ __cft_release(CMPIContext * ctx)
   CMReturn(CMPI_RC_ERR_FAILED);
 }
 
-
 static CMPIContext *
-__cft_clone(const CMPIContext * ctx, CMPIStatus * rc)
+__cft_clone(const CMPIContext *ctx, CMPIStatus *rc)
 {
   if (rc)
     CMSetStatus(rc, CMPI_RC_ERR_NOT_SUPPORTED);
   return NULL;
 }
 
-
 static CMPIData
-__cft_getEntry(const CMPIContext * ctx, const char *name, CMPIStatus * rc)
+__cft_getEntry(const CMPIContext *ctx, const char *name, CMPIStatus *rc)
 {
   struct native_context *c = (struct native_context *) ctx;
 
   return propertyFT.getDataProperty(c->entries, name, rc);
 }
 
-
 static CMPIData
-__cft_getEntryAt(const CMPIContext * ctx,
-		 unsigned int index, CMPIString ** name, CMPIStatus * rc)
+__cft_getEntryAt(const CMPIContext *ctx,
+                 unsigned int index, CMPIString **name, CMPIStatus *rc)
 {
   struct native_context *c = (struct native_context *) ctx;
 
   return propertyFT.getDataPropertyAt(c->entries, index, name, rc);
 }
 
-
 static unsigned int
-__cft_getEntryCount(const CMPIContext * ctx, CMPIStatus * rc)
+__cft_getEntryCount(const CMPIContext *ctx, CMPIStatus *rc)
 {
   struct native_context *c = (struct native_context *) ctx;
 
   return propertyFT.getPropertyCount(c->entries, rc);
 }
 
-
 static CMPIStatus
-__cft_addEntry(const CMPIContext * ctx,
-	       const char *name, const CMPIValue * value, CMPIType type)
+__cft_addEntry(const CMPIContext *ctx,
+               const char *name, const CMPIValue * value, CMPIType type)
 {
   struct native_context *c = (struct native_context *) ctx;
 
   CMReturn((propertyFT.addProperty(&c->entries,
-				   MEM_NOT_TRACKED,
-				   name,
-				   type,
-				   0,
-				   value)) ?
-	   CMPI_RC_ERR_ALREADY_EXISTS : CMPI_RC_OK);
+                                   MEM_NOT_TRACKED,
+                                   name,
+                                   type,
+                                   0,
+                                   value)) ?
+           CMPI_RC_ERR_ALREADY_EXISTS : CMPI_RC_OK);
 }
-
 
 static CMPIContextFT cft = {
   NATIVE_FT_VERSION,
@@ -191,7 +162,6 @@ static CMPIContextFT cft = {
   __cft_getEntryCount,
   __cft_addEntry
 };
-
 
 static struct native_context *
 __new_empty_context(int mm_add)
@@ -214,8 +184,6 @@ __new_empty_context(int mm_add)
   return (struct native_context *) tCtx;
 }
 
-
-
 CMPIContext    *
 native_new_CMPIContext(int mem_state, void *data)
 {
@@ -225,9 +193,8 @@ native_new_CMPIContext(int mem_state, void *data)
   return (CMPIContext *) ctx;
 }
 
-
 CMPIContext    *
-native_clone_CMPIContext(const CMPIContext * ctx)
+native_clone_CMPIContext(const CMPIContext *ctx)
 {
   CMPIString     *name;
   struct native_context *c = (struct native_context *) ctx;
@@ -242,7 +209,6 @@ native_clone_CMPIContext(const CMPIContext * ctx)
   return nCtx;
 }
 
-
 // ! Storage container for commonly needed data within native CMPI data
 // types.
 /*
@@ -250,18 +216,17 @@ native_clone_CMPIContext(const CMPIContext * ctx)
  * needed for various native data types. 
  */
 struct native_property {
-  char           *name;		// !< Property identifier.
-  CMPIType        type;		// !< Associated CMPIType.
-  CMPIValueState  state;	// !< Current value state.
-  CMPIValue       value;	// !< Current value.
-  struct native_property *next;	// !< Pointer to next property.
+  char           *name;         // !< Property identifier.
+  CMPIType        type;         // !< Associated CMPIType.
+  CMPIValueState  state;        // !< Current value state.
+  CMPIValue       value;        // !< Current value.
+  struct native_property *next; // !< Pointer to next property.
 };
-
 
 /****************************************************************************/
 
 static CMPIData
-__convert2CMPIData(struct native_property *prop, CMPIString ** propname)
+__convert2CMPIData(struct native_property *prop, CMPIString **propname)
 {
   CMPIData        result;
 
@@ -282,18 +247,16 @@ __convert2CMPIData(struct native_property *prop, CMPIString ** propname)
   return result;
 }
 
-
 /**
  * adds or replaces
  */
 static int
 __addProperty(struct native_property **prop,
-	      int mm_add,
-	      const char *name,
-	      CMPIType type, CMPIValueState state, const CMPIValue * value)
+              int mm_add,
+              const char *name,
+              CMPIType type, CMPIValueState state, const CMPIValue * value)
 {
   CMPIValue       v;
-
 
   /*
    * if it's new, add it to the end of the list 
@@ -305,7 +268,7 @@ __addProperty(struct native_property **prop,
     struct native_property *tmp;
     if (*prop == NULL) {
       *prop = (struct native_property *)
-	  calloc(1, sizeof(struct native_property));
+          calloc(1, sizeof(struct native_property));
       (*prop)->name = strdup(name);
     } else {
       sfcb_native_release_CMPIValue((*prop)->type, &((*prop)->value));
@@ -327,12 +290,12 @@ __addProperty(struct native_property **prop,
 
       if (mm_add == MEM_TRACKED) {
 
-	sfcb_setAlignedValue(&tmp->value, value, type);
+        sfcb_setAlignedValue(&tmp->value, value, type);
       } else {
 
-	CMPIStatus      rc;
-	tmp->value = sfcb_native_clone_CMPIValue(type, value, &rc);
-	// what if clone() fails???
+        CMPIStatus      rc;
+        tmp->value = sfcb_native_clone_CMPIValue(type, value, &rc);
+        // what if clone() fails???
       }
     } else
       tmp->state = CMPI_nullValue;
@@ -344,17 +307,16 @@ __addProperty(struct native_property **prop,
    * continue checking the list 
    */
   return (__addProperty(&((*prop)->next),
-			mm_add, name, type, state, value));
+                        mm_add, name, type, state, value));
 }
-
 
 /**
  * returns -1 if non-existant
  */
 static int
 __setProperty(struct native_property *prop,
-	      int mm_add,
-	      const char *name, CMPIType type, CMPIValue * value)
+              int mm_add,
+              const char *name, CMPIType type, CMPIValue * value)
 {
   CMPIValue       v;
   if (prop == NULL) {
@@ -379,9 +341,9 @@ __setProperty(struct native_property *prop,
 
     if (type != CMPI_null) {
       if (mm_add == MEM_TRACKED) {
-	sfcb_setAlignedValue(&prop->value, value, type);
+        sfcb_setAlignedValue(&prop->value, value, type);
       } else {
-	prop->value = sfcb_native_clone_CMPIValue(type, value, &rc);
+        prop->value = sfcb_native_clone_CMPIValue(type, value, &rc);
       }
     } else
       prop->state = CMPI_nullValue;
@@ -390,7 +352,6 @@ __setProperty(struct native_property *prop,
   }
   return __setProperty(prop->next, mm_add, name, type, value);
 }
-
 
 static struct native_property *
 __getProperty(struct native_property *prop, const char *name)
@@ -402,10 +363,9 @@ __getProperty(struct native_property *prop, const char *name)
       prop : __getProperty(prop->next, name);
 }
 
-
 static CMPIData
 __getDataProperty(struct native_property *prop,
-		  const char *name, CMPIStatus * rc)
+                  const char *name, CMPIStatus *rc)
 {
   struct native_property *p = __getProperty(prop, name);
 
@@ -414,7 +374,6 @@ __getDataProperty(struct native_property *prop,
 
   return __convert2CMPIData(p, NULL);
 }
-
 
 static struct native_property *__getPropertyAt
     (struct native_property *prop, unsigned int pos) {
@@ -425,11 +384,10 @@ static struct native_property *__getPropertyAt
   return (pos == 0) ? prop : __getPropertyAt(prop->next, --pos);
 }
 
-
 static CMPIData
 __getDataPropertyAt(struct native_property *prop,
-		    unsigned int pos,
-		    CMPIString ** propname, CMPIStatus * rc)
+                    unsigned int pos,
+                    CMPIString **propname, CMPIStatus *rc)
 {
   struct native_property *p = __getPropertyAt(prop, pos);
 
@@ -439,9 +397,8 @@ __getDataPropertyAt(struct native_property *prop,
   return __convert2CMPIData(p, propname);
 }
 
-
 static CMPICount
-__getPropertyCount(struct native_property *prop, CMPIStatus * rc)
+__getPropertyCount(struct native_property *prop, CMPIStatus *rc)
 {
   CMPICount       c = 0;
 
@@ -456,7 +413,6 @@ __getPropertyCount(struct native_property *prop, CMPIStatus * rc)
   return c;
 }
 
-
 static void
 __release(struct native_property *prop)
 {
@@ -469,8 +425,6 @@ __release(struct native_property *prop)
   }
 }
 
-
-
 /**
  * Global function table to access native_property helper functions.
  */
@@ -482,3 +436,8 @@ static struct native_propertyFT propertyFT = {
   __getPropertyCount,
   __release
 };
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

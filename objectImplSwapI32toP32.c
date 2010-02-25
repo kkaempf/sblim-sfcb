@@ -21,8 +21,6 @@
  *
  */
 
-
-
 #include <byteswap.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -68,7 +66,6 @@ typedef struct {
   CLP32_CMPIData  data;
 } CLP32_ClQualifier;
 
-
 typedef struct {
   CLP32_CMPIData  data;
   CLP32_ClString  id;
@@ -89,8 +86,8 @@ typedef struct {
   long            padP32;
 } CLP32_ClProperty;
 
-static CLP32_CMPIData
-copyI32toP32Data(ClObjectHdr * hdr, CMPIData * fd)
+static          CLP32_CMPIData
+copyI32toP32Data(ClObjectHdr * hdr, CMPIData *fd)
 {
   CLP32_CMPIData  td;
 
@@ -135,7 +132,7 @@ copyI32toP32Data(ClObjectHdr * hdr, CMPIData * fd)
        * td.value.sint32=bswap_32(fd->value.sint32); } }
        */
       if ((fd->type & CMPI_ARRAY) || (fd->type & CMPI_ENC)) {
-	td.value.sint32 = bswap_32(fd->value.sint32);
+        td.value.sint32 = bswap_32(fd->value.sint32);
       }
     }
 
@@ -155,7 +152,7 @@ p32SizeQualifiers(ClObjectHdr * hdr, ClSection * s)
 
 static int
 copyI32toP32Qualifiers(int ofs, char *to, CLP32_ClSection * ts,
-		       ClObjectHdr * from, ClSection * fs)
+                       ClObjectHdr * from, ClSection * fs)
 {
   ClQualifier    *fq = (ClQualifier *) ClObjectGetClSection(from, fs);
   CLP32_ClQualifier *tq = (CLP32_ClQualifier *) (to + ofs);
@@ -200,7 +197,7 @@ p32SizeProperties(ClObjectHdr * hdr, ClSection * s)
 
 static int
 copyI32toP32Properties(int ofs, char *to, CLP32_ClSection * ts,
-		       ClObjectHdr * from, ClSection * fs)
+                       ClObjectHdr * from, ClSection * fs)
 {
   ClProperty     *fp = (ClProperty *) ClObjectGetClSection(from, fs);
   CLP32_ClProperty *tp = (CLP32_ClProperty *) (to + ofs);
@@ -227,7 +224,7 @@ copyI32toP32Properties(int ofs, char *to, CLP32_ClSection * ts,
     tp->originId = fp->originId;
     if (fp->qualifiers.used) {
       l += copyI32toP32Qualifiers(ofs + l, to, &tp->qualifiers, from,
-				  &fp->qualifiers);
+                                  &fp->qualifiers);
     } else {
       tp->qualifiers.used = 0;
       tp->qualifiers.max = 0;
@@ -258,7 +255,7 @@ p32SizeParameters(ClObjectHdr * hdr, ClSection * s)
 
 static long
 copyI32toP32Parameters(int ofs, char *to, CLP32_ClSection * ts,
-		       ClObjectHdr * from, ClSection * fs)
+                       ClObjectHdr * from, ClSection * fs)
 {
   ClParameter    *fp = (ClParameter *) ClObjectGetClSection(from, fs);
   CLP32_ClParameter *tp = (CLP32_ClParameter *) (to + ofs);
@@ -281,14 +278,14 @@ copyI32toP32Parameters(int ofs, char *to, CLP32_ClSection * ts,
     tp->parameter.arraySize = bswap_32(fp->parameter.arraySize);
 #if __WORDSIZE == 64
     tp->parameter.refName =
-	(char *) bswap_64((unsigned long long) (fp->parameter.refName));
+        (char *) bswap_64((unsigned long long) (fp->parameter.refName));
 #else
     tp->parameter.refName =
-	(void *) bswap_32((int) (fp->parameter.refName));
+        (void *) bswap_32((int) (fp->parameter.refName));
 #endif
     if (fp->qualifiers.used)
       l += copyI32toP32Qualifiers(ofs + l, to, &tp->qualifiers, from,
-				  &fp->qualifiers);
+                                  &fp->qualifiers);
   }
 
   ts->sectionOffset = bswap_32(ofs);
@@ -316,7 +313,7 @@ p32SizeMethods(ClObjectHdr * hdr, ClSection * s)
 
 static int
 copyI32toP32Methods(int ofs, char *to, CLP32_ClSection * ts,
-		    ClObjectHdr * from, ClSection * fs)
+                    ClObjectHdr * from, ClSection * fs)
 {
   ClMethod       *fm = (ClMethod *) ClObjectGetClSection(from, fs);
   CLP32_ClMethod *tm = (CLP32_ClMethod *) (to + ofs);
@@ -339,10 +336,10 @@ copyI32toP32Methods(int ofs, char *to, CLP32_ClSection * ts,
     tm->flags = bswap_16(fm->flags);
     if (fm->qualifiers.used)
       l += copyI32toP32Qualifiers(ofs + l, to, &tm->qualifiers, from,
-				  &fm->qualifiers);
+                                  &fm->qualifiers);
     if (fm->parameters.used)
       l += copyI32toP32Parameters(ofs + l, to, &tm->parameters, from,
-				  &fm->parameters);
+                                  &fm->parameters);
   }
 
   ts->sectionOffset = bswap_32(ofs);
@@ -361,7 +358,7 @@ p32SizeStringBuf(ClObjectHdr * hdr)
   buf = getStrBufPtr(hdr);
 
   sz = sizeof(CLP32_ClStrBuf) + ALIGN(buf->bUsed,
-				      4) +
+                                      4) +
       (buf->iUsed * sizeof(*buf->indexPtr));
 
   return ALIGN(sz, CLALIGN);
@@ -405,8 +402,6 @@ copyI32toP32StringBuf(int ofs, CLP32_ClObjectHdr * th, ClObjectHdr * fh)
 
   return ALIGN(l + il, CLALIGN);
 }
-
-
 
 static long
 p32SizeArrayBuf(ClObjectHdr * hdr)
@@ -520,7 +515,7 @@ swapI32toP32Class(ClClass * cls, int *size)
 
     if (uName.machine[0] != 'i' || strcmp(uName.machine + 2, "86") != 0) {
       fprintf(stderr,
-	      "--- swapI32toP32Class can only execute on ix86 machines\n");
+              "--- swapI32toP32Class can only execute on ix86 machines\n");
       exit(16);
     }
     first = 0;
@@ -540,11 +535,11 @@ swapI32toP32Class(ClClass * cls, int *size)
   nc->parent.id = bswap_32(cls->parent.id);
 
   ofs += copyI32toP32Qualifiers(ofs, (char *) nc, &nc->qualifiers, hdr,
-				&cls->qualifiers);
+                                &cls->qualifiers);
   ofs += copyI32toP32Properties(ofs, (char *) nc, &nc->properties, hdr,
-				&cls->properties);
+                                &cls->properties);
   ofs += copyI32toP32Methods(ofs, (char *) nc, &nc->methods, hdr,
-			     &cls->methods);
+                             &cls->methods);
 
   ofs += copyI32toP32StringBuf(ofs, &nc->hdr, hdr);
   ofs += copyI32toP32ArrayBuf(ofs, &nc->hdr, hdr);
@@ -570,7 +565,7 @@ swapI32toP32Instance(ClInstance * inst, int *size)
 
     if (uName.machine[0] != 'i' || strcmp(uName.machine + 2, "86") != 0) {
       fprintf(stderr,
-	      "--- swapI32toP32Instance can only execute on ix86 machines\n");
+              "--- swapI32toP32Instance can only execute on ix86 machines\n");
       exit(16);
     }
     first = 0;
@@ -588,9 +583,9 @@ swapI32toP32Instance(ClInstance * inst, int *size)
   ni->className.id = bswap_32(inst->className.id);
   ni->nameSpace.id = bswap_32(inst->nameSpace.id);
   ofs += copyI32toP32Qualifiers(ofs, (char *) ni, &ni->qualifiers, hdr,
-				&inst->qualifiers);
+                                &inst->qualifiers);
   ofs += copyI32toP32Properties(ofs, (char *) ni, &ni->properties, hdr,
-				&inst->properties);
+                                &inst->properties);
 
   ofs += copyI32toP32StringBuf(ofs, &ni->hdr, hdr);
   ofs += copyI32toP32ArrayBuf(ofs, &ni->hdr, hdr);
@@ -616,7 +611,7 @@ swapI32toP32QualifierDeclaration(ClQualifierDeclaration * qual, int *size)
 
     if (uName.machine[0] != 'i' || strcmp(uName.machine + 2, "86") != 0) {
       fprintf(stderr,
-	      "--- swapI32toP32QualifierDeclaration can only execute on ix86 machines\n");
+              "--- swapI32toP32QualifierDeclaration can only execute on ix86 machines\n");
       exit(16);
     }
     first = 0;
@@ -637,7 +632,7 @@ swapI32toP32QualifierDeclaration(ClQualifierDeclaration * qual, int *size)
   nq->nameSpace.id = bswap_32(qual->nameSpace.id);
 
   ofs += copyI32toP32Qualifiers(ofs, (char *) nq, &nq->qualifierData, hdr,
-				&qual->qualifierData);
+                                &qual->qualifierData);
   ofs += copyI32toP32StringBuf(ofs, &nq->hdr, hdr);
   ofs += copyI32toP32ArrayBuf(ofs, &nq->hdr, hdr);
 
@@ -647,3 +642,8 @@ swapI32toP32QualifierDeclaration(ClQualifierDeclaration * qual, int *size)
 
   return nq;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -19,8 +19,6 @@
  *
  */
 
-
-
 #include "cmpidt.h"
 #include "cmpift.h"
 #include "cmpimacs.h"
@@ -38,23 +36,23 @@
 
 extern void     closeProviderContext(BinRequestContext * ctx);
 extern int      exportIndication(char *url, char *payload, char **resp,
-				 char **msg);
+                                 char **msg);
 extern void     dumpSegments(void *);
 extern UtilStringBuffer *segments2stringBuffer(RespSegment * rs);
 extern UtilStringBuffer *newStringBuffer(int);
-extern void     setStatus(CMPIStatus * st, CMPIrc rc, char *msg);
+extern void     setStatus(CMPIStatus *st, CMPIrc rc, char *msg);
 
-extern ExpSegments exportIndicationReq(CMPIInstance * ci, char *id);
+extern ExpSegments exportIndicationReq(CMPIInstance *ci, char *id);
 
 static const CMPIBroker *_broker;
 
 static int
-interOpNameSpace(const CMPIObjectPath * cop, CMPIStatus * st)
+interOpNameSpace(const CMPIObjectPath * cop, CMPIStatus *st)
 {
   char           *ns = (char *) CMGetNameSpace(cop, NULL)->hdl;
   if (strcasecmp(ns, "root/interop") && strcasecmp(ns, "root/pg_interop")) {
     setStatus(st, CMPI_RC_ERR_FAILED,
-	      "Object must reside in root/interop");
+              "Object must reside in root/interop");
     return 0;
   }
   return 1;
@@ -67,8 +65,8 @@ interOpNameSpace(const CMPIObjectPath * cop, CMPIStatus * st)
  */
 
 CMPIStatus
-IndCIMXMLHandlerCleanup(CMPIInstanceMI * mi, const CMPIContext * ctx,
-			CMPIBoolean terminating)
+IndCIMXMLHandlerCleanup(CMPIInstanceMI * mi, const CMPIContext *ctx,
+                        CMPIBoolean terminating)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_INDPROVIDER, "IndCIMXMLHandlerCleanup");
@@ -82,7 +80,7 @@ IndCIMXMLHandlerCleanup(CMPIInstanceMI * mi, const CMPIContext * ctx,
  */
 
 static CMPIContext *
-prepareUpcall(CMPIContext * ctx)
+prepareUpcall(CMPIContext *ctx)
 {
   /*
    * used to invoke the internal provider in upcalls, otherwise we will *
@@ -96,12 +94,11 @@ prepareUpcall(CMPIContext * ctx)
   return ctxLocal;
 }
 
-
 CMPIStatus
 IndCIMXMLHandlerEnumInstanceNames(CMPIInstanceMI * mi,
-				  const CMPIContext * ctx,
-				  const CMPIResult * rslt,
-				  const CMPIObjectPath * ref)
+                                  const CMPIContext *ctx,
+                                  const CMPIResult *rslt,
+                                  const CMPIObjectPath * ref)
 {
   CMPIStatus      st;
   CMPIEnumeration *enm;
@@ -119,32 +116,32 @@ IndCIMXMLHandlerEnumInstanceNames(CMPIInstanceMI * mi,
 
   if (strcasecmp(CMGetCharPtr(cn), "cim_listenerdestination") == 0) {
     enm =
-	_broker->bft->enumerateInstanceNames(_broker, ctxLocal, ref, &st);
+        _broker->bft->enumerateInstanceNames(_broker, ctxLocal, ref, &st);
     while (enm && enm->ft->hasNext(enm, &st)) {
       CMReturnObjectPath(rslt, (enm->ft->getNext(enm, &st)).value.ref);
     }
     refLocal =
-	CMNewObjectPath(_broker, "root/interop",
-			"cim_listenerdestinationcimxml", &st);
+        CMNewObjectPath(_broker, "root/interop",
+                        "cim_listenerdestinationcimxml", &st);
     enm =
-	_broker->bft->enumerateInstanceNames(_broker, ctxLocal, refLocal,
-					     &st);
+        _broker->bft->enumerateInstanceNames(_broker, ctxLocal, refLocal,
+                                             &st);
     while (enm && enm->ft->hasNext(enm, &st)) {
       CMReturnObjectPath(rslt, (enm->ft->getNext(enm, &st)).value.ref);
     }
     refLocal =
-	CMNewObjectPath(_broker, "root/interop",
-			"cim_indicationhandlercimxml", &st);
+        CMNewObjectPath(_broker, "root/interop",
+                        "cim_indicationhandlercimxml", &st);
     enm =
-	_broker->bft->enumerateInstanceNames(_broker, ctxLocal, refLocal,
-					     &st);
+        _broker->bft->enumerateInstanceNames(_broker, ctxLocal, refLocal,
+                                             &st);
     while (enm && enm->ft->hasNext(enm, &st)) {
       CMReturnObjectPath(rslt, (enm->ft->getNext(enm, &st)).value.ref);
     }
     CMRelease(refLocal);
   } else {
     enm =
-	_broker->bft->enumerateInstanceNames(_broker, ctxLocal, ref, &st);
+        _broker->bft->enumerateInstanceNames(_broker, ctxLocal, ref, &st);
     while (enm && enm->ft->hasNext(enm, &st)) {
       CMReturnObjectPath(rslt, (enm->ft->getNext(enm, &st)).value.ref);
     }
@@ -166,10 +163,10 @@ IndCIMXMLHandlerEnumInstanceNames(CMPIInstanceMI * mi,
 
 CMPIStatus
 IndCIMXMLHandlerEnumInstances(CMPIInstanceMI * mi,
-			      const CMPIContext * ctx,
-			      const CMPIResult * rslt,
-			      const CMPIObjectPath * ref,
-			      const char **properties)
+                              const CMPIContext *ctx,
+                              const CMPIResult *rslt,
+                              const CMPIObjectPath * ref,
+                              const char **properties)
 {
   CMPIStatus      st;
   CMPIEnumeration *enm;
@@ -187,34 +184,34 @@ IndCIMXMLHandlerEnumInstances(CMPIInstanceMI * mi,
 
   if (strcasecmp(CMGetCharPtr(cn), "cim_listenerdestination") == 0) {
     enm =
-	_broker->bft->enumerateInstances(_broker, ctxLocal, ref,
-					 properties, &st);
+        _broker->bft->enumerateInstances(_broker, ctxLocal, ref,
+                                         properties, &st);
     while (enm && enm->ft->hasNext(enm, &st)) {
       CMReturnInstance(rslt, (enm->ft->getNext(enm, &st)).value.inst);
     }
     refLocal =
-	CMNewObjectPath(_broker, "root/interop",
-			"cim_listenerdestinationcimxml", &st);
+        CMNewObjectPath(_broker, "root/interop",
+                        "cim_listenerdestinationcimxml", &st);
     enm =
-	_broker->bft->enumerateInstances(_broker, ctxLocal, refLocal,
-					 properties, &st);
+        _broker->bft->enumerateInstances(_broker, ctxLocal, refLocal,
+                                         properties, &st);
     while (enm && enm->ft->hasNext(enm, &st)) {
       CMReturnInstance(rslt, (enm->ft->getNext(enm, &st)).value.inst);
     }
     refLocal =
-	CMNewObjectPath(_broker, "root/interop",
-			"cim_indicationhandlercimxml", &st);
+        CMNewObjectPath(_broker, "root/interop",
+                        "cim_indicationhandlercimxml", &st);
     enm =
-	_broker->bft->enumerateInstances(_broker, ctxLocal, refLocal,
-					 properties, &st);
+        _broker->bft->enumerateInstances(_broker, ctxLocal, refLocal,
+                                         properties, &st);
     while (enm && enm->ft->hasNext(enm, &st)) {
       CMReturnInstance(rslt, (enm->ft->getNext(enm, &st)).value.inst);
     }
     CMRelease(refLocal);
   } else {
     enm =
-	_broker->bft->enumerateInstances(_broker, ctxLocal, ref,
-					 properties, &st);
+        _broker->bft->enumerateInstances(_broker, ctxLocal, ref,
+                                         properties, &st);
     while (enm && enm->ft->hasNext(enm, &st)) {
       CMReturnInstance(rslt, (enm->ft->getNext(enm, &st)).value.inst);
     }
@@ -222,7 +219,7 @@ IndCIMXMLHandlerEnumInstances(CMPIInstanceMI * mi,
 #else
   enm =
       _broker->bft->enumerateInstances(_broker, ctxLocal, ref, properties,
-				       &st);
+                                       &st);
   while (enm && enm->ft->hasNext(enm, &st)) {
     CMReturnInstance(rslt, (enm->ft->getNext(enm, &st)).value.inst);
   }
@@ -235,13 +232,12 @@ IndCIMXMLHandlerEnumInstances(CMPIInstanceMI * mi,
   _SFCB_RETURN(st);
 }
 
-
 CMPIStatus
 IndCIMXMLHandlerGetInstance(CMPIInstanceMI * mi,
-			    const CMPIContext * ctx,
-			    const CMPIResult * rslt,
-			    const CMPIObjectPath * cop,
-			    const char **properties)
+                            const CMPIContext *ctx,
+                            const CMPIResult *rslt,
+                            const CMPIObjectPath * cop,
+                            const char **properties)
 {
   CMPIStatus      st;
   _SFCB_ENTER(TRACE_INDPROVIDER, "IndCIMXMLHandlerGetInstance");
@@ -251,10 +247,10 @@ IndCIMXMLHandlerGetInstance(CMPIInstanceMI * mi,
 
 CMPIStatus
 IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
-			       const CMPIContext * ctx,
-			       const CMPIResult * rslt,
-			       const CMPIObjectPath * cop,
-			       const CMPIInstance * ci)
+                               const CMPIContext *ctx,
+                               const CMPIResult *rslt,
+                               const CMPIObjectPath * cop,
+                               const CMPIInstance *ci)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIArgs       *in,
@@ -282,10 +278,10 @@ IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
       CMGetProperty(ciLocal, "destination", &st).value.string;
   if (dest == NULL || CMGetCharPtr(dest) == NULL) {
     setStatus(&st, CMPI_RC_ERR_FAILED,
-	      "Destination property not found; is required");
+              "Destination property not found; is required");
     _SFCB_RETURN(st);
-  } else {			/* if no scheme is given, assume http (as
-				 * req. for param by mof) */
+  } else {                      /* if no scheme is given, assume http (as
+                                 * req. for param by mof) */
     char           *ds = CMGetCharPtr(dest);
     if (strchr(ds, ':') == NULL) {
       char           *prefix = "http:";
@@ -302,10 +298,10 @@ IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
       CMGetProperty(ciLocal, "persistencetype", &st);
   if (persistence.state == CMPI_nullValue
       || persistence.state == CMPI_notFound) {
-    persistenceType = 2;	/* default is 2 = permanent */
+    persistenceType = 2;        /* default is 2 = permanent */
   } else if (persistence.value.uint16 < 1 || persistence.value.uint16 > 3) {
     setStatus(&st, CMPI_RC_ERR_FAILED,
-	      "PersistenceType property must be 1, 2, or 3");
+              "PersistenceType property must be 1, 2, or 3");
     _SFCB_RETURN(st);
   } else {
     persistenceType = persistence.value.uint16;
@@ -315,13 +311,13 @@ IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
   CMPIString     *str = CDToString(_broker, cop, NULL);
   CMPIString     *ns = CMGetNameSpace(cop, NULL);
   _SFCB_TRACE(1,
-	      ("--- handler %s %s", (char *) ns->hdl, (char *) str->hdl));
+              ("--- handler %s %s", (char *) ns->hdl, (char *) str->hdl));
 
   in = CMNewArgs(_broker, NULL);
   CMAddArg(in, "handler", &ciLocal, CMPI_instance);
   CMAddArg(in, "key", &cop, CMPI_ref);
   op = CMNewObjectPath(_broker, "root/interop",
-		       "cim_indicationsubscription", &st);
+                       "cim_indicationsubscription", &st);
   rv = CBInvokeMethod(_broker, ctx, op, "_addHandler", in, out, &st);
 
   if (st.rc == CMPI_RC_OK)
@@ -333,11 +329,11 @@ IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
 
 CMPIStatus
 IndCIMXMLHandlerModifyInstance(CMPIInstanceMI * mi,
-			       const CMPIContext * ctx,
-			       const CMPIResult * rslt,
-			       const CMPIObjectPath * cop,
-			       const CMPIInstance * ci,
-			       const char **properties)
+                               const CMPIContext *ctx,
+                               const CMPIResult *rslt,
+                               const CMPIObjectPath * cop,
+                               const CMPIInstance *ci,
+                               const char **properties)
 {
   CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
   _SFCB_ENTER(TRACE_INDPROVIDER, "IndCIMXMLHandlerSetInstance");
@@ -346,9 +342,9 @@ IndCIMXMLHandlerModifyInstance(CMPIInstanceMI * mi,
 
 CMPIStatus
 IndCIMXMLHandlerDeleteInstance(CMPIInstanceMI * mi,
-			       const CMPIContext * ctx,
-			       const CMPIResult * rslt,
-			       const CMPIObjectPath * cop)
+                               const CMPIContext *ctx,
+                               const CMPIResult *rslt,
+                               const CMPIObjectPath * cop)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIArgs       *in,
@@ -368,7 +364,7 @@ IndCIMXMLHandlerDeleteInstance(CMPIInstanceMI * mi,
   in = CMNewArgs(_broker, NULL);
   CMAddArg(in, "key", &cop, CMPI_ref);
   op = CMNewObjectPath(_broker, "root/interop",
-		       "cim_indicationsubscription", &st);
+                       "cim_indicationsubscription", &st);
   rv = CBInvokeMethod(_broker, ctx, op, "_removeHandler", in, out, &st);
 
   if (st.rc == CMPI_RC_OK) {
@@ -380,16 +376,15 @@ IndCIMXMLHandlerDeleteInstance(CMPIInstanceMI * mi,
 
 CMPIStatus
 IndCIMXMLHandlerExecQuery(CMPIInstanceMI * mi,
-			  const CMPIContext * ctx,
-			  const CMPIResult * rslt,
-			  const CMPIObjectPath * cop,
-			  const char *lang, const char *query)
+                          const CMPIContext *ctx,
+                          const CMPIResult *rslt,
+                          const CMPIObjectPath * cop,
+                          const char *lang, const char *query)
 {
   CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
   _SFCB_ENTER(TRACE_INDPROVIDER, "IndCIMXMLHandlerExecQuery");
   _SFCB_RETURN(st);
 }
-
 
 /*
  * ---------------------------------------------------------------------------
@@ -403,14 +398,13 @@ IndCIMXMLHandlerExecQuery(CMPIInstanceMI * mi,
 
 CMPIStatus
 IndCIMXMLHandlerMethodCleanup(CMPIMethodMI * mi,
-			      const CMPIContext * ctx,
-			      CMPIBoolean terminating)
+                              const CMPIContext *ctx,
+                              CMPIBoolean terminating)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_INDPROVIDER, "IndCIMXMLHandlerMethodCleanup");
   _SFCB_RETURN(st);
 }
-
 
 /** \brief deliverInd - Sends the indication to the destination
  *
@@ -573,7 +567,7 @@ retryExport(void *lctx)
 
   // Get the retry params from IndService
   op = CMNewObjectPath(_broker, "root/interop", "CIM_IndicationService",
-		       NULL);
+                       NULL);
   isenm = _broker->bft->enumerateInstances(_broker, ctx, op, NULL, &st);
   CMPIData        isinst = CMGetNext(isenm, NULL);
   CMPIData        mc =
@@ -584,12 +578,14 @@ retryExport(void *lctx)
       CMGetProperty(isinst.value.inst, "SubscriptionRemovalAction", NULL);
   CMPIData        rti =
       CMGetProperty(isinst.value.inst, "SubscriptionRemovalTimeInterval",
-		    NULL);
-  maxcount = mc.value.uint16;	// Number of times to retry delivery
-  rint = ri.value.uint32;	// Interval between retries
-  rtint = rti.value.uint32;	// Time to allow sub to keep failing until 
-				// ...
-  ract = ra.value.uint16;	// ... this action is taken
+                    NULL);
+  maxcount = mc.value.uint16;   // Number of times to retry delivery
+  rint = ri.value.uint32;       // Interval between retries
+  rtint = rti.value.uint32;     // Time to allow sub to keep failing until 
+                                // 
+  // 
+  // ...
+  ract = ra.value.uint16;       // ... this action is taken
 
   // Now, run the queue
   pthread_mutex_lock(&RQlock);
@@ -608,59 +604,59 @@ retryExport(void *lctx)
       // Still valid, retry
       gettimeofday(&tv, &tz);
       if ((cur->lasttry + rint) > tv.tv_sec) {
-	// no retries are ready, release the lock
-	// and sleep for an interval, then relock
-	pthread_mutex_unlock(&RQlock);
-	sleep(rint);
-	pthread_mutex_lock(&RQlock);
+        // no retries are ready, release the lock
+        // and sleep for an interval, then relock
+        pthread_mutex_unlock(&RQlock);
+        sleep(rint);
+        pthread_mutex_lock(&RQlock);
       }
       st = deliverInd(ref, in);
       if ((st.rc == 0) || (cur->count >= maxcount - 1)) {
-	// either it worked, or we maxed out on retries
-	// If it succeeded, clear the failtime
-	if (st.rc == 0) {
-	  sfc = 0;
-	  CMSetProperty(sub, "DeliveryFailureTime", &sfc, CMPI_uint64);
-	  CBModifyInstance(_broker, ctx, subop, sub, NULL);
-	}
-	// remove from queue in either case
-	purge = cur;
-	cur = cur->next;
-	dqRetry(purge);
+        // either it worked, or we maxed out on retries
+        // If it succeeded, clear the failtime
+        if (st.rc == 0) {
+          sfc = 0;
+          CMSetProperty(sub, "DeliveryFailureTime", &sfc, CMPI_uint64);
+          CBModifyInstance(_broker, ctx, subop, sub, NULL);
+        }
+        // remove from queue in either case
+        purge = cur;
+        cur = cur->next;
+        dqRetry(purge);
       } else {
-	// still failing, leave on queue 
-	cur->count++;
-	gettimeofday(&tv, &tz);
-	cur->lasttry = tv.tv_sec;
-	CMPIData        sfcp =
-	    CMGetProperty(sub, "DeliveryFailureTime", NULL);
-	sfc = sfcp.value.uint64;
-	if (sfc == 0) {
-	  // if the time isn't set, this is the first failure
-	  sfc = tv.tv_sec;
-	  cur = cur->next;
-	  CMSetProperty(sub, "DeliveryFailureTime", &sfc, CMPI_uint64);
-	  CBModifyInstance(_broker, ctx, subop, sub, NULL);
-	} else if (sfc + rtint < tv.tv_sec) {
-	  // Exceeded subscription removal threshold, if action is:
-	  // 2, delete the sub; 3, disable the sub; otherwise, nothing
-	  if (ract == 2) {
-	    CBDeleteInstance(_broker, ctx, subop);
-	    purge = cur;
-	    cur = cur->next;
-	    dqRetry(purge);
-	  } else if (ract == 3) {
-	    // Set sub state to disable(4)
-	    CMPIUint16      sst = 4;
-	    CMSetProperty(sub, "SubscriptionState", &sst, CMPI_uint16);
-	    CBModifyInstance(_broker, ctx, subop, sub, NULL);
-	    purge = cur;
-	    cur = cur->next;
-	    dqRetry(purge);
-	  }
-	} else {
-	  cur = cur->next;
-	}
+        // still failing, leave on queue 
+        cur->count++;
+        gettimeofday(&tv, &tz);
+        cur->lasttry = tv.tv_sec;
+        CMPIData        sfcp =
+            CMGetProperty(sub, "DeliveryFailureTime", NULL);
+        sfc = sfcp.value.uint64;
+        if (sfc == 0) {
+          // if the time isn't set, this is the first failure
+          sfc = tv.tv_sec;
+          cur = cur->next;
+          CMSetProperty(sub, "DeliveryFailureTime", &sfc, CMPI_uint64);
+          CBModifyInstance(_broker, ctx, subop, sub, NULL);
+        } else if (sfc + rtint < tv.tv_sec) {
+          // Exceeded subscription removal threshold, if action is:
+          // 2, delete the sub; 3, disable the sub; otherwise, nothing
+          if (ract == 2) {
+            CBDeleteInstance(_broker, ctx, subop);
+            purge = cur;
+            cur = cur->next;
+            dqRetry(purge);
+          } else if (ract == 3) {
+            // Set sub state to disable(4)
+            CMPIUint16      sst = 4;
+            CMSetProperty(sub, "SubscriptionState", &sst, CMPI_uint16);
+            CBModifyInstance(_broker, ctx, subop, sub, NULL);
+            purge = cur;
+            cur = cur->next;
+            dqRetry(purge);
+          }
+        } else {
+          cur = cur->next;
+        }
       }
     }
   }
@@ -673,11 +669,11 @@ retryExport(void *lctx)
 
 CMPIStatus
 IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
-			     const CMPIContext * ctx,
-			     const CMPIResult * rslt,
-			     const CMPIObjectPath * ref,
-			     const char *methodName,
-			     const CMPIArgs * in, CMPIArgs * out)
+                             const CMPIContext *ctx,
+                             const CMPIResult *rslt,
+                             const CMPIObjectPath * ref,
+                             const char *methodName,
+                             const CMPIArgs * in, CMPIArgs * out)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
 
@@ -691,35 +687,35 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
     if (st.rc != 0) {
       // Get the retry params from IndService
       CMPIObjectPath *op =
-	  CMNewObjectPath(_broker, "root/interop", "CIM_IndicationService",
-			  NULL);
+          CMNewObjectPath(_broker, "root/interop", "CIM_IndicationService",
+                          NULL);
       CMPIEnumeration *isenm =
-	  _broker->bft->enumerateInstances(_broker, ctx, op, NULL, NULL);
+          _broker->bft->enumerateInstances(_broker, ctx, op, NULL, NULL);
       CMPIData        isinst = CMGetNext(isenm, NULL);
       CMPIData        mc =
-	  CMGetProperty(isinst.value.inst, "DeliveryRetryAttempts", NULL);
+          CMGetProperty(isinst.value.inst, "DeliveryRetryAttempts", NULL);
       if (mc.value.uint16 > 0) {
-	// Indication delivery failed, send to retry queue
-	// build an element
-	RTElement      *element;
-	element = (RTElement *) malloc(sizeof(*element));
-	element->ref = ref->ft->clone(ref, &st);
-	element->in = in->ft->clone(in, &st);
-	CMPIInstance   *ind =
-	    CMGetArg(in, "subscription", NULL).value.inst;
-	element->sub = ind->ft->clone(ind, &st);
-	// Add it to the retry queue
-	enqRetry(element);
-	// And launch the thread if it isn't already running
-	pthread_t       t;
-	pthread_attr_t  tattr;
-	pthread_attr_init(&tattr);
-	pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
-	if (retryRunning == 0) {
-	  CMPIContext    *pctx = native_clone_CMPIContext(ctx);
-	  pthread_create(&t, &tattr, &retryExport, (void *) pctx);
-	  retryRunning = 1;
-	}
+        // Indication delivery failed, send to retry queue
+        // build an element
+        RTElement      *element;
+        element = (RTElement *) malloc(sizeof(*element));
+        element->ref = ref->ft->clone(ref, &st);
+        element->in = in->ft->clone(in, &st);
+        CMPIInstance   *ind =
+            CMGetArg(in, "subscription", NULL).value.inst;
+        element->sub = ind->ft->clone(ind, &st);
+        // Add it to the retry queue
+        enqRetry(element);
+        // And launch the thread if it isn't already running
+        pthread_t       t;
+        pthread_attr_t  tattr;
+        pthread_attr_init(&tattr);
+        pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
+        if (retryRunning == 0) {
+          CMPIContext    *pctx = native_clone_CMPIContext(ctx);
+          pthread_create(&t, &tattr, &retryExport, (void *) pctx);
+          retryRunning = 1;
+        }
       }
     }
   }
@@ -733,8 +729,10 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
   _SFCB_RETURN(st);
 }
 
-
-
-
 CMInstanceMIStub(IndCIMXMLHandler, IndCIMXMLHandler, _broker, CMNoHook);
 CMMethodMIStub(IndCIMXMLHandler, IndCIMXMLHandler, _broker, CMNoHook);
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

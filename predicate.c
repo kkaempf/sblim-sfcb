@@ -19,7 +19,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,13 +33,12 @@ typedef struct native_predicate {
 } NativePredicate;
 
 static NativePredicate *__new_predicate(int mode, QLOperation * ptr,
-					CMPIStatus * rc);
-
+                                        CMPIStatus *rc);
 
 /*****************************************************************************/
 
 static CMPIStatus
-__eft_release(CMPIPredicate * pred)
+__eft_release(CMPIPredicate *pred)
 {
   NativePredicate *p = (NativePredicate *) pred;
 
@@ -53,9 +51,8 @@ __eft_release(CMPIPredicate * pred)
   CMReturn(CMPI_RC_ERR_FAILED);
 }
 
-
 static CMPIPredicate *
-__eft_clone(const CMPIPredicate * pred, CMPIStatus * rc)
+__eft_clone(const CMPIPredicate *pred, CMPIStatus *rc)
 {
   NativePredicate *p = (NativePredicate *) pred;
 
@@ -63,8 +60,8 @@ __eft_clone(const CMPIPredicate * pred, CMPIStatus * rc)
 }
 
 static CMPIStatus
-__eft_getData(const CMPIPredicate * pred, CMPIType * type,
-	      CMPIPredOp * opc, CMPIString ** lhs, CMPIString ** rhs)
+__eft_getData(const CMPIPredicate *pred, CMPIType *type,
+              CMPIPredOp * opc, CMPIString **lhs, CMPIString **rhs)
 {
   NativePredicate *p = (NativePredicate *) pred;
   QLOperation    *op = p->op,
@@ -75,47 +72,45 @@ __eft_getData(const CMPIPredicate * pred, CMPIType * type,
     if (op->opr == QL_bin) {
       QLOpd           type = QL_Invalid;
       if (op->lhon)
-	o = op->lhon;
+        o = op->lhon;
       else
-	o = op->rhon;
+        o = op->rhon;
       if (o->lhod && o->lhod->type != QL_PropertyName)
-	type = o->lhod->type;
+        type = o->lhod->type;
       else if (o->rhod && o->rhod->type != QL_PropertyName)
-	type = o->rhod->type;
+        type = o->rhod->type;
       if (opc)
-	*opc = o->opr;
+        *opc = o->opr;
       if (lhs)
-	*lhs =
-	    sfcb_native_new_CMPIString(o->lhod->ft->toString(o->lhod),
-				       NULL, 0);
+        *lhs =
+            sfcb_native_new_CMPIString(o->lhod->ft->toString(o->lhod),
+                                       NULL, 0);
       if (rhs)
-	*rhs =
-	    sfcb_native_new_CMPIString(o->rhod->ft->toString(o->rhod),
-				       NULL, 0);
+        *rhs =
+            sfcb_native_new_CMPIString(o->rhod->ft->toString(o->rhod),
+                                       NULL, 0);
     } else {
       printf("--- NOT QL_bin\n");
       CMSetStatusWithString(&irc, CMPI_RC_ERR_FAILED,
-			    sfcb_native_new_CMPIString
-			    ("Predicate has no a binary operator.", NULL,
-			     0));
+                            sfcb_native_new_CMPIString
+                            ("Predicate has no a binary operator.", NULL,
+                             0));
     }
   }
   return irc;
 }
 
 static CMPIBoolean
-__eft_evaluate(const CMPIPredicate * pred,
-	       CMPIAccessor * acc, void *v, CMPIStatus * rc)
+__eft_evaluate(const CMPIPredicate *pred,
+               CMPIAccessor * acc, void *v, CMPIStatus *rc)
 {
   if (rc)
     CMSetStatus(rc, CMPI_RC_ERR_NOT_SUPPORTED);
   return 0;
 }
 
-
-
 static NativePredicate *
-__new_predicate(int mode, QLOperation * op, CMPIStatus * rc)
+__new_predicate(int mode, QLOperation * op, CMPIStatus *rc)
 {
   static CMPIPredicateFT eft = {
     NATIVE_FT_VERSION,
@@ -146,15 +141,19 @@ __new_predicate(int mode, QLOperation * op, CMPIStatus * rc)
   return tPred;
 }
 
-
 CMPIPredicate  *
-TrackedCMPIPredicate(QLOperation * op, CMPIStatus * rc)
+TrackedCMPIPredicate(QLOperation * op, CMPIStatus *rc)
 {
   return (CMPIPredicate *) __new_predicate(MEM_TRACKED, op, rc);
 }
 
 CMPIPredicate  *
-NewCMPIPredicate(QLOperation * op, CMPIStatus * rc)
+NewCMPIPredicate(QLOperation * op, CMPIStatus *rc)
 {
   return (CMPIPredicate *) __new_predicate(MEM_NOT_TRACKED, op, rc);
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -79,9 +79,9 @@ struct _Class_Register_FT {
   CMPIConstClass *(*getClass) (ClassRegister * br, const char *clsName);
   int             (*putClass) (ClassRegister * br, CMPIConstClass * cls);
   int             (*removeClass) (ClassRegister * br,
-				  const char *className);
+                                  const char *className);
   UtilList       *(*getChildren) (ClassRegister * br,
-				  const char *className);
+                                  const char *className);
   void            (*rLock) (ClassRegister * cr);
   void            (*wLock) (ClassRegister * cr);
   void            (*rUnLock) (ClassRegister * cr);
@@ -90,7 +90,6 @@ struct _Class_Register_FT {
 
 // extern Class_Register_FT *ClassRegisterFT;
 
-
 typedef struct nameSpaces {
   int             next,
                   max,
@@ -98,7 +97,6 @@ typedef struct nameSpaces {
   char           *base;
   char           *names[1];
 } NameSpaces;
-
 
 static void
 buildClassSource(ClassRegister * cr, char *ns)
@@ -115,8 +113,8 @@ buildClassSource(ClassRegister * cr, char *ns)
   int             size;
 
   it = cb->it = UtilFactory->newHashTable(61,
-					  UtilHashTable_charKey |
-					  UtilHashTable_ignoreKeyCase);
+                                          UtilHashTable_charKey |
+                                          UtilHashTable_ignoreKeyCase);
 
   fprintf(stdout, "\n#include \"classSchemaMem.h\"\n\n");
   fprintf(stdout, "\n#include <stddef.h>\n\n");
@@ -132,7 +130,7 @@ buildClassSource(ClassRegister * cr, char *ns)
     for (j = 1; j < sizeof(ClVersionRecord); j++) {
       fprintf(stdout, ",0x%.2x", buf[j]);
       if ((j + 1) % 15 == 0) {
-	fprintf(stdout, "\n   ");
+        fprintf(stdout, "\n   ");
       }
     }
     fprintf(stdout, "\n};\n\n");
@@ -143,10 +141,10 @@ buildClassSource(ClassRegister * cr, char *ns)
 
     hdr = (ClObjectHdr *) cc->hdl;
     fprintf(stderr, "Class: %s - %d\n", cc->ft->getCharClassName(cc),
-	    hdr->size);
+            hdr->size);
 
     fprintf(stdout, "static unsigned char %s[]={",
-	    cc->ft->getCharClassName(cc));
+            cc->ft->getCharClassName(cc));
 
     if (swapMode) {
       hdr = swapEntryClass((ClClass *) hdr, &size);
@@ -159,7 +157,7 @@ buildClassSource(ClassRegister * cr, char *ns)
     for (j = 1; j < size; j++) {
       fprintf(stdout, ",0x%.2x", buf[j]);
       if ((j + 1) % 15 == 0) {
-	fprintf(stdout, "\n   ");
+        fprintf(stdout, "\n   ");
       }
     }
     fprintf(stdout, "\n};\n");
@@ -169,11 +167,11 @@ buildClassSource(ClassRegister * cr, char *ns)
   for (i = ct->ft->getFirst(ct, (void **) &cn, (void **) &cc); i;
        i = ct->ft->getNext(ct, i, (void **) &cn, (void **) &cc)) {
     fprintf(stdout, "\t{\"%s\",%s},\n", cc->ft->getCharClassName(cc),
-	    cc->ft->getCharClassName(cc));
+            cc->ft->getCharClassName(cc));
   }
   fprintf(stdout, "\t{NULL,NULL}};\n");
   fprintf(stdout, "\nClassSchema %s_classes={%s,classes};\n\n", ns,
-	  cr->vr ? "version" : "NULL");
+          cr->vr ? "version" : "NULL");
 
 }
 
@@ -209,8 +207,8 @@ newClassRegister(char *fname, char *ns)
 
   cr->fn = strdup(fin);
   cb->ht = UtilFactory->newHashTable(61,
-				     UtilHashTable_charKey |
-				     UtilHashTable_ignoreKeyCase);
+                                     UtilHashTable_charKey |
+                                     UtilHashTable_ignoreKeyCase);
   MRWInit(&cb->mrwLock);
 
   while ((s = fread(&hdr, 1, sizeof(hdr), in)) == sizeof(hdr)) {
@@ -220,12 +218,12 @@ newClassRegister(char *fname, char *ns)
 
     if (first) {
       if (vrp->size == sizeof(ClVersionRecord) && vrp->type == HDR_Version)
-	vRec = 1;
+        vRec = 1;
       else if (vrp->size == sizeof(ClVersionRecord) << 24
-	       && vrp->type == HDR_Version) {
-	mlogf(M_ERROR, M_SHOW, "--- %s is in wrong endian format\n", fin);
-	fclose(in);
-	return NULL;
+               && vrp->type == HDR_Version) {
+        mlogf(M_ERROR, M_SHOW, "--- %s is in wrong endian format\n", fin);
+        fclose(in);
+        return NULL;
       }
     }
 
@@ -238,7 +236,7 @@ newClassRegister(char *fname, char *ns)
     buf = (char *) malloc(hdr.size);
     if (buf == NULL) {
       mlogf(M_ERROR, M_SHOW,
-	    "--- %s contains record(s) that are too long\n", fin);
+            "--- %s contains record(s) that are too long\n", fin);
       fclose(in);
       return NULL;
     }
@@ -247,45 +245,44 @@ newClassRegister(char *fname, char *ns)
     *((ClObjectHdr *) buf) = hdr;
 
     if (fread(buf + sizeof(hdr), 1, hdr.size - sizeof(hdr), in) ==
-	hdr.size - sizeof(hdr)) {
+        hdr.size - sizeof(hdr)) {
       if (vRec) {
-	cr->vr = (ClVersionRecord *) buf;
-	vrp = NEW(ClVersionRecord);
-	memcpy(vrp, cr->vr, sizeof(ClVersionRecord));
-	if (strcmp(cr->vr->id, "sfcb-rep")) {
-	  mlogf(M_ERROR, M_SHOW,
-		"--- %s contains invalid version record - directory skipped\n",
-		fin);
-	  fclose(in);
-	  free(cr);
-	  free(buf);
-	  free(vrp);
-	  return NULL;
-	}
-	vRec = 0;
+        cr->vr = (ClVersionRecord *) buf;
+        vrp = NEW(ClVersionRecord);
+        memcpy(vrp, cr->vr, sizeof(ClVersionRecord));
+        if (strcmp(cr->vr->id, "sfcb-rep")) {
+          mlogf(M_ERROR, M_SHOW,
+                "--- %s contains invalid version record - directory skipped\n",
+                fin);
+          fclose(in);
+          free(cr);
+          free(buf);
+          free(vrp);
+          return NULL;
+        }
+        vRec = 0;
       } else {
-	vrp = NULL;
+        vrp = NULL;
       }
 
       if (first) {
-	int             v = -1;
-	first = 0;
-	if (ClVerifyObjImplLevel(vrp))
-	  continue;
-	if (vrp)
-	  v = vrp->objImplLevel;
-	mlogf(M_ERROR, M_SHOW,
-	      "--- %s contains unsupported object implementation format (%d) - directory skipped\n",
-	      fin, v);
-	fclose(in);
-	free(cr);
-	free(buf);
-	if (vrp) {
-	  free(vrp);
-	}
-	return NULL;
+        int             v = -1;
+        first = 0;
+        if (ClVerifyObjImplLevel(vrp))
+          continue;
+        if (vrp)
+          v = vrp->objImplLevel;
+        mlogf(M_ERROR, M_SHOW,
+              "--- %s contains unsupported object implementation format (%d) - directory skipped\n",
+              fin, v);
+        fclose(in);
+        free(cr);
+        free(buf);
+        if (vrp) {
+          free(vrp);
+        }
+        return NULL;
       }
-
 
       cc = NEW(CMPIConstClass);
       cc->hdl = buf;
@@ -294,18 +291,18 @@ newClassRegister(char *fname, char *ns)
       cn = (char *) cc->ft->getCharClassName(cc);
       if (strncmp(cn, "DMY_", 4) != 0) {
 
-	total += s;
-	cb->ht->ft->put(cb->ht, cn, cc);
-	if (cc->ft->isAssociation(cc)) {
-	  cr->assocs++;
-	  if (cc->ft->getCharSuperClassName(cc) == NULL)
-	    cr->topAssocs++;
-	}
+        total += s;
+        cb->ht->ft->put(cb->ht, cn, cc);
+        if (cc->ft->isAssociation(cc)) {
+          cr->assocs++;
+          if (cc->ft->getCharSuperClassName(cc) == NULL)
+            cr->topAssocs++;
+        }
       }
     } else {
       mlogf(M_ERROR, M_SHOW,
-	    "--- %s contains invalid record(s) - directory skipped\n",
-	    fin);
+            "--- %s contains invalid record(s) - directory skipped\n",
+            fin);
       fclose(in);
       free(cr);
       free(buf);
@@ -317,18 +314,17 @@ newClassRegister(char *fname, char *ns)
 
   if (cr->vr) {
     mlogf(M_INFO, M_SHOW,
-	  "--- ClassProvider for %s (%d.%d) using %ld bytes\n", fname,
-	  cr->vr->version, cr->vr->level, total);
+          "--- ClassProvider for %s (%d.%d) using %ld bytes\n", fname,
+          cr->vr->version, cr->vr->level, total);
   } else
     mlogf(M_INFO, M_SHOW,
-	  "--- ClassProvider for %s (no-version) using %ld bytes\n", fname,
-	  total);
+          "--- ClassProvider for %s (no-version) using %ld bytes\n", fname,
+          total);
 
   buildClassSource(cr, ns);
 
   return cr;
 }
-
 
 static int
 parse_options(int argc, char *argv[])
@@ -339,14 +335,14 @@ parse_options(int argc, char *argv[])
     case 'X':
       if (strcmp(optarg, "P32") == 0) {
 #ifdef SFCB_IX86
-	swapMode = 1;
+        swapMode = 1;
 #else
-	fprintf(stderr, "P32 only allowed on i386 platforms.\n");
-	return -1;
+        fprintf(stderr, "P32 only allowed on i386 platforms.\n");
+        return -1;
 #endif
       } else {
-	fprintf(stderr, "unsupported cross-build platform %s.\n", optarg);
-	return -1;
+        fprintf(stderr, "unsupported cross-build platform %s.\n", optarg);
+        return -1;
       }
       break;
     default:
@@ -369,14 +365,14 @@ main(int argc, char *argv[])
 
   if (argidx < 0 || argidx > argc - 1) {
     fprintf(stderr,
-	    "usage: %s [-X P32] <classSchema-directory> [<classSchema-prefix>]\n",
-	    argv[0]);
+            "usage: %s [-X P32] <classSchema-directory> [<classSchema-prefix>]\n",
+            argv[0]);
     return -1;
   }
 
   if (swapMode) {
     void           *swapLib =
-	dlopen("libsfcObjectImplSwapI32toP32.so", RTLD_LAZY);
+        dlopen("libsfcObjectImplSwapI32toP32.so", RTLD_LAZY);
     if (swapLib == NULL) {
       fprintf(stderr, "--- swap library not found - %s\n", dlerror());
       exit(16);
@@ -399,7 +395,7 @@ main(int argc, char *argv[])
 
   tme = time(NULL);
   fprintf(stdout, "/* File generated by classSchema2c %s */\n",
-	  ctime(&tme));
+          ctime(&tme));
   if (swapMode) {
     fprintf(stdout, "/* SWAPMODE! */\n");
   }
@@ -412,3 +408,8 @@ main(int argc, char *argv[])
 
   return 0;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

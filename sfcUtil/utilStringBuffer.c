@@ -21,8 +21,6 @@
  *
  */
 
-
-
 #include "utilft.h"
 // #include "native.h"
 #include <stdio.h>
@@ -105,9 +103,9 @@ sbft_appendBlock(UtilStringBuffer * sb, void *data, unsigned int size)
 
 static void
 sbft_append6Chars(UtilStringBuffer * sb, const char *chars1,
-		  const char *chars2, const char *chars3,
-		  const char *chars4, const char *chars5,
-		  const char *chars6)
+                  const char *chars2, const char *chars3,
+                  const char *chars4, const char *chars5,
+                  const char *chars6)
 {
   sbft_appendChars(sb, chars1);
   sbft_appendChars(sb, chars2);
@@ -119,8 +117,8 @@ sbft_append6Chars(UtilStringBuffer * sb, const char *chars1,
 
 static void
 sbft_append5Chars(UtilStringBuffer * sb, const char *chars1,
-		  const char *chars2, const char *chars3,
-		  const char *chars4, const char *chars5)
+                  const char *chars2, const char *chars3,
+                  const char *chars4, const char *chars5)
 {
   sbft_appendChars(sb, chars1);
   sbft_appendChars(sb, chars2);
@@ -131,13 +129,12 @@ sbft_append5Chars(UtilStringBuffer * sb, const char *chars1,
 
 static void
 sbft_append3Chars(UtilStringBuffer * sb, const char *chars1,
-		  const char *chars2, const char *chars3)
+                  const char *chars2, const char *chars3)
 {
   sbft_appendChars(sb, chars1);
   sbft_appendChars(sb, chars2);
   sbft_appendChars(sb, chars3);
 }
-
 
 /*
  * 
@@ -152,7 +149,6 @@ sbft_append3Chars(UtilStringBuffer * sb, const char *chars1,
  }
  */
 
-
 static void
 sbft_reset(UtilStringBuffer * sb)
 {
@@ -160,7 +156,6 @@ sbft_reset(UtilStringBuffer * sb)
     *((char *) sb->hdl) = 0;
   sb->len = 0;
 }
-
 
 UtilStringBuffer *
 newStringBuffer(int s)
@@ -193,3 +188,8 @@ newStringBuffer(int s)
 
   return sb;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

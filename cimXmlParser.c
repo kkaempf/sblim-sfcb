@@ -19,7 +19,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <cmpidt.h>
@@ -29,9 +28,8 @@
 #include "cimXmlRequest.h"
 #include "trace.h"
 
-
 static int      attrsOk(XmlBuffer * xb, const XmlElement * e, XmlAttr * r,
-			const char *tag, int etag);
+                        const char *tag, int etag);
 static char    *getValue(XmlBuffer * xb, const char *v);
 extern int      yyparse(void *);
 
@@ -40,7 +38,6 @@ typedef struct tags {
   int             (*process) (YYSTYPE *, ParserControl * parm);
   int             etag;
 } Tags;
-
 
 /*
  * TODO: be more graceful than just exit() 
@@ -189,7 +186,7 @@ tagEquals(XmlBuffer * xb, const char *t)
   if (*xb->cur == 0) {
     xb->cur++;
     sz = 1;
-  }				// why is this needed ?
+  }                             // why is this needed ?
   else
     start = xb->cur;
   skipWS(xb);
@@ -206,7 +203,7 @@ tagEquals(XmlBuffer * xb, const char *t)
 
 static int
 attrsOk(XmlBuffer * xb, const XmlElement * e, XmlAttr * r,
-	const char *tag, int etag)
+        const char *tag, int etag)
 {
   unsigned int    n;
 #define MAXATTR 32
@@ -226,31 +223,31 @@ attrsOk(XmlBuffer * xb, const XmlElement * e, XmlAttr * r,
   xb->eTagFound = 0;
   for (skipWS(xb); isalpha(*xb->cur); skipWS(xb)) {
     // for (n=0; n < a.size(); n++) {
-    for (n = 0; (e + n)->attr; n++) {	/* MAXATTR checked above */
+    for (n = 0; (e + n)->attr; n++) {   /* MAXATTR checked above */
       if (wa[n] == 1)
-	continue;
+        continue;
       if (getWord(xb, (e + n)->attr, 0)) {
-	if (!isalnum(*xb->cur)) {
-	  skipWS(xb);
-	  if (getChar(xb, '=')) {
-	    (r + n)->attr = getValue(xb, (e + n)->attr);
-	    wa[n] = 1;
-	    goto ok;
-	  } else
-	    Throw(xb, "'=' expected in attribute list");
-	}
+        if (!isalnum(*xb->cur)) {
+          skipWS(xb);
+          if (getChar(xb, '=')) {
+            (r + n)->attr = getValue(xb, (e + n)->attr);
+            wa[n] = 1;
+            goto ok;
+          } else
+            Throw(xb, "'=' expected in attribute list");
+        }
       }
     }
     strncpy(word, xb->cur, WORDLEN);
     word[WORDLEN] = 0;
     ptr =
-	(char *) alloca(strlen(tag) + strlen(msg1) + WORDLEN +
-			sizeof(char) * 4);
+        (char *) alloca(strlen(tag) + strlen(msg1) + WORDLEN +
+                        sizeof(char) * 4);
     strcpy(ptr, msg1);
     strcat(ptr, tag);
-    strcat(ptr, " (");		/* 2 chars */
+    strcat(ptr, " (");          /* 2 chars */
     strcat(ptr, word);
-    strcat(ptr, ")");		/* 1 char + \0 */
+    strcat(ptr, ")");           /* 1 char + \0 */
     Throw(xb, ptr);
   ok:;
   }
@@ -276,7 +273,7 @@ attrsOk(XmlBuffer * xb, const XmlElement * e, XmlAttr * r,
    */
   ptr =
       (char *) alloca(strlen(msg2) + strlen(tag) + sizeof(char) * 3 +
-		      strlen(word));
+                      strlen(word));
   strcpy(ptr, msg2);
   strcat(ptr, tag);
   strcat(ptr, ": ");
@@ -365,23 +362,23 @@ xmlUnescape(char *buf, char *end)
 
     int             unescchar = 0;
     int             charlen = 0;
-    int             diflen = 0;	// total unescaped char len, with
-				// &#<x><val>;
+    int             diflen = 0; // total unescaped char len, with
+    // &#<x><val>;
     if (escchar[0] == 'x' || escchar[0] == 'X') {
       // expecting a hex number, convert accordingly
-      charlen = strlen(escchar) - 1;	// x
-      diflen = charlen + 4;	// &#x and ;
+      charlen = strlen(escchar) - 1;    // x
+      diflen = charlen + 4;     // &#x and ;
       if (0 == sscanf(&escchar[1], "%x", &unescchar)) {
-	// couldn't convert hex number - malformed
-	return 0;
+        // couldn't convert hex number - malformed
+        return 0;
       }
     } else {
       // expecting a decimal number, convert accordingly
       charlen = strlen(escchar);
-      diflen = charlen + 3;	// &# and ;
+      diflen = charlen + 3;     // &# and ;
       if (0 == sscanf(escchar, "%d", &unescchar)) {
-	// couldn't convert decimal number - malformed
-	return 0;
+        // couldn't convert decimal number - malformed
+        return 0;
       }
     }
     // move the unescaped character to first position
@@ -399,12 +396,12 @@ xmlUnescape(char *buf, char *end)
     strncpy(escchar, buf, (int) (semiloc - buf + 1));
     for (i = 0; i < sizeof(xmlEscapeTab) / sizeof(struct _xmlescape); i++) {
       if (strncmp(escchar, xmlEscapeTab[i].escaped, xmlEscapeTab[i].len) ==
-	  0) {
-	*buf = xmlEscapeTab[i].unescaped;
-	memmove(buf + 1, buf + xmlEscapeTab[i].len,
-		end - buf - xmlEscapeTab[i].len + 1);
-	// return the number of characters we removed
-	return xmlEscapeTab[i].len - 1;
+          0) {
+        *buf = xmlEscapeTab[i].unescaped;
+        memmove(buf + 1, buf + xmlEscapeTab[i].len,
+                end - buf - xmlEscapeTab[i].len + 1);
+        // return the number of characters we removed
+        return xmlEscapeTab[i].len - 1;
       }
     }
   }
@@ -442,9 +439,9 @@ getContent(XmlBuffer * xb)
   while (*start && *start <= ' ')
     start++;
   if (start == NULL)
-    return "";			// should check for *start == NULL
-				// instead? start==NULL shouldn't happen,
-				// ever.
+    return "";                  // should check for *start == NULL
+  // instead? start==NULL shouldn't happen,
+  // ever.
   end = xb->cur;
   /*
    * strip trailing blanks 
@@ -465,8 +462,6 @@ getContent(XmlBuffer * xb)
   }
   return start;
 }
-
-
 
 typedef struct types {
   char           *str;
@@ -492,7 +487,6 @@ static Types    types[] = {
 };
 
 static int      num_types = sizeof(types) / sizeof(Types) - 1;
-
 
 // static XmlBuffer* xmb;
 
@@ -592,51 +586,51 @@ procImethodCall(YYSTYPE * lvalp, ParserControl * parm)
     if (attrsOk(parm->xmb, elm, attr, "IMETHODCALL", ZTOK_IMETHODCALL)) {
       parm->reqHdr.iMethod = attr[0].attr;
       if (strcasecmp(attr[0].attr, "getInstance") == 0)
-	return XTOK_GETINSTANCE;
+        return XTOK_GETINSTANCE;
       if (strcasecmp(attr[0].attr, "getClass") == 0)
-	return XTOK_GETCLASS;
+        return XTOK_GETCLASS;
       if (strcasecmp(attr[0].attr, "enumerateClassNames") == 0)
-	return XTOK_ENUMCLASSNAMES;
+        return XTOK_ENUMCLASSNAMES;
       if (strcasecmp(attr[0].attr, "enumerateClasses") == 0)
-	return XTOK_ENUMCLASSES;
+        return XTOK_ENUMCLASSES;
       if (strcasecmp(attr[0].attr, "enumerateInstanceNames") == 0)
-	return XTOK_ENUMINSTANCENAMES;
+        return XTOK_ENUMINSTANCENAMES;
       if (strcasecmp(attr[0].attr, "enumerateInstances") == 0)
-	return XTOK_ENUMINSTANCES;
+        return XTOK_ENUMINSTANCES;
       if (strcasecmp(attr[0].attr, "deleteInstance") == 0)
-	return XTOK_DELETEINSTANCE;
+        return XTOK_DELETEINSTANCE;
       if (strcasecmp(attr[0].attr, "createInstance") == 0)
-	return XTOK_CREATEINSTANCE;
+        return XTOK_CREATEINSTANCE;
       if (strcasecmp(attr[0].attr, "modifyInstance") == 0)
-	return XTOK_MODIFYINSTANCE;
+        return XTOK_MODIFYINSTANCE;
       if (strcasecmp(attr[0].attr, "associatorNames") == 0)
-	return XTOK_ASSOCIATORNAMES;
+        return XTOK_ASSOCIATORNAMES;
       if (strcasecmp(attr[0].attr, "associators") == 0)
-	return XTOK_ASSOCIATORS;
+        return XTOK_ASSOCIATORS;
       if (strcasecmp(attr[0].attr, "referenceNames") == 0)
-	return XTOK_REFERENCENAMES;
+        return XTOK_REFERENCENAMES;
       if (strcasecmp(attr[0].attr, "references") == 0)
-	return XTOK_REFERENCES;
+        return XTOK_REFERENCES;
       if (strcasecmp(attr[0].attr, "execQuery") == 0)
-	return XTOK_EXECQUERY;
+        return XTOK_EXECQUERY;
       if (strcasecmp(attr[0].attr, "createClass") == 0)
-	return XTOK_CREATECLASS;
+        return XTOK_CREATECLASS;
       if (strcasecmp(attr[0].attr, "deleteClass") == 0)
-	return XTOK_DELETECLASS;
+        return XTOK_DELETECLASS;
       if (strcasecmp(attr[0].attr, "deleteClass") == 0)
-	return unsupported(parm);
+        return unsupported(parm);
       if (strcasecmp(attr[0].attr, "getProperty") == 0)
-	return XTOK_GETPROPERTY;
+        return XTOK_GETPROPERTY;
       if (strcasecmp(attr[0].attr, "setProperty") == 0)
-	return XTOK_SETPROPERTY;
+        return XTOK_SETPROPERTY;
       if (strcasecmp(attr[0].attr, "getQualifier") == 0)
-	return XTOK_GETQUALIFIER;
+        return XTOK_GETQUALIFIER;
       if (strcasecmp(attr[0].attr, "setQualifier") == 0)
-	return XTOK_SETQUALIFIER;
+        return XTOK_SETQUALIFIER;
       if (strcasecmp(attr[0].attr, "deleteQualifier") == 0)
-	return XTOK_DELETEQUALIFIER;
+        return XTOK_DELETEQUALIFIER;
       if (strcasecmp(attr[0].attr, "enumerateQualifiers") == 0)
-	return XTOK_ENUMQUALIFIERS;
+        return XTOK_ENUMQUALIFIERS;
     }
   }
   return 0;
@@ -651,8 +645,8 @@ procLocalNameSpacePath(YYSTYPE * lvalp, ParserControl * parm)
   XmlAttr         attr[1];
   if (tagEquals(parm->xmb, "LOCALNAMESPACEPATH")) {
     if (attrsOk
-	(parm->xmb, elm, attr, "LOCALNAMESPACEPATH",
-	 ZTOK_LOCALNAMESPACEPATH)) {
+        (parm->xmb, elm, attr, "LOCALNAMESPACEPATH",
+         ZTOK_LOCALNAMESPACEPATH)) {
       return XTOK_LOCALNAMESPACEPATH;
     }
   }
@@ -668,7 +662,7 @@ procLocalClassPath(YYSTYPE * lvalp, ParserControl * parm)
   XmlAttr         attr[1];
   if (tagEquals(parm->xmb, "LOCALCLASSPATH")) {
     if (attrsOk
-	(parm->xmb, elm, attr, "LOCALCLASSPATH", ZTOK_LOCALCLASSPATH)) {
+        (parm->xmb, elm, attr, "LOCALCLASSPATH", ZTOK_LOCALCLASSPATH)) {
       return XTOK_LOCALCLASSPATH;
     }
   }
@@ -684,8 +678,8 @@ procLocalInstancePath(YYSTYPE * lvalp, ParserControl * parm)
   XmlAttr         attr[1];
   if (tagEquals(parm->xmb, "LOCALINSTANCEPATH")) {
     if (attrsOk
-	(parm->xmb, elm, attr, "LOCALINSTANCEPATH",
-	 ZTOK_LOCALINSTANCEPATH)) {
+        (parm->xmb, elm, attr, "LOCALINSTANCEPATH",
+         ZTOK_LOCALINSTANCEPATH)) {
       return XTOK_LOCALINSTANCEPATH;
     }
   }
@@ -730,41 +724,41 @@ procParamValue(YYSTYPE * lvalp, ParserControl * parm)
       lvalp->xtokParamValue.name = attr[0].attr;
       lvalp->xtokParamValue.type = 0;
       if (attr[1].attr) {
-	for (i = 0, m = num_types; i < m; i++) {
-	  if (strcasecmp(attr[1].attr, types[i].str) == 0) {
-	    lvalp->xtokParamValue.type = types[i].type;
-	    break;
-	  }
-	}
-	// is this right? why isn't reference covered by the types array
-	// in the loop above?
-	if (lvalp->xtokParamValue.type == 0) {
-	  if (strcasecmp(attr[1].attr, "reference") == 0)
-	    lvalp->xtokParamValue.type = CMPI_ref;
-	}
+        for (i = 0, m = num_types; i < m; i++) {
+          if (strcasecmp(attr[1].attr, types[i].str) == 0) {
+            lvalp->xtokParamValue.type = types[i].type;
+            break;
+          }
+        }
+        // is this right? why isn't reference covered by the types array
+        // in the loop above?
+        if (lvalp->xtokParamValue.type == 0) {
+          if (strcasecmp(attr[1].attr, "reference") == 0)
+            lvalp->xtokParamValue.type = CMPI_ref;
+        }
       }
       if (attr[2].attr) {
-	if (strcasecmp(attr[2].attr, "instance") == 0
-	    || strcasecmp(attr[2].attr, "object") == 0) {
-	  lvalp->xtokParamValue.type = CMPI_instance;
+        if (strcasecmp(attr[2].attr, "instance") == 0
+            || strcasecmp(attr[2].attr, "object") == 0) {
+          lvalp->xtokParamValue.type = CMPI_instance;
 
-	  /*
-	   * unescape 
-	   */
-	  char           *help = parm->xmb->cur;
-	  char           *end = strstr(help, "</PARAMVALUE");
-	  while (help < end) {
-	    if (*help == '&') {
-	      int             fewer = xmlUnescape(help, end);
-	      end -= fewer;
-	      memset(end, ' ', fewer);
-	    }
-	    help += 1;
-	  }
+          /*
+           * unescape 
+           */
+          char           *help = parm->xmb->cur;
+          char           *end = strstr(help, "</PARAMVALUE");
+          while (help < end) {
+            if (*help == '&') {
+              int             fewer = xmlUnescape(help, end);
+              end -= fewer;
+              memset(end, ' ', fewer);
+            }
+            help += 1;
+          }
 
-	} else {
-	  Throw(NULL, "Invalid value for attribute EmbeddedObject");
-	}
+        } else {
+          Throw(NULL, "Invalid value for attribute EmbeddedObject");
+        }
       }
       return XTOK_PARAMVALUE;
     }
@@ -816,9 +810,9 @@ procIParamValue(YYSTYPE * lvalp, ParserControl * parm)
   if (tagEquals(parm->xmb, "IPARAMVALUE")) {
     if (attrsOk(parm->xmb, elm, attr, "IPARAMVALUE", ZTOK_IPARAMVALUE)) {
       for (i = 0, m = sizeof(iParms) / sizeof(IParm); i < m; i++) {
-	if (strcasecmp(attr[0].attr, iParms[i].name) == 0) {
-	  return iParms[i].tag;
-	}
+        if (strcasecmp(attr[0].attr, iParms[i].name) == 0) {
+          return iParms[i].tag;
+        }
       }
     }
   }
@@ -973,8 +967,8 @@ procValue(YYSTYPE * lvalp, ParserControl * parm)
   if (tagEquals(parm->xmb, "VALUE")) {
     char           *v;
     if (attrsOk(parm->xmb, elm, attr, "VALUE", ZTOK_VALUE)) {
-      v = getContent(parm->xmb);	/* v is a pointer to where the
-					 * content starts */
+      v = getContent(parm->xmb);        /* v is a pointer to where the
+                                         * content starts */
       lvalp->xtokValue.value = v;
       return XTOK_VALUE;
     }
@@ -997,10 +991,10 @@ procCdata(YYSTYPE * lvalp, ParserControl * parm)
 
       v = strstr(parm->xmb->cur, "]]>");
       if (v) {
-	v[0] = '<';
-	v[1] = '/';
+        v[0] = '<';
+        v[1] = '/';
       } else {
-	return 0;
+        return 0;
       }
       return XTOK_CDATA;
     }
@@ -1032,7 +1026,7 @@ procValueRefArray(YYSTYPE * lvalp, ParserControl * parm)
   XmlAttr         attr[1];
   if (tagEquals(parm->xmb, "VALUE.REFARRAY")) {
     if (attrsOk(parm->xmb, elm, attr, "VALUE.REFARRAY",
-		ZTOK_VALUEREFARRAY)) {
+                ZTOK_VALUEREFARRAY)) {
       return XTOK_VALUEREFARRAY;
     }
   }
@@ -1048,7 +1042,7 @@ procValueNamedInstance(YYSTYPE * lvalp, ParserControl * parm)
   XmlAttr         attr[1];
   if (tagEquals(parm->xmb, "VALUE.NAMEDINSTANCE")) {
     if (attrsOk(parm->xmb, elm, attr, "VALUE.NAMEDINSTANCE",
-		ZTOK_VALUENAMEDINSTANCE)) {
+                ZTOK_VALUENAMEDINSTANCE)) {
       lvalp->xtokValue.value = getContent(parm->xmb);
       return XTOK_VALUENAMEDINSTANCE;
     }
@@ -1097,7 +1091,7 @@ procValueReference(YYSTYPE * lvalp, ParserControl * parm)
   XmlAttr         attr[1];
   if (tagEquals(parm->xmb, "VALUE.REFERENCE")) {
     if (attrsOk(parm->xmb, elm, attr, "VALUE.REFERENCE",
-		ZTOK_VALUEREFERENCE)) {
+                ZTOK_VALUEREFERENCE)) {
       lvalp->xtokValue.value = getContent(parm->xmb);
       return XTOK_VALUEREFERENCE;
     }
@@ -1145,47 +1139,51 @@ procQualifierDeclaration(YYSTYPE * lvalp, ParserControl * parm)
   memset(attr, 0, sizeof(attr));
   if (tagEquals(parm->xmb, "QUALIFIER.DECLARATION")) {
     if (attrsOk
-	(parm->xmb, elm, attr, "QUALIFIER.DECLARATION",
-	 ZTOK_QUALIFIERDECLARATION)) {
+        (parm->xmb, elm, attr, "QUALIFIER.DECLARATION",
+         ZTOK_QUALIFIERDECLARATION)) {
       memset(&lvalp->xtokQualifierDeclaration, 0,
-	     sizeof(XtokQualifierDeclaration));
+             sizeof(XtokQualifierDeclaration));
       lvalp->xtokQualifierDeclaration.name = attr[0].attr;
-      lvalp->xtokQualifierDeclaration.type = (CMPIType) - 1;
+      lvalp->xtokQualifierDeclaration.type = (CMPIType) -1;
       if (attr[1].attr)
-	for (i = 0, m = num_types; i < m; i++) {
-	  if (strcasecmp(attr[1].attr, types[i].str) == 0) {
-	    lvalp->xtokQualifierDeclaration.type = types[i].type;
-	    break;
-	  }
-	}
+        for (i = 0, m = num_types; i < m; i++) {
+          if (strcasecmp(attr[1].attr, types[i].str) == 0) {
+            lvalp->xtokQualifierDeclaration.type = types[i].type;
+            break;
+          }
+        }
       if (attr[2].attr) {
-	lvalp->xtokQualifierDeclaration.isarray =
-	    !strcasecmp(attr[2].attr, "true");
-	lvalp->xtokQualifierDeclaration.isarrayIsSet = 1;
+        lvalp->xtokQualifierDeclaration.isarray =
+            !strcasecmp(attr[2].attr, "true");
+        lvalp->xtokQualifierDeclaration.isarrayIsSet = 1;
       } else
-	lvalp->xtokQualifierDeclaration.isarrayIsSet = 0;	// needed, 
-								// because 
-								// attr is 
-								// mandatory
+        lvalp->xtokQualifierDeclaration.isarrayIsSet = 0;       // needed, 
+                                                                // 
+      // 
+      // because 
+      // attr is 
+      // mandatory
       if (attr[3].attr)
-	lvalp->xtokQualifierDeclaration.arraySize = atoi(attr[3].attr);
+        lvalp->xtokQualifierDeclaration.arraySize = atoi(attr[3].attr);
       if (attr[4].attr)
-	lvalp->xtokQualifierDeclaration.overridable =
-	    !strcasecmp(attr[4].attr, "true");
+        lvalp->xtokQualifierDeclaration.overridable =
+            !strcasecmp(attr[4].attr, "true");
       else
-	lvalp->xtokQualifierDeclaration.overridable = 1;	// default 
-								// true
+        lvalp->xtokQualifierDeclaration.overridable = 1;        // default 
+                                                                // 
+      // 
+      // true
       if (attr[5].attr)
-	lvalp->xtokQualifierDeclaration.tosubclass =
-	    !strcasecmp(attr[5].attr, "true");
+        lvalp->xtokQualifierDeclaration.tosubclass =
+            !strcasecmp(attr[5].attr, "true");
       else
-	lvalp->xtokQualifierDeclaration.tosubclass = 1;	// default true
+        lvalp->xtokQualifierDeclaration.tosubclass = 1; // default true
       if (attr[6].attr)
-	lvalp->xtokQualifierDeclaration.toinstance =
-	    !strcasecmp(attr[6].attr, "true");
+        lvalp->xtokQualifierDeclaration.toinstance =
+            !strcasecmp(attr[6].attr, "true");
       if (attr[7].attr)
-	lvalp->xtokQualifierDeclaration.translatable =
-	    !strcasecmp(attr[7].attr, "true");
+        lvalp->xtokQualifierDeclaration.translatable =
+            !strcasecmp(attr[7].attr, "true");
       return XTOK_QUALIFIERDECLARATION;
     }
   }
@@ -1213,29 +1211,29 @@ procQualifier(YYSTYPE * lvalp, ParserControl * parm)
     if (attrsOk(parm->xmb, elm, attr, "QUALIFIER", ZTOK_QUALIFIER)) {
       memset(&lvalp->xtokQualifier, 0, sizeof(XtokQualifier));
       lvalp->xtokQualifier.name = attr[0].attr;
-      lvalp->xtokQualifier.type = (CMPIType) - 1;
+      lvalp->xtokQualifier.type = (CMPIType) -1;
       if (attr[1].attr)
-	for (i = 0, m = num_types; i < m; i++) {
-	  if (strcasecmp(attr[1].attr, types[i].str) == 0) {
-	    lvalp->xtokQualifier.type = types[i].type;
-	    break;
-	  }
-	}
+        for (i = 0, m = num_types; i < m; i++) {
+          if (strcasecmp(attr[1].attr, types[i].str) == 0) {
+            lvalp->xtokQualifier.type = types[i].type;
+            break;
+          }
+        }
       if (attr[2].attr)
-	lvalp->xtokQualifier.propagated =
-	    !strcasecmp(attr[2].attr, "true");
+        lvalp->xtokQualifier.propagated =
+            !strcasecmp(attr[2].attr, "true");
       if (attr[3].attr)
-	lvalp->xtokQualifier.overridable =
-	    !strcasecmp(attr[3].attr, "true");
+        lvalp->xtokQualifier.overridable =
+            !strcasecmp(attr[3].attr, "true");
       if (attr[4].attr)
-	lvalp->xtokQualifier.tosubclass =
-	    !strcasecmp(attr[4].attr, "true");
+        lvalp->xtokQualifier.tosubclass =
+            !strcasecmp(attr[4].attr, "true");
       if (attr[5].attr)
-	lvalp->xtokQualifier.toinstance =
-	    !strcasecmp(attr[5].attr, "true");
+        lvalp->xtokQualifier.toinstance =
+            !strcasecmp(attr[5].attr, "true");
       if (attr[6].attr)
-	lvalp->xtokQualifier.translatable =
-	    !strcasecmp(attr[6].attr, "true");
+        lvalp->xtokQualifier.translatable =
+            !strcasecmp(attr[6].attr, "true");
       return XTOK_QUALIFIER;
     }
   }
@@ -1264,19 +1262,19 @@ procScope(YYSTYPE * lvalp, ParserControl * parm)
       memset(&lvalp->xtokScope, 0, sizeof(XtokScope));
 
       if (attr[0].attr)
-	lvalp->xtokScope.class = !strcasecmp(attr[0].attr, "true");
+        lvalp->xtokScope.class = !strcasecmp(attr[0].attr, "true");
       if (attr[1].attr)
-	lvalp->xtokScope.association = !strcasecmp(attr[1].attr, "true");
+        lvalp->xtokScope.association = !strcasecmp(attr[1].attr, "true");
       if (attr[2].attr)
-	lvalp->xtokScope.reference = !strcasecmp(attr[2].attr, "true");
+        lvalp->xtokScope.reference = !strcasecmp(attr[2].attr, "true");
       if (attr[3].attr)
-	lvalp->xtokScope.property = !strcasecmp(attr[3].attr, "true");
+        lvalp->xtokScope.property = !strcasecmp(attr[3].attr, "true");
       if (attr[4].attr)
-	lvalp->xtokScope.method = !strcasecmp(attr[4].attr, "true");
+        lvalp->xtokScope.method = !strcasecmp(attr[4].attr, "true");
       if (attr[5].attr)
-	lvalp->xtokScope.parameter = !strcasecmp(attr[5].attr, "true");
+        lvalp->xtokScope.parameter = !strcasecmp(attr[5].attr, "true");
       if (attr[6].attr)
-	lvalp->xtokScope.indication = !strcasecmp(attr[6].attr, "true");
+        lvalp->xtokScope.indication = !strcasecmp(attr[6].attr, "true");
       return XTOK_SCOPE;
     }
   }
@@ -1304,24 +1302,24 @@ procProperty(YYSTYPE * lvalp, ParserControl * parm)
     if (attrsOk(parm->xmb, elm, attr, "PROPERTY", ZTOK_PROPERTY)) {
       memset(&lvalp->xtokProperty, 0, sizeof(XtokProperty));
       lvalp->xtokProperty.name = attr[0].attr;
-      lvalp->xtokProperty.valueType = (CMPIType) - 1;
+      lvalp->xtokProperty.valueType = (CMPIType) -1;
       if (attr[1].attr)
-	for (i = 0, m = num_types; i < m; i++) {
-	  if (strcasecmp(attr[1].attr, types[i].str) == 0) {
-	    lvalp->xtokProperty.valueType = types[i].type;
-	    break;
-	  }
-	}
+        for (i = 0, m = num_types; i < m; i++) {
+          if (strcasecmp(attr[1].attr, types[i].str) == 0) {
+            lvalp->xtokProperty.valueType = types[i].type;
+            break;
+          }
+        }
       lvalp->xtokProperty.classOrigin = attr[2].attr;
       if (attr[3].attr)
-	lvalp->xtokProperty.propagated = !strcasecmp(attr[3].attr, "true");
+        lvalp->xtokProperty.propagated = !strcasecmp(attr[3].attr, "true");
       if (attr[4].attr) {
-	if (strcasecmp(attr[4].attr, "instance") == 0
-	    || strcasecmp(attr[4].attr, "object") == 0) {
-	  lvalp->xtokParamValue.type = CMPI_instance;
-	} else {
-	  Throw(NULL, "Invalid value for attribute EmbeddedObject");
-	}
+        if (strcasecmp(attr[4].attr, "instance") == 0
+            || strcasecmp(attr[4].attr, "object") == 0) {
+          lvalp->xtokParamValue.type = CMPI_instance;
+        } else {
+          Throw(NULL, "Invalid value for attribute EmbeddedObject");
+        }
       }
       return XTOK_PROPERTY;
     }
@@ -1347,28 +1345,28 @@ procPropertyArray(YYSTYPE * lvalp, ParserControl * parm)
   memset(attr, 0, sizeof(attr));
   if (tagEquals(parm->xmb, "PROPERTY.ARRAY")) {
     if (attrsOk
-	(parm->xmb, elmPA, attr, "PROPERTY.ARRAY", ZTOK_PROPERTYARRAY)) {
+        (parm->xmb, elmPA, attr, "PROPERTY.ARRAY", ZTOK_PROPERTYARRAY)) {
       memset(&lvalp->xtokProperty, 0, sizeof(XtokProperty));
-      lvalp->xtokProperty.valueType = (CMPIType) - 1;
+      lvalp->xtokProperty.valueType = (CMPIType) -1;
       if (attr[1].attr)
-	for (i = 0, m = num_types; i < m; i++) {
-	  if (strcasecmp(attr[1].attr, types[i].str) == 0) {
-	    lvalp->xtokProperty.valueType = types[i].type;
-	    break;
-	  }
-	}
+        for (i = 0, m = num_types; i < m; i++) {
+          if (strcasecmp(attr[1].attr, types[i].str) == 0) {
+            lvalp->xtokProperty.valueType = types[i].type;
+            break;
+          }
+        }
       lvalp->xtokProperty.valueType |= CMPI_ARRAY;
       lvalp->xtokProperty.name = attr[0].attr;
       lvalp->xtokProperty.classOrigin = attr[2].attr;
       if (attr[3].attr)
-	lvalp->xtokProperty.propagated = !strcasecmp(attr[3].attr, "true");
+        lvalp->xtokProperty.propagated = !strcasecmp(attr[3].attr, "true");
       if (attr[5].attr) {
-	if (strcasecmp(attr[5].attr, "instance") == 0
-	    || strcasecmp(attr[5].attr, "object") == 0) {
-	  lvalp->xtokParamValue.type = CMPI_instance;
-	} else {
-	  Throw(NULL, "Invalid value for attribute EmbeddedObject");
-	}
+        if (strcasecmp(attr[5].attr, "instance") == 0
+            || strcasecmp(attr[5].attr, "object") == 0) {
+          lvalp->xtokParamValue.type = CMPI_instance;
+        } else {
+          Throw(NULL, "Invalid value for attribute EmbeddedObject");
+        }
       }
       return XTOK_PROPERTYARRAY;
     }
@@ -1391,15 +1389,15 @@ procPropertyReference(YYSTYPE * lvalp, ParserControl * parm)
   if (tagEquals(parm->xmb, "PROPERTY.REFERENCE")) {
     attr[1].attr = NULL;
     if (attrsOk
-	(parm->xmb, elm, attr, "PROPERTY.REFERENCE",
-	 ZTOK_PROPERTYREFERENCE)) {
+        (parm->xmb, elm, attr, "PROPERTY.REFERENCE",
+         ZTOK_PROPERTYREFERENCE)) {
       memset(&lvalp->xtokProperty, 0, sizeof(XtokProperty));
       lvalp->xtokProperty.valueType = CMPI_ref;
       lvalp->xtokProperty.name = attr[0].attr;
       lvalp->xtokProperty.referenceClass = attr[1].attr;
       lvalp->xtokProperty.classOrigin = attr[2].attr;
       if (attr[3].attr)
-	lvalp->xtokProperty.propagated = !strcasecmp(attr[3].attr, "true");
+        lvalp->xtokProperty.propagated = !strcasecmp(attr[3].attr, "true");
       return XTOK_PROPERTYREFERENCE;
     }
   }
@@ -1427,15 +1425,15 @@ procMethod(YYSTYPE * lvalp, ParserControl * parm)
       lvalp->xtokMethod.name = attr[0].attr;
       lvalp->xtokMethod.type = CMPI_null;
       if (attr[1].attr)
-	for (i = 0, m = num_types; i < m; i++) {
-	  if (strcasecmp(attr[1].attr, types[i].str) == 0) {
-	    lvalp->xtokMethod.type = types[i].type;
-	    break;
-	  }
-	}
+        for (i = 0, m = num_types; i < m; i++) {
+          if (strcasecmp(attr[1].attr, types[i].str) == 0) {
+            lvalp->xtokMethod.type = types[i].type;
+            break;
+          }
+        }
       lvalp->xtokMethod.classOrigin = attr[2].attr;
       if (attr[3].attr)
-	lvalp->xtokMethod.propagated = !strcasecmp(attr[3].attr, "true");
+        lvalp->xtokMethod.propagated = !strcasecmp(attr[3].attr, "true");
       return XTOK_METHOD;
     }
   }
@@ -1462,12 +1460,12 @@ procParam(YYSTYPE * lvalp, ParserControl * parm)
       lvalp->xtokParam.name = attr[0].attr;
       lvalp->xtokParam.type = CMPI_null;
       if (attr[1].attr)
-	for (i = 0, m = num_types; i < m; i++) {
-	  if (strcasecmp(attr[1].attr, types[i].str) == 0) {
-	    lvalp->xtokParam.type = types[i].type;
-	    break;
-	  }
-	}
+        for (i = 0, m = num_types; i < m; i++) {
+          if (strcasecmp(attr[1].attr, types[i].str) == 0) {
+            lvalp->xtokParam.type = types[i].type;
+            break;
+          }
+        }
       return XTOK_PARAM;
     }
   }
@@ -1495,13 +1493,13 @@ procParamArray(YYSTYPE * lvalp, ParserControl * parm)
       lvalp->xtokParam.name = attr[0].attr;
       lvalp->xtokParam.type = CMPI_null;
       if (attr[1].attr)
-	for (i = 0, m = num_types; i < m; i++) {
-	  if (strcasecmp(attr[1].attr, types[i].str) == 0) {
-	    lvalp->xtokParam.type = types[i].type;
-	    lvalp->xtokParam.type |= CMPI_ARRAY;
-	    break;
-	  }
-	}
+        for (i = 0, m = num_types; i < m; i++) {
+          if (strcasecmp(attr[1].attr, types[i].str) == 0) {
+            lvalp->xtokParam.type = types[i].type;
+            lvalp->xtokParam.type |= CMPI_ARRAY;
+            break;
+          }
+        }
       lvalp->xtokParam.arraySize = atoi(attr[2].attr);
       return XTOK_PARAM;
     }
@@ -1558,7 +1556,6 @@ procParamRefArray(YYSTYPE * lvalp, ParserControl * parm)
   }
   return 0;
 }
-
 
 static Tags     tags[] = {
   {"CIM", procCim, ZTOK_CIM},
@@ -1635,10 +1632,10 @@ yylex(YYSTYPE * lvalp, ParserControl * parm)
      */
     if (*next == '/') {
       for (i = 0, m = sizeof(tags) / sizeof(Tags); i < m; i++) {
-	if (nextEquals(next + 1, tags[i].tag) == 1) {
-	  skipTag(parm->xmb);
-	  _SFCB_RETURN(tags[i].etag);
-	}
+        if (nextEquals(next + 1, tags[i].tag) == 1) {
+          skipTag(parm->xmb);
+          _SFCB_RETURN(tags[i].etag);
+        }
       }
     }
 
@@ -1647,17 +1644,17 @@ yylex(YYSTYPE * lvalp, ParserControl * parm)
        * skip comment section 
        */
       if (strncmp(parm->xmb->cur, "<!--", 4) == 0) {
-	parm->xmb->cur = strstr(parm->xmb->cur, "-->") + 3;
-	continue;
+        parm->xmb->cur = strstr(parm->xmb->cur, "-->") + 3;
+        continue;
       }
       for (i = 0, m = sizeof(tags) / sizeof(Tags); i < m; i++) {
-	if (nextEquals(next, tags[i].tag) == 1) {
+        if (nextEquals(next, tags[i].tag) == 1) {
 
-	  // fprintf(stderr, " yylex| processing for: %.10s\n", next);
-	  rc = tags[i].process(lvalp, parm);	/* call a procXXX fn based 
-						 * on tag name */
-	  _SFCB_RETURN(rc);
-	}
+          // fprintf(stderr, " yylex| processing for: %.10s\n", next);
+          rc = tags[i].process(lvalp, parm);    /* call a procXXX fn based 
+                                                 * on tag name */
+          _SFCB_RETURN(rc);
+        }
       }
     }
     break;
@@ -1822,7 +1819,7 @@ freeParamValue(XtokParamValue * op)
   } else if ((op->type & CMPI_ref) == CMPI_ref) {
     freeReference(&op->valueRef);
   } else if ((op->type & CMPI_instance) == CMPI_instance
-	     || (op->type & CMPI_class) == CMPI_class) {
+             || (op->type & CMPI_class) == CMPI_class) {
     freeValue(&op->value);
   }
 }
@@ -2125,3 +2122,8 @@ freeCimXmlRequest(RequestHdr hdr)
     free(hdr.cimRequest);
   }
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

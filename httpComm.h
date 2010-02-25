@@ -60,9 +60,8 @@
 
 #define intSSLerror(msg)  handleSSLerror(__FILE__, __LINE__, msg)
 void            handleSSLerror(const char *file, int lineno,
-			       const char *msg);
+                               const char *msg);
 #endif
-
 
 #define SOCKBUFSZ 32768
 
@@ -84,3 +83,8 @@ void            commFlush(CommHndl hdl);
 void            commClose(CommHndl hdl);
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

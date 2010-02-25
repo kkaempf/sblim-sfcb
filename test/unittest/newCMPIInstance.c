@@ -15,18 +15,15 @@
 #define SFCB_ASM(x)
 #endif
 
-
-
-
 CMPIInstance   *inst;
 CMPIObjectPath *cop;
 CMPIStatus      st;
 ClInstance     *i;
 
 extern CMPIInstance *internal_new_CMPIInstance(int mode,
-					       const CMPIObjectPath * cop,
-					       CMPIStatus * rc,
-					       int override);
+                                               const CMPIObjectPath * cop,
+                                               CMPIStatus *rc,
+                                               int override);
 
 int
 main(void)
@@ -45,3 +42,8 @@ main(void)
 
   return (rc);
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

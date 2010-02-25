@@ -72,33 +72,33 @@ _sfcCertificateAuthenticate(X509 * cert, char **principal, int mode)
     if (der_buflen > 0 && der_buflen <= MAX_CERTIFICATE && aquireSem()) {
 #ifdef DEBUG
       fprintf(stderr, "_sfcCertificateAuthenticate: cert len = %d\n",
-	      der_buflen);
+              der_buflen);
 #endif
       for (i = 0; i < CertStore->maxcert; i++) {
-	if (CertStore->certs[i].cert_length == der_buflen &&
-	    memcmp(CertStore->certs[i].cert_der, der_buf,
-		   der_buflen) == 0) {
-	  if (mode == 0) {
-	    *principal = CertStore->certs[i].cert_principal;
+        if (CertStore->certs[i].cert_length == der_buflen &&
+            memcmp(CertStore->certs[i].cert_der, der_buf,
+                   der_buflen) == 0) {
+          if (mode == 0) {
+            *principal = CertStore->certs[i].cert_principal;
 #ifdef DEBUG
-	    fprintf(stderr, "_sfcCertificateAuthenticate: found cert\n");
+            fprintf(stderr, "_sfcCertificateAuthenticate: found cert\n");
 #endif
-	    return 1;
-	  } else {
-	    break;
-	  }
-	}
+            return 1;
+          } else {
+            break;
+          }
+        }
       }
       if (mode == 1 && i < NUM_CERTS && *principal &&
-	  strlen(*principal) < MAX_PRINCIPAL) {
-	CertStore->certs[i].cert_length = der_buflen;
-	memcpy(CertStore->certs[i].cert_der, der_buf, der_buflen);
-	strcpy(CertStore->certs[i].cert_principal, *principal);
-	CertStore->maxcert = i + 1;
+          strlen(*principal) < MAX_PRINCIPAL) {
+        CertStore->certs[i].cert_length = der_buflen;
+        memcpy(CertStore->certs[i].cert_der, der_buf, der_buflen);
+        strcpy(CertStore->certs[i].cert_principal, *principal);
+        CertStore->maxcert = i + 1;
 #ifdef DEBUG
-	fprintf(stderr, "_sfcCertificateAuthenticate: inserted cert\n");
+        fprintf(stderr, "_sfcCertificateAuthenticate: inserted cert\n");
 #endif
-	return 1;
+        return 1;
       }
     }
     releaseSem();
@@ -130,64 +130,64 @@ aquireSem()
     if (semId >= 0) {
 #ifdef DEBUG
       fprintf(stderr, "sem value %d = %d\n", semId,
-	      semctl(semId, 0, GETVAL));
+              semctl(semId, 0, GETVAL));
 #endif
       /*
        * successfully created semaphore - must create shared memory now 
        */
       memid =
-	  shmget(semkey, sizeof(CertStore_t), IPC_CREAT | IPC_EXCL | 0600);
+          shmget(semkey, sizeof(CertStore_t), IPC_CREAT | IPC_EXCL | 0600);
       if (memid < 0 || (CertStore = shmat(memid, NULL, 0)) == NULL) {
-	/*
-	 * problem: got semaphore, won't get shared mem 
-	 */
+        /*
+         * problem: got semaphore, won't get shared mem 
+         */
 #ifdef DEBUG
-	fprintf(stderr, "failed to allocate/attach shared memory 0: %s\n",
-		strerror(errno));
+        fprintf(stderr, "failed to allocate/attach shared memory 0: %s\n",
+                strerror(errno));
 #endif
-	semctl(semId, 0, IPC_RMID);
-	semId = -1;
-	return 0;
+        semctl(semId, 0, IPC_RMID);
+        semId = -1;
+        return 0;
       } else {
-	memset(CertStore, 0, sizeof(CertStore_t));
-	/*
-	 * Init completed. Release semaphore and compete with other
-	 * processes. Necessary to make sure that the semaphore stays in a 
-	 * sane state if the process is unexpectedly terminated. 
-	 */
-	semop(semId, &sembVInitial, 1);
+        memset(CertStore, 0, sizeof(CertStore_t));
+        /*
+         * Init completed. Release semaphore and compete with other
+         * processes. Necessary to make sure that the semaphore stays in a 
+         * sane state if the process is unexpectedly terminated. 
+         */
+        semop(semId, &sembVInitial, 1);
       }
     } else {
 #ifdef DEBUG
       fprintf(stderr, "failed to aquire semaphore 0: %s(%d)\n",
-	      strerror(errno), semId);
+              strerror(errno), semId);
 #endif
       semId = semget(semkey, 1, 0);
       if (semId < 0) {
 #ifdef DEBUG
-	fprintf(stderr, "failed to aquire semaphore 1: %s (%d)\n",
-		strerror(errno), semId);
+        fprintf(stderr, "failed to aquire semaphore 1: %s (%d)\n",
+                strerror(errno), semId);
 #endif
-	return 0;
+        return 0;
       } else {
 #ifdef DEBUG
-	fprintf(stderr, "sem value %d = %d\n", semId,
-		semctl(semId, 0, GETVAL));
+        fprintf(stderr, "sem value %d = %d\n", semId,
+                semctl(semId, 0, GETVAL));
 #endif
-	memid = shmget(semkey, sizeof(CertStore_t), 0);
-	if (memid < 0 || (CertStore = shmat(memid, NULL, 0)) == NULL) {
-	  /*
-	   * problem: got semaphore, won't get shared mem 
-	   */
+        memid = shmget(semkey, sizeof(CertStore_t), 0);
+        if (memid < 0 || (CertStore = shmat(memid, NULL, 0)) == NULL) {
+          /*
+           * problem: got semaphore, won't get shared mem 
+           */
 #ifdef DEBUG
-	  fprintf(stderr,
-		  "failed to allocate/attach shared memory 1: %s\n",
-		  strerror(errno));
+          fprintf(stderr,
+                  "failed to allocate/attach shared memory 1: %s\n",
+                  strerror(errno));
 #endif
-	  semctl(semId, 0, IPC_RMID);
-	  semId = -1;
-	  return 0;
-	}
+          semctl(semId, 0, IPC_RMID);
+          semId = -1;
+          return 0;
+        }
       }
     }
   }
@@ -197,7 +197,7 @@ aquireSem()
   if (semop(semId, &sembP, 1)) {
 #ifdef DEBUG
     fprintf(stderr, "failed to aquire semaphore 2: %s (%d)\n",
-	    strerror(errno), semId);
+            strerror(errno), semId);
 #endif
     return 0;
   }
@@ -223,3 +223,8 @@ _sfcCertificateAuthenticate(void *cert, char **principal, int mode)
 }
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

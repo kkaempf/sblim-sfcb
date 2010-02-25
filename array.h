@@ -20,7 +20,6 @@
  *
  */
 
-
 #ifndef array_h
 #define array_h
 
@@ -28,7 +27,6 @@ struct native_array_item {
   CMPIValueState  state;
   CMPIValue       value;
 };
-
 
 struct native_array {
   CMPIArray       array;
@@ -43,3 +41,8 @@ struct native_array {
 };
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

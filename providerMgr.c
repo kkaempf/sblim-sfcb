@@ -20,7 +20,6 @@
  *
  */
 
-
 #include <signal.h>
 #include <time.h>
 #include <pthread.h>
@@ -51,7 +50,7 @@
 #include <pthread.h>
 #include "sfcbenum.h"
 void            addEnumResponsesLV(BinRequestContext *, BinResponseHdr **,
-				   int);
+                                   int);
 int             getLastValid(CMPIEnumeration *);
 int             enumLock(CMPIEnumeration *);
 int             enumUnLock(CMPIEnumeration *);
@@ -90,7 +89,7 @@ extern ProviderRegister *pReg;
 extern CMPIString *args2String(CMPIArgs *);
 extern void     processProviderInvocationRequests(ProviderInfo *);
 extern CMPIObjectPath *relocateSerializedObjectPath(void *area);
-extern MsgSegment setInstanceMsgSegment(CMPIInstance * op);
+extern MsgSegment setInstanceMsgSegment(CMPIInstance *op);
 extern MsgSegment setArgsMsgSegment(CMPIArgs * args);
 extern MsgSegment setConstClassMsgSegment(CMPIConstClass * cl);
 extern void     getSerializedConstClass(CMPIConstClass * cl, void *area);
@@ -102,7 +101,7 @@ extern MsgSegment setArgsMsgSegment(CMPIArgs * args);
 extern void     dump(char *msg, void *a, int l);
 extern void     showClHdr(void *ihdr);
 extern int      forkProvider(ProviderInfo * info, OperationHdr * req,
-			     char **msg);
+                             char **msg);
 
 static int      startUpProvider(const char *ns, const char *name);
 
@@ -114,7 +113,7 @@ extern char    *opsName[];
 
 static UtilList *_getConstClassChildren(const char *ns, const char *cn);
 static CMPIConstClass *_getConstClass(const char *ns, const char *cn,
-				      CMPIStatus * st);
+                                      CMPIStatus *st);
 static UtilList *_getAssocClassNames(const char *ns);
 
 static void
@@ -122,7 +121,7 @@ notSupported(int *requestor, OperationHdr * req)
 {
   mlogf(M_ERROR, M_SHOW, "--- MSG_X_NOT_SUPPORTED\n");
   spSendCtlResult(requestor, &sfcbSockets.send, MSG_X_NOT_SUPPORTED, 0,
-		  NULL, req->options);
+                  NULL, req->options);
   free(req);
 }
 
@@ -174,14 +173,14 @@ nameSpaceOk(ProviderInfo * info, char *nameSpace)
   _SFCB_ENTER(TRACE_PROVIDERMGR, "nameSpaceOk");
 
   _SFCB_TRACE(1,
-	      ("--- testing for %s on %s", nameSpace, info->providerName));
+              ("--- testing for %s on %s", nameSpace, info->providerName));
 
   if (info->ns) {
     if (strcasecmp(*info->ns, "*") == 0)
       _SFCB_RETURN(1);
     for (ns = info->ns; *ns; ns++) {
       if (strcasecmp(*ns, nameSpace) == 0)
-	_SFCB_RETURN(1);
+        _SFCB_RETURN(1);
     }
   }
   if (info == classProvInfoPtr)
@@ -201,8 +200,7 @@ nameSpaceOk(ProviderInfo * info, char *nameSpace)
  *
  */
 static ProviderInfo *
-lookupProvider(long type, char *className, char *nameSpace,
-	       CMPIStatus * st)
+lookupProvider(long type, char *className, char *nameSpace, CMPIStatus *st)
 {
   _SFCB_ENTER(TRACE_PROVIDERMGR, "lookupProvider");
   char           *cls;
@@ -211,8 +209,8 @@ lookupProvider(long type, char *className, char *nameSpace,
 
   if (*ht == NULL) {
     *ht = UtilFactory->newHashTable(61,
-				    UtilHashTable_charKey |
-				    UtilHashTable_ignoreKeyCase);
+                                    UtilHashTable_charKey |
+                                    UtilHashTable_ignoreKeyCase);
     (*ht)->ft->setReleaseFunctions(*ht, free, NULL);
   }
 
@@ -232,11 +230,11 @@ lookupProvider(long type, char *className, char *nameSpace,
     info = pReg->ft->getProvider(pReg, cls, type);
     while (info) {
       if (info && nameSpaceOk(info, nameSpace)) {
-	if ((*ht)->ft->get(*ht, cls) == NULL) {
-	  (*ht)->ft->put(*ht, strdup(cls), info);
-	}
-	free(cls);
-	_SFCB_RETURN(info);
+        if ((*ht)->ft->get(*ht, cls) == NULL) {
+          (*ht)->ft->put(*ht, strdup(cls), info);
+        }
+        free(cls);
+        _SFCB_RETURN(info);
       }
       info = info->nextInRegister;
     }
@@ -245,7 +243,7 @@ lookupProvider(long type, char *className, char *nameSpace,
      */
     _SFCB_TRACE(1, ("Getting class %s", cls));
     CMPIConstClass *cc =
-	(CMPIConstClass *) _getConstClass(nameSpace, cls, st);
+        (CMPIConstClass *) _getConstClass(nameSpace, cls, st);
     free(cls);
     if (cc == NULL) {
       _SFCB_TRACE(1, ("Returning NULL for %s", className));
@@ -266,7 +264,6 @@ lookupProvider(long type, char *className, char *nameSpace,
   }
 }
 
-
 #ifdef HAVE_OPTIMIZED_ENUMERATION
 static int
 optimized_provider_list_contains(UtilList * list, ProviderInfo * info)
@@ -277,7 +274,7 @@ optimized_provider_list_contains(UtilList * list, ProviderInfo * info)
     pInfo = (ProviderInfo *) list->ft->getFirst(list);
     while (pInfo) {
       if (strcmp(pInfo->providerName, info->providerName) == 0) {
-	return 1;
+        return 1;
       }
       pInfo = (ProviderInfo *) list->ft->getNext(list);
     }
@@ -288,7 +285,7 @@ optimized_provider_list_contains(UtilList * list, ProviderInfo * info)
 
 static int
 addProviders(long type, char *className, char *nameSpace,
-	     UtilList * providerList)
+             UtilList * providerList)
 {
   char           *child;
   ProviderInfo   *ip;
@@ -305,14 +302,14 @@ addProviders(long type, char *className, char *nameSpace,
   while (ip) {
     if (ip->providerName && nameSpaceOk(ip, nameSpace) &&
 #ifdef HAVE_OPTIMIZED_ENUMERATION
-	!optimized_provider_list_contains(providerList, ip)
+        !optimized_provider_list_contains(providerList, ip)
 #else
-	!providerList->ft->contains(providerList, ip)
+        !providerList->ft->contains(providerList, ip)
 #endif
-	) {
+        ) {
       _SFCB_TRACE(1,
-		  ("--- adding className: %s provider: %s", className,
-		   ip->providerName));
+                  ("--- adding className: %s provider: %s", className,
+                   ip->providerName));
       providerList->ft->add(providerList, ip);
     }
     /*
@@ -333,13 +330,13 @@ addProviders(long type, char *className, char *nameSpace,
 
   if (children) {
     for (child = children->ft->getFirst(children); child;
-	 child = children->ft->getNext(children)) {
+         child = children->ft->getNext(children)) {
       _SFCB_TRACE(1, ("--- add child %s", child));
       rc = addProviders(type, child, nameSpace, providerList);
       _SFCB_TRACE(1, ("--- add child %s rc: %d", child, rc));
       free(child);
       if (rc)
-	_SFCB_RETURN(rc);
+        _SFCB_RETURN(rc);
     }
     CMRelease(children);
   }
@@ -349,7 +346,7 @@ addProviders(long type, char *className, char *nameSpace,
 
 static UtilList *
 lookupProviders(long type, char *className, char *nameSpace,
-		CMPIStatus * st)
+                CMPIStatus *st)
 {
   UtilList       *lst;
   UtilHashTable **ht = provHt(type, 1);
@@ -365,8 +362,8 @@ lookupProviders(long type, char *className, char *nameSpace,
 
   if (*ht == NULL) {
     *ht = UtilFactory->newHashTable(61,
-				    UtilHashTable_charKey |
-				    UtilHashTable_ignoreKeyCase);
+                                    UtilHashTable_charKey |
+                                    UtilHashTable_ignoreKeyCase);
     (*ht)->ft->setReleaseFunctions(*ht, free, NULL);
   }
 
@@ -409,26 +406,26 @@ lookupProviderList(long type, int *requestor, OperationHdr * req)
     _SFCB_TRACE(1, ("--- found %d providers", count));
     if (n) {
       for (info = providers->ft->getFirst(providers); info;
-	   info = providers->ft->getNext(providers), n--) {
-	if (info->type != FORCE_PROVIDER_NOTFOUND &&
-	    (rc = forkProvider(info, req, NULL)) == CMPI_RC_OK) {
-	  _SFCB_TRACE(1,
-		      ("--- responding with  %s %p %d", info->providerName,
-		       info, count));
-	  spSendCtlResult(requestor, &info->providerSockets.send,
-			  MSG_X_PROVIDER, count--, getProvIds(info).ids,
-			  req->options);
-	  if (type == INDICATION_PROVIDER)
-	    indFound++;
-	} else {
-	  if (type == INDICATION_PROVIDER) {
-	    if (n > 1 || indFound)
-	      continue;
-	  };
-	  spSendCtlResult(requestor, &dmy, MSG_X_PROVIDER_NOT_FOUND, 0,
-			  NULL, req->options);
-	  break;
-	}
+           info = providers->ft->getNext(providers), n--) {
+        if (info->type != FORCE_PROVIDER_NOTFOUND &&
+            (rc = forkProvider(info, req, NULL)) == CMPI_RC_OK) {
+          _SFCB_TRACE(1,
+                      ("--- responding with  %s %p %d", info->providerName,
+                       info, count));
+          spSendCtlResult(requestor, &info->providerSockets.send,
+                          MSG_X_PROVIDER, count--, getProvIds(info).ids,
+                          req->options);
+          if (type == INDICATION_PROVIDER)
+            indFound++;
+        } else {
+          if (type == INDICATION_PROVIDER) {
+            if (n > 1 || indFound)
+              continue;
+          };
+          spSendCtlResult(requestor, &dmy, MSG_X_PROVIDER_NOT_FOUND, 0,
+                          NULL, req->options);
+          break;
+        }
       }
     } else {
       rc = MSG_X_NOT_SUPPORTED;
@@ -458,13 +455,13 @@ findProvider(long type, int *requestor, OperationHdr * req)
 
   if ((info = lookupProvider(type, className, nameSpace, &st)) != NULL) {
     if (info->type != FORCE_PROVIDER_NOTFOUND &&
-	(rc = forkProvider(info, req, NULL)) == CMPI_RC_OK) {
+        (rc = forkProvider(info, req, NULL)) == CMPI_RC_OK) {
       spSendCtlResult(requestor, &info->providerSockets.send,
-		      MSG_X_PROVIDER, 0, getProvIds(info).ids,
-		      req->options);
+                      MSG_X_PROVIDER, 0, getProvIds(info).ids,
+                      req->options);
     } else {
       spSendCtlResult(requestor, &sfcbSockets.send,
-		      MSG_X_PROVIDER_NOT_FOUND, 0, NULL, req->options);
+                      MSG_X_PROVIDER_NOT_FOUND, 0, NULL, req->options);
     }
   } else {
     if (st.rc == CMPI_RC_ERR_INVALID_NAMESPACE)
@@ -472,7 +469,7 @@ findProvider(long type, int *requestor, OperationHdr * req)
     else
       rc = MSG_X_INVALID_CLASS;
     spSendCtlResult(requestor, &sfcbSockets.send, rc, 0, NULL,
-		    req->options);
+                    req->options);
   }
   _SFCB_EXIT();
 }
@@ -529,14 +526,14 @@ getAssocProvider(char *className, char *nameSpace)
 
   if (assocProviderHt == NULL) {
     assocProviderHt = UtilFactory->newHashTable(61,
-						UtilHashTable_charKey |
-						UtilHashTable_ignoreKeyCase);
+                                                UtilHashTable_charKey |
+                                                UtilHashTable_ignoreKeyCase);
     assocProviderHt->ft->setReleaseFunctions(assocProviderHt, free, NULL);
   }
 
   info =
       (ProviderInfo *) assocProviderHt->ft->get(assocProviderHt,
-						className);
+                                                className);
   /*
    * there's a matching provider in the list, return it if the ns is right 
    */
@@ -564,14 +561,14 @@ getAssocProvider(char *className, char *nameSpace)
        * already there 
        */
       if (nameSpaceOk(info, nameSpace)) {
-	free(cls);
-	_SFCB_RETURN(info);
+        free(cls);
+        _SFCB_RETURN(info);
       }
       info = info->nextInRegister;
     }
 
     CMPIConstClass *cc =
-	(CMPIConstClass *) _getConstClass(nameSpace, cls, &rc);
+        (CMPIConstClass *) _getConstClass(nameSpace, cls, &rc);
     free(cls);
     if (cc == NULL) {
       _SFCB_RETURN(NULL);
@@ -591,7 +588,7 @@ getAssocProvider(char *className, char *nameSpace)
 
 static int
 addAssocProviders(char *className, char *nameSpace,
-		  UtilList * providerList)
+                  UtilList * providerList)
 {
   char           *child;
   ProviderInfo   *ip,
@@ -607,17 +604,17 @@ addAssocProviders(char *className, char *nameSpace,
       return CMPI_RC_ERR_FAILED;
     if (ip->providerName) {
       for (ipTemp = providerList->ft->getFirst(providerList); ipTemp;
-	   ipTemp = providerList->ft->getNext(providerList)) {
-	if (strcmp(ipTemp->providerName, ip->providerName) == 0) {
-	  break;
-	}
+           ipTemp = providerList->ft->getNext(providerList)) {
+        if (strcmp(ipTemp->providerName, ip->providerName) == 0) {
+          break;
+        }
       }
       /*
        * we did not find a provider with the same name 
        */
       if (!ipTemp) {
-	_SFCB_TRACE(1, ("--- Adding %s", ip->providerName));
-	providerList->ft->add(providerList, ip);
+        _SFCB_TRACE(1, ("--- Adding %s", ip->providerName));
+        providerList->ft->add(providerList, ip);
       }
     }
     children = _getConstClassChildren(nameSpace, className);
@@ -626,10 +623,10 @@ addAssocProviders(char *className, char *nameSpace,
 
   if (children) {
     for (child = children->ft->getFirst(children); child;
-	 child = children->ft->getNext(children)) {
+         child = children->ft->getNext(children)) {
       rc = addAssocProviders(child, nameSpace, providerList);
       if (rc)
-	_SFCB_RETURN(rc);
+        _SFCB_RETURN(rc);
     }
     CMRelease(children);
   }
@@ -647,10 +644,10 @@ getAssocProviders(char *className, char *nameSpace)
 
   if (assocProvidersHt == NULL) {
     assocProvidersHt = UtilFactory->newHashTable(61,
-						 UtilHashTable_charKey |
-						 UtilHashTable_ignoreKeyCase);
+                                                 UtilHashTable_charKey |
+                                                 UtilHashTable_ignoreKeyCase);
     assocProvidersHt->ft->setReleaseFunctions(assocProvidersHt, free,
-					      NULL);
+                                              NULL);
   }
 
   if (className) {
@@ -691,25 +688,25 @@ assocProviderList(int *requestor, OperationHdr * req)
     count = ((long) providers->ft->size(providers)) - 1;
     if (count >= 0) {
       for (info = providers->ft->getFirst(providers); info;
-	   info = providers->ft->getNext(providers)) {
-	if (info->type != FORCE_PROVIDER_NOTFOUND &&
-	    (rc = forkProvider(info, req, NULL)) == CMPI_RC_OK) {
-	  _SFCB_TRACE(1,
-		      ("--- responding with  %s %p %d", info->providerName,
-		       info, count));
-	  spSendCtlResult(requestor, &info->providerSockets.send,
-			  MSG_X_PROVIDER, count--, getProvIds(info).ids,
-			  req->options);
-	} else {
-	  spSendCtlResult(requestor, &dmy, MSG_X_PROVIDER_NOT_FOUND,
-			  0, NULL, req->options);
-	  break;
-	}
+           info = providers->ft->getNext(providers)) {
+        if (info->type != FORCE_PROVIDER_NOTFOUND &&
+            (rc = forkProvider(info, req, NULL)) == CMPI_RC_OK) {
+          _SFCB_TRACE(1,
+                      ("--- responding with  %s %p %d", info->providerName,
+                       info, count));
+          spSendCtlResult(requestor, &info->providerSockets.send,
+                          MSG_X_PROVIDER, count--, getProvIds(info).ids,
+                          req->options);
+        } else {
+          spSendCtlResult(requestor, &dmy, MSG_X_PROVIDER_NOT_FOUND,
+                          0, NULL, req->options);
+          break;
+        }
       }
     } else {
       spSendCtlResult(requestor, &sfcbSockets.send,
-		      MSG_X_PROVIDER_NOT_FOUND, count--, NULL,
-		      req->options);
+                      MSG_X_PROVIDER_NOT_FOUND, count--, NULL,
+                      req->options);
     }
   } else if (disableDefaultProvider) {
     /*
@@ -719,17 +716,17 @@ assocProviderList(int *requestor, OperationHdr * req)
      */
     if ((rc = forkProvider(defaultProvInfoPtr, req, NULL)) == CMPI_RC_OK) {
       _SFCB_TRACE(1, ("--- responding with  %s %p %d",
-		      defaultProvInfoPtr->providerName,
-		      defaultProvInfoPtr, count));
+                      defaultProvInfoPtr->providerName,
+                      defaultProvInfoPtr, count));
       spSendCtlResult(requestor, &defaultProvInfoPtr->providerSockets.send,
-		      MSG_X_PROVIDER, count--,
-		      getProvIds(defaultProvInfoPtr).ids, req->options);
+                      MSG_X_PROVIDER, count--,
+                      getProvIds(defaultProvInfoPtr).ids, req->options);
     } else {
       /*
        * Oops, even creation of the default provider failed 
        */
       mlogf(M_ERROR, M_SHOW,
-	    "--- forkProvider failed for defaultProvider\n");
+            "--- forkProvider failed for defaultProvider\n");
       /*
        * spSendCtlResult(requestor, &dmy, MSG_X_PROVIDER_NOT_FOUND, 0,
        * NULL, req->options); 
@@ -738,12 +735,10 @@ assocProviderList(int *requestor, OperationHdr * req)
     }
   } else {
     spSendCtlResult(requestor, &sfcbSockets.send, MSG_X_PROVIDER_NOT_FOUND,
-		    count--, NULL, req->options);
+                    count--, NULL, req->options);
   }
   _SFCB_EXIT();
 }
-
-
 
 /*
  * ------------- --- Method Provider support --- ------------- 
@@ -761,14 +756,14 @@ getMethodProvider(char *className, char *nameSpace)
 
   if (methodProviderHt == NULL) {
     methodProviderHt = UtilFactory->newHashTable(61,
-						 UtilHashTable_charKey |
-						 UtilHashTable_ignoreKeyCase);
+                                                 UtilHashTable_charKey |
+                                                 UtilHashTable_ignoreKeyCase);
     methodProviderHt->ft->setReleaseFunctions(methodProviderHt, free,
-					      NULL);
+                                              NULL);
   }
   info =
       (ProviderInfo *) methodProviderHt->ft->get(methodProviderHt,
-						 className);
+                                                 className);
   if (info)
     _SFCB_RETURN(info);
 
@@ -785,14 +780,14 @@ getMethodProvider(char *className, char *nameSpace)
       _SFCB_RETURN(info);
     } else {
       CMPIConstClass *cc =
-	  (CMPIConstClass *) _getConstClass(nameSpace, cls, &rc);
+          (CMPIConstClass *) _getConstClass(nameSpace, cls, &rc);
       free(cls);
       if (cc == NULL) {
-	_SFCB_RETURN(NULL);
+        _SFCB_RETURN(NULL);
       }
       cls = (char *) cc->ft->getCharSuperClassName(cc);
       if (cls) {
-	cls = strdup(cls);
+        cls = strdup(cls);
       }
       CMRelease(cc);
     }
@@ -823,13 +818,13 @@ classProvider(int *requestor, OperationHdr * req)
   }
 
   _SFCB_TRACE(1, ("--- result %d-%lu to with %d-%lu",
-		  *requestor, getInode(*requestor),
-		  classProvInfoPtr->providerSockets.send,
-		  getInode(classProvInfoPtr->providerSockets.send)));
+                  *requestor, getInode(*requestor),
+                  classProvInfoPtr->providerSockets.send,
+                  getInode(classProvInfoPtr->providerSockets.send)));
 
   spSendCtlResult(requestor, &classProvInfoPtr->providerSockets.send,
-		  MSG_X_PROVIDER, 0, getProvIds(classProvInfoPtr).ids,
-		  req->options);
+                  MSG_X_PROVIDER, 0, getProvIds(classProvInfoPtr).ids,
+                  req->options);
   _SFCB_EXIT();
 }
 
@@ -848,12 +843,12 @@ qualiProvider(int *requestor, OperationHdr * req)
     _SFCB_ABORT();
   }
   _SFCB_TRACE(1, ("--- result %d-%lu to with %d-%lu",
-		  *requestor, getInode(*requestor),
-		  qualiProvInfoPtr->providerSockets.send,
-		  getInode(qualiProvInfoPtr->providerSockets.send)));
+                  *requestor, getInode(*requestor),
+                  qualiProvInfoPtr->providerSockets.send,
+                  getInode(qualiProvInfoPtr->providerSockets.send)));
   spSendCtlResult(requestor, &qualiProvInfoPtr->providerSockets.send,
-		  MSG_X_PROVIDER, 0, getProvIds(qualiProvInfoPtr).ids,
-		  req->options);
+                  MSG_X_PROVIDER, 0, getProvIds(qualiProvInfoPtr).ids,
+                  req->options);
 
   _SFCB_EXIT();
 }
@@ -872,28 +867,27 @@ methProvider(int *requestor, OperationHdr * req)
   else if ((info = getMethodProvider(className, nameSpace)) != NULL) {
     rc = CMPI_RC_OK;
     if (info->type != FORCE_PROVIDER_NOTFOUND &&
-	(rc = forkProvider(info, req, NULL)) == CMPI_RC_OK) {
+        (rc = forkProvider(info, req, NULL)) == CMPI_RC_OK) {
       _SFCB_TRACE(1,
-		  ("--- responding with  %s %p", info->providerName,
-		   info));
+                  ("--- responding with  %s %p", info->providerName,
+                   info));
       spSendCtlResult(requestor, &info->providerSockets.send,
-		      MSG_X_PROVIDER, 0, getProvIds(info).ids,
-		      req->options);
+                      MSG_X_PROVIDER, 0, getProvIds(info).ids,
+                      req->options);
     } else {
       if (rc != CMPI_RC_OK) {
-	mlogf(M_ERROR, M_SHOW,
-	      "--- forkProvider failed in methProvider\n");
+        mlogf(M_ERROR, M_SHOW,
+              "--- forkProvider failed in methProvider\n");
       }
 
       spSendCtlResult(requestor, &sfcbSockets.send,
-		      MSG_X_PROVIDER_NOT_FOUND, 0, NULL, req->options);
+                      MSG_X_PROVIDER_NOT_FOUND, 0, NULL, req->options);
     }
   } else
     spSendCtlResult(requestor, &sfcbSockets.send, MSG_X_INVALID_CLASS, 0,
-		    NULL, req->options);
+                    NULL, req->options);
   _SFCB_EXIT();
 }
-
 
 static int
 _methProvider(BinRequestContext * ctx, OperationHdr * req)
@@ -909,7 +903,7 @@ _methProvider(BinRequestContext * ctx, OperationHdr * req)
     rc = forkProvider(classProvInfoPtr, req, NULL);
     if (rc != CMPI_RC_OK) {
       mlogf(M_ERROR, M_SHOW,
-	    "--- forkProvider failed in _methProvider (%s)\n", className);
+            "--- forkProvider failed in _methProvider (%s)\n", className);
       /*
        * spSendCtlResult(requestor, &dmy, MSG_X_PROVIDER_NOT_FOUND, 0,
        * NULL, req->options); 
@@ -924,7 +918,7 @@ _methProvider(BinRequestContext * ctx, OperationHdr * req)
     rc = forkProvider(interOpProvInfoPtr, req, NULL);
     if (rc != CMPI_RC_OK) {
       mlogf(M_ERROR, M_SHOW,
-	    "--- forkProvider failed in _methProvider (%s)\n", className);
+            "--- forkProvider failed in _methProvider (%s)\n", className);
       /*
        * spSendCtlResult(requestor, &dmy, MSG_X_PROVIDER_NOT_FOUND, 0,
        * NULL, req->options); 
@@ -955,43 +949,43 @@ _methProvider(BinRequestContext * ctx, OperationHdr * req)
 }
 
 static MgrHandler mHandlers[] = {
-  {notSupported},		// dummy
-  {classProvider},		// OPS_GetClass 1
-  {instProvider},		// OPS_GetInstance 2
-  {classProvider},		// OPS_DeleteClass 3
-  {instProvider},		// OPS_DeleteInstance 4
-  {classProvider},		// OPS_CreateClass 5
-  {instProvider},		// OPS_CreateInstance 6
-  {classProvider},		// OPS_ModifyClass 7
-  {instProvider},		// OPS_ModifyInstance 8
-  {classProvider},		// OPS_EnumerateClasses 9
-  {classProvider},		// OPS_EnumerateClassNames 10
-  {instProviderList},		// OPS_EnumerateInstances 11
-  {instProviderList},		// OPS_EnumerateInstanceNames 12
-  {instProviderList},		// OPS_ExecQuery 13
-  {assocProviderList},		// OPS_Associators 14
-  {assocProviderList},		// OPS_AssociatorNames 15
-  {assocProviderList},		// OPS_References 16
-  {assocProviderList},		// OPS_ReferenceNames 17
-  {propProvider},		// OPS_GetProperty 18
-  {propProvider},		// OPS_SetProperty 19
-  {qualiProvider},		// OPS_GetQualifier 20
-  {qualiProvider},		// OPS_SetQualifier 21
-  {qualiProvider},		// OPS_DeleteQualifier 22
-  {qualiProvider},		// OPS_EnumerateQualifiers 23
-  {methProvider},		// OPS_InvokeMethod 24
+  {notSupported},               // dummy
+  {classProvider},              // OPS_GetClass 1
+  {instProvider},               // OPS_GetInstance 2
+  {classProvider},              // OPS_DeleteClass 3
+  {instProvider},               // OPS_DeleteInstance 4
+  {classProvider},              // OPS_CreateClass 5
+  {instProvider},               // OPS_CreateInstance 6
+  {classProvider},              // OPS_ModifyClass 7
+  {instProvider},               // OPS_ModifyInstance 8
+  {classProvider},              // OPS_EnumerateClasses 9
+  {classProvider},              // OPS_EnumerateClassNames 10
+  {instProviderList},           // OPS_EnumerateInstances 11
+  {instProviderList},           // OPS_EnumerateInstanceNames 12
+  {instProviderList},           // OPS_ExecQuery 13
+  {assocProviderList},          // OPS_Associators 14
+  {assocProviderList},          // OPS_AssociatorNames 15
+  {assocProviderList},          // OPS_References 16
+  {assocProviderList},          // OPS_ReferenceNames 17
+  {propProvider},               // OPS_GetProperty 18
+  {propProvider},               // OPS_SetProperty 19
+  {qualiProvider},              // OPS_GetQualifier 20
+  {qualiProvider},              // OPS_SetQualifier 21
+  {qualiProvider},              // OPS_DeleteQualifier 22
+  {qualiProvider},              // OPS_EnumerateQualifiers 23
+  {methProvider},               // OPS_InvokeMethod 24
   {NULL},
   {NULL},
 #ifdef SFCB_INCL_INDICATION_SUPPORT
-  {processIndProviderList},	// OPS_ProcessIndicationList 27
+  {processIndProviderList},     // OPS_ProcessIndicationList 27
 #else
-  {notSupported},		// OPS_ProcessIndicationList 27
+  {notSupported},               // OPS_ProcessIndicationList 27
 #endif
   // Next entries are never called - They used by ProviderDrv.c
-  {NULL},			// OPS_ActivateFilter 28
-  {NULL},			// OPS_DeactivateFilter 29
-  {NULL},			// OPS_DisableIndications 30
-  {NULL},			// OPS_EnableIndications 31
+  {NULL},                       // OPS_ActivateFilter 28
+  {NULL},                       // OPS_DeactivateFilter 29
+  {NULL},                       // OPS_DisableIndications 30
+  {NULL},                       // OPS_EnableIndications 31
 };
 
 void
@@ -1023,40 +1017,40 @@ processProviderMgrRequests()
     MgrHandler      hdlr;
 
     _SFCB_TRACE(1,
-		("--- Waiting for mgr request to %d ",
-		 sfcbSockets.receive));
+                ("--- Waiting for mgr request to %d ",
+                 sfcbSockets.receive));
 
     if ((rc =
-	 spRecvReq(&sfcbSockets.receive, &requestor, (void **) &req, &rl,
-		   &mqg)) == 0) {
+         spRecvReq(&sfcbSockets.receive, &requestor, (void **) &req, &rl,
+                   &mqg)) == 0) {
       if (mqg.rdone) {
-	req->nameSpace.data =
-	    (void *) ((long) req->nameSpace.data + (char *) req);
-	if (req->className.length)
-	  req->className.data =
-	      (void *) ((long) req->className.data + (char *) req);
-	else
-	  req->className.data = NULL;
-	cn = (char *) req->className.data;
-	ns = (char *) req->nameSpace.data;
-	options = req->options;
+        req->nameSpace.data =
+            (void *) ((long) req->nameSpace.data + (char *) req);
+        if (req->className.length)
+          req->className.data =
+              (void *) ((long) req->className.data + (char *) req);
+        else
+          req->className.data = NULL;
+        cn = (char *) req->className.data;
+        ns = (char *) req->nameSpace.data;
+        options = req->options;
 
-	_SFCB_TRACE(1,
-		    ("--- Mgr request for %s-%s (%d) from %d",
-		     req->nameSpace.data, req->className.data, req->type,
-		     requestor));
+        _SFCB_TRACE(1,
+                    ("--- Mgr request for %s-%s (%d) from %d",
+                     req->nameSpace.data, req->className.data, req->type,
+                     requestor));
 
-	hdlr = mHandlers[req->type];
-	hdlr.handler(&requestor, req);
+        hdlr = mHandlers[req->type];
+        hdlr.handler(&requestor, req);
 
-	_SFCB_TRACE(1,
-		    ("--- Mgr request for %s-%s DONE", req->nameSpace.data,
-		     req->className.data));
-	free(req);
+        _SFCB_TRACE(1,
+                    ("--- Mgr request for %s-%s DONE", req->nameSpace.data,
+                     req->className.data));
+        free(req);
       } else {
       }
       if ((options & OH_Internal) == 0)
-	close(requestor);
+        close(requestor);
 
     } else {
       _SFCB_ABORT();
@@ -1076,8 +1070,8 @@ closeProviderContext(BinRequestContext * ctx)
       semAcquire(sfcbSem, PROV_INUSE(ctx->pAs[i].ids.procId));
     } else {
       fprintf(stderr,
-	      "--- closeProviderContext not touching sem %d; already zero\n",
-	      PROV_INUSE(ctx->pAs[i].ids.procId));
+              "--- closeProviderContext not touching sem %d; already zero\n",
+              PROV_INUSE(ctx->pAs[i].ids.procId));
     }
     semRelease(sfcbSem, PROV_GUARD(ctx->pAs[i].ids.procId));
   }
@@ -1092,7 +1086,7 @@ setInuseSem(void *id)
   key_t           semKey;
 
   _SFCB_ENTER(TRACE_PROVIDERMGR, "setInuseSem");
-  if (sfcbSem < 0) {		// Semaphore Not initialized.
+  if (sfcbSem < 0) {            // Semaphore Not initialized.
     semKey = ftok(SFCB_BINARY, 'S');
     sfcbSem = semget(semKey, 1, 0600);
   }
@@ -1105,7 +1099,6 @@ setInuseSem(void *id)
   semRelease(sfcbSem, PROV_GUARD(ids.procId));
   _SFCB_EXIT();
 }
-
 
 int
 getProviderContext(BinRequestContext * ctx, OperationHdr * ohdr)
@@ -1145,20 +1138,20 @@ getProviderContext(BinRequestContext * ctx, OperationHdr * ohdr)
     sockets = getSocketPair("getProviderContext");
 
   _SFCB_TRACE(1,
-	      ("--- Sending mgr request - to %d from %d", sfcbSockets.send,
-	       sockets.send));
+              ("--- Sending mgr request - to %d from %d", sfcbSockets.send,
+               sockets.send));
   rc = spSendReq(&sfcbSockets.send, &sockets.send, buf, l, localMode);
   free(buf);
 
   if (rc < 0) {
     mlogf(M_ERROR, M_SHOW,
-	  "--- spSendReq/spSendMsg failed to send on %d (%d)\n",
-	  sfcbSockets.send, rc);
+          "--- spSendReq/spSendMsg failed to send on %d (%d)\n",
+          sfcbSockets.send, rc);
     ctx->rc = rc;
     if (!localMode) {
-      closeSocket(&sockets,COM_ALL,"getProviderContext");
+      closeSocket(&sockets, COM_ALL, "getProviderContext");
     } else {
-       pthread_mutex_unlock(&resultsocketMutex);
+      pthread_mutex_unlock(&resultsocketMutex);
     }
     _SFCB_RETURN(rc);
 
@@ -1168,10 +1161,10 @@ getProviderContext(BinRequestContext * ctx, OperationHdr * ohdr)
 
   ctx->rc =
       spRecvCtlResult(&sockets.receive, &ctx->provA.socket,
-		      &ctx->provA.ids.ids, &l);
+                      &ctx->provA.ids.ids, &l);
   _SFCB_TRACE(1,
-	      ("--- Provider socket: %d - %lu %d", ctx->provA.socket,
-	       getInode(ctx->provA.socket), currentProc));
+              ("--- Provider socket: %d - %lu %d", ctx->provA.socket,
+               getInode(ctx->provA.socket), currentProc));
 
   if (ctx->rc == MSG_X_PROVIDER) {
     _SFCB_TRACE(1, ("--- Provider count: %d", l));
@@ -1181,22 +1174,22 @@ getProviderContext(BinRequestContext * ctx, OperationHdr * ohdr)
     *as = ctx->provA;
 
     _SFCB_TRACE(1, ("--- Provider socket: %d - %lu %d %lu %s",
-		    ctx->provA.socket, l, currentProc,
-		    getInode(ctx->provA.socket), ohdr->className.data));
+                    ctx->provA.socket, l, currentProc,
+                    getInode(ctx->provA.socket), ohdr->className.data));
 
     for (i = 1; l; i++) {
       rc = spRecvCtlResult(&sockets.receive, &as[i].socket, &as[i].ids.ids,
-			   &l);
+                           &l);
       if (rc != MSG_X_PROVIDER) {
-	ctx->rc = rc;
-	_SFCB_TRACE(1,
-		    ("--- Provider at index %d not loadable (perhaps out of processes) ",
-		     i));
+        ctx->rc = rc;
+        _SFCB_TRACE(1,
+                    ("--- Provider at index %d not loadable (perhaps out of processes) ",
+                     i));
       } else {
-	setInuseSem(as[i].ids.ids);
-	_SFCB_TRACE(1,
-		    ("--- getting provider socket: %lu %d", as[i].socket,
-		     getInode(as[i].socket), currentProc));
+        setInuseSem(as[i].ids.ids);
+        _SFCB_TRACE(1,
+                    ("--- getting provider socket: %lu %d", as[i].socket,
+                     getInode(as[i].socket), currentProc));
       }
     }
   }
@@ -1206,13 +1199,12 @@ getProviderContext(BinRequestContext * ctx, OperationHdr * ohdr)
   }
 
   if (!localMode) {
-     closeSocket(&sockets,COM_ALL,"getProviderContext");
+    closeSocket(&sockets, COM_ALL, "getProviderContext");
   } else {
-     pthread_mutex_unlock(&resultsocketMutex);
+    pthread_mutex_unlock(&resultsocketMutex);
   }
   _SFCB_RETURN(ctx->rc);
 }
-
 
 static BinResponseHdr *
 intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
@@ -1248,8 +1240,8 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
      * add padding length to calculation 
      */
     l += (hdr->object[i].type ==
-	  MSG_SEG_CHARS ? PADDED_LEN(hdr->object[i].length) : hdr->
-	  object[i].length);
+          MSG_SEG_CHARS ? PADDED_LEN(hdr->object[i].length) : hdr->
+          object[i].length);
   }
 
   buf = (char *) malloc(l + 8);
@@ -1267,7 +1259,7 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
     switch (hdr->object[i].type) {
     case MSG_SEG_OBJECTPATH:
       getSerializedObjectPath((CMPIObjectPath *) hdr->object[i].data,
-			      buf + l);
+                              buf + l);
       ((BinRequestHdr *) buf)->object[i].data = (void *) l;
       l += ol;
       break;
@@ -1284,7 +1276,7 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
       break;
     case MSG_SEG_CONSTCLASS:
       getSerializedConstClass((CMPIConstClass *) hdr->object[i].data,
-			      buf + l);
+                              buf + l);
       ((BinRequestHdr *) buf)->object[i].data = (void *) l;
       l += ol;
       break;
@@ -1296,23 +1288,23 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
 #ifdef HAVE_QUALREP
     case MSG_SEG_QUALIFIER:
       getSerializedQualifier((CMPIQualifierDecl *) hdr->object[i].data,
-			     buf + l);
+                             buf + l);
       ((BinRequestHdr *) buf)->object[i].data = (void *) l;
       l += ol;
       break;
 #endif
     default:
       mlogf(M_ERROR, M_SHOW, "--- bad intInvokeProvider request %d-%d\n",
-	    i, hdr->object[i].type);
+            i, hdr->object[i].type);
       abort();
     }
   }
 
   _SFCB_TRACE(1,
-	      ("--- Sending Provider invocation request (%d-%p) - to %d-%lu from %d-%lu",
-	       hdr->operation, hdr->provId, ctx->provA.socket,
-	       getInode(ctx->provA.socket), resultSockets.send,
-	       getInode(resultSockets.send)));
+              ("--- Sending Provider invocation request (%d-%p) - to %d-%lu from %d-%lu",
+               hdr->operation, hdr->provId, ctx->provA.socket,
+               getInode(ctx->provA.socket), resultSockets.send,
+               getInode(resultSockets.send)));
 
   for (;;) {
     // rc=spSendReq(&ctx->provA.socket, &sesultSockets.send, buf, l);
@@ -1329,8 +1321,8 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
   free(buf);
 
   _SFCB_TRACE(1,
-	      ("--- Waiting for Provider response - from %d",
-	       resultSockets.receive));
+              ("--- Waiting for Provider response - from %d",
+               resultSockets.receive));
 
   if (ctx->chunkedMode) {
     _SFCB_TRACE(1, ("--- chunked mode"));
@@ -1339,7 +1331,7 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
       void           *hc = markHeap();
 
       if (resp)
-	free(resp);
+        free(resp);
       resp = NULL;
       // spRecvResult(&resultSockets.receive, &fromS, (void**) &resp,
       // &size);
@@ -1348,12 +1340,12 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
        * nothing received -- construct a failure response 
        */
       if (resp == NULL || size == 0) {
-	resp = calloc(sizeof(BinResponseHdr), 1);
-	resp->rc = CMPI_RC_ERR_FAILED + 1;
+        resp = calloc(sizeof(BinResponseHdr), 1);
+        resp->rc = CMPI_RC_ERR_FAILED + 1;
       }
       for (i = 0; i < resp->count; i++) {
-	resp->object[i].data =
-	    (void *) ((long) resp->object[i].data + (char *) resp);
+        resp->object[i].data =
+            (void *) ((long) resp->object[i].data + (char *) resp);
       }
 
       ctx->rCount = 1;
@@ -1361,7 +1353,7 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
       ctx->chunkFncs->writeChunk(ctx, resp);
       _SFCB_TRACE(1, ("--- back from writing chunk"));
       if (resp->moreChunks)
-	spSendAck(sockets.receive);
+        spSendAck(sockets.receive);
 
       releaseHeap(hc);
 
@@ -1387,7 +1379,7 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
 
     for (i = 0; i < resp->count; i++) {
       resp->object[i].data =
-	  (void *) ((long) resp->object[i].data + (char *) resp);
+          (void *) ((long) resp->object[i].data + (char *) resp);
     }
   } else {
     _SFCB_TRACE(1, ("--- waiting for response skipped"));
@@ -1402,12 +1394,12 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
     gettimeofday(&ev, NULL);
     getrusage(RUSAGE_SELF, &ue);
     _sfcb_trace(1, __FILE__, __LINE__,
-		_sfcb_format_trace
-		("-#- Provider Remote Invocation %.5u %s-%s real: %f user: %f sys: %f \n",
-		 hdr->sessionId, opsName[hdr->operation],
-		 ctx->oHdr->className.data, timevalDiff(&sv, &ev),
-		 timevalDiff(&us.ru_utime, &ue.ru_utime),
-		 timevalDiff(&us.ru_stime, &ue.ru_stime)));
+                _sfcb_format_trace
+                ("-#- Provider Remote Invocation %.5u %s-%s real: %f user: %f sys: %f \n",
+                 hdr->sessionId, opsName[hdr->operation],
+                 ctx->oHdr->className.data, timevalDiff(&sv, &ev),
+                 timevalDiff(&us.ru_utime, &ue.ru_utime),
+                 timevalDiff(&us.ru_stime, &ue.ru_stime)));
   }
 #endif
   _SFCB_RETURN(resp);
@@ -1428,7 +1420,7 @@ invokeProvider(BinRequestContext * ctx)
   BinResponseHdr *resp = intInvokeProvider(ctx, sockets);
 
   if (!localMode) {
-    closeSocket(&sockets,COM_ALL,"invokeProvider");
+    closeSocket(&sockets, COM_ALL, "invokeProvider");
   } else {
     pthread_mutex_unlock(&resultsocketMutex);
   }
@@ -1473,7 +1465,7 @@ invokeProviders(BinRequestContext * binCtx, int *err, int *count)
   }
 
   if (!localMode) {
-    closeSocket(&sockets,COM_ALL,"invokeProvider");
+    closeSocket(&sockets, COM_ALL, "invokeProvider");
   } else {
     pthread_mutex_unlock(&resultsocketMutex);
   }
@@ -1488,7 +1480,7 @@ freeResponseHeaders(BinResponseHdr ** resp, BinRequestContext * binCtx)
     int             count = binCtx->pCount;
     while (count--) {
       if (resp[count]) {
-	free(resp[count]);
+        free(resp[count]);
       }
     }
     free(resp);
@@ -1559,7 +1551,7 @@ getConstClass(const char *ns, const char *cn)
 }
 
 static CMPIConstClass *
-_getConstClass(const char *ns, const char *cn, CMPIStatus * st)
+_getConstClass(const char *ns, const char *cn, CMPIStatus *st)
 {
   _SFCB_ENTER(TRACE_PROVIDERMGR, "_getConstClass");
 
@@ -1581,7 +1573,7 @@ _getConstClass(const char *ns, const char *cn, CMPIStatus * st)
   irc = forkProvider(classProvInfoPtr, &req, NULL);
   if (irc != CMPI_RC_OK) {
     mlogf(M_ERROR, M_SHOW,
-	  "--- forkProvider failed in _getConstClass(%s:%s)\n", ns, cn);
+          "--- forkProvider failed in _getConstClass(%s:%s)\n", ns, cn);
     /*
      * spSendCtlResult(requestor, &dmy, MSG_X_PROVIDER_NOT_FOUND, 0, NULL, 
      * req->options); 
@@ -1608,8 +1600,8 @@ _getConstClass(const char *ns, const char *cn, CMPIStatus * st)
   }
 
   _SFCB_TRACE(1,
-	      ("--- Invoking ClassProvider for %s %s rc: %d", ns, cn,
-	       resp->rc));
+              ("--- Invoking ClassProvider for %s %s rc: %d", ns, cn,
+               resp->rc));
 
   path->ft->release(path);
   if (resp)
@@ -1620,9 +1612,9 @@ _getConstClass(const char *ns, const char *cn, CMPIStatus * st)
 
 static CMPIData
 localInvokeMethod(BinRequestContext * binCtx,
-		  CMPIObjectPath * path, char *method,
-		  CMPIArgs * in, CMPIArgs ** out,
-		  CMPIStatus * rc, int noResp)
+                  CMPIObjectPath * path, char *method,
+                  CMPIArgs * in, CMPIArgs ** out,
+                  CMPIStatus *rc, int noResp)
 {
   _SFCB_ENTER(TRACE_PROVIDERMGR, "localInvokeMethod");
 
@@ -1630,8 +1622,8 @@ localInvokeMethod(BinRequestContext * binCtx,
   OperationHdr    req = { OPS_InvokeMethod, 1 };
   CMPIData        data = { 0, CMPI_nullValue, {0} };
   if (out)
-    *out = NULL;		/* out is used by getchildren and
-				 * getassocs */
+    *out = NULL;                /* out is used by getchildren and
+                                 * getassocs */
   BinResponseHdr *resp = NULL;
 
   sreq.in = setArgsMsgSegment(in);
@@ -1653,8 +1645,8 @@ localInvokeMethod(BinRequestContext * binCtx,
       rc->rc = resp->rc;
     if (resp->rc == CMPI_RC_OK) {
       if (out) {
-	*out = relocateSerializedArgs(resp->object[0].data);
-	*out = (*out)->ft->clone(*out, NULL);
+        *out = relocateSerializedArgs(resp->object[0].data);
+        *out = (*out)->ft->clone(*out, NULL);
       }
       data = resp->rv;
       // check for chars
@@ -1764,14 +1756,14 @@ _getConstClassChildren(const char *ns, const char *cn)
 
   if (irc == MSG_X_PROVIDER) {
     data =
-	localInvokeMethod(&binCtx, path, "getchildren", in, &out, &rc, 0);
+        localInvokeMethod(&binCtx, path, "getchildren", in, &out, &rc, 0);
     if (out) {
       ar = CMGetArg(out, "children", &rc).value.array;
       ul = UtilFactory->newList();
       for (i = 0, m = CMGetArrayCount(ar, NULL); i < m; i++) {
-	str = CMGetArrayElementAt(ar, i, NULL).value.string;
-	if (str && str->hdl)
-	  ul->ft->append(ul, strdup(str->hdl));
+        str = CMGetArrayElementAt(ar, i, NULL).value.string;
+        if (str && str->hdl)
+          ul->ft->append(ul, strdup(str->hdl));
       }
     }
   }
@@ -1817,11 +1809,11 @@ _getAssocClassNames(const char *ns)
       ar = CMGetArg(out, "assocs", &rc).value.array;
       ul = UtilFactory->newList();
       for (i = 0, m = CMGetArrayCount(ar, NULL); i < m; i++) {
-	char           *name =
-	    CMGetArrayElementAt(ar, i, NULL).value.string->hdl;
-	if (name)
-	  ul->ft->append(ul, name);
-	_SFCB_TRACE(1, ("--- assoc %s", name));
+        char           *name =
+            CMGetArrayElementAt(ar, i, NULL).value.string->hdl;
+        if (name)
+          ul->ft->append(ul, name);
+        _SFCB_TRACE(1, ("--- assoc %s", name));
       }
     }
   }
@@ -1848,7 +1840,7 @@ _getAssocClassNames(const char *ns)
 #ifdef LARGE_VOL_SUPPORT
 void
 addEnumResponsesLV(BinRequestContext * binCtx, BinResponseHdr ** resp,
-		   int index)
+                   int index)
 {
   int             c,
                   j,
@@ -1873,7 +1865,6 @@ addEnumResponsesLV(BinRequestContext * binCtx, BinResponseHdr ** resp,
    ********************************************************************** */
   /*
    ********************************************************************** */
-
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "genEnumResponses");
 
@@ -1901,22 +1892,21 @@ addEnumResponsesLV(BinRequestContext * binCtx, BinResponseHdr ** resp,
    * starting array index is arrayCurrentCount
    */
 
-
   for (j = 0, c = arrayCurrentCount; j < resp[index]->count; c++, j++) {
     if (binCtx->type == CMPI_ref) {
       object.path =
-	  relocateSerializedObjectPath(resp[index]->object[j].data);
+          relocateSerializedObjectPath(resp[index]->object[j].data);
     } else if (binCtx->type == CMPI_instance) {
       object.inst =
-	  relocateSerializedInstance(resp[index]->object[j].data);
+          relocateSerializedInstance(resp[index]->object[j].data);
     } else if (binCtx->type == CMPI_class) {
       object.cls =
-	  relocateSerializedConstClass(resp[index]->object[j].data);
+          relocateSerializedConstClass(resp[index]->object[j].data);
     }
 
     enumLock(enumeration);
     rc = CMSetArrayElementAt(ar, c, (CMPIValue *) & object.inst,
-			     binCtx->type);
+                             binCtx->type);
     incLastValid(enumeration);
     enumUnLock(enumeration);
 
@@ -1929,3 +1919,8 @@ addEnumResponsesLV(BinRequestContext * binCtx, BinResponseHdr ** resp,
   _SFCB_EXIT();
 }
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

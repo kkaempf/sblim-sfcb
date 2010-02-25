@@ -20,7 +20,6 @@
  *
  */
 
-
 #include "native.h"
 #include "trace.h"
 #include "constClass.h"
@@ -31,78 +30,70 @@ extern const char *opGetNameSpaceChars(const CMPIObjectPath * cop);
 extern CMPIConstClass *getConstClass(const char *ns, const char *cn);
 extern CMPIObjectPathFT *CMPI_ObjectPath_FT;
 extern CMPIInstanceFT *CMPI_Instance_FT;
-extern CMPIString *instance2String(CMPIInstance * inst, CMPIStatus * rc);
+extern CMPIString *instance2String(CMPIInstance *inst, CMPIStatus *rc);
 extern int      verifyPropertyList(CMPIConstClass * cls, char **list);
 extern CMPISelectExp *TrackedCMPISelectExp(const char *queryString,
-					   const char *language,
-					   CMPIArray ** projection,
-					   CMPIStatus * rc);
-
-
+                                           const char *language,
+                                           CMPIArray **projection,
+                                           CMPIStatus *rc);
 
 static CMPIInstance *
 __beft_newInstance(const CMPIBroker * broker,
-		   const CMPIObjectPath * cop, CMPIStatus * rc)
+                   const CMPIObjectPath * cop, CMPIStatus *rc)
 {
   _SFCB_ENTER(TRACE_ENCCALLS, "newInstance");
   CMPIInstance   *inst = TrackedCMPIInstance(cop, rc);
   _SFCB_RETURN(inst);
 }
 
-
 static CMPIObjectPath *
 __beft_newObjectPath(const CMPIBroker * broker,
-		     const char *namespace,
-		     const char *classname, CMPIStatus * rc)
+                     const char *namespace,
+                     const char *classname, CMPIStatus *rc)
 {
   _SFCB_ENTER(TRACE_ENCCALLS, "newObjectPath");
   CMPIObjectPath *path = TrackedCMPIObjectPath(namespace, classname, rc);
   _SFCB_RETURN(path);
 }
 
-
 static CMPIArgs *
-__beft_newArgs(const CMPIBroker * broker, CMPIStatus * rc)
+__beft_newArgs(const CMPIBroker * broker, CMPIStatus *rc)
 {
   _SFCB_ENTER(TRACE_ENCCALLS, "newArgs");
   CMPIArgs       *args = TrackedCMPIArgs(rc);
   _SFCB_RETURN(args);
 }
 
-
 static CMPIString *
 __beft_newString(const CMPIBroker * broker,
-		 const char *str, CMPIStatus * rc)
+                 const char *str, CMPIStatus *rc)
 {
   _SFCB_ENTER(TRACE_ENCCALLS, "newString");
   CMPIString     *s = sfcb_native_new_CMPIString(str, rc, 0);
   _SFCB_RETURN(s);
 }
 
-
 static CMPIArray *
 __beft_newArray(const CMPIBroker * broker,
-		CMPICount size, CMPIType type, CMPIStatus * rc)
+                CMPICount size, CMPIType type, CMPIStatus *rc)
 {
   _SFCB_ENTER(TRACE_ENCCALLS, "newArray");
   CMPIArray      *ar = TrackedCMPIArray(size, type, rc);
   _SFCB_RETURN(ar);
 }
 
-
 static CMPIDateTime *
-__beft_newDateTime(const CMPIBroker * broker, CMPIStatus * rc)
+__beft_newDateTime(const CMPIBroker * broker, CMPIStatus *rc)
 {
   _SFCB_ENTER(TRACE_ENCCALLS, "newDateTime");
   CMPIDateTime   *dt = sfcb_native_new_CMPIDateTime(rc);
   _SFCB_RETURN(dt);
 }
 
-
 static CMPIDateTime *
 __beft_newDateTimeFromBinary(const CMPIBroker * broker,
-			     CMPIUint64 time,
-			     CMPIBoolean interval, CMPIStatus * rc)
+                             CMPIUint64 time,
+                             CMPIBoolean interval, CMPIStatus *rc)
 {
   _SFCB_ENTER(TRACE_ENCCALLS, "newDateTimeFromBinary");
   CMPIDateTime   *dt =
@@ -110,22 +101,20 @@ __beft_newDateTimeFromBinary(const CMPIBroker * broker,
   _SFCB_RETURN(dt);
 }
 
-
 static CMPIDateTime *
 __beft_newDateTimeFromChars(const CMPIBroker * broker,
-			    const char *string, CMPIStatus * rc)
+                            const char *string, CMPIStatus *rc)
 {
   _SFCB_ENTER(TRACE_ENCCALLS, "newDateTimeFromChars");
   CMPIDateTime   *dt = sfcb_native_new_CMPIDateTime_fromChars(string, rc);
   _SFCB_RETURN(dt);
 }
 
-
 static CMPISelectExp *
 __beft_newSelectExp(const CMPIBroker * broker,
-		    const char *queryString,
-		    const char *language,
-		    CMPIArray ** projection, CMPIStatus * rc)
+                    const char *queryString,
+                    const char *language,
+                    CMPIArray **projection, CMPIStatus *rc)
 {
   _SFCB_ENTER(TRACE_ENCCALLS, "newSelectExp");
   CMPISelectExp  *sx =
@@ -133,11 +122,10 @@ __beft_newSelectExp(const CMPIBroker * broker,
   _SFCB_RETURN(sx);
 }
 
-
 static CMPIBoolean
 __beft_classPathIsA(const CMPIBroker * broker,
-		    const CMPIObjectPath * cop,
-		    const char *type, CMPIStatus * rc)
+                    const CMPIObjectPath * cop,
+                    const char *type, CMPIStatus *rc)
 {
   CMPIConstClass *cc;
   char           *scn,
@@ -161,32 +149,32 @@ __beft_classPathIsA(const CMPIBroker * broker,
   if (cc && type)
     for (; (scn = (char *) cc->ft->getCharSuperClassName(cc)) != NULL;) {
       if (strcasecmp(scn, type) == 0)
-	return 1;
+        return 1;
       cc = (CMPIConstClass *) getConstClass(ns, scn);
       if (cc == NULL)
-	break;
+        break;
     }
   _SFCB_RETURN(0);
 }
 
 static CMPIString *
 __beft_toString(const CMPIBroker * broker,
-		const void *object, CMPIStatus * rc)
+                const void *object, CMPIStatus *rc)
 {
   CMPIString     *str;
   _SFCB_ENTER(TRACE_ENCCALLS, "toString");
   if (object) {
     if (((CMPIInstance *) object)->ft) {
       if (((CMPIObjectPath *) object)->ft == CMPI_ObjectPath_FT) {
-	// str=__oft_toString((CMPIObjectPath *) object, rc);
-	str =
-	    ((CMPIObjectPath *) object)->ft->
-	    toString((CMPIObjectPath *) object, rc);
-	_SFCB_RETURN(str);
+        // str=__oft_toString((CMPIObjectPath *) object, rc);
+        str =
+            ((CMPIObjectPath *) object)->ft->
+            toString((CMPIObjectPath *) object, rc);
+        _SFCB_RETURN(str);
       }
       if (((CMPIInstance *) object)->ft == CMPI_Instance_FT) {
-	str = instance2String((CMPIInstance *) object, rc);
-	_SFCB_RETURN(str);
+        str = instance2String((CMPIInstance *) object, rc);
+        _SFCB_RETURN(str);
       }
     }
   }
@@ -196,10 +184,9 @@ __beft_toString(const CMPIBroker * broker,
   _SFCB_RETURN(NULL);
 }
 
-
 static CMPIBoolean
 __beft_isOfType(const CMPIBroker * broker,
-		const void *object, const char *type, CMPIStatus * rc)
+                const void *object, const char *type, CMPIStatus *rc)
 {
   char           *t = *((char **) object);
 
@@ -210,20 +197,18 @@ __beft_isOfType(const CMPIBroker * broker,
   _SFCB_RETURN(strcmp(t, type) == 0);
 }
 
-
 static CMPIString *
 __beft_getType(const CMPIBroker * broker,
-	       const void *object, CMPIStatus * rc)
+               const void *object, CMPIStatus *rc)
 {
   _SFCB_ENTER(TRACE_ENCCALLS, "getType");
   _SFCB_RETURN(__beft_newString(broker, *((char **) object), rc));
 }
 
-
 static CMPIString *
 __beft_getMessage(const CMPIBroker * broker,
-		  const char *msgId, const char *defMsg,
-		  CMPIStatus * rc, unsigned int count, ...)
+                  const char *msgId, const char *defMsg,
+                  CMPIStatus *rc, unsigned int count, ...)
 {
   if (rc)
     CMSetStatus(rc, CMPI_RC_ERR_NOT_SUPPORTED);
@@ -234,7 +219,7 @@ __beft_getMessage(const CMPIBroker * broker,
 
 static CMPIStatus __beft_logMessage
     (const CMPIBroker * broker, int severity, const char *id,
-     const char *text, const CMPIString * string) {
+     const char *text, const CMPIString *string) {
   CMPIStatus      rc = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
   _SFCB_ENTER(TRACE_ENCCALLS, "logMessage");
   _SFCB_TRACE(1, ("This operation is not yet supported."));
@@ -243,17 +228,16 @@ static CMPIStatus __beft_logMessage
 
 static CMPIStatus __beft_trace
     (const CMPIBroker * broker, int level, const char *component,
-     const char *text, const CMPIString * string) {
+     const char *text, const CMPIString *string) {
   CMPIStatus      rc = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
   _SFCB_ENTER(TRACE_ENCCALLS, "trace");
   _SFCB_TRACE(1, ("This operation is not yet supported."));
   _SFCB_RETURN(rc);
 }
 
-
 CMPIArray      *
 getKeyListAndVerifyPropertyList(CMPIObjectPath * cop,
-				char **props, int *ok, CMPIStatus * rc)
+                                char **props, int *ok, CMPIStatus *rc)
 {
   CMPIArray      *ar;
   CMPIConstClass *cc;
@@ -269,7 +253,6 @@ getKeyListAndVerifyPropertyList(CMPIObjectPath * cop,
 }
 
 /****************************************************************************/
-
 
 CMPIBrokerEncFT native_brokerEncFT = {
   NATIVE_FT_VERSION,
@@ -292,3 +275,8 @@ CMPIBrokerEncFT native_brokerEncFT = {
 };
 
 CMPIBrokerEncFT *BrokerEncFT = &native_brokerEncFT;
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -19,7 +19,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
@@ -87,7 +86,6 @@ ensureCharsListSpace(QLStatement * qs, char ***in, int *max, int nxt)
   }
   return list;
 }
-
 
 QLStatement    *
 newQLStatement(int fcm, int mode)
@@ -187,14 +185,14 @@ qsRelease(QLStatement * st)
 }
 
 static CMPIInstance *
-qsCloneAndFilter(QLStatement * st, CMPIInstance * ci, CMPIObjectPath * cop,
-		 char **kNames)
+qsCloneAndFilter(QLStatement * st, CMPIInstance *ci, CMPIObjectPath * cop,
+                 char **kNames)
 {
   CMPIInstance   *nic = CMNewInstance(Broker, cop, NULL);
   CMPICount       i,
                   c = CMGetPropertyCount(ci, NULL);
   CMSetPropertyFilter(nic, (const char **) st->spNames,
-		      (const char **) kNames);
+                      (const char **) kNames);
   for (i = 0; i < c; i++) {
     CMPIString     *name;
     CMPIData        d = CMGetPropertyAt(ci, i, &name, NULL);
@@ -203,7 +201,6 @@ qsCloneAndFilter(QLStatement * st, CMPIInstance * ci, CMPIObjectPath * cop,
   }
   return nic;
 }
-
 
 static void
 qcClear(QLCollector * qc)
@@ -224,7 +221,7 @@ newNameOperand(QLStatement * qs)
 
 static void
 qcAddPropIdentifier(QLCollector * qc, QLStatement * qs, char *cls,
-		    char *prop, int index)
+                    char *prop, int index)
 {
   QLPropertyNameData **pi;
   for (pi = &qc->propName; 1; pi = &(*pi)->nextPart)
@@ -247,7 +244,7 @@ qsAlloc(QLStatement * qs, unsigned int size)
     if (qs->allocNext == qs->allocMax) {
       qs->allocMax *= 2;
       qs->allocList =
-	  (void **) realloc(qs->allocList, qs->allocMax * sizeof(void *));
+          (void **) realloc(qs->allocList, qs->allocMax * sizeof(void *));
     }
   } else {
     int             x;
@@ -267,10 +264,9 @@ static QLStatementFt stmtFt = {
   qsGetFromClassList
 };
 
-
 QLStatement    *
 parseQuery(int mode, const char *query, const char *lang, const char *sns,
-	   int *rc)
+           int *rc)
 {
   QLStatement    *qs = NULL;
   QLCollector     ctlFt = {
@@ -290,7 +286,7 @@ parseQuery(int mode, const char *query, const char *lang, const char *sns,
   if (strcasecmp(lang, "wql") == 0)
     ctl.statement->lang = QL_WQL;
   else if (strcasecmp(lang, "cql") == 0
-	   || strcasecmp(lang, "cim:cql") == 0) {
+           || strcasecmp(lang, "cim:cql") == 0) {
     ctl.statement->lang = QL_CQL;
   } else
     ctl.statement->lang = 0;
@@ -303,3 +299,8 @@ parseQuery(int mode, const char *query, const char *lang, const char *sns,
 
   return qs;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -132,9 +132,9 @@ HashTableDestroy(HashTable * hashTable)
     while (pair != NULL) {
       KeyValuePair   *nextPair = pair->next;
       if (hashTable->keyDeallocator != NULL)
-	hashTable->keyDeallocator((void *) pair->key);
+        hashTable->keyDeallocator((void *) pair->key);
       if (hashTable->valueDeallocator != NULL)
-	hashTable->valueDeallocator(pair->value);
+        hashTable->valueDeallocator(pair->value);
       free(pair);
       pair = nextPair;
     }
@@ -196,7 +196,7 @@ HashTableContainsValue(const HashTable * hashTable, const void *value)
     KeyValuePair   *pair = hashTable->bucketArray[i];
     while (pair != NULL) {
       if (hashTable->valuecmp(value, pair->value) == 0)
-	return 1;
+        return 1;
       pair = pair->next;
     }
   }
@@ -242,17 +242,17 @@ HashTablePut(HashTable * hashTable, const void *key, void *value)
   if (pair) {
     if (pair->key != key) {
       if (hashTable->keyDeallocator != NULL)
-	hashTable->keyDeallocator((void *) pair->key);
+        hashTable->keyDeallocator((void *) pair->key);
       pair->key = key;
     }
     if (pair->value != value) {
       if (hashTable->valueDeallocator != NULL)
-	hashTable->valueDeallocator(pair->value);
+        hashTable->valueDeallocator(pair->value);
       pair->value = value;
     }
   } else {
     KeyValuePair   *newPair =
-	(KeyValuePair *) malloc(sizeof(KeyValuePair));
+        (KeyValuePair *) malloc(sizeof(KeyValuePair));
     if (newPair == NULL) {
       return -1;
     } else {
@@ -263,11 +263,11 @@ HashTablePut(HashTable * hashTable, const void *key, void *value)
       hashTable->numOfElements++;
 
       if (hashTable->upperRehashThreshold > hashTable->idealRatio) {
-	float           elementToBucketRatio =
-	    (float) hashTable->numOfElements /
-	    (float) hashTable->numOfBuckets;
-	if (elementToBucketRatio > hashTable->upperRehashThreshold)
-	  HashTableRehash(hashTable, 0);
+        float           elementToBucketRatio =
+            (float) hashTable->numOfElements /
+            (float) hashTable->numOfBuckets;
+        if (elementToBucketRatio > hashTable->upperRehashThreshold)
+          HashTableRehash(hashTable, 0);
       }
     }
   }
@@ -348,10 +348,10 @@ HashTableRemove(HashTable * hashTable, const void *key)
 
     if (hashTable->lowerRehashThreshold > 0.0) {
       float           elementToBucketRatio =
-	  (float) hashTable->numOfElements /
-	  (float) hashTable->numOfBuckets;
+          (float) hashTable->numOfElements /
+          (float) hashTable->numOfBuckets;
       if (elementToBucketRatio < hashTable->lowerRehashThreshold)
-	HashTableRehash(hashTable, 0);
+        HashTableRehash(hashTable, 0);
     }
   }
 }
@@ -380,9 +380,9 @@ HashTableRemoveAll(HashTable * hashTable)
     while (pair != NULL) {
       KeyValuePair   *nextPair = pair->next;
       if (hashTable->keyDeallocator != NULL)
-	hashTable->keyDeallocator((void *) pair->key);
+        hashTable->keyDeallocator((void *) pair->key);
       if (hashTable->valueDeallocator != NULL)
-	hashTable->valueDeallocator(pair->value);
+        hashTable->valueDeallocator(pair->value);
       free(pair);
       pair = nextPair;
     }
@@ -478,8 +478,8 @@ HashTableGetNumBuckets(const HashTable * hashTable)
 
 static void
 HashTableSetKeyComparisonFunction(HashTable * hashTable,
-				  int (*keycmp) (const void
-						 *key1, const void *key2))
+                                  int (*keycmp) (const void
+                                                 *key1, const void *key2))
 {
   assert(keycmp != NULL);
   hashTable->keycmp = keycmp;
@@ -506,9 +506,9 @@ HashTableSetKeyComparisonFunction(HashTable * hashTable,
 
 static void
 HashTableSetValueComparisonFunction(HashTable * hashTable,
-				    int (*valuecmp) (const void
-						     *value1,
-						     const void *value2))
+                                    int (*valuecmp) (const void
+                                                     *value1,
+                                                     const void *value2))
 {
   assert(valuecmp != NULL);
   hashTable->valuecmp = valuecmp;
@@ -537,7 +537,7 @@ HashTableSetValueComparisonFunction(HashTable * hashTable,
 
 static void
 HashTableSetHashFunction(HashTable * hashTable,
-			 unsigned long (*hashFunction) (const void *key))
+                         unsigned long (*hashFunction) (const void *key))
 {
   assert(hashFunction != NULL);
   hashTable->hashFunction = hashFunction;
@@ -580,7 +580,7 @@ HashTableRehash(HashTable * hashTable, long numOfBuckets)
     numOfBuckets = calculateIdealNumOfBuckets(hashTable);
 
   if (numOfBuckets == hashTable->numOfBuckets)
-    return;			/* already the right size! */
+    return;                     /* already the right size! */
 
   newBucketArray = (KeyValuePair **)
       malloc(numOfBuckets * sizeof(KeyValuePair *));
@@ -600,7 +600,7 @@ HashTableRehash(HashTable * hashTable, long numOfBuckets)
     while (pair != NULL) {
       KeyValuePair   *nextPair = pair->next;
       long            hashValue =
-	  hashTable->hashFunction(pair->key) % numOfBuckets;
+          hashTable->hashFunction(pair->key) % numOfBuckets;
       pair->next = newBucketArray[hashValue];
       newBucketArray[hashValue] = pair;
       pair = nextPair;
@@ -694,10 +694,10 @@ HashTableRehash(HashTable * hashTable, long numOfBuckets)
 
 static void
 HashTableSetDeallocationFunctions(HashTable * hashTable,
-				  void (*keyDeallocator) (void
-							  *key),
-				  void (*valueDeallocator)
-				                  (void *value))
+                                  void (*keyDeallocator) (void
+                                                          *key),
+                                  void (*valueDeallocator)
+                                                  (void *value))
 {
   hashTable->keyDeallocator = keyDeallocator;
   hashTable->valueDeallocator = valueDeallocator;
@@ -748,7 +748,7 @@ isProbablePrime(long oddNumber)
     else if (oddNumber % i == 0)
       return 0;
 
-  return 1;			/* maybe */
+  return 1;                     /* maybe */
 }
 
 static long
@@ -759,7 +759,7 @@ calculateIdealNumOfBuckets(HashTable * hashTable)
   if (idealNumOfBuckets < 5)
     idealNumOfBuckets = 5;
   else
-    idealNumOfBuckets |= 0x01;	/* make it an odd number */
+    idealNumOfBuckets |= 0x01;  /* make it an odd number */
   while (!isProbablePrime(idealNumOfBuckets))
     idealNumOfBuckets += 2;
   return idealNumOfBuckets;
@@ -857,16 +857,16 @@ hashTableGetFirst(UtilHashTable * ht, void **key, void **val)
 
 static HashTableIterator *
 hashTableGetNext(UtilHashTable * ht,
-		 HashTableIterator * iter, void **key, void **val)
+                 HashTableIterator * iter, void **key, void **val)
 {
   HashTable      *t = (HashTable *) ht->hdl;
   iter->pair = iter->pair->next;
   while (iter->bucket < t->numOfBuckets) {
     if (iter->pair == NULL) {
       if (iter->bucket + 1 < t->numOfBuckets)
-	iter->pair = t->bucketArray[++iter->bucket];
+        iter->pair = t->bucketArray[++iter->bucket];
       else
-	break;
+        break;
       continue;
     }
     *key = (void *) iter->pair->key;
@@ -879,8 +879,8 @@ hashTableGetNext(UtilHashTable * ht,
 
 static void
 hashTableSetKeyComparisonFunction(UtilHashTable * ht,
-				  int (*keycomp) (const void
-						  *k1, const void *k2))
+                                  int (*keycomp) (const void
+                                                  *k1, const void *k2))
 {
   HashTable      *t = (HashTable *) ht->hdl;
   HashTableSetKeyComparisonFunction(t, keycomp);
@@ -888,8 +888,8 @@ hashTableSetKeyComparisonFunction(UtilHashTable * ht,
 
 static void
 hashTableSetValueComparisonFunction(UtilHashTable * ht,
-				    int (*valcomp) (const void
-						    *v1, const void *v2))
+                                    int (*valcomp) (const void
+                                                    *v1, const void *v2))
 {
   HashTable      *t = (HashTable *) ht->hdl;
   HashTableSetValueComparisonFunction(t, valcomp);
@@ -897,7 +897,7 @@ hashTableSetValueComparisonFunction(UtilHashTable * ht,
 
 static void
 hashTableSetHashFunction(UtilHashTable * ht,
-			 unsigned long (*hashFunction) (const void *key))
+                         unsigned long (*hashFunction) (const void *key))
 {
   HashTable      *t = (HashTable *) ht->hdl;
   HashTableSetHashFunction(t, hashFunction);
@@ -905,9 +905,9 @@ hashTableSetHashFunction(UtilHashTable * ht,
 
 static void
 hashTableSetDeallocationFunctions(UtilHashTable * ht,
-				  void (*keyRelease) (void
-						      *key),
-				  void (*valueRelease) (void *value))
+                                  void (*keyRelease) (void
+                                                      *key),
+                                  void (*valueRelease) (void *value))
 {
   HashTable      *t = (HashTable *) ht->hdl;
   HashTableSetDeallocationFunctions(t, keyRelease, valueRelease);
@@ -915,27 +915,31 @@ hashTableSetDeallocationFunctions(UtilHashTable * ht,
 
 static Util_HashTable_FT ift = {
   1,
-  hashTableDestroy,		// release
-  NotSupported,			// clone
-  hashTableRemoveAll,		// clear
-  hashTableContainsKey,		// containsKey
-  hashTableContainsValue,	// containsValue
-  hashTablePut,			// put
-  hashTableGet,			// get
-  hashTableRemove,		// remove
-  hashTableIsEmpty,		// isEmpty
-  hashTableSize,		// size
-  hashTableGetNumBuckets,	// buckets
-  hashTableRehash,		// rehash
+  hashTableDestroy,             // release
+  NotSupported,                 // clone
+  hashTableRemoveAll,           // clear
+  hashTableContainsKey,         // containsKey
+  hashTableContainsValue,       // containsValue
+  hashTablePut,                 // put
+  hashTableGet,                 // get
+  hashTableRemove,              // remove
+  hashTableIsEmpty,             // isEmpty
+  hashTableSize,                // size
+  hashTableGetNumBuckets,       // buckets
+  hashTableRehash,              // rehash
 
-  hashTableGetFirst,		// getFirst
-  hashTableGetNext,		// getNext
+  hashTableGetFirst,            // getFirst
+  hashTableGetNext,             // getNext
 
-  hashTableSetKeyComparisonFunction,	// setKeyCmpFunction
-  hashTableSetValueComparisonFunction,	// setValueCmpFunction
-  hashTableSetHashFunction,	// setHashFunction
-  hashTableSetDeallocationFunctions,	// setReleaseFunctions
+  hashTableSetKeyComparisonFunction,    // setKeyCmpFunction
+  hashTableSetValueComparisonFunction,  // setValueCmpFunction
+  hashTableSetHashFunction,     // setHashFunction
+  hashTableSetDeallocationFunctions,    // setReleaseFunctions
 };
 
-
 Util_HashTable_FT *UtilHashTableFT = &ift;
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

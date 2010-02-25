@@ -19,7 +19,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,14 +35,13 @@ typedef struct native_selectcond {
   int             type;
 } NativeSelectCond;
 
-static NativeSelectCond *__new_cond(int mode, CMPIArray * conds, int type,
-				    CMPIStatus * rc);
-
+static NativeSelectCond *__new_cond(int mode, CMPIArray *conds, int type,
+                                    CMPIStatus *rc);
 
 /*****************************************************************************/
 
 static CMPIStatus
-__eft_release(CMPISelectCond * cond)
+__eft_release(CMPISelectCond *cond)
 {
   NativeSelectCond *c = (NativeSelectCond *) cond;
 
@@ -56,19 +54,17 @@ __eft_release(CMPISelectCond * cond)
   CMReturn(CMPI_RC_ERR_FAILED);
 }
 
-
 static CMPISelectCond *
-__eft_clone(const CMPISelectCond * cond, CMPIStatus * rc)
+__eft_clone(const CMPISelectCond *cond, CMPIStatus *rc)
 {
   NativeSelectCond *c = (NativeSelectCond *) cond;
 
   return (CMPISelectCond *) __new_cond(MEM_NOT_TRACKED, c->conds, c->type,
-				       rc);
+                                       rc);
 }
 
-
 static CMPICount __eft_getCountAndType
-    (const CMPISelectCond * cond, int *type, CMPIStatus * rc) {
+    (const CMPISelectCond *cond, int *type, CMPIStatus *rc) {
   NativeSelectCond *c = (NativeSelectCond *) cond;
   CMPICount       count = 0;
 
@@ -82,7 +78,7 @@ static CMPICount __eft_getCountAndType
 }
 
 static CMPISubCond *__eft_getSubCondAt
-    (const CMPISelectCond * cond, unsigned int index, CMPIStatus * rc) {
+    (const CMPISelectCond *cond, unsigned int index, CMPIStatus *rc) {
   NativeSelectCond *c = (NativeSelectCond *) cond;
   CMPIValuePtr    vp = { NULL, 0 };
   CMPISubCond    *sc = NULL;
@@ -104,7 +100,7 @@ static CMPISubCond *__eft_getSubCondAt
 }
 
 static NativeSelectCond *
-__new_cond(int mode, CMPIArray * conds, int type, CMPIStatus * rc)
+__new_cond(int mode, CMPIArray *conds, int type, CMPIStatus *rc)
 {
   static CMPISelectCondFT eft = {
     NATIVE_FT_VERSION,
@@ -119,7 +115,6 @@ __new_cond(int mode, CMPIArray * conds, int type, CMPIStatus * rc)
     &eft
   };
   int             state;
-
 
   NativeSelectCond cond,
                  *tCond;
@@ -137,15 +132,19 @@ __new_cond(int mode, CMPIArray * conds, int type, CMPIStatus * rc)
   return tCond;
 }
 
-
 CMPISelectCond *
-TrackedCMPISelectCond(CMPIArray * conds, int type, CMPIStatus * rc)
+TrackedCMPISelectCond(CMPIArray *conds, int type, CMPIStatus *rc)
 {
   return (CMPISelectCond *) __new_cond(MEM_TRACKED, conds, type, rc);
 }
 
 CMPISelectCond *
-NewCMPISelectCond(CMPIArray * conds, int type, CMPIStatus * rc)
+NewCMPISelectCond(CMPIArray *conds, int type, CMPIStatus *rc)
 {
   return (CMPISelectCond *) __new_cond(MEM_NOT_TRACKED, conds, type, rc);
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

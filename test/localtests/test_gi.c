@@ -50,21 +50,21 @@ main()
 
   printf(" Testing Get instance \n");
   printf(" using SfcbLocal interface : host = %s userid = %s\n",
-	 cim_host, cim_host_userid);
+         cim_host, cim_host_userid);
   ce = NewCIMCEnv("SfcbLocal", 0, &rc, &msg);
   if (ce == NULL) {
     printf
-	(" local connect failed call to NewCIMCEnv rc = %d , message = [%s] \n",
-	 retc, msg);
+        (" local connect failed call to NewCIMCEnv rc = %d , message = [%s] \n",
+         retc, msg);
     return 1;
   }
 
   client =
       ce->ft->connect(ce, cim_host, "http", cim_host_port, cim_host_userid,
-		      cim_host_passwd, &status);
+                      cim_host_passwd, &status);
 
   op = ce->ft->newObjectPath(ce, "root/cimv2", "Linux_ComputerSystem",
-			     &status);
+                             &status);
 
   CMAddKey(op, "CreationClassName", "Linux_ComputerSystem", CMPI_chars);
   CMAddKey(op, "Name", "localhost.localdomain", CMPI_chars);
@@ -74,7 +74,7 @@ main()
    * Print the results 
    */
   printf("getInstance() rc=%d, msg=%s\n",
-	 status.rc, (status.msg) ? (char *) status.msg->hdl : NULL);
+         status.rc, (status.msg) ? (char *) status.msg->hdl : NULL);
   if (!status.rc) {
     printf("result:\n");
     showInstance(instance);
@@ -89,3 +89,8 @@ main()
 
   return 0;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

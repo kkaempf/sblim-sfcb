@@ -49,41 +49,40 @@
                       if (i->p) i->p->n=i->n; else f=i->n;}
 
 CMPIClassMI    *loadClassMI(const char *provider,
-			    void *library,
-			    CMPIBroker * broker,
-			    CMPIContext * ctx, CMPIStatus * status);
+                            void *library,
+                            CMPIBroker * broker,
+                            CMPIContext *ctx, CMPIStatus *status);
 
 CMPIMethodMI   *loadMethodMI(const char *provider,
-			     void *library,
-			     CMPIBroker * broker,
-			     CMPIContext * ctx, CMPIStatus * status);
+                             void *library,
+                             CMPIBroker * broker,
+                             CMPIContext *ctx, CMPIStatus *status);
 
 CMPIPropertyMI *loadPropertyMI(const char *provider,
-			       void *library,
-			       CMPIBroker * broker,
-			       CMPIContext * ctx, CMPIStatus * status);
+                               void *library,
+                               CMPIBroker * broker,
+                               CMPIContext *ctx, CMPIStatus *status);
 
 CMPIInstanceMI *loadInstanceMI(const char *provider,
-			       void *library,
-			       CMPIBroker * broker,
-			       CMPIContext * ctx, CMPIStatus * status);
+                               void *library,
+                               CMPIBroker * broker,
+                               CMPIContext *ctx, CMPIStatus *status);
 
 CMPIIndicationMI *loadIndicationMI(const char *provider,
-				   void *library,
-				   CMPIBroker * broker,
-				   CMPIContext * ctx, CMPIStatus * status);
+                                   void *library,
+                                   CMPIBroker * broker,
+                                   CMPIContext *ctx, CMPIStatus *status);
 
 CMPIAssociationMI *loadAssociationMI(const char *provider,
-				     void *library,
-				     CMPIBroker * broker,
-				     CMPIContext * ctx,
-				     CMPIStatus * status);
+                                     void *library,
+                                     CMPIBroker * broker,
+                                     CMPIContext *ctx, CMPIStatus *status);
 
 CMPIQualifierDeclMI *loadQualifierDeclMI(const char *provider,
-					 void *library,
-					 CMPIBroker * broker,
-					 CMPIContext * ctx,
-					 CMPIStatus * status);
+                                         void *library,
+                                         CMPIBroker * broker,
+                                         CMPIContext *ctx,
+                                         CMPIStatus *status);
 
 /** @def MEM_NOT_TRACKED
  *
@@ -150,38 +149,35 @@ CMPIQualifierDeclMI *loadQualifierDeclMI(const char *provider,
 #define MT_SIZE_STEP 100
 
 typedef struct {
-  int             ftVersion;	     /**< function table version */
-                  CMPIStatus(*release) (void *obj);
-				     /**< function pointer to generic object release function 
+  int             ftVersion;         /**< function table version */
+  CMPIStatus      (*release) (void *obj);
+                                     /**< function pointer to generic object release function 
 				      *   @param obj generic object to be freed */
 } ObjectFT;
 
-
 typedef struct {
-  void           *hdl;		     /**< pointer to underlying object implementation */
-  ObjectFT       *ft;		     /**< pointer to generic object function table */
+  void           *hdl;               /**< pointer to underlying object implementation */
+  ObjectFT       *ft;                /**< pointer to generic object function table */
 } Object;
 
 typedef struct _managed_thread managed_thread;
 
 typedef struct heapControl {
-  unsigned        memSize;	     /**< current maximum number of tracked object pointers */
-  unsigned        memUsed;	     /**< number of currently tracked object pointers */
-  void          **memObjs;	     /**< pointers to object allocations */
-  unsigned        memEncUsed;	     /**< current maximum number of tracked encapsulated object pointers */
-  unsigned        memEncSize;	     /**< number of currently tracked encapsulated object pointers */
-  Object        **memEncObjs;	     /**< pointers to encapsulated object allocations */
+  unsigned        memSize;           /**< current maximum number of tracked object pointers */
+  unsigned        memUsed;           /**< number of currently tracked object pointers */
+  void          **memObjs;           /**< pointers to object allocations */
+  unsigned        memEncUsed;        /**< current maximum number of tracked encapsulated object pointers */
+  unsigned        memEncSize;        /**< number of currently tracked encapsulated object pointers */
+  Object        **memEncObjs;        /**< pointers to encapsulated object allocations */
 } HeapControl;
 
 struct _managed_thread {
   void           *broker;
-  void           *ctx;		     /**< pointer to current thread context */
+  void           *ctx;               /**< pointer to current thread context */
   void           *data;
-  HeapControl     hc;		     /**< heap control structure for this thread */
-  int             cleanupDone;	     /**< cleanup state */
+  HeapControl     hc;                /**< heap control structure for this thread */
+  int             cleanupDone;       /**< cleanup state */
 };
-
-
 
 void           *tool_mm_load_lib(const char *libname);
 
@@ -198,11 +194,10 @@ void           *memAlloc(int add, size_t size, int *memId);
 void           *memAddEncObj(int mode, void *ptr, size_t size, int *memId);
 void            memUnlinkEncObj(int memId);
 void            memLinkEncObj(void *ptr, int *memId);
-void            memLinkInstance(CMPIInstance * ci);
+void            memLinkInstance(CMPIInstance *ci);
 
 void           *markHeap();
 void            releaseHeap(void *heap);
-
 
 typedef struct cntlVals {
   int             type;
@@ -230,3 +225,8 @@ char           *sfcb_snprintf(const char *fmt, ...);
 #define PADDED_LEN(s) ((s) + PADDING_LEN(s))
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -19,7 +19,6 @@
  *
  */
 
-
 #include "cmpidt.h"
 #include "httpComm.h"
 
@@ -34,7 +33,6 @@ handleSSLerror(const char *file, int lineno, const char *msg)
   exit(-1);
 }
 #endif
-
 
 extern int      sfcbSSLMode;
 
@@ -69,24 +67,24 @@ commWrite(CommHndl to, void *data, size_t count)
   if ((_sfcb_trace_mask & TRACE_XMLOUT)) {
     char           *mp,
                    *m = alloca(count * 2),
-	*d = (char *) data;
+        *d = (char *) data;
     int             i;
     _SFCB_TRACE(1, ("->> xmlOut %d bytes:\n", count));
     for (mp = m, i = 0; i < count; i++)
       switch (d[i]) {
       case '\r':
-	*mp++ = '\\';
-	*mp++ = 'r';
-	break;
+        *mp++ = '\\';
+        *mp++ = 'r';
+        break;
       case '\n':
-	*mp++ = '\\';
-	*mp++ = 'n';
-	break;
+        *mp++ = '\\';
+        *mp++ = 'n';
+        break;
       case ' ':
-	*mp++ = '~';
-	break;
+        *mp++ = '~';
+        break;
       default:
-	*mp++ = d[i];
+        *mp++ = d[i];
       }
     *mp = 0;
     _SFCB_TRACE(1, ("%s\n", m));
@@ -173,3 +171,8 @@ commClose(CommHndl hndl)
   }
   _SFCB_EXIT();
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

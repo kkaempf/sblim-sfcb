@@ -90,7 +90,7 @@
 #   define _CMPIOS_H_
 
 #   include "cmpipl.h"
-#   include <stdlib.h>		// To get the size_t
+#   include <stdlib.h>          // To get the size_t
 #   define CMPI_THREAD_RETURN      void*
 #   define CMPI_THREAD_TYPE        void*
 #   define CMPI_MUTEX_TYPE         void*
@@ -106,7 +106,7 @@ struct timespec {
   long            tv_sec;
   long            tv_nsec;
 };
-#   endif			/* HAVE_STRUCT_TIMESPEC */
+#   endif                       /* HAVE_STRUCT_TIMESPEC */
 
 #   elif defined(CMPI_PLATFORM_ZOS_ZSERIES_IBM) || \
          defined (CMPI_PLATFORM_LINUX_GENERIC_GNU)
@@ -130,7 +130,7 @@ struct timespec {
 #   elif defined(CMPI_PLATFORM_LINUX_GENERIC_GNU) && (__GNUC__ >= 4)
 #      define CMPI_EXPORT __attribute__((visibility("default")))
 #   else
-#      define CMPI_EXPORT	/* empty */
+#      define CMPI_EXPORT       /* empty */
 #   endif
 
 /*
@@ -143,3 +143,8 @@ struct timespec {
 #   endif
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

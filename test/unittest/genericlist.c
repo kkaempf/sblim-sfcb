@@ -43,7 +43,7 @@ main(void)
   else
     printf("\nElement not found in the list\n");
   printf("\n\nCurrent element in list : %s \n ",
-	 list1->ft->getCurrent(list1));
+         list1->ft->getCurrent(list1));
   list1->ft->removeThis(list1, temp);
   printf("Removing element from the list1\n", i);
   list1->ft->clear(list1);
@@ -54,3 +54,8 @@ main(void)
   list2->ft->release(list2);
   return (rc);
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

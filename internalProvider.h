@@ -27,68 +27,73 @@
 #include "cmpidt.h"
 
 CMPIStatus      InternalProviderEnumInstanceNames(CMPIInstanceMI * mi,
-						  const CMPIContext * ctx,
-						  const CMPIResult * rslt,
-						  const CMPIObjectPath *
-						  ref);
+                                                  const CMPIContext *ctx,
+                                                  const CMPIResult *rslt,
+                                                  const CMPIObjectPath *
+                                                  ref);
 CMPIStatus      InternalProviderEnumInstances(CMPIInstanceMI * mi,
-					      const CMPIContext * ctx,
-					      const CMPIResult * rslt,
-					      const CMPIObjectPath * ref,
-					      const char **properties);
+                                              const CMPIContext *ctx,
+                                              const CMPIResult *rslt,
+                                              const CMPIObjectPath * ref,
+                                              const char **properties);
 CMPIInstance   *internalProviderGetInstance(const CMPIObjectPath * cop,
-					    CMPIStatus * rc);
+                                            CMPIStatus *rc);
 CMPIStatus      InternalProviderCreateInstance(CMPIInstanceMI * mi,
-					       const CMPIContext * ctx,
-					       const CMPIResult * rslt,
-					       const CMPIObjectPath * cop,
-					       const CMPIInstance * ci);
+                                               const CMPIContext *ctx,
+                                               const CMPIResult *rslt,
+                                               const CMPIObjectPath * cop,
+                                               const CMPIInstance *ci);
 CMPIStatus      InternalProviderModifyInstance(CMPIInstanceMI * mi,
-					       const CMPIContext * ctx,
-					       const CMPIResult * rslt,
-					       const CMPIObjectPath * cop,
-					       const CMPIInstance * ci,
-					       const char **properties);
+                                               const CMPIContext *ctx,
+                                               const CMPIResult *rslt,
+                                               const CMPIObjectPath * cop,
+                                               const CMPIInstance *ci,
+                                               const char **properties);
 CMPIStatus      InternalProviderGetInstance(CMPIInstanceMI * mi,
-					    const CMPIContext * ctx,
-					    const CMPIResult * rslt,
-					    const CMPIObjectPath * cop,
-					    const char **properties);
+                                            const CMPIContext *ctx,
+                                            const CMPIResult *rslt,
+                                            const CMPIObjectPath * cop,
+                                            const char **properties);
 CMPIStatus      InternalProviderDeleteInstance(CMPIInstanceMI * mi,
-					       const CMPIContext * ctx,
-					       const CMPIResult * rslt,
-					       const CMPIObjectPath * cop);
+                                               const CMPIContext *ctx,
+                                               const CMPIResult *rslt,
+                                               const CMPIObjectPath * cop);
 CMPIStatus      InternalProviderAssociatorNames(CMPIAssociationMI * mi,
-						const CMPIContext * ctx,
-						const CMPIResult * rslt,
-						const CMPIObjectPath * cop,
-						const char *assocClass,
-						const char *resultClass,
-						const char *role,
-						const char *resultRole);
+                                                const CMPIContext *ctx,
+                                                const CMPIResult *rslt,
+                                                const CMPIObjectPath * cop,
+                                                const char *assocClass,
+                                                const char *resultClass,
+                                                const char *role,
+                                                const char *resultRole);
 CMPIStatus      InternalProviderAssociators(CMPIAssociationMI * mi,
-					    const CMPIContext * ctx,
-					    const CMPIResult * rslt,
-					    const CMPIObjectPath * cop,
-					    const char *assocClass,
-					    const char *resultClass,
-					    const char *role,
-					    const char *resultRole,
-					    const char **propertyList);
+                                            const CMPIContext *ctx,
+                                            const CMPIResult *rslt,
+                                            const CMPIObjectPath * cop,
+                                            const char *assocClass,
+                                            const char *resultClass,
+                                            const char *role,
+                                            const char *resultRole,
+                                            const char **propertyList);
 CMPIStatus      InternalProviderReferenceNames(CMPIAssociationMI * mi,
-					       const CMPIContext * ctx,
-					       const CMPIResult * rslt,
-					       const CMPIObjectPath * cop,
-					       const char *assocClass,
-					       const char *role);
+                                               const CMPIContext *ctx,
+                                               const CMPIResult *rslt,
+                                               const CMPIObjectPath * cop,
+                                               const char *assocClass,
+                                               const char *role);
 CMPIStatus      InternalProviderReferences(CMPIAssociationMI * mi,
-					   const CMPIContext * ctx,
-					   const CMPIResult * rslt,
-					   const CMPIObjectPath * cop,
-					   const char *assocClass,
-					   const char *role,
-					   const char **propertyList);
+                                           const CMPIContext *ctx,
+                                           const CMPIResult *rslt,
+                                           const CMPIObjectPath * cop,
+                                           const char *assocClass,
+                                           const char *role,
+                                           const char **propertyList);
 extern char    *internalProviderNormalizeObjectPath(const CMPIObjectPath *
-						    cop);
+                                                    cop);
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

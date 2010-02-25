@@ -20,8 +20,6 @@
  *
  */
 
-
-
 #include <stdio.h>
 #include "native.h"
 #include "utilft.h"
@@ -58,11 +56,11 @@ static int      startSLP = 1;
 #ifdef LOCAL_CONNECT_ONLY_ENABLE
 // from httpAdapter.c
 int             sfcBrokerPid = 0;
-#endif				// LOCAL_CONNECT_ONLY_ENABLE
+#endif                          // LOCAL_CONNECT_ONLY_ENABLE
 
 extern void     setExFlag(unsigned long f);
 extern char    *parseTarget(const char *target);
-extern UtilStringBuffer *instanceToString(CMPIInstance * ci, char **props);
+extern UtilStringBuffer *instanceToString(CMPIInstance *ci, char **props);
 extern int      init_sfcBroker();
 extern CMPIBroker *Broker;
 extern void     initProvProcCtl(int);
@@ -189,15 +187,15 @@ stopBroker(void *p)
       waitTime.tv_sec = time(NULL) + 5;
       waitTime.tv_nsec = 0;
       if (sa == 0)
-	fprintf(stderr, "--- Stopping adapters\n");
+        fprintf(stderr, "--- Stopping adapters\n");
       sa++;
       if (stopNextAdapter()) {
-	rc = pthread_cond_timedwait(&sdCnd, &sdMtx, &waitTime);
+        rc = pthread_cond_timedwait(&sdCnd, &sdMtx, &waitTime);
       } else {
-	/*
-	 * no adapters found 
-	 */
-	adaptersStopped = 1;
+        /*
+         * no adapters found 
+         */
+        adaptersStopped = 1;
       }
       pthread_mutex_unlock(&sdMtx);
     }
@@ -207,10 +205,10 @@ stopBroker(void *p)
       waitTime.tv_sec = time(NULL) + 5;
       waitTime.tv_nsec = 0;
       if (sp == 0)
-	fprintf(stderr, "--- Stopping providers\n");
+        fprintf(stderr, "--- Stopping providers\n");
       sp++;
       if (stopNextProc()) {
-	rc = pthread_cond_timedwait(&sdCnd, &sdMtx, &waitTime);
+        rc = pthread_cond_timedwait(&sdCnd, &sdMtx, &waitTime);
       }
       // else providersStopped=1;
       pthread_mutex_unlock(&sdMtx);
@@ -312,30 +310,30 @@ handleSigChld(int sig)
       break;
     if ((int) pid < 0) {
       if (errno == EINTR || errno == EAGAIN) {
-	// mlogf(M_INFO,M_SHOW, "pid: %d continue \n", pid);
-	continue;
+        // mlogf(M_INFO,M_SHOW, "pid: %d continue \n", pid);
+        continue;
       }
       if (errno != ECHILD)
-	perror("child wait");
+        perror("child wait");
       break;
     } else {
       // mlogf(M_INFO,M_SHOW,"sigchild %d\n",pid);
       if (testStartedAdapter(pid, &left)) {
-	if (left == 0) {
-	  fprintf(stderr, "--- Adapters stopped\n");
-	  adaptersStopped = 1;
-	}
-	pthread_attr_init(&tattr);
-	pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
-	pthread_create(&t, &tattr, (void *(*)(void *)) signalBroker, NULL);
+        if (left == 0) {
+          fprintf(stderr, "--- Adapters stopped\n");
+          adaptersStopped = 1;
+        }
+        pthread_attr_init(&tattr);
+        pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
+        pthread_create(&t, &tattr, (void *(*)(void *)) signalBroker, NULL);
       } else if (testStartedProc(pid, &left)) {
-	if (left == 0) {
-	  fprintf(stderr, "--- Providers stopped\n");
-	  providersStopped = 1;
-	}
-	pthread_attr_init(&tattr);
-	pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
-	pthread_create(&t, &tattr, (void *(*)(void *)) signalBroker, NULL);
+        if (left == 0) {
+          fprintf(stderr, "--- Providers stopped\n");
+          providersStopped = 1;
+        }
+        pthread_attr_init(&tattr);
+        pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
+        pthread_create(&t, &tattr, (void *(*)(void *)) signalBroker, NULL);
       }
     }
   }
@@ -349,7 +347,7 @@ handleSigterm(int sig)
 
   if (!terminating) {
     fprintf(stderr, "--- %s - %d exiting due to signal %d\n", processName,
-	    currentProc, sig);
+            currentProc, sig);
     dumpTiming(currentProc);
   }
   terminating = 1;
@@ -363,14 +361,13 @@ static void
 handleSigSegv(int sig)
 {
   fprintf(stderr, "-#- %s - %d exiting due to a SIGSEGV signal\n",
-	  processName, currentProc);
+          processName, currentProc);
 }
 /*
  * static void handleSigAbort(int sig) { fprintf(stderr,"%s: exiting due
  * to a SIGABRT signal - %d\n", processName, currentProc); kill(0,
  * SIGTERM); } 
  */
-
 
 #ifndef LOCAL_CONNECT_ONLY_ENABLE
 
@@ -388,7 +385,7 @@ startHttpd(int argc, char *argv[], int sslMode)
   // Get/check http user info
   if (getControlBool("httpUserSFCB", &httpSFCB)) {
     mlogf(M_ERROR, M_SHOW,
-	  "--- Error retrieving http user info from config file.\n");
+          "--- Error retrieving http user info from config file.\n");
     exit(2);
   }
   if (httpSFCB) {
@@ -398,18 +395,18 @@ startHttpd(int argc, char *argv[], int sslMode)
     // Get the user specified in the config file
     if (getControlChars("httpUser", &httpUser)) {
       mlogf(M_ERROR, M_SHOW,
-	    "--- Error retrieving http user info from config file.\n");
+            "--- Error retrieving http user info from config file.\n");
       exit(2);
     } else {
       errno = 0;
       passwd = getpwnam(httpUser);
       if (passwd) {
-	httpuid = passwd->pw_uid;
+        httpuid = passwd->pw_uid;
       } else {
-	mlogf(M_ERROR, M_SHOW,
-	      "--- Couldn't find http username %s requested in SFCB config file. Errno: %d\n",
-	      httpUser, errno);
-	exit(2);
+        mlogf(M_ERROR, M_SHOW,
+              "--- Couldn't find http username %s requested in SFCB config file. Errno: %d\n",
+              httpUser, errno);
+        exit(2);
       }
     }
   }
@@ -426,8 +423,8 @@ startHttpd(int argc, char *argv[], int sslMode)
       // Set the real and effective uids
       rc = setreuid(httpuid, httpuid);
       if (rc == -1) {
-	mlogf(M_ERROR, M_SHOW, "--- Changing uid for http failed.\n");
-	exit(2);
+        mlogf(M_ERROR, M_SHOW, "--- Changing uid for http failed.\n");
+        exit(2);
       }
     }
     httpDaemon(argc, argv, sslMode, sfcPid);
@@ -440,12 +437,12 @@ startHttpd(int argc, char *argv[], int sslMode)
   return 0;
 }
 
-#endif				// LOCAL_CONNECT_ONLY_ENABLE
+#endif                          // LOCAL_CONNECT_ONLY_ENABLE
 
 #ifdef HAVE_JDBC
 
 extern int      dbpDaemon(int argc, char *argv[], int sslMode,
-			  int sfcbPid);
+                          int sfcbPid);
 static int
 startDbpd(int argc, char *argv[], int sslMode)
 {
@@ -569,7 +566,6 @@ main(int argc, char *argv[])
   restartArgc = argc;
   restartArgv = argv;
 
-
   exFlags = 0;
 
   static struct option const long_options[] = {
@@ -586,8 +582,8 @@ main(int argc, char *argv[])
   };
 
   while ((c =
-	  getopt_long(argc, argv, "c:dhkst:vil:", long_options,
-		      0)) != -1) {
+          getopt_long(argc, argv, "c:dhkst:vil:", long_options,
+                      0)) != -1) {
     switch (c) {
     case 0:
       break;
@@ -598,7 +594,7 @@ main(int argc, char *argv[])
 
     case 'd':
       daemon(0, 0);
-      currentProc = sfcBrokerPid = getpid();	/* req. on some systems */
+      currentProc = sfcBrokerPid = getpid();    /* req. on some systems */
       break;
 
     case 'h':
@@ -614,19 +610,19 @@ main(int argc, char *argv[])
 
     case 't':
       if (*optarg == '?') {
-	fprintf(stdout, "---   Traceable Components:     Int       Hex\n");
-	for (i = 0; traceIds[i].id; i++)
-	  fprintf(stdout, "--- \t%18s:    %d\t0x%05X\n", traceIds[i].id,
-		  traceIds[i].code, traceIds[i].code);
-	exit(0);
+        fprintf(stdout, "---   Traceable Components:     Int       Hex\n");
+        for (i = 0; traceIds[i].id; i++)
+          fprintf(stdout, "--- \t%18s:    %d\t0x%05X\n", traceIds[i].id,
+                  traceIds[i].code, traceIds[i].code);
+        exit(0);
       } else if (isdigit(*optarg)) {
-	char           *ep;
-	tmask = strtol(optarg, &ep, 0);
+        char           *ep;
+        tmask = strtol(optarg, &ep, 0);
       } else {
-	fprintf(stderr,
-		"Try %s -t ? for a list of the trace components and bitmasks.\n",
-		name);
-	exit(1);
+        fprintf(stderr,
+                "Try %s -t ? for a list of the trace components and bitmasks.\n",
+                name);
+        exit(1);
       }
       break;
 
@@ -639,14 +635,14 @@ main(int argc, char *argv[])
 
     case 'l':
       if (strcmp(optarg, "LOG_ERR") == 0) {
-	syslogLevel = LOG_ERR;
+        syslogLevel = LOG_ERR;
       } else if (strcmp(optarg, "LOG_INFO") == 0) {
-	syslogLevel = LOG_INFO;
+        syslogLevel = LOG_INFO;
       } else if (strcmp(optarg, "LOG_DEBUG") == 0) {
-	syslogLevel = LOG_DEBUG;
+        syslogLevel = LOG_DEBUG;
       } else {
-	fprintf(stderr, "Invalid value for syslog-level.\n");
-	usage(3);
+        fprintf(stderr, "Invalid value for syslog-level.\n");
+        usage(3);
       }
       break;
 
@@ -657,14 +653,14 @@ main(int argc, char *argv[])
 
   if (optind < argc) {
     fprintf(stderr, "SFCB not started: unrecognized config property %s\n",
-	    argv[optind]);
+            argv[optind]);
     usage(1);
   }
 
   startLogging("sfcb", syslogLevel);
 
   mlogf(M_INFO, M_SHOW, "--- %s V" sfcHttpDaemonVersion " started - %d\n",
-	name, currentProc);
+        name, currentProc);
 
   if (collectStat) {
     mlogf(M_INFO, M_SHOW, "--- Statistics collection enabled\n");
@@ -690,7 +686,7 @@ main(int argc, char *argv[])
       tracelevel = 1;
     }
     if (getenv("SFCB_TRACE_FILE") == NULL &&
-	getControlChars("traceFile", &tracefile) == 0) {
+        getControlChars("traceFile", &tracefile) == 0) {
       /*
        * only set tracefile from config file if not specified via env 
        */
@@ -702,7 +698,7 @@ main(int argc, char *argv[])
 #ifndef SFCB_DEBUG
   if (tmask)
     mlogf(M_ERROR, M_SHOW,
-	  "--- SCFB_DEBUG not configured. -t %d ignored\n", tmask);
+          "--- SCFB_DEBUG not configured. -t %d ignored\n", tmask);
 #endif
 
   if ((pauseStr = getenv("SFCB_PAUSE_PROVIDER"))) {
@@ -758,7 +754,7 @@ main(int argc, char *argv[])
     httpLocalOnly = 0;
   if (httpLocalOnly)
     mlogf(M_INFO, M_SHOW,
-	  "--- External HTTP connections disabled; using loopback only\n");
+          "--- External HTTP connections disabled; using loopback only\n");
 
   if (getControlNum
       ("providerSampleInterval", (long *) &provSampleInterval))
@@ -787,7 +783,7 @@ main(int argc, char *argv[])
       pSockets = 3;
     }
     mlogf(M_INFO, M_SHOW,
-	  "--- Max provider process number adjusted to %d\n", pSockets);
+          "--- Max provider process number adjusted to %d\n", pSockets);
   }
 
   if ((enableHttp && dSockets > 0) || (enableHttps && sSockets > 0)) {
@@ -816,7 +812,7 @@ main(int argc, char *argv[])
     if (!sslOMode)
       startHttpd(argc, argv, 0);
   }
-#endif				// LOCAL_CONNECT_ONLY_ENABLE
+#endif                          // LOCAL_CONNECT_ONLY_ENABLE
 
 #ifdef HAVE_JDBC
   // Start dbProtocol-Daemon
@@ -827,7 +823,6 @@ main(int argc, char *argv[])
       startDbpd(argc, argv, 0);
   }
 #endif
-
 
 #ifdef HAVE_SLP
   // Start SLP Agent
@@ -843,3 +838,8 @@ main(int argc, char *argv[])
 
   return 0;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

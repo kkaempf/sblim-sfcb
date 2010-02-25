@@ -76,7 +76,6 @@ typedef struct xmlAttr {
   char           *attr;
 } XmlAttr;
 
-
 typedef struct requestHdr {
   XmlBuffer      *xmlBuffer;
   int             rc;
@@ -92,21 +91,17 @@ typedef struct requestHdr {
   char           *className;
 } RequestHdr;
 
-
 extern RequestHdr scanCimXmlRequest(char *xmlData);
 extern void     freeCimXmlRequest(RequestHdr hdr);
 
-
-
 typedef struct xtokNameSpace {
   char           *ns;
-  char           *cns;		// must be free'd
+  char           *cns;          // must be free'd
 } XtokNameSpace;
 
 typedef struct xtokMessage {
   char           *id;
 } XtokMessage;
-
 
 struct xtokInstance;
 struct xtokClass;
@@ -135,8 +130,6 @@ typedef struct xtokNameSpacePath {
   char           *nameSpacePath;
 } XtokNameSpacePath;
 
-
-
 struct xtokKeyBinding;
 struct xtokValueReference;
 
@@ -148,7 +141,7 @@ typedef struct xtokKeyValue {
 typedef struct xtokKeyBindings {
   int             max,
                   next;
-  struct xtokKeyBinding *keyBindings;	// must be free'd
+  struct xtokKeyBinding *keyBindings;   // must be free'd
 } XtokKeyBindings;
 
 typedef struct xtokInstanceName {
@@ -245,7 +238,7 @@ typedef struct xtokQualifier {
 
 typedef struct xtokQualifiers {
   XtokQualifier  *last,
-                 *first;	// must be free'd
+                 *first;        // must be free'd
 } XtokQualifiers;
 
 typedef struct xtokPropertyData {
@@ -270,7 +263,7 @@ typedef struct xtokProperty {
 
 typedef struct xtokProperties {
   XtokProperty   *last,
-                 *first;	// must be free'd
+                 *first;        // must be free'd
 } XtokProperties;
 
 typedef struct xtokInstance {
@@ -289,7 +282,6 @@ typedef struct xtokNamedInstance {
   XtokInstance    instance;
 } XtokNamedInstance;
 
-
 typedef struct xtokParamValue {
   struct xtokParamValue *next;
   char           *name;
@@ -304,9 +296,8 @@ typedef struct xtokParamValue {
 
 typedef struct xtokParamValues {
   XtokParamValue *last,
-                 *first;	// must be free'd
+                 *first;        // must be free'd
 } XtokParamValues;
-
 
 typedef struct xtokParam {
   struct xtokParam *next;
@@ -322,9 +313,8 @@ typedef struct xtokParam {
 
 typedef struct xtokParams {
   XtokParam      *last,
-                 *first;	// must be free'd
+                 *first;        // must be free'd
 } XtokParams;
-
 
 typedef struct xtokMethod {
   struct xtokMethod *next;
@@ -343,9 +333,8 @@ typedef struct xtokMethodData {
 
 typedef struct xtokMethods {
   XtokMethod     *last,
-                 *first;	// must be free'd
+                 *first;        // must be free'd
 } XtokMethods;
-
 
 typedef struct xtokClass {
   char           *className;
@@ -375,8 +364,6 @@ typedef struct xtokMethodCall {
   char           *method;
   XtokParamValues paramValues;
 } XtokMethodCall;
-
-
 
 /*
  *    execQuery
@@ -418,7 +405,6 @@ typedef struct xtokGetClass {
   XtokValueArray  propertyList;
 } XtokGetClass;
 
-
 /*
  *    enumClassNames
  */
@@ -440,7 +426,6 @@ typedef struct xtokEnumClassNames {
   unsigned int    flags;
 } XtokEnumClassNames;
 
-
 /*
  *    enumClasses
  */
@@ -461,7 +446,6 @@ typedef struct xtokEnumClasses {
   OperationHdr    op;
   unsigned int    flags;
 } XtokEnumClasses;
-
 
 /*
  *    getInstance
@@ -494,7 +478,6 @@ typedef struct xtokGetInstance {
   XtokValueArray  propertyList;
 } XtokGetInstance;
 
-
 /*
  *    createClass
  */
@@ -510,7 +493,6 @@ typedef struct xtokCreateClass {
   char           *superClass;
 } XtokCreateClass;
 
-
 /*
  *    createInstance
  */
@@ -524,7 +506,6 @@ typedef struct xtokCreateInstance {
   XtokInstance    instance;
   char           *className;
 } XtokCreateInstance;
-
 
 /*
  *    modifyInstance
@@ -558,7 +539,6 @@ typedef struct xtokModifyInstance {
   XtokValueArray  propertyList;
 } XtokModifyInstance;
 
-
 /*
  *    deleteInstance
  */
@@ -571,7 +551,6 @@ typedef struct xtokDeleteClass {
   OperationHdr    op;
   char           *className;
 } XtokDeleteClass;
-
 
 /*
  *    deleteInstance
@@ -587,7 +566,6 @@ typedef struct xtokDeleteInstance {
   int             instNameSet;
 } XtokDeleteInstance;
 
-
 /*
  *    enumInstanceNames
  */
@@ -595,7 +573,6 @@ typedef struct xtokDeleteInstance {
 typedef struct xtokEnumInstanceNames {
   OperationHdr    op;
 } XtokEnumInstanceNames;
-
 
 /*
  *    enumInstances
@@ -623,7 +600,6 @@ typedef struct xtokEnumInstances {
   int             properties;
   XtokValueArray  propertyList;
 } XtokEnumInstances;
-
 
 /*
  *    associatorNames
@@ -653,7 +629,6 @@ typedef struct xtokAssociatorNames {
   int             objNameSet;
 } XtokAssociatorNames;
 
-
 /*
  *    referenceNames
  */
@@ -677,9 +652,6 @@ typedef struct xtokReferenceNames {
   XtokInstanceName objectName;
   int             objNameSet;
 } XtokReferenceNames;
-
-
-
 
 /*
  *    associators
@@ -719,8 +691,6 @@ typedef struct xtokAssociators {
   int             properties;
   XtokValueArray  propertyList;
 } XtokAssociators;
-
-
 
 /*
  *    references
@@ -842,7 +812,6 @@ typedef struct xtokSetProperty {
   XtokNewValue    newVal;
 } XtokSetProperty;
 
-
 /*
  *    Parser control
  */
@@ -865,5 +834,9 @@ typedef struct parser_control {
   jmp_buf         env;
 } ParserControl;
 
-
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

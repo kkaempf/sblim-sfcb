@@ -22,11 +22,11 @@
 #include "objectImpl.h"
 #include "qualifier.h"
 
-extern CMPIArray *native_make_CMPIArray(CMPIData * av, CMPIStatus * rc,
-					ClObjectHdr * hdr);
+extern CMPIArray *native_make_CMPIArray(CMPIData *av, CMPIStatus *rc,
+                                        ClObjectHdr * hdr);
 
 static CMPIQualifierDecl *qual_clone(CMPIQualifierDecl * q,
-				     CMPIStatus * rc);
+                                     CMPIStatus *rc);
 
 static CMPIStatus
 release(CMPIQualifierDecl * q)
@@ -49,7 +49,7 @@ getCharQualifierName(CMPIQualifierDecl * cq)
 }
 
 static CMPIData
-getQualifierDeclData(CMPIQualifierDecl * cq, CMPIStatus * rc)
+getQualifierDeclData(CMPIQualifierDecl * cq, CMPIStatus *rc)
 {
   ClQualifierDeclaration *q = (ClQualifierDeclaration *) cq->hdl;
 
@@ -61,14 +61,14 @@ getQualifierDeclData(CMPIQualifierDecl * cq, CMPIStatus * rc)
   }
   if (rv.type == CMPI_chars) {
     rv.value.string = sfcb_native_new_CMPIString(ClObjectGetClString
-						 (&q->hdr,
-						  (ClString *) & rv.value.
-						  chars), NULL, 0);
+                                                 (&q->hdr,
+                                                  (ClString *) & rv.value.
+                                                  chars), NULL, 0);
     rv.type = CMPI_string;
   }
   if (rv.type & CMPI_ARRAY && rv.value.array) {
     rv.value.array = native_make_CMPIArray((CMPIData *) rv.value.array,
-					   NULL, &q->hdr);
+                                           NULL, &q->hdr);
   }
 
   if (rc)
@@ -87,7 +87,7 @@ static struct _CMPIQualifierDecl_FT ift = {
 CMPIQualifierDecl_FT *CMPIQualifierDeclFT = &ift;
 
 static CMPIQualifierDecl *
-qual_clone(CMPIQualifierDecl * cq, CMPIStatus * rc)
+qual_clone(CMPIQualifierDecl * cq, CMPIStatus *rc)
 {
   CMPIQualifierDecl *q =
       (CMPIQualifierDecl *) malloc(getQualifierSerializedSize(cq));
@@ -122,11 +122,11 @@ getSerializedQualifier(CMPIQualifierDecl * q, void *area)
 {
   memcpy(area, q, sizeof(CMPIQualifierDecl));
   ClQualifierRebuildQualifier((ClQualifierDeclaration *) q->hdl,
-			      (void *) ((char *) area +
-					sizeof(CMPIQualifierDecl)));
+                              (void *) ((char *) area +
+                                        sizeof(CMPIQualifierDecl)));
   ((CMPIQualifierDecl *) (area))->hdl =
       (ClQualifierDeclaration *) ((char *) area +
-				  sizeof(CMPIQualifierDecl));
+                                  sizeof(CMPIQualifierDecl));
 }
 
 CMPIQualifierDecl
@@ -147,3 +147,8 @@ relocateSerializedQualifier(void *area)
   ClQualifierRelocateQualifier((ClQualifierDeclaration *) q->hdl);
   return (CMPIQualifierDecl *) q;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

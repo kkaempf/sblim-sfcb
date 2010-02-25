@@ -38,17 +38,12 @@ typedef struct _CMPIQualifierDecl CMPIQualifierDecl;
 
 struct _CMPIQualifierDecl_FT {
   int             version;
-                  CMPIStatus(*release) (CMPIQualifierDecl * cc);
-  CMPIQualifierDecl *(*clone) (CMPIQualifierDecl * cc, CMPIStatus * rc);
+  CMPIStatus      (*release) (CMPIQualifierDecl * cc);
+  CMPIQualifierDecl *(*clone) (CMPIQualifierDecl * cc, CMPIStatus *rc);
   const char     *(*getCharQualifierName) (CMPIQualifierDecl * cc);
-       
-       
-       
-       
-       
-       
-      CMPIData(*getQualifierDeclData) (CMPIQualifierDecl * cq,
-				       CMPIStatus * rc);
+
+  CMPIData        (*getQualifierDeclData) (CMPIQualifierDecl * cq,
+                                           CMPIStatus *rc);
 };
 
 extern CMPIQualifierDecl_FT *CMPIQualifierDeclFT;
@@ -60,3 +55,8 @@ CMPIQualifierDecl *relocateSerializedQualifier(void *area);
 unsigned long   getQualifierSerializedSize(CMPIQualifierDecl * q);
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

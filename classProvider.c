@@ -46,9 +46,9 @@ struct _Class_Register_FT {
   CMPIConstClass *(*getClass) (ClassRegister * br, const char *clsName);
   int             (*putClass) (ClassRegister * br, CMPIConstClass * cls);
   void            (*removeClass) (ClassRegister * br,
-				  const char *className);
+                                  const char *className);
   UtilList       *(*getChildren) (ClassRegister * br,
-				  const char *className);
+                                  const char *className);
   void            (*rLock) (ClassRegister * cr);
   void            (*wLock) (ClassRegister * cr);
   void            (*rUnLock) (ClassRegister * cr);
@@ -57,10 +57,9 @@ struct _Class_Register_FT {
 
 extern Class_Register_FT *ClassRegisterFT;
 
-
 static CMPIConstClass *getClass(ClassRegister * cr, const char *clsName);
 int             traverseChildren(ClassRegister * cReg, const char *parent,
-				 const char *child);
+                                 const char *child);
 
 static int      nsBaseLen;
 
@@ -76,8 +75,8 @@ buildInheritanceTable(ClassRegister * cr)
   UtilList       *ul;
 
   it = cb->it = UtilFactory->newHashTable(61,
-					  UtilHashTable_charKey |
-					  UtilHashTable_ignoreKeyCase);
+                                          UtilHashTable_charKey |
+                                          UtilHashTable_ignoreKeyCase);
 
   for (i = ct->ft->getFirst(ct, (void **) &cn, (void **) &cc); i;
        i = ct->ft->getNext(ct, i, (void **) &cn, (void **) &cc)) {
@@ -152,10 +151,10 @@ removeChild(ClassRegister * cr, const char *pn, const char *chd)
 
   if (ul)
     for (child = (char *) ul->ft->getFirst(ul); child;
-	 child = (char *) ul->ft->getNext(ul)) {
+         child = (char *) ul->ft->getNext(ul)) {
       if (strcasecmp(child, chd) == 0) {
-	ul->ft->removeCurrent(ul);
-	break;
+        ul->ft->removeCurrent(ul);
+        break;
       }
     }
 }
@@ -187,12 +186,12 @@ newClassRegister(char *fname)
 
   if (in == NULL) {
     cb->ht = UtilFactory->newHashTable(61,
-				       UtilHashTable_charKey |
-				       UtilHashTable_ignoreKeyCase);
+                                       UtilHashTable_charKey |
+                                       UtilHashTable_ignoreKeyCase);
     cb->it =
-	UtilFactory->newHashTable(61,
-				  UtilHashTable_charKey |
-				  UtilHashTable_ignoreKeyCase);
+        UtilFactory->newHashTable(61,
+                                  UtilHashTable_charKey |
+                                  UtilHashTable_ignoreKeyCase);
     MRWInit(&cb->mrwLock);
     return cr;
   }
@@ -200,8 +199,8 @@ newClassRegister(char *fname)
   cr->fn = strdup(fin);
   cr->vr = NULL;
   cb->ht = UtilFactory->newHashTable(61,
-				     UtilHashTable_charKey |
-				     UtilHashTable_ignoreKeyCase);
+                                     UtilHashTable_charKey |
+                                     UtilHashTable_ignoreKeyCase);
   MRWInit(&cb->mrwLock);
 
   while ((s = fread(&hdr, 1, sizeof(hdr), in)) == sizeof(hdr)) {
@@ -211,21 +210,21 @@ newClassRegister(char *fname)
 
     if (first) {
       if (vrp->size == sizeof(ClVersionRecord) && vrp->type == HDR_Version)
-	vRec = 1;
+        vRec = 1;
       else if (vrp->size == sizeof(ClVersionRecord) << 24
-	       && vrp->type == HDR_Version) {
-	mlogf(M_ERROR, M_SHOW,
-	      "--- %s is in wrong endian format - directory skipped\n",
-	      fin);
-	fclose(in);
-	return NULL;
+               && vrp->type == HDR_Version) {
+        mlogf(M_ERROR, M_SHOW,
+              "--- %s is in wrong endian format - directory skipped\n",
+              fin);
+        fclose(in);
+        return NULL;
       }
     }
 
     if (vRec == 0 && hdr.type != HDR_Class) {
       mlogf(M_ERROR, M_SHOW,
-	    "--- %s contains non-class record(s) - directory skipped\n",
-	    fin);
+            "--- %s contains non-class record(s) - directory skipped\n",
+            fin);
       fclose(in);
       return NULL;
     }
@@ -233,8 +232,8 @@ newClassRegister(char *fname)
     buf = (char *) malloc(hdr.size);
     if (buf == NULL) {
       mlogf(M_ERROR, M_SHOW,
-	    "--- %s contains record(s) that are too long - directory skipped\n",
-	    fin);
+            "--- %s contains record(s) that are too long - directory skipped\n",
+            fin);
       fclose(in);
       return NULL;
     }
@@ -242,39 +241,37 @@ newClassRegister(char *fname)
     s = hdr.size;
     *((ClObjectHdr *) buf) = hdr;
 
-
     if (fread(buf + sizeof(hdr), 1, hdr.size - sizeof(hdr), in) ==
-	hdr.size - sizeof(hdr)) {
+        hdr.size - sizeof(hdr)) {
       if (vRec) {
-	cr->vr = (ClVersionRecord *) buf;
-	if (strcmp(cr->vr->id, "sfcb-rep")) {
-	  mlogf(M_ERROR, M_SHOW,
-		"--- %s contains invalid version record - directory skipped\n",
-		fin);
-	  fclose(in);
-	  free(cr);
-	  free(buf);
-	  return NULL;
-	}
-	vRec = 0;
+        cr->vr = (ClVersionRecord *) buf;
+        if (strcmp(cr->vr->id, "sfcb-rep")) {
+          mlogf(M_ERROR, M_SHOW,
+                "--- %s contains invalid version record - directory skipped\n",
+                fin);
+          fclose(in);
+          free(cr);
+          free(buf);
+          return NULL;
+        }
+        vRec = 0;
       }
 
       if (first) {
-	int             v = -1;
-	first = 0;
-	if (ClVerifyObjImplLevel(cr->vr))
-	  continue;
-	if (cr->vr)
-	  v = cr->vr->objImplLevel;
-	mlogf(M_ERROR, M_SHOW,
-	      "--- %s contains unsupported object implementation format (%d) - directory skipped\n",
-	      fin, v);
-	fclose(in);
-	free(cr);
-	free(buf);
-	return NULL;
+        int             v = -1;
+        first = 0;
+        if (ClVerifyObjImplLevel(cr->vr))
+          continue;
+        if (cr->vr)
+          v = cr->vr->objImplLevel;
+        mlogf(M_ERROR, M_SHOW,
+              "--- %s contains unsupported object implementation format (%d) - directory skipped\n",
+              fin, v);
+        fclose(in);
+        free(cr);
+        free(buf);
+        return NULL;
       }
-
 
       cc = NEW(CMPIConstClass);
       cc->hdl = buf;
@@ -283,21 +280,21 @@ newClassRegister(char *fname)
       cn = (char *) cc->ft->getCharClassName(cc);
 
       if (strncmp(cn, "DMY_", 4) != 0) {
-	total += s;
-	cb->ht->ft->put(cb->ht, cn, cc);
-	if (cc->ft->isAssociation(cc)) {
-	  cr->assocs++;
-	  if (cc->ft->getCharSuperClassName(cc) == NULL)
-	    cr->topAssocs++;
-	}
+        total += s;
+        cb->ht->ft->put(cb->ht, cn, cc);
+        if (cc->ft->isAssociation(cc)) {
+          cr->assocs++;
+          if (cc->ft->getCharSuperClassName(cc) == NULL)
+            cr->topAssocs++;
+        }
       } else {
-	free(cc->hdl);
-	free(cc);
+        free(cc->hdl);
+        free(cc);
       }
     } else {
       mlogf(M_ERROR, M_SHOW,
-	    "--- %s contains invalid record(s) - directory skipped\n",
-	    fin);
+            "--- %s contains invalid record(s) - directory skipped\n",
+            fin);
       fclose(in);
       free(cr);
       free(buf);
@@ -311,12 +308,12 @@ newClassRegister(char *fname)
 
   if (cr->vr) {
     mlogf(M_INFO, M_SHOW,
-	  "--- ClassProvider for %s (%d.%d-%d) using %ld bytes\n", fname,
-	  cr->vr->version, cr->vr->level, cr->vr->objImplLevel, total);
+          "--- ClassProvider for %s (%d.%d-%d) using %ld bytes\n", fname,
+          cr->vr->version, cr->vr->level, cr->vr->objImplLevel, total);
   } else
     mlogf(M_INFO, M_SHOW,
-	  "--- ClassProvider for %s (no-version) using %ld bytes\n", fname,
-	  total);
+          "--- ClassProvider for %s (no-version) using %ld bytes\n", fname,
+          total);
 
   buildInheritanceTable(cr);
 
@@ -352,7 +349,7 @@ cpyClass(ClClass * cl, CMPIConstClass * cc, unsigned char originId)
   for (i = 0, m = ClClassGetQualifierCount(ccl); i < m; i++) {
     ClClassGetQualifierAt(ccl, i, &d, &name);
     ClClassAddQualifierSpecial(&cl->hdr, &cl->qualifiers, name, d,
-			       &ccl->hdr);
+                               &ccl->hdr);
   }
 
   for (i = 0, m = ClClassGetPropertyCount(ccl); i < m; i++) {
@@ -363,13 +360,13 @@ cpyClass(ClClass * cl, CMPIConstClass * cc, unsigned char originId)
       free(refName);
     }
     prop =
-	((ClProperty *) ClObjectGetClSection(&cl->hdr, &cl->properties)) +
-	propId - 1;
+        ((ClProperty *) ClObjectGetClSection(&cl->hdr, &cl->properties)) +
+        propId - 1;
 
     for (iq = 0, mq = ClClassGetPropQualifierCount(ccl, i); iq < mq; iq++) {
       ClClassGetPropQualifierAt(ccl, i, iq, &d, &name);
       ClClassAddPropertyQualifierSpecial(&cl->hdr, prop, name, d,
-					 &ccl->hdr);
+                                         &ccl->hdr);
     }
   }
 
@@ -377,35 +374,33 @@ cpyClass(ClClass * cl, CMPIConstClass * cc, unsigned char originId)
     ClClassGetMethodAt(ccl, i, &t, &name, &quals);
     methId = ClClassAddMethod(cl, name, t);
     meth =
-	((ClMethod *) ClObjectGetClSection(&ccl->hdr, &ccl->methods)) +
-	methId - 1;
+        ((ClMethod *) ClObjectGetClSection(&ccl->hdr, &ccl->methods)) +
+        methId - 1;
     newMeth =
-	((ClMethod *) ClObjectGetClSection(&cl->hdr, &cl->methods)) +
-	methId - 1;
+        ((ClMethod *) ClObjectGetClSection(&cl->hdr, &cl->methods)) +
+        methId - 1;
 
     for (iq = 0, mq = ClClassGetMethQualifierCount(ccl, methId - 1);
-	 iq < mq; iq++) {
+         iq < mq; iq++) {
       ClClassGetMethQualifierAt(ccl, meth, iq, &d, &name);
       ClClassAddMethodQualifier(&cl->hdr, newMeth, name, d);
     }
 
     for (ip = 0, mp = ClClassGetMethParameterCount(ccl, methId - 1);
-	 ip < mp; ip++) {
+         ip < mp; ip++) {
       ClClassGetMethParameterAt(ccl, meth, ip, &p, &name);
       parmId = ClClassAddMethParameter(&cl->hdr, newMeth, name, p);
-      parm =
-	  ((ClParameter *)
-	   ClObjectGetClSection(&ccl->hdr,
-				&meth->parameters)) + parmId - 1;
-      newParm =
-	  ((ClParameter *)
-	   ClObjectGetClSection(&cl->hdr,
-				&newMeth->parameters)) + parmId - 1;
+      parm = ((ClParameter *)
+              ClObjectGetClSection(&ccl->hdr,
+                                   &meth->parameters)) + parmId - 1;
+      newParm = ((ClParameter *)
+                 ClObjectGetClSection(&cl->hdr,
+                                      &newMeth->parameters)) + parmId - 1;
 
       for (iq = 0, mq = ClClassGetMethParamQualifierCount(ccl, parm);
-	   iq < mq; iq++) {
-	ClClassGetMethParamQualifierAt(ccl, parm, iq, &d, &name);
-	ClClassAddMethParamQualifier(&cl->hdr, newParm, name, d);
+           iq < mq; iq++) {
+        ClClassGetMethParamQualifierAt(ccl, parm, iq, &d, &name);
+        ClClassAddMethParamQualifier(&cl->hdr, newParm, name, d);
       }
     }
   }
@@ -414,7 +409,7 @@ cpyClass(ClClass * cl, CMPIConstClass * cc, unsigned char originId)
 
 static CMPIStatus
 mergeParents(ClassRegister * cr, ClClass * cl, char *p,
-	     CMPIConstClass * cc)
+             CMPIConstClass * cc)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIConstClass *pcc = NULL;
@@ -495,8 +490,8 @@ gatherNameSpaces(char *dn, UtilHashTable * ns, int first)
 
   if (ns == NULL) {
     ns = UtilFactory->newHashTable(61,
-				   UtilHashTable_charKey |
-				   UtilHashTable_ignoreKeyCase);
+                                   UtilHashTable_charKey |
+                                   UtilHashTable_ignoreKeyCase);
     nsBaseLen = strlen(dn) + 1;
   }
 
@@ -504,9 +499,9 @@ gatherNameSpaces(char *dn, UtilHashTable * ns, int first)
   if (dir) {
     while ((de = readdir(dir)) != NULL) {
       if (strcmp(de->d_name, ".") == 0)
-	continue;
+        continue;
       if (strcmp(de->d_name, "..") == 0)
-	continue;
+        continue;
       l = strlen(dn) + strlen(de->d_name) + 4;
       n = (char *) malloc(l + 8);
       strcpy(n, dn);
@@ -514,14 +509,14 @@ gatherNameSpaces(char *dn, UtilHashTable * ns, int first)
       strcat(n, de->d_name);
       dir_test = opendir(n);
       if (dir_test == NULL) {
-	free(n);
-	continue;
+        free(n);
+        continue;
       }
       closedir(dir_test);
       cr = newClassRegister(n);
       if (cr) {
-	ns->ft->put(ns, strdup(n + nsBaseLen), cr);
-	gatherNameSpaces(n, ns, 0);
+        ns->ft->put(ns, strdup(n + nsBaseLen), cr);
+        gatherNameSpaces(n, ns, 0);
       }
       free(n);
     }
@@ -558,7 +553,6 @@ nsHt_init()
   nsHt = buildClassRegisters();
 }
 
-
 static ClassRegister *
 getNsReg(const CMPIObjectPath * ref, int *rc)
 {
@@ -571,7 +565,7 @@ getNsReg(const CMPIObjectPath * ref, int *rc)
 
   if (nsHt == NULL) {
     mlogf(M_ERROR, M_SHOW,
-	  "--- ClassProvider: namespace hash table not initialized\n");
+          "--- ClassProvider: namespace hash table not initialized\n");
     *rc = 1;
     return NULL;
   }
@@ -623,16 +617,16 @@ removeClass(ClassRegister * cr, const char *clsName)
     *((ClObjectHdr *) buf) = hdr;
 
     if (fread(buf + sizeof(hdr), 1, hdr.size - sizeof(hdr), repold) ==
-	hdr.size - sizeof(hdr)) {
+        hdr.size - sizeof(hdr)) {
       if (hdr.type == HDR_Class) {
-	cc.hdl = buf;
-	cc.ft = CMPIConstClassFT;
-	cc.ft->relocate(&cc);
-	cn = (char *) cc.ft->getCharClassName(&cc);
-	if (strcasecmp(clsName, cn) == 0) {
-	  free(buf);
-	  continue;
-	}
+        cc.hdl = buf;
+        cc.ft = CMPIConstClassFT;
+        cc.ft->relocate(&cc);
+        cn = (char *) cc.ft->getCharClassName(&cc);
+        if (strcasecmp(clsName, cn) == 0) {
+          free(buf);
+          continue;
+        }
       }
       fwrite(buf, 1, hdr.size, repnew);
     }
@@ -646,7 +640,6 @@ removeClass(ClassRegister * cr, const char *clsName)
 
   free(tmpfn);
 }
-
 
 static CMPIConstClass *
 getClass(ClassRegister * cr, const char *clsName)
@@ -674,8 +667,6 @@ static Class_Register_FT ift = {
 
 Class_Register_FT *ClassRegisterFT = &ift;
 
-
-
 /*
  * ------------------------------------------------------------------ *
  * Class MI Cleanup
@@ -683,7 +674,7 @@ Class_Register_FT *ClassRegisterFT = &ift;
  */
 
 static CMPIStatus
-ClassProviderCleanup(CMPIClassMI * mi, CMPIContext * ctx)
+ClassProviderCleanup(CMPIClassMI * mi, CMPIContext *ctx)
 {
   HashTableIterator *i,
                  *ii;
@@ -700,13 +691,13 @@ ClassProviderCleanup(CMPIClassMI * mi, CMPIContext * ctx)
     cb = (ClassBase *) (cReg + 1);
     ct = cb->ht;
     for (ii = ct->ft->getFirst(ct, (void **) &cn, (void **) &cc); ii;
-	 ii = ct->ft->getNext(ct, ii, (void **) &cn, (void **) &cc)) {
+         ii = ct->ft->getNext(ct, ii, (void **) &cn, (void **) &cc)) {
       cc->ft->release(cc);
     }
     ct->ft->release(ct);
     it = cb->it;
     for (ii = it->ft->getFirst(it, (void **) &cn, (void **) &ul); ii;
-	 ii = it->ft->getNext(it, ii, (void **) &cn, (void **) &ul)) {
+         ii = it->ft->getNext(it, ii, (void **) &cn, (void **) &ul)) {
       ul->ft->release(ul);
     }
     it->ft->release(it);
@@ -723,25 +714,24 @@ ClassProviderCleanup(CMPIClassMI * mi, CMPIContext * ctx)
  */
 
 static void
-loopOnChildNames(ClassRegister * cReg, char *cn, CMPIResult * rslt)
+loopOnChildNames(ClassRegister * cReg, char *cn, CMPIResult *rslt)
 {
   CMPIObjectPath *op;
   UtilList       *ul = getChildren(cReg, cn);
   char           *child;
   if (ul)
     for (child = (char *) ul->ft->getFirst(ul); child;
-	 child = (char *) ul->ft->getNext(ul)) {
+         child = (char *) ul->ft->getNext(ul)) {
       op = CMNewObjectPath(_broker, NULL, child, NULL);
       CMReturnObjectPath(rslt, op);
       loopOnChildNames(cReg, child, rslt);
     }
 }
 
-
 static CMPIStatus
 ClassProviderEnumClassNames(CMPIClassMI * mi,
-			    CMPIContext * ctx,
-			    CMPIResult * rslt, CMPIObjectPath * ref)
+                            CMPIContext *ctx,
+                            CMPIResult *rslt, CMPIObjectPath * ref)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   char           *cn = NULL;
@@ -783,15 +773,15 @@ ClassProviderEnumClassNames(CMPIClassMI * mi,
   if (cn == NULL) {
     n = 0;
     for (it = cb->ht->ft->getFirst(cb->ht, (void **) &key, (void **) &cls);
-	 key && it && cls;
-	 it =
-	 cb->ht->ft->getNext(cb->ht, it, (void **) &key, (void **) &cls)) {
+         key && it && cls;
+         it =
+         cb->ht->ft->getNext(cb->ht, it, (void **) &key, (void **) &cls)) {
       if ((flgs & CMPI_FLAG_DeepInheritance)
-	  || cls->ft->getCharSuperClassName(cls) == NULL) {
-	if (((flgs & FL_assocsOnly) == 0) || cls->ft->isAssociation(cls)) {
-	  op = CMNewObjectPath(_broker, ns, key, NULL);
-	  CMReturnObjectPath(rslt, op);
-	}
+          || cls->ft->getCharSuperClassName(cls) == NULL) {
+        if (((flgs & FL_assocsOnly) == 0) || cls->ft->isAssociation(cls)) {
+          op = CMNewObjectPath(_broker, ns, key, NULL);
+          CMReturnObjectPath(rslt, op);
+        }
       }
     }
   } else {
@@ -802,14 +792,14 @@ ClassProviderEnumClassNames(CMPIClassMI * mi,
       UtilList       *ul = getChildren(cReg, cn);
       char           *child;
       if (ul)
-	for (child = (char *) ul->ft->getFirst(ul); child;
-	     child = (char *) ul->ft->getNext(ul)) {
-	  op = CMNewObjectPath(_broker, ns, child, NULL);
-	  CMReturnObjectPath(rslt, op);
-	}
+        for (child = (char *) ul->ft->getFirst(ul); child;
+             child = (char *) ul->ft->getNext(ul)) {
+          op = CMNewObjectPath(_broker, ns, child, NULL);
+          CMReturnObjectPath(rslt, op);
+        }
     } else if (flgs & CMPI_FLAG_DeepInheritance) {
       if (((flgs & FL_assocsOnly) == 0) || cls->ft->isAssociation(cls))
-	loopOnChildNames(cReg, cn, rslt);
+        loopOnChildNames(cReg, cn, rslt);
     }
   }
 
@@ -819,25 +809,23 @@ ClassProviderEnumClassNames(CMPIClassMI * mi,
 }
 
 static void
-loopOnChildren(ClassRegister * cReg, char *cn, CMPIResult * rslt)
+loopOnChildren(ClassRegister * cReg, char *cn, CMPIResult *rslt)
 {
   UtilList       *ul = getChildren(cReg, cn);
   char           *child;
   if (ul)
     for (child = (char *) ul->ft->getFirst(ul); child;
-	 child = (char *) ul->ft->getNext(ul)) {
+         child = (char *) ul->ft->getNext(ul)) {
       CMPIConstClass *cl = getClass(cReg, child);
       CMReturnInstance(rslt, (CMPIInstance *) cl);
       loopOnChildren(cReg, child, rslt);
     }
 }
 
-
-
 static CMPIStatus
 ClassProviderEnumClasses(CMPIClassMI * mi,
-			 CMPIContext * ctx,
-			 CMPIResult * rslt, CMPIObjectPath * ref)
+                         CMPIContext *ctx,
+                         CMPIResult *rslt, CMPIObjectPath * ref)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   char           *cn = NULL;
@@ -869,15 +857,14 @@ ClassProviderEnumClasses(CMPIClassMI * mi,
   }
   cb = (ClassBase *) cReg->hdl;
 
-
   if (cn == NULL) {
     for (it = cb->ht->ft->getFirst(cb->ht, (void **) &key, (void **) &cls);
-	 key && it && cls;
-	 it =
-	 cb->ht->ft->getNext(cb->ht, it, (void **) &key, (void **) &cls)) {
+         key && it && cls;
+         it =
+         cb->ht->ft->getNext(cb->ht, it, (void **) &key, (void **) &cls)) {
       if ((flgs & CMPI_FLAG_DeepInheritance)
-	  || cls->ft->getCharSuperClassName(cls) == NULL) {
-	CMReturnInstance(rslt, (CMPIInstance *) cls);
+          || cls->ft->getCharSuperClassName(cls) == NULL) {
+        CMReturnInstance(rslt, (CMPIInstance *) cls);
       }
     }
   } else {
@@ -888,11 +875,11 @@ ClassProviderEnumClasses(CMPIClassMI * mi,
       UtilList       *ul = getChildren(cReg, cn);
       char           *child;
       if (ul)
-	for (child = (char *) ul->ft->getFirst(ul); child;
-	     child = (char *) ul->ft->getNext(ul)) {
-	  cls = getClass(cReg, child);
-	  CMReturnInstance(rslt, (CMPIInstance *) cls);
-	}
+        for (child = (char *) ul->ft->getFirst(ul); child;
+             child = (char *) ul->ft->getNext(ul)) {
+          cls = getClass(cReg, child);
+          CMReturnInstance(rslt, (CMPIInstance *) cls);
+        }
     } else if (flgs & CMPI_FLAG_DeepInheritance) {
       loopOnChildren(cReg, cn, rslt);
     }
@@ -903,12 +890,11 @@ ClassProviderEnumClasses(CMPIClassMI * mi,
   _SFCB_RETURN(st);
 }
 
-
 static CMPIStatus
 ClassProviderGetClass(CMPIClassMI * mi,
-		      CMPIContext * ctx,
-		      CMPIResult * rslt,
-		      CMPIObjectPath * ref, char **properties)
+                      CMPIContext *ctx,
+                      CMPIResult *rslt,
+                      CMPIObjectPath * ref, char **properties)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIString     *cn = CMGetClassName(ref, NULL);
@@ -943,9 +929,9 @@ ClassProviderGetClass(CMPIClassMI * mi,
 
 static CMPIStatus
 ClassProviderCreateClass(CMPIClassMI * mi,
-			 CMPIContext * ctx,
-			 CMPIResult * rslt,
-			 CMPIObjectPath * ref, CMPIConstClass * cc)
+                         CMPIContext *ctx,
+                         CMPIResult *rslt,
+                         CMPIObjectPath * ref, CMPIConstClass * cc)
 {
   ClassRegister  *cReg;
   int             rc;
@@ -983,9 +969,9 @@ ClassProviderCreateClass(CMPIClassMI * mi,
 
 static CMPIStatus
 ClassProviderSetClass(CMPIClassMI * mi,
-		      CMPIContext * ctx,
-		      CMPIResult * rslt,
-		      CMPIObjectPath * cop, CMPIConstClass * ci)
+                      CMPIContext *ctx,
+                      CMPIResult *rslt,
+                      CMPIObjectPath * cop, CMPIConstClass * ci)
 {
   CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
   return st;
@@ -993,8 +979,8 @@ ClassProviderSetClass(CMPIClassMI * mi,
 
 static CMPIStatus
 ClassProviderDeleteClass(CMPIClassMI * mi,
-			 CMPIContext * ctx,
-			 CMPIResult * rslt, CMPIObjectPath * cop)
+                         CMPIContext *ctx,
+                         CMPIResult *rslt, CMPIObjectPath * cop)
 {
   ClassRegister  *cReg;
   CMPIConstClass *cl;
@@ -1080,8 +1066,8 @@ repCandidate(ClassRegister * cReg, char *cn)
 }
 
 static void
-loopOnChildChars(ClassRegister * cReg, char *cn, CMPIArray * ar, int *i,
-		 int ignprov)
+loopOnChildChars(ClassRegister * cReg, char *cn, CMPIArray *ar, int *i,
+                 int ignprov)
 {
   UtilList       *ul = getChildren(cReg, cn);
   char           *child;
@@ -1091,10 +1077,10 @@ loopOnChildChars(ClassRegister * cReg, char *cn, CMPIArray * ar, int *i,
 
   if (ul)
     for (child = (char *) ul->ft->getFirst(ul); child;
-	 child = (char *) ul->ft->getNext(ul)) {
+         child = (char *) ul->ft->getNext(ul)) {
       if (ignprov || repCandidate(cReg, child)) {
-	CMSetArrayElementAt(ar, *i, child, CMPI_chars);
-	*i = (*i) + 1;
+        CMSetArrayElementAt(ar, *i, child, CMPI_chars);
+        *i = (*i) + 1;
       }
       loopOnChildChars(cReg, child, ar, i, ignprov);
     }
@@ -1111,18 +1097,17 @@ loopOnChildCount(ClassRegister * cReg, char *cn, int *i, int ignprov)
 
   if (ul)
     for (child = (char *) ul->ft->getFirst(ul); child;
-	 child = (char *) ul->ft->getNext(ul)) {
+         child = (char *) ul->ft->getNext(ul)) {
       if (ignprov || repCandidate(cReg, child))
-	*i = (*i) + 1;
+        *i = (*i) + 1;
       loopOnChildCount(cReg, child, i, ignprov);
     }
   _SFCB_EXIT();
 }
 
-
 static CMPIStatus
 ClassProviderMethodCleanup(CMPIMethodMI * mi,
-			   const CMPIContext * ctx, CMPIBoolean terminate)
+                           const CMPIContext *ctx, CMPIBoolean terminate)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   return st;
@@ -1130,11 +1115,11 @@ ClassProviderMethodCleanup(CMPIMethodMI * mi,
 
 static CMPIStatus
 ClassProviderInvokeMethod(CMPIMethodMI * mi,
-			  const CMPIContext * ctx,
-			  const CMPIResult * rslt,
-			  const CMPIObjectPath * ref,
-			  const char *methodName,
-			  const CMPIArgs * in, CMPIArgs * out)
+                          const CMPIContext *ctx,
+                          const CMPIResult *rslt,
+                          const CMPIObjectPath * ref,
+                          const char *methodName,
+                          const CMPIArgs * in, CMPIArgs * out)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIArray      *ar;
@@ -1158,17 +1143,17 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
     if (cn.type == CMPI_string && cn.value.string && cn.value.string->hdl) {
       char           *child;
       int             l = 0,
-	  i = 0;
+          i = 0;
       UtilList       *ul =
-	  getChildren(cReg, (char *) cn.value.string->hdl);
+          getChildren(cReg, (char *) cn.value.string->hdl);
       if (ul)
-	l = ul->ft->size(ul);
+        l = ul->ft->size(ul);
       ar = CMNewArray(_broker, l, CMPI_string, NULL);
       if (ul)
-	for (child = (char *) ul->ft->getFirst(ul); child; child = (char *)
-	     ul->ft->getNext(ul)) {
-	  CMSetArrayElementAt(ar, i++, child, CMPI_chars);
-	}
+        for (child = (char *) ul->ft->getFirst(ul); child; child = (char *)
+             ul->ft->getNext(ul)) {
+          CMSetArrayElementAt(ar, i++, child, CMPI_chars);
+        }
       st = CMAddArg(out, "children", &ar, CMPI_stringA);
     } else {
     }
@@ -1189,17 +1174,17 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
       ignprov = 1;
     }
     _SFCB_TRACE(1,
-		("--- getallchildren %s", (char *) cn.value.string->hdl));
+                ("--- getallchildren %s", (char *) cn.value.string->hdl));
     if (cn.type == CMPI_string && cn.value.string && cn.value.string->hdl) {
       int             n = 0,
-	  i = 0;
+          i = 0;
       loopOnChildCount(cReg, (char *) cn.value.string->hdl, &n, ignprov);
       _SFCB_TRACE(1, ("--- count %d", n));
       ar = CMNewArray(_broker, n, CMPI_string, NULL);
       if (n) {
-	_SFCB_TRACE(1, ("--- loop %s", (char *) cn.value.string->hdl));
-	loopOnChildChars(cReg, (char *) cn.value.string->hdl, ar, &i,
-			 ignprov);
+        _SFCB_TRACE(1, ("--- loop %s", (char *) cn.value.string->hdl));
+        loopOnChildChars(cReg, (char *) cn.value.string->hdl, ar, &i,
+                         ignprov);
       }
       st = CMAddArg(out, "children", &ar, CMPI_stringA);
     } else {
@@ -1220,13 +1205,13 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
     cReg->ft->rLock(cReg);
 
     for (n = 0, i = ct->ft->getFirst(ct, (void **) &cn, (void **) &cc); i;
-	 i = ct->ft->getNext(ct, i, (void **) &cn, (void **) &cc)) {
+         i = ct->ft->getNext(ct, i, (void **) &cn, (void **) &cc)) {
       if (cc->ft->isAssociation(cc)
-	  && cc->ft->getCharSuperClassName(cc) == NULL) {
-	/*
-	 * add top-level association class 
-	 */
-	CMSetArrayElementAt(ar, n++, cn, CMPI_chars);
+          && cc->ft->getCharSuperClassName(cc) == NULL) {
+        /*
+         * add top-level association class 
+         */
+        CMSetArrayElementAt(ar, n++, cn, CMPI_chars);
       }
     }
     CMAddArg(out, "assocs", &ar, CMPI_stringA);
@@ -1237,7 +1222,7 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
   else if (strcasecmp(methodName, "ischild") == 0) {
     char           *parent = (char *) CMGetClassName(ref, NULL)->hdl;
     char           *chldn =
-	(char *) CMGetArg(in, "child", NULL).value.string->hdl;
+        (char *) CMGetArg(in, "child", NULL).value.string->hdl;
     st.rc = traverseChildren(cReg, parent, chldn);
   }
 
@@ -1247,8 +1232,8 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
 
   else {
     mlogf(M_ERROR, M_SHOW,
-	  "--- ClassProvider: Invalid invokeMethod request %s\n",
-	  methodName);
+          "--- ClassProvider: Invalid invokeMethod request %s\n",
+          methodName);
     st.rc = CMPI_RC_ERR_METHOD_NOT_FOUND;
   }
   _SFCB_RETURN(st);
@@ -1256,7 +1241,7 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
 
 int
 traverseChildren(ClassRegister * cReg, const char *parent,
-		 const char *chldn)
+                 const char *chldn)
 {
   char           *child;
   int             rc = CMPI_RC_ERR_FAILED;
@@ -1266,14 +1251,14 @@ traverseChildren(ClassRegister * cReg, const char *parent,
 
   if (ul)
     for (child = (char *) ul->ft->getFirst(ul); child;
-	 child = (char *) ul->ft->getNext(ul)) {
+         child = (char *) ul->ft->getNext(ul)) {
       if (strcasecmp(child, chldn) == 0) {
-	rc = CMPI_RC_OK;
-	break;
+        rc = CMPI_RC_OK;
+        break;
       } else {
-	rc = traverseChildren(cReg, child, chldn);
-	if (rc == CMPI_RC_OK)
-	  break;
+        rc = traverseChildren(cReg, child, chldn);
+        if (rc == CMPI_RC_OK)
+          break;
       }
     }
 
@@ -1281,10 +1266,14 @@ traverseChildren(ClassRegister * cReg, const char *parent,
   return rc;
 }
 
-
 CMClassMIStub(ClassProvider, ClassProvider, _broker, CMNoHook);
 
 CMMethodMIStub(ClassProvider, ClassProvider, _broker, CMNoHook);
 
 // 
 // 
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -19,7 +19,6 @@
  *
  */
 
-
 #include "utilft.h"
 
 #include "cmpimacs.h"
@@ -87,7 +86,6 @@
 #define LEFT 91
 #define RIGHT 92
 #define FULL 93
-
 
 #define EMPTY 100
 #define KEY 101
@@ -161,8 +159,6 @@ struct call {
 
 };
 
-
-
 struct updIns {
   char           *tname;
   UtilList       *colList;
@@ -171,7 +167,6 @@ struct updIns {
   void            (*free) ();
 
 };
-
 
 struct insert {
   char           *tname;
@@ -193,15 +188,11 @@ struct expressionLight {
 struct classDef {
   int             fieldCount;
   char           *className;
-  UtilList       *fieldNameList;	// Columns stecken da drin
+  UtilList       *fieldNameList;        // Columns stecken da drin
   int             fNameLength;
   char           *superclass;
   char           *description;
 };
-
-
-
-
 
 struct sqlWarning {
   char           *sqlstate;
@@ -217,23 +208,22 @@ struct resultSet {
   char           *tupel;
   void            (*setWarning) (ResultSet * this, char *s, char *r);
   void            (*addMeta) (ResultSet * this, Projection * prj);
-  int             (*addSet) (ResultSet * this, AvlTree * t);
+  int             (*addSet) (ResultSet * this, AvlTree *t);
   void            (*free) ();
 };
 
-
 struct sqlStatement {
-  int             type;		// select, insert, update...
+  int             type;         // select, insert, update...
   ResultSet      *rs;
   void           *stmt;
-  char           *db;		// namespace
+  char           *db;           // namespace
   // int currentType;
   UtilList       *cnode;
   FullSelect     *lasttos,
-                 *lastFs;	// um Sigma in fs einfügen zu können.
-				// wenn der parser das sigma erstellt hat
-				// ist aber setB schon gefüllt und das
-				// aktuelle fs schon vom stack genommen.
+                 *lastFs;       // um Sigma in fs einfügen zu können.
+  // wenn der parser das sigma erstellt hat
+  // ist aber setB schon gefüllt und das
+  // aktuelle fs schon vom stack genommen.
   // auch für Konstrukte der Form A u B u C
   void            (*free) ();
   int             (*addNode) (SqlStatement * this, int type, void *value);
@@ -242,10 +232,10 @@ struct sqlStatement {
 
 struct fullSelect {
   void           *setA;
-  int             typeA;	// fullselect oder subselect
-  int             type;		// UNION, EXCEPT, ...
-  Projection     *pi;		// hier wird eine Referenz auf eines der
-				// Subselects 
+  int             typeA;        // fullselect oder subselect
+  int             type;         // UNION, EXCEPT, ...
+  Projection     *pi;           // hier wird eine Referenz auf eines der
+  // Subselects 
   // gespeichert zum schnellen Vergleich, ob die weiteren
   // Subselects konform dazu sind!
   void           *setB;
@@ -270,8 +260,8 @@ struct subSelect {
 };
 
 struct projection {
-  int             mode;		// ALL, DISTINKT //Könnte auch in
-				// Selection passen??
+  int             mode;         // ALL, DISTINKT //Könnte auch in
+  // Selection passen??
   // int colCount;
   void            (*free) ();
   UtilList       *col;
@@ -289,8 +279,8 @@ struct column {
 };
 
 struct selection {
-  int             fetchFirst;	// oderBy und fetch first sind nicht
-				// wirklich eigenschaften 
+  int             fetchFirst;   // oderBy und fetch first sind nicht
+  // wirklich eigenschaften 
   // dieses objekts, allerdings passen sie hier dazu.
   UtilList       *orderBy;
   UtilList       *where;
@@ -306,7 +296,6 @@ struct crossJoin {
 
 };
 
-
 struct order {
   int             column;
   int             order;
@@ -317,8 +306,8 @@ struct order {
 
 struct row {
   char          **row;
-  int             doublette;	// hack. da avl-baum doubletten nicht
-				// unterstützt
+  int             doublette;    // hack. da avl-baum doubletten nicht
+  // unterstützt
   int             size;
   Selection      *sigma;
   void            (*free) ();
@@ -326,20 +315,23 @@ struct row {
 };
 
 struct sigma {
-  int             link;		// AND OR
-  int             op;		// == != < ... 
+  int             link;         // AND OR
+  int             op;           // == != < ... 
   Column         *colA;
-  char           *value;	// mit was der wert verglichen werden soll 
-				// 
-  char           *valueB;	// falls joinbedingung, oder between (dann 
-				// steht hier der zweite wert, daher auch
-				// double...)
+  char           *value;        // mit was der wert verglichen werden soll 
+                                // 
+  // 
+  // 
+  char           *valueB;       // falls joinbedingung, oder between (dann 
+                                // 
+  // 
+  // steht hier der zweite wert, daher auch
+  // double...)
   Column         *colB;
   void            (*negate) (Sigma * this);
   void            (*free) ();
 
 };
-
 
 /*
  * Konstruktoren, zu den oben definierten Datentypen
@@ -349,28 +341,25 @@ ResultSet      *newResultSet(char *query);
 FullSelect     *newFullSelect();
 SubSelect      *newSubSelect();
 SubSelect      *newSubSelectC(SubSelect * sbsA, SubSelect * sbsB,
-			      int type);
+                              int type);
 Projection     *newProjection(int mode, UtilList * ul);
 Column         *newColumn(char *tableName, char *tableAlias, char *colName,
-			  char *colAlias, int colSQLType, int isKey);
+                          char *colAlias, int colSQLType, int isKey);
 Selection      *newSelection(UtilList * orderBy, int fetchFirst);
 CrossJoin      *newCrossJoin(SubSelect * sbsA, SubSelect * sbsB, int type);
 Row            *newRow(int size);
 Order          *newOrder(int nr, int type, int order);
 Sigma          *newSigma(Column * colA, int op, char *value, Column * colB,
-			 char *valueB);
+                         char *valueB);
 ExpressionLight *newExpressionLight(char *name, int op, char *value);
 UpdIns         *newUpdIns(char *tname, UtilList * colList,
-			  UtilList * assignmentList, UtilList * where);
+                          UtilList * assignmentList, UtilList * where);
 Insert         *newInsert(char *tname);
 ClassDef       *newClassDef(int fieldCount, char *className,
-			    UtilList * fieldNameList, int fNameLength,
-			    char *superclass);
+                            UtilList * fieldNameList, int fNameLength,
+                            char *superclass);
 Call           *newCall(char *tname, char *pname, UtilList * klist,
-			UtilList * pList);
-
-
-
+                        UtilList * pList);
 
 /*
  * Definition der Schnittstelle zum CIMOM, über die Zugfriff auf die
@@ -379,15 +368,15 @@ Call           *newCall(char *tname, char *pname, UtilList * klist,
 CMPIEnumeration *enumInstances(char *ns, char *cn);
 int             createInstance(char *ns, char *cn, UtilList * ins);
 int             createClass(char *ns, char *cn, char *scn,
-			    UtilList * colDef);
+                            UtilList * colDef);
 int             deleteClass(char *ns, char *cn);
 CMPIValue      *string2cmpival(char *value, int type);
 int             deleteInstance(char *ns, char *cn, UtilList * al);
 int             updateInstance(char *ns, char *cn, UtilList * al,
-			       UtilList * kl);
+                               UtilList * kl);
 UtilList       *getClassNames(char *ns, char *filter);
 UtilList       *invokeMethod(char *ns, char *cn, char *mn, UtilList * pl,
-			     UtilList * kl);
+                             UtilList * kl);
 ClassDef       *getClassDef(const char *ns, const char *cn);
 
 /*
@@ -404,6 +393,11 @@ ResultSet      *createRS(char *query, int *rc);
  */
 char           *processMetaTables(char *filter, char *db);
 char           *processMetaColumns(char *filter, char *filtercol,
-				   char *db);
+                                   char *db);
 char           *processSuperTables(char *filter, char *db);
 char           *processKeyTable(char *filter, char *db);
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

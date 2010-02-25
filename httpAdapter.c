@@ -19,7 +19,6 @@
  *
  */
 
-
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -80,8 +79,8 @@ static int      doUdsAuth;
 static int      doFork = 0;
 int             noChunking = 0;
 int             sfcbSSLMode = 0;
-int             httpLocalOnly = 0;	/* 1 = only listen on loopback
-					 * interface */
+int             httpLocalOnly = 0;      /* 1 = only listen on loopback
+                                         * interface */
 static int      hBase;
 static int      hMax;
 static int      httpProcIdX;
@@ -90,8 +89,8 @@ static int      running = 0;
 static long     keepaliveTimeout = 15;
 static long     keepaliveMaxRequest = 10;
 static long     numRequest;
-struct timeval  httpSelectTimeout = { 5, 0 };	/* 5 sec. timeout for
-						 * select() before read() */
+struct timeval  httpSelectTimeout = { 5, 0 };   /* 5 sec. timeout for
+                                                 * select() before read() */
 
 #if defined USE_SSL
 static SSL_CTX *ctx;
@@ -111,19 +110,19 @@ static int      httpWorkSem;
 
 extern char    *decode64(char *data);
 extern void     libraryName(const char *dir, const char *location,
-			    char *fullName, int buf_size);
+                            char *fullName, int buf_size);
 extern void    *loadLibib(const char *libname);
 extern int      getControlChars(char *id, char **val);
 extern void    *loadLibib(const char *libname);
 
 extern RespSegments genFirstChunkResponses(BinRequestContext *,
-					   BinResponseHdr **, int, int);
+                                           BinResponseHdr **, int, int);
 extern RespSegments genLastChunkResponses(BinRequestContext *,
-					  BinResponseHdr **, int);
+                                          BinResponseHdr **, int);
 extern RespSegments genChunkResponses(BinRequestContext *,
-				      BinResponseHdr **, int);
+                                      BinResponseHdr **, int);
 extern RespSegments genFirstChunkErrorResponse(BinRequestContext * binCtx,
-					       int rc, char *msg);
+                                               int rc, char *msg);
 extern char    *getErrTrailer(int id, int rc, char *m);
 extern void     dumpTiming(int pid);
 extern char    *configfile;
@@ -159,7 +158,6 @@ typedef struct _buffer {
 #define USE_INET6
 #endif
 
-
 void
 initHttpProcCtl(int p, int sslmode)
 {
@@ -169,7 +167,7 @@ initHttpProcCtl(int p, int sslmode)
   int             i;
 
   mlogf(M_INFO, M_SHOW, "--- Max Http%s procs: %d\n", sslmode ? "s" : "",
-	p);
+        p);
   if ((httpProcSem = semget(httpProcSemKey, 1, 0600)) != -1)
     semctl(httpProcSem, 0, IPC_RMID, sun);
 
@@ -177,11 +175,11 @@ initHttpProcCtl(int p, int sslmode)
        semget(httpProcSemKey, 1 + p, IPC_CREAT | IPC_EXCL | 0600)) == -1) {
     char           *emsg = strerror(errno);
     mlogf(M_ERROR, M_SHOW,
-	  "\n--- Http Proc semaphore create key: 0x%x failed: %s\n",
-	  httpProcSemKey, emsg);
+          "\n--- Http Proc semaphore create key: 0x%x failed: %s\n",
+          httpProcSemKey, emsg);
     mlogf(M_ERROR, M_SHOW,
-	  "     use \"ipcrm -S 0x%x\" to remove semaphore\n\n",
-	  httpProcSemKey);
+          "     use \"ipcrm -S 0x%x\" to remove semaphore\n\n",
+          httpProcSemKey);
     abort();
   }
   sun.val = p;
@@ -198,11 +196,11 @@ initHttpProcCtl(int p, int sslmode)
        semget(httpWorkSemKey, 1, IPC_CREAT | IPC_EXCL | 0600)) == -1) {
     char           *emsg = strerror(errno);
     mlogf(M_ERROR, M_SHOW,
-	  "\n--- Http ProcWork semaphore create key: 0x%x failed: %s\n",
-	  httpWorkSemKey, emsg);
+          "\n--- Http ProcWork semaphore create key: 0x%x failed: %s\n",
+          httpWorkSemKey, emsg);
     mlogf(M_ERROR, M_SHOW,
-	  "     use \"ipcrm -S 0x%x\" to remove semaphore\n\n",
-	  httpProcSemKey);
+          "     use \"ipcrm -S 0x%x\" to remove semaphore\n\n",
+          httpProcSemKey);
     abort();
   }
   sun.val = 1;
@@ -216,7 +214,6 @@ remProcCtl()
   semctl(httpWorkSem, 0, IPC_RMID, 0);
   return 0;
 }
-
 
 int
 baValidate(char *cred, char **principal)
@@ -246,14 +243,14 @@ baValidate(char *cred, char **principal)
     if (getControlChars("basicAuthlib", &ln) == 0) {
       libraryName(NULL, ln, dlName, 512);
       if ((authLib = dlopen(dlName, RTLD_LAZY))) {
-	authenticate = dlsym(authLib, "_sfcBasicAuthenticate");
-	if (authenticate)
-	  err = 0;
+        authenticate = dlsym(authLib, "_sfcBasicAuthenticate");
+        if (authenticate)
+          err = 0;
       }
     }
     if (err)
       mlogf(M_ERROR, M_SHOW, "--- Authentication exit %s not found\n",
-	    dlName);
+            dlName);
   }
 
   if (err) {
@@ -282,11 +279,11 @@ handleSigChld(int sig)
       break;
     if ((int) pid < 0) {
       if (errno == EINTR || errno == EAGAIN) {
-	// fprintf(stderr, "pid: %d continue \n", pid);
-	continue;
+        // fprintf(stderr, "pid: %d continue \n", pid);
+        continue;
       }
       if (errno != ECHILD)
-	perror("child wait");
+        perror("child wait");
       break;
     } else {
       running--;
@@ -304,7 +301,7 @@ stopProc(void *p)
   for (;;) {
     if (running == 0) {
       mlogf(M_INFO, M_SHOW, "--- %s terminating %d\n", processName,
-	    getpid());
+            getpid());
       exit(0);
     }
     sleep(1);
@@ -330,7 +327,8 @@ freeBuffer(Buffer * b)
 {
   Buffer          emptyBuf =
       { NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL,
-NULL };
+    NULL
+  };
   if (b->data)
     free(b->data);
   if (b->content)
@@ -352,8 +350,8 @@ getNextHdr(Buffer * b)
       b->data[b->ptr] = 0;
       ++b->ptr;
       if (c == '\r' && b->ptr < b->length && b->data[b->ptr] == '\n') {
-	b->data[b->ptr] = 0;
-	++b->ptr;
+        b->data[b->ptr] = 0;
+        ++b->ptr;
       }
       return &(b->data[i]);
     }
@@ -418,8 +416,8 @@ readData(CommHndl conn_fd, char *into, int length)
 
   while (c < length) {
     isReady =
-	select(conn_fd.socket + 1, &httpfds, NULL, NULL,
-	       &httpSelectTimeout);
+        select(conn_fd.socket + 1, &httpfds, NULL, NULL,
+               &httpSelectTimeout);
     if (isReady == 0) {
       c = -1;
       break;
@@ -427,12 +425,12 @@ readData(CommHndl conn_fd, char *into, int length)
     r = commRead(conn_fd, into + c, length - c);
     if (r < 0) {
       if (errno == EINTR || errno == EAGAIN) {
-	continue;
+        continue;
       } else {
-	mlogf(M_INFO, M_SHOW, "--- readData(): read() error %s\n",
-	      strerror(errno));
-	c = -2;
-	break;
+        mlogf(M_INFO, M_SHOW, "--- readData(): read() error %s\n",
+              strerror(errno));
+        c = -2;
+        break;
       }
     }
     /*
@@ -460,7 +458,7 @@ getPayload(CommHndl conn_fd, Buffer * b)
 
   if (c > b->content_length) {
     mlogf(M_INFO, M_SHOW,
-	  "--- HTTP Content-Length is lying; content truncated\n");
+          "--- HTTP Content-Length is lying; content truncated\n");
     c = b->content_length;
   }
 
@@ -476,11 +474,11 @@ dumpResponse(RespSegments * rs)
   if (rs) {
     for (i = 0; i < 7; i++) {
       if (rs->segments[i].txt) {
-	if (rs->segments[i].mode == 2) {
-	  UtilStringBuffer *sb = (UtilStringBuffer *) rs->segments[i].txt;
-	  printf("%s", sb->ft->getCharPtr(sb));
-	} else
-	  printf("%s", rs->segments[i].txt);
+        if (rs->segments[i].mode == 2) {
+          UtilStringBuffer *sb = (UtilStringBuffer *) rs->segments[i].txt;
+          printf("%s", sb->ft->getCharPtr(sb));
+        } else
+          printf("%s", rs->segments[i].txt);
       }
     }
     printf("<\n");
@@ -508,13 +506,13 @@ writeResponse(CommHndl conn_fd, RespSegments rs)
   for (len = 0, i = 0; i < 7; i++) {
     if (rs.segments[i].txt) {
       if (rs.segments[i].mode == 2) {
-	UtilStringBuffer *sb = (UtilStringBuffer *) rs.segments[i].txt;
-	if (sb == NULL)
-	  ls[i] = 0;
-	else
-	  len += ls[i] = sb->ft->getSize(sb);
+        UtilStringBuffer *sb = (UtilStringBuffer *) rs.segments[i].txt;
+        if (sb == NULL)
+          ls[i] = 0;
+        else
+          len += ls[i] = sb->ft->getSize(sb);
       } else
-	len += ls[i] = strlen(rs.segments[i].txt);
+        len += ls[i] = strlen(rs.segments[i].txt);
     }
   }
 
@@ -532,15 +530,15 @@ writeResponse(CommHndl conn_fd, RespSegments rs)
   for (len = 0, i = 0; i < 7; i++) {
     if (rs.segments[i].txt) {
       if (rs.segments[i].mode == 2) {
-	UtilStringBuffer *sb = (UtilStringBuffer *) rs.segments[i].txt;
-	if (sb) {
-	  commWrite(conn_fd, (void *) sb->ft->getCharPtr(sb), ls[i]);
-	  sb->ft->release(sb);
-	}
+        UtilStringBuffer *sb = (UtilStringBuffer *) rs.segments[i].txt;
+        if (sb) {
+          commWrite(conn_fd, (void *) sb->ft->getCharPtr(sb), ls[i]);
+          sb->ft->release(sb);
+        }
       } else {
-	commWrite(conn_fd, rs.segments[i].txt, ls[i]);
-	if (rs.segments[i].mode == 1)
-	  free(rs.segments[i].txt);
+        commWrite(conn_fd, rs.segments[i].txt, ls[i]);
+        if (rs.segments[i].mode == 1)
+          free(rs.segments[i].txt);
       }
     }
   }
@@ -549,7 +547,6 @@ writeResponse(CommHndl conn_fd, RespSegments rs)
 
   _SFCB_EXIT();
 }
-
 
 static void
 writeChunkHeaders(BinRequestContext * ctx)
@@ -625,14 +622,14 @@ writeChunkResponse(BinRequestContext * ctx, BinResponseHdr * rh)
 
     for (len = 0, i = 0; i < 7; i++) {
       if (rs.segments[i].txt) {
-	if (rs.segments[i].mode == 2) {
-	  UtilStringBuffer *sb = (UtilStringBuffer *) rs.segments[i].txt;
-	  if (sb == NULL)
-	    ls[i] = 0;
-	  else
-	    len += ls[i] = sb->ft->getSize(sb);
-	} else
-	  len += ls[i] = strlen(rs.segments[i].txt);
+        if (rs.segments[i].mode == 2) {
+          UtilStringBuffer *sb = (UtilStringBuffer *) rs.segments[i].txt;
+          if (sb == NULL)
+            ls[i] = 0;
+          else
+            len += ls[i] = sb->ft->getSize(sb);
+        } else
+          len += ls[i] = strlen(rs.segments[i].txt);
       }
     }
     /*
@@ -647,18 +644,18 @@ writeChunkResponse(BinRequestContext * ctx, BinResponseHdr * rh)
 
     for (len = 0, i = 0; i < 7; i++) {
       if (rs.segments[i].txt) {
-	if (rs.segments[i].mode == 2) {
-	  UtilStringBuffer *sb = (UtilStringBuffer *) rs.segments[i].txt;
-	  if (sb) {
-	    commWrite(*(ctx->commHndl), (void *) sb->ft->getCharPtr(sb),
-		      ls[i]);
-	    sb->ft->release(sb);
-	  }
-	} else {
-	  commWrite(*(ctx->commHndl), rs.segments[i].txt, ls[i]);
-	  if (rs.segments[i].mode == 1)
-	    free(rs.segments[i].txt);
-	}
+        if (rs.segments[i].mode == 2) {
+          UtilStringBuffer *sb = (UtilStringBuffer *) rs.segments[i].txt;
+          if (sb) {
+            commWrite(*(ctx->commHndl), (void *) sb->ft->getCharPtr(sb),
+                      ls[i]);
+            sb->ft->release(sb);
+          }
+        } else {
+          commWrite(*(ctx->commHndl), rs.segments[i].txt, ls[i]);
+          if (rs.segments[i].mode == 1)
+            free(rs.segments[i].txt);
+        }
 
       }
     }
@@ -692,7 +689,6 @@ static ChunkFunctions httpChunkFunctions = {
   writeChunkResponse,
 };
 
-
 #define hdrBufsize 5000
 #define hdrLimmit 5000
 
@@ -710,8 +706,8 @@ getHdrs(CommHndl conn_fd, Buffer * b, char *cmd)
 
   for (;;) {
     isReady =
-	select(conn_fd.socket + 1, &httpfds, NULL, NULL,
-	       &httpSelectTimeout);
+        select(conn_fd.socket + 1, &httpfds, NULL, NULL,
+               &httpSelectTimeout);
     if (isReady == 0)
       return 3;
 
@@ -720,22 +716,22 @@ getHdrs(CommHndl conn_fd, Buffer * b, char *cmd)
 
     if (r < 0) {
       if (errno == EINTR || errno == EAGAIN) {
-	continue;
+        continue;
       } else {
-	mlogf(M_INFO, M_SHOW, "--- getHdrs: read() error %s\n",
-	      strerror(errno));
-	state = 3;
-	break;
+        mlogf(M_INFO, M_SHOW, "--- getHdrs: read() error %s\n",
+              strerror(errno));
+        state = 3;
+        break;
       }
     }
     if (r == 0) {
       if (b->size == 0)
-	break;
+        break;
       if (strstr(b->data, "\r\n\r\n") == NULL &&
-	  strstr(b->data, "\n\n") == NULL) {
-	mlogf(M_ERROR, M_SHOW, "-#- HTTP header ended prematurely\n");
-	state = 3;
-	break;
+          strstr(b->data, "\n\n") == NULL) {
+        mlogf(M_ERROR, M_SHOW, "-#- HTTP header ended prematurely\n");
+        state = 3;
+        break;
       }
     }
 
@@ -747,11 +743,11 @@ getHdrs(CommHndl conn_fd, Buffer * b, char *cmd)
      */
     if (r && first) {
       if (strncasecmp(buf, cmd, strlen(cmd)) != 0) {
-	/*
-	 * not what we expected - still continue to read to not confuse
-	 * the client 
-	 */
-	state = 1;
+        /*
+         * not what we expected - still continue to read to not confuse
+         * the client 
+         */
+        state = 1;
       }
       first = 0;
     }
@@ -760,7 +756,7 @@ getHdrs(CommHndl conn_fd, Buffer * b, char *cmd)
      * success condition: end of header 
      */
     if (strstr(b->data, "\r\n\r\n") != NULL ||
-	strstr(b->data, "\n\n") != NULL) {
+        strstr(b->data, "\n\n") != NULL) {
       break;
     }
 
@@ -786,8 +782,8 @@ pauseCodec(char *name)
       char           *p;
       p = httpPauseStr = strdup(httpPauseStr);
       while (*p) {
-	*p = tolower(*p);
-	p++;
+        *p = tolower(*p);
+        p++;
       }
     }
   }
@@ -801,8 +797,8 @@ pauseCodec(char *name)
     }
     if ((p = strstr(httpPauseStr, n)) != NULL) {
       if ((p == httpPauseStr || *(p - 1) == ',')
-	  && (p[l] == ',' || p[l] == 0))
-	rc = 1;
+          && (p[l] == ',' || p[l] == 0))
+        rc = 1;
     }
     free(n);
     return rc;
@@ -918,34 +914,34 @@ doHttpRequest(CommHndl conn_fd)
       cp = &hdr[15];
       cp += strspn(cp, " \t");
       if (cp[0] == '-') {
-	genError(conn_fd, &inBuf, 400, "Negative Content-Length", NULL);
-	_SFCB_TRACE(1, ("--- exiting: content-length too big"));
-	commClose(conn_fd);
-	exit(1);
+        genError(conn_fd, &inBuf, 400, "Negative Content-Length", NULL);
+        _SFCB_TRACE(1, ("--- exiting: content-length too big"));
+        commClose(conn_fd);
+        exit(1);
       }
       errno = 0;
       unsigned long   clen = strtoul(cp, NULL, 10);
       if (errno != 0) {
-	genError(conn_fd, &inBuf, 400,
-		 "Error converting Content-Length to a decimal value",
-		 NULL);
-	_SFCB_TRACE(1, ("--- exiting: content-length conversion error"));
-	commClose(conn_fd);
-	exit(1);
+        genError(conn_fd, &inBuf, 400,
+                 "Error converting Content-Length to a decimal value",
+                 NULL);
+        _SFCB_TRACE(1, ("--- exiting: content-length conversion error"));
+        commClose(conn_fd);
+        exit(1);
       }
       unsigned int    maxLen;
       if (getControlUNum("httpMaxContentLength", &maxLen) != 0) {
-	genError(conn_fd, &inBuf, 501,
-		 "Server misconfigured (httpMaxContentLength)", NULL);
-	_SFCB_TRACE(1, ("--- exiting: bad config httpMaxContentLength"));
-	commClose(conn_fd);
-	exit(1);
+        genError(conn_fd, &inBuf, 501,
+                 "Server misconfigured (httpMaxContentLength)", NULL);
+        _SFCB_TRACE(1, ("--- exiting: bad config httpMaxContentLength"));
+        commClose(conn_fd);
+        exit(1);
       }
       if ((clen >= UINT_MAX) || ((maxLen) && (clen > maxLen))) {
-	genError(conn_fd, &inBuf, 413, "Request Entity Too Large", NULL);
-	_SFCB_TRACE(1, ("--- exiting: content-length too big"));
-	commClose(conn_fd);
-	exit(1);
+        genError(conn_fd, &inBuf, 413, "Request Entity Too Large", NULL);
+        _SFCB_TRACE(1, ("--- exiting: content-length too big"));
+        commClose(conn_fd);
+        exit(1);
       }
       inBuf.content_length = clen;
     } else if (strncasecmp(hdr, "Content-Type:", 13) == 0) {
@@ -957,10 +953,10 @@ doHttpRequest(CommHndl conn_fd)
       cp += strspn(cp, " \t");
       inBuf.host = cp;
       if (strchr(inBuf.host, '/') != NULL || inBuf.host[0] == '.') {
-	if (!discardInput) {
-	  genError(conn_fd, &inBuf, 400, "Bad Request", NULL);
-	  discardInput = 2;
-	}
+        if (!discardInput) {
+          genError(conn_fd, &inBuf, 400, "Bad Request", NULL);
+          discardInput = 2;
+        }
       }
     } else if (strncasecmp(hdr, "User-Agent:", 11) == 0) {
       cp = &hdr[11];
@@ -970,11 +966,11 @@ doHttpRequest(CommHndl conn_fd)
       char           *cp = &hdr[3];
       cp += strspn(cp, " \t");
       if (strncasecmp(cp, "trailers", 8) == 0)
-	inBuf.trailers = 1;
+        inBuf.trailers = 1;
     } else if (strncasecmp(hdr, "Expect:", 7) == 0) {
       if (!discardInput) {
-	genError(conn_fd, &inBuf, 417, "Expectation Failed", NULL);	// more);
-	discardInput = 2;
+        genError(conn_fd, &inBuf, 417, "Expectation Failed", NULL);     // more);
+        discardInput = 2;
       }
     }
   }
@@ -983,21 +979,21 @@ doHttpRequest(CommHndl conn_fd)
   if (doBa && sfcbSSLMode) {
     if (ccVerifyMode != CC_VERIFY_IGNORE) {
       if (x509) {
-	inBuf.certificate = x509;
-	if (ccValidate(inBuf.certificate, &inBuf.principal, 0)) {
-	  /*
-	   * successful certificate validation overrides basic auth 
-	   */
-	  doBa = 0;
-	}
+        inBuf.certificate = x509;
+        if (ccValidate(inBuf.certificate, &inBuf.principal, 0)) {
+          /*
+           * successful certificate validation overrides basic auth 
+           */
+          doBa = 0;
+        }
       } else if (ccVerifyMode == CC_VERIFY_REQUIRE) {
-	/*
-	 * this should never happen ;-) famous last words 
-	 */
-	mlogf(M_ERROR, M_SHOW,
-	      "\n--- Client certificate not accessible - closing connection\n");
-	commClose(conn_fd);
-	exit(1);
+        /*
+         * this should never happen ;-) famous last words 
+         */
+        mlogf(M_ERROR, M_SHOW,
+              "\n--- Client certificate not accessible - closing connection\n");
+        commClose(conn_fd);
+        exit(1);
       }
     }
   }
@@ -1010,7 +1006,7 @@ doHttpRequest(CommHndl conn_fd)
     sun.sun_family = 0;
     socklen_t       cl = sizeof(sun);
     int             rc =
-	getpeername(conn_fd.socket, (struct sockaddr *) &sun, &cl);
+        getpeername(conn_fd.socket, (struct sockaddr *) &sun, &cl);
     if (rc == 0 && sun.sun_family == AF_UNIX) {
       /*
        * Already authenticated via permissions on unix socket 
@@ -1021,10 +1017,10 @@ doHttpRequest(CommHndl conn_fd)
 #endif
   if (!authorized && !discardInput && doBa) {
     if (!
-	(inBuf.authorization
-	 && baValidate(inBuf.authorization, &inBuf.principal))) {
+        (inBuf.authorization
+         && baValidate(inBuf.authorization, &inBuf.principal))) {
       char            more[] =
-	  "WWW-Authenticate: Basic realm=\"cimom\"\r\n";
+          "WWW-Authenticate: Basic realm=\"cimom\"\r\n";
       genError(conn_fd, &inBuf, 401, "Unauthorized", more);
       /*
        * we continue to parse headers and empty the socket to be graceful
@@ -1056,7 +1052,7 @@ doHttpRequest(CommHndl conn_fd)
   hdr = (char *) malloc(strlen(inBuf.authorization) + 64);
   len += hl =
       sprintf(hdr, "<!-- xml -->\n<!-- auth: %s -->\n",
-	      inBuf.authorization);
+              inBuf.authorization);
 
   rc = getPayload(conn_fd, &inBuf);
   if (rc < 0) {
@@ -1096,12 +1092,12 @@ doHttpRequest(CommHndl conn_fd)
 
     if ((_sfcb_trace_mask & TRACE_XMLIN)) {
       _sfcb_trace(1, __FILE__, __LINE__,
-		  _sfcb_format_trace("-#- xmlIn %d bytes:\n%*s",
-				     inBuf.content_length,
-				     inBuf.content_length,
-				     (char *) inBuf.content));
+                  _sfcb_format_trace("-#- xmlIn %d bytes:\n%*s",
+                                     inBuf.content_length,
+                                     inBuf.content_length,
+                                     (char *) inBuf.content));
       _sfcb_trace(1, __FILE__, __LINE__,
-		  _sfcb_format_trace("-#- xmlIn end\n"));
+                  _sfcb_format_trace("-#- xmlIn end\n"));
     }
 #endif
 
@@ -1121,19 +1117,18 @@ doHttpRequest(CommHndl conn_fd)
     gettimeofday(&ev, NULL);
     getrusage(RUSAGE_SELF, &ue);
     _sfcb_trace(1, __FILE__, __LINE__,
-		_sfcb_format_trace
-		("-#- Operation %.5u %s-%s real: %f user: %f sys: %f \n",
-		 sessionId, opsName[ctx.operation], ctx.className,
-		 timevalDiff(&sv, &ev), timevalDiff(&us.ru_utime,
-						    &ue.ru_utime),
-		 timevalDiff(&us.ru_stime, &ue.ru_stime)));
+                _sfcb_format_trace
+                ("-#- Operation %.5u %s-%s real: %f user: %f sys: %f \n",
+                 sessionId, opsName[ctx.operation], ctx.className,
+                 timevalDiff(&sv, &ev), timevalDiff(&us.ru_utime,
+                                                    &ue.ru_utime),
+                 timevalDiff(&us.ru_stime, &ue.ru_stime)));
   }
 #endif
 
   freeBuffer(&inBuf);
   _SFCB_RETURN(0);
 }
-
 
 /**
  * called by httpDaemon
@@ -1159,7 +1154,7 @@ handleHttpRequest(int connFd)
     semAcquire(httpProcSem, 0);
     for (httpProcIdX = 0; httpProcIdX < hMax; httpProcIdX++)
       if (semGetValue(httpProcSem, httpProcIdX + 1) == 0)
-	break;
+        break;
     procReleaseUnDo.sem_num = httpProcIdX + 1;
 
     sessionId++;
@@ -1207,12 +1202,12 @@ handleHttpRequest(int connFd)
     }
 
     _SFCB_TRACE(1, ("--- Started xml handler %d %d", currentProc,
-		    resultSockets.receive));
+                    resultSockets.receive));
 
     if (getenv("SFCB_PAUSE_HTTP"))
       for (breakloop = 0; breakloop == 0;) {
-	fprintf(stderr, "-#- Pausing - pid: %d\n", currentProc);
-	sleep(5);
+        fprintf(stderr, "-#- Pausing - pid: %d\n", currentProc);
+        sleep(5);
       }
 
     conn_fd.socket = connFd;
@@ -1220,16 +1215,16 @@ handleHttpRequest(int connFd)
     conn_fd.buf = NULL;
     if (conn_fd.file == NULL) {
       mlogf(M_ERROR, M_SHOW,
-	    "--- failed to create socket stream - continue with raw socket: %s\n",
-	    strerror(errno));
+            "--- failed to create socket stream - continue with raw socket: %s\n",
+            strerror(errno));
     } else {
       conn_fd.buf = malloc(SOCKBUFSZ);
       if (conn_fd.buf) {
-	setbuffer(conn_fd.file, conn_fd.buf, SOCKBUFSZ);
+        setbuffer(conn_fd.file, conn_fd.buf, SOCKBUFSZ);
       } else {
-	mlogf(M_ERROR, M_SHOW,
-	      "--- failed to create socket buffer - continue unbuffered: %s\n",
-	      strerror(errno));
+        mlogf(M_ERROR, M_SHOW,
+              "--- failed to create socket buffer - continue unbuffered: %s\n",
+              strerror(errno));
       }
     }
     if (sfcbSSLMode) {
@@ -1241,46 +1236,46 @@ handleHttpRequest(int connFd)
       fcntl(connFd, F_SETFL, flags);
       sb = BIO_new_socket(connFd, BIO_NOCLOSE);
       if (!(conn_fd.ssl = SSL_new(ctx)))
-	intSSLerror("Error creating SSL object");
+        intSSLerror("Error creating SSL object");
       SSL_set_bio(conn_fd.ssl, sb, sb);
       while (1) {
-	int             sslacc,
-	                sslerr;
-	sslacc = SSL_accept(conn_fd.ssl);
-	if (sslacc == 1) {
-	  /*
-	   * accepted 
-	   */
-	  break;
-	}
-	sslerr = SSL_get_error(conn_fd.ssl, sslacc);
-	if (sslerr == SSL_ERROR_WANT_WRITE ||
-	    sslerr == SSL_ERROR_WANT_READ) {
-	  /*
-	   * still in handshake 
-	   */
-	  FD_ZERO(&httpfds);
-	  FD_SET(connFd, &httpfds);
-	  if (sslerr == SSL_ERROR_WANT_WRITE) {
-	    isReady =
-		select(connFd + 1, NULL, &httpfds, NULL,
-		       &httpSelectTimeout);
-	  } else {
-	    isReady =
-		select(connFd + 1, &httpfds, NULL, NULL,
-		       &httpSelectTimeout);
-	  }
-	  if (isReady == 0) {
-	    intSSLerror("Timeout error accepting SSL connection");
-	  } else if (isReady < 0) {
-	    intSSLerror("Error accepting SSL connection");
-	  }
-	} else {
-	  /*
-	   * unexpected error 
-	   */
-	  intSSLerror("Error accepting SSL connection");
-	}
+        int             sslacc,
+                        sslerr;
+        sslacc = SSL_accept(conn_fd.ssl);
+        if (sslacc == 1) {
+          /*
+           * accepted 
+           */
+          break;
+        }
+        sslerr = SSL_get_error(conn_fd.ssl, sslacc);
+        if (sslerr == SSL_ERROR_WANT_WRITE ||
+            sslerr == SSL_ERROR_WANT_READ) {
+          /*
+           * still in handshake 
+           */
+          FD_ZERO(&httpfds);
+          FD_SET(connFd, &httpfds);
+          if (sslerr == SSL_ERROR_WANT_WRITE) {
+            isReady =
+                select(connFd + 1, NULL, &httpfds, NULL,
+                       &httpSelectTimeout);
+          } else {
+            isReady =
+                select(connFd + 1, &httpfds, NULL, NULL,
+                       &httpSelectTimeout);
+          }
+          if (isReady == 0) {
+            intSSLerror("Timeout error accepting SSL connection");
+          } else if (isReady < 0) {
+            intSSLerror("Error accepting SSL connection");
+          }
+        } else {
+          /*
+           * unexpected error 
+           */
+          intSSLerror("Error accepting SSL connection");
+        }
       }
       flags ^= O_NONBLOCK;
       fcntl(connFd, F_SETFL, flags);
@@ -1290,7 +1285,7 @@ handleHttpRequest(int connFd)
       BIO_push(conn_fd.bio, sslb);
       if (BIO_set_write_buffer_size(conn_fd.bio, SOCKBUFSZ)) {
       } else {
-	conn_fd.bio = NULL;
+        conn_fd.bio = NULL;
       }
 #endif
     } else {
@@ -1307,16 +1302,16 @@ handleHttpRequest(int connFd)
       numRequest += 1;
 
       if (doHttpRequest(conn_fd)) {
-	/*
-	 * eof reached - leave 
-	 */
-	break;
+        /*
+         * eof reached - leave 
+         */
+        break;
       }
       if (keepaliveTimeout == 0 || numRequest >= keepaliveMaxRequest) {
-	/*
-	 * no persistence wanted or exceeded - quit 
-	 */
-	break;
+        /*
+         * no persistence wanted or exceeded - quit 
+         */
+        break;
       }
       /*
        * wait for next request or timeout 
@@ -1324,16 +1319,16 @@ handleHttpRequest(int connFd)
       httpTimeout.tv_sec = keepaliveTimeout;
       httpTimeout.tv_usec = keepaliveTimeout;
       isReady =
-	  select(conn_fd.socket + 1, &httpfds, NULL, NULL, &httpTimeout);
+          select(conn_fd.socket + 1, &httpfds, NULL, NULL, &httpTimeout);
       if (isReady == 0) {
-	_SFCB_TRACE(1,
-		    ("--- HTTP connection timeout, quit %d ",
-		     currentProc));
-	break;
+        _SFCB_TRACE(1,
+                    ("--- HTTP connection timeout, quit %d ",
+                     currentProc));
+        break;
       } else if (isReady < 0) {
-	_SFCB_TRACE(1,
-		    ("--- HTTP connection error, quit %d ", currentProc));
-	break;
+        _SFCB_TRACE(1,
+                    ("--- HTTP connection error, quit %d ", currentProc));
+        break;
       }
     } while (1);
 
@@ -1468,7 +1463,7 @@ httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
       port = (unsigned short) atoi(argv[i]);
     } else if (strcmp(argv[i], "-tm") == 0) {
       if (isdigit(*argv[i + 1])) {
-	++i;
+        ++i;
       }
     } else if (strcmp(argv[i], "-F") == 0)
       doFork = 1;
@@ -1491,14 +1486,14 @@ httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
 
   if (sslMode)
     mlogf(M_INFO, M_SHOW,
-	  "--- %s HTTPS Daemon V" sfcHttpDaemonVersion
-	  " started - %d - port %ld\n", name, currentProc, port);
+          "--- %s HTTPS Daemon V" sfcHttpDaemonVersion
+          " started - %d - port %ld\n", name, currentProc, port);
 #ifdef HAVE_UDS
   else
     mlogf(M_INFO, M_SHOW,
-	  "--- %s HTTP  Daemon V" sfcHttpDaemonVersion
-	  " started - %d - port %ld, %s\n", name, currentProc, port,
-	  udsPath);
+          "--- %s HTTP  Daemon V" sfcHttpDaemonVersion
+          " started - %d - port %ld, %s\n", name, currentProc, port,
+          udsPath);
 #endif
 
   if (doBa)
@@ -1506,16 +1501,16 @@ httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
 #ifdef HAVE_UDS
   if (doUdsAuth)
     mlogf(M_INFO, M_SHOW,
-	  "--- Using Unix Socket Peer Cred Authentication\n");
+          "--- Using Unix Socket Peer Cred Authentication\n");
 #endif
 
   if (keepaliveTimeout == 0) {
     mlogf(M_INFO, M_SHOW, "--- Keep-alive timeout disabled\n");
   } else {
     mlogf(M_INFO, M_SHOW, "--- Keep-alive timeout: %ld seconds\n",
-	  keepaliveTimeout);
+          keepaliveTimeout);
     mlogf(M_INFO, M_SHOW, "--- Maximum requests per connection: %ld\n",
-	  keepaliveMaxRequest);
+          keepaliveMaxRequest);
   }
 
   ru = 1;
@@ -1535,7 +1530,7 @@ httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
     listenFd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 #endif
     setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, (char *) &ru,
-	       sizeof(ru));
+               sizeof(ru));
   }
 
   sin_len = sizeof(sin);
@@ -1571,7 +1566,7 @@ httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
     sin.sin_family = AF_INET;
     if (httpLocalOnly) {
       char           *loopback_int = "127.0.0.1";
-      inet_aton(loopback_int, &sin.sin_addr);	/* not INADDR_LOOPBACK ? */
+      inet_aton(loopback_int, &sin.sin_addr);   /* not INADDR_LOOPBACK ? */
     } else
       sin.sin_addr.s_addr = INADDR_ANY;
     sin.sin_port = htons(port);
@@ -1580,9 +1575,9 @@ httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
 
   if (listenFd >= 0) {
     if (bind(listenFd, (struct sockaddr *) &sin, sin_len) ||
-	listen(listenFd, 10)) {
+        listen(listenFd, 10)) {
       mlogf(M_ERROR, M_SHOW, "--- Cannot listen on port %ld (%s)\n", port,
-	    strerror(errno));
+            strerror(errno));
       sleep(1);
       kill(sfcbPid, 3);
     }
@@ -1607,9 +1602,9 @@ httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
     }
     mode_t          oldmask = umask(0007);
     if (bind(udsListenFd, (struct sockaddr *) &sun, sun_len) ||
-	listen(udsListenFd, 10)) {
+        listen(udsListenFd, 10)) {
       mlogf(M_ERROR, M_SHOW, "--- Cannot listen on unix socket %s (%s)\n",
-	    udsPath, strerror(errno));
+            udsPath, strerror(errno));
       sleep(1);
       kill(sfcbPid, 3);
     }
@@ -1671,34 +1666,34 @@ httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
     } else if (strcasecmp(fnl, "require") == 0) {
       ccVerifyMode = CC_VERIFY_REQUIRE;
       SSL_CTX_set_verify(ctx,
-			 SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
-			 get_cert);
+                         SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+                         get_cert);
     } else {
       intSSLerror
-	  ("sslClientCertificate must be one of: ignore, accept or require");
+          ("sslClientCertificate must be one of: ignore, accept or require");
     }
     getControlChars("sslClientTrustStore", &fnt);
     _SFCB_TRACE(1, ("---  sslClientTrustStore = %s", fnt));
 
     if (ccVerifyMode != CC_VERIFY_IGNORE) {
       if (isDir(fnt))
-	rc = SSL_CTX_load_verify_locations(ctx, NULL, fnt);
+        rc = SSL_CTX_load_verify_locations(ctx, NULL, fnt);
       else
-	rc = SSL_CTX_load_verify_locations(ctx, fnt, NULL);
+        rc = SSL_CTX_load_verify_locations(ctx, fnt, NULL);
       if (rc != 1)
-	intSSLerror("Error locating the client trust store");
+        intSSLerror("Error locating the client trust store");
     }
 
     /*
      * SSLv2 is pretty old; no one should be needing it any more 
      */
     SSL_CTX_set_options(ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2 |
-			SSL_OP_SINGLE_DH_USE);
+                        SSL_OP_SINGLE_DH_USE);
     /*
      * disable weak ciphers 
      */
     if (SSL_CTX_set_cipher_list(ctx, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH")
-	!= 1)
+        != 1)
       intSSLerror("Error setting cipher list (no valid ciphers)");
 
   }
@@ -1726,18 +1721,18 @@ httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
       break;
     if (rc < 0) {
       if (errno == EINTR || errno == EAGAIN) {
-	continue;
+        continue;
       }
     }
     if (listenFd >= 0 && FD_ISSET(listenFd, &httpfds)) {
       sz = sin_len;
       if ((connFd = accept(listenFd, (__SOCKADDR_ARG) & sin, &sz)) < 0) {
-	if (errno == EINTR || errno == EAGAIN) {
-	  continue;
-	}
-	emsg = strerror(errno);
-	mlogf(M_ERROR, M_SHOW, "--- accept error %s\n", emsg);
-	_SFCB_ABORT();
+        if (errno == EINTR || errno == EAGAIN) {
+          continue;
+        }
+        emsg = strerror(errno);
+        mlogf(M_ERROR, M_SHOW, "--- accept error %s\n", emsg);
+        _SFCB_ABORT();
       }
       _SFCB_TRACE(1, ("--- Processing http request"));
 
@@ -1748,12 +1743,12 @@ httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
     if (udsListenFd >= 0 && FD_ISSET(udsListenFd, &httpfds)) {
       sz = sun_len;
       if ((connFd = accept(udsListenFd, (__SOCKADDR_ARG) & sun, &sz)) < 0) {
-	if (errno == EINTR || errno == EAGAIN) {
-	  continue;
-	}
-	emsg = strerror(errno);
-	mlogf(M_ERROR, M_SHOW, "--- accept error %s\n", emsg);
-	_SFCB_ABORT();
+        if (errno == EINTR || errno == EAGAIN) {
+          continue;
+        }
+        emsg = strerror(errno);
+        mlogf(M_ERROR, M_SHOW, "--- accept error %s\n", emsg);
+        _SFCB_ABORT();
       }
       _SFCB_TRACE(1, ("--- Processing http request"));
 
@@ -1781,7 +1776,7 @@ get_cert(int preverify_ok, X509_STORE_CTX * x509_ctx)
 }
 
 typedef int     (*Validate) (X509 * certificate, char **principal,
-			     int mode);
+                             int mode);
 
 static int
 ccValidate(X509 * certificate, char **principal, int mode)
@@ -1798,18 +1793,23 @@ ccValidate(X509 * certificate, char **principal, int mode)
     if ((authLib = dlopen(dlName, RTLD_LAZY))) {
       validate = dlsym(authLib, "_sfcCertificateAuthenticate");
       if (validate) {
-	result = validate(certificate, principal, mode);
+        result = validate(certificate, principal, mode);
       } else {
-	mlogf(M_ERROR, M_SHOW,
-	      "--- Certificate authentication exit %s not found\n",
-	      dlName);
-	result = 0;
+        mlogf(M_ERROR, M_SHOW,
+              "--- Certificate authentication exit %s not found\n",
+              dlName);
+        result = 0;
       }
     }
   } else {
     mlogf(M_ERROR, M_SHOW,
-	  "--- Certificate authentication exit not configured\n");
+          "--- Certificate authentication exit not configured\n");
   }
   _SFCB_RETURN(result);
 }
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -19,7 +19,6 @@
  *
  */
 
-
 #ifndef _CMPIMACSX_H_
 #define _CMPIMACSX_H_
 
@@ -58,7 +57,7 @@
 	 @return The function table of this Class provider.
       */
 CMPIClassMI    *CMClassMIStub(chars pfx, chars pn,
-			      CMPIBroker * broker, statement hook);
+                              CMPIBroker * broker, statement hook);
 #else
 #define CMClassMIStub(pfx,pn,broker,hook) \
   static CMPIClassMIFT clsMIFT__={ \
@@ -106,8 +105,8 @@ CMPIClassMI    *CMClassMIStub(chars pfx, chars pn,
 	 @return The function table of this Qualifier provider.
       */
 CMPIQualifierDeclMI *CMQualifierDeclMIStub(chars pfx, chars pn,
-					   CMPIBroker * broker,
-					   statement hook);
+                                           CMPIBroker * broker,
+                                           statement hook);
 #else
 #define CMQualifierDeclMIStub(pfx,pn,broker,hook) \
   static CMPIQualifierDeclMIFT qualDeclMIFT__={ \
@@ -139,11 +138,16 @@ CMPIQualifierDeclMI *CMQualifierDeclMIStub(chars pfx, chars pn,
 	 @return Service return status.
       */
 inline static CMPIStatus CMReturnQualifier
-    (const CMPIResult * rslt, const CMPIValue * val) {
+    (const CMPIResult *rslt, const CMPIValue * val) {
   return ((rslt)->ft->returnData((rslt), (val), (CMPI_ptr)));
 }
 #else
 #define CMReturnQualifier(r,o)    ((r)->ft->returnData((r),(o),(CMPI_qualifierDecl)))
 #endif
 
-#endif				// _CMPIMACSX_H_
+#endif                          // _CMPIMACSX_H_
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

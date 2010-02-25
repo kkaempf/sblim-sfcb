@@ -19,7 +19,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,13 +36,12 @@ typedef struct native_subcond {
 } NativeSubCond;
 
 static NativeSubCond *__new_subcond(int mode, CMPIValuePtr ptr,
-				    CMPIStatus * rc);
-
+                                    CMPIStatus *rc);
 
 /*****************************************************************************/
 
 static CMPIStatus
-__eft_release(CMPISubCond * cond)
+__eft_release(CMPISubCond *cond)
 {
   NativeSubCond  *c = (NativeSubCond *) cond;
 
@@ -56,18 +54,16 @@ __eft_release(CMPISubCond * cond)
   CMReturn(CMPI_RC_ERR_FAILED);
 }
 
-
 static CMPISubCond *
-__eft_clone(const CMPISubCond * cond, CMPIStatus * rc)
+__eft_clone(const CMPISubCond *cond, CMPIStatus *rc)
 {
   NativeSubCond  *c = (NativeSubCond *) cond;
 
   return (CMPISubCond *) __new_subcond(MEM_NOT_TRACKED, c->cond, rc);
 }
 
-
 static CMPICount
-__eft_getCount(const CMPISubCond * cond, CMPIStatus * rc)
+__eft_getCount(const CMPISubCond *cond, CMPIStatus *rc)
 {
   NativeSubCond  *c = (NativeSubCond *) cond;
   CMPIArray      *conds = (CMPIArray *) c->cond.ptr;
@@ -81,7 +77,7 @@ __eft_getCount(const CMPISubCond * cond, CMPIStatus * rc)
 }
 
 static CMPIPredicate *__eft_getPredicateAt
-    (const CMPISubCond * cond, unsigned int index, CMPIStatus * rc) {
+    (const CMPISubCond *cond, unsigned int index, CMPIStatus *rc) {
   NativeSubCond  *c = (NativeSubCond *) cond;
   CMPIValuePtr    pvp = { NULL, 0 };
   CMPIPredicate  *pr = NULL;
@@ -106,14 +102,14 @@ static CMPIPredicate *__eft_getPredicateAt
 }
 
 static CMPIPredicate *__eft_getPredicate
-    (const CMPISubCond * cond, const char *id, CMPIStatus * rc) {
+    (const CMPISubCond *cond, const char *id, CMPIStatus *rc) {
   if (rc)
     CMSetStatus(rc, CMPI_RC_ERR_NOT_SUPPORTED);
   return NULL;
 }
 
 static NativeSubCond *
-__new_subcond(int mode, CMPIValuePtr ptr, CMPIStatus * rc)
+__new_subcond(int mode, CMPIValuePtr ptr, CMPIStatus *rc)
 {
   static CMPISubCondFT eft = {
     NATIVE_FT_VERSION,
@@ -130,7 +126,6 @@ __new_subcond(int mode, CMPIValuePtr ptr, CMPIStatus * rc)
   };
   int             state;
 
-
   NativeSubCond   cond,
                  *tCond;
   memset(&cond, 0, sizeof(cond));
@@ -146,15 +141,19 @@ __new_subcond(int mode, CMPIValuePtr ptr, CMPIStatus * rc)
   return tCond;
 }
 
-
 CMPISubCond    *
-TrackedCMPISubCond(CMPIValuePtr ptr, CMPIStatus * rc)
+TrackedCMPISubCond(CMPIValuePtr ptr, CMPIStatus *rc)
 {
   return (CMPISubCond *) __new_subcond(MEM_TRACKED, ptr, rc);
 }
 
 CMPISubCond    *
-NewCMPISubCond(CMPIValuePtr ptr, CMPIStatus * rc)
+NewCMPISubCond(CMPIValuePtr ptr, CMPIStatus *rc)
 {
   return (CMPISubCond *) __new_subcond(MEM_NOT_TRACKED, ptr, rc);
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

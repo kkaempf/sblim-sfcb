@@ -39,17 +39,15 @@
 #include "mlog.h"
 #include "support.h"
 
-
 #ifdef THINK_C
 #define malloc NewPtr
 #endif
 
 #define NEW(x) ((x *) emalloc(sizeof(x)))
 
-
 static void     initialize_list(Generic_list * list);
 static void     initialize_sorted_list(Generic_list * list,
-				       int (*lt) (void *a, void *b));
+                                       int (*lt) (void *a, void *b));
 static void     destroy_list(Generic_list * list);
 static void     add_to_beginning(Generic_list list, void *pointer);
 static void     add_to_end(Generic_list list, void *pointer);
@@ -89,8 +87,6 @@ static Generic_list copy_list(Generic_list list);
  * remove_all_such_that(Generic_list list, int (*fn) (const void *pointer,
  * const void *args), const void *args); 
  */
-
-
 
 static char    *module = "generic_list";
 
@@ -424,7 +420,7 @@ is_in_list(const Generic_list list, const void *pointer)
   element = list.info->pre_element.next;
 
   while (element != &list.info->post_element
-	 && element->pointer != pointer)
+         && element->pointer != pointer)
     element = element->next;
 
   return (element != &list.info->post_element);
@@ -432,7 +428,7 @@ is_in_list(const Generic_list list, const void *pointer)
 
 /****************************************************************************/
 
-static Generic_list
+static          Generic_list
 copy_list(Generic_list list)
 {
   Generic_list    list_copy;
@@ -535,7 +531,6 @@ copy_list(Generic_list list)
  * (obj, args)) remove_current(list); } 
  */
 
-
 /****************************************************************************/
 /****************************************************************************/
 /**                                                                        **/
@@ -556,7 +551,6 @@ emalloc(unsigned int n)
   }
   return ptr;
 }
-
 
 static void
 listRelease(UtilList * ul)
@@ -690,7 +684,6 @@ listRemoveThis(UtilList * ul, void *elm)
   return remove_from_list(l, elm);
 }
 
-
 Util_List_FT    UtilList_ft = {
   1,
   listRelease,
@@ -715,7 +708,6 @@ Util_List_FT    UtilList_ft = {
 
 Util_List_FT   *UtilListFT = &UtilList_ft;
 
-
 UtilList       *
 newList()
 {
@@ -730,3 +722,8 @@ newList()
 
   return tUl;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -21,7 +21,6 @@
 const char     *_mlog_id =
     "$Id: mlog.c,v 1.10 2009/08/07 23:31:13 mchasal Exp $";
 
-
 #include "mlog.h"
 #include "msgqueue.h"
 #include <syslog.h>
@@ -32,7 +31,6 @@ const char     *_mlog_id =
 // semaphore
 static key_t    logSemKey;
 static int      logSem = -1;
-
 
 void
 startLogging(const char *name, int level)
@@ -48,8 +46,8 @@ startLogging(const char *name, int level)
   if ((logSem = semget(logSemKey, 1, IPC_CREAT | IPC_EXCL | 0600)) == -1) {
     char           *emsg = strerror(errno);
     fprintf(stderr,
-	    "\n--- Logging semaphore create key: 0x%x failed: %s\n",
-	    logSemKey, emsg);
+            "\n--- Logging semaphore create key: 0x%x failed: %s\n",
+            logSemKey, emsg);
     abort();
   }
 
@@ -127,3 +125,8 @@ mlogf(int priority, int errout, const char *fmt, ...)
     // not aborting since that will kill sfcb, so try to continue
   }
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

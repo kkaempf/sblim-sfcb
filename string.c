@@ -20,7 +20,6 @@
  *
  */
 
-
 #include <string.h>
 
 #include "native.h"
@@ -31,15 +30,13 @@ struct native_string {
   int             mem_state;
 };
 
-
 static struct native_string *__new_string(int, const char *, CMPIStatus *,
-					  int);
-
+                                          int);
 
 /*****************************************************************************/
 
 static CMPIStatus
-__sft_release(CMPIString * string)
+__sft_release(CMPIString *string)
 {
   struct native_string *s = (struct native_string *) string;
 
@@ -55,18 +52,16 @@ __sft_release(CMPIString * string)
   CMReturn(CMPI_RC_ERR_FAILED);
 }
 
-
 static CMPIString *
-__sft_clone(const CMPIString * string, CMPIStatus * rc)
+__sft_clone(const CMPIString *string, CMPIStatus *rc)
 {
   return (CMPIString *)
       __new_string(MEM_NOT_TRACKED, string->ft->getCharPtr(string, rc), rc,
-		   0);
+                   0);
 }
 
-
 static char    *
-__sft_getCharPtr(const CMPIString * string, CMPIStatus * rc)
+__sft_getCharPtr(const CMPIString *string, CMPIStatus *rc)
 {
   return (char *) string->hdl;
 }
@@ -79,7 +74,7 @@ static CMPIStringFT sft = {
 };
 
 static struct native_string *
-__new_string(int mm_add, const char *ptr, CMPIStatus * rc, int reown)
+__new_string(int mm_add, const char *ptr, CMPIStatus *rc, int reown)
 {
   static CMPIString s = {
     NULL,
@@ -106,19 +101,17 @@ __new_string(int mm_add, const char *ptr, CMPIStatus * rc, int reown)
   return (struct native_string *) tStr;
 }
 
-
 CMPIString     *
-sfcb_native_new_CMPIString(const char *ptr, CMPIStatus * rc, int reown)
+sfcb_native_new_CMPIString(const char *ptr, CMPIStatus *rc, int reown)
 {
   return (CMPIString *) __new_string(MEM_TRACKED, ptr, rc, reown);
 }
 
 CMPIString     *
-NewCMPIString(const char *ptr, CMPIStatus * rc)
+NewCMPIString(const char *ptr, CMPIStatus *rc)
 {
   return (CMPIString *) __new_string(MEM_NOT_TRACKED, ptr, rc, 0);
 }
-
 
 /****************************************************************************/
 
@@ -126,3 +119,8 @@ NewCMPIString(const char *ptr, CMPIStatus * rc)
 /*** mode: C           ***/
 /*** c-basic-offset: 8 ***/
 /*** End:              ***/
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

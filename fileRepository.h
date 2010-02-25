@@ -50,20 +50,20 @@ typedef struct blobIndex {
 
 extern void     freeBlobIndex(BlobIndex ** bi, int all);
 extern int      getIndex(const char *ns, const char *cls, int elen,
-			 int mki, BlobIndex ** bip);
+                         int mki, BlobIndex ** bip);
 extern int      addBlob(const char *ns, const char *cls, char *id,
-			void *blob, int len);
+                        void *blob, int len);
 extern int      deleteBlob(const char *ns, const char *cls,
-			   const char *id);
+                           const char *id);
 extern void    *getBlob(const char *ns, const char *cls, const char *id,
-			int *len);
+                        int *len);
 extern int      existingBlob(const char *ns, const char *cls,
-			     const char *id);
+                             const char *id);
 extern int      existingNameSpace(const char *ns);
 extern void    *getFirst(BlobIndex * bi, int *len, char **keyb,
-			 size_t * keybl);
+                         size_t * keybl);
 extern void    *getNext(BlobIndex * bi, int *len, char **keyb,
-			size_t * keybl);
+                        size_t * keybl);
 
 /*
  * NOTE: useAlternateRepository must be called prior to calling any other
@@ -74,3 +74,8 @@ extern void    *getNext(BlobIndex * bi, int *len, char **keyb,
 extern void     useAlternateRepository(const char *inAltRepos);
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -123,7 +123,7 @@ typedef struct traceId {
 void            changeTextColor(int reset);
 int             colorTrace;
 
-#define MAX_MSG_SIZE 1024	/* max length of trace message */
+#define MAX_MSG_SIZE 1024       /* max length of trace message */
 
 #define TRACE_PROVIDERMGR       1
 #define TRACE_PROVIDERDRV       2
@@ -160,3 +160,8 @@ extern int      terminating;
 #ifdef UNITTEST
 extern int      trace_test();
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

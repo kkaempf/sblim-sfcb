@@ -55,7 +55,6 @@
 #include "sqlStatement.h"
 #include "control.h"
 
-
 // unsigned long exFlags = 0;
 static char    *name;
 
@@ -106,7 +105,6 @@ static key_t    dbpWorkSemKey;
 static int      dbpProcSem;
 static int      dbpWorkSem;
 
-
 extern int      setupControl(char *);
 extern int      getControlNum(char *id, long *val);
 extern int      getControlBool(char *id, int *val);
@@ -151,7 +149,6 @@ initDbpProcCtl(int p)
   semctl(dbpWorkSem, 0, SETVAL, sun);
 }
 
-
 char           *
 processSQLQuery(char *query, CommHndl conn_fd)
 {
@@ -164,9 +161,9 @@ processSQLQuery(char *query, CommHndl conn_fd)
   if (!stat) {
     printd("Parsen erfolgreich\n");
     res =
-	(char *) malloc(strlen(rs->meta) + strlen(rs->tupel) +
-			strlen(rs->sw->reason) + strlen(rs->sw->sqlstate) +
-			4 + 1 + 3 + 3 + 3 + 1);
+        (char *) malloc(strlen(rs->meta) + strlen(rs->tupel) +
+                        strlen(rs->sw->reason) + strlen(rs->sw->sqlstate) +
+                        4 + 1 + 3 + 3 + 3 + 1);
     strcpy(res, "2 1\n");
     strcat(res, rs->sw->sqlstate);
     strcat(res, ";");
@@ -189,8 +186,8 @@ processSQLQuery(char *query, CommHndl conn_fd)
       rs->sw->sqlstate = "03000";
     }
     res =
-	(char *) malloc(strlen(rs->sw->reason) + strlen(rs->sw->sqlstate) +
-			4 + 1 + 3 + 1);
+        (char *) malloc(strlen(rs->sw->reason) + strlen(rs->sw->sqlstate) +
+                        4 + 1 + 3 + 1);
     printd("Parse Error 2!!\n");
     strcpy(res, "2 0\n");
     strcat(res, rs->sw->sqlstate);
@@ -202,10 +199,6 @@ processSQLQuery(char *query, CommHndl conn_fd)
   // printf("return...\n");
   return res;
 }
-
-
-
-
 
 // CommHndl conn_fd;
 /*
@@ -227,13 +220,14 @@ handleDbpSession(int connFd)
   char            buffer[1024],
                   bc[1];
   char            buffer2[500];
-  char           *response = NULL;	// Fehlermeldung reinschreiben und 
-					// an Client zurückschicken.
+  char           *response = NULL;      // Fehlermeldung reinschreiben und 
+                                        // 
+  // 
+  // an Client zurückschicken.
   // Vermutlich später nicht mehr notwendig!!
   char           *header = NULL;
   char           *payload;
   int             nbytes;
-
 
   _SFCB_ENTER(TRACE_DBPDAEMON, "handledbpRequest");
   _SFCB_TRACE(1, ("--- Forking sql handler"));
@@ -246,7 +240,7 @@ handleDbpSession(int connFd)
     semAcquire(dbpProcSem, 0);
     for (dbpProcId = 0; dbpProcId < hMax; dbpProcId++)
       if (semGetValue(dbpProcSem, dbpProcId + 1) == 0)
-	break;
+        break;
     printf("dbpProcId: %d hMax: %d\n", dbpProcId, hMax);
     procReleaseUnDo.sem_num = dbpProcId + 1;
 
@@ -262,20 +256,20 @@ handleDbpSession(int connFd)
 
       if (sfcbSSLMode) {
 #if defined USE_SSL
-	conn_fd.socket = -2;
-	conn_fd.bio = BIO_new(BIO_s_socket());
-	BIO_set_fd(conn_fd.bio, connFd, BIO_CLOSE);
-	if (!(conn_fd.ssl = SSL_new(ctx)))
-	  intSSLerror("Error creating SSL context");
-	SSL_set_bio(conn_fd.ssl, conn_fd.bio, conn_fd.bio);
-	if (SSL_accept(conn_fd.ssl) <= 0)
-	  intSSLerror("Error accepting SSL connection");
+        conn_fd.socket = -2;
+        conn_fd.bio = BIO_new(BIO_s_socket());
+        BIO_set_fd(conn_fd.bio, connFd, BIO_CLOSE);
+        if (!(conn_fd.ssl = SSL_new(ctx)))
+          intSSLerror("Error creating SSL context");
+        SSL_set_bio(conn_fd.ssl, conn_fd.bio, conn_fd.bio);
+        if (SSL_accept(conn_fd.ssl) <= 0)
+          intSSLerror("Error accepting SSL connection");
 #endif
       } else {
-	conn_fd.socket = connFd;
+        conn_fd.socket = connFd;
 #if defined USE_SSL
-	conn_fd.bio = NULL;
-	conn_fd.ssl = NULL;
+        conn_fd.bio = NULL;
+        conn_fd.ssl = NULL;
 #endif
       }
     } else if (r > 0) {
@@ -294,16 +288,16 @@ handleDbpSession(int connFd)
   if (r == 0) {
     if (doFork) {
       _SFCB_TRACE(1, ("--- Forked sql handler %d", currentProc))
-	  resultSockets = sPairs[hBase + dbpProcId];
+          resultSockets = sPairs[hBase + dbpProcId];
     }
 
     _SFCB_TRACE(1, ("--- Started sql handler %d %d", currentProc,
-		    resultSockets.receive));
+                    resultSockets.receive));
 
     if (getenv("SFCB_PAUSE_HTTP"))
       for (;;) {
-	fprintf(stderr, "-#- Pausing - pid: %d\n", currentProc);
-	sleep(5);
+        fprintf(stderr, "-#- Pausing - pid: %d\n", currentProc);
+        sleep(5);
       }
 
     conn_fd.socket = connFd;
@@ -316,195 +310,193 @@ handleDbpSession(int connFd)
 
       // doHttpRequest(conn_fd);
       nbytes = read(connFd, buffer, HEADER);
-      header = (char *) malloc(nbytes);	// sowas wie \n Steuerzeichen
+      header = (char *) malloc(nbytes); // sowas wie \n Steuerzeichen
       strncpy(header, buffer, nbytes);
       header[nbytes] = 0;
       h = atoi(header);
       printd("Ein Client h: %d header: %s nbytes: %d\n", h, header,
-	     nbytes);
+             nbytes);
       // Sonderfall, noch nicht eingeloggt
       if (by & h) {
-	// login
-	nbytes = read(connFd, buffer, 2);
-	c = atoi((char *) &buffer);
-	if (c == CONNECT) {
-	  printd("Ein Client hat sich korrekt angemeldet\n");
-	  response = "1 1 1\n";	// "Sie sind angemeldet. Warte auf
-				// Anfragen:\n";
-	  write(connFd, response, strlen(response));
-	  by = 0;
-	  h = CONTINUE;		// dummy, um switch sofort zu verlassen
-	} else {
-	  printd("Ein Client hat sich NICHT korrekt angemeldet %d\n", c);
-	  response = "1 1 0\n";	// "Sie sind nicht angemeldet. Auf
-				// wiedersehen.\n";
-	  write(connFd, response, strlen(response));
-	  break;
-	}
-	while ((nbytes = read(connFd, bc, 1)) > 0)	// 
-	  if (bc[0] == '\n')
-	    break;
+        // login
+        nbytes = read(connFd, buffer, 2);
+        c = atoi((char *) &buffer);
+        if (c == CONNECT) {
+          printd("Ein Client hat sich korrekt angemeldet\n");
+          response = "1 1 1\n"; // "Sie sind angemeldet. Warte auf
+          // Anfragen:\n";
+          write(connFd, response, strlen(response));
+          by = 0;
+          h = CONTINUE;         // dummy, um switch sofort zu verlassen
+        } else {
+          printd("Ein Client hat sich NICHT korrekt angemeldet %d\n", c);
+          response = "1 1 0\n"; // "Sie sind nicht angemeldet. Auf
+          // wiedersehen.\n";
+          write(connFd, response, strlen(response));
+          break;
+        }
+        while ((nbytes = read(connFd, bc, 1)) > 0)      // 
+          if (bc[0] == '\n')
+            break;
       }
       if (by) {
-	printd("Ein Client hat sich NICHT korrekt angemeldet %d\n", h);
-	response = "1 1 0\n";	// "Sie sind nicht angemeldet. Auf
-				// wiedersehen.\n";
-	write(connFd, response, strlen(response));
-	break;
+        printd("Ein Client hat sich NICHT korrekt angemeldet %d\n", h);
+        response = "1 1 0\n";   // "Sie sind nicht angemeldet. Auf
+        // wiedersehen.\n";
+        write(connFd, response, strlen(response));
+        break;
       }
       switch (h) {
       case CONTINUE:
-	break;
+        break;
       case PROTOCOL:{
-	  nbytes = read(connFd, buffer, 2);
-	  c = atoi((char *) &buffer);
+          nbytes = read(connFd, buffer, 2);
+          c = atoi((char *) &buffer);
 
-	  // Pipe leersaugen
-	  while ((nbytes = read(connFd, bc, 1)) > 0)	// 
-	    if (bc[0] == '\n')
-	      break;
+          // Pipe leersaugen
+          while ((nbytes = read(connFd, bc, 1)) > 0)    // 
+            if (bc[0] == '\n')
+              break;
 
-
-	  if (c == CONNECT) {
-	    response = "1 1 0\n";	// "Sie sind bereits angemeldet,
-					// Operation wird ignoriert:\n";
-	    write(connFd, response, strlen(response));
-	  } else if (c == LOGOUT) {
-	    printd("Der Client hat die Verbindung beendet\n");
-	    response = "1 2 1\n";	// "By\n";
-	    write(connFd, response, strlen(response));
-	    by = 1;
-	  } else {
-	    b2 = sprintf(buffer2, "%d %d %d", 1, c, 0);	// sprintf(buffer2, 
-							// "Syntxfehler:
-							// Operation %d
-							// ist keine
-							// Protokolloperation\n",c);
-	    printd("%s", buffer2);
-	    write(connFd, buffer2, b2);
-	  }
-	  break;
-	}
+          if (c == CONNECT) {
+            response = "1 1 0\n";       // "Sie sind bereits angemeldet,
+            // Operation wird ignoriert:\n";
+            write(connFd, response, strlen(response));
+          } else if (c == LOGOUT) {
+            printd("Der Client hat die Verbindung beendet\n");
+            response = "1 2 1\n";       // "By\n";
+            write(connFd, response, strlen(response));
+            by = 1;
+          } else {
+            b2 = sprintf(buffer2, "%d %d %d", 1, c, 0); // sprintf(buffer2, 
+                                                        // 
+            // 
+            // "Syntxfehler:
+            // Operation %d
+            // ist keine
+            // Protokolloperation\n",c);
+            printd("%s", buffer2);
+            write(connFd, buffer2, b2);
+          }
+          break;
+        }
       case SQL:
-	while ((nbytes = read(connFd, buffer, 1024)) > 0) {
-	  if (buffer[nbytes - 1] == '\n')
-	    break;
-	  // falls Anweisung laenerg als 1024, muss buffer mit
-	  // vorgaengerbuffer konkadiniert werden. vgl. adrian 
-	}
-	// abschließendes $ finden:
+        while ((nbytes = read(connFd, buffer, 1024)) > 0) {
+          if (buffer[nbytes - 1] == '\n')
+            break;
+          // falls Anweisung laenerg als 1024, muss buffer mit
+          // vorgaengerbuffer konkadiniert werden. vgl. adrian 
+        }
+        // abschließendes $ finden:
 
-	// printd("SQL: %d\n",nbytes);
-	nbytes--;
-	while ((nbytes > 0) && (buffer[nbytes] != '$'))
-	  nbytes--;
-	// printf("malloc %d bytes",nbytes);
-	payload = (char *) malloc(nbytes + 1 + 1);
+        // printd("SQL: %d\n",nbytes);
+        nbytes--;
+        while ((nbytes > 0) && (buffer[nbytes] != '$'))
+          nbytes--;
+        // printf("malloc %d bytes",nbytes);
+        payload = (char *) malloc(nbytes + 1 + 1);
 
-	// ein \n voranstellen, yyerror()s wegen
-	// *payload = '\n';
-	strcpy(payload, "\n");
-	strncat(payload, buffer, nbytes);
+        // ein \n voranstellen, yyerror()s wegen
+        // *payload = '\n';
+        strcpy(payload, "\n");
+        strncat(payload, buffer, nbytes);
 
-	response = processSQLQuery(payload, conn_fd);	// -->
-							// Datenstruktur,
-							// in die das
-							// Statement
-							// reinkommt
+        response = processSQLQuery(payload, conn_fd);   // -->
+        // Datenstruktur,
+        // in die das
+        // Statement
+        // reinkommt
 
-	free(payload);
-	payload = NULL;
-	// ResultMetaData
+        free(payload);
+        payload = NULL;
+        // ResultMetaData
 
+        write(connFd, response, strlen(response));
+        free(response);
+        response = NULL;
 
-	write(connFd, response, strlen(response));
-	free(response);
-	response = NULL;
-
-	break;
+        break;
       case META:
-	nbytes = read(connFd, buffer, 2);
-	c = atoi((char *) &buffer);
-	if (c == METADB) {
-	  response = (char *) malloc(strlen(metaDB) + 7);
-	  response = strcpy(response, "3 1 1\n");
-	  response = strcat(response, metaDB);
-	  write(connFd, response, strlen(response));
-	  free(response);
-	  break;
-	}
+        nbytes = read(connFd, buffer, 2);
+        c = atoi((char *) &buffer);
+        if (c == METADB) {
+          response = (char *) malloc(strlen(metaDB) + 7);
+          response = strcpy(response, "3 1 1\n");
+          response = strcat(response, metaDB);
+          write(connFd, response, strlen(response));
+          free(response);
+          break;
+        }
 
-	if (c == TABLES || c == STABLES || c == KEYS || c == COLS) {
-	  // printf("UND los\n");
+        if (c == TABLES || c == STABLES || c == KEYS || c == COLS) {
+          // printf("UND los\n");
 
-	  while ((nbytes = read(connFd, buffer, 1024)) > 0) {
-	    if (buffer[nbytes - 1] == '\n')
-	      break;
-	    // falls Anweisung laenerg als 1024, muss buffer mit
-	    // vorgaengerbuffer konkadiniert werden. vgl. adrian 
-	  }
-	  // abschließendes $ finden:
+          while ((nbytes = read(connFd, buffer, 1024)) > 0) {
+            if (buffer[nbytes - 1] == '\n')
+              break;
+            // falls Anweisung laenerg als 1024, muss buffer mit
+            // vorgaengerbuffer konkadiniert werden. vgl. adrian 
+          }
+          // abschließendes $ finden:
 
-	  printd("SQL: %d\n", nbytes);
-	  nbytes--;
-	  while ((nbytes > 0) && (buffer[nbytes] != '$'))
-	    nbytes--;
-	  // printf("malloc %d bytes",nbytes);
+          printd("SQL: %d\n", nbytes);
+          nbytes--;
+          while ((nbytes > 0) && (buffer[nbytes] != '$'))
+            nbytes--;
+          // printf("malloc %d bytes",nbytes);
 
-	  buffer[nbytes] = 0;
-	  if (nbytes == 0)
-	    payload = NULL;
-	  else {
-	    payload = (char *) malloc(nbytes + 1);
-	    strcpy(payload, buffer);
-	    // printd(">%s< %d\n",payload,c);
-	  }
-	  if (c == TABLES)
-	    response = processMetaTables(payload, "root/cimv2");
-	  else if (c == STABLES)
-	    response = processSuperTables(payload, "root/cimv2");
-	  else if (c == KEYS)
-	    response = processKeyTable(payload, "root/cimv2");
-	  else if (c == COLS) {
-	    char           *arg2 = strstr(payload, "::");
+          buffer[nbytes] = 0;
+          if (nbytes == 0)
+            payload = NULL;
+          else {
+            payload = (char *) malloc(nbytes + 1);
+            strcpy(payload, buffer);
+            // printd(">%s< %d\n",payload,c);
+          }
+          if (c == TABLES)
+            response = processMetaTables(payload, "root/cimv2");
+          else if (c == STABLES)
+            response = processSuperTables(payload, "root/cimv2");
+          else if (c == KEYS)
+            response = processKeyTable(payload, "root/cimv2");
+          else if (c == COLS) {
+            char           *arg2 = strstr(payload, "::");
 
-	    char           *arg1 = strtok(payload, "::");
-	    // printf("lllllll\n");
-	    // printf(">%s< >%s< >%s< >%s<\n",payload,arg2,arg1,arg2+2);
-	    response = processMetaColumns(arg1, arg2 + 2, "root/cimv2");
-	    // printf("zurück\n");
-	  }
-	  // printf(">>%s<<",response);
-	  free(payload);
-	  payload = NULL;
-	  write(connFd, response, strlen(response));
-	  // free(response);
-	  // dieses free tut nicht, weil irgendwo anders was nicht
-	  // stimmt!!!
-	  break;
-	}
-	break;
+            char           *arg1 = strtok(payload, "::");
+            // printf("lllllll\n");
+            // printf(">%s< >%s< >%s< >%s<\n",payload,arg2,arg1,arg2+2);
+            response = processMetaColumns(arg1, arg2 + 2, "root/cimv2");
+            // printf("zurück\n");
+          }
+          // printf(">>%s<<",response);
+          free(payload);
+          payload = NULL;
+          write(connFd, response, strlen(response));
+          // free(response);
+          // dieses free tut nicht, weil irgendwo anders was nicht
+          // stimmt!!!
+          break;
+        }
+        break;
       case SPOOLIN:
-	break;
+        break;
       case SPOOLOUT:
-	break;
+        break;
       default:
-	printd("Unbekannter Befehl: \"%s\"\n", header);
-	b2 = sprintf(buffer2, "Fehler: unbekannter Befehl:  %s \n",
-		     header);
-	// strncpy(response,buffer2,b2);
+        printd("Unbekannter Befehl: \"%s\"\n", header);
+        b2 = sprintf(buffer2, "Fehler: unbekannter Befehl:  %s \n",
+                     header);
+        // strncpy(response,buffer2,b2);
 
-	// response = "Fehler: Unbekannter Befehl\n";
-	write(connFd, buffer2, b2);
-	break;
-
+        // response = "Fehler: Unbekannter Befehl\n";
+        write(connFd, buffer2, b2);
+        break;
 
       }
       free(header);
       if (by)
-	break;
+        break;
     }
-
 
     if (!doFork)
       return;
@@ -514,7 +506,6 @@ handleDbpSession(int connFd)
     dumpTiming(currentProc);
     exit(0);
   }
-
 
 }
 
@@ -534,16 +525,16 @@ handleSigChld(int sig)
       break;
     if ((int) pid < 0) {
       if (errno == EINTR || errno == EAGAIN) {
-	// fprintf(stderr, "pid: %d continue \n", pid);
-	continue;
+        // fprintf(stderr, "pid: %d continue \n", pid);
+        continue;
       }
       if (errno != ECHILD)
-	perror("child wait");
+        perror("child wait");
       break;
     } else {
       running--;
       fprintf(stderr, "%s: SIGCHLD signal %d - %s(%d)\n", name, pid,
-	      __FILE__, __LINE__);
+              __FILE__, __LINE__);
     }
   }
   errno = oerrno;
@@ -553,11 +544,8 @@ handleSigUsr1(int sig)
 {
   stopAccepting = 1;
   fprintf(stderr, "%s: handleSigUsr1 signal %d - %s(%d)\n", name, sig,
-	  __FILE__, __LINE__);
+          __FILE__, __LINE__);
 }
-
-
-
 
 /*
  * Von httpDaemon aus httpAdapter abgeschrieben.
@@ -565,7 +553,7 @@ handleSigUsr1(int sig)
  */
 int
 dbpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
-{				// int argc, char *argv[], int sslMode) {
+{                               // int argc, char *argv[], int sslMode) {
   struct sockaddr_in sin;
   int             sz,
                   sin_len,
@@ -644,13 +632,12 @@ dbpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
 
   if (sslMode)
     mlogf(M_INFO, M_SHOW,
-	  "--- %s DBPS Daemon V" sfcdbpDaemonVersion
-	  " started - %d - port %ld\n", name, currentProc, port);
+          "--- %s DBPS Daemon V" sfcdbpDaemonVersion
+          " started - %d - port %ld\n", name, currentProc, port);
   else
     mlogf(M_INFO, M_SHOW,
-	  "--- %s DBP  Daemon V" sfcdbpDaemonVersion
-	  " started - %d - port %ld\n", name, currentProc, port);
-
+          "--- %s DBP  Daemon V" sfcdbpDaemonVersion
+          " started - %d - port %ld\n", name, currentProc, port);
 
   if (doBa)
     mlogf(M_INFO, M_SHOW, "--- Using Basic Authentication\n");
@@ -712,9 +699,9 @@ dbpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
     sz = sizeof(sin);
     if ((connFd = accept(listenFd, (__SOCKADDR_ARG) & sin, &sz)) < 0) {
       if (errno == EINTR || errno == EAGAIN) {
-	if (stopAccepting)
-	  break;
-	continue;
+        if (stopAccepting)
+          break;
+        continue;
       }
       emsg = strerror(errno);
       mlogf(M_ERROR, M_SHOW, "--- accept error %s\n", emsg);
@@ -730,14 +717,11 @@ dbpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
   for (;;) {
     if (running == 0) {
       mlogf(M_INFO, M_SHOW, "--- %s terminating %d\n", processName,
-	    getpid());
+            getpid());
       exit(0);
     }
     sleep(1);
   }
-
-
-
 
   /*
    * struct sockaddr_in sin; int sz,i,sin_len,ru; char *cp;//?? long
@@ -798,3 +782,8 @@ dbpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
    * handleDbpSession(connFd); close(connFd); } 
    */
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

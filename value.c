@@ -20,7 +20,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -84,10 +83,9 @@ sfcb_native_release_CMPIValue(CMPIType type, CMPIValue * val)
   }
 }
 
-
 CMPIValue
 sfcb_native_clone_CMPIValue(const CMPIType type,
-			    const CMPIValue * val, CMPIStatus * rc)
+                            const CMPIValue * val, CMPIStatus *rc)
 {
   CMPIValue       v;
   CMPIConstClass *cl;
@@ -172,95 +170,97 @@ sfcb_value2Chars(CMPIType type, CMPIValue * value)
 
     } else if (type & CMPI_ENC) {
       if (value->chars) {
-	/*
-	 * non - null encapsulated value 
-	 */
-	switch (type) {
-	case CMPI_instance:
-	  break;
+        /*
+         * non - null encapsulated value 
+         */
+        switch (type) {
+        case CMPI_instance:
+          break;
 
-	case CMPI_ref:
-	  cStr = value->ref->ft->toString(value->ref, NULL);	// __oft_toString(value->ref, 
-								// NULL);
-	  return strdup((char *) cStr->hdl);
-	  break;
+        case CMPI_ref:
+          cStr = value->ref->ft->toString(value->ref, NULL);    // __oft_toString(value->ref, 
+                                                                // 
+          // 
+          // NULL);
+          return strdup((char *) cStr->hdl);
+          break;
 
-	case CMPI_args:
-	  break;
+        case CMPI_args:
+          break;
 
-	case CMPI_filter:
-	  break;
+        case CMPI_filter:
+          break;
 
-	case CMPI_string:
-	case CMPI_numericString:
-	case CMPI_booleanString:
-	case CMPI_dateTimeString:
-	case CMPI_classNameString:
-	  if (value->string->hdl) {
-	    size = strlen((char *) value->string->hdl);
-	    p = malloc(size + 8);
-	    sprintf(p, "\"%s\"", (char *) value->string->hdl);
-	    return p;
-	  }
-	  break;
+        case CMPI_string:
+        case CMPI_numericString:
+        case CMPI_booleanString:
+        case CMPI_dateTimeString:
+        case CMPI_classNameString:
+          if (value->string->hdl) {
+            size = strlen((char *) value->string->hdl);
+            p = malloc(size + 8);
+            sprintf(p, "\"%s\"", (char *) value->string->hdl);
+            return p;
+          }
+          break;
 
-	case CMPI_dateTime:
-	  cStr = CMGetStringFormat(value->dateTime, NULL);
-	  size = strlen((char *) cStr->hdl);
-	  p = malloc(size + 8);
-	  sprintf(p, "\"%s\"", (char *) cStr->hdl);
-	  return p;
-	  break;
-	}
+        case CMPI_dateTime:
+          cStr = CMGetStringFormat(value->dateTime, NULL);
+          size = strlen((char *) cStr->hdl);
+          p = malloc(size + 8);
+          sprintf(p, "\"%s\"", (char *) cStr->hdl);
+          return p;
+          break;
+        }
       }
     } else if (type & CMPI_SIMPLE) {
 
       switch (type) {
       case CMPI_boolean:
-	return strdup(value->boolean ? "true" : "false");
+        return strdup(value->boolean ? "true" : "false");
 
       case CMPI_char16:
-	break;
+        break;
       }
 
     } else if (type & CMPI_INTEGER) {
 
       switch (type) {
       case CMPI_uint8:
-	sprintf(str, "%u", value->uint8);
-	return strdup(str);
+        sprintf(str, "%u", value->uint8);
+        return strdup(str);
       case CMPI_sint8:
-	sprintf(str, "%d", value->sint8);
-	return strdup(str);
+        sprintf(str, "%d", value->sint8);
+        return strdup(str);
       case CMPI_uint16:
-	sprintf(str, "%u", value->uint16);
-	return strdup(str);
+        sprintf(str, "%u", value->uint16);
+        return strdup(str);
       case CMPI_sint16:
-	sprintf(str, "%d", value->sint16);
-	return strdup(str);
+        sprintf(str, "%d", value->sint16);
+        return strdup(str);
       case CMPI_uint32:
-	sprintf(str, "%u", value->uint32);
-	return strdup(str);
+        sprintf(str, "%u", value->uint32);
+        return strdup(str);
       case CMPI_sint32:
-	sprintf(str, "%d", value->sint32);
-	return strdup(str);
+        sprintf(str, "%d", value->sint32);
+        return strdup(str);
       case CMPI_uint64:
-	sprintf(str, "%llu", value->uint64);
-	return strdup(str);
+        sprintf(str, "%llu", value->uint64);
+        return strdup(str);
       case CMPI_sint64:
-	sprintf(str, "%lld", value->sint64);
-	return strdup(str);
+        sprintf(str, "%lld", value->sint64);
+        return strdup(str);
       }
 
     } else if (type & CMPI_REAL) {
 
       switch (type) {
       case CMPI_real32:
-	sprintf(str, "%g", value->real32);
-	return strdup(str);
+        sprintf(str, "%g", value->real32);
+        return strdup(str);
       case CMPI_real64:
-	sprintf(str, "%g", value->real64);
-	return strdup(str);
+        sprintf(str, "%g", value->real64);
+        return strdup(str);
       }
 
     }
@@ -270,7 +270,7 @@ sfcb_value2Chars(CMPIType type, CMPIValue * value)
 
 void
 sfcb_setAlignedValue(CMPIValue * target, const CMPIValue * source,
-		     CMPIType type)
+                     CMPIType type)
 {
   /*
    * copies a value making sure the alignments are right 
@@ -304,9 +304,9 @@ sfcb_setAlignedValue(CMPIValue * target, const CMPIValue * source,
       break;
     default:
       if (type == CMPI_ptr) {
-	*target = *source;
+        *target = *source;
       } else {
-	target->inst = source->inst;
+        target->inst = source->inst;
       }
     }
   }
@@ -338,11 +338,11 @@ sfcb_comp_CMPIValue(CMPIValue * val1, CMPIValue * val2, CMPIType type)
    * check if we have null pointers for our ENC data types, the pointers 
    */
   if (val1->array == NULL && val2->array == NULL)
-    return 0;			/* identical */
+    return 0;                   /* identical */
   if (val1->array == NULL)
-    return -1;			/* val1 is less than val2 */
+    return -1;                  /* val1 is less than val2 */
   if (val2->array == NULL)
-    return 1;			/* val2 is less than val1 */
+    return 1;                   /* val2 is less than val1 */
 
   if (type & CMPI_ARRAY) {
     c = (val1->array)->ft->getSize(val1->array, NULL);
@@ -354,17 +354,17 @@ sfcb_comp_CMPIValue(CMPIValue * val1, CMPIValue * val2, CMPIType type)
     }
     while (c--) {
       tempVal1 =
-	  ((val1->array)->ft->getElementAt(val1->array, c - 1, NULL)).
-	  value;
+          ((val1->array)->ft->getElementAt(val1->array, c - 1, NULL)).
+          value;
       tempVal2 =
-	  ((val2->array)->ft->getElementAt(val2->array, c - 1, NULL)).
-	  value;
+          ((val2->array)->ft->getElementAt(val2->array, c - 1, NULL)).
+          value;
 
       if (sfcb_comp_CMPIValue(&tempVal1, &tempVal2, type & ~CMPI_ARRAY)) {
-	/*
-	 * one element does not seem to be identical
-	 */
-	return 1;
+        /*
+         * one element does not seem to be identical
+         */
+        return 1;
       }
     }
     /*
@@ -398,17 +398,22 @@ sfcb_comp_CMPIValue(CMPIValue * val1, CMPIValue * val2, CMPIType type)
       return (objectpathCompare(val1->ref, val2->ref));
     case CMPI_string:
       return extended_strcmp(val1->string->ft->
-			     getCharPtr(val1->string, NULL),
-			     val2->string->ft->getCharPtr(val2->string,
-							  NULL));
+                             getCharPtr(val1->string, NULL),
+                             val2->string->ft->getCharPtr(val2->string,
+                                                          NULL));
     case CMPI_dateTime:
       s1 = val1->dateTime->ft->getStringFormat(val1->dateTime, NULL);
       s2 = val2->dateTime->ft->getStringFormat(val2->dateTime, NULL);
       return extended_strcmp(s1->ft->getCharPtr(s1, NULL),
-			     s2->ft->getCharPtr(s2, NULL));
+                             s2->ft->getCharPtr(s2, NULL));
     default:
       return 0;
     }
   }
   return 0;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

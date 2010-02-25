@@ -104,8 +104,8 @@ instance_accessor(const char *name, void *param)
 }
 
 CMPIBoolean
-evalute_selectcond(const CMPISelectCond * cond,
-		   CMPIAccessor * accessor, void *parm)
+evalute_selectcond(const CMPISelectCond *cond,
+                   CMPIAccessor * accessor, void *parm)
 {
   CMPIStatus      rc_String = { CMPI_RC_OK, NULL };
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
@@ -146,38 +146,36 @@ evalute_selectcond(const CMPISelectCond * cond,
        */
       subcnd_clone = CMClone(subcnd, &rc);
       if (subcnd_clone)
-	CMRelease(subcnd_clone);
+        CMRelease(subcnd_clone);
       pred_cnt = CMGetPredicateCount(subcnd, &rc);
 
       /*
        * Parsing throught conjuctives 
        */
       for (pred_idx = 0; pred_idx < pred_cnt; pred_idx++) {
-	pred = CMGetPredicateAt(subcnd, pred_idx, &rc);
+        pred = CMGetPredicateAt(subcnd, pred_idx, &rc);
 
-	pred_clone = CMClone(pred, &rc);
-	if (pred_clone)
-	  CMRelease(pred_clone);
+        pred_clone = CMClone(pred, &rc);
+        if (pred_clone)
+          CMRelease(pred_clone);
 
-	rc = CMGetPredicateData(pred,
-				&pred_type,
-				&pred_op, &left_side, &right_side);
-	// LS has the name. Get the predicate using another mechanism.
-	pred2 =
-	    CMGetPredicate(subcnd, CMGetCharsPtr(left_side, &rc_String),
-			   &rc);
+        rc = CMGetPredicateData(pred,
+                                &pred_type,
+                                &pred_op, &left_side, &right_side);
+        // LS has the name. Get the predicate using another mechanism.
+        pred2 =
+            CMGetPredicate(subcnd, CMGetCharsPtr(left_side, &rc_String),
+                           &rc);
       }
     }
   }
   return 0;
 }
 
-
-
 CMPIBoolean
-evaluate(const CMPISelectExp * se,
-	 const CMPIInstance * inst,
-	 CMPIAccessor * inst_accessor, void *parm)
+evaluate(const CMPISelectExp *se,
+         const CMPIInstance *inst,
+         CMPIAccessor * inst_accessor, void *parm)
 {
   CMPIStatus      rc_Eval = { CMPI_RC_OK, NULL };
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
@@ -192,7 +190,7 @@ evaluate(const CMPISelectExp * se,
     evalRes = CMEvaluateSelExp(se, inst, &rc_Eval);
 
     evalResAccessor =
-	CMEvaluateSelExpUsingAccessor(se, inst_accessor, parm, &rc_Eval);
+        CMEvaluateSelExpUsingAccessor(se, inst_accessor, parm, &rc_Eval);
     doc_cond = CMGetDoc(se, &rc);
     evalDOC = evalute_selectcond(doc_cond, inst_accessor, parm);
     cod_cond = CMGetCod(se, &rc);
@@ -202,10 +200,9 @@ evaluate(const CMPISelectExp * se,
   return (evalRes | evalResAccessor | evalDOC | evalCOD);
 }
 
-
 static CMPIObjectPath *
 make_ObjectPath(const CMPIBroker * broker, const char *ns,
-		const char *class)
+                const char *class)
 {
   CMPIObjectPath *objPath = NULL;
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
@@ -228,7 +225,7 @@ make_Instance(CMPIObjectPath * op)
 }
 
 int
-_setProperty(CMPIInstance * ci, const char *p)
+_setProperty(CMPIInstance *ci, const char *p)
 {
   CMPIValue       val;
   const char     *property;
@@ -241,7 +238,7 @@ _setProperty(CMPIInstance * ci, const char *p)
   if ((strncmp(property, "ElementName", 11) == 0)
       && (strlen(property) == 11)) {
     rc = CMSetProperty(ci, "ElementName", (CMPIValue *) _ClassName,
-		       CMPI_chars);
+                       CMPI_chars);
   }
 
   else if ((strncmp(property, "s", 1) == 0) && (strlen(property) == 1)) {
@@ -315,8 +312,7 @@ _setProperty(CMPIInstance * ci, const char *p)
 }
 static CMPISelectExp *
 construct_instance(const CMPIBroker * _broker,
-		   const char *query,
-		   const char *lang, CMPIInstance * inst)
+                   const char *query, const char *lang, CMPIInstance *inst)
 {
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   CMPISelectExp  *se_def = NULL;
@@ -331,20 +327,20 @@ construct_instance(const CMPIBroker * _broker,
     if (projection) {
       cnt = CMGetArrayCount(projection, &rc);
       for (idx = 0; idx < cnt; idx++) {
-	data = CMGetArrayElementAt(projection, idx, &rc);
-	if (data.type == CMPI_chars) {
-	  rc_setProperty = _setProperty(inst, data.value.chars);
-	  if (rc_setProperty) {
-	    goto error;
-	  }
-	}
-	if (data.type == CMPI_string) {
-	  rc_setProperty =
-	      _setProperty(inst, CMGetCharsPtr(data.value.string, &rc));
-	  if (rc_setProperty) {
-	    goto error;
-	  }
-	}
+        data = CMGetArrayElementAt(projection, idx, &rc);
+        if (data.type == CMPI_chars) {
+          rc_setProperty = _setProperty(inst, data.value.chars);
+          if (rc_setProperty) {
+            goto error;
+          }
+        }
+        if (data.type == CMPI_string) {
+          rc_setProperty =
+              _setProperty(inst, CMGetCharsPtr(data.value.string, &rc));
+          if (rc_setProperty) {
+            goto error;
+          }
+        }
       }
 
     } else {
@@ -370,17 +366,17 @@ error:
  */
 
 CMPIStatus
-TestExecQueryProviderCleanup(CMPIInstanceMI * mi, const CMPIContext * ctx,
-			     CMPIBoolean terminate)
+TestExecQueryProviderCleanup(CMPIInstanceMI * mi, const CMPIContext *ctx,
+                             CMPIBoolean terminate)
 {
   CMReturn(CMPI_RC_OK);
 }
 
 CMPIStatus
 TestExecQueryProviderEnumInstanceNames(CMPIInstanceMI * mi,
-				       const CMPIContext * ctx,
-				       const CMPIResult * rslt,
-				       const CMPIObjectPath * ref)
+                                       const CMPIContext *ctx,
+                                       const CMPIResult *rslt,
+                                       const CMPIObjectPath * ref)
 {
 
   CMReturn(CMPI_RC_ERR_NOT_SUPPORTED);
@@ -388,10 +384,10 @@ TestExecQueryProviderEnumInstanceNames(CMPIInstanceMI * mi,
 
 CMPIStatus
 TestExecQueryProviderEnumInstances(CMPIInstanceMI * mi,
-				   const CMPIContext * ctx,
-				   const CMPIResult * rslt,
-				   const CMPIObjectPath * ref,
-				   const char **properties)
+                                   const CMPIContext *ctx,
+                                   const CMPIResult *rslt,
+                                   const CMPIObjectPath * ref,
+                                   const char **properties)
 {
 
   CMReturn(CMPI_RC_ERR_NOT_SUPPORTED);
@@ -399,61 +395,61 @@ TestExecQueryProviderEnumInstances(CMPIInstanceMI * mi,
 
 CMPIStatus
 TestExecQueryProviderGetInstance(CMPIInstanceMI * mi,
-				 const CMPIContext * ctx,
-				 const CMPIResult * rslt,
-				 const CMPIObjectPath * cop,
-				 const char **properties)
+                                 const CMPIContext *ctx,
+                                 const CMPIResult *rslt,
+                                 const CMPIObjectPath * cop,
+                                 const char **properties)
 {
   CMReturn(CMPI_RC_ERR_NOT_SUPPORTED);
 }
 
 CMPIStatus
 TestExecQueryProviderCreateInstance(CMPIInstanceMI * mi,
-				    const CMPIContext * ctx,
-				    const CMPIResult * rslt,
-				    const CMPIObjectPath * cop,
-				    const CMPIInstance * ci)
+                                    const CMPIContext *ctx,
+                                    const CMPIResult *rslt,
+                                    const CMPIObjectPath * cop,
+                                    const CMPIInstance *ci)
 {
   CMReturn(CMPI_RC_ERR_NOT_SUPPORTED);
 }
 
 CMPIStatus
 TestExecQueryProviderSetInstance(CMPIInstanceMI * mi,
-				 const CMPIContext * ctx,
-				 const CMPIResult * rslt,
-				 const CMPIObjectPath * cop,
-				 const CMPIInstance * ci,
-				 const char **properties)
+                                 const CMPIContext *ctx,
+                                 const CMPIResult *rslt,
+                                 const CMPIObjectPath * cop,
+                                 const CMPIInstance *ci,
+                                 const char **properties)
 {
   CMReturn(CMPI_RC_ERR_NOT_SUPPORTED);
 }
 
 CMPIStatus
 TestExecQueryProviderModifyInstance(CMPIInstanceMI * mi,
-				    const CMPIContext * ctx,
-				    const CMPIResult * rslt,
-				    const CMPIObjectPath * cop,
-				    const CMPIInstance * ci,
-				    const char **properties)
+                                    const CMPIContext *ctx,
+                                    const CMPIResult *rslt,
+                                    const CMPIObjectPath * cop,
+                                    const CMPIInstance *ci,
+                                    const char **properties)
 {
   CMReturn(CMPI_RC_ERR_NOT_SUPPORTED);
 }
 
 CMPIStatus
 TestExecQueryProviderDeleteInstance(CMPIInstanceMI * mi,
-				    const CMPIContext * ctx,
-				    const CMPIResult * rslt,
-				    const CMPIObjectPath * cop)
+                                    const CMPIContext *ctx,
+                                    const CMPIResult *rslt,
+                                    const CMPIObjectPath * cop)
 {
   CMReturn(CMPI_RC_ERR_NOT_SUPPORTED);
 }
 
 CMPIStatus
 TestExecQueryProviderExecQuery(CMPIInstanceMI * mi,
-			       const CMPIContext * ctx,
-			       const CMPIResult * rslt,
-			       const CMPIObjectPath * ref,
-			       const char *query, const char *lang)
+                               const CMPIContext *ctx,
+                               const CMPIResult *rslt,
+                               const CMPIObjectPath * ref,
+                               const char *query, const char *lang)
 {
 
   CMPISelectExp  *se_def = NULL;
@@ -472,7 +468,6 @@ TestExecQueryProviderExecQuery(CMPIInstanceMI * mi,
   CMReturn(CMPI_RC_OK);
 }
 
-
 /*
  * ---------------------------------------------------------------------------
  */
@@ -484,8 +479,7 @@ TestExecQueryProviderExecQuery(CMPIInstanceMI * mi,
  */
 
 CMInstanceMIStub(TestExecQueryProvider,
-		 TestExecQueryProvider, _broker, CMNoHook);
-
+                 TestExecQueryProvider, _broker, CMNoHook);
 
 /*
  * ---------------------------------------------------------------------------
@@ -496,3 +490,8 @@ CMInstanceMIStub(TestExecQueryProvider,
 /*
  * ---------------------------------------------------------------------------
  */
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -35,7 +35,7 @@ main()
   printf(" Testing getClass \n");
 
   printf(" checking with bad input : host = %s userid = %s\n",
-	 cim_host, cim_host_userid);
+         cim_host, cim_host_userid);
   ce = NewCIMCEnv("bogus", 0, &rc, &msg);
   if (rc == 3) {
     printf(" bad input caught OK,\n\tmsg = %s\n\n", msg);
@@ -44,29 +44,29 @@ main()
   }
 
   printf(" using SfcbLocal interface : host = %s userid = %s\n",
-	 cim_host, cim_host_userid);
+         cim_host, cim_host_userid);
   ce = NewCIMCEnv("SfcbLocal", 0, &rc, &msg);
 
   if (rc == 0) {
 
     client =
-	ce->ft->connect(ce, cim_host, "http", cim_host_port,
-			cim_host_userid, cim_host_passwd, &status);
+        ce->ft->connect(ce, cim_host, "http", cim_host_port,
+                        cim_host_userid, cim_host_passwd, &status);
 
     op = (CMPIObjectPath *) ce->ft->newObjectPath(ce, "root/cimv2",
-						  "CIM_ComputerSystem",
-						  &status);
+                                                  "CIM_ComputerSystem",
+                                                  &status);
     class =
-	(CMPIConstClass *) client->ft->getClass(client,
-						(CIMCObjectPath *) op,
-						CMPI_FLAG_IncludeQualifiers,
-						NULL, &status);
+        (CMPIConstClass *) client->ft->getClass(client,
+                                                (CIMCObjectPath *) op,
+                                                CMPI_FLAG_IncludeQualifiers,
+                                                NULL, &status);
 
     /*
      * Print the results 
      */
     printf("getClass() rc=%d, msg=%s\n",
-	   status.rc, (status.msg) ? (char *) status.msg->hdl : NULL);
+           status.rc, (status.msg) ? (char *) status.msg->hdl : NULL);
 
     if (!status.rc) {
       printf("result:\n");
@@ -91,3 +91,8 @@ main()
     return 1;
   }
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

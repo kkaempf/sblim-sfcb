@@ -34,5 +34,10 @@ NamespaceDir    sfcb_mem_namespaces[] = {
   /*
    * {"root/cimv2", &cimv2_classes}, 
    */
-  {NULL, NULL}			/* this is the end marker, don't remove */
+  {NULL, NULL}                  /* this is the end marker, don't remove */
 };
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

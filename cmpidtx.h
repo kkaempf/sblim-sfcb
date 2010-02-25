@@ -19,11 +19,14 @@
  *
  */
 
-
 #ifndef CMPIDTX_H_
 #define CMPIDTX_H_
 
-
 #define CMPI_qualifierDecl     ((16+11)<<8)
 
-#endif				/* CMPIDTX_H_ */
+#endif                          /* CMPIDTX_H_ */
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

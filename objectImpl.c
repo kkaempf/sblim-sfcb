@@ -19,7 +19,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -44,16 +43,18 @@
 // static ClSection *newClSection();
 
 static ClClass *newClassH(ClObjectHdr * hdr, const char *cn,
-			  const char *pa);
+                          const char *pa);
 static ClClass *rebuildClassH(ClObjectHdr * hdr, ClClass * cls,
-			      void *area);
+                              void *area);
 
 static char    *addQualifierToString(stringControl * sc, ClObjectHdr * hdr,
-				     ClQualifier * q, int sb);
+                                     ClQualifier * q, int sb);
 static int      addClQualifier(ClObjectHdr * hdr, ClSection * qlfs,
-			       const char *id, CMPIData d,
-			       ClObjectHdr * arrHdr);
+                               const char *id, CMPIData d,
+                               ClObjectHdr * arrHdr);
 // static int insQualifier(ClObjectHdr * hdr, ClSection * qlfs,ClQualifier 
+// 
+// 
 // * nq);
 
 // static CMPIData _ClDataString(char *str, CMPIValueState s);
@@ -61,16 +62,16 @@ static int      addClQualifier(ClObjectHdr * hdr, ClSection * qlfs,
 
 static void     clearClSection(ClSection * s);
 static void    *ensureClSpace(ClObjectHdr * hdr, ClSection * sct, int size,
-			      int iSize);
-extern void     dateTime2chars(CMPIDateTime * dt, CMPIStatus * rc,
-			       char *str_time);
-extern char    *sfcb_pathToChars(CMPIObjectPath * cop, CMPIStatus * rc,
-				 char *str);
+                              int iSize);
+extern void     dateTime2chars(CMPIDateTime *dt, CMPIStatus *rc,
+                               char *str_time);
+extern char    *sfcb_pathToChars(CMPIObjectPath * cop, CMPIStatus *rc,
+                                 char *str);
 extern void     dump(char *msg, void *a, int l);
-extern CMPIArray *native_make_CMPIArray(CMPIData * av, CMPIStatus * rc,
-					ClObjectHdr * hdr);
-extern int      instance2xml(CMPIInstance * ci, UtilStringBuffer * sb,
-			     unsigned int flags);
+extern CMPIArray *native_make_CMPIArray(CMPIData *av, CMPIStatus *rc,
+                                        ClObjectHdr * hdr);
+extern int      instance2xml(CMPIInstance *ci, UtilStringBuffer * sb,
+                             unsigned int flags);
 static ClString nls = { 0 };
 static int      objectSize = 0;
 
@@ -78,15 +79,15 @@ ClVersionRecord
 ClBuildVersionRecord(unsigned short opt, int endianMode, long *size)
 {
   ClVersionRecord rec = { {{
-			    {0},
-			    0,
-			    HDR_Version,
-			    "sfcb-rep",
-			    ClCurrentVersion,
-			    ClCurrentLevel,
-			    ClCurrentObjImplLevel,
-			    opt, 0,
-			    {0}}}
+                            {0},
+                            0,
+                            HDR_Version,
+                            "sfcb-rep",
+                            ClCurrentVersion,
+                            ClCurrentLevel,
+                            ClCurrentObjImplLevel,
+                            opt, 0,
+                            {0}}}
   };
 
   time_t          tm = time(NULL);
@@ -179,7 +180,7 @@ ensureClSpace(ClObjectHdr * hdr, ClSection * sct, int size, int iSize)
     max *= 2;
     if (isMallocedSection(sct))
       setSectionPtr(sct,
-		    realloc(sct->sectionPtr, (sct->max = max) * size));
+                    realloc(sct->sectionPtr, (sct->max = max) * size));
     else {
       void           *f,
                      *t;
@@ -196,7 +197,6 @@ ensureClSpace(ClObjectHdr * hdr, ClSection * sct, int size, int iSize)
 
   return p;
 }
-
 
 long
 addClString(ClObjectHdr * hdr, const char *str)
@@ -218,9 +218,9 @@ addClString(ClObjectHdr * hdr, const char *str)
     nmax = 256;
     for (; nmax <= l; nmax *= 2);
     buf =
-	setStrBufPtr(hdr,
-		     malloc(((nmax - 1) * sizeof(char)) +
-			    sizeof(ClStrBuf)));
+        setStrBufPtr(hdr,
+                     malloc(((nmax - 1) * sizeof(char)) +
+                            sizeof(ClStrBuf)));
     buf->bMax = nmax;
     buf->bUsed = buf->iUsed = 0;
     buf->iMax = 16;
@@ -235,19 +235,19 @@ addClString(ClObjectHdr * hdr, const char *str)
     nmax = GetMax(buf->iMax);
     if (buf->iUsed >= nmax) {
       if (buf->iMax > 0) {
-	if (!isMallocedStrIndex(buf)) {
-	  void           *idx = buf->indexPtr;
-	  buf->iMax = nmax * 2;
-	  setStrIndexPtr(buf, malloc(buf->iMax * sizeof(long)));
-	  memcpy(buf->indexPtr, idx, nmax * sizeof(long));
-	} else {
-	  buf->iMax = nmax * 2;
-	  setStrIndexPtr(buf,
-			 realloc(buf->indexPtr, buf->iMax * sizeof(long)));
-	}
+        if (!isMallocedStrIndex(buf)) {
+          void           *idx = buf->indexPtr;
+          buf->iMax = nmax * 2;
+          setStrIndexPtr(buf, malloc(buf->iMax * sizeof(long)));
+          memcpy(buf->indexPtr, idx, nmax * sizeof(long));
+        } else {
+          buf->iMax = nmax * 2;
+          setStrIndexPtr(buf,
+                         realloc(buf->indexPtr, buf->iMax * sizeof(long)));
+        }
       } else {
-	buf->iMax = 16;
-	setStrIndexPtr(buf, malloc(buf->iMax * sizeof(long)));
+        buf->iMax = 16;
+        setStrIndexPtr(buf, malloc(buf->iMax * sizeof(long)));
       }
       hdr->flags |= HDR_Rebuild;
     }
@@ -256,19 +256,19 @@ addClString(ClObjectHdr * hdr, const char *str)
       nmax = buf->bMax;
       for (; nmax <= buf->bUsed + l; nmax *= 2);
       if (buf->bMax > 0) {
-	if (!malloced) {
-	  setStrBufPtr(hdr,
-		       malloc(((nmax - 1) * sizeof(char)) +
-			      sizeof(ClStrBuf)));
-	  memcpy(hdr->strBuffer, buf, buf->bMax + sizeof(ClStrBuf));
-	} else
-	  setStrBufPtr(hdr, realloc(hdr->strBuffer,
-				    ((nmax - 1) * sizeof(char)) +
-				    sizeof(ClStrBuf)));
+        if (!malloced) {
+          setStrBufPtr(hdr,
+                       malloc(((nmax - 1) * sizeof(char)) +
+                              sizeof(ClStrBuf)));
+          memcpy(hdr->strBuffer, buf, buf->bMax + sizeof(ClStrBuf));
+        } else
+          setStrBufPtr(hdr, realloc(hdr->strBuffer,
+                                    ((nmax - 1) * sizeof(char)) +
+                                    sizeof(ClStrBuf)));
       } else
-	setStrBufPtr(hdr,
-		     malloc(((nmax - 1) * sizeof(char)) +
-			    sizeof(ClStrBuf)));
+        setStrBufPtr(hdr,
+                     malloc(((nmax - 1) * sizeof(char)) +
+                            sizeof(ClStrBuf)));
       buf = hdr->strBuffer;
       buf->bMax = nmax;
       hdr->flags |= HDR_Rebuild;
@@ -294,7 +294,6 @@ addClObject(ClObjectHdr * hdr, const void *obj, int size)
   return (retCode);
 }
 
-
 /*
  * TODO: search for duplicate code between here and addObjectPropertyH() 
  */
@@ -316,9 +315,9 @@ addClArray(ClObjectHdr * hdr, CMPIData d)
     nmax = 16;
     for (; nmax <= l; nmax *= 2);
     buf =
-	setArrayBufPtr(hdr,
-		       malloc(((nmax - 1) * sizeof(CMPIData)) +
-			      sizeof(ClArrayBuf)));
+        setArrayBufPtr(hdr,
+                       malloc(((nmax - 1) * sizeof(CMPIData)) +
+                              sizeof(ClArrayBuf)));
     buf->bMax = nmax;
     buf->bUsed = buf->iUsed = 0;
     buf->iMax = 16;
@@ -333,20 +332,20 @@ addClArray(ClObjectHdr * hdr, CMPIData d)
     nmax = GetMax(buf->iMax);
     if (buf->iUsed >= nmax) {
       if (buf->iMax > 0) {
-	if (!isMallocedArrayIndex(buf)) {
-	  void           *idx = buf->indexPtr;
-	  buf->iMax = nmax * 2;
-	  setArrayIndexPtr(buf, malloc(buf->iMax * sizeof(long)));
-	  memcpy(buf->indexPtr, idx, nmax * sizeof(long));
-	} else {
-	  buf->iMax = nmax * 2;
-	  setArrayIndexPtr(buf,
-			   realloc(buf->indexPtr,
-				   buf->iMax * sizeof(long)));
-	}
+        if (!isMallocedArrayIndex(buf)) {
+          void           *idx = buf->indexPtr;
+          buf->iMax = nmax * 2;
+          setArrayIndexPtr(buf, malloc(buf->iMax * sizeof(long)));
+          memcpy(buf->indexPtr, idx, nmax * sizeof(long));
+        } else {
+          buf->iMax = nmax * 2;
+          setArrayIndexPtr(buf,
+                           realloc(buf->indexPtr,
+                                   buf->iMax * sizeof(long)));
+        }
       } else {
-	buf->iMax = 16;
-	setArrayIndexPtr(buf, malloc(buf->iMax * sizeof(long)));
+        buf->iMax = 16;
+        setArrayIndexPtr(buf, malloc(buf->iMax * sizeof(long)));
       }
       hdr->flags |= HDR_Rebuild;
     }
@@ -355,20 +354,20 @@ addClArray(ClObjectHdr * hdr, CMPIData d)
       nmax = buf->bMax;
       for (; nmax <= buf->bUsed + l; nmax *= 2);
       if (buf->bMax > 0) {
-	if (!malloced) {
-	  setArrayBufPtr(hdr,
-			 malloc(((nmax - 1) * sizeof(CMPIData)) +
-				sizeof(ClArrayBuf)));
-	  memcpy((void *) hdr->arrayBufOffset, buf,
-		 buf->bMax + sizeof(ClArrayBuf));
-	} else
-	  setArrayBufPtr(hdr, realloc(hdr->arrayBuffer,
-				      ((nmax - 1) * sizeof(CMPIData)) +
-				      sizeof(ClArrayBuf)));
+        if (!malloced) {
+          setArrayBufPtr(hdr,
+                         malloc(((nmax - 1) * sizeof(CMPIData)) +
+                                sizeof(ClArrayBuf)));
+          memcpy((void *) hdr->arrayBufOffset, buf,
+                 buf->bMax + sizeof(ClArrayBuf));
+        } else
+          setArrayBufPtr(hdr, realloc(hdr->arrayBuffer,
+                                      ((nmax - 1) * sizeof(CMPIData)) +
+                                      sizeof(ClArrayBuf)));
       } else
-	setArrayBufPtr(hdr,
-		       malloc(((nmax - 1) * sizeof(CMPIData)) +
-			      sizeof(ClArrayBuf)));
+        setArrayBufPtr(hdr,
+                       malloc(((nmax - 1) * sizeof(CMPIData)) +
+                              sizeof(ClArrayBuf)));
       buf = hdr->arrayBuffer;
       buf->bMax = nmax;
       hdr->flags |= HDR_Rebuild;
@@ -390,12 +389,12 @@ addClArray(ClObjectHdr * hdr, CMPIData d)
       td.value.chars = (char *) addClString(hdr, ar->data[i].value.chars);
       td.type = CMPI_string;
     } else if (ar->type == CMPI_string
-	       && ((td.state & CMPI_nullValue) == 0)) {
+               && ((td.state & CMPI_nullValue) == 0)) {
       td.value.chars =
-	  (char *) addClString(hdr, ar->data[i].value.string->hdl);
+          (char *) addClString(hdr, ar->data[i].value.string->hdl);
       td.type = CMPI_string;
     } else if (ar->type == CMPI_dateTime
-	       && ((td.state & CMPI_nullValue) == 0)) {
+               && ((td.state & CMPI_nullValue) == 0)) {
       char            chars[26];
       dateTime2chars(ar->data[i].value.dateTime, NULL, chars);
       td.value.chars = (char *) addClString(hdr, chars);
@@ -406,9 +405,9 @@ addClArray(ClObjectHdr * hdr, CMPIData d)
       td.value.chars = (char *) addClString(hdr, str);
       td.type = CMPI_ref;
     } else if (ar->type == CMPI_instance
-	       && ((td.state & CMPI_nullValue) == 0)) {
+               && ((td.state & CMPI_nullValue) == 0)) {
       int             size =
-	  getInstanceSerializedSize(ar->data[i].value.inst);
+          getInstanceSerializedSize(ar->data[i].value.inst);
       void           *blob = malloc(size);
       getSerializedInstance(ar->data[i].value.inst, blob);
       td.value.inst = (CMPIInstance *) addClObject(hdr, blob, size);
@@ -473,7 +472,7 @@ sizeStringBuf(ClObjectHdr * hdr)
   buf = getStrBufPtr(hdr);
 
   sz = sizeof(*buf) + ALIGN(buf->bUsed,
-			    4) + (buf->iUsed * sizeof(*buf->indexPtr));
+                            4) + (buf->iUsed * sizeof(*buf->indexPtr));
   DEB(printf("--- sizeStringBuf: %lu-%p\n", sz, (void *) sz));
 
   _SFCB_RETURN(ALIGN(sz, CLALIGN));
@@ -582,7 +581,6 @@ replaceClArray(ClObjectHdr * hdr, int id, CMPIData d)
   _SFCB_EXIT();
 }
 
-
 static int
 copyStringBuf(int ofs, int sz, ClObjectHdr * th, ClObjectHdr * fh)
 {
@@ -646,8 +644,6 @@ copyArrayBuf(int ofs, int sz, ClObjectHdr * th, ClObjectHdr * fh)
   _SFCB_RETURN(ALIGN(l + il, CLALIGN));
 }
 
-
-
 // string concatenation
 
 static char    *
@@ -669,7 +665,6 @@ cat2string(stringControl * sc, const char *str)
   return sc->str;
 }
 
-
 // -------------------------------------------------------
 // -----
 // -- data support
@@ -677,7 +672,7 @@ cat2string(stringControl * sc, const char *str)
 // -------------------------------------------------------
 
 static char    *
-datatypeToString(CMPIData * d, char **array)
+datatypeToString(CMPIData *d, char **array)
 {
   static char    *Array = "[]";
   CMPIType        type = d->type & ~CMPI_ARRAY;
@@ -756,7 +751,7 @@ fmtstr(const char *fmt, ...)
  * Translate a CMPIData value to a char*
  */
 static char    *
-dataValueToString(ClObjectHdr * hdr, CMPIData * d)
+dataValueToString(ClObjectHdr * hdr, CMPIData *d)
 {
   static char    *True = "true",
       *False = "false";
@@ -765,22 +760,22 @@ dataValueToString(ClObjectHdr * hdr, CMPIData * d)
   case CMPI_chars:
     {
       char           *ret =
-	  (char *) ClObjectGetClString(hdr, (ClString *) & d->value.chars);
+          (char *) ClObjectGetClString(hdr, (ClString *) & d->value.chars);
       if (ret)
-	retval = fmtstr("%s", ret);
+        retval = fmtstr("%s", ret);
       else
-	retval = strdup("");
+        retval = strdup("");
     }
     break;
   case CMPI_char16:
     {
-      char           *ret =
-	  (char *) ClObjectGetClString(hdr,
-				       (ClString *) & d->value.char16);
+      char           *ret = (char *) ClObjectGetClString(hdr,
+                                                         (ClString *) &
+                                                         d->value.char16);
       if (ret)
-	retval = fmtstr("%s", ret);
+        retval = fmtstr("%s", ret);
       else
-	retval = strdup("");
+        retval = strdup("");
     }
     break;
   case CMPI_real64:
@@ -822,8 +817,6 @@ dataValueToString(ClObjectHdr * hdr, CMPIData * d)
   return retval;
 }
 
-
-
 // -------------------------------------------------------
 // -----
 // -- qualifier support
@@ -847,7 +840,7 @@ locateQualifier(ClObjectHdr * hdr, ClSection * qlfs, const char *id)
 
 static int
 addClQualifier(ClObjectHdr * hdr, ClSection * qlfs, const char *id,
-	       CMPIData d, ClObjectHdr * arrHdr)
+               CMPIData d, ClObjectHdr * arrHdr)
 {
   int             i;
   ClQualifier     nq,
@@ -862,15 +855,15 @@ addClQualifier(ClObjectHdr * hdr, ClSection * qlfs, const char *id,
     } else if (d.type == CMPI_string && (d.state & CMPI_nullValue) == 0) {
       d.type = CMPI_chars;
       d.value.chars =
-	  (char *) addClString(hdr, (char *) d.value.string->hdl);
+          (char *) addClString(hdr, (char *) d.value.string->hdl);
     } else if ((d.type & CMPI_ARRAY) && (d.state & CMPI_nullValue) == 0) {
       if (arrHdr) {
-	ar = d.value.array =
-	    native_make_CMPIArray((CMPIData *) d.value.inst, &st, arrHdr);
+        ar = d.value.array =
+            native_make_CMPIArray((CMPIData *) d.value.inst, &st, arrHdr);
       }
       d.value.array = (CMPIArray *) addClArray(hdr, d);
       if (ar)
-	ar->ft->release(ar);
+        ar->ft->release(ar);
     }
 
     nq.data = d;
@@ -884,8 +877,8 @@ addClQualifier(ClObjectHdr * hdr, ClSection * qlfs, const char *id,
 
 int
 ClClassAddQualifierSpecial(ClObjectHdr * hdr, ClSection * qlfs,
-			   const char *id, CMPIData d,
-			   ClObjectHdr * arrHdr)
+                           const char *id, CMPIData d,
+                           ClObjectHdr * arrHdr)
 {
 
   if (hdr->type == HDR_Class) {
@@ -907,15 +900,15 @@ ClClassAddQualifierSpecial(ClObjectHdr * hdr, ClSection * qlfs,
 
 int
 ClClassAddQualifier(ClObjectHdr * hdr, ClSection * qlfs, const char *id,
-		    CMPIData d)
+                    CMPIData d)
 {
   return ClClassAddQualifierSpecial(hdr, qlfs, id, d, 0);
 }
 
 int
 ClClassAddPropertyQualifierSpecial(ClObjectHdr * hdr, ClProperty * p,
-				   const char *id, CMPIData d,
-				   ClObjectHdr * arrHdr)
+                                   const char *id, CMPIData d,
+                                   ClObjectHdr * arrHdr)
 {
   if (strcasecmp(id, "key") == 0)
     p->quals |= ClProperty_Q_Key;
@@ -928,14 +921,14 @@ ClClassAddPropertyQualifierSpecial(ClObjectHdr * hdr, ClProperty * p,
 
 int
 ClClassAddPropertyQualifier(ClObjectHdr * hdr, ClProperty * p,
-			    const char *id, CMPIData d)
+                            const char *id, CMPIData d)
 {
   return ClClassAddPropertyQualifierSpecial(hdr, p, id, d, NULL);
 }
 
 int
 ClClassAddMethodQualifier(ClObjectHdr * hdr, ClMethod * m,
-			  const char *id, CMPIData d)
+                          const char *id, CMPIData d)
 {
   // ClQualifier q;
   // q = makeClQualifier(hdr, id, d);
@@ -945,7 +938,7 @@ ClClassAddMethodQualifier(ClObjectHdr * hdr, ClMethod * m,
 
 int
 ClClassAddMethParamQualifier(ClObjectHdr * hdr, ClParameter * p,
-			     const char *id, CMPIData d)
+                             const char *id, CMPIData d)
 {
   // ClQualifier q;
   // q = makeClQualifier(hdr, id, d);
@@ -961,7 +954,7 @@ freeQualifiers(ClObjectHdr * hdr, ClSection * s)
 
 static char    *
 addQualifierToString(stringControl * sc, ClObjectHdr * hdr,
-		     ClQualifier * q, int sb)
+                     ClQualifier * q, int sb)
 {
   int             o = sc->used;
 
@@ -993,7 +986,7 @@ sizeQualifiers(ClObjectHdr * hdr, ClSection * s)
 
 static int
 copyQualifiers(int ofs, int max, char *to, ClSection * ts,
-	       ClObjectHdr * from, ClSection * fs)
+               ClObjectHdr * from, ClSection * fs)
 {
   ClQualifier    *q;
   int             l = ts->used * sizeof(ClQualifier);
@@ -1009,21 +1002,21 @@ copyQualifiers(int ofs, int max, char *to, ClSection * ts,
 }
 
 static int
-ClGetQualifierAt(ClClass * cls, ClQualifier * q, int id, CMPIData * data,
-		 char **name)
+ClGetQualifierAt(ClClass * cls, ClQualifier * q, int id, CMPIData *data,
+                 char **name)
 {
   if (data) {
     *data = (q + id)->data;
     if (data->type == CMPI_chars) {
       const char     *str =
-	  ClObjectGetClString(&cls->hdr, (ClString *) & data->value.chars);
+          ClObjectGetClString(&cls->hdr, (ClString *) & data->value.chars);
       data->value.string = sfcb_native_new_CMPIString(str, NULL, 0);
       data->type = CMPI_string;
     } else if (data->type & CMPI_ARRAY) {
       data->value.dataPtr.ptr = (void *) ClObjectGetClArray(&cls->hdr,
-							    (ClArray *) &
-							    data->value.
-							    array);
+                                                            (ClArray *) &
+                                                            data->value.
+                                                            array);
     }
   }
   if (name)
@@ -1032,7 +1025,7 @@ ClGetQualifierAt(ClClass * cls, ClQualifier * q, int id, CMPIData * data,
 }
 
 int
-ClClassGetQualifierAt(ClClass * cls, int id, CMPIData * data, char **name)
+ClClassGetQualifierAt(ClClass * cls, int id, CMPIData *data, char **name)
 {
   ClQualifier    *q;
   q = (ClQualifier *) ClObjectGetClSection(&cls->hdr, &cls->qualifiers);
@@ -1047,7 +1040,6 @@ ClClassGetQualifierCount(ClClass * cls)
   ClObjectGetClSection(&cls->hdr, &cls->qualifiers);
   return cls->qualifiers.used;
 }
-
 
 // -------------------------------------------------------
 // -----
@@ -1084,7 +1076,7 @@ addClParameter(ClObjectHdr * hdr, ClSection * prms, ClParameter * np)
 
   if ((i =
        locateParameter(hdr, prms,
-		       ClObjectGetClString(hdr, &np->id))) == 0) {
+                       ClObjectGetClString(hdr, &np->id))) == 0) {
     p = (ClParameter *) ensureClSpace(hdr, prms, sizeof(*p), 4);
     p = p + (prms->used++);
     *p = *np;
@@ -1093,7 +1085,7 @@ addClParameter(ClObjectHdr * hdr, ClSection * prms, ClParameter * np)
   return 0;
 }
 
-static ClParameter
+static          ClParameter
 makeClParameter(ClObjectHdr * hdr, const char *id, CMPIParameter cp)
 {
   ClParameter     p;
@@ -1109,7 +1101,7 @@ makeClParameter(ClObjectHdr * hdr, const char *id, CMPIParameter cp)
 
 int
 ClClassAddMethParameter(ClObjectHdr * hdr, ClMethod * m,
-			const char *id, CMPIParameter cp)
+                        const char *id, CMPIParameter cp)
 {
   ClParameter     p;
 
@@ -1133,7 +1125,7 @@ sizeParameters(ClObjectHdr * hdr, ClSection * s)
 
 static long
 copyParameters(int ofs, int max, char *to, ClSection * ts,
-	       ClObjectHdr * from, ClSection * fs)
+               ClObjectHdr * from, ClSection * fs)
 {
   ClParameter    *fp = (ClParameter *) ClObjectGetClSection(from, fs);
   ClParameter    *tp = (ClParameter *) (to + ofs);
@@ -1149,7 +1141,7 @@ copyParameters(int ofs, int max, char *to, ClSection * ts,
   for (i = ts->used; i > 0; i--, fp++, tp++) {
     if (tp->qualifiers.used)
       l += copyQualifiers(ofs + l, max, to, &tp->qualifiers, from,
-			  &fp->qualifiers);
+                          &fp->qualifiers);
   }
 
   return ALIGN(l, CLALIGN);
@@ -1197,7 +1189,7 @@ ClClassLocateMethod(ClObjectHdr * hdr, ClSection * mths, const char *id)
 
 static int
 addClassMethodH(ClObjectHdr * hdr, ClSection * mths,
-		const char *id, CMPIType t)
+                const char *id, CMPIType t)
 {
   int             i;
   ClMethod       *m;
@@ -1242,7 +1234,7 @@ sizeMethods(ClObjectHdr * hdr, ClSection * s)
 
 static long
 copyMethods(int ofs, int max, char *to, ClSection * ts,
-	    ClObjectHdr * from, ClSection * fs)
+            ClObjectHdr * from, ClSection * fs)
 {
   ClMethod       *fp = (ClMethod *) ClObjectGetClSection(from, fs);
   ClMethod       *tp = (ClMethod *) (to + ofs);
@@ -1258,10 +1250,10 @@ copyMethods(int ofs, int max, char *to, ClSection * ts,
   for (i = ts->used; i > 0; i--, fp++, tp++) {
     if (tp->qualifiers.used)
       l += copyQualifiers(ofs + l, max, to, &tp->qualifiers, from,
-			  &fp->qualifiers);
+                          &fp->qualifiers);
     if (tp->parameters.used)
       l += copyParameters(ofs + l, max, to, &tp->parameters, from,
-			  &fp->parameters);
+                          &fp->parameters);
   }
 
   return ALIGN(l, CLALIGN);
@@ -1324,7 +1316,7 @@ ClClassGetMethParmQualifierCount(ClClass * cls, ClMethod * m, int id)
 
 int
 ClClassGetMethParamQualifierAt(ClClass * cls, ClParameter * parm, int id,
-			       CMPIData * data, char **name)
+                               CMPIData *data, char **name)
 {
   ClQualifier    *q;
   q = (ClQualifier *) ClObjectGetClSection(&cls->hdr, &parm->qualifiers);
@@ -1335,14 +1327,12 @@ ClClassGetMethParamQualifierAt(ClClass * cls, ClParameter * parm, int id,
 
   if (data && data->type & CMPI_ARRAY && data->value.array) {
     data->value.array =
-	native_make_CMPIArray((CMPIData *) data->value.array, NULL,
-			      &cls->hdr);
+        native_make_CMPIArray((CMPIData *) data->value.array, NULL,
+                              &cls->hdr);
   }
 
   return 0;
 }
-
-
 
 // -------------------------------------------------------
 // -----
@@ -1401,12 +1391,11 @@ addPropertyToString(stringControl * sc, ClObjectHdr * hdr, ClProperty * p)
   if ((l = p->qualifiers.used)) {
     for (i = 0; i < l; sb = 0, i++) {
       if (i == l - 1)
-	sb |= 1;
+        sb |= 1;
       addQualifierToString(sc, hdr, q + i, sb);
     }
     cat2string(sc, "\n");
   }
-
 
   cat2string(sc, " ");
   cat2string(sc, datatypeToString(&p->data, &array));
@@ -1427,7 +1416,6 @@ addPropertyToString(stringControl * sc, ClObjectHdr * hdr, ClProperty * p)
   return sc->str + o;
 }
 
-
 static long
 sizeProperties(ClObjectHdr * hdr, ClSection * s)
 {
@@ -1444,7 +1432,7 @@ sizeProperties(ClObjectHdr * hdr, ClSection * s)
 
 static long
 copyProperties(int ofs, int max, char *to, ClSection * ts,
-	       ClObjectHdr * from, ClSection * fs)
+               ClObjectHdr * from, ClSection * fs)
 {
   ClProperty     *fp = (ClProperty *) ClObjectGetClSection(from, fs);
   ClProperty     *tp = (ClProperty *) (to + ofs);
@@ -1460,11 +1448,10 @@ copyProperties(int ofs, int max, char *to, ClSection * ts,
   for (i = ts->used; i > 0; i--, fp++, tp++)
     if (tp->qualifiers.used)
       l += copyQualifiers(ofs + l, max, to, &tp->qualifiers, from,
-			  &fp->qualifiers);
+                          &fp->qualifiers);
 
   return ALIGN(l, CLALIGN);
 }
-
 
 void
 showClHdr(void *ihdr)
@@ -1479,15 +1466,14 @@ showClHdr(void *ihdr)
   printf("\ttype:  %d\n", x->hdr->type);
   printf("\tflags: %d\n", x->hdr->flags);
   printf("\tsbo:   %p-%ld\n", (void *) x->hdr->strBufOffset,
-	 x->hdr->strBufOffset);
+         x->hdr->strBufOffset);
   printf("\tabo:   %p-%ld\n", (void *) x->hdr->arrayBufOffset,
-	 x->hdr->arrayBufOffset);
+         x->hdr->arrayBufOffset);
 }
-
 
 static int
 addObjectPropertyH(ClObjectHdr * hdr, ClSection * prps,
-		   const char *id, CMPIData d, char *refName)
+                   const char *id, CMPIData d, char *refName)
 {
   int             i;
   ClProperty     *p;
@@ -1517,10 +1503,10 @@ addObjectPropertyH(ClObjectHdr * hdr, ClSection * prps,
     } else if (d.type == CMPI_string && (d.state & CMPI_nullValue) == 0) {
       p->data = d;
       if (d.value.string)
-	p->data.value.chars =
-	    (char *) addClString(hdr, (char *) d.value.string->hdl);
+        p->data.value.chars =
+            (char *) addClString(hdr, (char *) d.value.string->hdl);
       else
-	p->data.value.chars = NULL;
+        p->data.value.chars = NULL;
       p->data.type = CMPI_chars;
     } else if (d.type == CMPI_dateTime && (d.state & CMPI_nullValue) == 0) {
       char            chars[26];
@@ -1557,87 +1543,87 @@ addObjectPropertyH(ClObjectHdr * hdr, ClSection * prps,
     if (od.type == CMPI_chars && (d.state & CMPI_nullValue) == 0) {
 
       if ((p + i - 1)->quals && ClProperty_Q_EmbeddedObject)
-	_SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
+        _SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
 
       if (d.type != CMPI_chars) {
-	if (d.type != CMPI_string) {
-	  _SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
-	}
-	replaceClString(hdr, (long) od.value.chars, "");
-	(p + i - 1)->data = d;
+        if (d.type != CMPI_string) {
+          _SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
+        }
+        replaceClString(hdr, (long) od.value.chars, "");
+        (p + i - 1)->data = d;
       } else if (od.value.chars) {
-	(p + i - 1)->data = d;
-	replaceClString(hdr, (long) od.value.chars, d.value.chars);
-	(p + i - 1)->data.value.chars = od.value.chars;
+        (p + i - 1)->data = d;
+        replaceClString(hdr, (long) od.value.chars, d.value.chars);
+        (p + i - 1)->data.value.chars = od.value.chars;
       } else {
-	(p + i - 1)->data = d;
-	(p + i - 1)->data.value.chars =
-	    (char *) addClString(hdr, d.value.chars);
+        (p + i - 1)->data = d;
+        (p + i - 1)->data.value.chars =
+            (char *) addClString(hdr, d.value.chars);
       }
     }
 
     else if (od.type == CMPI_dateTime && (d.state & CMPI_nullValue) == 0) {
       char            chars[26];
       if (d.type != CMPI_dateTime) {
-	_SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
+        _SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
       }
       dateTime2chars(d.value.dateTime, NULL, chars);
       if (od.value.chars) {
-	(p + i - 1)->data = d;
-	replaceClString(hdr, (long) od.value.chars, chars);
-	(p + i - 1)->data.value.chars = od.value.chars;
+        (p + i - 1)->data = d;
+        replaceClString(hdr, (long) od.value.chars, chars);
+        (p + i - 1)->data.value.chars = od.value.chars;
       } else {
-	(p + i - 1)->data = d;
-	(p + i - 1)->data.value.chars = (char *) addClString(hdr, chars);
+        (p + i - 1)->data = d;
+        (p + i - 1)->data.value.chars = (char *) addClString(hdr, chars);
       }
     }
 
     else if (od.type == CMPI_ref && (d.state & CMPI_nullValue) == 0) {
       char            chars[4096] = { 0 };
       if (d.type != CMPI_ref) {
-	_SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
+        _SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
       }
       sfcb_pathToChars(d.value.ref, &st, chars);
       if (od.value.chars) {
-	(p + i - 1)->data = d;
-	replaceClString(hdr, (long) od.value.chars, chars);
-	(p + i - 1)->data.value.chars = od.value.chars;
+        (p + i - 1)->data = d;
+        replaceClString(hdr, (long) od.value.chars, chars);
+        (p + i - 1)->data.value.chars = od.value.chars;
       } else {
-	(p + i - 1)->data = d;
-	(p + i - 1)->data.value.chars = (char *) addClString(hdr, chars);
+        (p + i - 1)->data = d;
+        (p + i - 1)->data.value.chars = (char *) addClString(hdr, chars);
       }
     }
 
     else if ((od.type & CMPI_ARRAY) && (d.state & CMPI_nullValue) == 0) {
       if (!(d.type & CMPI_ARRAY)) {
-	_SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
+        _SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
       }
       if (od.value.array) {
-	(p + i - 1)->data = d;
-	replaceClArray(hdr, (long) od.value.array, d);
-	(p + i - 1)->data.value.array = od.value.array;
+        (p + i - 1)->data = d;
+        replaceClArray(hdr, (long) od.value.array, d);
+        (p + i - 1)->data.value.array = od.value.array;
       } else {
-	(p + i - 1)->data = d;
-	(p + i - 1)->data.value.array = (CMPIArray *) addClArray(hdr, d);
+        (p + i - 1)->data = d;
+        (p + i - 1)->data.value.array = (CMPIArray *) addClArray(hdr, d);
       }
     }
 
     else if (hdr->type == HDR_Instance &&
-	     od.type == CMPI_instance && (d.state & CMPI_nullValue) == 0) {
+             od.type == CMPI_instance && (d.state & CMPI_nullValue) == 0) {
       if (d.type != CMPI_instance) {
-	_SFCB_RETURN(CMPI_RC_ERR_TYPE_MISMATCH);
+        _SFCB_RETURN(CMPI_RC_ERR_TYPE_MISMATCH);
       } else {
-	(p + i - 1)->data = d;
-	int             size = getInstanceSerializedSize(d.value.inst);
-	void           *blob = malloc(size);
-	getSerializedInstance(d.value.inst, blob);
-	if (od.value.chars) {
-	  replaceClObject(hdr, (long) od.value.chars, blob, size);
-	} else {
-	  (p + i - 1)->data.value.inst =
-	      (CMPIInstance *) addClObject(hdr, blob, size);
-	}
-	free(blob);
+        (p + i - 1)->data = d;
+        int             size = getInstanceSerializedSize(d.value.inst);
+        void           *blob = malloc(size);
+        getSerializedInstance(d.value.inst, blob);
+        if (od.value.chars) {
+          replaceClObject(hdr, (long) od.value.chars, blob, size);
+        } else {
+          (p + i - 1)->data.value.inst =
+              (CMPIInstance *) addClObject(hdr, blob, size);
+        }
+        free(blob);
       }
     } else
       (p + i - 1)->data = d;
@@ -1666,13 +1652,11 @@ ClObjectRelocateArrayBuffer(ClObjectHdr * hdr, ClArrayBuf * buf)
   buf->iMax = GetMax(buf->iMax);
 }
 
-
 // -------------------------------------------------------
 // -----
 // -- Class support
 // -----
 // -------------------------------------------------------
-
 
 static ClClass *
 newClassH(ClObjectHdr * hdr, const char *cn, const char *pa)
@@ -1753,11 +1737,11 @@ rebuildClassH(ClObjectHdr * hdr, ClClass * cls, void *area)
 
   nc->hdr.flags &= ~HDR_Rebuild;
   ofs += copyQualifiers(ofs, sz, (char *) nc, &nc->qualifiers, hdr,
-			&cls->qualifiers);
+                        &cls->qualifiers);
   ofs += copyProperties(ofs, sz, (char *) nc, &nc->properties, hdr,
-			&cls->properties);
+                        &cls->properties);
   ofs += copyMethods(ofs, sz, (char *) nc, &nc->methods, hdr,
-		     &cls->methods);
+                     &cls->methods);
 
   ofs += copyStringBuf(ofs, sz, &nc->hdr, hdr);
   ofs += copyArrayBuf(ofs, sz, &nc->hdr, hdr);
@@ -1821,17 +1805,17 @@ ClClassToString(ClClass * cls)
   if ((l = cls->qualifiers.used)) {
     for (i = 0; i < l; sb = 0, i++) {
       if ((quals == 0) && (i == l - 1))
-	sb |= 1;
+        sb |= 1;
       addQualifierToString(&sc, &cls->hdr, q + i, sb);
     }
     if (quals) {
       cat2string(&sc, "\n   ");
       if (quals & ClClass_Q_Abstract)
-	cat2string(&sc, ",Abstract");
+        cat2string(&sc, ",Abstract");
       if (quals & ClClass_Q_Association)
-	cat2string(&sc, ",Association");
+        cat2string(&sc, ",Association");
       if (quals & ClClass_Q_Indication)
-	cat2string(&sc, ",Indication");
+        cat2string(&sc, ",Indication");
       cat2string(&sc, "]");
     }
     cat2string(&sc, "\n");
@@ -1855,14 +1839,13 @@ ClClassToString(ClClass * cls)
   return sc.str;
 }
 
-
 // 
 // --- Class Properties
 // 
 
 int
 ClClassAddProperty(ClClass * cls, const char *id, CMPIData d,
-		   char *refName)
+                   char *refName)
 {
   ClSection      *prps = &cls->properties;
   return addObjectPropertyH(&cls->hdr, prps, id, d, refName);
@@ -1875,8 +1858,8 @@ ClClassGetPropertyCount(ClClass * cls)
 }
 
 int
-ClClassGetPropertyAt(ClClass * cls, int id, CMPIData * data, char **name,
-		     unsigned long *quals, char **refName)
+ClClassGetPropertyAt(ClClass * cls, int id, CMPIData *data, char **name,
+                     unsigned long *quals, char **refName)
 {
   char           *rName;
   ClProperty     *p;
@@ -1886,8 +1869,8 @@ ClClassGetPropertyAt(ClClass * cls, int id, CMPIData * data, char **name,
 
   if ((p + id)->quals & ClProperty_Q_EmbeddedObject) {
     data->type =
-	(data->
-	 type & CMPI_ARRAY ? CMPI_instance | CMPI_ARRAY : CMPI_instance);
+        (data->type & CMPI_ARRAY ? CMPI_instance | CMPI_ARRAY :
+         CMPI_instance);
   }
 
   if (data) {
@@ -1896,26 +1879,25 @@ ClClassGetPropertyAt(ClClass * cls, int id, CMPIData * data, char **name,
       data->value.uint64 = 0;
     } else if (data->type == CMPI_chars) {
       const char     *str =
-	  ClObjectGetClString(&cls->hdr, (ClString *) & data->value.chars);
+          ClObjectGetClString(&cls->hdr, (ClString *) & data->value.chars);
       data->value.string = sfcb_native_new_CMPIString(str, NULL, 0);
       data->type = CMPI_string;
     } else if (data->type == CMPI_dateTime) {
       const char     *str =
-	  ClObjectGetClString(&cls->hdr, (ClString *) & data->value.chars);
+          ClObjectGetClString(&cls->hdr, (ClString *) & data->value.chars);
       data->value.dateTime =
-	  sfcb_native_new_CMPIDateTime_fromChars(str, NULL);
+          sfcb_native_new_CMPIDateTime_fromChars(str, NULL);
     } else if (data->type & CMPI_ARRAY) {
       data->value.dataPtr.ptr = (void *) ClObjectGetClArray(&cls->hdr,
-							    (ClArray *) &
-							    data->value.
-							    array);
+                                                            (ClArray *) &
+                                                            data->value.
+                                                            array);
     } else if (data->type == CMPI_instance) {
-      data->value.inst =
-	  relocateSerializedInstance((void *)
-				     ClObjectGetClObject(&cls->hdr,
-							 (ClString *) &
-							 data->value.
-							 inst));
+      data->value.inst = relocateSerializedInstance((void *)
+                                                    ClObjectGetClObject
+                                                    (&cls->hdr,
+                                                     (ClString *) &
+                                                     data->value.inst));
     }
   }
 
@@ -1947,8 +1929,8 @@ ClClassGetPropQualifierCount(ClClass * cls, int id)
 }
 
 int
-ClClassGetPropQualifierAt(ClClass * cls, int id, int qid, CMPIData * data,
-			  char **name)
+ClClassGetPropQualifierAt(ClClass * cls, int id, int qid, CMPIData *data,
+                          char **name)
 {
   ClProperty     *p;
   ClQualifier    *q;
@@ -1982,8 +1964,8 @@ ClClassGetMethodCount(ClClass * cls)
 }
 
 int
-ClClassGetMethodAt(ClClass * cls, int id, CMPIType * data, char **name,
-		   unsigned long *quals)
+ClClassGetMethodAt(ClClass * cls, int id, CMPIType *data, char **name,
+                   unsigned long *quals)
 {
   ClMethod       *m;
   m = (ClMethod *) ClObjectGetClSection(&cls->hdr, &cls->methods);
@@ -2000,7 +1982,7 @@ ClClassGetMethodAt(ClClass * cls, int id, CMPIType * data, char **name,
 
 int
 ClClassGetMethQualifierAt(ClClass * cls, ClMethod * m, int qid,
-			  CMPIData * data, char **name)
+                          CMPIData *data, char **name)
 {
   ClQualifier    *q;
 
@@ -2011,8 +1993,8 @@ ClClassGetMethQualifierAt(ClClass * cls, ClMethod * m, int qid,
   ClGetQualifierAt(cls, q, qid, data, name);
   if (data->type & CMPI_ARRAY && data->value.array) {
     data->value.array =
-	native_make_CMPIArray((CMPIData *) data->value.array, NULL,
-			      &cls->hdr);
+        native_make_CMPIArray((CMPIData *) data->value.array, NULL,
+                              &cls->hdr);
   }
 
   return 0;
@@ -2020,7 +2002,7 @@ ClClassGetMethQualifierAt(ClClass * cls, ClMethod * m, int qid,
 
 int
 ClClassGetMethParameterAt(ClClass * cls, ClMethod * m, int pid,
-			  CMPIParameter * parm, char **name)
+                          CMPIParameter * parm, char **name)
 {
   ClParameter    *p;
 
@@ -2031,16 +2013,14 @@ ClClassGetMethParameterAt(ClClass * cls, ClMethod * m, int pid,
     *parm = (p + pid)->parameter;
     if (parm->refName) {
       parm->refName =
-	  (char *) ClObjectGetClString(&cls->hdr,
-				       (ClString *) & parm->refName);
+          (char *) ClObjectGetClString(&cls->hdr,
+                                       (ClString *) & parm->refName);
     }
   }
   if (name)
     *name = (char *) ClObjectGetClString(&cls->hdr, &(p + pid)->id);
   return 0;
 }
-
-
 
 // -------------------------------------------------------
 // -----
@@ -2049,7 +2029,7 @@ ClClassGetMethParameterAt(ClClass * cls, ClMethod * m, int pid,
 // -------------------------------------------------------
 
 int
-isInstance(const CMPIInstance * ci)
+isInstance(const CMPIInstance *ci)
 {
   ClInstance     *inst = (ClInstance *) ci->hdl;
   if (inst->hdr.type == HDR_Instance)
@@ -2128,9 +2108,9 @@ rebuildInstanceH(ClObjectHdr * hdr, ClInstance * inst, void *area)
   *ni = *inst;
   ni->hdr.flags &= ~HDR_Rebuild;
   ofs += copyQualifiers(ofs, sz, (char *) ni, &ni->qualifiers, hdr,
-			&inst->qualifiers);
+                        &inst->qualifiers);
   ofs += copyProperties(ofs, sz, (char *) ni, &ni->properties, hdr,
-			&inst->properties);
+                        &inst->properties);
   ofs += copyStringBuf(ofs, sz, &ni->hdr, hdr);
   ofs += copyArrayBuf(ofs, sz, &ni->hdr, hdr);
 
@@ -2180,7 +2160,7 @@ ClInstanceToString(ClInstance * inst)
   if ((l = inst->qualifiers.used)) {
     for (i = 0; i < l; sb = 0, i++) {
       if (i == l - 1)
-	sb |= 1;
+        sb |= 1;
       addQualifierToString(&sc, &inst->hdr, q + i, sb);
     }
     cat2string(&sc, "\n");
@@ -2208,8 +2188,8 @@ ClInstanceGetPropertyCount(ClInstance * inst)
 }
 
 int
-ClInstanceGetPropertyAt(ClInstance * inst, int id, CMPIData * data,
-			char **name, unsigned long *quals)
+ClInstanceGetPropertyAt(ClInstance * inst, int id, CMPIData *data,
+                        char **name, unsigned long *quals)
 {
   ClProperty     *p;
   _SFCB_ENTER(TRACE_OBJECTIMPL, "ClInstanceGetPropertyAt");
@@ -2220,31 +2200,31 @@ ClInstanceGetPropertyAt(ClInstance * inst, int id, CMPIData * data,
   if (data) {
     *data = (p + id)->data;
     if (data->type == CMPI_chars) {
-      const char     *str =
-	  ClObjectGetClString(&inst->hdr,
-			      (ClString *) & data->value.chars);
+      const char     *str = ClObjectGetClString(&inst->hdr,
+                                                (ClString *) & data->
+                                                value.chars);
       data->value.string = sfcb_native_new_CMPIString(str, NULL, 2);
       data->type = CMPI_string;
     }
     if (data->type == CMPI_dateTime) {
-      const char     *str =
-	  ClObjectGetClString(&inst->hdr,
-			      (ClString *) & data->value.chars);
+      const char     *str = ClObjectGetClString(&inst->hdr,
+                                                (ClString *) & data->
+                                                value.chars);
       data->value.dateTime =
-	  sfcb_native_new_CMPIDateTime_fromChars(str, NULL);
+          sfcb_native_new_CMPIDateTime_fromChars(str, NULL);
     }
     if (data->type & CMPI_ARRAY) {
       data->value.dataPtr.ptr = (void *) ClObjectGetClArray(&inst->hdr,
-							    (ClArray *) &
-							    data->value.
-							    array);
+                                                            (ClArray *) &
+                                                            data->value.
+                                                            array);
     }
     if (data->type == CMPI_instance) {
       data->value.inst = (void *) ClObjectGetClObject(&inst->hdr,
-						      (ClString *) & data->
-						      value.inst);
+                                                      (ClString *) &
+                                                      data->value.inst);
       if (data->value.inst) {
-	relocateSerializedInstance(data->value.inst);
+        relocateSerializedInstance(data->value.inst);
       }
     }
   }
@@ -2297,14 +2277,12 @@ ClInstanceGetNameSpace(ClInstance * inst)
 }
 
 const char     *
-ClGetStringData(CMPIInstance * ci, int id)
+ClGetStringData(CMPIInstance *ci, int id)
 {
   ClInstance     *inst = (ClInstance *) ci->hdl;
   ClString        sid = { id };
   return ClObjectGetClString(&inst->hdr, &sid);
 }
-
-
 
 // -------------------------------------------------------
 // -----
@@ -2375,7 +2353,7 @@ rebuildObjectPathH(ClObjectHdr * hdr, ClObjectPath * op, void *area)
   *nop = *op;
   nop->hdr.flags &= ~HDR_Rebuild;
   ofs += copyProperties(ofs, sz, (char *) nop, &nop->properties, hdr,
-			&op->properties);
+                        &op->properties);
   ofs += copyStringBuf(ofs, sz, &nop->hdr, hdr);
   nop->hdr.size = ALIGN(sz, CLALIGN);
 
@@ -2436,8 +2414,8 @@ ClObjectPathGetKeyCount(ClObjectPath * op)
 }
 
 int
-ClObjectPathGetKeyAt(ClObjectPath * op, int id, CMPIData * data,
-		     char **name)
+ClObjectPathGetKeyAt(ClObjectPath * op, int id, CMPIData *data,
+                     char **name)
 {
   ClProperty     *p;
 
@@ -2448,14 +2426,14 @@ ClObjectPathGetKeyAt(ClObjectPath * op, int id, CMPIData * data,
     *data = (p + id)->data;
     if (data->type == CMPI_chars) {
       const char     *str =
-	  ClObjectGetClString(&op->hdr, (ClString *) & data->value.chars);
+          ClObjectGetClString(&op->hdr, (ClString *) & data->value.chars);
       data->value.string = sfcb_native_new_CMPIString(str, NULL, 0);
       data->type = CMPI_string;
     } else if (data->type == CMPI_dateTime) {
       const char     *str =
-	  ClObjectGetClString(&op->hdr, (ClString *) & data->value.chars);
+          ClObjectGetClString(&op->hdr, (ClString *) & data->value.chars);
       data->value.dateTime =
-	  sfcb_native_new_CMPIDateTime_fromChars(str, NULL);
+          sfcb_native_new_CMPIDateTime_fromChars(str, NULL);
     }
   }
   if (name)
@@ -2524,8 +2502,6 @@ ClObjectPathGetClassName(ClObjectPath * op)
   return ClObjectGetClString(&op->hdr, &op->className);
 }
 
-
-
 // -------------------------------------------------------
 // -----
 // -- Args support
@@ -2581,7 +2557,7 @@ rebuildArgsH(ClObjectHdr * hdr, ClArgs * arg, void *area)
   *nop = *arg;
   nop->hdr.flags &= ~HDR_Rebuild;
   ofs += copyProperties(ofs, sz, (char *) nop, &nop->properties, hdr,
-			&arg->properties);
+                        &arg->properties);
   ofs += copyStringBuf(ofs, sz, &nop->hdr, hdr);
   ofs += copyArrayBuf(ofs, sz, &nop->hdr, hdr);
   nop->hdr.size = ALIGN(sz, CLALIGN);
@@ -2627,7 +2603,7 @@ ClArgsGetArgCount(ClArgs * arg)
 }
 
 int
-ClArgsGetArgAt(ClArgs * arg, int id, CMPIData * data, char **name)
+ClArgsGetArgAt(ClArgs * arg, int id, CMPIData *data, char **name)
 {
   ClProperty     *p;
   _SFCB_ENTER(TRACE_OBJECTIMPL, "ClArgsGetArgAt");
@@ -2639,28 +2615,28 @@ ClArgsGetArgAt(ClArgs * arg, int id, CMPIData * data, char **name)
     *data = (p + id)->data;
     if (data->type == CMPI_chars) {
       const char     *str =
-	  ClObjectGetClString(&arg->hdr, (ClString *) & data->value.chars);
+          ClObjectGetClString(&arg->hdr, (ClString *) & data->value.chars);
       data->value.string = sfcb_native_new_CMPIString(str, NULL, 0);
       data->type = CMPI_string;
     }
     if (data->type == CMPI_dateTime) {
       const char     *str =
-	  ClObjectGetClString(&arg->hdr, (ClString *) & data->value.chars);
+          ClObjectGetClString(&arg->hdr, (ClString *) & data->value.chars);
       data->value.dateTime =
-	  sfcb_native_new_CMPIDateTime_fromChars(str, NULL);
+          sfcb_native_new_CMPIDateTime_fromChars(str, NULL);
     }
     if (data->type & CMPI_ARRAY) {
       data->value.dataPtr.ptr = (void *) ClObjectGetClArray(&arg->hdr,
-							    (ClArray *) &
-							    data->value.
-							    array);
+                                                            (ClArray *) &
+                                                            data->value.
+                                                            array);
     }
     if (data->type == CMPI_instance) {
       data->value.inst = (void *) ClObjectGetClObject(&arg->hdr,
-						      (ClString *) & data->
-						      value.inst);
+                                                      (ClString *) &
+                                                      data->value.inst);
       if (data->value.inst) {
-	relocateSerializedInstance(data->value.inst);
+        relocateSerializedInstance(data->value.inst);
       }
     }
   }
@@ -2678,7 +2654,6 @@ ClArgsAddArg(ClArgs * arg, const char *id, CMPIData d)
   _SFCB_RETURN(addObjectPropertyH(&arg->hdr, prps, id, d, NULL));
 }
 
-
 // -------------------------------------------------------
 // -----
 // -- Qualifier support
@@ -2687,7 +2662,7 @@ ClArgsAddArg(ClArgs * arg, const char *id, CMPIData d)
 
 static ClQualifierDeclaration *
 newQualifierDeclarationH(ClObjectHdr * hdr, const char *ns,
-			 const char *name)
+                         const char *name)
 {
   ClQualifierDeclaration *q =
       (ClQualifierDeclaration *) malloc(sizeof(ClQualifierDeclaration));
@@ -2742,7 +2717,7 @@ ClSizeQualifierDeclaration(ClQualifierDeclaration * q)
 
 static ClQualifierDeclaration *
 rebuildQualifierH(ClObjectHdr * hdr, ClQualifierDeclaration * q,
-		  void *area)
+                  void *area)
 {
   int             ofs = sizeof(ClQualifierDeclaration);
   int             sz = ClSizeQualifierDeclaration(q);
@@ -2757,7 +2732,7 @@ rebuildQualifierH(ClObjectHdr * hdr, ClQualifierDeclaration * q,
   nq->hdr.flags &= ~HDR_Rebuild;
   ofs +=
       copyQualifiers(ofs, sz, (char *) nq, &nq->qualifierData, hdr,
-		     &q->qualifierData);
+                     &q->qualifierData);
   ofs += copyStringBuf(ofs, sz, &nq->hdr, hdr);
   ofs += copyArrayBuf(ofs, sz, &nq->hdr, hdr);
 
@@ -2786,37 +2761,35 @@ ClQualifierRelocateQualifier(ClQualifierDeclaration * q)
 
 int
 ClQualifierAddQualifier(ClObjectHdr * hdr, ClSection * qlfs,
-			const char *id, CMPIData d)
+                        const char *id, CMPIData d)
 {
   return addClQualifier(hdr, qlfs, id, d, 0);
 }
 
 static int
 ClGetQualifierFromQualifierDeclaration(ClQualifierDeclaration * q,
-				       ClQualifier * qData,
-				       CMPIData * data)
+                                       ClQualifier * qData, CMPIData *data)
 {
   if (data) {
     *data = qData->data;
     if (data->type == CMPI_chars) {
       const char     *str =
-	  ClObjectGetClString(&q->hdr, (ClString *) & data->value.chars);
+          ClObjectGetClString(&q->hdr, (ClString *) & data->value.chars);
       data->value.string = sfcb_native_new_CMPIString(str, NULL, 0);
       data->type = CMPI_string;
     } else if (data->type & CMPI_ARRAY) {
       data->value.dataPtr.ptr = (void *) ClObjectGetClArray(&q->hdr,
-							    (ClArray *) &
-							    data->value.
-							    array);
+                                                            (ClArray *) &
+                                                            data->value.
+                                                            array);
     }
   }
   return 0;
 }
 
-
 int
 ClQualifierDeclarationGetQualifierData(ClQualifierDeclaration * q,
-				       CMPIData * data)
+                                       CMPIData *data)
 {
   ClQualifier    *qData;
   qData = (ClQualifier *) ClObjectGetClSection(&q->hdr, &q->qualifierData);
@@ -2841,12 +2814,11 @@ dumpClass(char *msg, CMPIConstClass * cls)
   char           *buf = (char *) cl;
   printf("classDump: %s\n", msg);
   printf("strBuf: %p arrayBuf %p\n", buf + cl->hdr.strBufOffset,
-	 buf + cl->hdr.arrayBufOffset);
+         buf + cl->hdr.arrayBufOffset);
   dump("strBuf", buf + cl->hdr.strBufOffset, sizeof(ClStrBuf));
   dump("arrayBuf", buf + cl->hdr.arrayBufOffset, sizeof(ClArrayBuf));
   dump(msg, buf, cl->hdr.size);
 }
-
 
 char           *
 ClArgsToString(ClArgs * arg)
@@ -2873,15 +2845,14 @@ ClArgsToString(ClArgs * arg)
 #ifdef MAIN_TEST
 
 extern CMPIArray *NewCMPIArray(CMPICount size, CMPIType type,
-			       CMPIStatus * rc);
-extern CMPIArgs *NewCMPIArgs(CMPIStatus * rc);
-extern CMPIInstance *NewCMPIInstance(CMPIObjectPath * cop,
-				     CMPIStatus * rc);
+                               CMPIStatus *rc);
+extern CMPIArgs *NewCMPIArgs(CMPIStatus *rc);
+extern CMPIInstance *NewCMPIInstance(CMPIObjectPath * cop, CMPIStatus *rc);
 extern CMPIObjectPath *NewCMPIObjectPath(const char *nameSpace,
-					 const char *className,
-					 CMPIStatus * rc);
+                                         const char *className,
+                                         CMPIStatus *rc);
 extern unsigned long getArgsSerializedSize(CMPIArgs * args);
-extern unsigned long getInstanceSerializedSize(CMPIInstance * ci);
+extern unsigned long getInstanceSerializedSize(CMPIInstance *ci);
 
 int
 main()
@@ -2929,3 +2900,8 @@ main()
   return 0;
 }
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

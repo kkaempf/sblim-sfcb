@@ -60,7 +60,6 @@ typedef struct {
 #define Generic_stack Generic_list
 #define Generic_queue Generic_list
 
-
 /****************************************************************************/
 
 /*
@@ -87,4 +86,9 @@ typedef struct {
 #define peek_at_tail peek_at_end
 #define copy_queue copy_list
 
-#endif				/* GENERIC_LIST_DEFINED */
+#endif                          /* GENERIC_LIST_DEFINED */
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

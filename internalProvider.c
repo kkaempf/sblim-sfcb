@@ -20,8 +20,6 @@
  *
  */
 
-
-
 #include "cmpidt.h"
 #include "cmpift.h"
 #include "cmpimacs.h"
@@ -53,7 +51,7 @@ extern char    *sfcb_value2Chars(CMPIType type, CMPIValue * value);
 extern CMPIObjectPath *getObjectPath(char *path, char **msg);
 extern CMPIBroker *Broker;
 extern UtilStringBuffer *newStringBuffer(int s);
-extern void     setStatus(CMPIStatus * st, CMPIrc rc, const char *msg);
+extern void     setStatus(CMPIStatus *st, CMPIrc rc, const char *msg);
 
 static const CMPIBroker *_broker;
 
@@ -72,7 +70,6 @@ repositoryNs(const char *nss)
  * tolower(in[i++])) != 0); return i - 1; } 
  */
 
-
 static CMPIInstance *
 instifyBlob(void *blob)
 {
@@ -89,7 +86,7 @@ instifyBlob(void *blob)
 }
 
 static CMPIInstance *
-ipGetBlob(const char *ns, const char *cls, const char *id, int *len) 
+ipGetBlob(const char *ns, const char *cls, const char *id, int *len)
 {
   void           *blob = getBlob(ns, cls, id, len);
   return instifyBlob(blob);
@@ -125,20 +122,19 @@ getKeyList(const CMPIObjectPath * cop)
   return list;
 }
 
-
 static char   **nsTab = NULL;
 static int      nsTabLen = 0;
 
 static int
-testNameSpace(const char *ns, CMPIStatus * st)
+testNameSpace(const char *ns, CMPIStatus *st)
 {
   char          **nsp = nsTab;
 
   if (interOpProvInfoPtr == forceNoProvInfoPtr) {
     if (strcasecmp(ns, interopNs) == 0) {
       st->msg =
-	  sfcb_native_new_CMPIString("Interop namespace disabled", NULL,
-				     0);
+          sfcb_native_new_CMPIString("Interop namespace disabled", NULL,
+                                     0);
       st->rc = CMPI_RC_ERR_FAILED;
       return 0;
     }
@@ -170,9 +166,8 @@ _getIndex(const char *ns, const char *cn)
     return NULL;
 }
 
-
 extern int      isChild(const char *ns, const char *parent,
-			const char *child);
+                        const char *child);
 
 static int
 isa(const char *sns, const char *child, const char *parent)
@@ -186,7 +181,6 @@ isa(const char *sns, const char *child, const char *parent)
   _SFCB_RETURN(rv);
 }
 
-
 /*
  * ------------------------------------------------------------------ *
  * Instance MI Cleanup
@@ -195,7 +189,7 @@ isa(const char *sns, const char *child, const char *parent)
 
 CMPIStatus
 InternalProviderCleanup(CMPIInstanceMI * mi,
-			const CMPIContext * ctx, CMPIBoolean terminate)
+                        const CMPIContext *ctx, CMPIBoolean terminate)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderCleanup");
@@ -209,12 +203,11 @@ InternalProviderCleanup(CMPIInstanceMI * mi,
  * ------------------------------------------------------------------ 
  */
 
-
 CMPIStatus
 InternalProviderEnumInstanceNames(CMPIInstanceMI * mi,
-				  const CMPIContext * ctx,
-				  const CMPIResult * rslt,
-				  const CMPIObjectPath * ref)
+                                  const CMPIContext *ctx,
+                                  const CMPIResult *rslt,
+                                  const CMPIObjectPath * ref)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIStatus      sti = { CMPI_RC_OK, NULL };
@@ -252,25 +245,25 @@ InternalProviderEnumInstanceNames(CMPIInstanceMI * mi,
   for (i = 0; cns; i++) {
     if ((bi = _getIndex(bnss, cns)) != NULL) {
       if (ipGetFirst(bi, NULL, &kp, &ekl)) {
-	while (1) {
-	  strcpy(copKey, nss);
-	  strcat(copKey, ":");
-	  strcat(copKey, cns);
-	  strcat(copKey, ".");
-	  strncat(copKey, kp, ekl);
+        while (1) {
+          strcpy(copKey, nss);
+          strcat(copKey, ":");
+          strcat(copKey, cns);
+          strcat(copKey, ".");
+          strncat(copKey, kp, ekl);
 
-	  cop = getObjectPath(copKey, &msg);
-	  if (cop)
-	    CMReturnObjectPath(rslt, cop);
-	  else {
-	    CMPIStatus      st = { CMPI_RC_ERR_FAILED, NULL };
-	    return st;
-	  }
-	  if (bi->next < bi->dSize && ipGetNext(bi, NULL, &kp, &ekl)) {
-	    continue;
-	  }
-	  break;
-	}
+          cop = getObjectPath(copKey, &msg);
+          if (cop)
+            CMReturnObjectPath(rslt, cop);
+          else {
+            CMPIStatus      st = { CMPI_RC_ERR_FAILED, NULL };
+            return st;
+          }
+          if (bi->next < bi->dSize && ipGetNext(bi, NULL, &kp, &ekl)) {
+            continue;
+          }
+          break;
+        }
       }
       freeBlobIndex(&bi, 1);
     }
@@ -282,14 +275,14 @@ InternalProviderEnumInstanceNames(CMPIInstanceMI * mi,
   _SFCB_RETURN(st);
 }
 
-UtilStringBuffer *instanceToString(CMPIInstance * ci, char **props);
+UtilStringBuffer *instanceToString(CMPIInstance *ci, char **props);
 
 static CMPIStatus
 enumInstances(CMPIInstanceMI * mi,
-	      const CMPIContext * ctx, void *rslt,
-	      const CMPIObjectPath * ref,
-	      const char **properties,
-	      void (*retFnc) (void *, CMPIInstance *), int ignprov)
+              const CMPIContext *ctx, void *rslt,
+              const CMPIObjectPath * ref,
+              const char **properties,
+              void (*retFnc) (void *, CMPIInstance *), int ignprov)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIStatus      sti = { CMPI_RC_OK, NULL };
@@ -334,16 +327,16 @@ enumInstances(CMPIInstanceMI * mi,
     _SFCB_TRACE(1, ("--- looking for %s", cns));
     if ((bi = _getIndex(bnss, cns)) != NULL) {
       for (ci = ipGetFirst(bi, &len, NULL, 0); ci;
-	   ci = ipGetNext(bi, &len, NULL, 0)) {
-	if (properties) {
-	  keyList = getKeyList(ci->ft->getObjectPath(ci, NULL));
-	  ci->ft->setPropertyFilter(ci, properties, keyList);
-	  if (keyList) {
-	    free(keyList);
-	  }
-	}
-	_SFCB_TRACE(1, ("--- returning instance %p", ci));
-	retFnc(rslt, ci);
+           ci = ipGetNext(bi, &len, NULL, 0)) {
+        if (properties) {
+          keyList = getKeyList(ci->ft->getObjectPath(ci, NULL));
+          ci->ft->setPropertyFilter(ci, properties, keyList);
+          if (keyList) {
+            free(keyList);
+          }
+        }
+        _SFCB_TRACE(1, ("--- returning instance %p", ci));
+        retFnc(rslt, ci);
       }
     }
     freeBlobIndex(&bi, 1);
@@ -357,14 +350,14 @@ enumInstances(CMPIInstanceMI * mi,
 }
 
 static void
-return2result(void *ret, CMPIInstance * ci)
+return2result(void *ret, CMPIInstance *ci)
 {
   CMPIResult     *rslt = (CMPIResult *) ret;
   CMReturnInstance(rslt, ci);
 }
 
 static void
-return2lst(void *ret, CMPIInstance * ci)
+return2lst(void *ret, CMPIInstance *ci)
 {
   UtilList       *ul = (UtilList *) ret;
   ul->ft->append(ul, ci);
@@ -372,37 +365,37 @@ return2lst(void *ret, CMPIInstance * ci)
 
 CMPIStatus
 InternalProviderEnumInstances(CMPIInstanceMI * mi,
-			      const CMPIContext * ctx,
-			      const CMPIResult * rslt,
-			      const CMPIObjectPath * ref,
-			      const char **properties)
+                              const CMPIContext *ctx,
+                              const CMPIResult *rslt,
+                              const CMPIObjectPath * ref,
+                              const char **properties)
 {
   CMPIStatus      st;
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderEnumInstances");
   st = enumInstances(mi, ctx, (void *) rslt, ref, properties,
-		     return2result, 0);
+                     return2result, 0);
   _SFCB_RETURN(st);
 }
 
 UtilList       *
 SafeInternalProviderAddEnumInstances(UtilList * ul, CMPIInstanceMI * mi,
-				     const CMPIContext * ctx,
-				     const CMPIObjectPath * ref,
-				     const char **properties,
-				     CMPIStatus * rc, int ignprov)
+                                     const CMPIContext *ctx,
+                                     const CMPIObjectPath * ref,
+                                     const char **properties,
+                                     CMPIStatus *rc, int ignprov)
 {
   CMPIStatus      st;
   _SFCB_ENTER(TRACE_INTERNALPROVIDER,
-	      "SafeInternalProviderAddEnumInstances");
+              "SafeInternalProviderAddEnumInstances");
   st = enumInstances(mi, ctx, (void *) ul, ref, properties, return2lst,
-		     ignprov);
+                     ignprov);
   if (rc)
     *rc = st;
   _SFCB_RETURN(ul);
 }
 
 CMPIInstance   *
-internalProviderGetInstance(const CMPIObjectPath * cop, CMPIStatus * rc)
+internalProviderGetInstance(const CMPIObjectPath * cop, CMPIStatus *rc)
 {
   int             len;
   CMPIString     *cn = CMGetClassName(cop, NULL);
@@ -437,10 +430,10 @@ internalProviderGetInstance(const CMPIObjectPath * cop, CMPIStatus * rc)
 
 CMPIStatus
 InternalProviderGetInstance(CMPIInstanceMI * mi,
-			    const CMPIContext * ctx,
-			    const CMPIResult * rslt,
-			    const CMPIObjectPath * cop,
-			    const char **properties)
+                            const CMPIContext *ctx,
+                            const CMPIResult *rslt,
+                            const CMPIObjectPath * cop,
+                            const char **properties)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIInstance   *ci;
@@ -466,10 +459,10 @@ InternalProviderGetInstance(CMPIInstanceMI * mi,
 
 CMPIStatus
 InternalProviderCreateInstance(CMPIInstanceMI * mi,
-			       const CMPIContext * ctx,
-			       const CMPIResult * rslt,
-			       const CMPIObjectPath * cop,
-			       const CMPIInstance * ci)
+                               const CMPIContext *ctx,
+                               const CMPIResult *rslt,
+                               const CMPIObjectPath * cop,
+                               const CMPIInstance *ci)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   unsigned long   len;
@@ -511,8 +504,8 @@ InternalProviderCreateInstance(CMPIInstanceMI * mi,
   if (addBlob(bnss, cns, key, blob, (int) len)) {
     CMPIStatus      st = { CMPI_RC_ERR_FAILED, NULL };
     st.msg =
-	sfcb_native_new_CMPIString("Unable to write to repository", NULL,
-				   0);
+        sfcb_native_new_CMPIString("Unable to write to repository", NULL,
+                                   0);
     free(blob);
     free(key);
     _SFCB_RETURN(st);
@@ -526,11 +519,11 @@ InternalProviderCreateInstance(CMPIInstanceMI * mi,
       atArray = CMGetProperty(ci, "AdvertiseTypes", &st).value.array;
 #ifdef HAVE_SLP
       if (st.rc == CMPI_RC_OK ||
-	  atArray != NULL ||
-	  CMGetArrayElementAt(atArray, 0, &st).value.uint16 == 3) {
-	if (slppid > 1)		/* sanity check */
-	  kill(slppid, SIGHUP);	/* restart SLP to update
-				 * RegisteredProfiles */
+          atArray != NULL ||
+          CMGetArrayElementAt(atArray, 0, &st).value.uint16 == 3) {
+        if (slppid > 1)         /* sanity check */
+          kill(slppid, SIGHUP); /* restart SLP to update
+                                 * RegisteredProfiles */
       }
 #endif
     }
@@ -542,11 +535,11 @@ InternalProviderCreateInstance(CMPIInstanceMI * mi,
 
 CMPIStatus
 InternalProviderModifyInstance(CMPIInstanceMI * mi,
-			       const CMPIContext * ctx,
-			       const CMPIResult * rslt,
-			       const CMPIObjectPath * cop,
-			       const CMPIInstance * ci,
-			       const char **properties)
+                               const CMPIContext *ctx,
+                               const CMPIResult *rslt,
+                               const CMPIObjectPath * cop,
+                               const CMPIInstance *ci,
+                               const char **properties)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   unsigned long   len;
@@ -590,12 +583,12 @@ InternalProviderModifyInstance(CMPIInstanceMI * mi,
     CMPIArray      *atArray;
     atArray = CMGetProperty(ci, "AdvertiseTypes", &st).value.array;
     if (st.rc == CMPI_RC_OK ||
-	atArray != NULL ||
-	CMGetArrayElementAt(atArray, 0, &st).value.uint16 == 3) {
+        atArray != NULL ||
+        CMGetArrayElementAt(atArray, 0, &st).value.uint16 == 3) {
 
 #ifdef HAVE_SLP
-      kill(slppid, SIGHUP);	/* restart SLP to update
-				 * RegisteredProfiles */
+      kill(slppid, SIGHUP);     /* restart SLP to update
+                                 * RegisteredProfiles */
 #endif
     }
   }
@@ -606,9 +599,9 @@ InternalProviderModifyInstance(CMPIInstanceMI * mi,
 
 CMPIStatus
 InternalProviderDeleteInstance(CMPIInstanceMI * mi,
-			       const CMPIContext * ctx,
-			       const CMPIResult * rslt,
-			       const CMPIObjectPath * cop)
+                               const CMPIContext *ctx,
+                               const CMPIResult *rslt,
+                               const CMPIObjectPath * cop)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIString     *cn = CMGetClassName(cop, NULL);
@@ -635,8 +628,8 @@ InternalProviderDeleteInstance(CMPIInstanceMI * mi,
 
 #ifdef HAVE_SLP
   if (isa(nss, cns, "cim_registeredprofile")) {
-    kill(slppid, SIGHUP);	/* restart SLP to update
-				 * RegisteredProfiles */
+    kill(slppid, SIGHUP);       /* restart SLP to update
+                                 * RegisteredProfiles */
   }
 #endif
 
@@ -646,15 +639,14 @@ InternalProviderDeleteInstance(CMPIInstanceMI * mi,
 
 CMPIStatus
 InternalProviderExecQuery(CMPIInstanceMI * mi,
-			  const CMPIContext * ctx,
-			  const CMPIResult * rslt,
-			  const CMPIObjectPath * cop,
-			  const char *lang, const char *query)
+                          const CMPIContext *ctx,
+                          const CMPIResult *rslt,
+                          const CMPIObjectPath * cop,
+                          const char *lang, const char *query)
 {
   CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
   return st;
 }
-
 
 /*
  * ------------------------------------------------------------------ *
@@ -671,21 +663,21 @@ CMPIConstClass *getConstClass(const char *ns, const char *cn);
 
 static CMPIConstClass *
 assocForName(const char *nameSpace, const char *assocClass,
-	     const char *role, const char *resultRole)
+             const char *role, const char *resultRole)
 {
   CMPIConstClass *cc = getConstClass(nameSpace, assocClass);
 
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "assocForName");
   _SFCB_TRACE(1,
-	      ("--- nameSpace: %s assocClass: %s cc: %p", nameSpace,
-	       assocClass, cc));
+              ("--- nameSpace: %s assocClass: %s cc: %p", nameSpace,
+               assocClass, cc));
 
   if (cc != NULL && cc->ft->isAssociation(cc) != 0 &&
       (role == NULL
        || (cc->ft->getProperty(cc, role, NULL).state & CMPI_notFound) == 0)
       && (resultRole == NULL
-	  || (cc->ft->getProperty(cc, resultRole, NULL).
-	      state & CMPI_notFound) == 0)) {
+          || (cc->ft->getProperty(cc, resultRole,
+                                  NULL).state & CMPI_notFound) == 0)) {
     _SFCB_RETURN(cc);
   } else
     _SFCB_RETURN(NULL);
@@ -693,7 +685,7 @@ assocForName(const char *nameSpace, const char *assocClass,
 
 static int
 objectPathEquals(UtilStringBuffer * pn, CMPIObjectPath * op,
-		 UtilStringBuffer ** retName, int eq)
+                 UtilStringBuffer ** retName, int eq)
 {
   int             rc = 0;
   UtilStringBuffer *opn = normalizeObjectPathStrBuf(op);
@@ -707,13 +699,13 @@ objectPathEquals(UtilStringBuffer * pn, CMPIObjectPath * op,
 }
 
 CMPIStatus
-getRefs(const CMPIContext * ctx, const CMPIResult * rslt,
-	const CMPIObjectPath * cop,
-	const char *assocClass,
-	const char *resultClass,
-	const char *role,
-	const char *resultRole,
-	const char **propertyList, int associatorFunction)
+getRefs(const CMPIContext *ctx, const CMPIResult *rslt,
+        const CMPIObjectPath * cop,
+        const char *assocClass,
+        const char *resultClass,
+        const char *role,
+        const char *resultRole,
+        const char **propertyList, int associatorFunction)
 {
   UtilList       *refs = UtilFactory->newList();
   char           *ns = (char *) CMGetNameSpace(cop, NULL)->hdl;
@@ -731,13 +723,13 @@ getRefs(const CMPIContext * ctx, const CMPIResult * rslt,
     }
     path = CMNewObjectPath(_broker, ns, assocClass, NULL);
     SafeInternalProviderAddEnumInstances(refs, NULL, ctx, path,
-					 propertyList, &st, 1);
+                                         propertyList, &st, 1);
   }
 
   else {
     CMPIData        rv;
     CMPIObjectPath *op =
-	CMNewObjectPath(Broker, ns, "$ClassProvider$", &st);
+        CMNewObjectPath(Broker, ns, "$ClassProvider$", &st);
     CMPIArgs       *in = CMNewArgs(Broker, NULL);
     CMPIArgs       *out = CMNewArgs(Broker, NULL);
     rv = CBInvokeMethod(Broker, ctx, op, "getassocs", in, out, &st);
@@ -746,20 +738,19 @@ getRefs(const CMPIContext * ctx, const CMPIResult * rslt,
                       m;
       CMPIArray      *ar = CMGetArg(out, "assocs", &st).value.array;
       for (i = 0, m = CMGetArrayCount(ar, NULL); i < m; i++) {
-	char           *name =
-	    CMGetArrayElementAt(ar, i, NULL).value.string->hdl;
-	if (name) {
-	  CMPIObjectPath *cop = CMNewObjectPath(Broker, ns, name, NULL);
-	  if (cop) {
-	    SafeInternalProviderAddEnumInstances(refs, NULL, ctx, cop,
-						 propertyList, &st, 1);
-	  }
-	}
-	_SFCB_TRACE(1, ("--- assoc %s", name));
+        char           *name =
+            CMGetArrayElementAt(ar, i, NULL).value.string->hdl;
+        if (name) {
+          CMPIObjectPath *cop = CMNewObjectPath(Broker, ns, name, NULL);
+          if (cop) {
+            SafeInternalProviderAddEnumInstances(refs, NULL, ctx, cop,
+                                                 propertyList, &st, 1);
+          }
+        }
+        _SFCB_TRACE(1, ("--- assoc %s", name));
       }
     }
   }
-
 
   if (role) {
     // filter out the associations not matching the role property
@@ -768,9 +759,9 @@ getRefs(const CMPIContext * ctx, const CMPIResult * rslt,
     for (ci = refs->ft->getFirst(refs); ci; ci = refs->ft->getNext(refs)) {
       CMPIData        data = CMGetProperty(ci, role, NULL);
       if ((data.state & CMPI_notFound) ||
-	  data.type != CMPI_ref ||
-	  objectPathEquals(pn, data.value.ref, NULL, 0) == 0) {
-	refs->ft->removeCurrent(refs);
+          data.type != CMPI_ref ||
+          objectPathEquals(pn, data.value.ref, NULL, 0) == 0) {
+        refs->ft->removeCurrent(refs);
       }
     }
     pn->ft->release(pn);
@@ -785,16 +776,16 @@ getRefs(const CMPIContext * ctx, const CMPIResult * rslt,
     UtilStringBuffer *pn = normalizeObjectPathStrBuf(cop);
     for (ci = refs->ft->getFirst(refs); ci; ci = refs->ft->getNext(refs)) {
       for (matched = 0, i = 0, m = CMGetPropertyCount(ci, NULL); i < m;
-	   i++) {
-	CMPIData        data = CMGetPropertyAt(ci, i, NULL, NULL);
-	if (data.type == CMPI_ref
-	    && objectPathEquals(pn, data.value.ref, NULL, 0)) {
-	  matched = 1;
-	  break;
-	}
+           i++) {
+        CMPIData        data = CMGetPropertyAt(ci, i, NULL, NULL);
+        if (data.type == CMPI_ref
+            && objectPathEquals(pn, data.value.ref, NULL, 0)) {
+          matched = 1;
+          break;
+        }
       }
       if (matched == 0)
-	refs->ft->removeCurrent(refs);
+        refs->ft->removeCurrent(refs);
     }
     pn->ft->release(pn);
   }
@@ -822,7 +813,7 @@ getRefs(const CMPIContext * ctx, const CMPIResult * rslt,
     // Use hashtable to avoid dup'd associators
     CMPIInstance   *ci;
     UtilHashTable  *assocs =
-	UtilFactory->newHashTable(61, UtilHashTable_charKey);
+        UtilFactory->newHashTable(61, UtilHashTable_charKey);
     UtilStringBuffer *pn = normalizeObjectPathStrBuf(cop);
     for (ci = refs->ft->getFirst(refs); ci; ci = refs->ft->getNext(refs)) {
       // Q: for ASSOC_NAME we should not require the
@@ -830,45 +821,45 @@ getRefs(const CMPIContext * ctx, const CMPIResult * rslt,
       // The current approach retrieves the instances
       // via the CIMOM handle
       if (resultRole) {
-	CMPIData        data = CMGetProperty(ci, resultRole, NULL);
-	UtilStringBuffer *an = NULL;
-	if ((data.state & CMPI_notFound) == 0 && data.type == CMPI_ref &&
-	    objectPathEquals(pn, data.value.ref, &an, 0) == 0) {
-	  if (resultClass == NULL
-	      || CMClassPathIsA(Broker, data.value.ref, resultClass,
-				NULL)) {
-	    CMPIInstance   *aci =
-		CBGetInstance(Broker, ctx, data.value.ref, propertyList,
-			      &st);
-	    assocs->ft->put(assocs, an->ft->getCharPtr(an), aci);
-	  }
-	}
+        CMPIData        data = CMGetProperty(ci, resultRole, NULL);
+        UtilStringBuffer *an = NULL;
+        if ((data.state & CMPI_notFound) == 0 && data.type == CMPI_ref &&
+            objectPathEquals(pn, data.value.ref, &an, 0) == 0) {
+          if (resultClass == NULL
+              || CMClassPathIsA(Broker, data.value.ref, resultClass,
+                                NULL)) {
+            CMPIInstance   *aci =
+                CBGetInstance(Broker, ctx, data.value.ref, propertyList,
+                              &st);
+            assocs->ft->put(assocs, an->ft->getCharPtr(an), aci);
+          }
+        }
       }
 
       else {
-	// must loop over the properties to find ref instances
-	int             i,
-	                m;
-	for (i = 0, m = CMGetPropertyCount(ci, NULL); i < m; i++) {
-	  CMPIData        data = CMGetPropertyAt(ci, i, NULL, NULL);
-	  if (data.type == CMPI_ref) {
-	    CMPIObjectPath *ref = data.value.ref;
-	    CMPIString     *tns = CMGetNameSpace(ref, NULL);
-	    if (tns == NULL || tns->hdl == NULL)
-	      CMSetNameSpace(ref, ns);
-	    UtilStringBuffer *an = NULL;
-	    if (objectPathEquals(pn, ref, &an, 0) == 0) {
+        // must loop over the properties to find ref instances
+        int             i,
+                        m;
+        for (i = 0, m = CMGetPropertyCount(ci, NULL); i < m; i++) {
+          CMPIData        data = CMGetPropertyAt(ci, i, NULL, NULL);
+          if (data.type == CMPI_ref) {
+            CMPIObjectPath *ref = data.value.ref;
+            CMPIString     *tns = CMGetNameSpace(ref, NULL);
+            if (tns == NULL || tns->hdl == NULL)
+              CMSetNameSpace(ref, ns);
+            UtilStringBuffer *an = NULL;
+            if (objectPathEquals(pn, ref, &an, 0) == 0) {
 
-	      if (resultClass == NULL
-		  || CMClassPathIsA(Broker, ref, resultClass, NULL)) {
-		CMPIInstance   *aci =
-		    CBGetInstance(Broker, ctx, ref, propertyList, &st);
-		if (aci)
-		  assocs->ft->put(assocs, an->ft->getCharPtr(an), aci);
-	      }
-	    }
-	  }
-	}
+              if (resultClass == NULL
+                  || CMClassPathIsA(Broker, ref, resultClass, NULL)) {
+                CMPIInstance   *aci =
+                    CBGetInstance(Broker, ctx, ref, propertyList, &st);
+                if (aci)
+                  assocs->ft->put(assocs, an->ft->getCharPtr(an), aci);
+              }
+            }
+          }
+        }
       }
     }
 
@@ -877,16 +868,16 @@ getRefs(const CMPIContext * ctx, const CMPIResult * rslt,
       char           *an;
       CMPIInstance   *aci;
       for (it =
-	   assocs->ft->getFirst(assocs, (void **) &an, (void **) &aci); it;
-	   it =
-	   assocs->ft->getNext(assocs, it, (void **) &an,
-			       (void **) &aci)) {
-	if (associatorFunction == ASSOC)
-	  CMReturnInstance(rslt, aci);
-	else {
-	  CMPIObjectPath *op = CMGetObjectPath(aci, NULL);
-	  CMReturnObjectPath(rslt, op);
-	}
+           assocs->ft->getFirst(assocs, (void **) &an, (void **) &aci); it;
+           it =
+           assocs->ft->getNext(assocs, it, (void **) &an,
+                               (void **) &aci)) {
+        if (associatorFunction == ASSOC)
+          CMReturnInstance(rslt, aci);
+        else {
+          CMPIObjectPath *op = CMGetObjectPath(aci, NULL);
+          CMReturnObjectPath(rslt, op);
+        }
       }
     }
 
@@ -900,83 +891,78 @@ getRefs(const CMPIContext * ctx, const CMPIResult * rslt,
 
 CMPIStatus
 InternalProviderAssociationCleanup(CMPIAssociationMI * mi,
-				   const CMPIContext * ctx,
-				   CMPIBoolean terminate)
+                                   const CMPIContext *ctx,
+                                   CMPIBoolean terminate)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_INTERNALPROVIDER,
-	      "InternalProviderAssociationCleanup");
+              "InternalProviderAssociationCleanup");
 
   _SFCB_RETURN(st);
 }
 
-
-
 CMPIStatus
 InternalProviderAssociators(CMPIAssociationMI * mi,
-			    const CMPIContext * ctx,
-			    const CMPIResult * rslt,
-			    const CMPIObjectPath * cop,
-			    const char *assocClass,
-			    const char *resultClass,
-			    const char *role,
-			    const char *resultRole,
-			    const char **propertyList)
+                            const CMPIContext *ctx,
+                            const CMPIResult *rslt,
+                            const CMPIObjectPath * cop,
+                            const char *assocClass,
+                            const char *resultClass,
+                            const char *role,
+                            const char *resultRole,
+                            const char **propertyList)
 {
   CMPIStatus      st;
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderAssociators");
   st = getRefs(ctx, rslt, cop, assocClass, resultClass,
-	       role, resultRole, propertyList, ASSOC);
+               role, resultRole, propertyList, ASSOC);
   _SFCB_RETURN(st);
 }
 
 CMPIStatus
 InternalProviderAssociatorNames(CMPIAssociationMI * mi,
-				const CMPIContext * ctx,
-				const CMPIResult * rslt,
-				const CMPIObjectPath * cop,
-				const char *assocClass,
-				const char *resultClass,
-				const char *role, const char *resultRole)
+                                const CMPIContext *ctx,
+                                const CMPIResult *rslt,
+                                const CMPIObjectPath * cop,
+                                const char *assocClass,
+                                const char *resultClass,
+                                const char *role, const char *resultRole)
 {
   CMPIStatus      st;
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderAssociatorNames");
   st = getRefs(ctx, rslt, cop, assocClass, resultClass,
-	       role, resultRole, NULL, ASSOC_NAME);
+               role, resultRole, NULL, ASSOC_NAME);
   _SFCB_RETURN(st);
 }
 
 CMPIStatus
 InternalProviderReferences(CMPIAssociationMI * mi,
-			   const CMPIContext * ctx,
-			   const CMPIResult * rslt,
-			   const CMPIObjectPath * cop,
-			   const char *assocClass,
-			   const char *role, const char **propertyList)
+                           const CMPIContext *ctx,
+                           const CMPIResult *rslt,
+                           const CMPIObjectPath * cop,
+                           const char *assocClass,
+                           const char *role, const char **propertyList)
 {
   CMPIStatus      st;
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderReferences");
   st = getRefs(ctx, rslt, cop, assocClass, NULL,
-	       role, NULL, propertyList, REF);
+               role, NULL, propertyList, REF);
   _SFCB_RETURN(st);
 }
 
-
 CMPIStatus
 InternalProviderReferenceNames(CMPIAssociationMI * mi,
-			       const CMPIContext * ctx,
-			       const CMPIResult * rslt,
-			       const CMPIObjectPath * cop,
-			       const char *assocClass, const char *role)
+                               const CMPIContext *ctx,
+                               const CMPIResult *rslt,
+                               const CMPIObjectPath * cop,
+                               const char *assocClass, const char *role)
 {
   CMPIStatus      st;
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderReferenceNames");
   st = getRefs(ctx, rslt, cop, assocClass, NULL,
-	       role, NULL, NULL, REF_NAME);
+               role, NULL, NULL, REF_NAME);
   _SFCB_RETURN(st);
 }
-
-
 
 /*
  * ------------------------------------------------------------------ *
@@ -986,8 +972,8 @@ InternalProviderReferenceNames(CMPIAssociationMI * mi,
 
 CMPIStatus
 InternalProviderMethodCleanup(CMPIMethodMI * mi,
-			      const CMPIContext * ctx,
-			      CMPIBoolean terminate)
+                              const CMPIContext *ctx,
+                              CMPIBoolean terminate)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   return st;
@@ -995,15 +981,15 @@ InternalProviderMethodCleanup(CMPIMethodMI * mi,
 
 CMPIStatus
 InternalProviderInvokeMethod(CMPIMethodMI * mi,
-			     const CMPIContext * ctx,
-			     const CMPIResult * rslt,
-			     const CMPIObjectPath * ref,
-			     const char *methodName,
-			     const CMPIArgs * in, CMPIArgs * out)
+                             const CMPIContext *ctx,
+                             const CMPIResult *rslt,
+                             const CMPIObjectPath * ref,
+                             const char *methodName,
+                             const CMPIArgs * in, CMPIArgs * out)
 {
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderInvokeMethod");
   CMReturnWithChars(_broker, CMPI_RC_ERR_FAILED,
-		    "DefaultProvider does not support invokeMethod operations");
+                    "DefaultProvider does not support invokeMethod operations");
 }
 
 /*
@@ -1014,8 +1000,8 @@ InternalProviderInvokeMethod(CMPIMethodMI * mi,
 
 CMPIStatus
 InternalProviderPropertyCleanup(CMPIPropertyMI * mi,
-				const CMPIContext * ctx,
-				CMPIBoolean terminate)
+                                const CMPIContext *ctx,
+                                CMPIBoolean terminate)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   return st;
@@ -1023,26 +1009,26 @@ InternalProviderPropertyCleanup(CMPIPropertyMI * mi,
 
 CMPIStatus
 InternalProviderSetProperty(CMPIPropertyMI * mi,
-			    const CMPIContext * ctx,
-			    const CMPIResult * rslt,
-			    const CMPIObjectPath * ref,
-			    const char *propName, const CMPIData data)
+                            const CMPIContext *ctx,
+                            const CMPIResult *rslt,
+                            const CMPIObjectPath * ref,
+                            const char *propName, const CMPIData data)
 {
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderSetProperty");
   CMReturnWithChars(_broker, CMPI_RC_ERR_FAILED,
-		    "DefaultProvider does not support property operations");
+                    "DefaultProvider does not support property operations");
 }
 
 CMPIStatus
 InternalProviderGetProperty(CMPIPropertyMI * mi,
-			    const CMPIContext * ctx,
-			    const CMPIResult * rslt,
-			    const CMPIObjectPath * ref,
-			    const char *propName)
+                            const CMPIContext *ctx,
+                            const CMPIResult *rslt,
+                            const CMPIObjectPath * ref,
+                            const char *propName)
 {
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderGetProperty");
   CMReturnWithChars(_broker, CMPI_RC_ERR_FAILED,
-		    "DefaultProvider does not support property operations");
+                    "DefaultProvider does not support property operations");
 }
 
 /*
@@ -1060,3 +1046,8 @@ CMAssociationMIStub(InternalProvider, InternalProvider, _broker, CMNoHook);
 CMMethodMIStub(InternalProvider, InternalProvider, _broker, CMNoHook);
 
 CMPropertyMIStub(InternalProvider, InternalProvider, _broker, CMNoHook);
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

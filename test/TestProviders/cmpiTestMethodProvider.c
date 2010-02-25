@@ -7,22 +7,20 @@ static const CMPIBroker *_broker;
 
 #define _ClassName "Sample_Method"
 
-
-
 CMPIStatus
 TestMethodProviderMethodCleanup(CMPIMethodMI * mi,
-				const CMPIContext * ctx, CMPIBoolean term)
+                                const CMPIContext *ctx, CMPIBoolean term)
 {
   CMReturn(CMPI_RC_OK);
 }
 
 CMPIStatus
 TestMethodProviderInvokeMethod(CMPIMethodMI * mi,
-			       const CMPIContext * ctx,
-			       const CMPIResult * rslt,
-			       const CMPIObjectPath * ref,
-			       const char *methodName,
-			       const CMPIArgs * in, CMPIArgs * out)
+                               const CMPIContext *ctx,
+                               const CMPIResult *rslt,
+                               const CMPIObjectPath * ref,
+                               const char *methodName,
+                               const CMPIArgs * in, CMPIArgs * out)
 {
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   CMPIString     *className;
@@ -50,27 +48,27 @@ TestMethodProviderInvokeMethod(CMPIMethodMI * mi,
        * gets the number of arguments contained in "in" Args. 
        */
       if (CMGetArgCount(in, &rc) > 0) {
-	/*
-	 * gets a Name argument value 
-	 */
-	data = CMGetArg(in, "Name", &rc);
-	/*
-	 * check for data type and not null value of argument value
-	 * recieved 
-	 */
-	if (data.type == CMPI_string && !(CMIsNullValue(data))) {
-	  strCat = CMGetCharsPtr(data.value.string, &rc);
-	  strcat(result, strCat);
-	  // strcat(result, "!");
-	  /*
-	   * create the new string to return to client 
-	   */
-	  str1 = CMNewString(_broker, result, &rc);
-	  val1.string = str1;
-	}
+        /*
+         * gets a Name argument value 
+         */
+        data = CMGetArg(in, "Name", &rc);
+        /*
+         * check for data type and not null value of argument value
+         * recieved 
+         */
+        if (data.type == CMPI_string && !(CMIsNullValue(data))) {
+          strCat = CMGetCharsPtr(data.value.string, &rc);
+          strcat(result, strCat);
+          // strcat(result, "!");
+          /*
+           * create the new string to return to client 
+           */
+          str1 = CMNewString(_broker, result, &rc);
+          val1.string = str1;
+        }
       } else {
-	str1 = CMNewString(_broker, result, &rc);
-	val1.string = str1;
+        str1 = CMNewString(_broker, result, &rc);
+        val1.string = str1;
       }
       /*
        * create string to add to an array 
@@ -98,7 +96,6 @@ TestMethodProviderInvokeMethod(CMPIMethodMI * mi,
  * ---------------------------------------------------------------------------
  */
 
-
 CMMethodMIStub(TestMethodProvider, TestMethodProvider, _broker, CMNoHook)
 
     /*
@@ -110,3 +107,8 @@ CMMethodMIStub(TestMethodProvider, TestMethodProvider, _broker, CMNoHook)
     /*
      * ---------------------------------------------------------------------------
      */
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

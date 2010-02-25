@@ -129,7 +129,6 @@ extern          "C" {
 #      define CMPI_VER_200
 #   endif
 
-
   // CMPI_VER_x switch is used by Management Broker implementations only.
 
   // It defines the CMPI version supported by the Management Broker.
@@ -160,7 +159,7 @@ extern          "C" {
   // the
   // version.
 
-#   else			// default version
+#   else                        // default version
 #      define CMPI_VER_200
 #      define CMPI_VER_100
 #      define CMPICurrentVersion CMPIVersion200
@@ -168,7 +167,6 @@ extern          "C" {
 
 /** A platform independent CMPI data type, usually an unsigned int */
   typedef unsigned int CMPICount;
-
 
   struct _CMPIBroker;
   struct _CMPIInstance;
@@ -247,7 +245,6 @@ extern          "C" {
   typedef struct _CMPIContextFT CMPIContextFT;
   typedef struct _CMPIDateTimeFT CMPIDateTimeFT;
 
-
   typedef unsigned char CMPIBoolean;
   typedef unsigned short CMPIChar16;
   typedef unsigned char CMPIUint8;
@@ -259,21 +256,20 @@ extern          "C" {
   typedef unsigned __int64 CMPIUint64;
 #   endif
   typedef signed char CMPISint8;
-  typedef short   CMPISint16;
+  typedef short CMPISint16;
   typedef signed int CMPISint32;
 #   ifndef CMPI_PLATFORM_WIN32_IX86_MSVC
   typedef long long CMPISint64;
 #   else
   typedef __int64 CMPISint64;
 #   endif
-  typedef float   CMPIReal32;
-  typedef double  CMPIReal64;
+  typedef float CMPIReal32;
+  typedef double CMPIReal64;
 
   typedef struct _CMPIValuePtr {
     void           *ptr;
     CMPICount       length;
   } CMPIValuePtr;
-
 
   typedef union _CMPIValue {
     CMPIUint64      uint64;
@@ -307,7 +303,6 @@ extern          "C" {
     CMPIReal32      Float;
     CMPIReal64      Double;
   } CMPIValue;
-
 
   typedef unsigned short CMPIType;
 
@@ -417,11 +412,11 @@ extern          "C" {
   typedef struct _CMPIData {
     /** An unsigned short representing the type of the CMPIData object */
     CMPIType        type;
-	/** An unsigned short representing whether this CMPIData object is
+        /** An unsigned short representing whether this CMPIData object is
         valid or not.
 	*/
     CMPIValueState  state;
-	/** A union which holds the actual underlying value of the data object */
+        /** A union which holds the actual underlying value of the data object */
     CMPIValue       value;
   } CMPIData;
 
@@ -441,10 +436,10 @@ extern          "C" {
 #      define CMPI_LongA   CMPI_sint64A
 #      define CMPI_FloatA  CMPI_real32A
 #      define CMPI_DoubleA CMPI_real64A
-#   endif			// CMPI_NO_SYNONYM_SUPPORT
+#   endif                       // CMPI_NO_SYNONYM_SUPPORT
 
   typedef void   *CMPIMsgFileHandle;
-  typedef void    CMPIGcStat;
+  typedef void CMPIGcStat;
 
 /** The CMPIFlags type is used to inform MI functions about options specified
     by the client and passed on to the MI for certain requests. CMPIFlags are
@@ -495,47 +490,47 @@ extern          "C" {
 	of the CMPIStatus structure
 */
   typedef enum _CMPIrc {
-	/** Success */
+        /** Success */
     CMPI_RC_OK = 0,
-	/** Generic failure */
+        /** Generic failure */
     CMPI_RC_ERR_FAILED = 1,
-	/** Specified user does not have access to perform the requested action */
+        /** Specified user does not have access to perform the requested action */
     CMPI_RC_ERR_ACCESS_DENIED = 2,
-	/** invalid namespace specified */
+        /** invalid namespace specified */
     CMPI_RC_ERR_INVALID_NAMESPACE = 3,
-	/** invalid parameter specified */
+        /** invalid parameter specified */
     CMPI_RC_ERR_INVALID_PARAMETER = 4,
-	/** Invalid class specified */
+        /** Invalid class specified */
     CMPI_RC_ERR_INVALID_CLASS = 5,
-	/** Item was not found */
+        /** Item was not found */
     CMPI_RC_ERR_NOT_FOUND = 6,
-	/** Operation not supported */
+        /** Operation not supported */
     CMPI_RC_ERR_NOT_SUPPORTED = 7,
-	/** Object has child objects */
+        /** Object has child objects */
     CMPI_RC_ERR_CLASS_HAS_CHILDREN = 8,
-	/** Object has instances */
+        /** Object has instances */
     CMPI_RC_ERR_CLASS_HAS_INSTANCES = 9,
-	/** Invalid super class specified */
+        /** Invalid super class specified */
     CMPI_RC_ERR_INVALID_SUPERCLASS = 10,
-	/** specified object already exists */
+        /** specified object already exists */
     CMPI_RC_ERR_ALREADY_EXISTS = 11,
-	/** Property does not exist */
+        /** Property does not exist */
     CMPI_RC_ERR_NO_SUCH_PROPERTY = 12,
-	/** This is a type mismatch */
+        /** This is a type mismatch */
     CMPI_RC_ERR_TYPE_MISMATCH = 13,
-	/** Query language not supported */
+        /** Query language not supported */
     CMPI_RC_ERR_QUERY_LANGUAGE_NOT_SUPPORTED = 14,
-	/** Invalid query */
+        /** Invalid query */
     CMPI_RC_ERR_INVALID_QUERY = 15,
-	/** Method is not available */
+        /** Method is not available */
     CMPI_RC_ERR_METHOD_NOT_AVAILABLE = 16,
-	/** could not find the specified method */
+        /** could not find the specified method */
     CMPI_RC_ERR_METHOD_NOT_FOUND = 17,
-	/** Returned by a MI to indicate that it should not be unloaded, only
+        /** Returned by a MI to indicate that it should not be unloaded, only
 		returned via a cleanup() call
 	*/
     CMPI_RC_DO_NOT_UNLOAD = 50,
-	/** Returned by a MI to indicate that it should never be unloaded, only
+        /** Returned by a MI to indicate that it should never be unloaded, only
 		returned via a cleanup() call
 	*/
     CMPI_RC_NEVER_UNLOAD = 51,
@@ -553,16 +548,15 @@ extern          "C" {
 
 /** The status structure is used to indicate success or failure of a call */
   typedef struct _CMPIStatus {
-	  /** The CMPIrc value.
+          /** The CMPIrc value.
 		  @see _CMPIrc
 	  */
     CMPIrc          rc;
-	  /** A text string representing the error message
+          /** A text string representing the error message
 		  @see CMPIString
 	  */
     CMPIString     *msg;
   } CMPIStatus;
-
 
   /*
    * Management Broker capabilities and feature support 
@@ -594,7 +588,6 @@ extern          "C" {
 #   define CMPI_MB_BasicQualifierSupport 0x00000047
 #   define CMPI_MB_OSEncapsulationSupport 0x00000100
 
-
   /*
    * Query Predicate operations 
    */
@@ -611,7 +604,7 @@ extern          "C" {
     CMPI_PredOp_Like = 9,
     CMPI_PredOp_NotLike = 10
 #   ifdef CMPI_VER_200
-	,
+        ,
     CMPI_PredOp_Not_Null = 11,
     CMPI_PredOp_Null = 12,
     CMPI_PredOp_And = 13,
@@ -621,354 +614,354 @@ extern          "C" {
 
   /** Severity levels for logging functions */
   typedef enum _CMPISeverity {
-	/** Error */
+        /** Error */
     CMPI_SEV_ERROR = 1,
-	/** General info */
+        /** General info */
     CMPI_SEV_INFO = 2,
-	/** Warning message */
+        /** Warning message */
     CMPI_SEV_WARNING = 3,
-	/** Debug message */
+        /** Debug message */
     CMPI_DEV_DEBUG = 4
   } CMPISeverity;
 
   /** Logging level for trace functions*/
   typedef enum _CMPILevel {
-	/** Generic information */
+        /** Generic information */
     CMPI_LEV_INFO = 1,
-	/** warnings */
+        /** warnings */
     CMPI_LEV_WARNING = 2,
-	/** detailed/specific information */
+        /** detailed/specific information */
     CMPI_LEV_VERBOSE = 3
   } CMPILevel;
 
   /** Type of query expression it is normalized to. */
   typedef enum _CMPISelectCondType {
-	/** Disjuntion Of Conjunctions */
+        /** Disjuntion Of Conjunctions */
     CMPI_COND_DOC = 0,
-	/** Conjuction of disjunctions */
+        /** Conjuction of disjunctions */
     CMPI_COND_COD = 1
   } CMPISelectCondType;
 
 #ifdef CMPI_VER_200
-	/** Possible values an Error object can use in its type property
+        /** Possible values an Error object can use in its type property
 	    @version 2.0
 	*/
   typedef enum _CMPIErrorType {
-	/** Unkown */
+        /** Unkown */
     UnknownErrorType = 0,
-	/** Other */
+        /** Other */
     OtherErrorType = 1,
-	/** Communications error */
+        /** Communications error */
     CommunicationsError = 2,
-	/** QoS error */
+        /** QoS error */
     QualityOfServiceError = 3,
-	/** Software error */
+        /** Software error */
     SoftwareError = 4,
-	/** Hardware error */
+        /** Hardware error */
     HardwareError = 5,
-	/** Environmental error */
+        /** Environmental error */
     EnvironmentalError = 6,
-	/** Security error */
+        /** Security error */
     SecurityError = 7,
-	/** over subscription error */
+        /** over subscription error */
     Oversubscription_Error = 8,
-	/** Unavailable resource */
+        /** Unavailable resource */
     UnavailableResourceError = 9,
-	/** Unsupported operation */
+        /** Unsupported operation */
     UnsupportedOperationError = 10
   } CMPIErrorType;
 
 /** Possible values an Error object can use to indicate severity */
   typedef enum _CMPIErrorSeverity {
-	/** Unknown */
+        /** Unknown */
     ErrorSevUnknown = 0,
-	/** Low severity */
+        /** Low severity */
     ErrorSevLow = 2,
-	/** Medium Severity */
+        /** Medium Severity */
     ErrorSevMedium = 3,
-	/** High severity */
+        /** High severity */
     ErrorSevHigh = 4,
-	/** Fatal error */
+        /** Fatal error */
     ErrorSevFatal = 5,
   } CMPIErrorSeverity;
 
 /** Possible values an Error object can use to indicate the probable cause */
   typedef enum _CMPIErrorProbableCause {
-	/** Unknown */
+        /** Unknown */
     ErrorProbCauseUnknown = 0,
-	/** Other cause */
+        /** Other cause */
     ErrorProbCauseOther = 1,
-	/** Adpater card failure */
+        /** Adpater card failure */
     Adapter_Card_Error = 2,
-	/** Subsystem failure */
+        /** Subsystem failure */
     Application_Subsystem_Failure = 3,
-	/** Reduced bandwidth */
+        /** Reduced bandwidth */
     Bandwidth_Reduced = 4,
-	/** Could not establish connection */
+        /** Could not establish connection */
     Connection_Establishment_Error = 5,
-	/** protocol error */
+        /** protocol error */
     Communications_Protocol_Error = 6,
-	/** Subsystem failure */
+        /** Subsystem failure */
     Communications_Subsystem_Failure = 7,
-	/** Configuration error */
+        /** Configuration error */
     ConfigurationCustomization_Error = 8,
-	/** Congested */
+        /** Congested */
     Congestion = 9,
-	/** Data is corrupt */
+        /** Data is corrupt */
     Corrupt_Data = 10,
-	/** CPU cycles exceeded */
+        /** CPU cycles exceeded */
     CPU_Cycles_Limit_Exceeded = 11,
     /*
      * Dataset modem error 
      */
     DatasetModem_Error = 12,
-	/** Degraded signal */
+        /** Degraded signal */
     Degraded_Signal = 13,
-	/** STE/DCE Interface Error */
+        /** STE/DCE Interface Error */
     DTE_DCE_Interface_Error = 14,
-	/** Door open */
+        /** Door open */
     Enclosure_Door_Open = 15,
-	/** Equipment malfunction */
+        /** Equipment malfunction */
     Equipment_Malfunction = 16,
-	/** Excessive Vibration */
+        /** Excessive Vibration */
     Excessive_Vibration = 17,
-	/** File format error */
+        /** File format error */
     File_Format_Error = 18,
-	/** Fire detected */
+        /** Fire detected */
     Fire_Detected = 19,
-	/** Flood detected */
+        /** Flood detected */
     Flood_Detected = 20,
-	/** framing error */
+        /** framing error */
     Framing_Error = 21,
-	/** HVAC problem */
+        /** HVAC problem */
     HVAC_Problem = 22,
     /*
      * Humidity unacceptable 
      */
     Humidity_Unacceptable = 23,
-	/** IO device error */
+        /** IO device error */
     IO_Device_Error = 24,
-	/** Input device error */
+        /** Input device error */
     Input_Device_Error = 25,
-	/** LAN Error */
+        /** LAN Error */
     LAN_Error = 26,
-	/** Non-toxic leak detected */
+        /** Non-toxic leak detected */
     Non_Toxic_Leak_Detected = 27,
     /*
      * Local node transmission error 
      */
     Local_Node_Transmission_Error = 28,
-	/** loss of frame */
+        /** loss of frame */
     Loss_of_Frame = 29,
-	/** loss of signal */
+        /** loss of signal */
     Loss_of_Signal = 30,
-	/** Material supply exhausted */
+        /** Material supply exhausted */
     Material_Supply_Exhausted = 31,
-	/** Multiplexer problem */
+        /** Multiplexer problem */
     Multiplexer_Problem = 32,
-	/** Out of memory */
+        /** Out of memory */
     Out_of_Memory = 33,
-	/** Output device error */
+        /** Output device error */
     Output_Device_Error = 34,
-	/** Performance degraded */
+        /** Performance degraded */
     Performance_Degraded = 35,
-	/** Power problem */
+        /** Power problem */
     Power_Problem = 36,
-	/** Pressure unacceptable */
+        /** Pressure unacceptable */
     Pressure_Unacceptable = 37,
-	/** Processor problem */
+        /** Processor problem */
     Processor_Problem = 38,
-	/** Pump failure */
+        /** Pump failure */
     Pump_Failure = 39,
-	/** Queue size exceeded */
+        /** Queue size exceeded */
     Queue_Size_Exceeded = 40,
-	/** Receive failure */
+        /** Receive failure */
     Receive_Failure = 41,
-	/** Receiver failure */
+        /** Receiver failure */
     Receiver_Failure = 42,
-	/** Remote node transmission error */
+        /** Remote node transmission error */
     Remote_Node_Transmission_Error = 43,
-	/** Resource at or nearing capacity */
+        /** Resource at or nearing capacity */
     Resource_at_or_Nearing_Capacity = 44,
-	/** Response time excessive */
+        /** Response time excessive */
     Response_Time_Excessive = 45,
-	/** Retransmission rate excessive */
+        /** Retransmission rate excessive */
     Retransmission_Rate_Excessive = 46,
-	/** Software Error */
+        /** Software Error */
     Software_Error = 47,
-	/** Software terminated abnormally */
+        /** Software terminated abnormally */
     Software_Program_Abnormally_Terminated = 48,
-	/** Program error */
+        /** Program error */
     Software_Program_Error = 49,
-	/** Storage capacity problem */
+        /** Storage capacity problem */
     Storage_Capacity_Problem = 50,
-	/** Temperature_Unacceptable */
+        /** Temperature_Unacceptable */
     Temperature_Unacceptable = 51,
-	/** Threshold_Crossed */
+        /** Threshold_Crossed */
     Threshold_Crossed = 52,
-	/** Timing_Problem */
+        /** Timing_Problem */
     Timing_Problem = 53,
-	/** Toxic_Leak_Detected */
+        /** Toxic_Leak_Detected */
     Toxic_Leak_Detected = 54,
-	/** Transmit_Failure */
+        /** Transmit_Failure */
     Transmit_Failure = 55,
-	/** Transmitter_Failure */
+        /** Transmitter_Failure */
     Transmitter_Failure = 56,
-	/** Underlying_Resource_Unavailable */
+        /** Underlying_Resource_Unavailable */
     Underlying_Resource_Unavailable = 57,
-	/** Version_Mismatch */
+        /** Version_Mismatch */
     Version_Mismatch = 58,
-	/** Previous_Alert_Cleared */
+        /** Previous_Alert_Cleared */
     Previous_Alert_Cleared = 59,
-	/** Login_Attempts_Failed */
+        /** Login_Attempts_Failed */
     Login_Attempts_Failed = 60,
-	/** Software_Virus_Detected */
+        /** Software_Virus_Detected */
     Software_Virus_Detected = 61,
-	/** Hardware_Security_Breached */
+        /** Hardware_Security_Breached */
     Hardware_Security_Breached = 62,
-	/** Denial_of_Service_Detected */
+        /** Denial_of_Service_Detected */
     Denial_of_Service_Detected = 63,
-	/** Security_Credential_Mismatch */
+        /** Security_Credential_Mismatch */
     Security_Credential_Mismatch = 64,
-	/** Unauthorized_Access */
+        /** Unauthorized_Access */
     Unauthorized_Access = 65,
-	/** Alarm_Received */
+        /** Alarm_Received */
     Alarm_Received = 66,
-	/** Loss_of_Pointer */
+        /** Loss_of_Pointer */
     Loss_of_Pointer = 67,
-	/** Payload_Mismatch */
+        /** Payload_Mismatch */
     Payload_Mismatch = 68,
-	/** Transmission_Error */
+        /** Transmission_Error */
     Transmission_Error = 69,
-	/** Excessive_Error_Rate */
+        /** Excessive_Error_Rate */
     Excessive_Error_Rate = 70,
-	/** Trace_Problem */
+        /** Trace_Problem */
     Trace_Problem = 71,
-	/** Element_Unavailable */
+        /** Element_Unavailable */
     Element_Unavailable = 72,
-	/** Element_Missing */
+        /** Element_Missing */
     Element_Missing = 73,
-	/** Loss_of_Multi_Frame */
+        /** Loss_of_Multi_Frame */
     Loss_of_Multi_Frame = 74,
-	/** Broadcast_Channel_Failure */
+        /** Broadcast_Channel_Failure */
     Broadcast_Channel_Failure = 75,
-	/** Invalid_Message_Received */
+        /** Invalid_Message_Received */
     Invalid_Message_Received = 76,
-	/** Routing_Failure */
+        /** Routing_Failure */
     Routing_Failure = 77,
-	/** Backplane_Failure */
+        /** Backplane_Failure */
     Backplane_Failure = 78,
-	/** Identifier_Duplication */
+        /** Identifier_Duplication */
     Identifier_Duplication = 79,
-	/** Protection_Path_Failure */
+        /** Protection_Path_Failure */
     Protection_Path_Failure = 80,
-	/** Sync_Loss_or_Mismatch */
+        /** Sync_Loss_or_Mismatch */
     Sync_Loss_or_Mismatch = 81,
-	/** Terminal_Problem */
+        /** Terminal_Problem */
     Terminal_Problem = 82,
-	/** Real_Time_Clock_Failure */
+        /** Real_Time_Clock_Failure */
     Real_Time_Clock_Failure = 83,
-	/** Antenna_Failure */
+        /** Antenna_Failure */
     Antenna_Failure = 84,
-	/** Battery_Charging_Failure */
+        /** Battery_Charging_Failure */
     Battery_Charging_Failure = 85,
-	/** Disk_Failure */
+        /** Disk_Failure */
     Disk_Failure = 86,
-	/** Frequency_Hopping_Failure */
+        /** Frequency_Hopping_Failure */
     Frequency_Hopping_Failure = 87,
-	/** Loss_of_Redundancy */
+        /** Loss_of_Redundancy */
     Loss_of_Redundancy = 88,
-	/** Power_Supply_Failure */
+        /** Power_Supply_Failure */
     Power_Supply_Failure = 89,
-	/** Signal_Quality_Problem */
+        /** Signal_Quality_Problem */
     Signal_Quality_Problem = 90,
-	/** Battery_Discharging */
+        /** Battery_Discharging */
     Battery_Discharging = 91,
-	/** Battery_Failure */
+        /** Battery_Failure */
     Battery_Failure = 92,
-	/** Commercial_Power_Problem */
+        /** Commercial_Power_Problem */
     Commercial_Power_Problem = 93,
-	/** Fan_Failure */
+        /** Fan_Failure */
     Fan_Failure = 94,
-	/** Engine_Failure */
+        /** Engine_Failure */
     Engine_Failure = 95,
-	/** Sensor_Failure */
+        /** Sensor_Failure */
     Sensor_Failure = 96,
-	/** Fuse_Failure */
+        /** Fuse_Failure */
     Fuse_Failure = 97,
-	/** Generator_Failure */
+        /** Generator_Failure */
     Generator_Failure = 98,
-	/** Low_Battery */
+        /** Low_Battery */
     Low_Battery = 99,
-	/** Low_Fuel */
+        /** Low_Fuel */
     Low_Fuel = 100,
-	/** Low_Water */
+        /** Low_Water */
     Low_Water = 101,
-	/** Explosive_Gas */
+        /** Explosive_Gas */
     Explosive_Gas = 102,
-	/** High_Winds */
+        /** High_Winds */
     High_Winds = 103,
-	/** Ice_Buildup */
+        /** Ice_Buildup */
     Ice_Buildup = 104,
-	/** Smoke */
+        /** Smoke */
     Smoke = 105,
-	/** Memory_Mismatch */
+        /** Memory_Mismatch */
     Memory_Mismatch = 106,
-	/** Out_of_CPU_Cycles */
+        /** Out_of_CPU_Cycles */
     Out_of_CPU_Cycles = 107,
-	/** Software_Environment_Problem */
+        /** Software_Environment_Problem */
     Software_Environment_Problem = 108,
-	/** Software_Download_Failure */
+        /** Software_Download_Failure */
     Software_Download_Failure = 109,
-	/** Element_Reinitialized */
+        /** Element_Reinitialized */
     Element_Reinitialized = 110,
-	/** Timeout */
+        /** Timeout */
     Timeout = 111,
-	/** Logging_Problems */
+        /** Logging_Problems */
     Logging_Problems = 112,
-	/** Leak_Detected */
+        /** Leak_Detected */
     Leak_Detected_113,
-	/** Protection_Mechanism_Failure */
+        /** Protection_Mechanism_Failure */
     Protection_Mechanism_Failure = 114,
-	/** Protecting_Resource_Failure */
+        /** Protecting_Resource_Failure */
     Protecting_Resource_Failure = 115,
-	/** Database_Inconsistency */
+        /** Database_Inconsistency */
     Database_Inconsistency = 116,
-	/** Authentication_Failure */
+        /** Authentication_Failure */
     Authentication_Failure = 117,
-	/** Breach_of_Confidentiality */
+        /** Breach_of_Confidentiality */
     Breach_of_Confidentiality = 118,
-	/** Cable_Tamper */
+        /** Cable_Tamper */
     Cable_Tamper = 119,
-	/** Delayed_Information */
+        /** Delayed_Information */
     Delayed_Information = 120,
-	/** Duplicate_Information */
+        /** Duplicate_Information */
     Duplicate_Information = 121,
-	/** Information_Missing */
+        /** Information_Missing */
     Information_Missing = 122,
-	/** Information_Modification */
+        /** Information_Modification */
     Information_Modification = 123,
-	/** Information_Out_of_Sequence */
+        /** Information_Out_of_Sequence */
     Information_Out_of_Sequence = 124,
-	/** Key_Expired */
+        /** Key_Expired */
     Key_Expired = 125,
-	/** Non_Repudiation_Failure */
+        /** Non_Repudiation_Failure */
     Non_Repudiation_Failure = 126,
-	/** Out_of_Hours_Activity */
+        /** Out_of_Hours_Activity */
     Out_of_Hours_Activity = 127,
-	/** Out_of_Service */
+        /** Out_of_Service */
     Out_of_Service = 128,
-	/** Procedural_Error */
+        /** Procedural_Error */
     Procedural_Error = 129,
-	/** Unexpected_Information */
+        /** Unexpected_Information */
     Unexpected_Information = 130,
   } CMPIErrorProbableCause;
 
 /** Possible values an Error object can have for the error src format */
   typedef enum _CMPIErrorSrcFormat {
-	/** Unknown source */
+        /** Unknown source */
     CMPIErrSrcUnknown = 0,
-	/** Other source */
+        /** Other source */
     CMPIErrSrcOther = 1,
     /*
      * Object handle 
@@ -976,10 +969,15 @@ extern          "C" {
     CIMObjectHandle = 2,
   } CMPIErrorSrcFormat;
 
-#endif				/* CMPI_VER_200 */
+#endif                          /* CMPI_VER_200 */
 
 #   ifdef __cplusplus
 };
 #   endif
 
-#endif				// _CMPIDT_H_
+#endif                          // _CMPIDT_H_
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

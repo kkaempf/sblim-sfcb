@@ -59,7 +59,6 @@ typedef struct {
   CLP32_CMPIData  data;
 } CLP32_ClQualifier;
 
-
 typedef struct {
   CLP32_CMPIData  data;
   CLP32_ClString  id;
@@ -93,16 +92,16 @@ typedef enum { REC_VER,
 
 static int      checkargs(int argc, char *argv[]);
 static int      dumpString(const CLP32_ClObjectHdr * hdr,
-			   const CLP32_ClString * cs, const char *prefix);
+                           const CLP32_ClString * cs, const char *prefix);
 static int      dumpStringBuffer(const CLP32_ClObjectHdr * hdr,
-				 const char *prefix);
+                                 const char *prefix);
 static int      dumpArrayBuffer(const CLP32_ClObjectHdr * hdr,
-				const char *prefix);
+                                const char *prefix);
 
 static int      dumpProperties(const CLP32_ClClass * cls,
-			       const char *prefix);
+                               const char *prefix);
 static int      dumpQualifiers(const CLP32_ClClass * cls,
-			       const char *prefix);
+                               const char *prefix);
 static int      dumpMethods(const CLP32_ClClass * cls, const char *prefix);
 
 static int      detail_stringbuf = 0;
@@ -124,132 +123,132 @@ main(int argc, char *argv[])
       DUMP_STATE      state = REC_VER;
       DUMP_STATE      fillState = REC_QUIT;
       int             numRead = 0,
-	  numFill = 0;
+          numFill = 0;
       void           *fillBuf = NULL;
       CLP32_ClVersionRecord clv;
       CLP32_ClObjectHdr coh,
                      *clob;
       CLP32_ClClass  *cls;
       do {
-	switch (state) {
-	case REC_VER:
-	  if (read(fdSchema, &clv, sizeof(CLP32_ClVersionRecord)) !=
-	      sizeof(CLP32_ClVersionRecord)) {
-	    rc = 1;
-	    fprintf(stderr, "%s: version record error, short record\n",
-		    SCHEMA_NAME);
-	    state = REC_QUIT;
-	  } else if (bswap_32(clv.size) != sizeof(CLP32_ClVersionRecord)) {
-	    rc = 1;
-	    fprintf(stderr,
-		    "%s: version record size mismatch, is %d expected %d\n",
-		    SCHEMA_NAME, bswap_32(clv.size),
-		    (int) sizeof(CLP32_ClVersionRecord));
-	    state = REC_QUIT;
-	  } else {
-	    printf("%s: Size of version record: %d, version: %hx\n",
-		   SCHEMA_NAME, bswap_32(clv.size), bswap_16(clv.version));
-	    state = REC_HDR;
-	  }
-	  break;
-	case REC_HDR:
-	  numRead = read(fdSchema, &coh, sizeof(CLP32_ClObjectHdr));
-	  if (numRead == 0) {
-	    state = REC_QUIT;	/* regular end */
-	  } else if (numRead != sizeof(CLP32_ClObjectHdr)) {
-	    rc = 1;
-	    fprintf(stderr, "%s: header record error, short record\n",
-		    SCHEMA_NAME);
-	    state = REC_QUIT;
-	  } else if (bswap_32(coh.size) < sizeof(CLP32_ClObjectHdr)) {
-	    rc = 1;
-	    fprintf(stderr,
-		    "%s: header record size mismatch, is %d expected at least %d\n",
-		    SCHEMA_NAME, bswap_32(coh.size),
-		    (int) sizeof(CLP32_ClObjectHdr));
-	    state = REC_QUIT;
-	  } else {
-	    printf("%s: Header size: %d, type: %hx\n",
-		   SCHEMA_NAME, bswap_32(coh.size), bswap_16(coh.type));
-	    switch (bswap_16(coh.type)) {
-	    case HDR_Class:
-	      numFill = bswap_32(coh.size) - sizeof(CLP32_ClObjectHdr);
-	      fillState = REC_CLS;
-	      state = REC_FILL;
-	      break;
-	    default:
-	      fillState = REC_ANY;
-	      state = REC_FILL;
-	      break;
-	    }
-	  }
-	  break;
-	case REC_CLS:
-	  cls = (CLP32_ClClass *) fillBuf;
-	  printf("== Class Record\n");
-	  rc = dumpString(&cls->hdr, &cls->name, "   Class name: ");
-	  if (rc == 0) {
-	    rc = dumpString(&cls->hdr, &cls->parent, "   Parent name: ");
-	  }
-	  if (rc == 0) {
-	    rc = dumpStringBuffer(&cls->hdr, "   ");
-	  }
-	  if (rc == 0) {
-	    rc = dumpArrayBuffer(&cls->hdr, "   ");
-	  }
-	  if (rc == 0) {
-	    rc = dumpQualifiers(cls, "   ");
-	  }
-	  if (rc == 0) {
-	    rc = dumpProperties(cls, "   ");
-	  }
-	  if (rc == 0) {
-	    rc = dumpMethods(cls, "   ");
-	  }
-	  if (rc == 0) {
-	    state = REC_HDR;
-	  } else {
-	    state = REC_QUIT;
-	  }
-	  break;
-	case REC_ANY:
-	  clob = (CLP32_ClObjectHdr *) fillBuf;
-	  printf("== Unspecified Record Type %d\n", clob->type);
-	  if (rc == 0) {
-	    rc = dumpStringBuffer(clob, "   ");
-	  }
-	  if (rc == 0) {
-	    rc = dumpArrayBuffer(clob, "   ");
-	  }
-	  if (rc == 0) {
-	    state = REC_HDR;
-	  } else {
-	    state = REC_QUIT;
-	  }
-	  break;
-	case REC_FILL:
-	  fillBuf = realloc(fillBuf, numFill + sizeof(CLP32_ClObjectHdr));
-	  memcpy(fillBuf, &coh, sizeof(CLP32_ClObjectHdr));
-	  if ((numRead =
-	       read(fdSchema, fillBuf + sizeof(CLP32_ClObjectHdr),
-		    numFill)) != numFill) {
-	    rc = 1;
-	    fprintf(stderr,
-		    "%s: structure record short, is %d expected %d\n",
-		    SCHEMA_NAME, numRead + (int) sizeof(CLP32_ClObjectHdr),
-		    numFill + (int) sizeof(CLP32_ClObjectHdr));
-	    state = REC_QUIT;
-	  } else {
-	    state = fillState;
-	  }
-	  break;
-	case REC_QUIT:
-	  close(fdSchema);
-	  break;
-	}
+        switch (state) {
+        case REC_VER:
+          if (read(fdSchema, &clv, sizeof(CLP32_ClVersionRecord)) !=
+              sizeof(CLP32_ClVersionRecord)) {
+            rc = 1;
+            fprintf(stderr, "%s: version record error, short record\n",
+                    SCHEMA_NAME);
+            state = REC_QUIT;
+          } else if (bswap_32(clv.size) != sizeof(CLP32_ClVersionRecord)) {
+            rc = 1;
+            fprintf(stderr,
+                    "%s: version record size mismatch, is %d expected %d\n",
+                    SCHEMA_NAME, bswap_32(clv.size),
+                    (int) sizeof(CLP32_ClVersionRecord));
+            state = REC_QUIT;
+          } else {
+            printf("%s: Size of version record: %d, version: %hx\n",
+                   SCHEMA_NAME, bswap_32(clv.size), bswap_16(clv.version));
+            state = REC_HDR;
+          }
+          break;
+        case REC_HDR:
+          numRead = read(fdSchema, &coh, sizeof(CLP32_ClObjectHdr));
+          if (numRead == 0) {
+            state = REC_QUIT;   /* regular end */
+          } else if (numRead != sizeof(CLP32_ClObjectHdr)) {
+            rc = 1;
+            fprintf(stderr, "%s: header record error, short record\n",
+                    SCHEMA_NAME);
+            state = REC_QUIT;
+          } else if (bswap_32(coh.size) < sizeof(CLP32_ClObjectHdr)) {
+            rc = 1;
+            fprintf(stderr,
+                    "%s: header record size mismatch, is %d expected at least %d\n",
+                    SCHEMA_NAME, bswap_32(coh.size),
+                    (int) sizeof(CLP32_ClObjectHdr));
+            state = REC_QUIT;
+          } else {
+            printf("%s: Header size: %d, type: %hx\n",
+                   SCHEMA_NAME, bswap_32(coh.size), bswap_16(coh.type));
+            switch (bswap_16(coh.type)) {
+            case HDR_Class:
+              numFill = bswap_32(coh.size) - sizeof(CLP32_ClObjectHdr);
+              fillState = REC_CLS;
+              state = REC_FILL;
+              break;
+            default:
+              fillState = REC_ANY;
+              state = REC_FILL;
+              break;
+            }
+          }
+          break;
+        case REC_CLS:
+          cls = (CLP32_ClClass *) fillBuf;
+          printf("== Class Record\n");
+          rc = dumpString(&cls->hdr, &cls->name, "   Class name: ");
+          if (rc == 0) {
+            rc = dumpString(&cls->hdr, &cls->parent, "   Parent name: ");
+          }
+          if (rc == 0) {
+            rc = dumpStringBuffer(&cls->hdr, "   ");
+          }
+          if (rc == 0) {
+            rc = dumpArrayBuffer(&cls->hdr, "   ");
+          }
+          if (rc == 0) {
+            rc = dumpQualifiers(cls, "   ");
+          }
+          if (rc == 0) {
+            rc = dumpProperties(cls, "   ");
+          }
+          if (rc == 0) {
+            rc = dumpMethods(cls, "   ");
+          }
+          if (rc == 0) {
+            state = REC_HDR;
+          } else {
+            state = REC_QUIT;
+          }
+          break;
+        case REC_ANY:
+          clob = (CLP32_ClObjectHdr *) fillBuf;
+          printf("== Unspecified Record Type %d\n", clob->type);
+          if (rc == 0) {
+            rc = dumpStringBuffer(clob, "   ");
+          }
+          if (rc == 0) {
+            rc = dumpArrayBuffer(clob, "   ");
+          }
+          if (rc == 0) {
+            state = REC_HDR;
+          } else {
+            state = REC_QUIT;
+          }
+          break;
+        case REC_FILL:
+          fillBuf = realloc(fillBuf, numFill + sizeof(CLP32_ClObjectHdr));
+          memcpy(fillBuf, &coh, sizeof(CLP32_ClObjectHdr));
+          if ((numRead =
+               read(fdSchema, fillBuf + sizeof(CLP32_ClObjectHdr),
+                    numFill)) != numFill) {
+            rc = 1;
+            fprintf(stderr,
+                    "%s: structure record short, is %d expected %d\n",
+                    SCHEMA_NAME, numRead + (int) sizeof(CLP32_ClObjectHdr),
+                    numFill + (int) sizeof(CLP32_ClObjectHdr));
+            state = REC_QUIT;
+          } else {
+            state = fillState;
+          }
+          break;
+        case REC_QUIT:
+          close(fdSchema);
+          break;
+        }
       } while (state != REC_QUIT);
       if (fillBuf) {
-	free(fillBuf);
+        free(fillBuf);
       }
     }
   }
@@ -316,7 +315,7 @@ checkargs(int argc, char *argv[])
 
 static int
 dumpString(const CLP32_ClObjectHdr * hdr, const CLP32_ClString * cs,
-	   const char *prefix)
+           const char *prefix)
 {
   /*
    * check offset range 
@@ -330,28 +329,28 @@ dumpString(const CLP32_ClObjectHdr * hdr, const CLP32_ClString * cs,
     if (bswap_32(cs->id) == 0) {
       printf("%s NULL\n", prefix);
     } else if (bswap_32(cs->id) > 0
-	       && bswap_32(cs->id) <= bswap_32(sb->iMax)) {
+               && bswap_32(cs->id) <= bswap_32(sb->iMax)) {
       if (bswap_32(index[bswap_32(cs->id) - 1]) >= 0
-	  && (bswap_32(index[bswap_32(cs->id) - 1]) +
-	      abs(bswap_32(hdr->strBufOffset))) < bswap_32(hdr->size)) {
-	printf("%s \"%s\"\n", prefix,
-	       (char *) sb + offsetof(CLP32_ClStrBuf,
-				      buf) +
-	       bswap_32(index[bswap_32(cs->id) - 1]));
+          && (bswap_32(index[bswap_32(cs->id) - 1]) +
+              abs(bswap_32(hdr->strBufOffset))) < bswap_32(hdr->size)) {
+        printf("%s \"%s\"\n", prefix,
+               (char *) sb + offsetof(CLP32_ClStrBuf,
+                                      buf) +
+               bswap_32(index[bswap_32(cs->id) - 1]));
       } else {
-	fprintf(stderr, "%s string index value %d out of range (0..%d)\n",
-		prefix, bswap_32(index[bswap_32(cs->id) - 1]),
-		bswap_32(hdr->size) - abs(bswap_32(hdr->strBufOffset)));
-	rc = 2;
+        fprintf(stderr, "%s string index value %d out of range (0..%d)\n",
+                prefix, bswap_32(index[bswap_32(cs->id) - 1]),
+                bswap_32(hdr->size) - abs(bswap_32(hdr->strBufOffset)));
+        rc = 2;
       }
     } else {
       fprintf(stderr, "%s string index key %d out of range (0..%d) \n",
-	      prefix, bswap_32(cs->id), bswap_16(sb->iMax));
+              prefix, bswap_32(cs->id), bswap_16(sb->iMax));
       rc = 2;
     }
   } else {
     fprintf(stderr, "%s invalid string buffer offset %d, must be < %d\n",
-	    prefix, abs(bswap_32(hdr->strBufOffset)), bswap_32(hdr->size));
+            prefix, abs(bswap_32(hdr->strBufOffset)), bswap_32(hdr->size));
     rc = 2;
   }
   return rc;
@@ -373,23 +372,23 @@ dumpStringBuffer(const CLP32_ClObjectHdr * hdr, const char *prefix)
     sb = (void *) hdr + abs(bswap_32(hdr->strBufOffset));
     index = (void *) hdr + abs(bswap_32(sb->indexOffset));
     if ((bswap_16(sb->iUsed) * sizeof(int) +
-	 abs(bswap_32(hdr->strBufOffset))) <= bswap_32(hdr->size)) {
+         abs(bswap_32(hdr->strBufOffset))) <= bswap_32(hdr->size)) {
       printf("%s * String buffer contains %d of maximum %d strings\n",
-	     prefix, bswap_16(sb->iUsed), bswap_16(sb->iMax));
+             prefix, bswap_16(sb->iUsed), bswap_16(sb->iMax));
       if (detail_stringbuf) {
-	for (i = 0; i < bswap_16(sb->iUsed); i++) {
-	  printf("%s sb[%3d]=\"%s\"\n", prefix, i,
-		 sb->buf + bswap_32(index[i]));
-	}
+        for (i = 0; i < bswap_16(sb->iUsed); i++) {
+          printf("%s sb[%3d]=\"%s\"\n", prefix, i,
+                 sb->buf + bswap_32(index[i]));
+        }
       }
     } else {
       fprintf(stderr, "%s to many stringbuffer index entries %d\n",
-	      prefix, bswap_16(sb->iUsed));
+              prefix, bswap_16(sb->iUsed));
       rc = 2;
     }
   } else {
     fprintf(stderr, "%s invalid string buffer offset %d, must be < %d\n",
-	    prefix, abs(bswap_32(hdr->strBufOffset)), bswap_32(hdr->size));
+            prefix, abs(bswap_32(hdr->strBufOffset)), bswap_32(hdr->size));
     rc = 2;
   }
   return rc;
@@ -411,27 +410,28 @@ dumpArrayBuffer(const CLP32_ClObjectHdr * hdr, const char *prefix)
     ab = (void *) hdr + abs(bswap_32(hdr->arrayBufOffset));
     index = (void *) hdr + abs(bswap_32(ab->indexOffset));
     if ((bswap_16(ab->iUsed) * sizeof(int) +
-	 abs(bswap_32(hdr->arrayBufOffset))) <= bswap_32(hdr->size)) {
+         abs(bswap_32(hdr->arrayBufOffset))) <= bswap_32(hdr->size)) {
       printf("%s * Array buffer contains %d of maximum %d values\n",
-	     prefix, bswap_16(ab->iUsed), bswap_16(ab->iMax));
+             prefix, bswap_16(ab->iUsed), bswap_16(ab->iMax));
       if (detail_arraybuf) {
-	for (i = 0; i < bswap_16(ab->iUsed); i++) {
-	  printf("%s ab[%3d]=(%hx,%hx,%016llx)\n", prefix, i,
-		 bswap_16(ab->buf[bswap_32(index[i])].type),
-		 bswap_16(ab->buf[bswap_32(index[i])].state),
-		 (unsigned long long) bswap_64(ab->buf[bswap_32(index[i])].
-					       value.uint64));
-	}
+        for (i = 0; i < bswap_16(ab->iUsed); i++) {
+          printf("%s ab[%3d]=(%hx,%hx,%016llx)\n", prefix, i,
+                 bswap_16(ab->buf[bswap_32(index[i])].type),
+                 bswap_16(ab->buf[bswap_32(index[i])].state),
+                 (unsigned long long) bswap_64(ab->buf[bswap_32
+                                                       (index[i])].
+                                               value.uint64));
+        }
       }
     } else {
       fprintf(stderr, "%s to many array buffer index entries %d\n",
-	      prefix, bswap_16(ab->iUsed));
+              prefix, bswap_16(ab->iUsed));
       rc = 2;
     }
   } else {
     fprintf(stderr, "%s invalid array buffer offset %d, must be < %d\n",
-	    prefix, abs(bswap_32(hdr->arrayBufOffset)),
-	    bswap_32(hdr->size) + (int) sizeof(CLP32_ClArrayBuf));
+            prefix, abs(bswap_32(hdr->arrayBufOffset)),
+            bswap_32(hdr->size) + (int) sizeof(CLP32_ClArrayBuf));
     rc = 2;
   }
   return rc;
@@ -450,38 +450,38 @@ dumpProperties(const CLP32_ClClass * cls, const char *prefix)
   if (bswap_32(cls->properties.sectionOffset) == 0) {
     printf("%s * Empty property section\n", prefix);
   } else if (abs(bswap_32(cls->properties.sectionOffset)) <=
-	     bswap_32(cls->hdr.size)) {
+             bswap_32(cls->hdr.size)) {
     cp = (void *) cls + abs(bswap_32(cls->properties.sectionOffset));
     if ((bswap_16(cls->properties.used) * sizeof(CLP32_ClProperty) +
-	 abs(bswap_32(cls->properties.sectionOffset)))
-	<= bswap_32(cls->hdr.size)) {
+         abs(bswap_32(cls->properties.sectionOffset)))
+        <= bswap_32(cls->hdr.size)) {
       printf
-	  ("%s * Property section contains %d properties of maximum %d\n",
-	   prefix, bswap_16(cls->properties.used),
-	   bswap_16(cls->properties.max));
+          ("%s * Property section contains %d properties of maximum %d\n",
+           prefix, bswap_16(cls->properties.used),
+           bswap_16(cls->properties.max));
       if (detail_properties) {
-	prefixbuf =
-	    malloc(strlen(prefix) + strlen(" -- Property[999]:") + 2);
-	if (prefixbuf == NULL) {
-	  fprintf(stderr, "out of memory\n");
-	  return 1;
-	}
-	for (i = 0; i < bswap_16(cls->properties.used); i++) {
-	  sprintf(prefixbuf, "%s -- Property[%3d]:", prefix, i);
-	  dumpString(&cls->hdr, &cp[i].id, prefixbuf);
-	}
-	free(prefixbuf);
+        prefixbuf =
+            malloc(strlen(prefix) + strlen(" -- Property[999]:") + 2);
+        if (prefixbuf == NULL) {
+          fprintf(stderr, "out of memory\n");
+          return 1;
+        }
+        for (i = 0; i < bswap_16(cls->properties.used); i++) {
+          sprintf(prefixbuf, "%s -- Property[%3d]:", prefix, i);
+          dumpString(&cls->hdr, &cp[i].id, prefixbuf);
+        }
+        free(prefixbuf);
       }
     } else {
       fprintf(stderr, "%s to many property entries %d\n",
-	      prefix, bswap_16(cls->properties.used));
+              prefix, bswap_16(cls->properties.used));
       rc = 2;
     }
   } else {
     fprintf(stderr,
-	    "%s invalid property section offset %d, must be < %d\n",
-	    prefix, abs(bswap_32(cls->properties.sectionOffset)),
-	    bswap_32(cls->hdr.size));
+            "%s invalid property section offset %d, must be < %d\n",
+            prefix, abs(bswap_32(cls->properties.sectionOffset)),
+            bswap_32(cls->hdr.size));
     rc = 2;
   }
   return rc;
@@ -500,38 +500,38 @@ dumpQualifiers(const CLP32_ClClass * cls, const char *prefix)
   if (bswap_32(cls->qualifiers.sectionOffset) == 0) {
     printf("%s * Empty qualifier section\n", prefix);
   } else if (abs(bswap_32(cls->qualifiers.sectionOffset)) <=
-	     bswap_32(cls->hdr.size)) {
+             bswap_32(cls->hdr.size)) {
     cq = (void *) cls + abs(bswap_32(cls->qualifiers.sectionOffset));
     if ((bswap_16(cls->qualifiers.used) * sizeof(CLP32_ClQualifier) +
-	 abs(bswap_32(cls->qualifiers.sectionOffset)))
-	<= bswap_32(cls->hdr.size)) {
+         abs(bswap_32(cls->qualifiers.sectionOffset)))
+        <= bswap_32(cls->hdr.size)) {
       printf
-	  ("%s * Qualifier section contains %d qualifiers of maximum %d\n",
-	   prefix, bswap_16(cls->qualifiers.used),
-	   bswap_16(cls->qualifiers.max));
+          ("%s * Qualifier section contains %d qualifiers of maximum %d\n",
+           prefix, bswap_16(cls->qualifiers.used),
+           bswap_16(cls->qualifiers.max));
       if (detail_qualifiers) {
-	prefixbuf =
-	    malloc(strlen(prefix) + strlen(" -- Qualifier[999]:") + 2);
-	if (prefixbuf == NULL) {
-	  fprintf(stderr, "out of memory\n");
-	  return 1;
-	}
-	for (i = 0; i < bswap_16(cls->qualifiers.used); i++) {
-	  sprintf(prefixbuf, "%s -- Qualifier[%3d]:", prefix, i);
-	  dumpString(&cls->hdr, &cq[i].id, prefixbuf);
-	}
-	free(prefixbuf);
+        prefixbuf =
+            malloc(strlen(prefix) + strlen(" -- Qualifier[999]:") + 2);
+        if (prefixbuf == NULL) {
+          fprintf(stderr, "out of memory\n");
+          return 1;
+        }
+        for (i = 0; i < bswap_16(cls->qualifiers.used); i++) {
+          sprintf(prefixbuf, "%s -- Qualifier[%3d]:", prefix, i);
+          dumpString(&cls->hdr, &cq[i].id, prefixbuf);
+        }
+        free(prefixbuf);
       }
     } else {
       fprintf(stderr, "%s to many qualifier entries %d\n",
-	      prefix, bswap_16(cls->qualifiers.used));
+              prefix, bswap_16(cls->qualifiers.used));
       rc = 2;
     }
   } else {
     fprintf(stderr,
-	    "%s invalid qualifier section offset %d, must be < %d\n",
-	    prefix, abs(bswap_32(cls->qualifiers.sectionOffset)),
-	    bswap_32(cls->hdr.size));
+            "%s invalid qualifier section offset %d, must be < %d\n",
+            prefix, abs(bswap_32(cls->qualifiers.sectionOffset)),
+            bswap_32(cls->hdr.size));
     rc = 2;
   }
   return rc;
@@ -550,37 +550,42 @@ dumpMethods(const CLP32_ClClass * cls, const char *prefix)
   if (bswap_32(cls->methods.sectionOffset) == 0) {
     printf("%s * Empty method section\n", prefix);
   } else if (abs(bswap_32(cls->methods.sectionOffset)) <=
-	     bswap_32(cls->hdr.size)) {
+             bswap_32(cls->hdr.size)) {
     cm = (void *) cls + abs(bswap_32(cls->methods.sectionOffset));
     if ((bswap_16(cls->methods.used) * sizeof(CLP32_ClMethod) +
-	 abs(bswap_32(cls->methods.sectionOffset)))
-	<= bswap_32(cls->hdr.size)) {
+         abs(bswap_32(cls->methods.sectionOffset)))
+        <= bswap_32(cls->hdr.size)) {
       printf("%s * Method section contains %d methods of maximum %d\n",
-	     prefix, bswap_16(cls->methods.used),
-	     bswap_16(cls->methods.max));
+             prefix, bswap_16(cls->methods.used),
+             bswap_16(cls->methods.max));
       if (detail_methods) {
-	prefixbuf =
-	    malloc(strlen(prefix) + strlen(" -- Method[999]:") + 2);
-	if (prefixbuf == NULL) {
-	  fprintf(stderr, "out of memory\n");
-	  return 1;
-	}
-	for (i = 0; i < bswap_16(cls->methods.used); i++) {
-	  sprintf(prefixbuf, "%s -- Method[%3d]:", prefix, i);
-	  dumpString(&cls->hdr, &cm[i].id, prefixbuf);
-	}
-	free(prefixbuf);
+        prefixbuf =
+            malloc(strlen(prefix) + strlen(" -- Method[999]:") + 2);
+        if (prefixbuf == NULL) {
+          fprintf(stderr, "out of memory\n");
+          return 1;
+        }
+        for (i = 0; i < bswap_16(cls->methods.used); i++) {
+          sprintf(prefixbuf, "%s -- Method[%3d]:", prefix, i);
+          dumpString(&cls->hdr, &cm[i].id, prefixbuf);
+        }
+        free(prefixbuf);
       }
     } else {
       fprintf(stderr, "%s to many method entries %d\n",
-	      prefix, bswap_16(cls->methods.used));
+              prefix, bswap_16(cls->methods.used));
       rc = 2;
     }
   } else {
     fprintf(stderr, "%s invalid method section offset %d, must be < %d\n",
-	    prefix, abs(bswap_32(cls->methods.sectionOffset)),
-	    bswap_32(cls->hdr.size));
+            prefix, abs(bswap_32(cls->methods.sectionOffset)),
+            bswap_32(cls->hdr.size));
     rc = 2;
   }
   return rc;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

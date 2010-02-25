@@ -20,7 +20,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,20 +29,18 @@
 #include "selectexp.h"
 
 static NativeSelectExp *__new_exp(int node,
-				  const char *queryString,
-				  const char *language, const char *sns,
-				  CMPIArray ** projection,
-				  CMPIStatus * rc);
+                                  const char *queryString,
+                                  const char *language, const char *sns,
+                                  CMPIArray **projection, CMPIStatus *rc);
 extern CMPIValue queryGetValue(QLPropertySource * src, char *name,
-			       QLOpd * type);
-extern CMPISelectCond *TrackedCMPISelectCond(CMPIArray * conds, int type,
-					     CMPIStatus * rc);
-
+                               QLOpd * type);
+extern CMPISelectCond *TrackedCMPISelectCond(CMPIArray *conds, int type,
+                                             CMPIStatus *rc);
 
 /*****************************************************************************/
 
 static CMPIStatus
-__eft_release(CMPISelectExp * exp)
+__eft_release(CMPISelectExp *exp)
 {
   NativeSelectExp *e = (NativeSelectExp *) exp;
 
@@ -60,22 +57,19 @@ __eft_release(CMPISelectExp * exp)
   CMReturn(CMPI_RC_ERR_FAILED);
 }
 
-
 static CMPISelectExp *
-__eft_clone(const CMPISelectExp * exp, CMPIStatus * rc)
+__eft_clone(const CMPISelectExp *exp, CMPIStatus *rc)
 {
   NativeSelectExp *e = (NativeSelectExp *) exp;
 
   return (CMPISelectExp *) __new_exp(MEM_NOT_TRACKED,
-				     e->queryString, e->language, e->sns,
-				     NULL, rc);
+                                     e->queryString, e->language, e->sns,
+                                     NULL, rc);
 }
 
-
-
 CMPIBoolean
-__eft_evaluate(const CMPISelectExp * exp,
-	       const CMPIInstance * inst, CMPIStatus * rc)
+__eft_evaluate(const CMPISelectExp *exp,
+               const CMPIInstance *inst, CMPIStatus *rc)
 {
   int             irc;
   NativeSelectExp *e = (NativeSelectExp *) exp;
@@ -92,17 +86,15 @@ __eft_evaluate(const CMPISelectExp * exp,
   return irc;
 }
 
-
 CMPIString     *
-__eft_getString(const CMPISelectExp * exp, CMPIStatus * rc)
+__eft_getString(const CMPISelectExp *exp, CMPIStatus *rc)
 {
   NativeSelectExp *e = (NativeSelectExp *) exp;
   return sfcb_native_new_CMPIString(e->queryString, rc, 0);
 }
 
-
 CMPISelectCond *
-__eft_getDOC(const CMPISelectExp * exp, CMPIStatus * rc)
+__eft_getDOC(const CMPISelectExp *exp, CMPIStatus *rc)
 {
   NativeSelectExp *e = (NativeSelectExp *) exp;
   PredicateDisjunction *pc = NULL;
@@ -113,9 +105,8 @@ __eft_getDOC(const CMPISelectExp * exp, CMPIStatus * rc)
   return TrackedCMPISelectCond(pc, 0, rc);
 }
 
-
 CMPISelectCond *
-__eft_getCOD(const CMPISelectExp * exp, CMPIStatus * rc)
+__eft_getCOD(const CMPISelectExp *exp, CMPIStatus *rc)
 {
   NativeSelectExp *e = (NativeSelectExp *) exp;
   PredicateConjunction *pc = NULL;
@@ -127,9 +118,9 @@ __eft_getCOD(const CMPISelectExp * exp, CMPIStatus * rc)
 }
 
 CMPIBoolean
-__eft_evaluateUsingAccessor(const CMPISelectExp * se,
-			    CMPIAccessor * accessor,
-			    void *parm, CMPIStatus * rc)
+__eft_evaluateUsingAccessor(const CMPISelectExp *se,
+                            CMPIAccessor * accessor,
+                            void *parm, CMPIStatus *rc)
 {
   if (rc)
     rc->rc = CMPI_RC_ERR_NOT_SUPPORTED;
@@ -154,8 +145,8 @@ static CMPISelectExp eFt = {
 
 static NativeSelectExp *
 __new_exp(int mode, const char *queryString,
-	  const char *language, const char *sns, CMPIArray ** projection,
-	  CMPIStatus * rc)
+          const char *language, const char *sns, CMPIArray **projection,
+          CMPIStatus *rc)
 {
   int             state,
                   irc;
@@ -165,14 +156,13 @@ __new_exp(int mode, const char *queryString,
   memset(&exp, 0, sizeof(exp));
   exp.exp = eFt;
 
-
   /*
    * fprintf(stderr,"*** new select expression: %s %s\n",queryString,
    * language);
    */
   exp.qs =
       parseQuery(mode, (char *) queryString, (char *) language,
-		 (char *) sns, &irc);
+                 (char *) sns, &irc);
   if (irc) {
     if (rc)
       CMSetStatus(rc, CMPI_RC_ERR_INVALID_QUERY);
@@ -188,7 +178,7 @@ __new_exp(int mode, const char *queryString,
     char          **list = exp.qs->spNames;
     int             i;
     CMPIArray      *ar =
-	*projection = TrackedCMPIArray(exp.qs->spNext, CMPI_string, NULL);
+        *projection = TrackedCMPIArray(exp.qs->spNext, CMPI_string, NULL);
     for (i = 0; *list; list++, i++)
       CMSetArrayElementAt(ar, i, (CMPIValue *) * list, CMPI_chars);
   }
@@ -201,25 +191,24 @@ __new_exp(int mode, const char *queryString,
   return tExp;
 }
 
-
 CMPISelectExp  *
 TrackedCMPISelectExp(const char *queryString,
-		     const char *language,
-		     CMPIArray ** projection, CMPIStatus * rc)
+                     const char *language,
+                     CMPIArray **projection, CMPIStatus *rc)
 {
   return (CMPISelectExp *) __new_exp(MEM_TRACKED,
-				     queryString, language, NULL,
-				     projection, rc);
+                                     queryString, language, NULL,
+                                     projection, rc);
 }
 
 CMPISelectExp  *
 NewCMPISelectExp(const char *queryString,
-		 const char *language, char *sns,
-		 CMPIArray ** projection, CMPIStatus * rc)
+                 const char *language, char *sns,
+                 CMPIArray **projection, CMPIStatus *rc)
 {
   return (CMPISelectExp *) __new_exp(MEM_NOT_TRACKED,
-				     queryString, language, sns,
-				     projection, rc);
+                                     queryString, language, sns,
+                                     projection, rc);
 }
 
 CMPISelectExp  *
@@ -233,10 +222,14 @@ TempCMPISelectExp(QLStatement * qs)
   return (CMPISelectExp *) exp;
 }
 
-
 /****************************************************************************/
 
 /*** Local Variables:  ***/
 /*** mode: C           ***/
 /*** c-basic-offset: 8 ***/
 /*** End:              ***/
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

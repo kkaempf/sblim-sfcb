@@ -19,8 +19,6 @@
  *
  */
 
-
-
 #include <curl/curl.h>
 #include "utilft.h"
 #include "trace.h"
@@ -38,7 +36,6 @@ static const char *headers[] = {
   "CIMExportMethod: ExportIndication"
 };
 #define NUM_HEADERS ((sizeof(headers))/(sizeof(headers[0])))
-
 
 // 
 // NOTE:
@@ -72,7 +69,6 @@ typedef struct curlData {
    * // Initializes the HTTP headers void initializeHeaders(); 
    */
 } CurlData;
-
 
 static void
 init(CurlData * cd)
@@ -130,7 +126,7 @@ initializeHeaders(CurlData * cd)
     cd->mHeaders = curl_slist_append(cd->mHeaders, headers[i]);
 }
 
-static size_t
+static          size_t
 writeCb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   UtilStringBuffer *sb = (UtilStringBuffer *) stream;
@@ -138,7 +134,7 @@ writeCb(void *ptr, size_t size, size_t nmemb, void *stream)
   unsigned long long calcLength = (unsigned long) size * nmemb;
   if (calcLength > UINT_MAX) {
     mlogf(M_ERROR, M_SHOW,
-	  "--- Cannot allocate for %d members of size $d\n", nmemb, size);
+          "--- Cannot allocate for %d members of size $d\n", nmemb, size);
     return 0;
   }
   length = calcLength & UINT_MAX;
@@ -198,8 +194,8 @@ genRequest(CurlData * cd, char *url, char **msg)
     rv = curl_easy_setopt(cd->mHandle, CURLOPT_SSLCERT, fnc);
   } else {
     *msg =
-	strdup
-	("Failed to get cert path and/or key file information for client side cert usage.");
+        strdup
+        ("Failed to get cert path and/or key file information for client side cert usage.");
     return 3;
   }
 
@@ -276,7 +272,7 @@ getErrorMessage(CURLcode err)
 #if LIBCURL_VERSION_NUM >= 0x071200
   // error = curl_easy_strerror(err);
   snprintf(error, 4095, "CURL error: %d (%s)", err,
-	   curl_easy_strerror(err));
+           curl_easy_strerror(err));
 #else
   if ((err > 0 && err < 8) || (err >= 22 && err <= 23))
     snprintf(error, 4095, "CURL error: %d (%s)", err, curlMsgs[err]);
@@ -301,7 +297,7 @@ getResponse(CurlData * cd, char **msg)
     curl_easy_getinfo(cd->mHandle, CURLINFO_HTTP_CODE, &responseCode);
     if (responseCode == 401) {
       error = (cd->mUserPass) ? "Invalid username/password." :
-	  "Username/password required.";
+          "Username/password required.";
       *msg = strdup(error);
       rc = 3;
     } else {
@@ -327,7 +323,7 @@ addPayload(CurlData * cd, char *pl, char **msg)
 
   cd->mBody->ft->appendChars(cd->mBody, pl);
   rv = curl_easy_setopt(cd->mHandle, CURLOPT_POSTFIELDS,
-			cd->mBody->ft->getCharPtr(cd->mBody));
+                        cd->mBody->ft->getCharPtr(cd->mBody));
 
   if (rv) {
     *msg = getErrorMessage(rv);
@@ -336,7 +332,7 @@ addPayload(CurlData * cd, char *pl, char **msg)
 
   else {
     rv = curl_easy_setopt(cd->mHandle, CURLOPT_POSTFIELDSIZE,
-			  cd->mBody->ft->getSize(cd->mBody));
+                          cd->mBody->ft->getSize(cd->mBody));
     if (rv) {
       *msg = getErrorMessage(rv);
       return 7;
@@ -344,7 +340,6 @@ addPayload(CurlData * cd, char *pl, char **msg)
   }
   return 0;
 }
-
 
 int
 exportIndication(char *url, char *payload, char **resp, char **msg)
@@ -367,7 +362,7 @@ exportIndication(char *url, char *payload, char **resp, char **msg)
     } else {
       rc = 1;
       mlogf(M_ERROR, M_SHOW,
-	    "Unable to open file to process indication: %s\n", url);
+            "Unable to open file to process indication: %s\n", url);
       _SFCB_TRACE(1, ("--- Unable to open file: %s", url));
     }
     _SFCB_RETURN(rc);
@@ -377,7 +372,7 @@ exportIndication(char *url, char *payload, char **resp, char **msg)
   if ((rc = genRequest(&cd, url, msg)) == 0) {
     if ((rc = addPayload(&cd, payload, msg)) == 0) {
       if ((rc = getResponse(&cd, msg)) == 0) {
-	*resp = strdup(cd.mResponse->ft->getCharPtr(cd.mResponse));
+        *resp = strdup(cd.mResponse->ft->getCharPtr(cd.mResponse));
       }
     }
   }
@@ -385,11 +380,16 @@ exportIndication(char *url, char *payload, char **resp, char **msg)
   _SFCB_TRACE(1, ("--- url: %s rc: %d %s", url, rc, msg));
   if (rc) {
     mlogf(M_ERROR, M_SHOW,
-	  "Problem processing indication to %s. sfcb rc: %d %s\n", url, rc,
-	  *msg);
+          "Problem processing indication to %s. sfcb rc: %d %s\n", url, rc,
+          *msg);
   }
 
   uninit(&cd);
 
   _SFCB_RETURN(rc);
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

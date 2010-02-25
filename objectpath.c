@@ -20,7 +20,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,11 +33,11 @@
 
 extern UtilStringBuffer *newStringBuffer(int s);
 
-extern CMPIArray *native_make_CMPIArray(CMPIData * av, CMPIStatus * rc,
-					ClObjectHdr * hdr);
+extern CMPIArray *native_make_CMPIArray(CMPIData *av, CMPIStatus *rc,
+                                        ClObjectHdr * hdr);
 extern CMPIObjectPath *interal_new_CMPIObjectPath(int mode, const char *,
-						  const char *,
-						  CMPIStatus *);
+                                                  const char *,
+                                                  CMPIStatus *);
 extern CMPIBroker *Broker;
 
 CMPIObjectPath *getObjectPath(char *path, char **msg);
@@ -48,7 +47,6 @@ struct native_cop {
   int             refCount;
   int             mem_state;
 };
-
 
 static struct native_cop *__new_empty_cop(int, CMPIStatus *);
 
@@ -60,7 +58,6 @@ memLinkObjectPath(CMPIObjectPath * cop)
 }
 
 /****************************************************************************/
-
 
 static CMPIStatus
 __oft_release(CMPIObjectPath * cop)
@@ -79,9 +76,8 @@ __oft_release(CMPIObjectPath * cop)
   CMReturn(CMPI_RC_ERR_FAILED);
 }
 
-
 static CMPIObjectPath *
-__oft_clone(const CMPIObjectPath * op, CMPIStatus * rc)
+__oft_clone(const CMPIObjectPath * op, CMPIStatus *rc)
 {
   CMPIStatus      tmp;
   struct native_cop *ncop = __new_empty_cop(MEM_NOT_TRACKED, &tmp);
@@ -90,7 +86,6 @@ __oft_clone(const CMPIObjectPath * op, CMPIStatus * rc)
 
   return (CMPIObjectPath *) ncop;
 }
-
 
 static CMPIStatus
 __oft_setNameSpace(CMPIObjectPath * op, const char *nameSpace)
@@ -101,12 +96,11 @@ __oft_setNameSpace(CMPIObjectPath * op, const char *nameSpace)
 }
 
 CMPIString     *
-__oft_getNameSpace(const CMPIObjectPath * op, CMPIStatus * rc)
+__oft_getNameSpace(const CMPIObjectPath * op, CMPIStatus *rc)
 {
   ClObjectPath   *cop = (ClObjectPath *) op->hdl;
   return sfcb_native_new_CMPIString(ClObjectPathGetNameSpace(cop), rc, 0);
 }
-
 
 static CMPIStatus
 __oft_setHostName(CMPIObjectPath * op, const char *hostName)
@@ -117,13 +111,11 @@ __oft_setHostName(CMPIObjectPath * op, const char *hostName)
 }
 
 static CMPIString *
-__oft_getHostName(const CMPIObjectPath * op, CMPIStatus * rc)
+__oft_getHostName(const CMPIObjectPath * op, CMPIStatus *rc)
 {
   ClObjectPath   *cop = (ClObjectPath *) op->hdl;
   return sfcb_native_new_CMPIString(ClObjectPathGetHostName(cop), rc, 0);
 }
-
-
 
 static CMPIStatus
 __oft_setClassName(CMPIObjectPath * op, const char *className)
@@ -134,7 +126,7 @@ __oft_setClassName(CMPIObjectPath * op, const char *className)
 }
 
 static CMPIString *
-__oft_getClassName(const CMPIObjectPath * op, CMPIStatus * rc)
+__oft_getClassName(const CMPIObjectPath * op, CMPIStatus *rc)
 {
   ClObjectPath   *cop = (ClObjectPath *) op->hdl;
   return sfcb_native_new_CMPIString(ClObjectPathGetClassName(cop), rc, 0);
@@ -154,10 +146,9 @@ opGetNameSpaceChars(const CMPIObjectPath * op)
   return ClObjectPathGetNameSpace(cop);
 }
 
-
 CMPIData
 opGetKeyCharsAt(const CMPIObjectPath * op,
-		unsigned int i, char **name, CMPIStatus * rc)
+                unsigned int i, char **name, CMPIStatus *rc)
 {
   ClObjectPath   *cop = (ClObjectPath *) op->hdl;
   CMPIData        rv = { 0, CMPI_notFound, {0} };
@@ -174,14 +165,15 @@ opGetKeyCharsAt(const CMPIObjectPath * op,
   } else if (rv.type == CMPI_ref) {
     char           *msg = "";
     rv.value.ref = getObjectPath((char *)
-				 ClObjectGetClString(&cop->hdr,
-						     (ClString *) & rv.
-						     value.chars), &msg);
-  } else if (rv.type & CMPI_ARRAY && rv.value.array) {	// should nor
-							// occcur
+                                 ClObjectGetClString(&cop->hdr,
+                                                     (ClString *) &
+                                                     rv.value.chars),
+                                 &msg);
+  } else if (rv.type & CMPI_ARRAY && rv.value.array) {  // should nor
+    // occcur
     rv.value.array =
-	native_make_CMPIArray((CMPIData *) rv.value.array, NULL,
-			      &cop->hdr);
+        native_make_CMPIArray((CMPIData *) rv.value.array, NULL,
+                              &cop->hdr);
   }
 
   if (rc)
@@ -189,10 +181,9 @@ opGetKeyCharsAt(const CMPIObjectPath * op,
   return rv;
 }
 
-
 static CMPIData
-__oft_getKeyAt(const CMPIObjectPath * op, CMPICount i, CMPIString ** name,
-	       CMPIStatus * rc)
+__oft_getKeyAt(const CMPIObjectPath * op, CMPICount i, CMPIString **name,
+               CMPIStatus *rc)
 {
   char           *n;
   CMPIData        rv = opGetKeyCharsAt(op, i, &n, rc);
@@ -204,7 +195,7 @@ __oft_getKeyAt(const CMPIObjectPath * op, CMPICount i, CMPIString ** name,
 }
 
 static CMPIData
-__oft_getKey(const CMPIObjectPath * op, const char *id, CMPIStatus * rc)
+__oft_getKey(const CMPIObjectPath * op, const char *id, CMPIStatus *rc)
 {
   ClObjectPath   *cop = (ClObjectPath *) op->hdl;
   ClSection      *prps = &cop->properties;
@@ -221,7 +212,7 @@ __oft_getKey(const CMPIObjectPath * op, const char *id, CMPIStatus * rc)
 }
 
 static CMPICount
-__oft_getKeyCount(const CMPIObjectPath * op, CMPIStatus * rc)
+__oft_getKeyCount(const CMPIObjectPath * op, CMPIStatus *rc)
 {
   ClObjectPath   *cop = (ClObjectPath *) op->hdl;
   if (rc)
@@ -231,7 +222,7 @@ __oft_getKeyCount(const CMPIObjectPath * op, CMPIStatus * rc)
 
 static CMPIStatus
 __oft_addKey(CMPIObjectPath * op,
-	     const char *name, const CMPIValue * value, CMPIType type)
+             const char *name, const CMPIValue * value, CMPIType type)
 {
   ClObjectPath   *cop = (ClObjectPath *) op->hdl;
   CMPIData        data = { type, CMPI_goodValue, {0LL} };
@@ -260,7 +251,7 @@ __oft_addKey(CMPIObjectPath * op,
 
 static CMPIStatus
 __oft_setHostAndNameSpaceFromObjectPath(CMPIObjectPath * op,
-					const CMPIObjectPath * src)
+                                        const CMPIObjectPath * src)
 {
   ClObjectPath   *s = (ClObjectPath *) src->hdl;
   CMPIStatus      st = { CMPI_RC_OK, NULL };
@@ -273,7 +264,7 @@ __oft_setHostAndNameSpaceFromObjectPath(CMPIObjectPath * op,
 
 static CMPIStatus
 __oft_setNameSpaceFromObjectPath(CMPIObjectPath * op,
-				 const CMPIObjectPath * src)
+                                 const CMPIObjectPath * src)
 {
   ClObjectPath   *s = (ClObjectPath *) src->hdl;
   return __oft_setNameSpace(op, ClObjectPathGetNameSpace(s));
@@ -282,7 +273,7 @@ __oft_setNameSpaceFromObjectPath(CMPIObjectPath * op,
 extern char    *sfcb_value2Chars(CMPIType type, CMPIValue * value);
 
 char           *
-sfcb_pathToChars(const CMPIObjectPath * cop, CMPIStatus * rc, char *str)
+sfcb_pathToChars(const CMPIObjectPath * cop, CMPIStatus *rc, char *str)
 {
   // "//atp:9999/root/cimv25:TennisPlayer.first="Patrick",last="Rafter";
 
@@ -330,7 +321,7 @@ sfcb_pathToChars(const CMPIObjectPath * cop, CMPIStatus * rc, char *str)
 }
 
 static CMPIString *
-__oft_toString(const CMPIObjectPath * cop, CMPIStatus * rc)
+__oft_toString(const CMPIObjectPath * cop, CMPIStatus *rc)
 {
   char            str[4096] = { 0 };
   sfcb_pathToChars(cop, rc, str);
@@ -339,7 +330,7 @@ __oft_toString(const CMPIObjectPath * cop, CMPIStatus * rc)
 
 char           *
 oft_toCharsNormalized(const CMPIObjectPath * cop, CMPIConstClass * cls,
-		      int full, CMPIStatus * rc)
+                      int full, CMPIStatus *rc)
 {
   char            str[2048] = { 0 };
   CMPIString     *cn;
@@ -360,15 +351,15 @@ oft_toCharsNormalized(const CMPIObjectPath * cop, CMPIConstClass * cls,
     if (quals & 1) {
       data = __oft_getKey(cop, (const char *) name->hdl, &irc);
       if (irc.rc == CMPI_RC_OK) {
-	if (n)
-	  strcat(str, ",");
-	else
-	  strcat(str, ".");
-	strcat(str, (char *) name->hdl);
-	strcat(str, "=");
-	v = sfcb_value2Chars(data.type, &data.value);
-	strcat(str, v);
-	free(v);
+        if (n)
+          strcat(str, ",");
+        else
+          strcat(str, ".");
+        strcat(str, (char *) name->hdl);
+        strcat(str, "=");
+        v = sfcb_value2Chars(data.type, &data.value);
+        strcat(str, v);
+        free(v);
       }
     }
   }
@@ -412,8 +403,8 @@ getSerializedObjectPath(const CMPIObjectPath * op, void *area)
 {
   memcpy(area, op, sizeof(struct native_cop));
   ClObjectPathRebuild((ClObjectPath *) op->hdl,
-		      (void *) ((char *) area +
-				sizeof(struct native_cop)));
+                      (void *) ((char *) area +
+                                sizeof(struct native_cop)));
 }
 
 CMPIObjectPath *
@@ -438,7 +429,7 @@ setObjectPathMsgSegment(const CMPIObjectPath * op)
 }
 
 static struct native_cop *
-__new_empty_cop(int mm_add, CMPIStatus * rc)
+__new_empty_cop(int mm_add, CMPIStatus *rc)
 {
   static CMPIObjectPath o = {
     "CMPIObjectPath",
@@ -458,11 +449,9 @@ __new_empty_cop(int mm_add, CMPIStatus * rc)
   return (struct native_cop *) tCop;
 }
 
-
-
 CMPIObjectPath *
 internal_new_CMPIObjectPath(int mode, const char *nameSpace,
-			    const char *className, CMPIStatus * rc)
+                            const char *className, CMPIStatus *rc)
 {
   struct native_cop *cop = __new_empty_cop(mode, rc);
   cop->cop.hdl = ClObjectPathNew(nameSpace, className);
@@ -471,18 +460,18 @@ internal_new_CMPIObjectPath(int mode, const char *nameSpace,
 
 CMPIObjectPath *
 TrackedCMPIObjectPath(const char *nameSpace,
-		      const char *className, CMPIStatus * rc)
+                      const char *className, CMPIStatus *rc)
 {
   return internal_new_CMPIObjectPath(MEM_TRACKED, nameSpace, className,
-				     rc);
+                                     rc);
 }
 
 CMPIObjectPath *
 NewCMPIObjectPath(const char *nameSpace, const char *className,
-		  CMPIStatus * rc)
+                  CMPIStatus *rc)
 {
   return internal_new_CMPIObjectPath(MEM_NOT_TRACKED, nameSpace, className,
-				     rc);
+                                     rc);
 }
 
 static int
@@ -493,49 +482,49 @@ refLookAhead(char *u, char **nu)
   char           *pu = NULL;
   for (i = 0; u[i] != 0; i++) {
     switch (state) {
-    case 0:			/* start */
+    case 0:                    /* start */
       if (isalnum(u[i]))
-	state = 1;
+        state = 1;
       break;
-    case 1:			/* lhs: key property name */
+    case 1:                    /* lhs: key property name */
       if (u[i] == '=')
-	state = 2;
+        state = 2;
       break;
-    case 2:			/* rhs: value */
+    case 2:                    /* rhs: value */
       if (isalnum(u[i]))
-	state = 3;
+        state = 3;
       else
-	return 0;
+        return 0;
       break;
-    case 3:			/* rhs: some identifier or value */
+    case 3:                    /* rhs: some identifier or value */
       if (u[i] == ',')
-	return 0;
+        return 0;
       if (u[i] == '.') {
-	state = 4;
+        state = 4;
       }
       break;
-    case 4:			/* rhs: start of key property of an ref
-				 * value */
+    case 4:                    /* rhs: start of key property of an ref *
+                                 * value */
       if (!isalnum(u[i]))
-	return 0;
+        return 0;
       state = 5;
       break;
-    case 5:			/* rhs: key property of an ref value */
+    case 5:                    /* rhs: key property of an ref value */
       if (u[i] == '=') {
-	state = 6;
-	if (u[i + 1] == 0) {
-	  *nu = u + i;
-	  return 1;
-	}
+        state = 6;
+        if (u[i + 1] == 0) {
+          *nu = u + i;
+          return 1;
+        }
       }
       break;
-    case 6:			/* rhs: key property of a ref value's key
-				 * property */
+    case 6:                    /* rhs: key property of a ref value's key
+                                 * * property */
       if (u[i] == ',') {
-	if (refLookAhead(u + i, &pu)) {
-	  *nu = u + i;
-	  return 1;
-	}
+        if (refLookAhead(u + i, &pu)) {
+          *nu = u + i;
+          return 1;
+        }
       }
       break;
     }
@@ -547,7 +536,6 @@ refLookAhead(char *u, char **nu)
     return 0;
   }
 }
-
 
 static char    *
 strnDup(const char *n, int l)
@@ -610,8 +598,8 @@ getObjectPath(char *path, char **msg)
   if (!p) {
     if (u) {
       if ((pp = strchr(u, ':')) != NULL) {
-	nname = strnDup(u, pp - u);
-	u = pp + 1;
+        nname = strnDup(u, pp - u);
+        u = pp + 1;
       }
       cname = strdup(u);
       // op = Broker->eft->newObjectPath(Broker, nname ? nname :
@@ -620,7 +608,7 @@ getObjectPath(char *path, char **msg)
       free(cname);
       free(origu);
       if (nname)
-	free(nname);
+        free(nname);
       return op;
     }
     *msg = "No className found";
@@ -637,6 +625,8 @@ getObjectPath(char *path, char **msg)
 
   cname = strnDup(u, p - u);
   // op = Broker->eft->newObjectPath(Broker, nname ? nname : "root/cimv2", 
+  // 
+  // 
   // cname, NULL);
   op = Broker->eft->newObjectPath(Broker, nname, cname, NULL);
   free(cname);
@@ -648,7 +638,7 @@ getObjectPath(char *path, char **msg)
       char           *t;
       p = un;
       if (*p == 0) {
-	break;
+        break;
       }
       t = strnDup(u, un - u);
       addKey(op, t, ref);
@@ -659,24 +649,24 @@ getObjectPath(char *path, char **msg)
       break;
     if (*p == '"') {
       if (*(p - 1) != '=') {
-	*msg = "Incorrectly quoted string 1";
-	free(origu);
-	return NULL;
+        *msg = "Incorrectly quoted string 1";
+        free(origu);
+        return NULL;
       }
       p++;
       if ((p = strchr(p, '"')) == NULL) {
-	*msg = "Unbalanced quoted string";
-	free(origu);
-	return NULL;
+        *msg = "Unbalanced quoted string";
+        free(origu);
+        return NULL;
       }
       p++;
       if (*p != ',' && *p != 0) {
-	*msg = "Incorrectly quoted string 2";
-	free(origu);
-	return NULL;
+        *msg = "Incorrectly quoted string 2";
+        free(origu);
+        return NULL;
       }
       if (*p == 0)
-	break;
+        break;
     }
     char           *t = strnDup(u, p - u);
     addKey(op, t, ref);
@@ -700,7 +690,7 @@ static int
 qCompare(const void *arg1, const void *arg2)
 {
   return strcasecmp((char *) ((KeyIds *) arg1)->key->hdl,
-		    (char *) ((KeyIds *) arg2)->key->hdl);
+                    (char *) ((KeyIds *) arg2)->key->hdl);
 }
 
 static char     copKey[8192];
@@ -735,21 +725,21 @@ normalizeObjectPathStrBuf(const CMPIObjectPath * cop)
       CMPIString     *cn = CMGetClassName(ids[i].data.value.ref, NULL);
       CMPIString     *ns = CMGetNameSpace(ids[i].data.value.ref, NULL);
       UtilStringBuffer *sbt =
-	  normalizeObjectPathStrBuf(ids[i].data.value.ref);
+          normalizeObjectPathStrBuf(ids[i].data.value.ref);
       char           *nss;
       cp = (char *) cn->hdl;
       while (*cp) {
-	*cp = tolower(*cp);
-	cp++;
+        *cp = tolower(*cp);
+        cp++;
       }
       if (ns == NULL) {
-	nss = CMGetCharPtr(CMGetNameSpace(cop, NULL));
+        nss = CMGetCharPtr(CMGetNameSpace(cop, NULL));
       } else {
-	nss = CMGetCharPtr(ns);
+        nss = CMGetCharPtr(ns);
       }
       if (nss) {
-	sb->ft->appendChars(sb, nss);
-	SFCB_APPENDCHARS_BLOCK(sb, ":");
+        sb->ft->appendChars(sb, nss);
+        SFCB_APPENDCHARS_BLOCK(sb, ":");
       }
       sb->ft->appendChars(sb, (char *) cn->hdl);
       SFCB_APPENDCHARS_BLOCK(sb, ".");
@@ -757,14 +747,13 @@ normalizeObjectPathStrBuf(const CMPIObjectPath * cop)
       sbt->ft->release(sbt);
     } else {
       char           *v =
-	  sfcb_value2Chars(ids[i].data.type, &ids[i].data.value);
+          sfcb_value2Chars(ids[i].data.type, &ids[i].data.value);
       sb->ft->appendChars(sb, v);
       free(v);
     }
     pc = ',';
   }
   free(ids);
-
 
   return (sb);
 }
@@ -805,3 +794,8 @@ objectpathCompare(const CMPIObjectPath * cop1, const CMPIObjectPath * cop2)
 
   return result;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -19,7 +19,6 @@
  *
  */
 
-
 #include <pthread.h>
 #include "native.h"
 #include <stdlib.h>
@@ -89,9 +88,6 @@ threadOnce(int *once, void (*init) (void))
 #endif
 }
 
-
-
-
 static int
 createThreadKey(CMPI_THREAD_KEY_TYPE * key, void (*cleanup) (void *))
 {
@@ -132,9 +128,7 @@ setThreadSpecific(CMPI_THREAD_KEY_TYPE key, void *value)
 #endif
 }
 
-
-
-static CMPI_MUTEX_TYPE
+static          CMPI_MUTEX_TYPE
 newMutex(int opt)
 {
 #if defined(CMPI_PLATFORM_LINUX_GENERIC_GNU)
@@ -179,9 +173,7 @@ unlockMutex(CMPI_MUTEX_TYPE m)
 #endif
 }
 
-
-
-static CMPI_COND_TYPE
+static          CMPI_COND_TYPE
 newCondition(int opt)
 {
 #if defined(CMPI_PLATFORM_LINUX_GENERIC_GNU)
@@ -209,7 +201,7 @@ timedCondWait(CMPI_COND_TYPE c, CMPI_MUTEX_TYPE m, struct timespec *wait)
 {
 #if defined(CMPI_PLATFORM_LINUX_GENERIC_GNU)
   return pthread_cond_timedwait((pthread_cond_t *) c,
-				(pthread_mutex_t *) m, wait);
+                                (pthread_mutex_t *) m, wait);
 #else
 #error Platform not yet supported
 #endif
@@ -225,16 +217,14 @@ condWait(CMPI_COND_TYPE c, CMPI_MUTEX_TYPE m)
 #endif
 }
 
-
-
 CMPIBrokerExtFT brokerExt_FT = {
   CMPICurrentVersion,
   resolveFileName,
   newThread,
-  NULL,				// Join not implemented yet
-  NULL,				// exit not implemented yet
-  NULL,				// cancel not implemented yet
-  NULL,				// sleep not implemented yet
+  NULL,                         // Join not implemented yet
+  NULL,                         // exit not implemented yet
+  NULL,                         // cancel not implemented yet
+  NULL,                         // sleep not implemented yet
   threadOnce,
 
   createThreadKey,
@@ -251,7 +241,12 @@ CMPIBrokerExtFT brokerExt_FT = {
   destroyCondition,
   condWait,
   timedCondWait,
-  NULL				// Signal not supported yet
+  NULL                          // Signal not supported yet
 };
 
 CMPIBrokerExtFT *CMPI_BrokerExt_Ftab = &brokerExt_FT;
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

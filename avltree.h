@@ -20,7 +20,6 @@
  *
  */
 
-
 #ifndef AVL_H
 #define AVL_H
 #define AVL_STACK_SIZE 1000
@@ -29,7 +28,6 @@ struct avlTree;
 typedef struct avlTree AvlTree;
 struct avlNode;
 typedef struct avlNode AvlNode;
-
 
 struct avlNode {
   void           *item;
@@ -43,17 +41,20 @@ struct avlTree {
   int             n;
   int             (*compar) (const void *a, const void *b);
   AvlNode       **stack;
-  void            (*free) (AvlTree ** this);
-  void           *(*insert) (AvlTree * this, void *item);
-  void           *(*find) (AvlTree * this, void *item);
-  void           *(*findMin) (AvlTree * this);
-  void           *(*delete) (AvlTree * this, void *item);
-  void           *(*deleteMin) (AvlTree * this);
+  void            (*free) (AvlTree **this);
+  void           *(*insert) (AvlTree *this, void *item);
+  void           *(*find) (AvlTree *this, void *item);
+  void           *(*findMin) (AvlTree *this);
+  void           *(*delete) (AvlTree *this, void *item);
+  void           *(*deleteMin) (AvlTree *this);
   signed char    *pathInfo;
 };
 
-
 AvlTree        *newAvlTree(int (*compar) (const void *, const void *));
 
-
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

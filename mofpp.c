@@ -1,5 +1,4 @@
 
-
 #include <stdio.h>
 #include <string.h>
 #include <malloc.h>
@@ -51,28 +50,28 @@ incOK(char *str, char **s, char **e, char **ifn, FILE ** f)
     if (*str && strncmp(str, "include", 7) == 0) {
       str += 7;
       while (*str && *str <= ' ')
-	str++;
+        str++;
       if (*str == '(') {
-	str += 1;
-	while (*str && *str <= ' ')
-	  str++;
-	if (*str == '"') {
-	  str++;
-	  if ((*e = strchr(str, '"'))) {
-	    ch = **e;
-	    **e = 0;
-	    strcpy(fn, path);
-	    strcat(fn, str);
-	    *ifn = strdup(fn);
-	    **e = ch;
-	    (*e)++;
-	    while (**e && **e <= ' ')
-	      (*e)++;
-	    if (**e == ')')
-	      *f = fopen(fn, "r");
-	    return 1;
-	  }
-	}
+        str += 1;
+        while (*str && *str <= ' ')
+          str++;
+        if (*str == '"') {
+          str++;
+          if ((*e = strchr(str, '"'))) {
+            ch = **e;
+            **e = 0;
+            strcpy(fn, path);
+            strcat(fn, str);
+            *ifn = strdup(fn);
+            **e = ch;
+            (*e)++;
+            while (**e && **e <= ' ')
+              (*e)++;
+            if (**e == ')')
+              *f = fopen(fn, "r");
+            return 1;
+          }
+        }
       }
     }
   }
@@ -94,54 +93,54 @@ processFile(char *fn, FILE * in, FILE * out)
     nl++;
     if (comment == 0 && incOK(rec, &s, &e, &ifn, &incFile)) {
       if (incFile) {
-	fprintf(out, "// resolved:  >>>> %s", s);
-	processFile(ifn, incFile, out);
-	fprintf(out, "// back from: >>>> %s", s);
+        fprintf(out, "// resolved:  >>>> %s", s);
+        processFile(ifn, incFile, out);
+        fprintf(out, "// back from: >>>> %s", s);
       } else {
-	fprintf(stderr, "%s:%d File not found: %s\n", fn, nl, s);
+        fprintf(stderr, "%s:%d File not found: %s\n", fn, nl, s);
       }
     } else {
       s = rec;
 
       if (comment == 1) {
-	if ((e = strstr(s, "\r\n"))) {
-	  strcpy(s, e + 2);
-	  comment = 0;
-	} else if ((e = strstr(s, "\n"))) {
-	  strcpy(s, e + 1);
-	  comment = 0;
-	}
+        if ((e = strstr(s, "\r\n"))) {
+          strcpy(s, e + 2);
+          comment = 0;
+        } else if ((e = strstr(s, "\n"))) {
+          strcpy(s, e + 1);
+          comment = 0;
+        }
       } else if (comment == 2) {
-	if ((e = strstr(s, "*/"))) {
-	  strcpy(s, e + 2);
-	  comment = 0;
-	} else {
-	  continue;
-	}
+        if ((e = strstr(s, "*/"))) {
+          strcpy(s, e + 2);
+          comment = 0;
+        } else {
+          continue;
+        }
       }
 
       while ((s = strstr(s, "/"))) {
-	if (*(s + 1) == '/') {
-	  if ((e = strstr(s + 2, "\r\n"))) {
-	    strcpy(s, e + 2);
-	  } else if ((e = strstr(s + 2, "\n"))) {
-	    strcpy(s, e + 1);
-	  } else {
-	    *s = 0;
-	    comment = 1;
-	    break;
-	  }
-	} else if (*(s + 1) == '*') {
-	  if ((e = strstr(s + 2, "*/"))) {
-	    strcpy(s, e + 2);
-	  } else {
-	    *s = 0;
-	    comment = 2;
-	    break;
-	  }
-	} else {
-	  s++;
-	}
+        if (*(s + 1) == '/') {
+          if ((e = strstr(s + 2, "\r\n"))) {
+            strcpy(s, e + 2);
+          } else if ((e = strstr(s + 2, "\n"))) {
+            strcpy(s, e + 1);
+          } else {
+            *s = 0;
+            comment = 1;
+            break;
+          }
+        } else if (*(s + 1) == '*') {
+          if ((e = strstr(s + 2, "*/"))) {
+            strcpy(s, e + 2);
+          } else {
+            *s = 0;
+            comment = 2;
+            break;
+          }
+        } else {
+          s++;
+        }
       }
 
       fprintf(out, "%s", rec);
@@ -189,3 +188,8 @@ main(int argc, char *argv[])
     free(fn);
   return err;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

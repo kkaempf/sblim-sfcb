@@ -27,9 +27,9 @@ static const CMPIBroker *_broker;
 
 const char     *
 get_assoc_targetClass_Name(const CMPIBroker * broker,
-			   const CMPIObjectPath * ref,
-			   const char *_RefLeftClass,
-			   const char *_RefRightClass, CMPIStatus * rc)
+                           const CMPIObjectPath * ref,
+                           const char *_RefLeftClass,
+                           const char *_RefRightClass, CMPIStatus *rc)
 {
   CMPIString     *sourceClass = NULL;
   CMPIObjectPath *op = NULL;
@@ -40,26 +40,25 @@ get_assoc_targetClass_Name(const CMPIBroker * broker,
   sourceClass = CMGetClassName(ref, rc);
 
   op = CMNewObjectPath(broker,
-		       CMGetCharsPtr(CMGetNameSpace(ref, rc), NULL),
-		       _RefLeftClass, rc);
+                       CMGetCharsPtr(CMGetNameSpace(ref, rc), NULL),
+                       _RefLeftClass, rc);
 
   if (strcmp(CMGetCharsPtr(sourceClass, NULL), "CMPI_TEST_Person") == 0) {
     return "CMPI_TEST_Vehicle";
   } else if (strcmp(CMGetCharsPtr(sourceClass, NULL),
-		    "CMPI_TEST_Vehicle") == 0) {
+                    "CMPI_TEST_Vehicle") == 0) {
     return "CMPI_TEST_Person";
   } else {
     return NULL;
   }
 }
 
-
 CMPIObjectPath *
 get_assoc_targetClass_ObjectPath(const CMPIBroker * broker,
-				 const CMPIObjectPath * ref,
-				 const char *_RefLeftClass,
-				 const char *_RefRightClass,
-				 CMPIStatus * rc)
+                                 const CMPIObjectPath * ref,
+                                 const char *_RefLeftClass,
+                                 const char *_RefRightClass,
+                                 CMPIStatus *rc)
 {
   CMPIObjectPath *op = NULL;
   const char     *targetName = NULL;
@@ -68,17 +67,17 @@ get_assoc_targetClass_ObjectPath(const CMPIBroker * broker,
    * get name of the target class 
    */
   targetName = get_assoc_targetClass_Name(broker,
-					  ref,
-					  _RefLeftClass,
-					  _RefRightClass, rc);
+                                          ref,
+                                          _RefLeftClass,
+                                          _RefRightClass, rc);
 
   if (targetName != NULL) {
     /*
      * create new object path of the target class 
      */
     op = CMNewObjectPath(broker,
-			 CMGetCharsPtr(CMGetNameSpace(ref, rc), NULL),
-			 targetName, rc);
+                         CMGetCharsPtr(CMGetNameSpace(ref, rc), NULL),
+                         targetName, rc);
   }
   return op;
 }
@@ -95,8 +94,8 @@ get_assoc_targetClass_ObjectPath(const CMPIBroker * broker,
 
 CMPIStatus
 TestAssociationProviderAssociationCleanup(CMPIAssociationMI * mi,
-					  const CMPIContext * ctx,
-					  CMPIBoolean term)
+                                          const CMPIContext *ctx,
+                                          CMPIBoolean term)
 {
 
   CMReturn(CMPI_RC_OK);
@@ -104,14 +103,14 @@ TestAssociationProviderAssociationCleanup(CMPIAssociationMI * mi,
 
 CMPIStatus
 TestAssociationProviderAssociators(CMPIAssociationMI * mi,
-				   const CMPIContext * ctx,
-				   const CMPIResult * rslt,
-				   const CMPIObjectPath * ref,
-				   const char *_RefLeftClass,
-				   const char *_RefRightClass,
-				   const char *role,
-				   const char *resultRole,
-				   const char **properties)
+                                   const CMPIContext *ctx,
+                                   const CMPIResult *rslt,
+                                   const CMPIObjectPath * ref,
+                                   const char *_RefLeftClass,
+                                   const char *_RefRightClass,
+                                   const char *role,
+                                   const char *resultRole,
+                                   const char **properties)
 {
   CMPIObjectPath *op = NULL;
   CMPIEnumeration *en = NULL;
@@ -126,9 +125,9 @@ TestAssociationProviderAssociators(CMPIAssociationMI * mi,
    * get object path of the target class 
    */
   op = get_assoc_targetClass_ObjectPath(_broker,
-					ref,
-					_RefLeftClass,
-					_RefRightClass, &rc);
+                                        ref,
+                                        _RefLeftClass,
+                                        _RefRightClass, &rc);
 
   sourceClass = CMGetClassName(op, &rc);
 
@@ -161,13 +160,13 @@ TestAssociationProviderAssociators(CMPIAssociationMI * mi,
 
 CMPIStatus
 TestAssociationProviderAssociatorNames(CMPIAssociationMI * mi,
-				       const CMPIContext * ctx,
-				       const CMPIResult * rslt,
-				       const CMPIObjectPath * ref,
-				       const char *_RefLeftClass,
-				       const char *_RefRightClass,
-				       const char *role,
-				       const char *resultRole)
+                                       const CMPIContext *ctx,
+                                       const CMPIResult *rslt,
+                                       const CMPIObjectPath * ref,
+                                       const char *_RefLeftClass,
+                                       const char *_RefRightClass,
+                                       const char *role,
+                                       const char *resultRole)
 {
   CMPIObjectPath *op = NULL;
   CMPIObjectPath *rop = NULL;
@@ -180,16 +179,16 @@ TestAssociationProviderAssociatorNames(CMPIAssociationMI * mi,
    * get object path of the target class 
    */
   op = get_assoc_targetClass_ObjectPath(_broker,
-					ref,
-					_RefLeftClass,
-					_RefRightClass, &rc);
+                                        ref,
+                                        _RefLeftClass,
+                                        _RefRightClass, &rc);
 
   /*
    * create new object path of association 
    */
   rop = CMNewObjectPath(_broker,
-			CMGetCharsPtr(CMGetNameSpace(ref, &rc), NULL),
-			_ClassName, &rc);
+                        CMGetCharsPtr(CMGetNameSpace(ref, &rc), NULL),
+                        _ClassName, &rc);
 
   /*
    * upcall to CIMOM; call enumInstanceNames() of the target class 
@@ -217,12 +216,12 @@ TestAssociationProviderAssociatorNames(CMPIAssociationMI * mi,
 
 CMPIStatus
 TestAssociationProviderReferences(CMPIAssociationMI * mi,
-				  const CMPIContext * ctx,
-				  const CMPIResult * rslt,
-				  const CMPIObjectPath * ref,
-				  const char *resultClass,
-				  const char *role,
-				  const char **properties)
+                                  const CMPIContext *ctx,
+                                  const CMPIResult *rslt,
+                                  const CMPIObjectPath * ref,
+                                  const char *resultClass,
+                                  const char *role,
+                                  const char **properties)
 {
   CMPIInstance   *ci = NULL;
   CMPIObjectPath *op = NULL;
@@ -243,17 +242,16 @@ TestAssociationProviderReferences(CMPIAssociationMI * mi,
    * get object path of the target class 
    */
   op = get_assoc_targetClass_ObjectPath(_broker,
-					ref,
-					_RefLeftClass,
-					_RefRightClass, &rc);
-
+                                        ref,
+                                        _RefLeftClass,
+                                        _RefRightClass, &rc);
 
   /*
    * create new object path of association 
    */
   rop = CMNewObjectPath(_broker,
-			CMGetCharsPtr(CMGetNameSpace(ref, &rc), NULL),
-			_thisClassName, &rc);
+                        CMGetCharsPtr(CMGetNameSpace(ref, &rc), NULL),
+                        _thisClassName, &rc);
 
   /*
    * upcall to CIMOM; call enumInstanceNames() of the target class 
@@ -270,37 +268,37 @@ TestAssociationProviderReferences(CMPIAssociationMI * mi,
        */
       data = CMGetNext(en, &rc);
       {
-	/*
-	 * create new instance of the association 
-	 */
-	ci = CMNewInstance(_broker, rop, &rc);
+        /*
+         * create new instance of the association 
+         */
+        ci = CMNewInstance(_broker, rop, &rc);
 
-	/*
-	 * get name of the target class 
-	 */
-	targetName = get_assoc_targetClass_Name(_broker,
-						ref,
-						_RefLeftClass,
-						_RefRightClass, &rc);
+        /*
+         * get name of the target class 
+         */
+        targetName = get_assoc_targetClass_Name(_broker,
+                                                ref,
+                                                _RefLeftClass,
+                                                _RefRightClass, &rc);
 
-	/*
-	 * set the properties of the association instance depending on the
-	 * constellation of the source class (parameter ref) and the target
-	 * class (see targetName) 
-	 */
-	if (strcmp(targetName, "CMPI_TEST_Person") == 0) {
-	  CMSetProperty(ci,
-			"model",
-			(CMPIValue *) & (data.value.ref), CMPI_ref);
-	  CMSetProperty(ci, "driver", (CMPIValue *) & (ref), CMPI_ref);
-	} else if (strcmp(targetName, "CMPI_TEST_Vehicle") == 0) {
-	  CMSetProperty(ci,
-			"model",
-			(CMPIValue *) & (data.value.ref), CMPI_ref);
-	  CMSetProperty(ci, "driver", (CMPIValue *) & (ref), CMPI_ref);
-	}
+        /*
+         * set the properties of the association instance depending on the
+         * constellation of the source class (parameter ref) and the target
+         * class (see targetName) 
+         */
+        if (strcmp(targetName, "CMPI_TEST_Person") == 0) {
+          CMSetProperty(ci,
+                        "model",
+                        (CMPIValue *) & (data.value.ref), CMPI_ref);
+          CMSetProperty(ci, "driver", (CMPIValue *) & (ref), CMPI_ref);
+        } else if (strcmp(targetName, "CMPI_TEST_Vehicle") == 0) {
+          CMSetProperty(ci,
+                        "model",
+                        (CMPIValue *) & (data.value.ref), CMPI_ref);
+          CMSetProperty(ci, "driver", (CMPIValue *) & (ref), CMPI_ref);
+        }
 
-	CMReturnInstance(rslt, ci);
+        CMReturnInstance(rslt, ci);
       }
     }
 
@@ -309,11 +307,11 @@ TestAssociationProviderReferences(CMPIAssociationMI * mi,
 
 CMPIStatus
 TestAssociationProviderReferenceNames(CMPIAssociationMI * mi,
-				      const CMPIContext * ctx,
-				      const CMPIResult * rslt,
-				      const CMPIObjectPath * ref,
-				      const char *resultClass,
-				      const char *role)
+                                      const CMPIContext *ctx,
+                                      const CMPIResult *rslt,
+                                      const CMPIObjectPath * ref,
+                                      const char *resultClass,
+                                      const char *role)
 {
   CMPIInstance   *ci = NULL;
   CMPIObjectPath *op = NULL;
@@ -330,21 +328,20 @@ TestAssociationProviderReferenceNames(CMPIAssociationMI * mi,
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   _thisClassName = _ClassName;
 
-
   /*
    * get object path of the target class 
    */
   op = get_assoc_targetClass_ObjectPath(_broker,
-					ref,
-					_RefLeftClass,
-					_RefRightClass, &rc);
+                                        ref,
+                                        _RefLeftClass,
+                                        _RefRightClass, &rc);
 
   /*
    * create new object path of association 
    */
   rop = CMNewObjectPath(_broker,
-			CMGetCharsPtr(CMGetNameSpace(ref, &rc), NULL),
-			_thisClassName, &rc);
+                        CMGetCharsPtr(CMGetNameSpace(ref, &rc), NULL),
+                        _thisClassName, &rc);
 
   /*
    * upcall to CIMOM; call enumInstanceNames() of the target class 
@@ -370,9 +367,9 @@ TestAssociationProviderReferenceNames(CMPIAssociationMI * mi,
        * get name of the target class 
        */
       targetName = get_assoc_targetClass_Name(_broker,
-					      ref,
-					      _RefLeftClass,
-					      _RefRightClass, &rc);
+                                              ref,
+                                              _RefLeftClass,
+                                              _RefRightClass, &rc);
 
       /*
        * set the properties of the association instance depending on the
@@ -381,13 +378,13 @@ TestAssociationProviderReferenceNames(CMPIAssociationMI * mi,
        */
 
       if (strcmp(targetName, "CMPI_TEST_Person") == 0) {
-	CMSetProperty(ci,
-		      "model", (CMPIValue *) & (data.value.ref), CMPI_ref);
-	CMSetProperty(ci, "driver", (CMPIValue *) & (ref), CMPI_ref);
+        CMSetProperty(ci,
+                      "model", (CMPIValue *) & (data.value.ref), CMPI_ref);
+        CMSetProperty(ci, "driver", (CMPIValue *) & (ref), CMPI_ref);
       } else if (strcmp(targetName, "CMPI_TEST_Vehicle") == 0) {
-	CMSetProperty(ci,
-		      "model", (CMPIValue *) & (data.value.ref), CMPI_ref);
-	CMSetProperty(ci, "driver", (CMPIValue *) & (ref), CMPI_ref);
+        CMSetProperty(ci,
+                      "model", (CMPIValue *) & (data.value.ref), CMPI_ref);
+        CMSetProperty(ci, "driver", (CMPIValue *) & (ref), CMPI_ref);
       }
 
       /*
@@ -410,8 +407,6 @@ TestAssociationProviderReferenceNames(CMPIAssociationMI * mi,
   return rc;
 }
 
-
-
 /*
  * ---------------------------------------------------------------------------
  */
@@ -423,7 +418,7 @@ TestAssociationProviderReferenceNames(CMPIAssociationMI * mi,
  */
 
 CMAssociationMIStub(TestAssociationProvider,
-		    TestAssociationProvider, _broker, CMNoHook)
+                    TestAssociationProvider, _broker, CMNoHook)
 
     /*
      * ---------------------------------------------------------------------------
@@ -434,3 +429,8 @@ CMAssociationMIStub(TestAssociationProvider,
     /*
      * ---------------------------------------------------------------------------
      */
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

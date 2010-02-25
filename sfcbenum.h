@@ -19,7 +19,6 @@
  *
  */
 
-
 #ifndef LARGE_VOL_SUPPORT
 struct native_enum {
   CMPIEnumeration enumeration;
@@ -32,10 +31,10 @@ struct native_enum {
 /*
  * enum_states
  */
-#define ENUM_INIT       0x80	/* initialized */
-#define ENUM_STARTED    0x85	/* some data has been added to the data
-				 * array */
-#define ENUM_COMPLETE   0x90	/* finished adding data to the array */
+#define ENUM_INIT       0x80    /* initialized */
+#define ENUM_STARTED    0x85    /* some data has been added to the data
+                                 * array */
+#define ENUM_COMPLETE   0x90    /* finished adding data to the array */
 
 struct native_enum {
   CMPIEnumeration enumeration;
@@ -44,7 +43,12 @@ struct native_enum {
   CMPICount       current;
   CMPIArray      *data;
   int             enum_state;
-  CMPICount       last_valid;	/* the count of last added array element */
+  CMPICount       last_valid;   /* the count of last added array element */
   pthread_mutex_t enumlock;
 };
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

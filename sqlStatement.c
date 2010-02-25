@@ -23,7 +23,7 @@
 #include "sqlStatement.h"
 #include "utilft.h"
 
-#include "cimXmlParser.h"	// Provider operationen
+#include "cimXmlParser.h"       // Provider operationen
 #include "cmpidt.h"
 
 #include "objectImpl.h"
@@ -62,23 +62,18 @@ extern CMPIConstClass *getConstClass(const char *ns, const char *cn);
 extern CMPIConstClass initConstClass(ClClass * cl);
 extern MsgSegment setConstClassMsgSegment(CMPIConstClass * cl);
 extern CMPIValue str2CMPIValue(CMPIType type, char *val,
-			       XtokValueReference * ref);
-extern MsgSegment setInstanceMsgSegment(CMPIInstance * ci);
-extern CMPIStatus arraySetElementNotTrackedAt(CMPIArray * array,
-					      CMPICount index,
-					      CMPIValue * val,
-					      CMPIType type);
+                               XtokValueReference * ref);
+extern MsgSegment setInstanceMsgSegment(CMPIInstance *ci);
+extern CMPIStatus arraySetElementNotTrackedAt(CMPIArray *array,
+                                              CMPICount index,
+                                              CMPIValue * val,
+                                              CMPIType type);
 extern void     closeProviderContext(BinRequestContext * ctx);
 extern BinResponseHdr *invokeProvider(BinRequestContext * ctx);
 extern int      getProviderContext(BinRequestContext * ctx,
-				   OperationHdr * ohdr);
+                                   OperationHdr * ohdr);
 extern MsgSegment setCharsMsgSegment(const char *str);
 extern MsgSegment setArgsMsgSegment(CMPIArgs * args);
-
-
-
-
-
 
 /*
  * die parse-Funktion, die in sqlParser.y definiert ist (im Makefile
@@ -104,7 +99,7 @@ static ResultSet *rs = NULL;
 static void     freeWarn(SqlWarning ** this);
 static void     freeCall(Call ** this);
 static void     addMetaRset(ResultSet * this, Projection * prj);
-static int      addSetRset(ResultSet * this, AvlTree * t);
+static int      addSetRset(ResultSet * this, AvlTree *t);
 static void     freeRSet(ResultSet ** this);
 static void     freeStm(SqlStatement ** this);
 static int      addNodeStm(SqlStatement * this, int type, void *value);
@@ -130,8 +125,6 @@ static void     freeSi(Sigma ** this);
 static void     freeExL(ExpressionLight ** this);
 static void     addWhereListSbs(SubSelect * this, UtilList * ul);
 
-
-
 /*
  * Konstruktoren
  */
@@ -146,7 +139,6 @@ newCall(char *tname, char *pname, UtilList * klist, UtilList * plist)
   this->free = freeCall;
   return this;
 }
-
 
 SqlWarning     *
 newSqlWarning()
@@ -255,7 +247,7 @@ newExpressionLight(char *name, int op, char *value)
 
 Column         *
 newColumn(char *tableName, char *tableAlias, char *colName, char *colAlias,
-	  int colSQLType, int isKey)
+          int colSQLType, int isKey)
 {
   Column         *this = (Column *) calloc(1, sizeof(Column));
   if (tableName != NULL) {
@@ -304,7 +296,7 @@ newCrossJoin(SubSelect * sbsA, SubSelect * sbsB, int type)
 
 UpdIns         *
 newUpdIns(char *tname, UtilList * colList, UtilList * assignmentList,
-	  UtilList * where)
+          UtilList * where)
 {
   UpdIns         *this = (UpdIns *) calloc(1, sizeof(UpdIns));
   this->tname = tname;
@@ -328,7 +320,7 @@ newRow(int size)
 
 ClassDef       *
 newClassDef(int fieldCount, char *className, UtilList * fieldNameList,
-	    int fNameLength, char *superclass)
+            int fNameLength, char *superclass)
 {
   ClassDef       *this = (ClassDef *) calloc(1, sizeof(ClassDef));
   this->className = className;
@@ -338,7 +330,6 @@ newClassDef(int fieldCount, char *className, UtilList * fieldNameList,
   this->superclass = superclass;
   return this;
 }
-
 
 Order          *
 newOrder(int nr, int type, int order)
@@ -388,7 +379,7 @@ coleql(Column * colA, Column * colB)
  * rekursiv. 
  */
 void
-copytree(AvlTree * t, AvlNode * node)
+copytree(AvlTree *t, AvlNode *node)
 {
   if (node != NULL) {
     copytree(t, node->left);
@@ -418,20 +409,20 @@ addWhere(SubSelect * sbs, Sigma * sigma)
     // printf(">>> %d\n",i);
     // printf(">>> %p %p\n", sigma, col);
 
-    if (sigma->colB != NULL && sigma->colA != NULL) {	// JOIN!!!
+    if (sigma->colB != NULL && sigma->colA != NULL) {   // JOIN!!!
       if (strcasecmp(col->colName, sigma->colA->colName) == 0
-	  && strcasecmp(col->colName, sigma->colB->colName) == 0) {
-	if (sbs->sigma->where == NULL)
-	  sbs->sigma->where = newList();
-	sbs->sigma->where->ft->append(sbs->sigma->where, sigma);
-	return;
+          && strcasecmp(col->colName, sigma->colB->colName) == 0) {
+        if (sbs->sigma->where == NULL)
+          sbs->sigma->where = newList();
+        sbs->sigma->where->ft->append(sbs->sigma->where, sigma);
+        return;
       }
     }
     // printf("3\n");
     if (coleql(col, sigma->colA) == 0) {
       // printf("4\n");
       if (sbs->sigma->where == NULL)
-	sbs->sigma->where = newList();
+        sbs->sigma->where = newList();
       sbs->sigma->where->ft->append(sbs->sigma->where, sigma);
 
       // printf(">>> found\n");
@@ -527,9 +518,9 @@ row_cmp(char *r1, char *r2, int type, int order)
   unsigned long long int b2;
   long double     a3;
   long double     b3;
-  if (r1 == NULL || strcasecmp(r1, "NULL") == 0)	// ||strcmp(r1,"Null")==0||strcmp(r1,"null")==0)
+  if (r1 == NULL || strcasecmp(r1, "NULL") == 0)        // ||strcmp(r1,"Null")==0||strcmp(r1,"null")==0)
     res = -1;
-  if (r2 == NULL || strcasecmp(r2, "NULL") == 0)	// ||strcmp(r2,"Null")==0||strcmp(r2,"null")==0)
+  if (r2 == NULL || strcasecmp(r2, "NULL") == 0)        // ||strcmp(r2,"Null")==0||strcmp(r2,"null")==0)
     res = 1;
   else {
     switch (type & ~CMPI_ARRAY) {
@@ -537,10 +528,10 @@ row_cmp(char *r1, char *r2, int type, int order)
     case CMPI_ARRAY:
       return 0;
 
-    case CMPI_ref:		// ???
-    case CMPI_instance:	// ???
-    case CMPI_boolean:		// true-false
-    case CMPI_dateTime:	// jjjj-mm-tt ????
+    case CMPI_ref:             // ???
+    case CMPI_instance:        // ???
+    case CMPI_boolean:         // true-false
+    case CMPI_dateTime:        // jjjj-mm-tt ????
     case CMPI_chars:
     case CMPI_char16:
     case CMPI_string:
@@ -553,9 +544,9 @@ row_cmp(char *r1, char *r2, int type, int order)
       a1 = strtoll(r1, (char **) NULL, 10);
       b1 = strtoll(r2, (char **) NULL, 10);
       if (a1 == b1)
-	res = 0;
+        res = 0;
       else
-	res = (a1 < b1) ? -1 : 1;
+        res = (a1 < b1) ? -1 : 1;
       break;
     case CMPI_uint32:
     case CMPI_uint16:
@@ -564,18 +555,18 @@ row_cmp(char *r1, char *r2, int type, int order)
       a2 = strtoull(r1, (char **) NULL, 10);
       b2 = strtoull(r2, (char **) NULL, 10);
       if (a2 == b2)
-	res = 0;
+        res = 0;
       else
-	res = (a2 < b2) ? -1 : 1;
+        res = (a2 < b2) ? -1 : 1;
       break;
     case CMPI_real32:
     case CMPI_real64:
       a3 = strtold(r1, (char **) NULL);
       b3 = strtold(r2, (char **) NULL);
       if (a3 == b3)
-	res = 0;
+        res = 0;
       else
-	res = (a3 < b3) ? -1 : 1;
+        res = (a3 < b3) ? -1 : 1;
       break;
 
     }
@@ -623,8 +614,8 @@ item_cmp(const void *item1, const void *item2)
     Order          *o = si->orderBy->ft->getFirst(si->orderBy);
     do {
       res =
-	  row_cmp(r1->row[o->column], r2->row[o->column], o->colSQLType,
-		  o->order);
+          row_cmp(r1->row[o->column], r2->row[o->column], o->colSQLType,
+                  o->order);
       i++;
       o = si->orderBy->ft->getNext(si->orderBy);
     } while (res == 0 && i < si->orderBy->ft->size(si->orderBy));
@@ -636,6 +627,8 @@ item_cmp(const void *item1, const void *item2)
   // bekomme
   // UPDATE: Ich hab die Info eigebaut. Allerdngs steckt die in der
   // Column, die von hier offenbar nicht accessible ist - also belasse ich 
+  // 
+  // 
   // es erstmal wie es ist
   // - oder eben nach allen und dies kann banal mit strcmp gemacht werden,
   // da die reihenfolge ja nicht definiert ist
@@ -644,10 +637,10 @@ item_cmp(const void *item1, const void *item2)
     for (i = 0; i < r1->size; i++) {
 
       if (r1->row[i] != NULL && r2->row[i] != NULL)
-	res = strcmp(r1->row[i], r2->row[i]);
+        res = strcmp(r1->row[i], r2->row[i]);
       // else printf("NULL aber warum???\n");
       if (res != 0)
-	break;
+        break;
     }
   }
   // printf("5\n"); 
@@ -658,7 +651,7 @@ item_cmp(const void *item1, const void *item2)
  * Baumdurchlauf, bei dem alle items vom Typ Row freigegeben werden
  */
 void
-traverseDelRow(AvlNode * node)
+traverseDelRow(AvlNode *node)
 {
   if (node != NULL) {
     traverseDelRow(node->left);
@@ -709,7 +702,7 @@ dataType(CMPIType type)
   case CMPI_sint64:
     return "BIGINT";
   case CMPI_uint64:
-    return "BIGINT";		// was ist mit unsigned???
+    return "BIGINT";            // was ist mit unsigned???
   case CMPI_sint32:
     return "INTEGER";
   case CMPI_uint32:
@@ -719,13 +712,13 @@ dataType(CMPIType type)
   case CMPI_uint16:
     return "INTEGER";
   case CMPI_uint8:
-    return "TINYINT";		// Tinyint??
+    return "TINYINT";           // Tinyint??
   case CMPI_sint8:
     return "SMALLINT";
   case CMPI_boolean:
     return "BOOLEAN";
   case CMPI_char16:
-    return "VARCHAR(17)";	// Vielleicth CHAR(xy)
+    return "VARCHAR(17)";       // Vielleicth CHAR(xy)
   case CMPI_real32:
     return "DECIMAL(7,4)";
   case CMPI_real64:
@@ -738,7 +731,7 @@ dataType(CMPIType type)
     return "OTHER";
   }
   printf("%s(%d): invalid data type %d %x\n", __FILE__, __LINE__,
-	 (int) type, (int) type);
+         (int) type, (int) type);
   SFCB_ASM("int $3");
   abort();
   return "*??*";
@@ -754,7 +747,6 @@ int2String(int v)
   strncpy(res, buf, i);
   return res;
 }
-
 
 char           *
 type2sqlString(int type)
@@ -782,7 +774,7 @@ type2sqlString(int type)
   case CMPI_boolean:
     return "BOOLEAN";
   case CMPI_char16:
-    return "VARCHAR(222)";	// vielleicht CHAR(12)
+    return "VARCHAR(222)";      // vielleicht CHAR(12)
   case CMPI_real32:
     return "DECIMAL(7,4)";
   case CMPI_real64:
@@ -795,12 +787,11 @@ type2sqlString(int type)
     return "OTHER";
   }
   printf("%s(%d): invalid data type %d %x\n", __FILE__, __LINE__,
-	 (int) type, (int) type);
+         (int) type, (int) type);
   SFCB_ASM("int $3");
   abort();
   return "*??*";
 }
-
 
 /*
  * Codiert die Metainfos des Ergebnis, das dieses Resultset repräsentiert 
@@ -837,13 +828,12 @@ addMetaRset(ResultSet * this, Projection * prj)
 
 }
 
-
 /*
  * codiert die Tupel dem Baum gemäß der Protokollspezifikation.
  * Rekursicer Baumdurhlauf
  */
 static void
-tree2sb(AvlNode * node, UtilStringBuffer * sb)
+tree2sb(AvlNode *node, UtilStringBuffer * sb)
 {
   int             i,
                   h;
@@ -853,15 +843,15 @@ tree2sb(AvlNode * node, UtilStringBuffer * sb)
     tree2sb(node->left, sb);
 
     Row            *row = (Row *) node->item;
-    for (h = 0; h < row->doublette; ++h) {	// fügt doubletten ein
+    for (h = 0; h < row->doublette; ++h) {      // fügt doubletten ein
       for (i = 0; i < row->size; ++i) {
-	if (row->row[i] != NULL)
-	  sb->ft->appendChars(sb, row->row[i]);
-	else
-	  sb->ft->appendChars(sb, "UNDEF");
+        if (row->row[i] != NULL)
+          sb->ft->appendChars(sb, row->row[i]);
+        else
+          sb->ft->appendChars(sb, "UNDEF");
 
-	if (i < row->size - 1)
-	  sb->ft->appendChars(sb, ";");
+        if (i < row->size - 1)
+          sb->ft->appendChars(sb, ";");
       }
 
       sb->ft->appendChars(sb, "\n");
@@ -872,28 +862,26 @@ tree2sb(AvlNode * node, UtilStringBuffer * sb)
 
 }
 
-
 /*
  * Dubugging-Funktion, gibt den Baum auf der Standardausgabe aus
  */
 void
-treetoString(AvlNode * node)
+treetoString(AvlNode *node)
 {
   if (node) {
 
     treetoString(node->left);
     int             h;
     Row            *row = (Row *) node->item;
-    for (h = 0; h < row->doublette; ++h) {	// fügt doubletten ein
+    for (h = 0; h < row->doublette; ++h) {      // fügt doubletten ein
       if (row->row[1] != NULL)
-	printf("\t%s ", row->row[1]);
+        printf("\t%s ", row->row[1]);
       else
-	printf("\t%s ", "UNDEF");
+        printf("\t%s ", "UNDEF");
       if (row->row[2] != NULL)
-	printf("\t%s \n", row->row[2]);
+        printf("\t%s \n", row->row[2]);
       else
-	printf("\t%s \n", "UNDEF");
-
+        printf("\t%s \n", "UNDEF");
 
     }
     treetoString(node->right);
@@ -906,7 +894,7 @@ treetoString(AvlNode * node)
  * codiert die Ergebnismenge, falls eine vorliegt gemäß dem DB Protokoll
  */
 static int
-addSetRset(ResultSet * this, AvlTree * t)
+addSetRset(ResultSet * this, AvlTree *t)
 {
   // printf("addSetRset()\n");
 
@@ -917,12 +905,12 @@ addSetRset(ResultSet * this, AvlTree * t)
     return 1;
   } else {
     // printf("afsf 1\n"); 
-    UtilStringBuffer *sb = newStringBuffer(80960000);	// ist der groß
-							// genug???
-							// Großes
-							// Problem!!!
-							// Stürzt sonst
-							// ab!!!
+    UtilStringBuffer *sb = newStringBuffer(80960000);   // ist der groß
+    // genug???
+    // Großes
+    // Problem!!!
+    // Stürzt sonst
+    // ab!!!
     // printf("afsf 2\n");
     // treetoString(t->root); 
     // printf("afsf 3\n");
@@ -935,10 +923,10 @@ addSetRset(ResultSet * this, AvlTree * t)
     } else {
       this->tupel = calloc(1, size + 1);
       // printf("1 %d\n",sb->ft->getSize(sb));
-      strncpy(this->tupel, sb->ft->getCharPtr(sb), size - 1);	// das
-								// letzte
-								// \n ist
-								// zu viel
+      strncpy(this->tupel, sb->ft->getCharPtr(sb), size - 1);   // das
+      // letzte
+      // \n ist
+      // zu viel
       // printf("2\n");
     }
     sb->ft->release(sb);
@@ -965,7 +953,6 @@ freeRSet(ResultSet ** this)
   t->sw->free(&(t->sw));
   // FREE(t->sw); 
 }
-
 
 static void
 freeStm(SqlStatement ** this)
@@ -1002,13 +989,15 @@ freeSel(Selection ** this)
     Order          *ob;
     // printf("freeSel a\n");
 
-    for (ob = (Order *) t->orderBy->ft->getFirst(t->orderBy); ob; ob = (Order *) t->orderBy->ft->getNext(t->orderBy)) {	// printf("freeSel 
-															// c2\n");
+    for (ob = (Order *) t->orderBy->ft->getFirst(t->orderBy); ob; ob = (Order *) t->orderBy->ft->getNext(t->orderBy)) { // printf("freeSel 
+                                                                                                                        // 
+      // 
+      // c2\n");
       ob->free(&ob);
       // printf("freeSel c3\n");
     }
     // printf("freeSel d\n");
-    t->orderBy->ft->release(t->orderBy);	// printf("freeSel e\n");
+    t->orderBy->ft->release(t->orderBy);        // printf("freeSel e\n");
   }
   // printf("freeSel 2\n");
 
@@ -1018,9 +1007,11 @@ freeSel(Selection ** this)
   if (t->where != NULL) {
     Sigma          *si;
 
-    for (si = (Sigma *) t->where->ft->getFirst(t->where); si; si = (Sigma *) t->where->ft->getNext(t->where)) {	// printf("freeSel 
-														// 4a 
-														// %p\n",si);
+    for (si = (Sigma *) t->where->ft->getFirst(t->where); si; si = (Sigma *) t->where->ft->getNext(t->where)) { // printf("freeSel 
+                                                                                                                // 
+      // 
+      // 4a 
+      // %p\n",si);
       si->free(&si);
       // printf("freeSel 4b\n");
     }
@@ -1040,7 +1031,7 @@ static int
 addNodeStm(SqlStatement * this, int type, void *value)
 {
   FullSelect     *fs = NULL;
-  FullSelect     *fsroot;	// printf("--- 1 %d\n",type);
+  FullSelect     *fsroot;       // printf("--- 1 %d\n",type);
   if (type == SUB && this->lastFs != NULL) {
     // printf("--- 2a\n");
     fs = this->lasttos;
@@ -1057,7 +1048,7 @@ addNodeStm(SqlStatement * this, int type, void *value)
   if ((type == UNION || type == UNIONALL || type == EXCEPT
        || type == EXCEPTALL || type == INTERSECT) && fs != NULL
       && fs->typeB != UNDEF) {
-    FullSelect     *nfs = newFullSelect();	// printf("--- 3a\n");
+    FullSelect     *nfs = newFullSelect();      // printf("--- 3a\n");
     nfs->setA = this->lasttos->setB;
     nfs->typeA = this->lasttos->typeB;
     nfs->type = type;
@@ -1067,7 +1058,7 @@ addNodeStm(SqlStatement * this, int type, void *value)
     this->lasttos->typeB = FUL;
     this->lasttos = nfs;
     return OK;
-  }				// printf("--- 3 2\n");
+  }                             // printf("--- 3 2\n");
   Insert         *ins;
   UpdIns         *upi;
   switch (type) {
@@ -1112,11 +1103,11 @@ addNodeStm(SqlStatement * this, int type, void *value)
     } else if (this->type == INSERT) {
       ins = (Insert *) this->stmt;
       if (ins->fs == NULL) {
-	ins->fs = (FullSelect *) value;
-	this->cnode->ft->append(this->cnode, value);
+        ins->fs = (FullSelect *) value;
+        this->cnode->ft->append(this->cnode, value);
       } else {
-	fs = (FullSelect *) value;
-	fs->free(&fs);
+        fs = (FullSelect *) value;
+        fs->free(&fs);
       }
     } else {
       fs = (FullSelect *) value;
@@ -1128,16 +1119,16 @@ addNodeStm(SqlStatement * this, int type, void *value)
     // printf("**** %p\n",value);
     if (fs->type != EMPTY) {
       if (fs->typeA == UNDEF) {
-	fs->setA = value;
-	fs->typeA = FUL;
-	// printf("### FUL A %p %p\n",fs, value); 
+        fs->setA = value;
+        fs->typeA = FUL;
+        // printf("### FUL A %p %p\n",fs, value); 
       } else {
-	fs->setB = value;
-	fs->typeB = FUL;
-	// printf("### FUL %p %p\n",fs, value);
+        fs->setB = value;
+        fs->typeB = FUL;
+        // printf("### FUL %p %p\n",fs, value);
       }
-    } else {			// kann nicht passiere. sollte durch die
-				// grammatik abgefangen werden!!
+    } else {                    // kann nicht passiere. sollte durch die
+      // grammatik abgefangen werden!!
       // printf("Schwerer Fehler in addNode(): \"cannot happen\"\n");
     }
 
@@ -1183,19 +1174,19 @@ addNodeStm(SqlStatement * this, int type, void *value)
       Projection     *pi = ((SubSelect *) value)->pi;
       int             i;
       if (pi->col->ft->size(pi->col) ==
-	  fsroot->pi->col->ft->size(fsroot->pi->col)) {
-	Column         *c1 = (Column *) pi->col->ft->getFirst(pi->col);
-	Column         *c2 =
-	    (Column *) fsroot->pi->col->ft->getFirst(fsroot->pi->col);
-	for (i = 0; i < pi->col->ft->size(pi->col); i++) {	// ist so
-								// übersichtlicher
-	  if (c1->colSQLType != c2->colSQLType)
-	    return CDEFERR + i + 1;
-	  c1 = (Column *) pi->col->ft->getNext(pi->col);
-	  c2 = (Column *) fsroot->pi->col->ft->getNext(fsroot->pi->col);
-	}
+          fsroot->pi->col->ft->size(fsroot->pi->col)) {
+        Column         *c1 = (Column *) pi->col->ft->getFirst(pi->col);
+        Column         *c2 =
+            (Column *) fsroot->pi->col->ft->getFirst(fsroot->pi->col);
+        for (i = 0; i < pi->col->ft->size(pi->col); i++) {      // ist so
+          // übersichtlicher
+          if (c1->colSQLType != c2->colSQLType)
+            return CDEFERR + i + 1;
+          c1 = (Column *) pi->col->ft->getNext(pi->col);
+          c2 = (Column *) fsroot->pi->col->ft->getNext(fsroot->pi->col);
+        }
       } else {
-	return CCOUNTERR;
+        return CCOUNTERR;
       }
     }
     // printf("--- 4\n");
@@ -1205,23 +1196,23 @@ addNodeStm(SqlStatement * this, int type, void *value)
       // printf("### SUB A %p %p\n",fs, value);
     } else {
       // printf("--- 5\n");
-      if (fs->typeB == UNDEF) {	// A union B
-	fs->typeB = SUB;
-	fs->setB = value;
-	// printf("### SUB B %p %p\n",fs, value);
-	this->lasttos = fs;
-	this->cnode->ft->removeLast(this->cnode);
-	// this->lastFs = fs;
+      if (fs->typeB == UNDEF) { // A union B
+        fs->typeB = SUB;
+        fs->setB = value;
+        // printf("### SUB B %p %p\n",fs, value);
+        this->lasttos = fs;
+        this->cnode->ft->removeLast(this->cnode);
+        // this->lastFs = fs;
 
-      } else {			// A union B union C
-	printf("### cannot happen\n");
-	/*
-	 * FullSelect * nfs = newFullSelect(); nfs->setA = fs->setB;
-	 * nfs->typeA = fs->typeB; nfs->type = fs->typeB; nfs->setB =
-	 * value; nfs->typeA = SUB; fs->setB = nfs; fs->typeA = FUL;
-	 * this->lastFs = nfs; printf("### 2\n");
-	 */
-	// this->cnode->ft->add(this->cnode,nfs);
+      } else {                  // A union B union C
+        printf("### cannot happen\n");
+        /*
+         * FullSelect * nfs = newFullSelect(); nfs->setA = fs->setB;
+         * nfs->typeA = fs->typeB; nfs->type = fs->typeB; nfs->setB =
+         * value; nfs->typeA = SUB; fs->setB = nfs; fs->typeA = FUL;
+         * this->lastFs = nfs; printf("### 2\n");
+         */
+        // this->cnode->ft->add(this->cnode,nfs);
       }
     }
     // this->cnode->ft->add(this->cnode,value);
@@ -1231,8 +1222,8 @@ addNodeStm(SqlStatement * this, int type, void *value)
     // printf("------hm\n"); 
     // }
     break;
-  case SIGMA:			// funktioniert im Falle von () union ()
-				// order by nicht!!!
+  case SIGMA:                  // funktioniert im Falle von () union ()
+    // order by nicht!!!
     fs = this->cnode->ft->getLast(this->cnode);
     this->lastFs = NULL;
     // printf("SIGMA: %p %p\n",this->lasttos,this->lasttos->sigma);
@@ -1242,14 +1233,14 @@ addNodeStm(SqlStatement * this, int type, void *value)
       fs->sigma = (Selection *) value;
       // printf("****remove: %p\n",fs);
       // printf("****SIGMA %p\n",this->lasttos);
-      this->cnode->ft->removeLast(this->cnode);	// nun ist setB des
-						// bisherigen
-						// mutterknotens
-						// definiert. also wird
-						// dieses fs nicht mehr
-						// bearbeitet und kann vom 
-						// stack genommen werden
-						// ==> Zeichnung fs-Stack
+      this->cnode->ft->removeLast(this->cnode); // nun ist setB des
+      // bisherigen
+      // mutterknotens
+      // definiert. also wird
+      // dieses fs nicht mehr
+      // bearbeitet und kann vom 
+      // stack genommen werden
+      // ==> Zeichnung fs-Stack
     } else {
       this->lasttos->sigma = (Selection *) value;
       // printf("****SIGMA %p\n",this->lasttos);
@@ -1266,7 +1257,6 @@ addNodeStm(SqlStatement * this, int type, void *value)
   // printf("OK\n");
   return OK;
 }
-
 
 /*
  * die Anfrage, die durch den Baum, der in stmt repräsentiert wird, wird
@@ -1300,25 +1290,25 @@ calculateStm(SqlStatement * this)
     call = (Call *) this->stmt;
 
     ul = invokeMethod(this->db, call->tableName, call->procedureName,
-		      call->keyList, call->parameterList);
+                      call->keyList, call->parameterList);
 
     if (ul != NULL) {
       colList = newList();
 
       r = newRow(ul->ft->size(ul));
       for (el = (ExpressionLight *) ul->ft->getFirst(ul), i = 0; el;
-	   el = (ExpressionLight *) ul->ft->getNext(ul), i++) {
-	r->row[i] = el->value;
-	char           *tmp = r->row[i];
-	while (*tmp != 0) {
-	  if (*tmp == '\n')
-	    *tmp = ',';
-	  *tmp++;
-	}			// printf("--- ::: %s
-				// \n###%s\n",r->row[i], el->name);
-	colList->ft->append(colList,
-			    newColumn("CALL", NULL, el->name, NULL,
-				      el->sqltype, NKEY));
+           el = (ExpressionLight *) ul->ft->getNext(ul), i++) {
+        r->row[i] = el->value;
+        char           *tmp = r->row[i];
+        while (*tmp != 0) {
+          if (*tmp == '\n')
+            *tmp = ',';
+          *tmp++;
+        }                       // printf("--- ::: %s
+        // \n###%s\n",r->row[i], el->name);
+        colList->ft->append(colList,
+                            newColumn("CALL", NULL, el->name, NULL,
+                                      el->sqltype, NKEY));
       }
       t = newAvlTree(item_cmp);
       t->insert(t, r);
@@ -1340,7 +1330,7 @@ calculateStm(SqlStatement * this)
   case CREATE:
     cd = (ClassDef *) this->stmt;
     c = createClass(this->db, cd->className, cd->superclass,
-		    cd->fieldNameList);
+                    cd->fieldNameList);
     if (c == 0) {
       this->rs->meta = "<EMPTY>";
       this->rs->tupel = "TABLE CREATED";
@@ -1377,39 +1367,38 @@ calculateStm(SqlStatement * this)
       stack[0] = t->root;
       tos = 1;
       while (tos) {
-	p = stack[--tos];
-	if (p->left) {
-	  stack[tos++] = p->left;
-	}
-	if (p->right) {
-	  stack[tos++] = p->right;
-	}
-	// Knoten vergleichen, falls ok neue row basteln und einfuegen
-	// printf("3\n");
-	al = newList();
-	r = (Row *) p->item;
-	col = (Column *) sb->pi->col->ft->getFirst(sb->pi->col);
-	for (i = 0; i < r->size; i++) {
-	  if (r->row[i] == NULL || col->isKey != KEY) {
-	    // printf("Null ");
-	    col = (Column *) sb->pi->col->ft->getNext(sb->pi->col);
-	    continue;
-	  }
-	  el = newExpressionLight(col->colName, UNDEF, r->row[i]);
-	  el->sqltype = col->colSQLType;
-	  al->ft->append(al, el);
-	  col = (Column *) sb->pi->col->ft->getNext(sb->pi->col);
+        p = stack[--tos];
+        if (p->left) {
+          stack[tos++] = p->left;
+        }
+        if (p->right) {
+          stack[tos++] = p->right;
+        }
+        // Knoten vergleichen, falls ok neue row basteln und einfuegen
+        // printf("3\n");
+        al = newList();
+        r = (Row *) p->item;
+        col = (Column *) sb->pi->col->ft->getFirst(sb->pi->col);
+        for (i = 0; i < r->size; i++) {
+          if (r->row[i] == NULL || col->isKey != KEY) {
+            // printf("Null ");
+            col = (Column *) sb->pi->col->ft->getNext(sb->pi->col);
+            continue;
+          }
+          el = newExpressionLight(col->colName, UNDEF, r->row[i]);
+          el->sqltype = col->colSQLType;
+          al->ft->append(al, el);
+          col = (Column *) sb->pi->col->ft->getNext(sb->pi->col);
 
-
-	}
-	// printf("...\n");
-	if ((c = deleteInstance(this->db, tupel->tname, al)) != 0) {
-	  this->rs->sw->reason = "INTERNAL ERROR";
-	  this->rs->sw->sqlstate = "XX000";
-	  return 1;
-	}
-	al->ft->release(al);
-	size++;
+        }
+        // printf("...\n");
+        if ((c = deleteInstance(this->db, tupel->tname, al)) != 0) {
+          this->rs->sw->reason = "INTERNAL ERROR";
+          this->rs->sw->sqlstate = "XX000";
+          return 1;
+        }
+        al->ft->release(al);
+        size++;
       }
     }
     // iterativ baum ends
@@ -1418,20 +1407,19 @@ calculateStm(SqlStatement * this)
       this->rs->tupel = "NO TUPEL DELETED";
     } else {
       if (c == 0) {
-	this->rs->meta = "<EMPTY>";
-	// this->rs->tupel = "TUPEL DELETED";
-	char           *sizec = int2String(size);
-	this->rs->tupel =
-	    (char *) malloc(strlen(" TUPEL DELETED") + strlen(sizec) + 1);
-	strcpy(this->rs->tupel, sizec);
-	strcat(this->rs->tupel, " TUPEL DELETED");
+        this->rs->meta = "<EMPTY>";
+        // this->rs->tupel = "TUPEL DELETED";
+        char           *sizec = int2String(size);
+        this->rs->tupel =
+            (char *) malloc(strlen(" TUPEL DELETED") + strlen(sizec) + 1);
+        strcpy(this->rs->tupel, sizec);
+        strcat(this->rs->tupel, " TUPEL DELETED");
 
       } else {
-	this->rs->sw->reason = "INTERNAL ERROR";
-	this->rs->sw->sqlstate = "XX000";
+        this->rs->sw->reason = "INTERNAL ERROR";
+        this->rs->sw->sqlstate = "XX000";
       }
     }
-
 
     return c;
     break;
@@ -1439,21 +1427,21 @@ calculateStm(SqlStatement * this)
     ins = (Insert *) this->stmt;
 
     for (tupel = ins->tupelList->ft->getFirst(ins->tupelList); tupel;
-	 tupel = ins->tupelList->ft->getNext(ins->tupelList)) {
+         tupel = ins->tupelList->ft->getNext(ins->tupelList)) {
       // printf("insert...
       // %d\n",ins->tupelList->ft->size(ins->tupelList));
       if ((c =
-	   createInstance(this->db, ins->tname,
-			  tupel->assignmentList)) != 0) {
-	if (c == CMPI_RC_ERR_ALREADY_EXISTS) {
-	  this->rs->sw->reason = "WARNING:\nTupel already insered";
-	  this->rs->sw->sqlstate = "01000";
-	} else {
-	  this->rs->sw->reason =
-	      "INTERNAL ERROR:\nINSERT into Table: error...";
-	  this->rs->sw->sqlstate = "XX000";
-	}
-	return 1;
+           createInstance(this->db, ins->tname,
+                          tupel->assignmentList)) != 0) {
+        if (c == CMPI_RC_ERR_ALREADY_EXISTS) {
+          this->rs->sw->reason = "WARNING:\nTupel already insered";
+          this->rs->sw->sqlstate = "01000";
+        } else {
+          this->rs->sw->reason =
+              "INTERNAL ERROR:\nINSERT into Table: error...";
+          this->rs->sw->sqlstate = "XX000";
+        }
+        return 1;
       }
 
     }
@@ -1488,40 +1476,40 @@ calculateStm(SqlStatement * this)
       stack[0] = t->root;
       tos = 1;
       while (tos) {
-	p = stack[--tos];
-	if (p->left) {
-	  stack[tos++] = p->left;
-	}
-	if (p->right) {
-	  stack[tos++] = p->right;
-	}
-	// Knoten vergleichen, falls ok neue row basteln und einfuegen
-	// printf("3\n");
-	al = newList();
-	r = (Row *) p->item;
-	col = (Column *) sb->pi->col->ft->getFirst(sb->pi->col);
-	for (i = 0; i < r->size; i++) {
-	  if (r->row[i] == NULL || col->isKey != KEY) {
-	    // printf("Null ");
-	    col = (Column *) sb->pi->col->ft->getNext(sb->pi->col);
-	    continue;
-	  }
-	  // printf("key: %s %s\n",col->colName, r->row[i]);
-	  el = newExpressionLight(col->colName, UNDEF, r->row[i]);
-	  el->sqltype = col->colSQLType;
-	  al->ft->append(al, el);
-	  col = (Column *) sb->pi->col->ft->getNext(sb->pi->col);
+        p = stack[--tos];
+        if (p->left) {
+          stack[tos++] = p->left;
+        }
+        if (p->right) {
+          stack[tos++] = p->right;
+        }
+        // Knoten vergleichen, falls ok neue row basteln und einfuegen
+        // printf("3\n");
+        al = newList();
+        r = (Row *) p->item;
+        col = (Column *) sb->pi->col->ft->getFirst(sb->pi->col);
+        for (i = 0; i < r->size; i++) {
+          if (r->row[i] == NULL || col->isKey != KEY) {
+            // printf("Null ");
+            col = (Column *) sb->pi->col->ft->getNext(sb->pi->col);
+            continue;
+          }
+          // printf("key: %s %s\n",col->colName, r->row[i]);
+          el = newExpressionLight(col->colName, UNDEF, r->row[i]);
+          el->sqltype = col->colSQLType;
+          al->ft->append(al, el);
+          col = (Column *) sb->pi->col->ft->getNext(sb->pi->col);
 
-	}
-	// printf("...\n");
-	if ((c =
-	     updateInstance(this->db, tupel->tname, tupel->assignmentList,
-			    al)) != 0) {
-	  this->rs->sw->reason = "INTERNAL ERROR:\nUPDATE WHERE: error...";
-	  this->rs->sw->sqlstate = "XX000";
-	  return 1;
-	}
-	al->ft->release(al);
+        }
+        // printf("...\n");
+        if ((c =
+             updateInstance(this->db, tupel->tname, tupel->assignmentList,
+                            al)) != 0) {
+          this->rs->sw->reason = "INTERNAL ERROR:\nUPDATE WHERE: error...";
+          this->rs->sw->sqlstate = "XX000";
+          return 1;
+        }
+        al->ft->release(al);
       }
     }
     // iterativ baum ends
@@ -1552,29 +1540,29 @@ calculateStm(SqlStatement * this)
   case SELECT:
     fs = (FullSelect *) this->stmt;
 
-    c = this->rs->addSet(this->rs, fs->calculate(fs, this->db));	// mussvor 
-									// addMeta 
-									// ausgefuhert 
-									// werden, 
-									// da 
-									// hier 
-									// pi 
-									// bei 
-									// joins 
-									// geandert 
-									// wird
+    c = this->rs->addSet(this->rs, fs->calculate(fs, this->db));        // mussvor 
+                                                                        // 
+    // 
+    // addMeta 
+    // ausgefuhert 
+    // werden, 
+    // da 
+    // hier 
+    // pi 
+    // bei 
+    // joins 
+    // geandert 
+    // wird
     this->rs->addMeta(this->rs, fs->pi);
 
     return c;
-  default:			// Fehlermeldung, obwohl es nicht
-				// vorkommen sollte...
+  default:                     // Fehlermeldung, obwohl es nicht
+    // vorkommen sollte...
     this->rs->sw->reason = "FEATURE NOT SUPPORTED:\nNot supported";
     this->rs->sw->sqlstate = "0A000";
     return 1;
     break;
   }
-
-
 
 }
 
@@ -1617,7 +1605,7 @@ min(int a, int b)
  * aus.
  */
 AvlTree        *
-uniontree(AvlTree * t1, AvlNode * node, int type)
+uniontree(AvlTree *t1, AvlNode *node, int type)
 {
 
   if (node != NULL) {
@@ -1634,7 +1622,7 @@ uniontree(AvlTree * t1, AvlNode * node, int type)
 }
 
 AvlTree        *
-excepttree(AvlTree * t1, AvlNode * node, int type)
+excepttree(AvlTree *t1, AvlNode *node, int type)
 {
 
   if (node != NULL) {
@@ -1645,7 +1633,7 @@ excepttree(AvlTree * t1, AvlNode * node, int type)
       r2->doublette -= r1->doublette;
       // printf("doublette-- \n");
       if (r2->doublette > 0)
-	t1->insert(t1, node->item);
+        t1->insert(t1, node->item);
     }
     excepttree(t1, node->right, type);
   }
@@ -1653,7 +1641,7 @@ excepttree(AvlTree * t1, AvlNode * node, int type)
 }
 
 AvlTree        *
-intersecttree(AvlTree * res, AvlTree * t1, AvlNode * node, int type)
+intersecttree(AvlTree *res, AvlTree *t1, AvlNode *node, int type)
 {
 
   if (node != NULL) {
@@ -1663,39 +1651,36 @@ intersecttree(AvlTree * res, AvlTree * t1, AvlNode * node, int type)
     if (r2 != NULL) {
       res->insert(res, r2);
       if (type == INTERSECTALL)
-	r2->doublette = min(r1->doublette, r2->doublette);
+        r2->doublette = min(r1->doublette, r2->doublette);
       else
-	r2->doublette = 1;
+        r2->doublette = 1;
     }
     intersecttree(res, t1, node->right, type);
   }
   return res;
 }
 
-
-
 void
-changeSigma(AvlNode * node, Selection * sigma)
+changeSigma(AvlNode *node, Selection * sigma)
 {
   if (node != NULL) {
     changeSigma(node->left, sigma);
     Row            *r = (Row *) node->item;
-    r->sigma = sigma;		// man kann hier nicht einfach einen **xy
-				// umbigen auf neues Sigma für alle Rows
-				// auf einma, denn die einzelnen Rows
-				// können aus unterschiedlichen
-				// Relationen stammen
+    r->sigma = sigma;           // man kann hier nicht einfach einen **xy
+    // umbigen auf neues Sigma für alle Rows
+    // auf einma, denn die einzelnen Rows
+    // können aus unterschiedlichen
+    // Relationen stammen
     changeSigma(node->right, sigma);
   }
 }
-
 
 /*
  * das Subselect ist Teil eines anderen Subselects und das ist anders
  * geornet, daher muss auch dieses umsortiert werden
  */
 AvlTree        *
-reorder(AvlTree * t, Selection * sigma)
+reorder(AvlTree *t, Selection * sigma)
 {
   // printf("+++ roerder 1\n");
   changeSigma(t->root, sigma);
@@ -1711,7 +1696,7 @@ reorder(AvlTree * t, Selection * sigma)
  * kürzt den Baum auf ff Elemente
  */
 static AvlTree *
-fetchfirst(AvlTree * t, int ff)
+fetchfirst(AvlTree *t, int ff)
 {
   AvlTree        *ot = newAvlTree(item_cmp);
   int             i;
@@ -1750,13 +1735,13 @@ calculateFSel(FullSelect * this, char *db)
       // printf("calculateFSel()3\n");
       avlt = sbs->calculate(sbs, db);
       if (avlt == NULL)
-	return NULL;
+        return NULL;
     } else {
       // printf("geklammertes select\n");
       FullSelect     *fs = (FullSelect *) this->setA;
       avlt = fs->calculate(fs, db);
       if (avlt == NULL)
-	return NULL;
+        return NULL;
 
     }
   }
@@ -1771,14 +1756,14 @@ calculateFSel(FullSelect * this, char *db)
       // printf("+++ %p\n",sbs);
       t1 = sbs->calculate(sbs, db);
       if (t1 == NULL)
-	return NULL;
+        return NULL;
     } else {
       // printf("+++ 2b\n");
 
       FullSelect     *fs = (FullSelect *) this->setA;
       t1 = fs->calculate(fs, db);
       if (t1 == NULL)
-	return NULL;
+        return NULL;
     }
     if (this->typeB == SUB) {
       // printf("+++ 3a\n");
@@ -1788,24 +1773,26 @@ calculateFSel(FullSelect * this, char *db)
       t2 = sbs->calculate(sbs, db);
       // printf("+++ 3a2 %p\n",t2);
       if (t2 == NULL)
-	return NULL;
+        return NULL;
     } else {
       // printf("+++ 3b\n");
 
       FullSelect     *fs = (FullSelect *) this->setB;
       t2 = fs->calculate(fs, db);
       if (t2 == NULL)
-	return NULL;
+        return NULL;
     }
     // printf("+++ 4\n");
 
     avlt = uniontree(t1, t2->root, this->type);
   }
-  if (this->type == EXCEPT || this->type == EXCEPTALL) {	// liefert 
-								// eine
-								// Rel<tion 
-								// zuviel
-								// !!!
+  if (this->type == EXCEPT || this->type == EXCEPTALL) {        // liefert 
+                                                                // 
+    // 
+    // eine
+    // Rel<tion 
+    // zuviel
+    // !!!
     // printf("+++ 1\n");
     AvlTree        *t1,
                    *t2;
@@ -1816,14 +1803,14 @@ calculateFSel(FullSelect * this, char *db)
       // printf("+++ %p\n",sbs);
       t1 = sbs->calculate(sbs, db);
       if (t1 == NULL)
-	return NULL;
+        return NULL;
     } else {
       // printf("+++ 2b\n");
 
       FullSelect     *fs = (FullSelect *) this->setA;
       t1 = fs->calculate(fs, db);
       if (t1 == NULL)
-	return NULL;
+        return NULL;
     }
     if (this->typeB == SUB) {
       // printf("+++ 3a\n");
@@ -1832,14 +1819,14 @@ calculateFSel(FullSelect * this, char *db)
       // printf("+++ %p\n",sbs);
       t2 = sbs->calculate(sbs, db);
       if (t2 == NULL)
-	return NULL;
+        return NULL;
     } else {
       // printf("+++ 3b\n");
 
       FullSelect     *fs = (FullSelect *) this->setB;
       t2 = fs->calculate(fs, db);
       if (t2 == NULL)
-	return NULL;
+        return NULL;
     }
     // printf("+++ 4\n");
 
@@ -1856,14 +1843,14 @@ calculateFSel(FullSelect * this, char *db)
       // printf("+++ %p\n",sbs);
       t1 = sbs->calculate(sbs, db);
       if (t1 == NULL)
-	return NULL;
+        return NULL;
     } else {
       // printf("+++ 2b\n");
 
       FullSelect     *fs = (FullSelect *) this->setA;
       t1 = fs->calculate(fs, db);
       if (t1 == NULL)
-	return NULL;
+        return NULL;
     }
     if (this->typeB == SUB) {
       // printf("+++ 3a\n");
@@ -1872,14 +1859,14 @@ calculateFSel(FullSelect * this, char *db)
       // printf("+++ %p\n",sbs);
       t2 = sbs->calculate(sbs, db);
       if (t2 == NULL)
-	return NULL;
+        return NULL;
     } else {
       // printf("+++ 3b\n");
 
       FullSelect     *fs = (FullSelect *) this->setB;
       t2 = fs->calculate(fs, db);
       if (t2 == NULL)
-	return NULL;
+        return NULL;
     }
     // printf("+++ 4\n");
     AvlTree        *res = newAvlTree(item_cmp);
@@ -1927,9 +1914,6 @@ freeSSel(SubSelect ** this)
   // printf("freeSSel 9\n");
   FREE(t);
 }
-
-
-
 
 static void
 addNodeSSel(SubSelect * this, int type, void *value)
@@ -2018,14 +2002,13 @@ value2string(CMPIData d)
 
   }
   // printf("--- %s ---\n",sp);
-  return sp;			// strdup(sp);
+  return sp;                    // strdup(sp);
 
 }
 
 static void
 extractValue(CMPIData d, UtilStringBuffer * sb)
 {
-
 
   if (d.type & CMPI_ARRAY) {
     // sprintf(sp,"**[]**"); 
@@ -2039,7 +2022,7 @@ extractValue(CMPIData d, UtilStringBuffer * sb)
 
       extractValue(da, sb);
       if (j < ac - 1)
-	sb->ft->appendChars(sb, ",");
+        sb->ft->appendChars(sb, ",");
     }
     return;
 
@@ -2097,77 +2080,77 @@ testSigma(Projection * pi, Row * row)
 {
   int             res = UNDEF;
   UtilList       *ul = row->sigma->where;
-  if (ul == NULL || ul->ft->size(ul) == 0)	// kein Sigma also alle
+  if (ul == NULL || ul->ft->size(ul) == 0)      // kein Sigma also alle
     return 1;
   Sigma          *sigma;
   for (sigma = (Sigma *) ul->ft->getLast(ul); sigma;
        sigma = (Sigma *) ul->ft->getPrevious(ul)) {
     // printf(">1>> %d %p\n",sigma->link,sigma);
     if (!(sigma->link == AND && res == 0)
-	&& !(sigma->link == OR && res == 1)) {
+        && !(sigma->link == OR && res == 1)) {
 
       int             nr = getColNr(sigma->colA, pi->col);
       int             cmp;
 
       if (sigma->op == ISNULL || sigma->op == NOTNULL)
-	cmp = strcasecmp(row->row[nr], "NULL");
+        cmp = strcasecmp(row->row[nr], "NULL");
       else if (sigma->op == BETWEEN || sigma->op == NOTBETWEEN) {
-	double          v = strtod(row->row[nr], (char **) NULL);
-	double          a = strtod(sigma->value, (char **) NULL);
-	double          b = strtod(sigma->valueB, (char **) NULL);
-	// printf("%f %f %f\n",a,v,b);
-	if (v > a && v < b)
-	  cmp = 0;
+        double          v = strtod(row->row[nr], (char **) NULL);
+        double          a = strtod(sigma->value, (char **) NULL);
+        double          b = strtod(sigma->valueB, (char **) NULL);
+        // printf("%f %f %f\n",a,v,b);
+        if (v > a && v < b)
+          cmp = 0;
       } else {
-	cmp =
-	    row_cmp(row->row[nr], sigma->value, sigma->colA->colSQLType,
-		    ASC);
+        cmp =
+            row_cmp(row->row[nr], sigma->value, sigma->colA->colSQLType,
+                    ASC);
       }
       int             cmp_op = 0;
       switch (sigma->op) {
       case ISNULL:
-      case BETWEEN:		// printf("between\n");
+      case BETWEEN:            // printf("between\n");
       case EQ:
-	if (cmp == 0)
-	  cmp_op = 1;
-	break;
+        if (cmp == 0)
+          cmp_op = 1;
+        break;
       case NOTNULL:
       case NOTBETWEEN:
       case NE:
-	if (cmp != 0)
-	  cmp_op = 1;
-	break;
+        if (cmp != 0)
+          cmp_op = 1;
+        break;
       case GT:
-	if (cmp > 0)
-	  cmp_op = 1;
-	break;
+        if (cmp > 0)
+          cmp_op = 1;
+        break;
       case LT:
-	if (cmp < 0)
-	  cmp_op = 1;
-	break;
+        if (cmp < 0)
+          cmp_op = 1;
+        break;
       case GE:
-	if (cmp >= 0)
-	  cmp_op = 1;
-	break;
+        if (cmp >= 0)
+          cmp_op = 1;
+        break;
       case LE:
-	if (cmp <= 0)
-	  cmp_op = 1;
-	break;
+        if (cmp <= 0)
+          cmp_op = 1;
+        break;
 
       }
       if (res == UNDEF) {
-	res = cmp_op;
+        res = cmp_op;
       } else if (sigma->link == UNDEF) {
-	res = cmp_op;
+        res = cmp_op;
       } else if (sigma->link == AND) {
-	// printf("AND %d ",cmp_op);
-	res = (res == 1) ? cmp_op : 0;
-	// printf("AND %d %d\n",res,cmp_op);
+        // printf("AND %d ",cmp_op);
+        res = (res == 1) ? cmp_op : 0;
+        // printf("AND %d %d\n",res,cmp_op);
       } else if (sigma->link == OR) {
-	// printf("OR %d %d\n",res, cmp_op);
-	if (res != 1)
-	  res = cmp_op;
-	// printf("\tOR %d %d\n",res, cmp_op);
+        // printf("OR %d %d\n",res, cmp_op);
+        if (res != 1)
+          res = cmp_op;
+        // printf("\tOR %d %d\n",res, cmp_op);
 
       }
     }
@@ -2176,13 +2159,12 @@ testSigma(Projection * pi, Row * row)
   return res;
 }
 
-
 /*
  * berechnet das Kreuzprodukt zweier Bäume
  */
 void
-traversecross(AvlTree * res, AvlNode * node, AvlTree * t, UtilList * ul,
-	      int type)
+traversecross(AvlTree *res, AvlNode *node, AvlTree *t, UtilList * ul,
+              int type)
 {
   if (node != NULL) {
     // printf("1\n");
@@ -2204,136 +2186,135 @@ traversecross(AvlTree * res, AvlNode * node, AvlTree * t, UtilList * ul,
       stack[0] = t->root;
       tos = 1;
       while (tos) {
-	p = stack[--tos];
-	if (p->left) {
-	  stack[tos++] = p->left;
-	}
-	if (p->right) {
-	  stack[tos++] = p->right;
-	}
-	// Knoten vergleichen, falls ok neue row basteln und einfuegen
-	// printf("3\n");
+        p = stack[--tos];
+        if (p->left) {
+          stack[tos++] = p->left;
+        }
+        if (p->right) {
+          stack[tos++] = p->right;
+        }
+        // Knoten vergleichen, falls ok neue row basteln und einfuegen
+        // printf("3\n");
 
-	r2 = (Row *) p->item;
-	// printf("=== %p %p\n",r1,r2);
-	int             cmp = 0;
-	int            *si;
-	// int si[3] = *_si;
-	for (si = (int *) ul->ft->getFirst(ul); si;
-	     si = (int *) ul->ft->getNext(ul)) {
-	  int             cmp_t = -1;
-	  // printf("3a %d %d %d\n",i, si[0],si[1]);
-	  // printf("3a %d %p\n",i, r1->row[si[0]]);//invalid read
+        r2 = (Row *) p->item;
+        // printf("=== %p %p\n",r1,r2);
+        int             cmp = 0;
+        int            *si;
+        // int si[3] = *_si;
+        for (si = (int *) ul->ft->getFirst(ul); si;
+             si = (int *) ul->ft->getNext(ul)) {
+          int             cmp_t = -1;
+          // printf("3a %d %d %d\n",i, si[0],si[1]);
+          // printf("3a %d %p\n",i, r1->row[si[0]]);//invalid read
 
-	  switch (type) {
-	  case LEFT:
-	    if (r1->row[si[0]] != NULL)
-	      cmp_t = strcmp(r1->row[si[0]], "NULL");
-	    else
-	      cmp_t = 0;
-	    break;
-	  case RIGHT:
-	    if (r2->row[si[0]] != NULL)
-	      cmp_t = strcmp(r2->row[si[1]], "NULL");
-	    else
-	      cmp_t = 0;
-	    break;
-	  case FULL:
-	    if (r1->row[si[0]] != NULL)
-	      cmp_t = strcmp(r1->row[si[0]], "NULL");
-	    else
-	      cmp_t = 0;
-	    if (cmp_t != 0)
-	      cmp_t = strcmp(r2->row[si[1]], "NULL");
-	    break;
-	  }
-	  // was, wenn beide NULL???
-	  // printf("3b %p %p\n",r1->row[si[0]],r2->row[si[1]]);
-	  // printf("3b1 %d %d %d %d\n",si[0],si[1],r1->size,r2->size);
-	  if (cmp_t != 0)
-	    if (r1->row[si[0]] != NULL && r2->row[si[1]] != NULL) {
-	      // printf("...\n");printf("3b1a %s
-	      // %s\n",r1->row[si[0]],r2->row[si[1]]);
-	      // cmp_t= strcmp(r1->row[si[0]],r2->row[si[1]]);
-	    }
-	  // printf("3b2\n");
-	  if (cmp_t == 0) {
-	    switch (si[2]) {
-	    case UNDEF:
-	      cmp = cmp_t;
-	      break;
-	    case OR:
-	      if (cmp_t == 0)
-		cmp = 0;
-	      break;
-	    case AND:
-	      if (cmp == 1 && cmp_t == 1)
-		cmp = 1;
-	      else
-		cmp = 0;
-	      break;
-	    }
+          switch (type) {
+          case LEFT:
+            if (r1->row[si[0]] != NULL)
+              cmp_t = strcmp(r1->row[si[0]], "NULL");
+            else
+              cmp_t = 0;
+            break;
+          case RIGHT:
+            if (r2->row[si[0]] != NULL)
+              cmp_t = strcmp(r2->row[si[1]], "NULL");
+            else
+              cmp_t = 0;
+            break;
+          case FULL:
+            if (r1->row[si[0]] != NULL)
+              cmp_t = strcmp(r1->row[si[0]], "NULL");
+            else
+              cmp_t = 0;
+            if (cmp_t != 0)
+              cmp_t = strcmp(r2->row[si[1]], "NULL");
+            break;
+          }
+          // was, wenn beide NULL???
+          // printf("3b %p %p\n",r1->row[si[0]],r2->row[si[1]]);
+          // printf("3b1 %d %d %d %d\n",si[0],si[1],r1->size,r2->size);
+          if (cmp_t != 0)
+            if (r1->row[si[0]] != NULL && r2->row[si[1]] != NULL) {
+              // printf("...\n");printf("3b1a %s
+              // %s\n",r1->row[si[0]],r2->row[si[1]]);
+              // cmp_t= strcmp(r1->row[si[0]],r2->row[si[1]]);
+            }
+          // printf("3b2\n");
+          if (cmp_t == 0) {
+            switch (si[2]) {
+            case UNDEF:
+              cmp = cmp_t;
+              break;
+            case OR:
+              if (cmp_t == 0)
+                cmp = 0;
+              break;
+            case AND:
+              if (cmp == 1 && cmp_t == 1)
+                cmp = 1;
+              else
+                cmp = 0;
+              break;
+            }
 
-	  }
-	  // printf("3c\n");
+          }
+          // printf("3c\n");
 
+        }
+        // printf("4\n");
 
-	}
-	// printf("4\n");
+        if (cmp == 0) {         // gilt auch, wenn keine Bedingung
+          // angegben wurde also wirkliches
+          // kreuzprodukt berechnet wird
+          // printf("4a 1\n");
+          rn = newRow(r1->size + r2->size - ul->ft->size(ul));
+          // printf("Anzahl der cols: %d\n",rn->size);
+          // printf("4a 1a\n");
+          // rn->doublette = r1->doublette + r1->doublette;
+          int             j;
+          // printf("4a 1b\n");
+          // printf("4a 2 %d %d %d\n",r1->size,r2->size,rn->size);
 
-	if (cmp == 0) {		// gilt auch, wenn keine Bedingung
-				// angegben wurde also wirkliches
-				// kreuzprodukt berechnet wird
-	  // printf("4a 1\n");
-	  rn = newRow(r1->size + r2->size - ul->ft->size(ul));
-	  // printf("Anzahl der cols: %d\n",rn->size);
-	  // printf("4a 1a\n");
-	  // rn->doublette = r1->doublette + r1->doublette;
-	  int             j;
-	  // printf("4a 1b\n");
-	  // printf("4a 2 %d %d %d\n",r1->size,r2->size,rn->size);
+          for (j = 0; j < r1->size; j++) {
+            // printf("%d %p %p\n",j,rn->row[j],r1->row[j]);
+            if (r1->row[j] == NULL)
+              continue;
+            rn->row[j] = (char *) malloc(strlen(r1->row[j]) + 1);
+            strcpy(rn->row[j], r1->row[j]);
+            // printf(" %d %s\n",j,r1->row[j]); 
+          }
+          int             k = r1->size;
+          // printf("4a 3\n");
 
-	  for (j = 0; j < r1->size; j++) {
-	    // printf("%d %p %p\n",j,rn->row[j],r1->row[j]);
-	    if (r1->row[j] == NULL)
-	      continue;
-	    rn->row[j] = (char *) malloc(strlen(r1->row[j]) + 1);
-	    strcpy(rn->row[j], r1->row[j]);
-	    // printf(" %d %s\n",j,r1->row[j]); 
-	  }
-	  int             k = r1->size;
-	  // printf("4a 3\n");
+          for (j = 0; j < r2->size; j++) {
+            // printf("4a 3 %d\n",j);
 
-	  for (j = 0; j < r2->size; j++) {
-	    // printf("4a 3 %d\n",j);
+            int             ignore = 0;
+            // printf("4a 3a %d\n",j);
+            for (si = (int *) ul->ft->getFirst(ul); si;
+                 si = (int *) ul->ft->getNext(ul)) {
+              if (j == si[1])
+                ignore = 1;
 
-	    int             ignore = 0;
-	    // printf("4a 3a %d\n",j);
-	    for (si = (int *) ul->ft->getFirst(ul); si;
-		 si = (int *) ul->ft->getNext(ul)) {
-	      if (j == si[1])
-		ignore = 1;
-
-	    }
-	    // printf("4a 3b %d\n",j);
-	    if (ignore == 0) {
-	      if (r2->row[j] != NULL) {
-		rn->row[k] = (char *) malloc(strlen(r2->row[j]) + 1);
-		strcpy(rn->row[k], r2->row[j]);
-	      }
-	      k++;
-	    } else
-	      ignore = 0;
-	    // printf("4a 3c %d\n",j); 
-	  }
-	  // printf("4a 4...\n");
-	  rn->sigma = r1->sigma;
-	  t->insert(res, rn);
-	  // printf("4a 5\n");
-	  // r1->free(&r1); 
-	  // printf("4a 6\n");
-	}
-	// printf("5\n");
+            }
+            // printf("4a 3b %d\n",j);
+            if (ignore == 0) {
+              if (r2->row[j] != NULL) {
+                rn->row[k] = (char *) malloc(strlen(r2->row[j]) + 1);
+                strcpy(rn->row[k], r2->row[j]);
+              }
+              k++;
+            } else
+              ignore = 0;
+            // printf("4a 3c %d\n",j); 
+          }
+          // printf("4a 4...\n");
+          rn->sigma = r1->sigma;
+          t->insert(res, rn);
+          // printf("4a 5\n");
+          // r1->free(&r1); 
+          // printf("4a 6\n");
+        }
+        // printf("5\n");
 
       }
     }
@@ -2349,7 +2330,7 @@ traversecross(AvlTree * res, AvlNode * node, AvlTree * t, UtilList * ul,
  * siehe traversecross
  */
 AvlTree        *
-crossproduct(AvlTree * setA, AvlTree * setB, UtilList * ul, int type)
+crossproduct(AvlTree *setA, AvlTree *setB, UtilList * ul, int type)
 {
   // ein reorder auf setB waere hier sinnvoll damit man die suche auch
   // abbrechen kann. 
@@ -2381,49 +2362,51 @@ calculateSSel(SubSelect * this, char *db)
       // printf("-- 1A\n");
       setA = this->cross->setA->calculate(this->cross->setA);
       if (setA == NULL)
-	return NULL;
+        return NULL;
     }
     if (this->cross->setB != NULL) {
       // printf("-- 1B\n");
       setB = this->cross->setB->calculate(this->cross->setB);
       if (setB == NULL)
-	return NULL;
+        return NULL;
     }
     // printf("-- cross-product\n");
     UtilList       *ul = newList();
     Sigma          *sigma;
     if (this->sigma->where != NULL
-	&& this->sigma->where->ft->size(this->sigma->where) > 0) {
+        && this->sigma->where->ft->size(this->sigma->where) > 0) {
       sigma =
-	  (Sigma *) this->sigma->where->ft->getFirst(this->sigma->where);
+          (Sigma *) this->sigma->where->ft->getFirst(this->sigma->where);
       // printf("1\n");
       for (sigma =
-	   (Sigma *) this->sigma->where->ft->getFirst(this->sigma->where);
-	   sigma;
-	   sigma =
-	   (Sigma *) this->sigma->where->ft->getNext(this->sigma->where)) {
-	if (sigma->colB != NULL) {	// also join
-	  int             si[3] =
-	      { getColumnNr(sigma->colA->colName,
-			    this->cross->setA->pi->col),
-getColumnNr(sigma->colB->colName, this->cross->setB->pi->col), sigma->link };
-	  ul->ft->append(ul, &si);
-	  // in this->pi muessen die doppelten geloescht werden 
+           (Sigma *) this->sigma->where->ft->getFirst(this->sigma->where);
+           sigma;
+           sigma =
+           (Sigma *) this->sigma->where->ft->getNext(this->sigma->where)) {
+        if (sigma->colB != NULL) {      // also join
+          int             si[3] = { getColumnNr(sigma->colA->colName,
+                                                this->cross->setA->
+                                                pi->col),
+            getColumnNr(sigma->colB->colName, this->cross->setB->pi->col),
+            sigma->link
+          };
+          ul->ft->append(ul, &si);
+          // in this->pi muessen die doppelten geloescht werden 
 
-	  Column         *tcol;
-	  // printf("1\n");
-	  for (tcol =
-	       (Column *) this->pi->col->ft->getFirst(this->pi->col); tcol;
-	       tcol =
-	       (Column *) this->pi->col->ft->getNext(this->pi->col)) {
-	    if (strcasecmp(tcol->colAlias, sigma->colB->colAlias) == 0) {
-	      this->pi->col->ft->removeCurrent(this->pi->col);
-	      // printf("col %s aus pi loeschen\n",tcol->colAlias);
-	      break;
-	    }
+          Column         *tcol;
+          // printf("1\n");
+          for (tcol =
+               (Column *) this->pi->col->ft->getFirst(this->pi->col); tcol;
+               tcol =
+               (Column *) this->pi->col->ft->getNext(this->pi->col)) {
+            if (strcasecmp(tcol->colAlias, sigma->colB->colAlias) == 0) {
+              this->pi->col->ft->removeCurrent(this->pi->col);
+              // printf("col %s aus pi loeschen\n",tcol->colAlias);
+              break;
+            }
 
-	  }
-	}
+          }
+        }
       }
     }
     // printf("und los\n");
@@ -2443,7 +2426,7 @@ getColumnNr(sigma->colB->colName, this->cross->setB->pi->col), sigma->link };
     // CMPIObjectPath *cop;
     CMPIInstance   *ci;
 
-    CMPIEnumeration *enm;	// noChunking = 1;
+    CMPIEnumeration *enm;       // noChunking = 1;
     // enm = enumInst("root/cimv2", this->setName);
     // enm = enumInstss("root/cimv2", this->setName);
     enm = enumInstances(db, this->setName);
@@ -2455,74 +2438,74 @@ getColumnNr(sigma->colB->colName, this->cross->setB->pi->col), sigma->link };
       return NULL;
     } else
       while (CMHasNext(enm, NULL)) {
-	wcount++;
-	// printf("-- 3 %d\n",wcount);
+        wcount++;
+        // printf("-- 3 %d\n",wcount);
 
-	ci = CMGetNext(enm, NULL).value.inst;
-	// cop = CMGetObjectPath(ci, NULL);
-	ClInstance     *inst = (ClInstance *) ci->hdl;
-	int             i,
-	                mm = this->pi->col->ft->size(this->pi->col),
-	    m = ClInstanceGetPropertyCount(inst);	// offenbar gibt
-							// es Felder, die
-							// keine Werte
-							// haben (und
-							// nicht NULL
-							// sind); diese
-							// werden nicht im 
-							// Couint
-							// berücksichtigt
-	// char *trow[m];
-	Row            *row = newRow(mm);
-	// printf("Anzahl der cols: %d\n",mm);
-	UtilStringBuffer *sb = newStringBuffer(4096);
+        ci = CMGetNext(enm, NULL).value.inst;
+        // cop = CMGetObjectPath(ci, NULL);
+        ClInstance     *inst = (ClInstance *) ci->hdl;
+        int             i,
+                        mm = this->pi->col->ft->size(this->pi->col),
+            m = ClInstanceGetPropertyCount(inst);       // offenbar gibt
+        // es Felder, die
+        // keine Werte
+        // haben (und
+        // nicht NULL
+        // sind); diese
+        // werden nicht im 
+        // Couint
+        // berücksichtigt
+        // char *trow[m];
+        Row            *row = newRow(mm);
+        // printf("Anzahl der cols: %d\n",mm);
+        UtilStringBuffer *sb = newStringBuffer(4096);
 
-	for (i = 0; i < m; i++) {
-	  CMPIString     *name;
-	  CMPIData        d;
+        for (i = 0; i < m; i++) {
+          CMPIString     *name;
+          CMPIData        d;
 
-	  d = CMGetPropertyAt(ci, i, &name, NULL);
-	  sb->ft->reset(sb);
-	  extractValue(d, sb);
-	  int             cnr =
-	      getColumnNr(name->ft->getCharPtr(name, NULL), this->pi->col);
-	  if (cnr != -1) {
-	    // printf("--- %d %d %d\n",wcount, i, cnr);
-	    // copy(row->row[cnr],(char*)sb->hdl);
-	    row->row[cnr] = malloc(strlen((char *) sb->hdl) + 1);
-	    strcpy(row->row[cnr], (char *) sb->hdl);
-	  }
-	  CMRelease(name);
-	}
-	row->sigma = this->sigma;
+          d = CMGetPropertyAt(ci, i, &name, NULL);
+          sb->ft->reset(sb);
+          extractValue(d, sb);
+          int             cnr =
+              getColumnNr(name->ft->getCharPtr(name, NULL), this->pi->col);
+          if (cnr != -1) {
+            // printf("--- %d %d %d\n",wcount, i, cnr);
+            // copy(row->row[cnr],(char*)sb->hdl);
+            row->row[cnr] = malloc(strlen((char *) sb->hdl) + 1);
+            strcpy(row->row[cnr], (char *) sb->hdl);
+          }
+          CMRelease(name);
+        }
+        row->sigma = this->sigma;
 
-	// printf("---------- %d %d\n", rcount,this->sigma->fetchFirst);
-	// printf("%p\n",this->sigma);
-	// if(this->sigma!=NULL){//==NULL bei Joins!?
-	if (this->sigma->orderBy == NULL
-	    || this->sigma->orderBy->ft->size(this->sigma->orderBy) == 0) {
-	  // printf("a 0\n");
-	  if (this->sigma != NULL && rcount == this->sigma->fetchFirst)
-	    break;
-	}
-	// printf("a\n");
+        // printf("---------- %d %d\n", rcount,this->sigma->fetchFirst);
+        // printf("%p\n",this->sigma);
+        // if(this->sigma!=NULL){//==NULL bei Joins!?
+        if (this->sigma->orderBy == NULL
+            || this->sigma->orderBy->ft->size(this->sigma->orderBy) == 0) {
+          // printf("a 0\n");
+          if (this->sigma != NULL && rcount == this->sigma->fetchFirst)
+            break;
+        }
+        // printf("a\n");
 
-	if (!testSigma(this->pi, row))
-	  continue;
-	// }printf("b %p %p\n",this->set,row); 
-	// printf("b1\n");
-	Row            *r = (Row *) this->set->insert(this->set, row);
+        if (!testSigma(this->pi, row))
+          continue;
+        // }printf("b %p %p\n",this->set,row); 
+        // printf("b1\n");
+        Row            *r = (Row *) this->set->insert(this->set, row);
 
-	// printf("b2\n");
-	if (r != NULL) {
-	  if (this->pi->mode == ALL)
-	    r->doublette++;
-	  else
-	    rcount--;
-	}
-	// printf("%d ",row->size);
-	rcount++;
-	// printf("c\n");
+        // printf("b2\n");
+        if (r != NULL) {
+          if (this->pi->mode == ALL)
+            r->doublette++;
+          else
+            rcount--;
+        }
+        // printf("%d ",row->size);
+        rcount++;
+        // printf("c\n");
       }
     // printf("forend\n");
     // printf("rcount: %d %d ",rcount, this->sigma->fetchFirst);
@@ -2531,16 +2514,16 @@ getColumnNr(sigma->colB->colName, this->cross->setB->pi->col), sigma->link };
 
     // fetch-first auf geordneter ergebnismenge
     if (this->sigma->orderBy != NULL
-	&& this->sigma->orderBy->ft->size(this->sigma->orderBy) > 0) {
+        && this->sigma->orderBy->ft->size(this->sigma->orderBy) > 0) {
       AvlTree        *ot = newAvlTree(item_cmp);
       // printf("+++++ order\n");
       for (i = 0; i < rcount;) {
-	Row            *r = (Row *) this->set->deleteMin(this->set);
-	i += r->doublette;
-	if (i > rcount)
-	  r->doublette = r->doublette - i + rcount;
-	if (r != NULL)
-	  ot->insert(ot, r);
+        Row            *r = (Row *) this->set->deleteMin(this->set);
+        i += r->doublette;
+        if (i > rcount)
+          r->doublette = r->doublette - i + rcount;
+        if (r != NULL)
+          ot->insert(ot, r);
       }
 
       // printf("%d\n",i);
@@ -2548,7 +2531,6 @@ getColumnNr(sigma->colB->colName, this->cross->setB->pi->col), sigma->link };
       this->set->free(&(this->set));
       this->set = ot;
     }
-
     // printf("calculateSSel() end %d\n", wcount);
     // treetoString(this->set->root);
     // printf("calculateSSel() end %d\n", wcount);
@@ -2636,8 +2618,8 @@ static void
 freeCol(Column ** this)
 {
   // printf("freeCol 1\n");
-  Column         *t = *this;	// die sind vermutlich nicht allocated
-				// sondern einfach kopiert --> aendern!!!!
+  Column         *t = *this;    // die sind vermutlich nicht allocated
+  // sondern einfach kopiert --> aendern!!!!
   // printf("freeCol 2\n");
   // FREE(t->colAlias);
   // FREE(t->tableName);
@@ -2689,7 +2671,6 @@ calculateCJoin(CrossJoin * this)
   return NULL;
 }
 
-
 static void
 setWarning(SqlWarning * this, char *s, char *r)
 {
@@ -2718,7 +2699,6 @@ setMeta(char *meta)
   rs->meta = meta;
 }
 
-
 int
 sqlInput(char *buffer, int *done, int requested)
 {
@@ -2736,14 +2716,13 @@ sqlInput(char *buffer, int *done, int requested)
 
 }
 
-
 /*
  * wird vom SQL-Prozessor aufgerufen, wenn eine Anfage (Komanndo der
  * Gruppe 2) bearbeitet werden soll
  */
 ResultSet      *
 createRS(char *query, int *rc)
-{				// wird CommHndl noch benutzt?
+{                               // wird CommHndl noch benutzt?
 
   int             p;
 
@@ -2764,11 +2743,6 @@ createRS(char *query, int *rc)
   *rc = p;
   return rs;
 }
-
-
-
-
-
 
 char           *
 type2cmpiString(int type)
@@ -2811,7 +2785,6 @@ type2cmpiString(int type)
   return "*??*";
 }
 
-
 /*
  * Hilfsfunktion für enumInstances
  */
@@ -2826,12 +2799,11 @@ createEnum(BinRequestContext * binCtx, BinResponseHdr ** resp, int arrLen)
   CMPIEnumeration *enm;
   CMPIStatus      rc;
 
-
   ar = NewCMPIArray(arrLen, binCtx->type, NULL);
   for (c = 0, i = 0; i < binCtx->rCount; i++) {
     for (j = 0; j < resp[i]->count; c++, j++) {
       object = relocateSerializedInstance(resp[i]->object[j].data);
-      rc = arraySetElementNotTrackedAt(ar, c, &object, binCtx->type);	// object???.
+      rc = arraySetElementNotTrackedAt(ar, c, &object, binCtx->type);   // object???.
     }
   }
 
@@ -2840,7 +2812,6 @@ createEnum(BinRequestContext * binCtx, BinResponseHdr ** resp, int arrLen)
   ar->ft->release(ar);
   return enm;
 }
-
 
 /*
  * Es folgt die Implementation der Schnittstelle zu den Providern.
@@ -2857,7 +2828,7 @@ enumInstances(char *ns, char *cn)
   reqq.op.type = OPS_EnumerateInstances;
   reqq.op.nameSpace = setCharsMsgSegment(ns);
   reqq.op.className = setCharsMsgSegment(cn);
-  reqq.flags = 0;		// 
+  reqq.flags = 0;               // 
   reqq.propertyList = NULL;
   reqq.properties = 0;
 
@@ -2889,8 +2860,8 @@ enumInstances(char *ns, char *cn)
 
   path =
       NewCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			NULL);
-  sreq->principal = setCharsMsgSegment(NULL);	// ctx->principal
+                        NULL);
+  sreq->principal = setCharsMsgSegment(NULL);   // ctx->principal
   sreq->objectPath = setObjectPathMsgSegment(path);
 
   binCtx.oHdr = (OperationHdr *) req;
@@ -2921,7 +2892,6 @@ enumInstances(char *ns, char *cn)
   return NULL;
 }
 
-
 int
 createInstance(char *ns, char *cn, UtilList * ins)
 {
@@ -2942,7 +2912,6 @@ createInstance(char *ns, char *cn, UtilList * ins)
 
   hdr = &hdrq;
 
-
   CMPIObjectPath *path;
   CMPIInstance   *inst;
   CMPIValue       val;
@@ -2952,13 +2921,12 @@ createInstance(char *ns, char *cn, UtilList * ins)
   BinResponseHdr *resp;
   CreateInstanceReq sreq = BINREQ(OPS_CreateInstance, 3);
 
-
   memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokCreateInstance *req = (XtokCreateInstance *) hdr->cimRequest;
 
   path =
       NewCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			NULL);
+                        NULL);
   inst = NewCMPIInstance(path, NULL);
   // printf("%s %s <<\n",req->op.nameSpace.data,req->op.className.data); 
   ExpressionLight *el;
@@ -2966,14 +2934,16 @@ createInstance(char *ns, char *cn, UtilList * ins)
   for (el = (ExpressionLight *) ins->ft->getFirst(ins); el;
        el = (ExpressionLight *) ins->ft->getNext(ins)) {
     // printf(" %s %s \n", el->value,el->name);
-    val = str2CMPIValue(el->sqltype == CMPI_string ? CMPI_chars : el->sqltype, el->value, NULL);	// refernzen 
-													// bis 
-													// auf 
-													// weiteres 
-													// nicht 
-													// unterstuetzt
+    val = str2CMPIValue(el->sqltype == CMPI_string ? CMPI_chars : el->sqltype, el->value, NULL);        // refernzen 
+                                                                                                        // 
+    // 
+    // bis 
+    // auf 
+    // weiteres 
+    // nicht 
+    // unterstuetzt
     CMSetProperty(inst, el->name, &val,
-		  el->sqltype == CMPI_string ? CMPI_chars : el->sqltype);
+                  el->sqltype == CMPI_string ? CMPI_chars : el->sqltype);
   }
 
   sreq.instance = setInstanceMsgSegment(inst);
@@ -3004,7 +2974,6 @@ createInstance(char *ns, char *cn, UtilList * ins)
   closeProviderContext(&binCtx);
   return 1;
 }
-
 
 int
 createClass(char *ns, char *cn, char *scn, UtilList * colDef)
@@ -3040,16 +3009,15 @@ createClass(char *ns, char *cn, char *scn, UtilList * colDef)
 
   CMPIData        d;
 
-
   memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokCreateClass *req = (XtokCreateClass *) hdr->cimRequest;
 
   path =
       NewCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			NULL);
+                        NULL);
 
   cl = ClClassNew(req->op.className.data,
-		  req->superClass ? req->superClass : NULL);
+                  req->superClass ? req->superClass : NULL);
 
   // hier koennte man eine Klassenbeschreibung mitgeben. Dazu den
   // SQL-Standart erweitern 
@@ -3066,31 +3034,33 @@ createClass(char *ns, char *cn, char *scn, UtilList * colDef)
 
   if (colDef != NULL && colDef->ft->size(colDef) > 0) {
     for (col = (Column *) colDef->ft->getFirst(colDef); col;
-	 col = (Column *) colDef->ft->getNext(colDef)) {
+         col = (Column *) colDef->ft->getNext(colDef)) {
       ClProperty     *prop;
       int             propId;
       d.state = CMPI_goodValue;
       // d.value=//str2CMPIValue(col->colSQLType,NULL,NULL); 
       d.type = col->colSQLType;
-      propId = ClClassAddProperty(cl, col->colName, d);	// (cl, p->name,
-							// d);
+      propId = ClClassAddProperty(cl, col->colName, d); // (cl, p->name,
+      // d);
       // qs=&p->val.qualifiers;
       prop =
-	  ((ClProperty *) ClObjectGetClSection(&cl->hdr, &cl->properties))
-	  + propId - 1;
+          ((ClProperty *) ClObjectGetClSection(&cl->hdr, &cl->properties))
+          + propId - 1;
       // for (q=qs->first; q; q=q->next) {
       // Key oder Nicht-Key Qualifier einbauen
       // hier koennte man Min, Max und Columnbeschreibung einfuegen.
-      if (col->isKey == KEY) {	// bug im sfcb: d.value wird ignoriert und 
-				// immer true reingeschrieben
-	d.state = CMPI_goodValue;
-	// printf("::: %d
-	// %s\n",col->isKey,col->isKey==KEY?"true":"false");
-	d.value =
-	    str2CMPIValue(CMPI_boolean,
-			  col->isKey == KEY ? "true" : "false", NULL);
-	d.type = CMPI_boolean;
-	ClClassAddPropertyQualifier(&cl->hdr, prop, "Key", d);
+      if (col->isKey == KEY) {  // bug im sfcb: d.value wird ignoriert und 
+                                // 
+        // 
+        // immer true reingeschrieben
+        d.state = CMPI_goodValue;
+        // printf("::: %d
+        // %s\n",col->isKey,col->isKey==KEY?"true":"false");
+        d.value =
+            str2CMPIValue(CMPI_boolean,
+                          col->isKey == KEY ? "true" : "false", NULL);
+        d.type = CMPI_boolean;
+        ClClassAddPropertyQualifier(&cl->hdr, prop, "Key", d);
       }
       // }
     }
@@ -3143,7 +3113,6 @@ deleteClass(char *ns, char *cn)
   reqq.op.className = setCharsMsgSegment(cn);
   reqq.className = cn;
 
-
   RequestHdr      hdrq;
   unsigned long   size = sizeof(XtokDeleteClass);
   hdrq.cimRequestLength = size;
@@ -3152,7 +3121,6 @@ deleteClass(char *ns, char *cn)
   hdrq.opType = OPS_DeleteClass;
 
   hdr = &hdrq;
-
 
   CMPIObjectPath *path;
   int             irc;
@@ -3169,7 +3137,7 @@ deleteClass(char *ns, char *cn)
 
   path =
       NewCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			NULL);
+                        NULL);
   sreq.objectPath = setObjectPathMsgSegment(path);
   sreq.principal = setCharsMsgSegment(NULL);
 
@@ -3197,7 +3165,6 @@ deleteClass(char *ns, char *cn)
   // printf(">>> Fehler\n");
   return 1;
 }
-
 
 /*
  * Hilfssfunktion für die Erzeugung einer Instanz, da während der
@@ -3263,7 +3230,6 @@ string2cmpival(char *value, int type)
   return val;
 }
 
-
 int
 deleteInstance(char *ns, char *cn, UtilList * al)
 {
@@ -3285,7 +3251,6 @@ deleteInstance(char *ns, char *cn, UtilList * al)
 
   hdr = &hdrq;
 
-
   CMPIObjectPath *path;
 
   int             irc;
@@ -3299,18 +3264,20 @@ deleteInstance(char *ns, char *cn, UtilList * al)
   ExpressionLight *el;
   path =
       NewCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			NULL);
+                        NULL);
   for (el = (ExpressionLight *) al->ft->getFirst(al); el;
        el = (ExpressionLight *) al->ft->getNext(al)) {
     // valp =
     // getKeyValueTypePtr(type2cmpiString(el->sqltype),el->value,NULL,&val,&type); 
+    // 
+    // 
     // //type ist char* !!!!!
     // hier muss ich den valp selber bauen. denn diese getKey... 
     // arbeitet nur mit strings sauber siehe
     // val = str2CMPIValue(el->value,el->sqltype,NULL);
     // printf("%s %s %d\n",el->name,el->value,el->sqltype);
     CMAddKey(path, el->name, string2cmpival(el->value, el->sqltype),
-	     el->sqltype);
+             el->sqltype);
     // printf("%s \n",el->value);
   }
   sreq.objectPath = setObjectPathMsgSegment(path);
@@ -3366,17 +3333,16 @@ updateInstance(char *ns, char *cn, UtilList * al, UtilList * kl)
   CMPIObjectPath *path;
   CMPIInstance   *inst;
 
-
   int             irc,
                   i,
-                  sreqSize =
-      sizeof(ModifyInstanceReq) - sizeof(MsgSegment);
+   
+      
+      
+      
+                 sreqSize = sizeof(ModifyInstanceReq) - sizeof(MsgSegment);
   BinRequestContext binCtx;
   BinResponseHdr *resp;
   ModifyInstanceReq *sreq;
-
-
-
 
   // printf("2\n");
 
@@ -3389,12 +3355,11 @@ updateInstance(char *ns, char *cn, UtilList * al, UtilList * kl)
   sreq->hdr.operation = OPS_ModifyInstance;
   sreq->hdr.count = req->properties + 3;
 
-
   ExpressionLight *el;
   // printf("%s %s\n",req->op.nameSpace.data, req->op.className.data);
   path =
       NewCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			NULL);
+                        NULL);
   for (el = (ExpressionLight *) kl->ft->getFirst(kl); el;
        el = (ExpressionLight *) kl->ft->getNext(kl)) {
     // printf("a\n");
@@ -3402,7 +3367,7 @@ updateInstance(char *ns, char *cn, UtilList * al, UtilList * kl)
     // val = str2CMPIValue(el->value,el->sqltype,NULL);
     // printf("b\n");
     CMAddKey(path, el->name, string2cmpival(el->value, el->sqltype),
-	     el->sqltype);
+             el->sqltype);
   }
 
   // printf("4\n"); 
@@ -3413,7 +3378,7 @@ updateInstance(char *ns, char *cn, UtilList * al, UtilList * kl)
        el = (ExpressionLight *) al->ft->getNext(al), i++) {
     // printf("val: %s %s\n",el->name,el->value);
     CMSetProperty(inst, el->name, string2cmpival(el->value, el->sqltype),
-		  el->sqltype);
+                  el->sqltype);
   }
 
   // printf("6\n");
@@ -3470,7 +3435,6 @@ getClassNames(char *ns, char *filter)
 
   hdr = &hdrq;
 
-
   CMPIObjectPath *path;
   EnumClassNamesReq sreq = BINREQ(OPS_EnumerateClassNames, 2);
   int             irc,
@@ -3479,13 +3443,12 @@ getClassNames(char *ns, char *filter)
   BinResponseHdr **resp;
   BinRequestContext binCtx;
 
-
   memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokEnumClassNames *req = (XtokEnumClassNames *) hdr->cimRequest;
 
   path =
       NewCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			NULL);
+                        NULL);
   sreq.objectPath = setObjectPathMsgSegment(path);
   sreq.principal = setCharsMsgSegment(NULL);
   sreq.hdr.flags = req->flags;
@@ -3515,27 +3478,27 @@ getClassNames(char *ns, char *filter)
       CMPIArray      *ar = NewCMPIArray(l, binCtx.type, NULL);
       // printf("l: %d\n",l);
       for (c = 0, i = 0; i < binCtx.rCount; i++) {
-	void           *object;
-	for (j = 0; j < resp[i]->count; c++, j++) {
-	  if (binCtx.type == CMPI_ref)
-	    object = relocateSerializedObjectPath(resp[i]->object[j].data);
-	  else if (binCtx.type == CMPI_instance)
-	    object = relocateSerializedInstance(resp[i]->object[j].data);
-	  else if (binCtx.type == CMPI_class) {
-	    object = relocateSerializedConstClass(resp[i]->object[j].data);
-	  }
-	  arraySetElementNotTrackedAt(ar, c, (CMPIValue *) & object,
-				      binCtx.type);
-	}
+        void           *object;
+        for (j = 0; j < resp[i]->count; c++, j++) {
+          if (binCtx.type == CMPI_ref)
+            object = relocateSerializedObjectPath(resp[i]->object[j].data);
+          else if (binCtx.type == CMPI_instance)
+            object = relocateSerializedInstance(resp[i]->object[j].data);
+          else if (binCtx.type == CMPI_class) {
+            object = relocateSerializedConstClass(resp[i]->object[j].data);
+          }
+          arraySetElementNotTrackedAt(ar, c, (CMPIValue *) & object,
+                                      binCtx.type);
+        }
       }
       CMPIEnumeration *enm = sfcb_native_new_CMPIEnumeration(ar, NULL);
       while (CMHasNext(enm, NULL)) {
-	CMPIObjectPath *cop = CMGetNext(enm, NULL).value.ref;
-	char           *kk = opGetClassNameChars(cop);
-	if (filter == NULL || strstr(kk, filter) != NULL) {
-	  cn->ft->append(cn, kk);
-	  // printf("%s\n",kk);
-	}
+        CMPIObjectPath *cop = CMGetNext(enm, NULL).value.ref;
+        char           *kk = opGetClassNameChars(cop);
+        if (filter == NULL || strstr(kk, filter) != NULL) {
+          cn->ft->append(cn, kk);
+          // printf("%s\n",kk);
+        }
       }
       return cn;
     }
@@ -3544,7 +3507,6 @@ getClassNames(char *ns, char *filter)
   closeProviderContext(&binCtx);
   return NULL;
 }
-
 
 UtilList       *
 invokeMethod(char *ns, char *cn, char *mn, UtilList * pl, UtilList * kl)
@@ -3569,8 +3531,6 @@ invokeMethod(char *ns, char *cn, char *mn, UtilList * pl, UtilList * kl)
   CMPIObjectPath *path;
   CMPIArgs       *out;
 
-
-
   int             irc,
                   i;
   BinRequestContext binCtx;
@@ -3579,19 +3539,18 @@ invokeMethod(char *ns, char *cn, char *mn, UtilList * pl, UtilList * kl)
   InvokeMethodReq sreq = BINREQ(OPS_InvokeMethod, 5);
   CMPIArgs       *in = TrackedCMPIArgs(NULL);
 
-
   memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokMethodCall *req = (XtokMethodCall *) hdr->cimRequest;
 
   path =
       NewCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-			NULL);
+                        NULL);
   ExpressionLight *el;
   for (el = (ExpressionLight *) kl->ft->getFirst(kl); el;
        el = (ExpressionLight *) kl->ft->getNext(kl)) {
     // printf("key: %s %s %d\n",el->name,el->value,el->sqltype);
     CMAddKey(path, el->name, string2cmpival(el->value, el->sqltype),
-	     el->sqltype);
+             el->sqltype);
   }
   sreq.objectPath = setObjectPathMsgSegment(path);
   sreq.principal = setCharsMsgSegment(NULL);
@@ -3600,7 +3559,7 @@ invokeMethod(char *ns, char *cn, char *mn, UtilList * pl, UtilList * kl)
        el = (ExpressionLight *) pl->ft->getNext(pl), i++) {
     // printf("param: %s %s %d\n",el->name,el->value,el->sqltype);
     CMAddArg(in, el->name, string2cmpival(el->value, el->sqltype),
-	     el->sqltype);
+             el->sqltype);
   }
   sreq.in = setArgsMsgSegment(in);
   sreq.out = setArgsMsgSegment(NULL);
@@ -3613,7 +3572,6 @@ invokeMethod(char *ns, char *cn, char *mn, UtilList * pl, UtilList * kl)
   binCtx.bHdrSize = sizeof(InvokeMethodReq);
   binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
   binCtx.pAs = NULL;
-
 
   irc = getProviderContext(&binCtx, (OperationHdr *) req);
   // printf("irc %d\n",irc);
@@ -3630,31 +3588,29 @@ invokeMethod(char *ns, char *cn, char *mn, UtilList * pl, UtilList * kl)
       int             i,
                       m;
 
-
       el = newExpressionLight("RETURNVALUE", UNDEF,
-			      strdup(value2string(resp->rv)));
+                              strdup(value2string(resp->rv)));
       el->sqltype = resp->rv.type;
       rl->ft->append(rl, el);
 
       if (out != NULL) {
 
-	m = CMGetArgCount(out, NULL);
-	for (i = 0; i < m; i++) {
-	  CMPIString     *name;
-	  CMPIData        data;
-	  data = CMGetArgAt(out, i, &name, NULL);
+        m = CMGetArgCount(out, NULL);
+        for (i = 0; i < m; i++) {
+          CMPIString     *name;
+          CMPIData        data;
+          data = CMGetArgAt(out, i, &name, NULL);
 
-	  if (data.type & CMPI_ARRAY) {
+          if (data.type & CMPI_ARRAY) {
 
-	  } else {
-	    el = newExpressionLight(name->hdl, UNDEF, value2string(data));
-	    el->sqltype = data.type;
-	    rl->ft->append(rl, el);
-	  }
-	  CMRelease(name);
-	}
+          } else {
+            el = newExpressionLight(name->hdl, UNDEF, value2string(data));
+            el->sqltype = data.type;
+            rl->ft->append(rl, el);
+          }
+          CMRelease(name);
+        }
       }
-
 
       return rl;
     }
@@ -3687,13 +3643,11 @@ getClassDef(const char *ns, const char *cn)
       (ClProperty *) ClObjectGetClSection(&cls->hdr, &cls->properties);
   int             l;
 
-
-
   char           *dscr;
   UtilList       *ul = newList();
   ClassDef       *cld =
       newClassDef(count, ccl->ft->getCharClassName(ccl), ul, 0,
-		  ccl->ft->getCharSuperClassName(ccl));
+                  ccl->ft->getCharSuperClassName(ccl));
 
   int             m,
                   j;
@@ -3709,9 +3663,9 @@ getClassDef(const char *ns, const char *cn)
     for (j = 0, m = ClClassGetPropQualifierCount(cls, i); j < m; j++) {
       CMPIString     *name;
       CMPIData        data =
-	  ccl->ft->getPropQualifierAt(ccl, i, j, &name, NULL);
+          ccl->ft->getPropQualifierAt(ccl, i, j, &name, NULL);
       if (strcmp("Description", name->hdl) == 0) {
-	dscr = (char *) data.value.string->hdl;
+        dscr = (char *) data.value.string->hdl;
       }
     }
 
@@ -3721,15 +3675,13 @@ getClassDef(const char *ns, const char *cn)
     }
 
     Column         *col =
-	newColumn(NULL, NULL, ClObjectGetClString(&cls->hdr, &(p + i)->id),
-		  NULL, (int) cd.type, key);
+        newColumn(NULL, NULL, ClObjectGetClString(&cls->hdr, &(p + i)->id),
+                  NULL, (int) cd.type, key);
     col->description = dscr;
     ul->ft->append(ul, col);
   }
   return cld;
 }
-
-
 
 /*
  * es folgen die weiteren Prozessor-Funktionen 
@@ -3764,49 +3716,49 @@ processMetaTables(char *filter, char *db)
   }
   UtilList       *colList = newList();
   colList->ft->append(colList,
-		      newColumn("ALLTABLES", NULL, "TABLE_CAT", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLTABLES", NULL, "TABLE_CAT", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLTABLES", NULL, "TABLE_SCHEM", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLTABLES", NULL, "TABLE_SCHEM", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLTABLES", NULL, "TABLE_NAME", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLTABLES", NULL, "TABLE_NAME", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLTABLES", NULL, "TABLE_TYPE", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLTABLES", NULL, "TABLE_TYPE", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLTABLES", NULL, "REMARKS", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLTABLES", NULL, "REMARKS", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLTABLES", NULL, "TYPE_CAT", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLTABLES", NULL, "TYPE_CAT", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLTABLES", NULL, "TYPE_SCHEM", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLTABLES", NULL, "TYPE_SCHEM", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLTABLES", NULL, "TYPE_NAME", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLTABLES", NULL, "TYPE_NAME", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLTABLES", NULL,
-				"SELF_REFERENCING_COL_NAME", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLTABLES", NULL,
+                                "SELF_REFERENCING_COL_NAME", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLTABLES", NULL, "REF_GENERATION", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLTABLES", NULL, "REF_GENERATION", NULL,
+                                CMPI_string, NKEY));
 
   Projection     *pi = newProjection(ALL, colList);
 
-  rs->addSet(rs, t);		// mussvor addMeta ausgefuhert werden, da
-				// hier pi bei joins geandert wird
+  rs->addSet(rs, t);            // mussvor addMeta ausgefuhert werden, da
+  // hier pi bei joins geandert wird
 
   rs->addMeta(rs, pi);
   rs->sw->reason = "Successful Completion";
   rs->sw->sqlstate = "00000";
   char           *res =
       (char *) malloc(strlen(rs->meta) + strlen(rs->tupel) +
-		      strlen(rs->sw->reason) + strlen(rs->sw->sqlstate) +
-		      4 + 1 + 3 + 3 + 3 + 1);
+                      strlen(rs->sw->reason) + strlen(rs->sw->sqlstate) +
+                      4 + 1 + 3 + 3 + 3 + 1);
   strcpy(res, "3 2 1\n");
   strcat(res, rs->sw->sqlstate);
   strcat(res, ";");
@@ -3819,7 +3771,6 @@ processMetaTables(char *filter, char *db)
   // Free rs, sbs,...
   return res;
 }
-
 
 char           *
 processMetaColumns(char *filter, char *filtercol, char *db)
@@ -3836,13 +3787,13 @@ processMetaColumns(char *filter, char *filtercol, char *db)
        cn = (char *) ul->ft->getNext(ul)) {
     cd = getClassDef(db, cn);
     for (i = 0, col =
-	 (Column *) cd->fieldNameList->ft->getFirst(cd->fieldNameList);
-	 col;
-	 col =
-	 (Column *) cd->fieldNameList->ft->getNext(cd->fieldNameList),
-	 i++) {
+         (Column *) cd->fieldNameList->ft->getFirst(cd->fieldNameList);
+         col;
+         col =
+         (Column *) cd->fieldNameList->ft->getNext(cd->fieldNameList),
+         i++) {
       if (filtercol == NULL || strstr(col->colName, filtercol) == NULL)
-	continue;
+        continue;
 
       r = newRow(22);
       r->row[0] = "NULL";
@@ -3851,18 +3802,20 @@ processMetaColumns(char *filter, char *filtercol, char *db)
       r->row[3] = col->colName;
       r->row[4] = int2String(col->colSQLType);
       r->row[5] = type2sqlString(col->colSQLType);
-      r->row[6] = "0";		// Column-size. siehe java
-      r->row[7] = "0";		// not used
-      r->row[8] = "0";		// ??
-      r->row[9] = "0";		// ??
-      r->row[10] = "0";		// unknown -> in java.api nachschlagen
+      r->row[6] = "0";          // Column-size. siehe java
+      r->row[7] = "0";          // not used
+      r->row[8] = "0";          // ??
+      r->row[9] = "0";          // ??
+      r->row[10] = "0";         // unknown -> in java.api nachschlagen
       r->row[11] = col->description;
       r->row[12] = "NULL";
-      r->row[13] = "0";		// not used
-      r->row[14] = "0";		// not used
-      r->row[15] = "0";		// das hier zu berechnen ist zu aufwendig. 
-				// im jdbc gibts glaub ich solch eine
-				// Methode 
+      r->row[13] = "0";         // not used
+      r->row[14] = "0";         // not used
+      r->row[15] = "0";         // das hier zu berechnen ist zu aufwendig. 
+                                // 
+      // 
+      // im jdbc gibts glaub ich solch eine
+      // Methode 
       r->row[16] = int2String(i + 1);
       r->row[17] = "";
       r->row[18] = "NULL";
@@ -3875,71 +3828,71 @@ processMetaColumns(char *filter, char *filtercol, char *db)
   }
   UtilList       *colList = newList();
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "TABLE_CAT", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "TABLE_CAT", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "TABLE_SCHEM", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "TABLE_SCHEM", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "TABLE_NAME", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "TABLE_NAME", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "COLUMN_NAME", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "COLUMN_NAME", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "DATA_TYPE", NULL,
-				CMPI_sint32, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "DATA_TYPE", NULL,
+                                CMPI_sint32, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "TYPE_NAME", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "TYPE_NAME", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "COLUMN_SIZE", NULL,
-				CMPI_sint32, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "COLUMN_SIZE", NULL,
+                                CMPI_sint32, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "BUFFER_LENGTH", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "BUFFER_LENGTH", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "DECIMAL_DIGITS", NULL,
-				CMPI_sint32, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "DECIMAL_DIGITS", NULL,
+                                CMPI_sint32, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "NUM_PREC_RADIX", NULL,
-				CMPI_sint32, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "NUM_PREC_RADIX", NULL,
+                                CMPI_sint32, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "NULLABLE", NULL,
-				CMPI_sint32, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "NULLABLE", NULL,
+                                CMPI_sint32, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "REMARKS", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "REMARKS", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "COLUMN_DEF", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "COLUMN_DEF", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "SQL_DATA_TYPE", NULL,
-				CMPI_sint32, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "SQL_DATA_TYPE", NULL,
+                                CMPI_sint32, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "SQL_DATETIME_SUB",
-				NULL, CMPI_sint32, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "SQL_DATETIME_SUB",
+                                NULL, CMPI_sint32, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "CHAR_OCTET_LENGTH",
-				NULL, CMPI_sint32, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "CHAR_OCTET_LENGTH",
+                                NULL, CMPI_sint32, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "ORDINAL_POSITION",
-				NULL, CMPI_sint32, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "ORDINAL_POSITION",
+                                NULL, CMPI_sint32, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "IS_NULLABLE", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "IS_NULLABLE", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "SCOPE_CATLOG", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "SCOPE_CATLOG", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "SCOPE_SCHEMA", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "SCOPE_SCHEMA", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "SCOPE_TABLE", NULL,
-				CMPI_string, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "SCOPE_TABLE", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("ALLCOLUMNS", NULL, "SOURCE_DATA_TYPE",
-				NULL, CMPI_string, NKEY));
+                      newColumn("ALLCOLUMNS", NULL, "SOURCE_DATA_TYPE",
+                                NULL, CMPI_string, NKEY));
 
   Projection     *pi = newProjection(ALL, colList);
   rs->addSet(rs, t);
@@ -3950,8 +3903,8 @@ processMetaColumns(char *filter, char *filtercol, char *db)
   rs->sw->sqlstate = "00000";
   char           *res =
       (char *) malloc(strlen(rs->meta) + strlen(rs->tupel) +
-		      strlen(rs->sw->reason) + strlen(rs->sw->sqlstate) +
-		      4 + 1 + 3 + 3 + 3 + 1);
+                      strlen(rs->sw->reason) + strlen(rs->sw->sqlstate) +
+                      4 + 1 + 3 + 3 + 3 + 1);
   strcpy(res, "3 5 1\n");
   strcat(res, rs->sw->sqlstate);
   strcat(res, ";");
@@ -3963,7 +3916,6 @@ processMetaColumns(char *filter, char *filtercol, char *db)
   strcat(res, "$$\n");
   return res;
 }
-
 
 char           *
 processSuperTables(char *filter, char *db)
@@ -3988,30 +3940,30 @@ processSuperTables(char *filter, char *db)
   }
   UtilList       *colList = newList();
   colList->ft->append(colList,
-		      newColumn("SUPERTABLES", NULL, "TABLE_CAT", NULL,
-				CMPI_string, NKEY));
+                      newColumn("SUPERTABLES", NULL, "TABLE_CAT", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("SUPERTABLES", NULL, "TABLE_SCHEM", NULL,
-				CMPI_string, NKEY));
+                      newColumn("SUPERTABLES", NULL, "TABLE_SCHEM", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("SUPERTABLES", NULL, "TABLE_NAME", NULL,
-				CMPI_string, NKEY));
+                      newColumn("SUPERTABLES", NULL, "TABLE_NAME", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("SUPERTABLES", NULL, "SUPERTABLE_NAME",
-				NULL, CMPI_string, NKEY));
+                      newColumn("SUPERTABLES", NULL, "SUPERTABLE_NAME",
+                                NULL, CMPI_string, NKEY));
 
   Projection     *pi = newProjection(ALL, colList);
 
-  rs->addSet(rs, t);		// mussvor addMeta ausgefuhert werden, da
-				// hier pi bei joins geandert wird
+  rs->addSet(rs, t);            // mussvor addMeta ausgefuhert werden, da
+  // hier pi bei joins geandert wird
 
   rs->addMeta(rs, pi);
   rs->sw->reason = "Successful Completion";
   rs->sw->sqlstate = "00000";
   char           *res =
       (char *) malloc(strlen(rs->meta) + strlen(rs->tupel) +
-		      strlen(rs->sw->reason) + strlen(rs->sw->sqlstate) +
-		      4 + 1 + 3 + 3 + 3 + 1);
+                      strlen(rs->sw->reason) + strlen(rs->sw->sqlstate) +
+                      4 + 1 + 3 + 3 + 3 + 1);
   strcpy(res, "3 3 1\n");
   strcat(res, rs->sw->sqlstate);
   strcat(res, ";");
@@ -4023,7 +3975,6 @@ processSuperTables(char *filter, char *db)
   strcat(res, "$$\n");
   return res;
 }
-
 
 char           *
 processKeyTable(char *filter, char *db)
@@ -4043,8 +3994,8 @@ processKeyTable(char *filter, char *db)
     rs->sw->sqlstate = "42P01";
 
     char           *res =
-	(char *) malloc(strlen(rs->sw->reason) + strlen(rs->sw->sqlstate) +
-			4 + 1 + 3 + 1);
+        (char *) malloc(strlen(rs->sw->reason) + strlen(rs->sw->sqlstate) +
+                        4 + 1 + 3 + 1);
     strcpy(res, "3 4 0\n");
     strcat(res, rs->sw->sqlstate);
     strcat(res, ";");
@@ -4065,7 +4016,7 @@ processKeyTable(char *filter, char *db)
     r->row[1] = "NULL";
     r->row[2] = cd->className;
     r->row[3] = col->colName;
-    r->row[4] = "???";		// ist das i?
+    r->row[4] = "???";          // ist das i?
     r->row[5] = "NULL";
 
     t->insert(t, r);
@@ -4074,36 +4025,36 @@ processKeyTable(char *filter, char *db)
 
   UtilList       *colList = newList();
   colList->ft->append(colList,
-		      newColumn("KEYTABLE", NULL, "TABLE_CAT", NULL,
-				CMPI_string, NKEY));
+                      newColumn("KEYTABLE", NULL, "TABLE_CAT", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("KEYTABLE", NULL, "TABLE_SCHEM", NULL,
-				CMPI_string, NKEY));
+                      newColumn("KEYTABLE", NULL, "TABLE_SCHEM", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("KEYTABLE", NULL, "TABLE_NAME", NULL,
-				CMPI_string, NKEY));
+                      newColumn("KEYTABLE", NULL, "TABLE_NAME", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("KEYTABLE", NULL, "COLUMN_NAME", NULL,
-				CMPI_string, NKEY));
+                      newColumn("KEYTABLE", NULL, "COLUMN_NAME", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("KEYTABLE", NULL, "KEY_SEQ", NULL,
-				CMPI_string, NKEY));
+                      newColumn("KEYTABLE", NULL, "KEY_SEQ", NULL,
+                                CMPI_string, NKEY));
   colList->ft->append(colList,
-		      newColumn("KEYTABLE", NULL, "PK_NAME", NULL,
-				CMPI_string, NKEY));
+                      newColumn("KEYTABLE", NULL, "PK_NAME", NULL,
+                                CMPI_string, NKEY));
 
   Projection     *pi = newProjection(ALL, colList);
 
-  rs->addSet(rs, t);		// mussvor addMeta ausgefuhert werden, da
-				// hier pi bei joins geandert wird
+  rs->addSet(rs, t);            // mussvor addMeta ausgefuhert werden, da
+  // hier pi bei joins geandert wird
 
   rs->addMeta(rs, pi);
   rs->sw->reason = "Successful Completion";
   rs->sw->sqlstate = "00000";
   char           *res =
       (char *) malloc(strlen(rs->meta) + strlen(rs->tupel) +
-		      strlen(rs->sw->reason) + strlen(rs->sw->sqlstate) +
-		      4 + 1 + 3 + 3 + 3 + 1);
+                      strlen(rs->sw->reason) + strlen(rs->sw->sqlstate) +
+                      4 + 1 + 3 + 3 + 3 + 1);
   strcpy(res, "3 4 1\n");
   strcat(res, rs->sw->sqlstate);
   strcat(res, ";");
@@ -4115,3 +4066,8 @@ processKeyTable(char *filter, char *db)
   strcat(res, "$$\n");
   return res;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -19,7 +19,6 @@
  *
  */
 
-
 #include "utilft.h"
 #include "support.h"
 #include "mlog.h"
@@ -32,7 +31,6 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
 
 #ifndef SFCB_CONFDIR
 #define SFCB_CONFDIR "/etc/sfcb"
@@ -101,9 +99,9 @@ Control         init[] = {
   {"sslCertificateFilePath", 0, SFCB_CONFDIR "/server.pem"},
 
   {"registrationDir", 0, SFCB_STATEDIR "/registration"},
-  {"providerDirs", 3, SFCB_LIBDIR " " CMPI_LIBDIR " " LIBDIR},	/* 3:
-								 * unstripped 
-								 */
+  {"providerDirs", 3, SFCB_LIBDIR " " CMPI_LIBDIR " " LIBDIR},  /* 3:
+                                                                 * unstripped 
+                                                                 */
 
   {"enableInterOp", 2, "true"},
   {"sslClientTrustStore", 0, SFCB_CONFDIR "/client.pem"},
@@ -150,7 +148,7 @@ setupControl(char *fn)
     return 0;
 
   ct = UtilFactory->newHashTable(61, UtilHashTable_charKey |
-				 UtilHashTable_ignoreKeyCase);
+                                 UtilHashTable_ignoreKeyCase);
 
   for (i = 0, m = sizeof(init) / sizeof(Control); i < m; i++) {
     ct->ft->put(ct, init[i].id, &init[i]);
@@ -182,29 +180,29 @@ setupControl(char *fn)
     case 0:
     case 1:
       mlogf(M_ERROR, M_SHOW,
-	    "--- control statement not recognized: \n\t%d: %s\n", n, stmt);
+            "--- control statement not recognized: \n\t%d: %s\n", n, stmt);
       err = 1;
       break;
     case 2:
       for (i = 0; i < sizeof(init) / sizeof(Control); i++) {
-	if (strcmp(rv.id, init[i].id) == 0) {
-	  if (init[i].type == 3) {
-	    /*
-	     * unstripped character string 
-	     */
-	    init[i].strValue = strdup(rv.val);
-	    if (strchr(init[i].strValue, '\n'))
-	      *(strchr(init[i].strValue, '\n')) = 0;
-	    init[i].dupped = 1;
-	  } else {
-	    init[i].strValue = strdup(cntlGetVal(&rv));
-	    init[i].dupped = 1;
-	  }
-	  goto ok;
-	}
+        if (strcmp(rv.id, init[i].id) == 0) {
+          if (init[i].type == 3) {
+            /*
+             * unstripped character string 
+             */
+            init[i].strValue = strdup(rv.val);
+            if (strchr(init[i].strValue, '\n'))
+              *(strchr(init[i].strValue, '\n')) = 0;
+            init[i].dupped = 1;
+          } else {
+            init[i].strValue = strdup(cntlGetVal(&rv));
+            init[i].dupped = 1;
+          }
+          goto ok;
+        }
       }
       mlogf(M_ERROR, M_SHOW, "--- invalid control statement: \n\t%d: %s\n",
-	    n, stmt);
+            n, stmt);
       err = 1;
     ok:
       break;
@@ -215,14 +213,13 @@ setupControl(char *fn)
   if (stmt)
     free(stmt);
 
-
   if (in) {
     fclose(in);
   }
 
   if (err) {
     mlogf(M_INFO, M_SHOW,
-	  "--- Broker terminated because of previous error(s)\n");
+          "--- Broker terminated because of previous error(s)\n");
     abort();
   }
 
@@ -280,8 +277,8 @@ getControlUNum(char *id, unsigned int *val)
     if (ctl->type == 1 && isdigit(ctl->strValue[0])) {
       unsigned long   tmp = strtoul(ctl->strValue, NULL, 0);
       if (tmp < UINT_MAX) {
-	*val = tmp;
-	return 0;
+        *val = tmp;
+        return 0;
       }
     }
     rc = -2;
@@ -305,3 +302,8 @@ getControlBool(char *id, int *val)
   *val = 0;
   return rc;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

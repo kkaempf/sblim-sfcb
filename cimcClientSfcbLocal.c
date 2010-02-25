@@ -29,7 +29,6 @@
 #include "providerMgr.h"
 #include "queryOperation.h"
 
-
 #define CIMCSetStatusWithChars(st,rcp,chars) \
       { if (st != NULL) { (st)->rc=(rcp); \
         (st)->msg=NewCMPIString((chars),NULL); }}
@@ -41,31 +40,30 @@ extern unsigned long _sfcb_trace_mask;
 extern void     closeProviderContext(BinRequestContext * binCtx);
 extern MsgSegment setObjectPathMsgSegment(const CMPIObjectPath * op);
 extern MsgSegment setArgsMsgSegment(CMPIArgs * args);
-extern MsgSegment setInstanceMsgSegment(const CMPIInstance * inst);
+extern MsgSegment setInstanceMsgSegment(const CMPIInstance *inst);
 extern CMPIConstClass *relocateSerializedConstClass(void *area);
 extern CMPIObjectPath *relocateSerializedObjectPath(void *area);
 extern CMPIInstance *relocateSerializedInstance(void *area);
 extern CMPIArgs *relocateSerializedArgs(void *area);
 
 extern CMPIObjectPath *NewCMPIObjectPath(const char *ns, const char *cn,
-					 CMPIStatus *);
-extern CMPIInstance *NewCMPIInstance(CMPIObjectPath * cop,
-				     CMPIStatus * rc);
+                                         CMPIStatus *);
+extern CMPIInstance *NewCMPIInstance(CMPIObjectPath * cop, CMPIStatus *rc);
 extern CMPIArray *NewCMPIArray(CMPICount size, CMPIType type,
-			       CMPIStatus * rc);
-extern CMPIEnumeration *sfcb_native_new_CMPIEnumeration(CMPIArray * array,
-							CMPIStatus * rc);
-extern CMPIString *NewCMPIString(const char *ptr, CMPIStatus * rc);
-extern CMPIEnumeration *NewCMPIEnumeration(CMPIArray * array,
-					   CMPIStatus * rc);
+                               CMPIStatus *rc);
+extern CMPIEnumeration *sfcb_native_new_CMPIEnumeration(CMPIArray *array,
+                                                        CMPIStatus *rc);
+extern CMPIString *NewCMPIString(const char *ptr, CMPIStatus *rc);
+extern CMPIEnumeration *NewCMPIEnumeration(CMPIArray *array,
+                                           CMPIStatus *rc);
 
-extern CMPIArgs *NewCMPIArgs(CMPIStatus * rc);
-extern CMPIDateTime *NewCMPIDateTime(CMPIStatus * rc);
+extern CMPIArgs *NewCMPIArgs(CMPIStatus *rc);
+extern CMPIDateTime *NewCMPIDateTime(CMPIStatus *rc);
 extern CMPIDateTime *NewCMPIDateTimeFromBinary(CMPIUint64 binTime,
-					       CMPIBoolean interval,
-					       CMPIStatus * rc);
+                                               CMPIBoolean interval,
+                                               CMPIStatus *rc);
 extern CMPIDateTime *NewCMPIDateTimeFromChars(const char *utcTime,
-					      CMPIStatus * rc);
+                                              CMPIStatus *rc);
 
 extern void     setInstanceLocalMode(int mode);
 
@@ -88,7 +86,7 @@ extern void     sunsetControl();
 #endif
 
 #if DEBUG
-int             do_debug = 0;	/* simple enable debug messages flag */
+int             do_debug = 0;   /* simple enable debug messages flag */
 
 static void
 set_debug()
@@ -98,7 +96,7 @@ set_debug()
   if (firsttime == 1) {
     firsttime--;
     do_debug = ((dbg = getenv("CMPISFCC_DEBUG")) != NULL &&
-		strcasecmp(dbg, "true") == 0);
+                strcasecmp(dbg, "true") == 0);
   }
 }
 #endif
@@ -122,22 +120,22 @@ typedef struct thrdInfo {
 } thrdInfo;
 
 static CMPIEnumeration *enumInstances(Client *, CMPIObjectPath *,
-				      CMPIFlags, char **, CMPIStatus *);
+                                      CMPIFlags, char **, CMPIStatus *);
 void           *enumInstancesThrd(thrdInfo *);
 static CMPIEnumeration *enumInstanceNames(Client *, CMPIObjectPath *,
-					  CMPIStatus *);
+                                          CMPIStatus *);
 void           *enumInstanceNamesThrd(thrdInfo *);
 static CMPIEnumeration *enumClassNames(Client *, CMPIObjectPath *,
-				       CMPIFlags, CMPIStatus *);
+                                       CMPIFlags, CMPIStatus *);
 void           *enumClassNamesThrd(thrdInfo *);
 static CMPIEnumeration *enumClasses(Client *, CMPIObjectPath *, CMPIFlags,
-				    CMPIStatus *);
+                                    CMPIStatus *);
 void           *enumClassesThrd(thrdInfo *);
 
 #endif
 
 typedef const struct _ClientConnectionFT {
-  CMPIStatus(*release) (ClientConnection *);
+  CMPIStatus      (*release) (ClientConnection *);
 } ClientConnectionFT;
 
 struct _ClientEnc {
@@ -151,22 +149,20 @@ struct _ClientConnection {
   ClientConnectionFT *ft;
 };
 
-char           *getResponse(ClientConnection * con, CMPIObjectPath * cop);
+char           *getResponse(ClientConnection *con, CMPIObjectPath * cop);
 ClientConnection *initConnection(ClientData * cld);
 
 /*
  * --------------------------------------------------------------------------
  */
 
-
 static CMPIStatus
-releaseConnection(ClientConnection * con)
+releaseConnection(ClientConnection *con)
 {
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   free(con);
   return rc;
 }
-
 
 static ClientConnectionFT conFt = {
   releaseConnection
@@ -191,11 +187,11 @@ initConnection(ClientData * cld)
  */
 
 static Client  *
-cloneClient(Client * cl, CMPIStatus * st)
+cloneClient(Client * cl, CMPIStatus *st)
 {
   CMPIStatus      rc;
   CIMCSetStatusWithChars(&rc, CMPI_RC_ERR_NOT_SUPPORTED,
-			 "Clone function not supported");
+                         "Clone function not supported");
   if (st)
     *st = rc;
   return NULL;
@@ -250,11 +246,11 @@ freeResps(BinResponseHdr ** resp, int count)
     free(resp);
 }
 
-extern void     setEnumArray(CMPIEnumeration * enumeration,
-			     CMPIArray * array);
+extern void     setEnumArray(CMPIEnumeration *enumeration,
+                             CMPIArray *array);
 static CMPIEnumeration *
 cpyEnumResponses(BinRequestContext * binCtx,
-		 BinResponseHdr ** resp, int arrLen)
+                 BinResponseHdr ** resp, int arrLen)
 {
   int             i,
                   c,
@@ -277,16 +273,16 @@ cpyEnumResponses(BinRequestContext * binCtx,
   for (c = 0, i = 0; i < binCtx->rCount; i++) {
     for (j = 0; j < resp[i]->count; c++, j++) {
       if (binCtx->type == CMPI_ref)
-	object.path =
-	    relocateSerializedObjectPath(resp[i]->object[j].data);
+        object.path =
+            relocateSerializedObjectPath(resp[i]->object[j].data);
       else if (binCtx->type == CMPI_instance)
-	object.inst = relocateSerializedInstance(resp[i]->object[j].data);
+        object.inst = relocateSerializedInstance(resp[i]->object[j].data);
       else if (binCtx->type == CMPI_class) {
-	object.cls = relocateSerializedConstClass(resp[i]->object[j].data);
+        object.cls = relocateSerializedConstClass(resp[i]->object[j].data);
       }
       // object.inst=CMClone(object.inst,NULL);
       rc = CMSetArrayElementAt(ar, c, (CMPIValue *) & object.inst,
-			       binCtx->type);
+                               binCtx->type);
     }
   }
 
@@ -298,7 +294,7 @@ cpyEnumResponses(BinRequestContext * binCtx,
 }
 
 static void
-ctxErrResponse(BinRequestContext * ctx, CMPIStatus * rc)
+ctxErrResponse(BinRequestContext * ctx, CMPIStatus *rc)
 {
   MsgXctl        *xd = ctx->ctlXdata;
   char            msg[256],
@@ -345,7 +341,7 @@ closeSockets(BinRequestContext * binCtx)
 
 #ifndef LARGE_VOL_SUPPORT
 static CMPIEnumeration *
-enumInstanceNames(Client * mb, CMPIObjectPath * cop, CMPIStatus * rc)
+enumInstanceNames(Client * mb, CMPIObjectPath * cop, CMPIStatus *rc)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "enumInstanceNames");
   EnumInstanceNamesReq sreq = BINREQ(OPS_EnumerateInstanceNames, 2);
@@ -400,7 +396,7 @@ enumInstanceNames(Client * mb, CMPIObjectPath * cop, CMPIStatus * rc)
     }
     if (rc)
       CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
-			     (char *) resp[err - 1]->object[0].data);
+                             (char *) resp[err - 1]->object[0].data);
     if (resp)
       freeResps(resp, binCtx.pCount);
     _SFCB_RETURN(NULL);
@@ -411,11 +407,10 @@ enumInstanceNames(Client * mb, CMPIObjectPath * cop, CMPIStatus * rc)
   _SFCB_RETURN(NULL);
 }
 
-
 static CMPIEnumeration *
 enumInstances(Client * mb,
-	      CMPIObjectPath * cop,
-	      CMPIFlags flags, char **properties, CMPIStatus * rc)
+              CMPIObjectPath * cop,
+              CMPIFlags flags, char **properties, CMPIStatus *rc)
 {
   EnumInstancesReq *sreq;
   int             pCount = 0,
@@ -485,7 +480,7 @@ enumInstances(Client * mb,
     }
     if (rc)
       CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
-			     (char *) resp[err - 1]->object[0].data);
+                             (char *) resp[err - 1]->object[0].data);
     if (resp)
       freeResps(resp, binCtx.pCount);
     free(sreq);
@@ -506,8 +501,8 @@ enumInstances(Client * mb,
 
 static CMPIInstance *
 getInstance(Client * mb,
-	    CMPIObjectPath * cop,
-	    CMPIFlags flags, char **properties, CMPIStatus * rc)
+            CMPIObjectPath * cop,
+            CMPIFlags flags, char **properties, CMPIStatus *rc)
 {
   CMPIInstance   *inst;
   int             irc,
@@ -591,14 +586,13 @@ getInstance(Client * mb,
   _SFCB_RETURN(NULL);
 }
 
-
 /*
  * --------------------------------------------------------------------------
  */
 
 static CMPIObjectPath *
 createInstance(Client * mb,
-	       CMPIObjectPath * cop, CMPIInstance * inst, CMPIStatus * rc)
+               CMPIObjectPath * cop, CMPIInstance *inst, CMPIStatus *rc)
 {
   int             irc;
   BinRequestContext binCtx;
@@ -662,15 +656,14 @@ createInstance(Client * mb,
   _SFCB_RETURN(NULL);
 }
 
-
 /*
  * --------------------------------------------------------------------------
  */
 
 static CMPIStatus
 modifyInstance(Client * mb,
-	       CMPIObjectPath * cop,
-	       CMPIInstance * inst, CMPIFlags flags, char **properties)
+               CMPIObjectPath * cop,
+               CMPIInstance *inst, CMPIFlags flags, char **properties)
 {
   int             pCount = 0,
       irc,
@@ -807,11 +800,10 @@ deleteInstance(Client * mb, CMPIObjectPath * cop)
   _SFCB_RETURN(rc);
 }
 
-
 static CMPIEnumeration *
 execQuery(Client * mb,
-	  CMPIObjectPath * cop,
-	  const char *query, const char *lang, CMPIStatus * rc)
+          CMPIObjectPath * cop,
+          const char *query, const char *lang, CMPIStatus *rc)
 {
   ExecQueryReq    sreq = BINREQ(OPS_ExecQuery, 4);
   int             irc,
@@ -879,7 +871,7 @@ execQuery(Client * mb,
     }
     if (rc)
       CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
-			     (char *) resp[err - 1]->object[0].data);
+                             (char *) resp[err - 1]->object[0].data);
     CMRelease(path);
     freeResps(resp, binCtx.pCount);
     _SFCB_RETURN(NULL);
@@ -893,12 +885,12 @@ execQuery(Client * mb,
 
 static CMPIEnumeration *
 associators(Client * mb,
-	    CMPIObjectPath * cop,
-	    const char *assocClass,
-	    const char *resultClass,
-	    const char *role,
-	    const char *resultRole,
-	    CMPIFlags flags, char **properties, CMPIStatus * rc)
+            CMPIObjectPath * cop,
+            const char *assocClass,
+            const char *resultClass,
+            const char *role,
+            const char *resultRole,
+            CMPIFlags flags, char **properties, CMPIStatus *rc)
 {
   AssociatorsReq *sreq;
   int             irc,
@@ -980,7 +972,7 @@ associators(Client * mb,
     }
     if (rc)
       CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
-			     (char *) resp[err - 1]->object[0].data);
+                             (char *) resp[err - 1]->object[0].data);
     if (resp)
       freeResps(resp, binCtx.pCount);
     free(sreq);
@@ -993,13 +985,12 @@ associators(Client * mb,
   _SFCB_RETURN(NULL);
 }
 
-
 static CMPIEnumeration *
 references(Client * mb,
-	   CMPIObjectPath * cop,
-	   const char *resultClass,
-	   const char *role,
-	   CMPIFlags flags, char **properties, CMPIStatus * rc)
+           CMPIObjectPath * cop,
+           const char *resultClass,
+           const char *role,
+           CMPIFlags flags, char **properties, CMPIStatus *rc)
 {
   AssociatorsReq *sreq;
   int             irc,
@@ -1036,7 +1027,6 @@ references(Client * mb,
   sreq = calloc(1, sreqSize);
   sreq->hdr.operation = OPS_References;
   sreq->hdr.count = pCount + 4;
-
 
   sreq->objectPath = setObjectPathMsgSegment(cop);
   sreq->resultClass = setCharsMsgSegment(resultClass);
@@ -1079,7 +1069,7 @@ references(Client * mb,
     }
     if (rc)
       CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
-			     (char *) resp[err - 1]->object[0].data);
+                             (char *) resp[err - 1]->object[0].data);
     if (resp)
       freeResps(resp, binCtx.pCount);
     free(sreq);
@@ -1092,13 +1082,12 @@ references(Client * mb,
   _SFCB_RETURN(NULL);
 }
 
-
 static CMPIEnumeration *
 associatorNames(Client * mb,
-		CMPIObjectPath * cop,
-		const char *assocClass,
-		const char *resultClass,
-		const char *role, const char *resultRole, CMPIStatus * rc)
+                CMPIObjectPath * cop,
+                const char *assocClass,
+                const char *resultClass,
+                const char *role, const char *resultRole, CMPIStatus *rc)
 {
   AssociatorNamesReq sreq = BINREQ(OPS_AssociatorNames, 6);
   int             irc,
@@ -1157,7 +1146,7 @@ associatorNames(Client * mb,
     }
     if (rc)
       CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
-			     (char *) resp[err - 1]->object[0].data);
+                             (char *) resp[err - 1]->object[0].data);
     freeResps(resp, binCtx.pCount);
     _SFCB_RETURN(NULL);
   } else
@@ -1167,12 +1156,10 @@ associatorNames(Client * mb,
   _SFCB_RETURN(NULL);
 }
 
-
-
 static CMPIEnumeration *
 referenceNames(Client * mb,
-	       CMPIObjectPath * cop,
-	       const char *resultClass, const char *role, CMPIStatus * rc)
+               CMPIObjectPath * cop,
+               const char *resultClass, const char *role, CMPIStatus *rc)
 {
   ReferenceNamesReq sreq = BINREQ(OPS_ReferenceNames, 4);
   int             irc,
@@ -1228,7 +1215,7 @@ referenceNames(Client * mb,
     }
     if (rc)
       CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
-			     (char *) resp[err - 1]->object[0].data);
+                             (char *) resp[err - 1]->object[0].data);
     freeResps(resp, binCtx.pCount);
     _SFCB_RETURN(NULL);
   } else
@@ -1240,9 +1227,9 @@ referenceNames(Client * mb,
 
 static CMPIData
 invokeMethod(Client * mb,
-	     CMPIObjectPath * cop,
-	     const char *method,
-	     CMPIArgs * in, CMPIArgs * out, CMPIStatus * rc)
+             CMPIObjectPath * cop,
+             const char *method,
+             CMPIArgs * in, CMPIArgs * out, CMPIStatus *rc)
 {
   InvokeMethodReq sreq = BINREQ(OPS_InvokeMethod, 5);
   int             irc,
@@ -1257,7 +1244,6 @@ invokeMethod(Client * mb,
     CMSetStatus(rc, CMPI_RC_OK);
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "referenceNames");
-
 
   CMPIString     *ns = cop->ft->getNameSpace(cop, NULL);
   CMPIString     *cn = cop->ft->getClassName(cop, NULL);
@@ -1298,18 +1284,18 @@ invokeMethod(Client * mb,
       argsout = relocateSerializedArgs(resp->object[0].data);
       outc = CMGetArgCount(argsout, NULL);
       for (i = 0; i < outc; i++) {
-	CMPIString     *name;
-	CMPIData        data = CMGetArgAt(argsout, i, &name, NULL);
-	CMAddArg(out, (char *) name->hdl, &data.value, data.type);
+        CMPIString     *name;
+        CMPIData        data = CMGetArgAt(argsout, i, &name, NULL);
+        CMAddArg(out, (char *) name->hdl, &data.value, data.type);
       }
       if (resp->rvValue) {
-	if (resp->rv.type == CMPI_chars) {
-	  resp->rv.value.chars = (long) resp->rvEnc.data + (char *) resp;
-	} else if (resp->rv.type == CMPI_dateTime) {
-	  resp->rv.value.dateTime =
-	      NewCMPIDateTimeFromChars((long) resp->rvEnc.data
-				       + (char *) resp, NULL);
-	}
+        if (resp->rv.type == CMPI_chars) {
+          resp->rv.value.chars = (long) resp->rvEnc.data + (char *) resp;
+        } else if (resp->rv.type == CMPI_dateTime) {
+          resp->rv.value.dateTime =
+              NewCMPIDateTimeFromChars((long) resp->rvEnc.data
+                                       + (char *) resp, NULL);
+        }
       }
       retval = resp->rv;
       free(resp);
@@ -1328,19 +1314,18 @@ invokeMethod(Client * mb,
 
 static CMPIStatus
 setProperty(Client * mb,
-	    CMPIObjectPath * cop,
-	    const char *name, CMPIValue * value, CMPIType type)
+            CMPIObjectPath * cop,
+            const char *name, CMPIValue * value, CMPIType type)
 {
   CMPIStatus      rc;
   CMSetStatus(&rc, CMPI_RC_ERR_NOT_SUPPORTED);
-
 
   return rc;
 }
 
 static CMPIData
 getProperty(Client * mb,
-	    CMPIObjectPath * cop, const char *name, CMPIStatus * rc)
+            CMPIObjectPath * cop, const char *name, CMPIStatus *rc)
 {
   CMPIData        retval = { 0, CMPI_notFound, {0l} };
   if (rc)
@@ -1348,14 +1333,13 @@ getProperty(Client * mb,
   return retval;
 }
 
-
 /*
  * --------------------------------------------------------------------------
  */
 static CMPIConstClass *
 getClass(Client * mb,
-	 CMPIObjectPath * cop,
-	 CMPIFlags flags, char **properties, CMPIStatus * rc)
+         CMPIObjectPath * cop,
+         CMPIFlags flags, char **properties, CMPIStatus *rc)
 {
   CMPIConstClass *cls;
   int             irc,
@@ -1439,7 +1423,7 @@ getClass(Client * mb,
 #ifndef LARGE_VOL_SUPPORT
 static CMPIEnumeration *
 enumClassNames(Client * mb,
-	       CMPIObjectPath * cop, CMPIFlags flags, CMPIStatus * rc)
+               CMPIObjectPath * cop, CMPIFlags flags, CMPIStatus *rc)
 {
   EnumClassNamesReq sreq = BINREQ(OPS_EnumerateClassNames, 2);
   int             irc,
@@ -1497,7 +1481,7 @@ enumClassNames(Client * mb,
     }
     if (rc)
       CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
-			     (char *) resp[err - 1]->object[0].data);
+                             (char *) resp[err - 1]->object[0].data);
     freeResps(resp, binCtx.pCount);
     _SFCB_RETURN(NULL);
   } else
@@ -1509,7 +1493,7 @@ enumClassNames(Client * mb,
 
 static CMPIEnumeration *
 enumClasses(Client * mb,
-	    CMPIObjectPath * cop, CMPIFlags flags, CMPIStatus * rc)
+            CMPIObjectPath * cop, CMPIFlags flags, CMPIStatus *rc)
 {
   EnumClassesReq  sreq = BINREQ(OPS_EnumerateClasses, 2);
   int             irc,
@@ -1566,7 +1550,7 @@ enumClasses(Client * mb,
     }
     if (rc)
       CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
-			     (char *) resp[err - 1]->object[0].data);
+                             (char *) resp[err - 1]->object[0].data);
     freeResps(resp, binCtx.pCount);
     _SFCB_RETURN(NULL);
   } else
@@ -1579,10 +1563,8 @@ enumClasses(Client * mb,
 
 #endif
 
-
-
 static ClientFT clientFt = {
-  1,				// NATIVE_FT_VERSION,
+  1,                            // NATIVE_FT_VERSION,
   releaseClient,
   cloneClient,
   getClass,
@@ -1620,7 +1602,7 @@ static pthread_mutex_t lcc_mutex = PTHREAD_MUTEX_INITIALIZER;
 #define CONNECT_UNLOCK_RETURN(rc) { pthread_mutex_unlock(&lcc_mutex); return (rc);}
 
 int
-localConnect(ClientEnv * ce, CMPIStatus * st)
+localConnect(ClientEnv *ce, CMPIStatus *st)
 {
   static struct sockaddr_un serverAddr;
   int             sock,
@@ -1630,7 +1612,6 @@ localConnect(ClientEnv * ce, CMPIStatus * st)
   unsigned long int l;
   char           *user;
   static char    *socketName = NULL;
-
 
   struct _msg {
     unsigned int    size;
@@ -1643,8 +1624,8 @@ localConnect(ClientEnv * ce, CMPIStatus * st)
   if (localConnectCount == 0) {
     if ((sock = socket(PF_UNIX, SOCK_STREAM, 0)) < 0) {
       if (st) {
-	st->rc = CMPI_RC_ERR_FAILED;
-	st->msg = ce->ft->newString(ce, strerror(errno), NULL);
+        st->rc = CMPI_RC_ERR_FAILED;
+        st->msg = ce->ft->newString(ce, strerror(errno), NULL);
       }
       CONNECT_UNLOCK_RETURN(-1);
     }
@@ -1654,15 +1635,15 @@ localConnect(ClientEnv * ce, CMPIStatus * st)
       rc = getControlChars("localSocketPath", &socketName);
       sunsetControl();
       if (rc) {
-	if (st) {
-	  st->rc = CMPI_RC_ERR_FAILED;
-	  st->msg =
-	      ce->ft->newString(ce, "failed to open sfcb local socket",
-				NULL);
-	}
-	fprintf(stderr, "--- Failed to open sfcb local socket (%d)\n", rc);
-	close(sock);
-	CONNECT_UNLOCK_RETURN(-2);
+        if (st) {
+          st->rc = CMPI_RC_ERR_FAILED;
+          st->msg =
+              ce->ft->newString(ce, "failed to open sfcb local socket",
+                                NULL);
+        }
+        fprintf(stderr, "--- Failed to open sfcb local socket (%d)\n", rc);
+        close(sock);
+        CONNECT_UNLOCK_RETURN(-2);
       }
     }
 
@@ -1670,11 +1651,11 @@ localConnect(ClientEnv * ce, CMPIStatus * st)
     strcpy(serverAddr.sun_path, socketName);
 
     if (connect(sock, (struct sockaddr *) &serverAddr,
-		sizeof(serverAddr.sun_family) +
-		strlen(serverAddr.sun_path)) < 0) {
+                sizeof(serverAddr.sun_family) +
+                strlen(serverAddr.sun_path)) < 0) {
       if (st) {
-	st->rc = CMPI_RC_ERR_FAILED;
-	st->msg = ce->ft->newString(ce, strerror(errno), NULL);
+        st->rc = CMPI_RC_ERR_FAILED;
+        st->msg = ce->ft->newString(ce, strerror(errno), NULL);
       }
       close(sock);
       CONNECT_UNLOCK_RETURN(-1);
@@ -1692,15 +1673,15 @@ localConnect(ClientEnv * ce, CMPIStatus * st)
     rc = spRecvCtlResult(&sock, &sfcbSocket, &idData, &l);
     if (rc < 0 || sfcbSocket <= 0) {
       if (st) {
-	st->rc = CMPI_RC_ERR_FAILED;
-	st->msg =
-	    ce->ft->newString(ce,
-			      "failed to get socket fd for local connect",
-			      NULL);
+        st->rc = CMPI_RC_ERR_FAILED;
+        st->msg =
+            ce->ft->newString(ce,
+                              "failed to get socket fd for local connect",
+                              NULL);
       }
       fprintf(stderr,
-	      "--- Failed to get socket fd for local connect (%d, %d, %lu)\n",
-	      rc, sfcbSocket, l);
+              "--- Failed to get socket fd for local connect (%d, %d, %lu)\n",
+              rc, sfcbSocket, l);
       close(sock);
       CONNECT_UNLOCK_RETURN(-3);
     }
@@ -1716,7 +1697,7 @@ localConnect(ClientEnv * ce, CMPIStatus * st)
 }
 
 static void    *
-release(ClientEnv * ce)
+release(ClientEnv *ce)
 {
   void           *lib = ce->hdl;
   CONNECT_LOCK();
@@ -1732,27 +1713,27 @@ release(ClientEnv * ce)
   return lib;
 }
 
-static Client  *CMPIConnect2(ClientEnv * ce, const char *hn,
-			     const char *scheme, const char *port,
-			     const char *user, const char *pwd,
-			     int verifyMode, const char *trustStore,
-			     const char *certFile, const char *keyFile,
-			     CMPIStatus * rc);
+static Client  *CMPIConnect2(ClientEnv *ce, const char *hn,
+                             const char *scheme, const char *port,
+                             const char *user, const char *pwd,
+                             int verifyMode, const char *trustStore,
+                             const char *certFile, const char *keyFile,
+                             CMPIStatus *rc);
 
 static Client  *
-CMPIConnect(ClientEnv * ce, const char *hn, const char *scheme,
-	    const char *port, const char *user, const char *pwd,
-	    CMPIStatus * rc)
+CMPIConnect(ClientEnv *ce, const char *hn, const char *scheme,
+            const char *port, const char *user, const char *pwd,
+            CMPIStatus *rc)
 {
   return CMPIConnect2(ce, hn, scheme, port, user, pwd, Client_VERIFY_PEER,
-		      NULL, NULL, NULL, rc);
+                      NULL, NULL, NULL, rc);
 }
 
 static Client  *
-CMPIConnect2(ClientEnv * ce, const char *hn, const char *scheme,
-	     const char *port, const char *user, const char *pwd,
-	     int verifyMode, const char *trustStore, const char *certFile,
-	     const char *keyFile, CMPIStatus * rc)
+CMPIConnect2(ClientEnv *ce, const char *hn, const char *scheme,
+             const char *port, const char *user, const char *pwd,
+             int verifyMode, const char *trustStore, const char *certFile,
+             const char *keyFile, CMPIStatus *rc)
 {
   ClientEnc      *cc = (ClientEnc *) calloc(1, sizeof(ClientEnc));
 
@@ -1771,7 +1752,7 @@ CMPIConnect2(ClientEnv * ce, const char *hn, const char *scheme,
     cc->data.port = strdup(port);
   else
     cc->data.port = strcmp(cc->data.scheme, "https") == 0 ?
-	strdup("5989") : strdup("5988");
+        strdup("5989") : strdup("5988");
 
   cc->certData.verifyMode = verifyMode;
   cc->certData.trustStore = trustStore ? strdup(trustStore) : NULL;
@@ -1785,51 +1766,51 @@ CMPIConnect2(ClientEnv * ce, const char *hn, const char *scheme,
 }
 
 static CMPIInstance *
-newInstance(ClientEnv * ce, const CMPIObjectPath * op, CMPIStatus * rc)
+newInstance(ClientEnv *ce, const CMPIObjectPath * op, CMPIStatus *rc)
 {
   return NewCMPIInstance((CMPIObjectPath *) op, rc);
 }
 
 static CMPIString *
-newString(ClientEnv * ce, const char *ptr, CMPIStatus * rc)
+newString(ClientEnv *ce, const char *ptr, CMPIStatus *rc)
 {
   return NewCMPIString(ptr, rc);
 }
 
 static CMPIObjectPath *
-newObjectPath(ClientEnv * ce, const char *ns, const char *cn,
-	      CMPIStatus * rc)
+newObjectPath(ClientEnv *ce, const char *ns, const char *cn,
+              CMPIStatus *rc)
 {
   return NewCMPIObjectPath(ns, cn, rc);
 }
 
 static CMPIArgs *
-newArgs(ClientEnv * ce, CMPIStatus * rc)
+newArgs(ClientEnv *ce, CMPIStatus *rc)
 {
   return NewCMPIArgs(rc);
 }
 
 static CMPIArray *
-newArray(ClientEnv * ce, CMPICount max, CMPIType type, CMPIStatus * rc)
+newArray(ClientEnv *ce, CMPICount max, CMPIType type, CMPIStatus *rc)
 {
   return NewCMPIArray(max, type, rc);
 }
 
 static CMPIDateTime *
-newDateTime(ClientEnv * ce, CMPIStatus * rc)
+newDateTime(ClientEnv *ce, CMPIStatus *rc)
 {
   return NewCMPIDateTime(rc);
 }
 
 static CMPIDateTime *
-newDateTimeFromBinary(ClientEnv * ce, CMPIUint64 binTime,
-		      CMPIBoolean interval, CMPIStatus * rc)
+newDateTimeFromBinary(ClientEnv *ce, CMPIUint64 binTime,
+                      CMPIBoolean interval, CMPIStatus *rc)
 {
   return NewCMPIDateTimeFromBinary(binTime, interval, rc);
 }
 
 static CMPIDateTime *
-newDateTimeFromChars(ClientEnv * ce, const char *utcTime, CMPIStatus * rc)
+newDateTimeFromChars(ClientEnv *ce, const char *utcTime, CMPIStatus *rc)
 {
   return NewCMPIDateTimeFromChars(utcTime, rc);
 }
@@ -1878,12 +1859,10 @@ _Create_SfcbLocal_Env(char *id)
  ************************************************************************************** */
 #ifdef LARGE_VOL_SUPPORT
 
-
-
 static CMPIEnumeration *
 enumInstances(Client * mb,
-	      CMPIObjectPath * cop,
-	      CMPIFlags flags, char **properties, CMPIStatus * rc)
+              CMPIObjectPath * cop,
+              CMPIFlags flags, char **properties, CMPIStatus *rc)
 {
   pthread_t       enumThrdId = 0;
   int             pthrd_error = 0;
@@ -1912,10 +1891,9 @@ enumInstances(Client * mb,
   passedInfo.rc = rc;
 
   pthrd_error = pthread_create(&enumThrdId,
-			       NULL,
-			       (void *) &enumInstancesThrd,
-			       (void *) &passedInfo);
-
+                               NULL,
+                               (void *) &enumInstancesThrd,
+                               (void *) &passedInfo);
 
   /*
    * for now delay here till we see state changed
@@ -1927,7 +1905,7 @@ enumInstances(Client * mb,
     if (timeOut > 1000) {
       pthread_cancel(enumThrdId);
       CIMCSetStatusWithChars(rc, CMPI_RC_ERR_FAILED,
-			     " Failed timeout - EnumState is still ENUM_INIT ");
+                             " Failed timeout - EnumState is still ENUM_INIT ");
       break;
     }
   }
@@ -2011,8 +1989,8 @@ enumInstancesThrd(thrdInfo * passedInInfo)
 
     if (err != 0) {
       if (rc)
-	CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
-			       (char *) resp[err - 1]->object[0].data);
+        CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
+                               (char *) resp[err - 1]->object[0].data);
     }
 
     if (resp)
@@ -2033,7 +2011,7 @@ enumInstancesThrd(thrdInfo * passedInInfo)
  ************************************************************************************* */
 
 static CMPIEnumeration *
-enumInstanceNames(Client * mb, CMPIObjectPath * cop, CMPIStatus * rc)
+enumInstanceNames(Client * mb, CMPIObjectPath * cop, CMPIStatus *rc)
 {
   pthread_t       enumThrdId = 0;
   int             pthrd_error = 0;
@@ -2063,9 +2041,9 @@ enumInstanceNames(Client * mb, CMPIObjectPath * cop, CMPIStatus * rc)
   passedInfo.rc = rc;
 
   pthrd_error = pthread_create(&enumThrdId,
-			       NULL,
-			       (void *) &enumInstanceNamesThrd,
-			       (void *) &passedInfo);
+                               NULL,
+                               (void *) &enumInstanceNamesThrd,
+                               (void *) &passedInfo);
 
   /*
    * for now delay here till we see state changed
@@ -2077,7 +2055,7 @@ enumInstanceNames(Client * mb, CMPIObjectPath * cop, CMPIStatus * rc)
     if (timeOut > 1000) {
       pthread_cancel(enumThrdId);
       CIMCSetStatusWithChars(rc, CMPI_RC_ERR_FAILED,
-			     " Failed timeout - EnumState is still ENUM_INIT ");
+                             " Failed timeout - EnumState is still ENUM_INIT ");
       break;
     }
   }
@@ -2128,7 +2106,6 @@ enumInstanceNamesThrd(thrdInfo * passedInInfo)
   binCtx.largeVolLocal = 1;
   binCtx.enm = enm;
 
-
   _SFCB_TRACE(1, ("--- Getting Provider context"));
   irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
   CMRelease(ns);
@@ -2146,8 +2123,8 @@ enumInstanceNamesThrd(thrdInfo * passedInInfo)
 
     if (err != 0) {
       if (rc)
-	CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
-			       (char *) resp[err - 1]->object[0].data);
+        CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
+                               (char *) resp[err - 1]->object[0].data);
     }
 
     if (resp)
@@ -2165,7 +2142,7 @@ enumInstanceNamesThrd(thrdInfo * passedInInfo)
 
 static CMPIEnumeration *
 enumClassNames(Client * mb,
-	       CMPIObjectPath * cop, CMPIFlags flags, CMPIStatus * rc)
+               CMPIObjectPath * cop, CMPIFlags flags, CMPIStatus *rc)
 {
   pthread_t       enumThrdId = 0;
   int             pthrd_error = 0;
@@ -2195,9 +2172,9 @@ enumClassNames(Client * mb,
   passedInfo.rc = rc;
 
   pthrd_error = pthread_create(&enumThrdId,
-			       NULL,
-			       (void *) &enumClassNamesThrd,
-			       (void *) &passedInfo);
+                               NULL,
+                               (void *) &enumClassNamesThrd,
+                               (void *) &passedInfo);
 
   /*
    * for now delay here till we see state changed
@@ -2208,7 +2185,7 @@ enumClassNames(Client * mb,
     if (timeOut > 1000) {
       pthread_cancel(enumThrdId);
       CIMCSetStatusWithChars(rc, CMPI_RC_ERR_FAILED,
-			     " Failed timeout - EnumState is still ENUM_INIT ");
+                             " Failed timeout - EnumState is still ENUM_INIT ");
       break;
     }
   }
@@ -2216,7 +2193,6 @@ enumClassNames(Client * mb,
   _SFCB_RETURN(enm);
 
 }
-
 
 void           *
 enumClassNamesThrd(thrdInfo * passedInInfo)
@@ -2264,7 +2240,6 @@ enumClassNamesThrd(thrdInfo * passedInInfo)
   binCtx.largeVolLocal = 1;
   binCtx.enm = enm;
 
-
   _SFCB_TRACE(1, ("--- Getting Provider context"));
   irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
 
@@ -2283,8 +2258,8 @@ enumClassNamesThrd(thrdInfo * passedInInfo)
 
     if (err != 0) {
       if (rc)
-	CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
-			       (char *) resp[err - 1]->object[0].data);
+        CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
+                               (char *) resp[err - 1]->object[0].data);
     }
 
     if (resp)
@@ -2300,7 +2275,7 @@ enumClassNamesThrd(thrdInfo * passedInInfo)
 
 static CMPIEnumeration *
 enumClasses(Client * mb,
-	    CMPIObjectPath * cop, CMPIFlags flags, CMPIStatus * rc)
+            CMPIObjectPath * cop, CMPIFlags flags, CMPIStatus *rc)
 {
   pthread_t       enumThrdId = 0;
   int             pthrd_error = 0;
@@ -2330,9 +2305,9 @@ enumClasses(Client * mb,
   passedInfo.rc = rc;
 
   pthrd_error = pthread_create(&enumThrdId,
-			       NULL,
-			       (void *) &enumClassesThrd,
-			       (void *) &passedInfo);
+                               NULL,
+                               (void *) &enumClassesThrd,
+                               (void *) &passedInfo);
 
   /*
    * for now delay here till we see state changed
@@ -2343,7 +2318,7 @@ enumClasses(Client * mb,
     if (timeOut > 1000) {
       pthread_cancel(enumThrdId);
       CIMCSetStatusWithChars(rc, CMPI_RC_ERR_FAILED,
-			     " Failed timeout - EnumState is still ENUM_INIT ");
+                             " Failed timeout - EnumState is still ENUM_INIT ");
       break;
     }
   }
@@ -2368,7 +2343,6 @@ enumClassesThrd(thrdInfo * passedInInfo)
   BinResponseHdr **resp;
   BinRequestContext binCtx;
   OperationHdr    oHdr = { OPS_EnumerateClasses, 0, 2 };
-
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "enumClassesThrd");
 
@@ -2415,8 +2389,8 @@ enumClassesThrd(thrdInfo * passedInInfo)
 
     if (err != 0) {
       if (rc)
-	CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
-			       (char *) resp[err - 1]->object[0].data);
+        CIMCSetStatusWithChars(rc, resp[err - 1]->rc,
+                               (char *) resp[err - 1]->object[0].data);
     }
 
     if (resp)
@@ -2432,3 +2406,8 @@ enumClassesThrd(thrdInfo * passedInInfo)
 }
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

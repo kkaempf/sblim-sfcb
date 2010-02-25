@@ -19,18 +19,16 @@
  *
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <security/pam_appl.h>
 
-
 #define SFCB_PAM_APP "sfcb"
 
 static int
 sfcBasicConv(int num_msg, const struct pam_message **msg,
-	     struct pam_response **resp, void *credentials)
+             struct pam_response **resp, void *credentials)
 {
   if (num_msg == 1 && msg && resp && credentials) {
     /*
@@ -52,7 +50,6 @@ sfcBasicConv(int num_msg, const struct pam_message **msg,
   return PAM_CONV_ERR;
 }
 
-
 static int
 _sfcBasicAuthenticateRemote(char *user, char *pw, char *rhost)
 {
@@ -63,7 +60,6 @@ _sfcBasicAuthenticateRemote(char *user, char *pw, char *rhost)
   pam_handle_t   *pamh = NULL;
   int             rc,
                   retval;
-
 
   rc = pam_start(SFCB_PAM_APP, user, &sfcConvStruct, &pamh);
 
@@ -98,3 +94,8 @@ _sfcBasicAuthenticate(char *user, char *pw)
 {
   return _sfcBasicAuthenticateRemote(user, pw, NULL);
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

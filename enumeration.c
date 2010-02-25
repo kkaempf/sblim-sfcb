@@ -20,14 +20,13 @@
  *
  */
 
-
 #include "native.h"
 #include "sfcbenum.h"
 
 #ifdef LARGE_VOL_SUPPORT
 #include <pthread.h>
 inline static void
-CMSetStatusWithMsg(CMPIStatus * st, CMPIrc rcp, char *string)
+CMSetStatusWithMsg(CMPIStatus *st, CMPIrc rcp, char *string)
 {
   (st)->rc = (rcp);
   (st)->msg = (string);
@@ -41,15 +40,14 @@ static CMPIBoolean __eft_hasNext(const CMPIEnumeration *, CMPIStatus *);
 #define TIMEOUTVALUE2 20000
 #endif
 
-extern void     adjustArrayElementRefCount(CMPIArray * array, int n);
+extern void     adjustArrayElementRefCount(CMPIArray *array, int n);
 static struct native_enum *__new_enumeration(int, CMPIArray *,
-					     CMPIStatus *);
-
+                                             CMPIStatus *);
 
 /*****************************************************************************/
 
 static CMPIStatus
-__eft_release(CMPIEnumeration * enumeration)
+__eft_release(CMPIEnumeration *enumeration)
 {
   struct native_enum *e = (struct native_enum *) enumeration;
 
@@ -64,9 +62,8 @@ __eft_release(CMPIEnumeration * enumeration)
   CMReturn(CMPI_RC_ERR_FAILED);
 }
 
-
 static CMPIEnumeration *
-__eft_clone(const CMPIEnumeration * enumeration, CMPIStatus * rc)
+__eft_clone(const CMPIEnumeration *enumeration, CMPIStatus *rc)
 {
   CMPIStatus      tmp;
   struct native_enum *e = (struct native_enum *) enumeration;
@@ -84,15 +81,14 @@ __eft_clone(const CMPIEnumeration * enumeration, CMPIStatus * rc)
 #ifndef LARGE_VOL_SUPPORT
 
 static CMPIData
-__eft_getNext(const CMPIEnumeration * enumeration, CMPIStatus * rc)
+__eft_getNext(const CMPIEnumeration *enumeration, CMPIStatus *rc)
 {
   struct native_enum *e = (struct native_enum *) enumeration;
   return CMGetArrayElementAt(e->data, e->current++, rc);
 }
 
-
 static CMPIBoolean
-__eft_hasNext(const CMPIEnumeration * enumeration, CMPIStatus * rc)
+__eft_hasNext(const CMPIEnumeration *enumeration, CMPIStatus *rc)
 {
   struct native_enum *e = (struct native_enum *) enumeration;
   return (e->current < CMGetArrayCount(e->data, rc));
@@ -100,7 +96,7 @@ __eft_hasNext(const CMPIEnumeration * enumeration, CMPIStatus * rc)
 #endif
 
 static CMPIArray *
-__eft_toArray(const CMPIEnumeration * enumeration, CMPIStatus * rc)
+__eft_toArray(const CMPIEnumeration *enumeration, CMPIStatus *rc)
 {
   struct native_enum *e = (struct native_enum *) enumeration;
   if (rc)
@@ -118,7 +114,7 @@ static CMPIEnumerationFT eft = {
 };
 
 static struct native_enum *
-__new_enumeration(int mm_add, CMPIArray * array, CMPIStatus * rc)
+__new_enumeration(int mm_add, CMPIArray *array, CMPIStatus *rc)
 {
   static CMPIEnumeration e = {
     "CMPIEnumeration",
@@ -141,12 +137,12 @@ __new_enumeration(int mm_add, CMPIArray * array, CMPIStatus * rc)
   tEnm->last_valid = -1;
   if ((pthread_mutex_init(&tEnm->enumlock, NULL)) != 0) {
     CMSetStatusWithMsg(rc, CMPI_RC_ERR_FAILED,
-		       " Failed pthread mutex init");
+                       " Failed pthread mutex init");
     return NULL;
   }
 #endif
-  tEnm->data =			// (mm_add == MEM_NOT_TRACKED) ?
-				// CMClone(array, rc) : 
+  tEnm->data =                  // (mm_add == MEM_NOT_TRACKED) ?
+      // CMClone(array, rc) : 
       array;
 
   if (rc)
@@ -156,21 +152,20 @@ __new_enumeration(int mm_add, CMPIArray * array, CMPIStatus * rc)
 }
 
 void
-setEnumArray(CMPIEnumeration * enumeration, CMPIArray * array)
+setEnumArray(CMPIEnumeration *enumeration, CMPIArray *array)
 {
   struct native_enum *e = (struct native_enum *) enumeration;
   e->data = array;
 }
 
-
 CMPIEnumeration *
-sfcb_native_new_CMPIEnumeration(CMPIArray * array, CMPIStatus * rc)
+sfcb_native_new_CMPIEnumeration(CMPIArray *array, CMPIStatus *rc)
 {
   return (CMPIEnumeration *) __new_enumeration(MEM_TRACKED, array, rc);
 }
 
 CMPIEnumeration *
-NewCMPIEnumeration(CMPIArray * array, CMPIStatus * rc)
+NewCMPIEnumeration(CMPIArray *array, CMPIStatus *rc)
 {
   return (CMPIEnumeration *) __new_enumeration(MEM_NOT_TRACKED, array, rc);
 }
@@ -189,7 +184,7 @@ NewCMPIEnumeration(CMPIArray * array, CMPIStatus * rc)
  ************************************************************************************** */
 #ifdef LARGE_VOL_SUPPORT
 static CMPIData
-__eft_getNext(const CMPIEnumeration * enumeration, CMPIStatus * rc)
+__eft_getNext(const CMPIEnumeration *enumeration, CMPIStatus *rc)
 {
   CMPIData        retData;
   struct native_enum *e = (struct native_enum *) enumeration;
@@ -200,12 +195,11 @@ __eft_getNext(const CMPIEnumeration * enumeration, CMPIStatus * rc)
   return (retData);
 }
 
-
 static CMPIBoolean
-__eft_hasNext(const CMPIEnumeration * enumeration, CMPIStatus * rc)
+__eft_hasNext(const CMPIEnumeration *enumeration, CMPIStatus *rc)
 {
   struct native_enum *e = (struct native_enum *) enumeration;
-  int             hasNextTO = 0;	/* timeout */
+  int             hasNextTO = 0;        /* timeout */
   int             savelast = 0;
 
   if (!(e->enum_state)) {
@@ -220,8 +214,8 @@ __eft_hasNext(const CMPIEnumeration * enumeration, CMPIStatus * rc)
       usleep(10000);
       hasNextTO++;
       if (hasNextTO > TIMEOUTVALUE) {
-	CMSetStatus(rc, CMPI_RC_ERROR);
-	return (0);
+        CMSetStatus(rc, CMPI_RC_ERROR);
+        return (0);
       }
     }
 
@@ -234,14 +228,14 @@ __eft_hasNext(const CMPIEnumeration * enumeration, CMPIStatus * rc)
     } else {
       hasNextTO = 0;
       while (savelast == e->last_valid) {
-	usleep(1000);
-	hasNextTO++;
-	if (e->enum_state == ENUM_COMPLETE)
-	  break;
-	if (hasNextTO > TIMEOUTVALUE2) {
-	  CMSetStatus(rc, CMPI_RC_ERROR);
-	  return (0);
-	}
+        usleep(1000);
+        hasNextTO++;
+        if (e->enum_state == ENUM_COMPLETE)
+          break;
+        if (hasNextTO > TIMEOUTVALUE2) {
+          CMSetStatus(rc, CMPI_RC_ERROR);
+          return (0);
+        }
       }
       return (e->current < CMGetArrayCount(e->data, rc));
     }
@@ -249,28 +243,28 @@ __eft_hasNext(const CMPIEnumeration * enumeration, CMPIStatus * rc)
 }
 
 void
-setEnumState(CMPIEnumeration * enumeration, int new_state)
+setEnumState(CMPIEnumeration *enumeration, int new_state)
 {
   struct native_enum *e = (struct native_enum *) enumeration;
   e->enum_state = new_state;
 }
 
 int
-getEnumState(CMPIEnumeration * enumeration)
+getEnumState(CMPIEnumeration *enumeration)
 {
   struct native_enum *e = (struct native_enum *) enumeration;
   return e->enum_state;
 }
 
 CMPIArray      *
-getEnumDatap(CMPIEnumeration * enumeration)
+getEnumDatap(CMPIEnumeration *enumeration)
 {
   struct native_enum *e = (struct native_enum *) enumeration;
   return e->data;
 }
 
 void
-enumLock(CMPIEnumeration * enumeration)
+enumLock(CMPIEnumeration *enumeration)
 {
   struct native_enum *e = (struct native_enum *) enumeration;
   pthread_mutex_lock(&e->enumlock);
@@ -278,7 +272,7 @@ enumLock(CMPIEnumeration * enumeration)
 }
 
 void
-enumUnLock(CMPIEnumeration * enumeration)
+enumUnLock(CMPIEnumeration *enumeration)
 {
   struct native_enum *e = (struct native_enum *) enumeration;
   pthread_mutex_unlock(&e->enumlock);
@@ -286,14 +280,14 @@ enumUnLock(CMPIEnumeration * enumeration)
 }
 
 void
-incLastValid(CMPIEnumeration * enumeration)
+incLastValid(CMPIEnumeration *enumeration)
 {
   struct native_enum *e = (struct native_enum *) enumeration;
   e->last_valid++;
 }
 
 int
-getLastValid(CMPIEnumeration * enumeration)
+getLastValid(CMPIEnumeration *enumeration)
 {
   struct native_enum *e = (struct native_enum *) enumeration;
   return (e->last_valid);
@@ -306,3 +300,8 @@ getLastValid(CMPIEnumeration * enumeration)
 /*** mode: C           ***/
 /*** c-basic-offset: 8 ***/
 /*** End:              ***/
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

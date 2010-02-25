@@ -20,7 +20,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,18 +33,17 @@
  * CMPI providers. 
  */
 struct native_datetime {
-  CMPIDateTime    dt;		/* !< the inheriting data structure */
+  CMPIDateTime    dt;           /* !< the inheriting data structure */
   int             refCount;
-  int             mem_state;	/* !< states, whether this object is
-				 * registered within the memory
-				 * mangagement or represents a cloned
-				 * object */
+  int             mem_state;    /* !< states, whether this object is
+                                 * registered within the memory
+                                 * mangagement or represents a cloned
+                                 * object */
   char            cimDt[26];
 };
 
-
 static struct native_datetime *__new_datetime(int state, const char *cimDt,
-					      CMPIStatus * rc);
+                                              CMPIStatus *rc);
 
 /****************************************************************************/
 
@@ -59,7 +57,7 @@ static struct native_datetime *__new_datetime(int state, const char *cimDt,
  * \return CMPI_RC_OK. 
  */
 static CMPIStatus
-__dtft_release(CMPIDateTime * dt)
+__dtft_release(CMPIDateTime *dt)
 {
   struct native_datetime *ndt = (struct native_datetime *) dt;
 
@@ -73,7 +71,6 @@ __dtft_release(CMPIDateTime * dt)
   CMReturn(CMPI_RC_ERR_FAILED);
 }
 
-
 // ! Clones an existing CMPIDateTime object.
 /*
  * ! The function simply calls __new_datetime() with the data fields
@@ -85,7 +82,7 @@ __dtft_release(CMPIDateTime * dt)
  * from memory before calling __dtft_release(). 
  */
 static CMPIDateTime *
-__dtft_clone(const CMPIDateTime * dt, CMPIStatus * rc)
+__dtft_clone(const CMPIDateTime *dt, CMPIStatus *rc)
 {
   struct native_datetime *ndt = (struct native_datetime *) dt;
   struct native_datetime *new =
@@ -93,9 +90,8 @@ __dtft_clone(const CMPIDateTime * dt, CMPIStatus * rc)
   return (CMPIDateTime *) new;
 }
 
-
 CMPIUint64
-chars2bin(const char *string, CMPIStatus * rc)
+chars2bin(const char *string, CMPIStatus *rc)
 {
 /**
  * \brief chars2bin(): Converts a string time to microseconds since epoch.
@@ -120,7 +116,6 @@ chars2bin(const char *string, CMPIStatus * rc)
     // convert it to seconds, and save it
     offset = atoi(str + 21) * 60ULL;
   }
-
 
   str[21] = 0;
   msecs = strtoull(str + 15, NULL, 10);
@@ -164,8 +159,8 @@ chars2bin(const char *string, CMPIStatus * rc)
 }
 
 static void
-bin2chars(CMPIUint64 msecs, CMPIBoolean interval, CMPIStatus * rc,
-	  char *str_time)
+bin2chars(CMPIUint64 msecs, CMPIBoolean interval, CMPIStatus *rc,
+          char *str_time)
 {
 /** /brief bin2chars(): Converts microseconds since epoch to a string time.
  *
@@ -193,7 +188,7 @@ bin2chars(CMPIUint64 msecs, CMPIBoolean interval, CMPIStatus * rc,
     hrs %= 24ULL;
 
     sprintf(str_time, "%8.8llu%2.2llu%2.2llu%2.2llu.%6.6llu:000",
-	    days, hrs, mins, seconds, useconds);
+            days, hrs, mins, seconds, useconds);
   }
 
   else {
@@ -203,14 +198,14 @@ bin2chars(CMPIUint64 msecs, CMPIBoolean interval, CMPIStatus * rc,
     if (localtime_r(&secs, &tm_time) == NULL) {
 
       if (rc)
-	CMSetStatus(rc, CMPI_RC_ERR_FAILED);
+        CMSetStatus(rc, CMPI_RC_ERR_FAILED);
       return;
     }
 
     tzset();
 
     snprintf(us_utc_time, 11, "%6.6ld%+4.3ld",
-	     usecs, (tm_time.tm_isdst != 0) * 60 - timezone / 60);
+             usecs, (tm_time.tm_isdst != 0) * 60 - timezone / 60);
 
     strftime(str_time, 26, "%Y%m%d%H%M%S.", &tm_time);
 
@@ -226,7 +221,7 @@ bin2chars(CMPIUint64 msecs, CMPIBoolean interval, CMPIStatus * rc,
  * \return an amount of microseconds. 
  */
 static CMPIUint64
-__dtft_getBinaryFormat(const CMPIDateTime * dt, CMPIStatus * rc)
+__dtft_getBinaryFormat(const CMPIDateTime *dt, CMPIStatus *rc)
 {
   struct native_datetime *ndt = (struct native_datetime *) dt;
 
@@ -247,7 +242,7 @@ __dtft_getBinaryFormat(const CMPIDateTime * dt, CMPIStatus * rc)
  */
 
 void
-dateTime2chars(CMPIDateTime * dt, CMPIStatus * rc, char *str_time)
+dateTime2chars(CMPIDateTime *dt, CMPIStatus *rc, char *str_time)
 {
   struct native_datetime *ndt = (struct native_datetime *) dt;
 
@@ -257,7 +252,7 @@ dateTime2chars(CMPIDateTime * dt, CMPIStatus * rc, char *str_time)
 }
 
 static CMPIString *
-__dtft_getStringFormat(const CMPIDateTime * dt, CMPIStatus * rc)
+__dtft_getStringFormat(const CMPIDateTime *dt, CMPIStatus *rc)
 {
   struct native_datetime *ndt = (struct native_datetime *) dt;
 
@@ -267,7 +262,7 @@ __dtft_getStringFormat(const CMPIDateTime * dt, CMPIStatus * rc)
 }
 
 static CMPIBoolean
-__dtft_isInterval(const CMPIDateTime * dt, CMPIStatus * rc)
+__dtft_isInterval(const CMPIDateTime *dt, CMPIStatus *rc)
 {
   struct native_datetime *ndt = (struct native_datetime *) dt;
 
@@ -285,7 +280,6 @@ static CMPIDateTimeFT dtft = {
   __dtft_isInterval
 };
 
-
 // ! Creates a new native_datetime object.
 /*
  * ! The newly allocated object's function table is initialized to point
@@ -298,7 +292,7 @@ static CMPIDateTimeFT dtft = {
  * \return a fully initialized native_datetime object pointer. 
  */
 static struct native_datetime *
-__new_datetime(int mm_add, const char *cimDt, CMPIStatus * rc)
+__new_datetime(int mm_add, const char *cimDt, CMPIStatus *rc)
 {
   static CMPIDateTime dt = {
     "CMPIDateTime",
@@ -320,7 +314,6 @@ __new_datetime(int mm_add, const char *cimDt, CMPIStatus * rc)
 
 }
 
-
 // ! Creates a native CMPIDateTime representing the current time.
 /*
  * ! This function calculates the current time and stores it within a new
@@ -331,7 +324,7 @@ __new_datetime(int mm_add, const char *cimDt, CMPIStatus * rc)
  * \return a pointer to a native CMPIDateTime. 
  */
 static CMPIDateTime *
-_new_CMPIDateTime(CMPIStatus * rc, int mm_add)
+_new_CMPIDateTime(CMPIStatus *rc, int mm_add)
 {
   struct timeval  tv;
   struct timezone tz;
@@ -349,17 +342,16 @@ _new_CMPIDateTime(CMPIStatus * rc, int mm_add)
 }
 
 CMPIDateTime   *
-sfcb_native_new_CMPIDateTime(CMPIStatus * rc)
+sfcb_native_new_CMPIDateTime(CMPIStatus *rc)
 {
   return _new_CMPIDateTime(rc, MEM_TRACKED);;
 }
 
 CMPIDateTime   *
-NewCMPIDateTime(CMPIStatus * rc)
+NewCMPIDateTime(CMPIStatus *rc)
 {
   return _new_CMPIDateTime(rc, MEM_NOT_TRACKED);;
 }
-
 
 // ! Creates a native CMPIDateTime given a fixed binary time.
 /*
@@ -375,8 +367,8 @@ NewCMPIDateTime(CMPIStatus * rc)
  */
 static CMPIDateTime *
 _new_CMPIDateTime_fromBinary(CMPIUint64 msecs,
-			     CMPIBoolean interval,
-			     CMPIStatus * rc, int mm_add)
+                             CMPIBoolean interval,
+                             CMPIStatus *rc, int mm_add)
 {
   char            cimDt[26];
   bin2chars(msecs, interval, rc, cimDt);
@@ -385,20 +377,19 @@ _new_CMPIDateTime_fromBinary(CMPIUint64 msecs,
 
 CMPIDateTime   *
 sfcb_native_new_CMPIDateTime_fromBinary(CMPIUint64 msecs,
-					CMPIBoolean interval,
-					CMPIStatus * rc)
+                                        CMPIBoolean interval,
+                                        CMPIStatus *rc)
 {
   return _new_CMPIDateTime_fromBinary(msecs, interval, rc, MEM_TRACKED);
 }
 
 CMPIDateTime   *
 NewCMPIDateTimeFromBinary(CMPIUint64 msecs,
-			  CMPIBoolean interval, CMPIStatus * rc)
+                          CMPIBoolean interval, CMPIStatus *rc)
 {
   return _new_CMPIDateTime_fromBinary(msecs, interval, rc,
-				      MEM_NOT_TRACKED);
+                                      MEM_NOT_TRACKED);
 }
-
 
 // ! Creates a native CMPIDateTime given a fixed time in string
 // representation.
@@ -418,8 +409,7 @@ NewCMPIDateTimeFromBinary(CMPIUint64 msecs,
  * \sa __dtft_getStringFormat() 
  */
 static CMPIDateTime *
-_new_CMPIDateTime_fromChars(const char *string,
-			    CMPIStatus * rc, int mm_add)
+_new_CMPIDateTime_fromChars(const char *string, CMPIStatus *rc, int mm_add)
 {
   if (string == NULL || strlen(string) != 25 ||
       (string[21] != '-' && string[21] != '+' && string[21] != ':')) {
@@ -432,13 +422,13 @@ _new_CMPIDateTime_fromChars(const char *string,
 }
 
 CMPIDateTime   *
-sfcb_native_new_CMPIDateTime_fromChars(const char *string, CMPIStatus * rc)
+sfcb_native_new_CMPIDateTime_fromChars(const char *string, CMPIStatus *rc)
 {
   return _new_CMPIDateTime_fromChars(string, rc, MEM_TRACKED);
 }
 
 CMPIDateTime   *
-NewCMPIDateTimeFromChars(const char *string, CMPIStatus * rc)
+NewCMPIDateTimeFromChars(const char *string, CMPIStatus *rc)
 {
   return _new_CMPIDateTime_fromChars(string, rc, MEM_NOT_TRACKED);
 }
@@ -449,3 +439,8 @@ NewCMPIDateTimeFromChars(const char *string, CMPIStatus * rc)
 /*** mode: C           ***/
 /*** c-basic-offset: 8 ***/
 /*** End:              ***/
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

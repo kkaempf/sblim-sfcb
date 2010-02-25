@@ -38,11 +38,11 @@ typedef enum { REC_VER,
 
 static int      checkargs(int argc, char *argv[]);
 static int      dumpString(const ClObjectHdr * hdr, const ClString * cs,
-			   const char *prefix);
+                           const char *prefix);
 static int      dumpStringBuffer(const ClObjectHdr * hdr,
-				 const char *prefix);
+                                 const char *prefix);
 static int      dumpArrayBuffer(const ClObjectHdr * hdr,
-				const char *prefix);
+                                const char *prefix);
 
 static int      dumpProperties(const ClClass * cls, const char *prefix);
 static int      dumpQualifiers(const ClClass * cls, const char *prefix);
@@ -67,136 +67,136 @@ main(int argc, char *argv[])
       DUMP_STATE      state = REC_VER;
       DUMP_STATE      fillState = REC_QUIT;
       int             numRead = 0,
-	  numFill = 0;
+          numFill = 0;
       void           *fillBuf = NULL;
       ClVersionRecord clv;
       ClObjectHdr     coh,
                      *clob;
       ClClass        *cls;
       do {
-	switch (state) {
-	case REC_VER:
-	  if (read(fdSchema, &clv, sizeof(ClVersionRecord)) !=
-	      sizeof(ClVersionRecord)) {
-	    rc = 1;
-	    fprintf(stderr, "%s: version record error, short record\n",
-		    SCHEMA_NAME);
-	    state = REC_QUIT;
-	  } else if (clv.size != sizeof(ClVersionRecord)) {
-	    rc = 1;
-	    fprintf(stderr,
-		    "%s: version record size mismatch, is %d expected %zd\n",
-		    SCHEMA_NAME, clv.size, sizeof(ClVersionRecord));
-	    state = REC_QUIT;
-	  } else {
-	    printf("%s: Size of version record: %d, version: %hx\n",
-		   SCHEMA_NAME, clv.size, clv.version);
-	    printf("%s: Repository type: %hx\n", SCHEMA_NAME, clv.options);
-	    state = REC_HDR;
-	  }
-	  break;
-	case REC_HDR:
-	  numRead = read(fdSchema, &coh, sizeof(ClObjectHdr));
-	  if (numRead == 0) {
-	    state = REC_QUIT;	/* regular end */
-	  } else if (numRead != sizeof(ClObjectHdr)) {
-	    rc = 1;
-	    fprintf(stderr, "%s: header record error, short record\n",
-		    SCHEMA_NAME);
-	    state = REC_QUIT;
-	  } else if (coh.size < sizeof(ClObjectHdr)) {
-	    rc = 1;
-	    fprintf(stderr,
-		    "%s: header record size mismatch, is %d expected at least %zd\n",
-		    SCHEMA_NAME, coh.size, sizeof(ClObjectHdr));
-	    state = REC_QUIT;
-	  } else {
-	    printf("%s: Header size: %d, type: %hx\n",
-		   SCHEMA_NAME, coh.size, coh.type);
-	    switch (coh.type) {
-	    case HDR_Class:
-	      numFill = coh.size - sizeof(ClObjectHdr);
-	      fillState = REC_CLS;
-	      state = REC_FILL;
-	      break;
-	    case HDR_IncompleteClass:
-	      numFill = coh.size - sizeof(ClObjectHdr);
-	      fillState = REC_CLS;
-	      state = REC_FILL;
-	      break;
-	    default:
-	      fillState = REC_ANY;
-	      state = REC_FILL;
-	      break;
-	    }
-	  }
-	  break;
-	case REC_CLS:
-	  cls = (ClClass *) fillBuf;
-	  printf("== Class Record\n");
-	  rc = dumpString(&cls->hdr, &cls->name, "   Class name: ");
-	  if (rc == 0) {
-	    rc = dumpString(&cls->hdr, &cls->parent, "   Parent name: ");
-	  }
-	  if (rc == 0) {
-	    rc = dumpStringBuffer(&cls->hdr, "   ");
-	  }
-	  if (rc == 0) {
-	    rc = dumpArrayBuffer(&cls->hdr, "   ");
-	  }
-	  if (rc == 0) {
-	    rc = dumpQualifiers(cls, "   ");
-	  }
-	  if (rc == 0) {
-	    rc = dumpProperties(cls, "   ");
-	  }
-	  if (rc == 0) {
-	    rc = dumpMethods(cls, "   ");
-	  }
-	  if (rc == 0) {
-	    state = REC_HDR;
-	  } else {
-	    state = REC_QUIT;
-	  }
-	  break;
-	case REC_ANY:
-	  clob = (ClObjectHdr *) fillBuf;
-	  printf("== Unspecified Record Type %d\n", clob->type);
-	  if (rc == 0) {
-	    rc = dumpStringBuffer(clob, "   ");
-	  }
-	  if (rc == 0) {
-	    rc = dumpArrayBuffer(clob, "   ");
-	  }
-	  if (rc == 0) {
-	    state = REC_HDR;
-	  } else {
-	    state = REC_QUIT;
-	  }
-	  break;
-	case REC_FILL:
-	  fillBuf = realloc(fillBuf, numFill + sizeof(ClObjectHdr));
-	  memcpy(fillBuf, &coh, sizeof(ClObjectHdr));
-	  if ((numRead =
-	       read(fdSchema, fillBuf + sizeof(ClObjectHdr),
-		    numFill)) != numFill) {
-	    rc = 1;
-	    fprintf(stderr,
-		    "%s: structure record short, is %zd expected %zd\n",
-		    SCHEMA_NAME, numRead + sizeof(ClObjectHdr),
-		    numFill + sizeof(ClObjectHdr));
-	    state = REC_QUIT;
-	  } else {
-	    state = fillState;
-	  }
-	  break;
-	case REC_QUIT:
-	  close(fdSchema);
-	  break;
-	}
+        switch (state) {
+        case REC_VER:
+          if (read(fdSchema, &clv, sizeof(ClVersionRecord)) !=
+              sizeof(ClVersionRecord)) {
+            rc = 1;
+            fprintf(stderr, "%s: version record error, short record\n",
+                    SCHEMA_NAME);
+            state = REC_QUIT;
+          } else if (clv.size != sizeof(ClVersionRecord)) {
+            rc = 1;
+            fprintf(stderr,
+                    "%s: version record size mismatch, is %d expected %zd\n",
+                    SCHEMA_NAME, clv.size, sizeof(ClVersionRecord));
+            state = REC_QUIT;
+          } else {
+            printf("%s: Size of version record: %d, version: %hx\n",
+                   SCHEMA_NAME, clv.size, clv.version);
+            printf("%s: Repository type: %hx\n", SCHEMA_NAME, clv.options);
+            state = REC_HDR;
+          }
+          break;
+        case REC_HDR:
+          numRead = read(fdSchema, &coh, sizeof(ClObjectHdr));
+          if (numRead == 0) {
+            state = REC_QUIT;   /* regular end */
+          } else if (numRead != sizeof(ClObjectHdr)) {
+            rc = 1;
+            fprintf(stderr, "%s: header record error, short record\n",
+                    SCHEMA_NAME);
+            state = REC_QUIT;
+          } else if (coh.size < sizeof(ClObjectHdr)) {
+            rc = 1;
+            fprintf(stderr,
+                    "%s: header record size mismatch, is %d expected at least %zd\n",
+                    SCHEMA_NAME, coh.size, sizeof(ClObjectHdr));
+            state = REC_QUIT;
+          } else {
+            printf("%s: Header size: %d, type: %hx\n",
+                   SCHEMA_NAME, coh.size, coh.type);
+            switch (coh.type) {
+            case HDR_Class:
+              numFill = coh.size - sizeof(ClObjectHdr);
+              fillState = REC_CLS;
+              state = REC_FILL;
+              break;
+            case HDR_IncompleteClass:
+              numFill = coh.size - sizeof(ClObjectHdr);
+              fillState = REC_CLS;
+              state = REC_FILL;
+              break;
+            default:
+              fillState = REC_ANY;
+              state = REC_FILL;
+              break;
+            }
+          }
+          break;
+        case REC_CLS:
+          cls = (ClClass *) fillBuf;
+          printf("== Class Record\n");
+          rc = dumpString(&cls->hdr, &cls->name, "   Class name: ");
+          if (rc == 0) {
+            rc = dumpString(&cls->hdr, &cls->parent, "   Parent name: ");
+          }
+          if (rc == 0) {
+            rc = dumpStringBuffer(&cls->hdr, "   ");
+          }
+          if (rc == 0) {
+            rc = dumpArrayBuffer(&cls->hdr, "   ");
+          }
+          if (rc == 0) {
+            rc = dumpQualifiers(cls, "   ");
+          }
+          if (rc == 0) {
+            rc = dumpProperties(cls, "   ");
+          }
+          if (rc == 0) {
+            rc = dumpMethods(cls, "   ");
+          }
+          if (rc == 0) {
+            state = REC_HDR;
+          } else {
+            state = REC_QUIT;
+          }
+          break;
+        case REC_ANY:
+          clob = (ClObjectHdr *) fillBuf;
+          printf("== Unspecified Record Type %d\n", clob->type);
+          if (rc == 0) {
+            rc = dumpStringBuffer(clob, "   ");
+          }
+          if (rc == 0) {
+            rc = dumpArrayBuffer(clob, "   ");
+          }
+          if (rc == 0) {
+            state = REC_HDR;
+          } else {
+            state = REC_QUIT;
+          }
+          break;
+        case REC_FILL:
+          fillBuf = realloc(fillBuf, numFill + sizeof(ClObjectHdr));
+          memcpy(fillBuf, &coh, sizeof(ClObjectHdr));
+          if ((numRead =
+               read(fdSchema, fillBuf + sizeof(ClObjectHdr),
+                    numFill)) != numFill) {
+            rc = 1;
+            fprintf(stderr,
+                    "%s: structure record short, is %zd expected %zd\n",
+                    SCHEMA_NAME, numRead + sizeof(ClObjectHdr),
+                    numFill + sizeof(ClObjectHdr));
+            state = REC_QUIT;
+          } else {
+            state = fillState;
+          }
+          break;
+        case REC_QUIT:
+          close(fdSchema);
+          break;
+        }
       } while (state != REC_QUIT);
       if (fillBuf) {
-	free(fillBuf);
+        free(fillBuf);
       }
     }
   }
@@ -263,7 +263,7 @@ checkargs(int argc, char *argv[])
 
 static int
 dumpString(const ClObjectHdr * hdr, const ClString * cs,
-	   const char *prefix)
+           const char *prefix)
 {
   /*
    * check offset range 
@@ -278,23 +278,23 @@ dumpString(const ClObjectHdr * hdr, const ClString * cs,
       printf("%s NULL\n", prefix);
     } else if (cs->id > 0 && cs->id <= sb->iMax) {
       if (index[cs->id - 1] >= 0 &&
-	  (index[cs->id - 1] + abs(hdr->strBufOffset)) < hdr->size) {
-	printf("%s \"%s\"\n", prefix,
-	       (char *) sb + offsetof(ClStrBuf, buf) + index[cs->id - 1]);
+          (index[cs->id - 1] + abs(hdr->strBufOffset)) < hdr->size) {
+        printf("%s \"%s\"\n", prefix,
+               (char *) sb + offsetof(ClStrBuf, buf) + index[cs->id - 1]);
       } else {
-	fprintf(stderr, "%s string index value %d out of range (0..%d)\n",
-		prefix, index[cs->id - 1],
-		hdr->size - abs(hdr->strBufOffset));
-	rc = 2;
+        fprintf(stderr, "%s string index value %d out of range (0..%d)\n",
+                prefix, index[cs->id - 1],
+                hdr->size - abs(hdr->strBufOffset));
+        rc = 2;
       }
     } else {
       fprintf(stderr, "%s string index key %ld out of range (0..%d) \n",
-	      prefix, cs->id, sb->iMax);
+              prefix, cs->id, sb->iMax);
       rc = 2;
     }
   } else {
     fprintf(stderr, "%s invalid string buffer offset %d, must be < %d\n",
-	    prefix, abs(hdr->strBufOffset), hdr->size);
+            prefix, abs(hdr->strBufOffset), hdr->size);
     rc = 2;
   }
   return rc;
@@ -317,20 +317,20 @@ dumpStringBuffer(const ClObjectHdr * hdr, const char *prefix)
     index = (void *) hdr + abs(sb->indexOffset);
     if ((sb->iUsed * sizeof(int) + abs(hdr->strBufOffset)) <= hdr->size) {
       printf("%s * String buffer contains %d of maximum %d strings\n",
-	     prefix, sb->iUsed, sb->iMax);
+             prefix, sb->iUsed, sb->iMax);
       if (detail_stringbuf) {
-	for (i = 0; i < sb->iUsed; i++) {
-	  printf("%s sb[%3d]=\"%s\"\n", prefix, i, sb->buf + index[i]);
-	}
+        for (i = 0; i < sb->iUsed; i++) {
+          printf("%s sb[%3d]=\"%s\"\n", prefix, i, sb->buf + index[i]);
+        }
       }
     } else {
       fprintf(stderr, "%s to many stringbuffer index entries %d\n",
-	      prefix, sb->iUsed);
+              prefix, sb->iUsed);
       rc = 2;
     }
   } else {
     fprintf(stderr, "%s invalid string buffer offset %d, must be < %d\n",
-	    prefix, abs(hdr->strBufOffset), hdr->size);
+            prefix, abs(hdr->strBufOffset), hdr->size);
     rc = 2;
   }
   return rc;
@@ -353,23 +353,23 @@ dumpArrayBuffer(const ClObjectHdr * hdr, const char *prefix)
     index = (void *) hdr + abs(ab->indexOffset);
     if ((ab->iUsed * sizeof(int) + abs(hdr->arrayBufOffset)) <= hdr->size) {
       printf("%s * Array buffer contains %d of maximum %d values\n",
-	     prefix, ab->iUsed, ab->iMax);
+             prefix, ab->iUsed, ab->iMax);
       if (detail_arraybuf) {
-	for (i = 0; i < ab->iUsed; i++) {
-	  printf("%s ab[%3d]=(%hx,%hx,%016llx)\n", prefix, i,
-		 ab->buf[index[i]].type, ab->buf[index[i]].state,
-		 ab->buf[index[i]].value.uint64);
-	}
+        for (i = 0; i < ab->iUsed; i++) {
+          printf("%s ab[%3d]=(%hx,%hx,%016llx)\n", prefix, i,
+                 ab->buf[index[i]].type, ab->buf[index[i]].state,
+                 ab->buf[index[i]].value.uint64);
+        }
       }
     } else {
       fprintf(stderr, "%s to many array buffer index entries %d\n",
-	      prefix, ab->iUsed);
+              prefix, ab->iUsed);
       rc = 2;
     }
   } else {
     fprintf(stderr, "%s invalid array buffer offset %d, must be < %zd\n",
-	    prefix, abs(hdr->arrayBufOffset),
-	    hdr->size + sizeof(ClArrayBuf));
+            prefix, abs(hdr->arrayBufOffset),
+            hdr->size + sizeof(ClArrayBuf));
     rc = 2;
   }
   return rc;
@@ -390,33 +390,33 @@ dumpProperties(const ClClass * cls, const char *prefix)
   } else if (abs(cls->properties.sectionOffset) <= cls->hdr.size) {
     cp = (void *) cls + abs(cls->properties.sectionOffset);
     if ((cls->properties.used * sizeof(ClProperty) +
-	 abs(cls->properties.sectionOffset))
-	<= cls->hdr.size) {
+         abs(cls->properties.sectionOffset))
+        <= cls->hdr.size) {
       printf
-	  ("%s * Property section contains %d properties of maximum %d\n",
-	   prefix, cls->properties.used, cls->properties.max);
+          ("%s * Property section contains %d properties of maximum %d\n",
+           prefix, cls->properties.used, cls->properties.max);
       if (detail_properties) {
-	prefixbuf =
-	    malloc(strlen(prefix) + strlen(" -- Property[999]:") + 2);
-	if (prefixbuf == NULL) {
-	  fprintf(stderr, "out of memory\n");
-	  return 1;
-	}
-	for (i = 0; i < cls->properties.used; i++) {
-	  sprintf(prefixbuf, "%s -- Property[%3d]:", prefix, i);
-	  dumpString(&cls->hdr, &cp[i].id, prefixbuf);
-	}
-	free(prefixbuf);
+        prefixbuf =
+            malloc(strlen(prefix) + strlen(" -- Property[999]:") + 2);
+        if (prefixbuf == NULL) {
+          fprintf(stderr, "out of memory\n");
+          return 1;
+        }
+        for (i = 0; i < cls->properties.used; i++) {
+          sprintf(prefixbuf, "%s -- Property[%3d]:", prefix, i);
+          dumpString(&cls->hdr, &cp[i].id, prefixbuf);
+        }
+        free(prefixbuf);
       }
     } else {
       fprintf(stderr, "%s to many property entries %d\n",
-	      prefix, cls->properties.used);
+              prefix, cls->properties.used);
       rc = 2;
     }
   } else {
     fprintf(stderr,
-	    "%s invalid property section offset %d, must be < %d\n",
-	    prefix, abs(cls->properties.sectionOffset), cls->hdr.size);
+            "%s invalid property section offset %d, must be < %d\n",
+            prefix, abs(cls->properties.sectionOffset), cls->hdr.size);
     rc = 2;
   }
   return rc;
@@ -437,33 +437,33 @@ dumpQualifiers(const ClClass * cls, const char *prefix)
   } else if (abs(cls->qualifiers.sectionOffset) <= cls->hdr.size) {
     cq = (void *) cls + abs(cls->qualifiers.sectionOffset);
     if ((cls->qualifiers.used * sizeof(ClQualifier) +
-	 abs(cls->qualifiers.sectionOffset))
-	<= cls->hdr.size) {
+         abs(cls->qualifiers.sectionOffset))
+        <= cls->hdr.size) {
       printf
-	  ("%s * Qualifier section contains %d qualifiers of maximum %d\n",
-	   prefix, cls->qualifiers.used, cls->qualifiers.max);
+          ("%s * Qualifier section contains %d qualifiers of maximum %d\n",
+           prefix, cls->qualifiers.used, cls->qualifiers.max);
       if (detail_qualifiers) {
-	prefixbuf =
-	    malloc(strlen(prefix) + strlen(" -- Qualifier[999]:") + 2);
-	if (prefixbuf == NULL) {
-	  fprintf(stderr, "out of memory\n");
-	  return 1;
-	}
-	for (i = 0; i < cls->qualifiers.used; i++) {
-	  sprintf(prefixbuf, "%s -- Qualifier[%3d]:", prefix, i);
-	  dumpString(&cls->hdr, &cq[i].id, prefixbuf);
-	}
-	free(prefixbuf);
+        prefixbuf =
+            malloc(strlen(prefix) + strlen(" -- Qualifier[999]:") + 2);
+        if (prefixbuf == NULL) {
+          fprintf(stderr, "out of memory\n");
+          return 1;
+        }
+        for (i = 0; i < cls->qualifiers.used; i++) {
+          sprintf(prefixbuf, "%s -- Qualifier[%3d]:", prefix, i);
+          dumpString(&cls->hdr, &cq[i].id, prefixbuf);
+        }
+        free(prefixbuf);
       }
     } else {
       fprintf(stderr, "%s to many qualifier entries %d\n",
-	      prefix, cls->qualifiers.used);
+              prefix, cls->qualifiers.used);
       rc = 2;
     }
   } else {
     fprintf(stderr,
-	    "%s invalid qualifier section offset %d, must be < %d\n",
-	    prefix, abs(cls->qualifiers.sectionOffset), cls->hdr.size);
+            "%s invalid qualifier section offset %d, must be < %d\n",
+            prefix, abs(cls->qualifiers.sectionOffset), cls->hdr.size);
     rc = 2;
   }
   return rc;
@@ -484,32 +484,37 @@ dumpMethods(const ClClass * cls, const char *prefix)
   } else if (abs(cls->methods.sectionOffset) <= cls->hdr.size) {
     cm = (void *) cls + abs(cls->methods.sectionOffset);
     if ((cls->methods.used * sizeof(ClMethod) +
-	 abs(cls->methods.sectionOffset))
-	<= cls->hdr.size) {
+         abs(cls->methods.sectionOffset))
+        <= cls->hdr.size) {
       printf("%s * Method section contains %d methods of maximum %d\n",
-	     prefix, cls->methods.used, cls->methods.max);
+             prefix, cls->methods.used, cls->methods.max);
       if (detail_methods) {
-	prefixbuf =
-	    malloc(strlen(prefix) + strlen(" -- Method[999]:") + 2);
-	if (prefixbuf == NULL) {
-	  fprintf(stderr, "out of memory\n");
-	  return 1;
-	}
-	for (i = 0; i < cls->methods.used; i++) {
-	  sprintf(prefixbuf, "%s -- Method[%3d]:", prefix, i);
-	  dumpString(&cls->hdr, &cm[i].id, prefixbuf);
-	}
-	free(prefixbuf);
+        prefixbuf =
+            malloc(strlen(prefix) + strlen(" -- Method[999]:") + 2);
+        if (prefixbuf == NULL) {
+          fprintf(stderr, "out of memory\n");
+          return 1;
+        }
+        for (i = 0; i < cls->methods.used; i++) {
+          sprintf(prefixbuf, "%s -- Method[%3d]:", prefix, i);
+          dumpString(&cls->hdr, &cm[i].id, prefixbuf);
+        }
+        free(prefixbuf);
       }
     } else {
       fprintf(stderr, "%s to many method entries %d\n",
-	      prefix, cls->methods.used);
+              prefix, cls->methods.used);
       rc = 2;
     }
   } else {
     fprintf(stderr, "%s invalid method section offset %d, must be < %d\n",
-	    prefix, abs(cls->methods.sectionOffset), cls->hdr.size);
+            prefix, abs(cls->methods.sectionOffset), cls->hdr.size);
     rc = 2;
   }
   return rc;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

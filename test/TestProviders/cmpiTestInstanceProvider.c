@@ -17,7 +17,6 @@ static CMPI_MUTEX_TYPE threadCntMutex;
 
 #define _ClassName "Sample_Instance"
 
-
 // Threads
 
 static CMPI_THREAD_RETURN CMPI_THREAD_CDECL
@@ -97,8 +96,6 @@ deleteThreads()
   _broker->xft->destroyCondition(_cond);
 }
 
-
-
 static void
 initialize()
 {
@@ -148,7 +145,7 @@ initialize()
      * assign the created instance to array created 
      */
     rc = CMSetArrayElementAt(arr_ptr,
-			     numOfInst, &value_inst1, CMPI_instance);
+                             numOfInst, &value_inst1, CMPI_instance);
     /*
      * set the validity of instance to be true. Validity gets false if
      * instance gets deleted using deleteInstance(). 
@@ -171,7 +168,7 @@ initialize()
     CMSetProperty(instance2, "Message", &value2, CMPI_string);
     value_inst2.inst = instance2;
     rc = CMSetArrayElementAt(arr_ptr,
-			     numOfInst, &value_inst2, CMPI_instance);
+                             numOfInst, &value_inst2, CMPI_instance);
     valid[numOfInst] = 1;
     numOfInst++;
   }
@@ -190,7 +187,7 @@ initialize()
     CMSetProperty(instance3, "Message", &value2, CMPI_string);
     value_inst2.inst = instance3;
     rc = CMSetArrayElementAt(arr_ptr,
-			     numOfInst, &value_inst2, CMPI_instance);
+                             numOfInst, &value_inst2, CMPI_instance);
     valid[numOfInst] = 1;
     numOfInst++;
   }
@@ -202,7 +199,7 @@ initialize()
 
 CMPIStatus
 TestInstanceProviderCleanup(CMPIInstanceMI * mi,
-			    const CMPIContext * ctx, CMPIBoolean term)
+                            const CMPIContext *ctx, CMPIBoolean term)
 {
   CMRelease(clone_arr_ptr);
   deleteThreads();
@@ -215,9 +212,9 @@ TestInstanceProviderCleanup(CMPIInstanceMI * mi,
 */
 CMPIStatus
 TestInstanceProviderEnumInstanceNames(CMPIInstanceMI * mi,
-				      const CMPIContext * ctx,
-				      const CMPIResult * rslt,
-				      const CMPIObjectPath * ref)
+                                      const CMPIContext *ctx,
+                                      const CMPIResult *rslt,
+                                      const CMPIObjectPath * ref)
 {
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   unsigned int    j = 0;
@@ -254,10 +251,10 @@ TestInstanceProviderEnumInstanceNames(CMPIInstanceMI * mi,
 */
 CMPIStatus
 TestInstanceProviderEnumInstances(CMPIInstanceMI * mi,
-				  const CMPIContext * ctx,
-				  const CMPIResult * rslt,
-				  const CMPIObjectPath * op,
-				  const char **properties)
+                                  const CMPIContext *ctx,
+                                  const CMPIResult *rslt,
+                                  const CMPIObjectPath * op,
+                                  const char **properties)
 {
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   unsigned int    j = 0;
@@ -289,10 +286,10 @@ TestInstanceProviderEnumInstances(CMPIInstanceMI * mi,
 */
 CMPIStatus
 TestInstanceProviderGetInstance(CMPIInstanceMI * mi,
-				const CMPIContext * ctx,
-				const CMPIResult * rslt,
-				const CMPIObjectPath * op,
-				const char **properties)
+                                const CMPIContext *ctx,
+                                const CMPIResult *rslt,
+                                const CMPIObjectPath * op,
+                                const char **properties)
 {
   CMPIData        data,
                   key1,
@@ -332,8 +329,8 @@ TestInstanceProviderGetInstance(CMPIInstanceMI * mi,
        * compare key values. If they match return instance 
        */
       if (key1.value.uint8 == key2.value.uint8) {
-	CMReturnInstance(rslt, data.value.inst);
-	flag = 1;
+        CMReturnInstance(rslt, data.value.inst);
+        flag = 1;
       }
     }
   }
@@ -352,10 +349,10 @@ TestInstanceProviderGetInstance(CMPIInstanceMI * mi,
 */
 CMPIStatus
 TestInstanceProviderCreateInstance(CMPIInstanceMI * mi,
-				   const CMPIContext * ctx,
-				   const CMPIResult * rslt,
-				   const CMPIObjectPath * cop,
-				   const CMPIInstance * ci)
+                                   const CMPIContext *ctx,
+                                   const CMPIResult *rslt,
+                                   const CMPIObjectPath * cop,
+                                   const CMPIInstance *ci)
 {
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   CMPIInstance   *inst;
@@ -376,25 +373,25 @@ TestInstanceProviderCreateInstance(CMPIInstanceMI * mi,
        * check for validity of Instance, that its not deleted 
        */
       if (valid[j] == 1) {
-	/*
-	 * get element(instance) from array 
-	 */
-	retInst = CMGetArrayElementAt(clone_arr_ptr, j, &rc);
-	/*
-	 * get object-path of instance 
-	 */
-	obp = CMGetObjectPath(retInst.value.inst, &rc);
-	/*
-	 * get key from this object-path 
-	 */
-	key2 = CMGetKey(obp, "Identifier", &rc);
-	/*
-	 * compare key values. If they match throw exception as two
-	 * instance with same key properties cannot exists. 
-	 */
-	if (key1.value.uint8 == key2.value.uint8) {
-	  CMReturn(CMPI_RC_ERR_ALREADY_EXISTS);
-	}
+        /*
+         * get element(instance) from array 
+         */
+        retInst = CMGetArrayElementAt(clone_arr_ptr, j, &rc);
+        /*
+         * get object-path of instance 
+         */
+        obp = CMGetObjectPath(retInst.value.inst, &rc);
+        /*
+         * get key from this object-path 
+         */
+        key2 = CMGetKey(obp, "Identifier", &rc);
+        /*
+         * compare key values. If they match throw exception as two
+         * instance with same key properties cannot exists. 
+         */
+        if (key1.value.uint8 == key2.value.uint8) {
+          CMReturn(CMPI_RC_ERR_ALREADY_EXISTS);
+        }
       }
     }
     value_inst.inst = inst;
@@ -402,7 +399,7 @@ TestInstanceProviderCreateInstance(CMPIInstanceMI * mi,
      * If instance doesnot exists in array add it 
      */
     rc = CMSetArrayElementAt(clone_arr_ptr,
-			     numOfInst, &value_inst, CMPI_instance);
+                             numOfInst, &value_inst, CMPI_instance);
     valid[numOfInst] = 1;
     numOfInst++;
     /*
@@ -421,11 +418,11 @@ TestInstanceProviderCreateInstance(CMPIInstanceMI * mi,
 */
 CMPIStatus
 TestInstanceProviderModifyInstance(CMPIInstanceMI * mi,
-				   const CMPIContext * ctx,
-				   const CMPIResult * rslt,
-				   const CMPIObjectPath * cop,
-				   const CMPIInstance * ci,
-				   const char **properties)
+                                   const CMPIContext *ctx,
+                                   const CMPIResult *rslt,
+                                   const CMPIObjectPath * cop,
+                                   const CMPIInstance *ci,
+                                   const char **properties)
 {
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   CMPIInstance   *inst;
@@ -455,26 +452,26 @@ TestInstanceProviderModifyInstance(CMPIInstanceMI * mi,
        * check for validity of Instance, that its not deleted 
        */
       if (valid[j] == 1) {
-	/*
-	 * get element(instance) from array 
-	 */
-	retInst = CMGetArrayElementAt(clone_arr_ptr, j, &rc);
-	/*
-	 * get object-path of instance 
-	 */
-	obp = CMGetObjectPath(retInst.value.inst, &rc);
-	/*
-	 * get key from this object-path 
-	 */
-	key2 = CMGetKey(obp, "Identifier", &rc);
-	/*
-	 * compare key values. If they match then set the properties
-	 * received from client 
-	 */
-	if (key1.value.uint8 == key2.value.uint8) {
-	  CMSetProperty(retInst.value.inst, "Message", &val2, CMPI_string);
-	  flag = 1;
-	}
+        /*
+         * get element(instance) from array 
+         */
+        retInst = CMGetArrayElementAt(clone_arr_ptr, j, &rc);
+        /*
+         * get object-path of instance 
+         */
+        obp = CMGetObjectPath(retInst.value.inst, &rc);
+        /*
+         * get key from this object-path 
+         */
+        key2 = CMGetKey(obp, "Identifier", &rc);
+        /*
+         * compare key values. If they match then set the properties
+         * received from client 
+         */
+        if (key1.value.uint8 == key2.value.uint8) {
+          CMSetProperty(retInst.value.inst, "Message", &val2, CMPI_string);
+          flag = 1;
+        }
       }
     }
     CMRelease(inst);
@@ -492,9 +489,9 @@ TestInstanceProviderModifyInstance(CMPIInstanceMI * mi,
 
 CMPIStatus
 TestInstanceProviderDeleteInstance(CMPIInstanceMI * mi,
-				   const CMPIContext * ctx,
-				   const CMPIResult * result,
-				   const CMPIObjectPath * cop)
+                                   const CMPIContext *ctx,
+                                   const CMPIResult *result,
+                                   const CMPIObjectPath * cop)
 {
 
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
@@ -533,13 +530,13 @@ TestInstanceProviderDeleteInstance(CMPIInstanceMI * mi,
        * Also set its validity to zero, marking it as deleted 
        */
       if (key1.value.uint8 == key2.value.uint8) {
-	if (retInst.value.inst) {
-	  flag = 1;
-	  CMRelease(retInst.value.inst);
-	  CMSetArrayElementAt(clone_arr_ptr,
-			      j, &retInst.value.inst, CMPI_null);
-	  valid[j] = 0;
-	}
+        if (retInst.value.inst) {
+          flag = 1;
+          CMRelease(retInst.value.inst);
+          CMSetArrayElementAt(clone_arr_ptr,
+                              j, &retInst.value.inst, CMPI_null);
+          valid[j] = 0;
+        }
       }
     }
   }
@@ -551,10 +548,10 @@ TestInstanceProviderDeleteInstance(CMPIInstanceMI * mi,
 
 CMPIStatus
 TestInstanceProviderExecQuery(CMPIInstanceMI * mi,
-			      const CMPIContext * ctx,
-			      const CMPIResult * rslt,
-			      const CMPIObjectPath * referencePath,
-			      const char *query, const char *lang)
+                              const CMPIContext *ctx,
+                              const CMPIResult *rslt,
+                              const CMPIObjectPath * referencePath,
+                              const char *query, const char *lang)
 {
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   CMPIStatus      rc_Eval = { CMPI_RC_OK, NULL };
@@ -586,73 +583,73 @@ TestInstanceProviderExecQuery(CMPIInstanceMI * mi,
        * check for validity of Instance,that its not deleted 
        */
       if (valid[j] == 1) {
-	/*
-	 * get the element from array 
-	 */
-	arr_data = CMGetArrayElementAt(clone_arr_ptr, j, &rc);
-	/*
-	 * Evaluate the instance using this select expression 
-	 */
-	evalRes = CMEvaluateSelExp(se_def, arr_data.value.inst, &rc_Eval);
-	if (evalRes) {
-	  /*
-	   * check if any of properties are requested 
-	   */
-	  if (projection) {
-	    /*
-	     * get number of properties requested 
-	     */
-	    cnt = CMGetArrayCount(projection, &rc_Array);
-	    /*
-	     * if count is not equal to number of properties of instance 
-	     */
-	    if (cnt == 1) {
-	      /*
-	       * check for the properties, requested 
-	       */
-	      data = CMGetArrayElementAt(projection, 0, &rc_Array);
-	      prop_name = CMGetCharsPtr(data.value.string, &rc);
-	      /*
-	       * create the new instance that has to be returned 
-	       */
-	      cop1 = CMNewObjectPath(_broker,
-				     "root/cimv2", _ClassName, &rc);
+        /*
+         * get the element from array 
+         */
+        arr_data = CMGetArrayElementAt(clone_arr_ptr, j, &rc);
+        /*
+         * Evaluate the instance using this select expression 
+         */
+        evalRes = CMEvaluateSelExp(se_def, arr_data.value.inst, &rc_Eval);
+        if (evalRes) {
+          /*
+           * check if any of properties are requested 
+           */
+          if (projection) {
+            /*
+             * get number of properties requested 
+             */
+            cnt = CMGetArrayCount(projection, &rc_Array);
+            /*
+             * if count is not equal to number of properties of instance 
+             */
+            if (cnt == 1) {
+              /*
+               * check for the properties, requested 
+               */
+              data = CMGetArrayElementAt(projection, 0, &rc_Array);
+              prop_name = CMGetCharsPtr(data.value.string, &rc);
+              /*
+               * create the new instance that has to be returned 
+               */
+              cop1 = CMNewObjectPath(_broker,
+                                     "root/cimv2", _ClassName, &rc);
 
-	      instance1 = CMNewInstance(_broker, cop1, &rc);
+              instance1 = CMNewInstance(_broker, cop1, &rc);
 
-	      /*
-	       * if property name is "Identifier", gets its value from
-	       * instance 
-	       */
-	      if (!strcmp(prop_name, "Identifier")) {
-		retProp = CMGetProperty(arr_data.value.inst,
-					"Identifier", &rc);
-		value1.uint8 = retProp.value.uint8;
-		CMSetProperty(instance1,
-			      "Identifier",
-			      (CMPIValue *) & value1, CMPI_uint8);
-	      }
-	      /*
-	       * if property name is "Message", gets its value from
-	       * instance 
-	       */
-	      if (!strcmp(prop_name, "Message")) {
-		retProp = CMGetProperty(arr_data.value.inst,
-					"Message", &rc);
-		value1.string = retProp.value.string;
-		CMSetProperty(instance1,
-			      "Message",
-			      (CMPIValue *) & value1, CMPI_string);
-	      }
-	      /*
-	       * if the query is evaluated return instance 
-	       */
-	      CMReturnInstance(rslt, instance1);
-	    }
-	  } else {
-	    CMReturnInstance(rslt, arr_data.value.inst);
-	  }
-	}
+              /*
+               * if property name is "Identifier", gets its value from
+               * instance 
+               */
+              if (!strcmp(prop_name, "Identifier")) {
+                retProp = CMGetProperty(arr_data.value.inst,
+                                        "Identifier", &rc);
+                value1.uint8 = retProp.value.uint8;
+                CMSetProperty(instance1,
+                              "Identifier",
+                              (CMPIValue *) & value1, CMPI_uint8);
+              }
+              /*
+               * if property name is "Message", gets its value from
+               * instance 
+               */
+              if (!strcmp(prop_name, "Message")) {
+                retProp = CMGetProperty(arr_data.value.inst,
+                                        "Message", &rc);
+                value1.string = retProp.value.string;
+                CMSetProperty(instance1,
+                              "Message",
+                              (CMPIValue *) & value1, CMPI_string);
+              }
+              /*
+               * if the query is evaluated return instance 
+               */
+              CMReturnInstance(rslt, instance1);
+            }
+          } else {
+            CMReturnInstance(rslt, arr_data.value.inst);
+          }
+        }
       }
     }
   }
@@ -660,7 +657,6 @@ TestInstanceProviderExecQuery(CMPIInstanceMI * mi,
   CMReturnDone(rslt);
   CMReturn(CMPI_RC_OK);
 }
-
 
 /*
  * ---------------------------------------------------------------------------
@@ -672,12 +668,10 @@ TestInstanceProviderExecQuery(CMPIInstanceMI * mi,
  * ---------------------------------------------------------------------------
  */
 
-
 /*
  * CMInstanceMIStub( TestInstanceProvider, TestInstanceProvider, _broker,
  * initialize()) 
  */
-
 
 static CMPIInstanceMIFT instMIFT__ =
     { 100, 100, "instance" "TestCMPIThreadProvider",
@@ -692,8 +686,8 @@ static CMPIInstanceMIFT instMIFT__ =
 };
 CMPI_EXTERN_C CMPIInstanceMI *
 TestInstanceProvider_Create_InstanceMI(const CMPIBroker * brkr,
-				       const CMPIContext * ctx,
-				       CMPIStatus * rc)
+                                       const CMPIContext *ctx,
+                                       CMPIStatus *rc)
 {
   static CMPIInstanceMI mi = { ((void *) 0), &instMIFT__, };
   _broker = brkr;
@@ -711,3 +705,8 @@ TestInstanceProvider_Create_InstanceMI(const CMPIBroker * brkr,
 /*
  * ---------------------------------------------------------------------------
  */
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

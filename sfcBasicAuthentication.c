@@ -19,7 +19,6 @@
  *
  */
 
-
 #include <stdio.h>
 #include <string.h>
 
@@ -33,3 +32,8 @@ _sfcBasicAuthenticate(char *user, char *pw)
    * (strcmp(user,"REJECT")==0) return 0; return 1; 
    */
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

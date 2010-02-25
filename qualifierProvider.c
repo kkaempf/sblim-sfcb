@@ -29,19 +29,16 @@
 
 #include "trace.h"
 
-
-
 #include "providerRegister.h"
 #include "fileRepository.h"
 static char    *interopNs = "root/interop";
 static char    *pg_interopNs = "root/pg_interop";
-static char    *qualrep = "qualifiers";	// filename of qualifier
-					// repository
+static char    *qualrep = "qualifiers"; // filename of qualifier
+                                        // repository
 extern ProviderInfo *interOpProvInfoPtr;
 extern ProviderInfo *forceNoProvInfoPtr;
 
 static const CMPIBroker *_broker;
-
 
 /*
  * 
@@ -59,13 +56,13 @@ repositoryNs(const char *nss)
   }
 }
 static int
-testNameSpace(const char *ns, CMPIStatus * st)
+testNameSpace(const char *ns, CMPIStatus *st)
 {
   if (interOpProvInfoPtr == forceNoProvInfoPtr) {
     if (strcasecmp(ns, interopNs) == 0) {
       st->msg =
-	  sfcb_native_new_CMPIString("Interop namespace disabled", NULL,
-				     0);
+          sfcb_native_new_CMPIString("Interop namespace disabled", NULL,
+                                     0);
       st->rc = CMPI_RC_ERR_FAILED;
       return 0;
     }
@@ -86,7 +83,7 @@ testNameSpace(const char *ns, CMPIStatus * st)
  */
 
 static CMPIStatus
-QualifierProviderCleanup(CMPIQualifierDeclMI * mi, CMPIContext * ctx)
+QualifierProviderCleanup(CMPIQualifierDeclMI * mi, CMPIContext *ctx)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   return st;
@@ -94,16 +91,16 @@ QualifierProviderCleanup(CMPIQualifierDeclMI * mi, CMPIContext * ctx)
 
 static CMPIStatus
 QualifierProviderGetQualifier(CMPIQualifierDeclMI * mi,
-			      CMPIContext * ctx,
-			      CMPIResult * rslt, CMPIObjectPath * cop)
+                              CMPIContext *ctx,
+                              CMPIResult *rslt, CMPIObjectPath * cop)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIQualifierDecl *q;
   int             len;
-  CMPIString     *qn = CMGetClassName(cop, NULL);	// qualifier name
-							// - abused
-							// classname to
-							// hold it
+  CMPIString     *qn = CMGetClassName(cop, NULL);       // qualifier name
+  // - abused
+  // classname to
+  // hold it
   CMPIString     *ns = CMGetNameSpace(cop, NULL);
   void           *blob;
   const char     *nss = ns->ft->getCharPtr(ns, NULL);
@@ -141,10 +138,10 @@ QualifierProviderGetQualifier(CMPIQualifierDeclMI * mi,
 
 static CMPIStatus
 QualifierProviderSetQualifier(CMPIQualifierDeclMI * mi,
-			      CMPIContext * ctx,
-			      CMPIResult * rslt,
-			      CMPIObjectPath * cop,
-			      CMPIQualifierDecl * qual)
+                              CMPIContext *ctx,
+                              CMPIResult *rslt,
+                              CMPIObjectPath * cop,
+                              CMPIQualifierDecl * qual)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   unsigned long   len;
@@ -174,8 +171,8 @@ QualifierProviderSetQualifier(CMPIQualifierDeclMI * mi,
   if (addBlob(bnss, qualrep, qns, blob, (int) len)) {
     CMPIStatus      st = { CMPI_RC_ERR_FAILED, NULL };
     st.msg =
-	sfcb_native_new_CMPIString("Unable to write to repository", NULL,
-				   0);
+        sfcb_native_new_CMPIString("Unable to write to repository", NULL,
+                                   0);
     free(blob);
     _SFCB_RETURN(st);
   }
@@ -185,8 +182,8 @@ QualifierProviderSetQualifier(CMPIQualifierDeclMI * mi,
 
 static CMPIStatus
 QualifierProviderDeleteQualifier(CMPIQualifierDeclMI * mi,
-				 CMPIContext * ctx,
-				 CMPIResult * rslt, CMPIObjectPath * cop)
+                                 CMPIContext *ctx,
+                                 CMPIResult *rslt, CMPIObjectPath * cop)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIString     *qn = CMGetClassName(cop, NULL);
@@ -215,8 +212,8 @@ QualifierProviderDeleteQualifier(CMPIQualifierDeclMI * mi,
 
 static CMPIStatus
 QualifierProviderEnumQualifiers(CMPIQualifierDeclMI * mi,
-				CMPIContext * ctx,
-				CMPIResult * rslt, CMPIObjectPath * ref)
+                                CMPIContext *ctx,
+                                CMPIResult *rslt, CMPIObjectPath * ref)
 {
   CMPIString     *ns = CMGetNameSpace(ref, NULL);
   const char     *nss = ns->ft->getCharPtr(ns, NULL);
@@ -236,7 +233,7 @@ QualifierProviderEnumQualifiers(CMPIQualifierDeclMI * mi,
   // why 64 ? copied it from _getIndex from InternalProvider
   if (getIndex(bnss, qualrep, strlen(bnss) + strlen(qualrep) + 64, 0, &bi)) {
     for (blob = getFirst(bi, &len, NULL, 0); blob;
-	 blob = getNext(bi, &len, NULL, 0)) {
+         blob = getNext(bi, &len, NULL, 0)) {
       q = relocateSerializedQualifier(blob);
       _SFCB_TRACE(1, ("--- returning qualifier %p", q));
 
@@ -255,4 +252,9 @@ QualifierProviderEnumQualifiers(CMPIQualifierDeclMI * mi,
 }
 
 CMQualifierDeclMIStub(QualifierProvider, QualifierProvider, _broker,
-		      CMNoHook);
+                      CMNoHook);
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

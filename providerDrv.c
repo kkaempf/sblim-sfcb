@@ -55,7 +55,6 @@
 
 char           *opsName[];
 
-
 #ifdef SFCB_DEBUG
 
 #define TIMING_PREP \
@@ -104,7 +103,7 @@ extern ProviderInfo *classProvInfoPtr;
 
 extern void     processProviderInvocationRequests(char *);
 extern CMPIObjectPath *relocateSerializedObjectPath(void *area);
-extern MsgSegment setInstanceMsgSegment(CMPIInstance * op);
+extern MsgSegment setInstanceMsgSegment(CMPIInstance *op);
 extern MsgSegment setArgsMsgSegment(CMPIArgs * args);
 extern MsgSegment setConstClassMsgSegment(CMPIConstClass * cl);
 extern void     getSerializedConstClass(CMPIConstClass * cl, void *area);
@@ -117,23 +116,22 @@ extern MsgSegment setArgsMsgSegment(CMPIArgs * args);
 extern void     dump(char *msg, void *a, int l);
 extern void     showClHdr(void *ihdr);
 extern ProvIds  getProvIds(ProviderInfo * info);
-extern int      xferLastResultBuffer(CMPIResult * result, int to, int rc);
-extern void     setResultQueryFilter(CMPIResult * result,
-				     QLStatement * qs);
+extern int      xferLastResultBuffer(CMPIResult *result, int to, int rc);
+extern void     setResultQueryFilter(CMPIResult *result, QLStatement * qs);
 extern CMPIArray *getKeyListAndVerifyPropertyList(CMPIObjectPath *,
-						  char **props, int *ok,
-						  CMPIStatus * rc);
+                                                  char **props, int *ok,
+                                                  CMPIStatus *rc);
 extern void     dumpTiming(int pid);
 static BinResponseHdr *errorCharsResp(int rc, char *msg);
 static int      sendResponse(int requestor, BinResponseHdr * hdr);
 
 extern CMPISelectExp *NewCMPISelectExp(const char *queryString,
-				       const char *language,
-				       const char *sns,
-				       CMPIArray ** projection,
-				       CMPIStatus * rc);
+                                       const char *language,
+                                       const char *sns,
+                                       CMPIArray **projection,
+                                       CMPIStatus *rc);
 NativeSelectExp *activFilters = NULL;
-extern void     setStatus(CMPIStatus * st, CMPIrc rc, char *msg);
+extern void     setStatus(CMPIStatus *st, CMPIrc rc, char *msg);
 
 static ProviderProcess *provProc = NULL,
     *curProvProc = NULL;
@@ -153,7 +151,6 @@ extern void     uninitSocketPairs();
 extern void     sunsetControl();
 extern void     uninitGarbageCollector();
 
-
 typedef struct parms {
   int             requestor;
   BinRequestHdr  *req;
@@ -167,7 +164,8 @@ static Parms   *activeThreadsFirst = NULL,
 /*
  * old version support 
  */
-typedef         CMPIStatus(*authorizeFilterPreV1)
+typedef CMPIStatus (*authorizeFilterPreV1)
+
  
     
     
@@ -183,30 +181,12 @@ typedef         CMPIStatus(*authorizeFilterPreV1)
     
     
     
-    (CMPIIndicationMI * mi, const CMPIContext * ctx, CMPIResult * result,
-     const CMPISelectExp * se, const char *ns, const CMPIObjectPath * op,
+    (CMPIIndicationMI * mi, const CMPIContext *ctx, CMPIResult *result,
+     const CMPISelectExp *se, const char *ns, const CMPIObjectPath * op,
      const char *user);
 
-typedef         CMPIStatus(*mustPollPreV1)
- 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    (CMPIIndicationMI * mi, const CMPIContext * ctx, CMPIResult * result,
-     const CMPISelectExp * se, const char *ns, const CMPIObjectPath * op);
+typedef CMPIStatus (*mustPollPreV1)
 
-typedef         CMPIStatus(*activateFilterPreV1)
  
     
     
@@ -222,11 +202,32 @@ typedef         CMPIStatus(*activateFilterPreV1)
     
     
     
-    (CMPIIndicationMI * mi, const CMPIContext * ctx, CMPIResult * result,
-     const CMPISelectExp * se, const char *ns, const CMPIObjectPath * op,
+    (CMPIIndicationMI * mi, const CMPIContext *ctx, CMPIResult *result,
+     const CMPISelectExp *se, const char *ns, const CMPIObjectPath * op);
+
+typedef CMPIStatus (*activateFilterPreV1)
+
+ 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    (CMPIIndicationMI * mi, const CMPIContext *ctx, CMPIResult *result,
+     const CMPISelectExp *se, const char *ns, const CMPIObjectPath * op,
      CMPIBoolean first);
 
-typedef         CMPIStatus(*deActivateFilterPreV1)
+typedef CMPIStatus (*deActivateFilterPreV1)
+
  
     
     
@@ -242,14 +243,13 @@ typedef         CMPIStatus(*deActivateFilterPreV1)
     
     
     
-    (CMPIIndicationMI * mi, const CMPIContext * ctx, CMPIResult * result,
-     const CMPISelectExp * se, const char *ns, const CMPIObjectPath * op,
+    (CMPIIndicationMI * mi, const CMPIContext *ctx, CMPIResult *result,
+     const CMPISelectExp *se, const char *ns, const CMPIObjectPath * op,
      CMPIBoolean last);
-
 
 void
 libraryName(const char *dir, const char *location, char *fullName,
-	    int buf_size)
+            int buf_size)
 {
 #if defined(CMPI_PLATFORM_WIN32_IX86_MSVC)
   if (dir) {
@@ -356,18 +356,18 @@ stopProc(void *p)
   for (pInfo = activProvs; pInfo; pInfo = pInfo->next) {
     for (temp = activProvs; temp; temp = temp->next) {
       if ((strcmp(temp->providerName, pInfo->providerName) == 0)
-	  && (strcmp(temp->className, pInfo->className) != 0))
-	break;
+          && (strcmp(temp->className, pInfo->className) != 0))
+        break;
       if (pInfo->classMI)
-	pInfo->classMI->ft->cleanup(pInfo->classMI, ctx);
+        pInfo->classMI->ft->cleanup(pInfo->classMI, ctx);
       if (pInfo->instanceMI)
-	pInfo->instanceMI->ft->cleanup(pInfo->instanceMI, ctx, 1);
+        pInfo->instanceMI->ft->cleanup(pInfo->instanceMI, ctx, 1);
       if (pInfo->associationMI)
-	pInfo->associationMI->ft->cleanup(pInfo->associationMI, ctx, 1);
+        pInfo->associationMI->ft->cleanup(pInfo->associationMI, ctx, 1);
       if (pInfo->methodMI)
-	pInfo->methodMI->ft->cleanup(pInfo->methodMI, ctx, 1);
+        pInfo->methodMI->ft->cleanup(pInfo->methodMI, ctx, 1);
       if (pInfo->indicationMI)
-	pInfo->indicationMI->ft->cleanup(pInfo->indicationMI, ctx, 1);
+        pInfo->indicationMI->ft->cleanup(pInfo->indicationMI, ctx, 1);
       // dlclose(pInfo->library);
     }
   }
@@ -383,7 +383,6 @@ stopProc(void *p)
   exit(0);
 }
 
-
 static void
 handleSigSegv(int sig)
 {
@@ -392,12 +391,12 @@ handleSigSegv(int sig)
   BinResponseHdr *resp;
 
   mlogf(M_ERROR, M_SHOW,
-	"-#- %s - %d provider exiting due to a SIGSEGV signal\n",
-	processName, currentProc);
+        "-#- %s - %d provider exiting due to a SIGSEGV signal\n",
+        processName, currentProc);
   while (threads) {
     snprintf(msg, 1023,
-	     "*** Provider %s(%d) exiting due to a SIGSEGV signal",
-	     threads->pInfo->providerName, currentProc);
+             "*** Provider %s(%d) exiting due to a SIGSEGV signal",
+             threads->pInfo->providerName, currentProc);
     resp = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
     sendResponse(threads->requestor, resp);
     threads = threads->next;
@@ -416,8 +415,6 @@ handleSigUsr1(int sig)
   pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
   pthread_create(&t, &tattr, (void *(*)(void *)) stopProc, NULL);
 }
-
-
 
 /*
  * ------------- --- Provider Loading support --- ------------- 
@@ -469,8 +466,8 @@ providerIdleThread()
     idleTime.tv_nsec = 0;
 
     _SFCB_TRACE(1,
-		("--- providerIdleThread cycle restarted %d",
-		 currentProc));
+                ("--- providerIdleThread cycle restarted %d",
+                 currentProc));
     pthread_mutex_lock(&idleMtx);
     rc = pthread_cond_timedwait(&idleCnd, &idleMtx, &idleTime);
     if (stopping)
@@ -483,70 +480,70 @@ providerIdleThread()
       crc.rc = 0;
       noBreak = 1;
       if (pInfo) {
-	proc = curProvProc;
-	if (proc) {
-	  semAcquireUnDo(sfcbSem, PROV_GUARD(proc->id));
-	  if ((val = semGetValue(sfcbSem, PROV_INUSE(proc->id))) == 0) {
-	    if ((now - proc->lastActivity) > provTimeoutInterval) {
-	      ctx = native_new_CMPIContext(MEM_TRACKED, NULL);
-	      noBreak = 0;
-	      for (crc.rc = 0, pInfo = activProvs; pInfo;
-		   pInfo = pInfo->next) {
-		for (temp = activProvs; temp; temp = temp->next) {
-		  if ((strcmp(temp->providerName, pInfo->providerName) ==
-		       0)
-		      && (strcmp(temp->className, pInfo->className) != 0))
-		    break;
-		  if (pInfo->library == NULL)
-		    continue;
-		  if (pInfo->indicationMI != NULL)
-		    continue;
-		  if (crc.rc == 0 && pInfo->instanceMI)
-		    crc =
-			pInfo->instanceMI->ft->cleanup(pInfo->instanceMI,
-						       ctx, 0);
-		  if (crc.rc == 0 && pInfo->associationMI)
-		    crc =
-			pInfo->associationMI->ft->cleanup(pInfo->
-							  associationMI,
-							  ctx, 0);
-		  if (crc.rc == 0 && pInfo->methodMI)
-		    crc =
-			pInfo->methodMI->ft->cleanup(pInfo->methodMI, ctx,
-						     0);
-		  _SFCB_TRACE(1,
-			      ("--- Cleanup rc: %d %s-%d", crc.rc,
-			       processName, currentProc));
-		  if (crc.rc == CMPI_RC_NEVER_UNLOAD)
-		    doNotExit = 1;
-		  if (crc.rc == CMPI_RC_DO_NOT_UNLOAD)
-		    doNotExit = noBreak = 1;
-		  if (crc.rc == 0) {
-		    _SFCB_TRACE(1,
-				("--- Unloading provider %s-%d",
-				 pInfo->providerName, currentProc));
-		    dlclose(pInfo->library);
-		    pInfo->library = NULL;
-		    pInfo->instanceMI = NULL;
-		    pInfo->associationMI = NULL;
-		    pInfo->methodMI = NULL;
-		    pInfo->initialized = 0;
-		    pthread_mutex_destroy(&pInfo->initMtx);
-		  } else
-		    doNotExit = 1;
-		}
-	      }
-	      if (doNotExit == 0) {
-		dumpTiming(currentProc);
-		_SFCB_TRACE(1,
-			    ("--- Exiting %s-%d", processName,
-			     currentProc));
-		exit(0);
-	      }
-	    }
-	  }
-	  semRelease(sfcbSem, PROV_GUARD(proc->id));
-	}
+        proc = curProvProc;
+        if (proc) {
+          semAcquireUnDo(sfcbSem, PROV_GUARD(proc->id));
+          if ((val = semGetValue(sfcbSem, PROV_INUSE(proc->id))) == 0) {
+            if ((now - proc->lastActivity) > provTimeoutInterval) {
+              ctx = native_new_CMPIContext(MEM_TRACKED, NULL);
+              noBreak = 0;
+              for (crc.rc = 0, pInfo = activProvs; pInfo;
+                   pInfo = pInfo->next) {
+                for (temp = activProvs; temp; temp = temp->next) {
+                  if ((strcmp(temp->providerName, pInfo->providerName) ==
+                       0)
+                      && (strcmp(temp->className, pInfo->className) != 0))
+                    break;
+                  if (pInfo->library == NULL)
+                    continue;
+                  if (pInfo->indicationMI != NULL)
+                    continue;
+                  if (crc.rc == 0 && pInfo->instanceMI)
+                    crc =
+                        pInfo->instanceMI->ft->cleanup(pInfo->instanceMI,
+                                                       ctx, 0);
+                  if (crc.rc == 0 && pInfo->associationMI)
+                    crc =
+                        pInfo->associationMI->ft->cleanup(pInfo->
+                                                          associationMI,
+                                                          ctx, 0);
+                  if (crc.rc == 0 && pInfo->methodMI)
+                    crc =
+                        pInfo->methodMI->ft->cleanup(pInfo->methodMI, ctx,
+                                                     0);
+                  _SFCB_TRACE(1,
+                              ("--- Cleanup rc: %d %s-%d", crc.rc,
+                               processName, currentProc));
+                  if (crc.rc == CMPI_RC_NEVER_UNLOAD)
+                    doNotExit = 1;
+                  if (crc.rc == CMPI_RC_DO_NOT_UNLOAD)
+                    doNotExit = noBreak = 1;
+                  if (crc.rc == 0) {
+                    _SFCB_TRACE(1,
+                                ("--- Unloading provider %s-%d",
+                                 pInfo->providerName, currentProc));
+                    dlclose(pInfo->library);
+                    pInfo->library = NULL;
+                    pInfo->instanceMI = NULL;
+                    pInfo->associationMI = NULL;
+                    pInfo->methodMI = NULL;
+                    pInfo->initialized = 0;
+                    pthread_mutex_destroy(&pInfo->initMtx);
+                  } else
+                    doNotExit = 1;
+                }
+              }
+              if (doNotExit == 0) {
+                dumpTiming(currentProc);
+                _SFCB_TRACE(1,
+                            ("--- Exiting %s-%d", processName,
+                             currentProc));
+                exit(0);
+              }
+            }
+          }
+          semRelease(sfcbSem, PROV_GUARD(proc->id));
+        }
       }
     }
     pthread_mutex_unlock(&idleMtx);
@@ -554,23 +551,22 @@ providerIdleThread()
       break;
   }
   _SFCB_TRACE(1,
-	      ("--- Stopping idle-monitoring due to provider request %s-%d",
-	       processName, currentProc));
+              ("--- Stopping idle-monitoring due to provider request %s-%d",
+               processName, currentProc));
 
   _SFCB_RETURN(NULL);
 }
 
-
 static CMPIStatus
-getInstanceMI(ProviderInfo * info, CMPIInstanceMI ** mi, CMPIContext * ctx)
+getInstanceMI(ProviderInfo * info, CMPIInstanceMI ** mi, CMPIContext *ctx)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getInstanceMI");
 
   if (info->instanceMI == NULL)
     info->instanceMI =
-	loadInstanceMI(info->providerName, info->library, Broker, ctx,
-		       &st);
+        loadInstanceMI(info->providerName, info->library, Broker, ctx,
+                       &st);
   if (info->instanceMI == NULL && st.rc == CMPI_RC_OK) {
     st.rc = CMPI_RC_ERR_FAILED;
   } else {
@@ -581,15 +577,15 @@ getInstanceMI(ProviderInfo * info, CMPIInstanceMI ** mi, CMPIContext * ctx)
 
 static CMPIStatus
 getAssociationMI(ProviderInfo * info, CMPIAssociationMI ** mi,
-		 CMPIContext * ctx)
+                 CMPIContext *ctx)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getAssociationMI");
 
   if (info->associationMI == NULL)
     info->associationMI =
-	loadAssociationMI(info->providerName, info->library, Broker, ctx,
-			  &st);
+        loadAssociationMI(info->providerName, info->library, Broker, ctx,
+                          &st);
   if (info->associationMI == NULL && st.rc == CMPI_RC_OK) {
     st.rc = CMPI_RC_ERR_FAILED;
   } else {
@@ -600,15 +596,15 @@ getAssociationMI(ProviderInfo * info, CMPIAssociationMI ** mi,
 
 static CMPIStatus
 getIndicationMI(ProviderInfo * info, CMPIIndicationMI ** mi,
-		CMPIContext * ctx)
+                CMPIContext *ctx)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getIndicationMI");
 
   if (info->indicationMI == NULL)
     info->indicationMI =
-	loadIndicationMI(info->providerName, info->library, Broker, ctx,
-			 &st);
+        loadIndicationMI(info->providerName, info->library, Broker, ctx,
+                         &st);
   if (info->indicationMI == NULL && st.rc == CMPI_RC_OK) {
     st.rc = CMPI_RC_ERR_FAILED;
   } else {
@@ -618,14 +614,14 @@ getIndicationMI(ProviderInfo * info, CMPIIndicationMI ** mi,
 }
 
 static CMPIStatus
-getMethodMI(ProviderInfo * info, CMPIMethodMI ** mi, CMPIContext * ctx)
+getMethodMI(ProviderInfo * info, CMPIMethodMI ** mi, CMPIContext *ctx)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getMethodMI");
 
   if (info->methodMI == NULL)
     info->methodMI =
-	loadMethodMI(info->providerName, info->library, Broker, ctx, &st);
+        loadMethodMI(info->providerName, info->library, Broker, ctx, &st);
   if (info->methodMI == NULL && st.rc == CMPI_RC_OK) {
     st.rc = CMPI_RC_ERR_FAILED;
   } else {
@@ -635,14 +631,14 @@ getMethodMI(ProviderInfo * info, CMPIMethodMI ** mi, CMPIContext * ctx)
 }
 
 static CMPIStatus
-getClassMI(ProviderInfo * info, CMPIClassMI ** mi, CMPIContext * ctx)
+getClassMI(ProviderInfo * info, CMPIClassMI ** mi, CMPIContext *ctx)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getClassMI");
 
   if (info->classMI == NULL)
     info->classMI =
-	loadClassMI(info->providerName, info->library, Broker, ctx, &st);
+        loadClassMI(info->providerName, info->library, Broker, ctx, &st);
   if (info->classMI == NULL && st.rc == CMPI_RC_OK) {
     st.rc = CMPI_RC_ERR_FAILED;
   } else {
@@ -652,15 +648,15 @@ getClassMI(ProviderInfo * info, CMPIClassMI ** mi, CMPIContext * ctx)
 }
 
 static CMPIStatus
-getPropertyMI(ProviderInfo * info, CMPIPropertyMI ** mi, CMPIContext * ctx)
+getPropertyMI(ProviderInfo * info, CMPIPropertyMI ** mi, CMPIContext *ctx)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getPropertyMI");
 
   if (info->propertyMI == NULL)
     info->propertyMI =
-	loadPropertyMI(info->providerName, info->library, Broker, ctx,
-		       &st);
+        loadPropertyMI(info->providerName, info->library, Broker, ctx,
+                       &st);
   if (info->propertyMI == NULL && st.rc == CMPI_RC_OK) {
     st.rc = CMPI_RC_ERR_FAILED;
   } else {
@@ -672,15 +668,15 @@ getPropertyMI(ProviderInfo * info, CMPIPropertyMI ** mi, CMPIContext * ctx)
 #ifdef HAVE_QUALREP
 static CMPIStatus
 getQualifierDeclMI(ProviderInfo * info, CMPIQualifierDeclMI ** mi,
-		   CMPIContext * ctx)
+                   CMPIContext *ctx)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getQualiferMI");
 
   if (info->qualifierDeclMI == NULL)
     info->qualifierDeclMI =
-	loadQualifierDeclMI(info->providerName, info->library, Broker, ctx,
-			    &st);
+        loadQualifierDeclMI(info->providerName, info->library, Broker, ctx,
+                            &st);
   if (info->qualifierDeclMI == NULL && st.rc == CMPI_RC_OK) {
     st.rc = CMPI_RC_ERR_FAILED;
   } else {
@@ -689,7 +685,6 @@ getQualifierDeclMI(ProviderInfo * info, CMPIQualifierDeclMI ** mi,
   _SFCB_RETURN(st);
 }
 #endif
-
 
 /*
  * see if we're under the max allowed number of loaded providers. if so,
@@ -715,26 +710,26 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
   if (info->group) {
     for (i = 0; i < provProcMax; i++) {
       if ((provProc + i) && provProc[i].pid &&
-	  provProc[i].group
-	  && strcmp(provProc[i].group, info->group) == 0) {
-	semAcquire(sfcbSem, PROV_GUARD(provProc[i].id));
-	semRelease(sfcbSem, PROV_INUSE(provProc[i].id));
-	semRelease(sfcbSem, PROV_GUARD(provProc[i].id));
-	info->pid = provProc[i].pid;
-	info->providerSockets = provProc[i].providerSockets;
-	_SFCB_TRACE(1,
-		    ("--- Process %d shared by %s and %s", provProc[i].pid,
-		     info->providerName,
-		     provProc[i].firstProv->providerName));
-	if (provProc[i].firstProv)
-	  info->next = provProc[i].firstProv;
-	else
-	  info->next = NULL;
-	provProc[i].firstProv = info;
-	info->proc = provProc + i;
-	if (info->unload < provProc[i].unload)
-	  provProc[i].unload = info->unload;
-	_SFCB_RETURN(provProc[i].pid);
+          provProc[i].group
+          && strcmp(provProc[i].group, info->group) == 0) {
+        semAcquire(sfcbSem, PROV_GUARD(provProc[i].id));
+        semRelease(sfcbSem, PROV_INUSE(provProc[i].id));
+        semRelease(sfcbSem, PROV_GUARD(provProc[i].id));
+        info->pid = provProc[i].pid;
+        info->providerSockets = provProc[i].providerSockets;
+        _SFCB_TRACE(1,
+                    ("--- Process %d shared by %s and %s", provProc[i].pid,
+                     info->providerName,
+                     provProc[i].firstProv->providerName));
+        if (provProc[i].firstProv)
+          info->next = provProc[i].firstProv;
+        else
+          info->next = NULL;
+        provProc[i].firstProv = info;
+        info->proc = provProc + i;
+        if (info->unload < provProc[i].unload)
+          provProc[i].unload = info->unload;
+        _SFCB_RETURN(provProc[i].pid);
       }
     }
   }
@@ -754,62 +749,62 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
       (*proc)->pid = info->pid = fork();
 
       if (info->pid < 0) {
-	perror("provider fork");
-	_SFCB_ABORT();
+        perror("provider fork");
+        _SFCB_ABORT();
       }
 
       if (info->pid == 0) {
 
-	currentProc = getpid();
-	setSignal(SIGCHLD, SIG_DFL, 0);
-	setSignal(SIGTERM, SIG_IGN, 0);
-	setSignal(SIGHUP, SIG_IGN, 0);
-	setSignal(SIGUSR1, handleSigUsr1, 0);
+        currentProc = getpid();
+        setSignal(SIGCHLD, SIG_DFL, 0);
+        setSignal(SIGTERM, SIG_IGN, 0);
+        setSignal(SIGHUP, SIG_IGN, 0);
+        setSignal(SIGUSR1, handleSigUsr1, 0);
 
-	setSignal(SIGSEGV, handleSigSegv, SA_ONESHOT);
+        setSignal(SIGSEGV, handleSigSegv, SA_ONESHOT);
 
-	// If requested, change the uid of the provider
-	if (info->uid != -1) {
-	  _SFCB_TRACE(1,
-		      ("--- Changing uid of provider, %s, to %d(%s)",
-		       info->providerName, info->uid, info->user));
-	  // Set the real and effective uids
-	  rc = setreuid(info->uid, info->uid);
-	  if (rc == -1) {
-	    mlogf(M_ERROR, M_SHOW, "--- Changing uid for %s failed.\n",
-		  info->providerName);
-	    _SFCB_RETURN(-1);
-	  }
-	}
+        // If requested, change the uid of the provider
+        if (info->uid != -1) {
+          _SFCB_TRACE(1,
+                      ("--- Changing uid of provider, %s, to %d(%s)",
+                       info->providerName, info->uid, info->user));
+          // Set the real and effective uids
+          rc = setreuid(info->uid, info->uid);
+          if (rc == -1) {
+            mlogf(M_ERROR, M_SHOW, "--- Changing uid for %s failed.\n",
+                  info->providerName);
+            _SFCB_RETURN(-1);
+          }
+        }
 
-	curProvProc = (*proc);
-	resultSockets = sPairs[(*proc)->id + ptBase];
+        curProvProc = (*proc);
+        resultSockets = sPairs[(*proc)->id + ptBase];
 
-	_SFCB_TRACE(1, ("--- Forked started for %s %d %d-%lu",
-			info->providerName, currentProc,
-			providerSockets.receive,
-			getInode(providerSockets.receive)));
-	processName = info->providerName;
-	providerProcess = 1;
-	info->proc = *proc;
-	info->pid = currentProc;
+        _SFCB_TRACE(1, ("--- Forked started for %s %d %d-%lu",
+                        info->providerName, currentProc,
+                        providerSockets.receive,
+                        getInode(providerSockets.receive)));
+        processName = info->providerName;
+        providerProcess = 1;
+        info->proc = *proc;
+        info->pid = currentProc;
 
-	semSetValue(sfcbSem, PROV_GUARD((*proc)->id), 0);
-	semSetValue(sfcbSem, PROV_INUSE((*proc)->id), 0);
-	semSetValue(sfcbSem, PROV_ALIVE((*proc)->id), 0);
-	semReleaseUnDo(sfcbSem, PROV_ALIVE((*proc)->id));
-	semReleaseUnDo(sfcbSem, PROV_INUSE((*proc)->id));
-	semRelease(sfcbSem, PROV_GUARD((*proc)->id));
+        semSetValue(sfcbSem, PROV_GUARD((*proc)->id), 0);
+        semSetValue(sfcbSem, PROV_INUSE((*proc)->id), 0);
+        semSetValue(sfcbSem, PROV_ALIVE((*proc)->id), 0);
+        semReleaseUnDo(sfcbSem, PROV_ALIVE((*proc)->id));
+        semReleaseUnDo(sfcbSem, PROV_INUSE((*proc)->id));
+        semRelease(sfcbSem, PROV_GUARD((*proc)->id));
 
-	processProviderInvocationRequests(info->providerName);
-	_SFCB_RETURN(0);
+        processProviderInvocationRequests(info->providerName);
+        _SFCB_RETURN(0);
       }
 
       else {
-	info->startSeq = ++seq;
+        info->startSeq = ++seq;
       }
       _SFCB_TRACE(1, ("--- Fork provider OK %s %d %d", info->providerName,
-		      info->pid, i));
+                      info->pid, i));
       _SFCB_RETURN(info->pid);
     }
   }
@@ -841,7 +836,7 @@ forkProvider(ProviderInfo * info, OperationHdr * req, char **msg)
 
     semRelease(sfcbSem, PROV_GUARD(proc->id));
     _SFCB_TRACE(1,
-		("--- Provider has been unloaded prevously, will reload"));
+                ("--- Provider has been unloaded prevously, will reload"));
 
     info->pid = 0;
     for (pInfo = proc->firstProv; pInfo; pInfo = pInfo->next) {
@@ -884,9 +879,9 @@ forkProvider(ProviderInfo * info, OperationHdr * req, char **msg)
     resp->rc--;
     if (msg) {
       if (resp->rc) {
-	*msg = strdup((char *) resp->object[0].data);
+        *msg = strdup((char *) resp->object[0].data);
       } else
-	*msg = NULL;
+        *msg = NULL;
     }
 
     rc = resp->rc;
@@ -901,9 +896,8 @@ forkProvider(ProviderInfo * info, OperationHdr * req, char **msg)
 
 typedef struct provHandler {
   BinResponseHdr *(*handler) (BinRequestHdr *, ProviderInfo * info,
-			      int requestor);
+                              int requestor);
 } ProvHandler;
-
 
 static int
 sendResponse(int requestor, BinResponseHdr * hdr)
@@ -924,10 +918,10 @@ sendResponse(int requestor, BinResponseHdr * hdr)
     switch (hdr->rv.type) {
     case CMPI_string:
       if (hdr->rv.value.string) {
-	if (hdr->rv.value.string->hdl) {
-	  hdr->rv.value.string = hdr->rv.value.string->hdl;
-	} else
-	  hdr->rv.value.string = NULL;
+        if (hdr->rv.value.string->hdl) {
+          hdr->rv.value.string = hdr->rv.value.string->hdl;
+        } else
+          hdr->rv.value.string = NULL;
       }
       hdr->rv.type = CMPI_chars;
     case CMPI_chars:
@@ -952,8 +946,8 @@ sendResponse(int requestor, BinResponseHdr * hdr)
      * add padding length to calculation 
      */
     l += (hdr->object[i].type ==
-	  MSG_SEG_CHARS ? PADDED_LEN(hdr->object[i].length) : hdr->
-	  object[i].length);
+          MSG_SEG_CHARS ? PADDED_LEN(hdr->object[i].length) : hdr->
+          object[i].length);
   }
 
   buf = (BinResponseHdr *) malloc(l + rvl + 8);
@@ -977,13 +971,13 @@ sendResponse(int requestor, BinResponseHdr * hdr)
     switch (hdr->object[i].type) {
     case MSG_SEG_OBJECTPATH:
       getSerializedObjectPath((CMPIObjectPath *) hdr->object[i].data,
-			      ((char *) buf) + l);
+                              ((char *) buf) + l);
       buf->object[i].data = (void *) l;
       l += ol;
       break;
     case MSG_SEG_INSTANCE:
       getSerializedInstance((CMPIInstance *) hdr->object[i].data,
-			    ((char *) buf) + l);
+                            ((char *) buf) + l);
       buf->object[i].data = (void *) l;
       l += ol;
       break;
@@ -995,42 +989,41 @@ sendResponse(int requestor, BinResponseHdr * hdr)
       break;
     case MSG_SEG_CONSTCLASS:
       getSerializedConstClass((CMPIConstClass *) hdr->object[i].data,
-			      ((char *) buf) + l);
+                              ((char *) buf) + l);
       buf->object[i].data = (void *) l;
       l += ol;
       break;
     case MSG_SEG_ARGS:
       getSerializedArgs((CMPIArgs *) hdr->object[i].data,
-			((char *) buf) + l);
+                        ((char *) buf) + l);
       buf->object[i].data = (void *) l;
       l += ol;
       break;
 #ifdef HAVE_QUALREP
     case MSG_SEG_QUALIFIER:
       getSerializedQualifier((CMPIQualifierDecl *) hdr->object[i].data,
-			     ((char *) buf) + l);
+                             ((char *) buf) + l);
       buf->object[i].data = (void *) l;
       l += ol;
       break;
 #endif
     default:
       mlogf(M_ERROR, M_SHOW, "--- bad sendResponse request %d\n",
-	    hdr->object[i].type);
+            hdr->object[i].type);
       _SFCB_ABORT();
     }
   }
 
   _SFCB_TRACE(1, ("--- Sending result to %d-%lu",
-		  requestor, getInode(requestor)));
+                  requestor, getInode(requestor)));
 
   spSendResult(&requestor, &dmy, buf, l);
   free(buf);
   _SFCB_RETURN(0);
 }
 
-
 int
-sendResponseChunk(CMPIArray * r, int requestor, CMPIType type)
+sendResponseChunk(CMPIArray *r, int requestor, CMPIType type)
 {
   int             i,
                   count;
@@ -1042,7 +1035,7 @@ sendResponseChunk(CMPIArray * r, int requestor, CMPIType type)
   count = CMGetArrayCount(r, NULL);
   resp = (BinResponseHdr *)
       calloc(1,
-	     sizeof(BinResponseHdr) + ((count - 1) * sizeof(MsgSegment)));
+             sizeof(BinResponseHdr) + ((count - 1) * sizeof(MsgSegment)));
 
   resp->moreChunks = 1;
   resp->rc = 1;
@@ -1050,12 +1043,12 @@ sendResponseChunk(CMPIArray * r, int requestor, CMPIType type)
   for (i = 0; i < count; i++)
     if (type == CMPI_instance)
       resp->object[i] =
-	  setInstanceMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
-				inst);
+          setInstanceMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
+                                inst);
     else
       resp->object[i] =
-	  setObjectPathMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
-				  ref);
+          setObjectPathMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
+                                  ref);
 
   rslt = sendResponse(requestor, resp);
   if (resp)
@@ -1064,7 +1057,7 @@ sendResponseChunk(CMPIArray * r, int requestor, CMPIType type)
 }
 
 static BinResponseHdr *
-errorResp(CMPIStatus * rci)
+errorResp(CMPIStatus *rci)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "errorResp");
   BinResponseHdr *resp =
@@ -1081,9 +1074,9 @@ static BinResponseHdr *
 errorCharsResp(int rc, char *msg)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "errorCharsResp");
-  BinResponseHdr *resp =
-      (BinResponseHdr *) calloc(1,
-				sizeof(BinResponseHdr) + strlen(msg) + 4);
+  BinResponseHdr *resp = (BinResponseHdr *) calloc(1,
+                                                   sizeof(BinResponseHdr) +
+                                                   strlen(msg) + 4);
   strcpy((char *) (resp + 1), msg ? msg : "");
   resp->rc = rc + 1;
   resp->count = 1;
@@ -1110,7 +1103,7 @@ static BinResponseHdr *
 deleteClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "deleteClass");
-  TIMING_PREP DeleteClassReq * req = (DeleteClassReq *) hdr;
+  TIMING_PREP DeleteClassReq *req = (DeleteClassReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1120,11 +1113,11 @@ deleteClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIFlags       flgs = 0;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
@@ -1147,7 +1140,7 @@ deleteClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 static BinResponseHdr *
 getClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
-  TIMING_PREP GetClassReq * req = (GetClassReq *) hdr;
+  TIMING_PREP GetClassReq *req = (GetClassReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1173,11 +1166,11 @@ getClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   if (req->hdr.flags & FL_includeClassOrigin)
     flgs |= CMPI_FLAG_IncludeClassOrigin;
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   if (req->hdr.count > 2)
     props = makePropertyList(req->hdr.count - 2, req->properties);
@@ -1193,14 +1186,14 @@ getClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   if (rci.rc == CMPI_RC_OK) {
     count = 1;
     resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-				     ((count - 1) * sizeof(MsgSegment)));
+                                     ((count - 1) * sizeof(MsgSegment)));
     resp->moreChunks = 0;
     resp->rc = 1;
     resp->count = count;
     for (i = 0; i < count; i++)
       resp->object[i] =
-	  setConstClassMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
-				  dataPtr.ptr);
+          setConstClassMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
+                                  dataPtr.ptr);
   } else
     resp = errorResp(&rci);
   if (props)
@@ -1213,7 +1206,7 @@ static BinResponseHdr *
 createClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "createClass");
-  TIMING_PREP CreateClassReq * req = (CreateClassReq *) hdr;
+  TIMING_PREP CreateClassReq *req = (CreateClassReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIConstClass *cls = relocateSerializedConstClass(req->cls.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1223,17 +1216,17 @@ createClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIFlags       flgs = 0;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
       rci =
       info->classMI->ft->createClass(info->classMI, ctx, result, path,
-				     cls);
+                                     cls);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -1251,7 +1244,7 @@ createClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 static BinResponseHdr *
 enumClassNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
-  TIMING_PREP EnumClassNamesReq * req = (EnumClassNamesReq *) hdr;
+  TIMING_PREP EnumClassNamesReq *req = (EnumClassNamesReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1266,11 +1259,11 @@ enumClassNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   _SFCB_ENTER(TRACE_PROVIDERDRV, "enumClassNames");
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
 
@@ -1278,7 +1271,7 @@ enumClassNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   // result,
   TIMING_START(hdr, info)
       rci = info->classMI->ft->enumClassNames(info->classMI, ctx, result,
-					      path);
+                                              path);
   TIMING_STOP(hdr, info)
       r = native_result2array(result);
 
@@ -1290,15 +1283,15 @@ enumClassNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
     else
       count = 0;
     resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-				     ((count ? count -
-				       1 : 0) * sizeof(MsgSegment)));
+                                     ((count ? count -
+                                       1 : 0) * sizeof(MsgSegment)));
     resp->moreChunks = 0;
     resp->rc = 1;
     resp->count = count;
     for (i = 0; i < count; i++)
       resp->object[i] =
-	  setObjectPathMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
-				  ref);
+          setObjectPathMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
+                                  ref);
   } else
     resp = errorResp(&rci);
 
@@ -1309,7 +1302,7 @@ static BinResponseHdr *
 enumClasses(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "enumClasses");
-  TIMING_PREP EnumClassesReq * req = (EnumClassesReq *) hdr;
+  TIMING_PREP EnumClassesReq *req = (EnumClassesReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1321,11 +1314,11 @@ enumClasses(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIFlags       flgs = req->hdr.flags;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
 
@@ -1352,7 +1345,7 @@ static BinResponseHdr *
 enumQualifiers(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "enumQualifiers");
-  TIMING_PREP EnumQualifiersReq * req = (EnumQualifiersReq *) hdr;
+  TIMING_PREP EnumQualifiersReq *req = (EnumQualifiersReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   CMPIArray      *r;
@@ -1365,18 +1358,18 @@ enumQualifiers(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   int             i;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
 
   TIMING_START(hdr, info)
       rci =
       info->qualifierDeclMI->ft->enumQualifiers(info->qualifierDeclMI, ctx,
-						result, path);
+                                                result, path);
   TIMING_STOP(hdr, info)
       r = native_result2array(result);
 
@@ -1388,15 +1381,15 @@ enumQualifiers(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
     else
       count = 0;
     resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-				     ((count ? count -
-				       1 : 0) * sizeof(MsgSegment)));
+                                     ((count ? count -
+                                       1 : 0) * sizeof(MsgSegment)));
     resp->moreChunks = 0;
     resp->rc = 1;
     resp->count = count;
     for (i = 0; i < count; i++) {
       resp->object[i] =
-	  setQualifierMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
-				 dataPtr.ptr);
+          setQualifierMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
+                                 dataPtr.ptr);
     }
   } else
     resp = errorResp(&rci);
@@ -1408,7 +1401,7 @@ static BinResponseHdr *
 setQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "setQualifier");
-  TIMING_PREP SetQualifierReq * req = (SetQualifierReq *) hdr;
+  TIMING_PREP SetQualifierReq *req = (SetQualifierReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIQualifierDecl *q = relocateSerializedQualifier(req->qualifier.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1418,17 +1411,17 @@ setQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIFlags       flgs = 0;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
       rci =
       info->qualifierDeclMI->ft->setQualifier(info->qualifierDeclMI, ctx,
-					      result, path, q);
+                                              result, path, q);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -1447,7 +1440,7 @@ static BinResponseHdr *
 getQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getQualifier");
-  TIMING_PREP GetQualifierReq * req = (GetQualifierReq *) hdr;
+  TIMING_PREP GetQualifierReq *req = (GetQualifierReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   CMPIArray      *r;
@@ -1459,17 +1452,17 @@ getQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIFlags       flgs = 0;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
       rci =
       info->qualifierDeclMI->ft->getQualifier(info->qualifierDeclMI, ctx,
-					      result, path);
+                                              result, path);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -1478,14 +1471,14 @@ getQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   if (rci.rc == CMPI_RC_OK) {
     count = 1;
     resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-				     ((count - 1) * sizeof(MsgSegment)));
+                                     ((count - 1) * sizeof(MsgSegment)));
     resp->moreChunks = 0;
     resp->rc = 1;
     resp->count = count;
     for (i = 0; i < count; i++)
       resp->object[i] =
-	  setQualifierMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
-				 dataPtr.ptr);
+          setQualifierMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
+                                 dataPtr.ptr);
   } else
     resp = errorResp(&rci);
 
@@ -1496,7 +1489,7 @@ static BinResponseHdr *
 deleteQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "deleteQualifier");
-  TIMING_PREP DeleteQualifierReq * req = (DeleteQualifierReq *) hdr;
+  TIMING_PREP DeleteQualifierReq *req = (DeleteQualifierReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIResult     *result = native_new_CMPIResult(0, 1, NULL);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1505,17 +1498,17 @@ deleteQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIFlags       flgs = 0;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
       rci =
       info->qualifierDeclMI->ft->deleteQualifier(info->qualifierDeclMI,
-						 ctx, result, path);
+                                                 ctx, result, path);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -1535,7 +1528,7 @@ static BinResponseHdr *
 getProperty(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getProperty");
-  TIMING_PREP GetPropertyReq * req = (GetPropertyReq *) hdr;
+  TIMING_PREP GetPropertyReq *req = (GetPropertyReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   CMPIArray      *r;
@@ -1549,23 +1542,23 @@ getProperty(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIFlags       flgs = 0;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   if (info->propertyMI == NULL)
     info->propertyMI =
-	loadPropertyMI(info->providerName, info->library, Broker, ctx,
-		       &rci);
+        loadPropertyMI(info->providerName, info->library, Broker, ctx,
+                       &rci);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
       rci =
       info->propertyMI->ft->getProperty(info->propertyMI, ctx, result,
-					path,
-					(const char *) req->name.data);
+                                        path,
+                                        (const char *) req->name.data);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -1574,14 +1567,14 @@ getProperty(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   if (rci.rc == CMPI_RC_OK) {
     count = 1;
     resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-				     ((count - 1) * sizeof(MsgSegment)));
+                                     ((count - 1) * sizeof(MsgSegment)));
     resp->moreChunks = 0;
     resp->rc = 1;
     resp->count = count;
 
     data = CMGetArrayElementAt(r, 0, NULL);
     inst->ft->setProperty(inst, (const char *) req->name.data, &data.value,
-			  data.type);
+                          data.type);
     resp->object[0] = setInstanceMsgSegment(inst);
   } else
     resp = errorResp(&rci);
@@ -1593,7 +1586,7 @@ static BinResponseHdr *
 setProperty(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "setProperty");
-  TIMING_PREP SetPropertyReq * req = (SetPropertyReq *) hdr;
+  TIMING_PREP SetPropertyReq *req = (SetPropertyReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIInstance   *inst = relocateSerializedInstance(req->inst.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1605,25 +1598,25 @@ setProperty(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIData        data;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   data = inst->ft->getPropertyAt(inst, 0, &pName, NULL);
 
   if (info->propertyMI == NULL)
     info->propertyMI =
-	loadPropertyMI(info->providerName, info->library, Broker, ctx,
-		       &rci);
+        loadPropertyMI(info->providerName, info->library, Broker, ctx,
+                       &rci);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
       rci =
       info->propertyMI->ft->setProperty(info->propertyMI, ctx, result,
-					path, (const char *) pName->hdl,
-					data);
+                                        path, (const char *) pName->hdl,
+                                        data);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -1644,7 +1637,7 @@ static BinResponseHdr *
 invokeMethod(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "invokeMethod");
-  TIMING_PREP InvokeMethodReq * req = (InvokeMethodReq *) hdr;
+  TIMING_PREP InvokeMethodReq *req = (InvokeMethodReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   char           *method = (char *) req->method.data;
@@ -1660,14 +1653,14 @@ invokeMethod(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIFlags       flgs = 0;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
   if (info->parms)
     ctx->ft->addEntry(ctx, "sfcbProviderParameters",
-		      (CMPIValue *) info->parms, CMPI_chars);
+                      (CMPIValue *) info->parms, CMPI_chars);
 
   if (req->hdr.count > 5) {
     int             i,
@@ -1679,7 +1672,7 @@ invokeMethod(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
     for (n = 5, i = 0, s = CMGetArgCount(tIn, NULL); i < s; i++) {
       CMPIData        d = CMGetArgAt(tIn, i, &name, NULL);
       if (d.type == CMPI_instance) {
-	d.value.inst = relocateSerializedInstance(r->object[n++].data);
+        d.value.inst = relocateSerializedInstance(r->object[n++].data);
       }
       CMAddArg(in, (char *) name->hdl, &d.value, d.type);
     }
@@ -1701,7 +1694,7 @@ invokeMethod(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
       count = CMGetArrayCount(r, NULL);
       resp->rvValue = 1;
       if (count) {
-	resp->rv = CMGetArrayElementAt(r, 0, NULL);
+        resp->rv = CMGetArrayElementAt(r, 0, NULL);
       }
     }
 
@@ -1719,7 +1712,7 @@ static BinResponseHdr *
 getInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getInstance");
-  TIMING_PREP GetInstanceReq * req = (GetInstanceReq *) hdr;
+  TIMING_PREP GetInstanceReq *req = (GetInstanceReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1739,11 +1732,11 @@ getInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   if (req->hdr.flags & FL_includeClassOrigin)
     flgs |= CMPI_FLAG_IncludeClassOrigin;
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   if (req->hdr.count > 2)
     props = makePropertyList(req->hdr.count - 2, req->properties);
@@ -1752,7 +1745,7 @@ getInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   TIMING_START(hdr, info)
       rci =
       info->instanceMI->ft->getInstance(info->instanceMI, ctx, result,
-					path, (const char **) props);
+                                        path, (const char **) props);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -1763,14 +1756,14 @@ getInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
       count = 1;
 
       resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-				       ((count - 1) * sizeof(MsgSegment)));
+                                       ((count - 1) * sizeof(MsgSegment)));
       resp->moreChunks = 0;
       resp->rc = 1;
       resp->count = count;
       for (i = 0; i < count; i++)
-	resp->object[i] =
-	    setInstanceMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
-				  inst);
+        resp->object[i] =
+            setInstanceMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
+                                  inst);
     } else {
       rci.rc = CMPI_RC_ERR_NOT_FOUND;
       rci.msg = NULL;
@@ -1788,7 +1781,7 @@ static BinResponseHdr *
 deleteInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "deleteInstance");
-  TIMING_PREP DeleteInstanceReq * req = (DeleteInstanceReq *) hdr;
+  TIMING_PREP DeleteInstanceReq *req = (DeleteInstanceReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1798,17 +1791,17 @@ deleteInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIFlags       flgs = 0;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
       rci =
       info->instanceMI->ft->deleteInstance(info->instanceMI, ctx, result,
-					   path);
+                                           path);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -1827,7 +1820,7 @@ static BinResponseHdr *
 createInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "createInstance");
-  TIMING_PREP CreateInstanceReq * req = (CreateInstanceReq *) hdr;
+  TIMING_PREP CreateInstanceReq *req = (CreateInstanceReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIInstance   *inst = relocateSerializedInstance(req->instance.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1840,17 +1833,17 @@ createInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   int             i;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
       rci =
       info->instanceMI->ft->createInstance(info->instanceMI, ctx, result,
-					   path, inst);
+                                           path, inst);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
   r = native_result2array(result);
@@ -1858,14 +1851,14 @@ createInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   if (rci.rc == CMPI_RC_OK) {
     count = 1;
     resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-				     ((count - 1) * sizeof(MsgSegment)));
+                                     ((count - 1) * sizeof(MsgSegment)));
     resp->moreChunks = 0;
     resp->rc = 1;
     resp->count = count;
     for (i = 0; i < count; i++)
       resp->object[i] =
-	  setObjectPathMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
-				  ref);
+          setObjectPathMsgSegment(CMGetArrayElementAt(r, i, NULL).value.
+                                  ref);
   } else
     resp = errorResp(&rci);
 
@@ -1876,7 +1869,7 @@ static BinResponseHdr *
 modifyInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "modifyInstance");
-  TIMING_PREP ModifyInstanceReq * req = (ModifyInstanceReq *) hdr;
+  TIMING_PREP ModifyInstanceReq *req = (ModifyInstanceReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIInstance   *inst = relocateSerializedInstance(req->instance.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1890,11 +1883,11 @@ modifyInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   if (req->hdr.flags & FL_includeQualifiers)
     flgs |= CMPI_FLAG_IncludeQualifiers;
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   if (req->hdr.count > 3)
     props = makePropertyList(req->hdr.count - 3, req->properties);
@@ -1903,17 +1896,17 @@ modifyInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   TIMING_START(hdr, info)
       rci =
       info->instanceMI->ft->modifyInstance(info->instanceMI, ctx, result,
-					   path, inst,
-					   (const char **) props);
+                                           path, inst,
+                                           (const char **) props);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
   if (rci.rc == CMPI_RC_OK) {
     count = 1;
     resp =
-	(BinResponseHdr *) calloc(1,
-				  sizeof(BinResponseHdr) -
-				  sizeof(MsgSegment));
+        (BinResponseHdr *) calloc(1,
+                                  sizeof(BinResponseHdr) -
+                                  sizeof(MsgSegment));
     resp->moreChunks = 0;
     resp->rc = 1;
     resp->count = 0;
@@ -1929,7 +1922,7 @@ static BinResponseHdr *
 enumInstances(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "enumInstances");
-  TIMING_PREP EnumInstancesReq * req = (EnumInstancesReq *) hdr;
+  TIMING_PREP EnumInstancesReq *req = (EnumInstancesReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1950,10 +1943,10 @@ enumInstances(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
     char           *namespace = CMGetCharPtr(CMGetNameSpace(path, NULL));
     if (classname && namespace && strcasecmp(info->className, classname)) {
       CMPIObjectPath *provPath =
-	  CMNewObjectPath(Broker, namespace, info->className, NULL);
+          CMNewObjectPath(Broker, namespace, info->className, NULL);
       if (provPath && CMClassPathIsA(Broker, provPath, classname, NULL)) {
-	_SFCB_TRACE(1, ("--- Replacing class name %s", info->className));
-	path = provPath;
+        _SFCB_TRACE(1, ("--- Replacing class name %s", info->className));
+        path = provPath;
       }
     }
   }
@@ -1968,11 +1961,11 @@ enumInstances(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   if (req->hdr.flags & FL_includeClassOrigin)
     flgs |= CMPI_FLAG_IncludeClassOrigin;
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   if (req->hdr.count > 2)
     props = makePropertyList(req->hdr.count - 2, req->properties);
@@ -1981,8 +1974,8 @@ enumInstances(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   TIMING_START(hdr, info)
       rci =
       info->instanceMI->ft->enumerateInstances(info->instanceMI, ctx,
-					       result, path,
-					       (const char **) props);
+                                               result, path,
+                                               (const char **) props);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -2001,7 +1994,7 @@ static BinResponseHdr *
 enumInstanceNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "enumInstanceNames");
-  TIMING_PREP EnumInstanceNamesReq * req = (EnumInstanceNamesReq *) hdr;
+  TIMING_PREP EnumInstanceNamesReq *req = (EnumInstanceNamesReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -2021,27 +2014,27 @@ enumInstanceNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
     char           *namespace = CMGetCharPtr(CMGetNameSpace(path, NULL));
     if (classname && namespace && strcasecmp(info->className, classname)) {
       CMPIObjectPath *provPath =
-	  CMNewObjectPath(Broker, namespace, info->className, NULL);
+          CMNewObjectPath(Broker, namespace, info->className, NULL);
       if (provPath && CMClassPathIsA(Broker, provPath, classname, NULL)) {
-	_SFCB_TRACE(1, ("--- Replacing class name %s", info->className));
-	path = provPath;
+        _SFCB_TRACE(1, ("--- Replacing class name %s", info->className));
+        path = provPath;
       }
     }
   }
 #endif
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
       rci =
       info->instanceMI->ft->enumerateInstanceNames(info->instanceMI, ctx,
-						   result, path);
+                                                   result, path);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -2065,54 +2058,54 @@ queryGetValue(QLPropertySource * src, char *name, QLOpd * type)
   if (rc.rc == CMPI_RC_OK) {
     if ((d.type & CMPI_SINT) == CMPI_SINT) {
       if (d.type == CMPI_sint32)
-	v.sint64 = d.value.sint32;
+        v.sint64 = d.value.sint32;
       else if (d.type == CMPI_sint16)
-	v.sint64 = d.value.sint16;
+        v.sint64 = d.value.sint16;
       else if (d.type == CMPI_sint8)
-	v.sint64 = d.value.sint8;
+        v.sint64 = d.value.sint8;
       else
-	v.sint64 = d.value.sint64;
+        v.sint64 = d.value.sint64;
       *type = QL_Integer;
     } else if (d.type & CMPI_UINT) {
       if (d.type == CMPI_uint32)
-	v.uint64 = d.value.uint32;
+        v.uint64 = d.value.uint32;
       else if (d.type == CMPI_uint16)
-	v.uint64 = d.value.uint16;
+        v.uint64 = d.value.uint16;
       else if (d.type == CMPI_uint8)
-	v.uint64 = d.value.uint8;
+        v.uint64 = d.value.uint8;
       else
-	v.uint64 = d.value.uint64;
+        v.uint64 = d.value.uint64;
       *type = QL_UInteger;
     }
 
     else
       switch (d.type) {
       case CMPI_string:
-	*type = QL_Chars;
-	v.chars = (char *) d.value.string->hdl;
-	break;
+        *type = QL_Chars;
+        v.chars = (char *) d.value.string->hdl;
+        break;
       case CMPI_boolean:
-	*type = QL_Boolean;
-	v.boolean = d.value.boolean;
-	break;
+        *type = QL_Boolean;
+        v.boolean = d.value.boolean;
+        break;
       case CMPI_real64:
-	*type = QL_Double;
-	v.real64 = d.value.real64;
-	break;
+        *type = QL_Double;
+        v.real64 = d.value.real64;
+        break;
       case CMPI_real32:
-	*type = QL_Double;
-	v.real64 = d.value.real32;
-	break;
+        *type = QL_Double;
+        v.real64 = d.value.real32;
+        break;
       case CMPI_char16:
-	*type = QL_Char;
-	v.char16 = d.value.char16;
-	break;
+        *type = QL_Char;
+        v.char16 = d.value.char16;
+        break;
       case CMPI_instance:
-	*type = QL_Inst;
-	v.inst = d.value.inst;
-	break;
+        *type = QL_Inst;
+        v.inst = d.value.inst;
+        break;
       default:
-	*type = QL_Invalid;
+        *type = QL_Invalid;
       }
   } else
     *type = QL_NotFound;
@@ -2123,7 +2116,7 @@ static BinResponseHdr *
 execQuery(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "execQuery");
-  TIMING_PREP ExecQueryReq * req = (ExecQueryReq *) hdr;
+  TIMING_PREP ExecQueryReq *req = (ExecQueryReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -2135,18 +2128,18 @@ execQuery(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   int             irc;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
       rci =
       info->instanceMI->ft->execQuery(info->instanceMI, ctx, result, path,
-				      PROVCHARS(req->query.data),
-				      PROVCHARS(req->queryLang.data));
+                                      PROVCHARS(req->query.data),
+                                      PROVCHARS(req->queryLang.data));
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -2158,7 +2151,7 @@ execQuery(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
     int             ok = 1;
 
     qs = parseQuery(MEM_TRACKED, (char *) req->query.data,
-		    (char *) req->queryLang.data, NULL, &irc);
+                    (char *) req->queryLang.data, NULL, &irc);
     if (irc) {
       rci.rc = CMPI_RC_ERR_INVALID_QUERY;
       resp = errorResp(&rci);
@@ -2172,12 +2165,12 @@ execQuery(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 
     if (qs->allProps) {
       CMPIConstClass *cc =
-	  getConstClass(CMGetNameSpace(qs->cop, NULL)->hdl,
-			CMGetClassName(qs->cop, NULL)->hdl);
+          getConstClass(CMGetNameSpace(qs->cop, NULL)->hdl,
+                        CMGetClassName(qs->cop, NULL)->hdl);
       kar = cc->ft->getKeyList(cc);
     } else {
       kar =
-	  getKeyListAndVerifyPropertyList(qs->cop, qs->spNames, &ok, NULL);
+          getKeyListAndVerifyPropertyList(qs->cop, qs->spNames, &ok, NULL);
     }
 
     if (ok) {
@@ -2185,20 +2178,20 @@ execQuery(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
       qs->keys = (char **) malloc((c + 1) * sizeof(char *));
 
       for (i = 0; i < c; i++)
-	qs->keys[i] =
-	    (char *) kar->ft->getElementAt(kar, i, NULL).value.string->hdl;
+        qs->keys[i] =
+            (char *) kar->ft->getElementAt(kar, i, NULL).value.string->hdl;
       qs->keys[c] = NULL;
 
       setResultQueryFilter(result, qs);
       _SFCB_TRACE(1,
-		  ("--- Calling enumerateInstances provider %s",
-		   info->providerName));
+                  ("--- Calling enumerateInstances provider %s",
+                   info->providerName));
       TIMING_START(hdr, info)
-	  rci =
-	  info->instanceMI->ft->enumerateInstances(info->instanceMI, ctx,
-						   result, path, NULL);
+          rci =
+          info->instanceMI->ft->enumerateInstances(info->instanceMI, ctx,
+                                                   result, path, NULL);
       TIMING_STOP(hdr, info)
-	  _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
+          _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
       free(qs->keys);
     } else
       rci.rc = CMPI_RC_OK;
@@ -2216,12 +2209,11 @@ execQuery(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   _SFCB_RETURN(resp);
 }
 
-
 static BinResponseHdr *
 associators(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "associators");
-  TIMING_PREP AssociatorsReq * req = (AssociatorsReq *) hdr;
+  TIMING_PREP AssociatorsReq *req = (AssociatorsReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -2237,11 +2229,11 @@ associators(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   if (req->hdr.flags & FL_includeClassOrigin)
     flgs |= CMPI_FLAG_IncludeClassOrigin;
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   if (req->hdr.count > 6)
     props = makePropertyList(req->hdr.count - 6, req->properties);
@@ -2250,13 +2242,13 @@ associators(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   TIMING_START(hdr, info)
       rci =
       info->associationMI->ft->associators(info->associationMI, ctx,
-					   result, path,
-					   PROVCHARS(req->assocClass.data),
-					   PROVCHARS(req->resultClass.
-						     data),
-					   PROVCHARS(req->role.data),
-					   PROVCHARS(req->resultRole.data),
-					   (const char **) props);
+                                           result, path,
+                                           PROVCHARS(req->assocClass.data),
+                                           PROVCHARS(req->resultClass.
+                                                     data),
+                                           PROVCHARS(req->role.data),
+                                           PROVCHARS(req->resultRole.data),
+                                           (const char **) props);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -2275,7 +2267,7 @@ static BinResponseHdr *
 references(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "references");
-  TIMING_PREP ReferencesReq * req = (ReferencesReq *) hdr;
+  TIMING_PREP ReferencesReq *req = (ReferencesReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -2291,11 +2283,11 @@ references(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   if (req->hdr.flags & FL_includeClassOrigin)
     flgs |= CMPI_FLAG_IncludeClassOrigin;
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   if (req->hdr.count > 4)
     props = makePropertyList(req->hdr.count - 4, req->properties);
@@ -2304,10 +2296,10 @@ references(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   TIMING_START(hdr, info)
       rci =
       info->associationMI->ft->references(info->associationMI, ctx, result,
-					  path,
-					  PROVCHARS(req->resultClass.data),
-					  PROVCHARS(req->role.data),
-					  (const char **) props);
+                                          path,
+                                          PROVCHARS(req->resultClass.data),
+                                          PROVCHARS(req->role.data),
+                                          (const char **) props);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -2326,7 +2318,7 @@ static BinResponseHdr *
 associatorNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "associatorNames");
-  TIMING_PREP AssociatorNamesReq * req = (AssociatorNamesReq *) hdr;
+  TIMING_PREP AssociatorNamesReq *req = (AssociatorNamesReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -2337,24 +2329,24 @@ associatorNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIFlags       flgs = 0;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
       rci =
       info->associationMI->ft->associatorNames(info->associationMI, ctx,
-					       result, path,
-					       PROVCHARS(req->assocClass.
-							 data),
-					       PROVCHARS(req->resultClass.
-							 data),
-					       PROVCHARS(req->role.data),
-					       PROVCHARS(req->resultRole.
-							 data));
+                                               result, path,
+                                               PROVCHARS(req->assocClass.
+                                                         data),
+                                               PROVCHARS(req->resultClass.
+                                                         data),
+                                               PROVCHARS(req->role.data),
+                                               PROVCHARS(req->resultRole.
+                                                         data));
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -2367,12 +2359,11 @@ associatorNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   _SFCB_RETURN(resp);
 }
 
-
 static BinResponseHdr *
 referenceNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "referenceNames");
-  TIMING_PREP ReferenceNamesReq * req = (ReferenceNamesReq *) hdr;
+  TIMING_PREP ReferenceNamesReq *req = (ReferenceNamesReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -2383,20 +2374,20 @@ referenceNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIFlags       flgs = 0;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
       rci =
       info->associationMI->ft->referenceNames(info->associationMI, ctx,
-					      result, path,
-					      PROVCHARS(req->resultClass.
-							data),
-					      PROVCHARS(req->role.data));
+                                              result, path,
+                                              PROVCHARS(req->resultClass.
+                                                        data),
+                                              PROVCHARS(req->role.data));
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -2408,9 +2399,6 @@ referenceNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 
   _SFCB_RETURN(resp);
 }
-
-
-
 
 #ifdef SFCB_INCL_INDICATION_SUPPORT
 
@@ -2418,7 +2406,7 @@ static BinResponseHdr *
 activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV | TRACE_INDPROVIDER, "activateFilter");
-  TIMING_PREP IndicationReq * req = (IndicationReq *) hdr;
+  TIMING_PREP IndicationReq *req = (IndicationReq *) hdr;
   BinResponseHdr *resp = NULL;
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   NativeSelectExp *se = NULL,
@@ -2432,15 +2420,15 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   char           *type = NULL;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   _SFCB_TRACE(1,
-	      ("--- pid: %d activFilters %p %s", currentProc, activFilters,
-	       processName));
+              ("--- pid: %d activFilters %p %s", currentProc, activFilters,
+               processName));
   for (se = activFilters; se; se = se->next) {
     if (se->filterId == req->filterId)
       break;
@@ -2453,7 +2441,7 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
     type = (char *) req->type.data;
     char           *sns = (char *) req->sns.data;
     se = (NativeSelectExp *) NewCMPISelectExp(query, lang, sns, NULL,
-					      &rci);
+                                              &rci);
     makeActive = 1;
     se->filterId = req->filterId;
     prev = se->next = activFilters;
@@ -2464,7 +2452,7 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   if (info->indicationMI == NULL) {
     CMPIStatus      st;
     setStatus(&st, CMPI_RC_ERR_NOT_SUPPORTED,
-	      "Provider does not support indications");
+              "Provider does not support indications");
     resp = errorResp(&st);
     _SFCB_RETURN(resp);
   }
@@ -2473,16 +2461,16 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   TIMING_START(hdr, info)
       if (info->indicationMI->ft->ftVersion < 100) {
     authorizeFilterPreV1 fptr =
-	(authorizeFilterPreV1) info->indicationMI->ft->authorizeFilter;
+        (authorizeFilterPreV1) info->indicationMI->ft->authorizeFilter;
     rci = fptr(info->indicationMI, ctx, result,
-	       (CMPISelectExp *) se, type, path,
-	       PROVCHARS(req->principal.data));
+               (CMPISelectExp *) se, type, path,
+               PROVCHARS(req->principal.data));
   } else {
     rci = info->indicationMI->ft->authorizeFilter(info->indicationMI, ctx,
-						  (CMPISelectExp *) se,
-						  type, path,
-						  PROVCHARS(req->principal.
-							    data));
+                                                  (CMPISelectExp *) se,
+                                                  type, path,
+                                                  PROVCHARS(req->principal.
+                                                            data));
   }
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
@@ -2490,33 +2478,33 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   if (rci.rc == CMPI_RC_OK) {
     _SFCB_TRACE(1, ("--- Calling mustPoll %s", info->providerName));
     TIMING_START(hdr, info)
-	if (info->indicationMI->ft->ftVersion < 100) {
+        if (info->indicationMI->ft->ftVersion < 100) {
       mustPollPreV1   fptr =
-	  (mustPollPreV1) info->indicationMI->ft->mustPoll;
+          (mustPollPreV1) info->indicationMI->ft->mustPoll;
       rci = fptr(info->indicationMI, ctx, result,
-		 (CMPISelectExp *) se, type, path);
+                 (CMPISelectExp *) se, type, path);
     } else {
       rci = info->indicationMI->ft->mustPoll(info->indicationMI, ctx,
-					     (CMPISelectExp *) se, type,
-					     path);
+                                             (CMPISelectExp *) se, type,
+                                             path);
     }
     TIMING_STOP(hdr, info)
-	_SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
+        _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
     _SFCB_TRACE(1, ("--- Calling activateFilter %s", info->providerName));
     TIMING_START(hdr, info)
-	if (info->indicationMI->ft->ftVersion < 100) {
+        if (info->indicationMI->ft->ftVersion < 100) {
       activateFilterPreV1 fptr =
-	  (activateFilterPreV1) info->indicationMI->ft->activateFilter;
+          (activateFilterPreV1) info->indicationMI->ft->activateFilter;
       rci = fptr(info->indicationMI, ctx, result,
-		 (CMPISelectExp *) se, type, path, 1);
+                 (CMPISelectExp *) se, type, path, 1);
     } else {
       rci = info->indicationMI->ft->activateFilter(info->indicationMI, ctx,
-						   (CMPISelectExp *) se,
-						   type, path, 1);
+                                                   (CMPISelectExp *) se,
+                                                   type, path, 1);
     }
     TIMING_STOP(hdr, info)
-	_SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
+        _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
     /*
      * if (indicationEnabled==0 && rci.rc==CMPI_RC_OK) {
@@ -2539,7 +2527,7 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
     _SFCB_TRACE(1, ("--- OK activFilters: %p", activFilters));
   }
   _SFCB_TRACE(1,
-	      ("---  pid: %d activFilters %p", currentProc, activFilters));
+              ("---  pid: %d activFilters %p", currentProc, activFilters));
 
   _SFCB_RETURN(resp);
 }
@@ -2548,7 +2536,7 @@ static BinResponseHdr *
 deactivateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV | TRACE_INDPROVIDER, "deactivateFilter");
-  TIMING_PREP IndicationReq * req = (IndicationReq *) hdr;
+  TIMING_PREP IndicationReq *req = (IndicationReq *) hdr;
   BinResponseHdr *resp = NULL;
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   NativeSelectExp *se = NULL,
@@ -2560,17 +2548,17 @@ deactivateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIFlags       flgs = 0;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
   resp->rc = 1;
 
   _SFCB_TRACE(1,
-	      ("---  pid: %d activFilters %p", currentProc, activFilters));
+              ("---  pid: %d activFilters %p", currentProc, activFilters));
   if (info->indicationMI == NULL || activFilters == NULL)
     _SFCB_RETURN(resp);
 
@@ -2578,41 +2566,41 @@ deactivateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
     if (se->filterId == req->filterId) {
       *sef = se->next;
       if (activFilters == NULL) {
-	_SFCB_TRACE(1,
-		    ("--- Calling disableIndications %s",
-		     info->providerName));
-	indicationEnabled = 0;
-	TIMING_START(hdr, info)
-	    info->indicationMI->ft->disableIndications(info->indicationMI,
-						       ctx);
-	TIMING_STOP(hdr, info)
+        _SFCB_TRACE(1,
+                    ("--- Calling disableIndications %s",
+                     info->providerName));
+        indicationEnabled = 0;
+        TIMING_START(hdr, info)
+            info->indicationMI->ft->disableIndications(info->indicationMI,
+                                                       ctx);
+        TIMING_STOP(hdr, info)
       }
 
       _SFCB_TRACE(1,
-		  ("--- Calling deactivateFilter %s", info->providerName));
+                  ("--- Calling deactivateFilter %s", info->providerName));
       TIMING_START(hdr, info)
-	  if (info->indicationMI->ft->ftVersion < 100) {
-	deActivateFilterPreV1 fptr =
-	    (deActivateFilterPreV1) info->indicationMI->ft->
-	    deActivateFilter;
-	rci =
-	    fptr(info->indicationMI, ctx, result, (CMPISelectExp *) se, "",
-		 path, 1);
+          if (info->indicationMI->ft->ftVersion < 100) {
+        deActivateFilterPreV1 fptr =
+            (deActivateFilterPreV1) info->indicationMI->ft->
+            deActivateFilter;
+        rci =
+            fptr(info->indicationMI, ctx, result, (CMPISelectExp *) se, "",
+                 path, 1);
       } else {
-	rci =
-	    info->indicationMI->ft->deActivateFilter(info->indicationMI,
-						     ctx,
-						     (CMPISelectExp *) se,
-						     "", path, 1);
+        rci =
+            info->indicationMI->ft->deActivateFilter(info->indicationMI,
+                                                     ctx,
+                                                     (CMPISelectExp *) se,
+                                                     "", path, 1);
       }
       TIMING_STOP(hdr, info)
-	  if (rci.rc == CMPI_RC_OK) {
-	resp->rc = 1;
-	_SFCB_RETURN(resp);
+          if (rci.rc == CMPI_RC_OK) {
+        resp->rc = 1;
+        _SFCB_RETURN(resp);
       }
 
       if (resp)
-	free(resp);
+        free(resp);
       resp = errorResp(&rci);
       _SFCB_RETURN(resp);
     }
@@ -2626,7 +2614,7 @@ static BinResponseHdr *
 enableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV | TRACE_INDPROVIDER, "enableIndications");
-  TIMING_PREP IndicationReq * req = (IndicationReq *) hdr;
+  TIMING_PREP IndicationReq *req = (IndicationReq *) hdr;
   BinResponseHdr *resp = NULL;
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   // CMPIObjectPath *path =
@@ -2635,16 +2623,16 @@ enableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIFlags       flgs = 0;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   if (info->indicationMI == NULL) {
     CMPIStatus      st;
     setStatus(&st, CMPI_RC_ERR_NOT_SUPPORTED,
-	      "Provider does not support indications");
+              "Provider does not support indications");
     resp = errorResp(&st);
     _SFCB_RETURN(resp);
   }
@@ -2652,7 +2640,7 @@ enableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   if (indicationEnabled == 0 && rci.rc == CMPI_RC_OK) {
     indicationEnabled = 1;
     TIMING_START(hdr, info)
-	info->indicationMI->ft->enableIndications(info->indicationMI, ctx);
+        info->indicationMI->ft->enableIndications(info->indicationMI, ctx);
     TIMING_STOP(hdr, info)
   }
 
@@ -2672,7 +2660,7 @@ static BinResponseHdr *
 disableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV | TRACE_INDPROVIDER, "disableIndications");
-  TIMING_PREP IndicationReq * req = (IndicationReq *) hdr;
+  TIMING_PREP IndicationReq *req = (IndicationReq *) hdr;
   BinResponseHdr *resp = NULL;
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   // CMPIObjectPath *path =
@@ -2681,16 +2669,16 @@ disableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIFlags       flgs = 0;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		    CMPI_uint32);
+                    CMPI_uint32);
   ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
-		    CMPI_chars);
+                    CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
-		    CMPI_uint32);
+                    CMPI_uint32);
 
   if (info->indicationMI == NULL) {
     CMPIStatus      st;
     setStatus(&st, CMPI_RC_ERR_NOT_SUPPORTED,
-	      "Provider does not support indications");
+              "Provider does not support indications");
     resp = errorResp(&st);
     _SFCB_RETURN(resp);
   }
@@ -2698,8 +2686,8 @@ disableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   if (indicationEnabled == 1 && rci.rc == CMPI_RC_OK) {
     indicationEnabled = 0;
     TIMING_START(hdr, info)
-	info->indicationMI->ft->disableIndications(info->indicationMI,
-						   ctx);
+        info->indicationMI->ft->disableIndications(info->indicationMI,
+                                                   ctx);
     TIMING_STOP(hdr, info)
   }
 
@@ -2717,8 +2705,6 @@ disableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 
 #endif
 
-
-
 static BinResponseHdr *
 opNotSupported(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
@@ -2730,7 +2716,6 @@ opNotSupported(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   resp = errorResp(&rci);
   _SFCB_RETURN(resp);
 }
-
 
 void
 appendStr(char **base, const char *str, const char *arg)
@@ -2761,62 +2746,61 @@ initProvider(ProviderInfo * info, unsigned int sessionId, char **errorStr)
     info->initialized = 1;
 
     ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
-		      CMPI_uint32);
+                      CMPI_uint32);
     ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) "$$", CMPI_chars);
     ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & sessionId,
-		      CMPI_uint32);
+                      CMPI_uint32);
     if (info->parms) {
       ctx->ft->addEntry(ctx, "sfcbProviderParameters",
-			(CMPIValue *) info->parms, CMPI_chars);
+                        (CMPIValue *) info->parms, CMPI_chars);
     }
-
 
     if (info->type & INSTANCE_PROVIDER) {
       st = getInstanceMI(info, &mi, ctx);
       rc |= st.rc;
       if (st.rc != CMPI_RC_OK && st.msg != NULL) {
-	appendStr(&errstr, "Error from Instance MI Factory:",
-		  CMGetCharsPtr(st.msg, NULL));
+        appendStr(&errstr, "Error from Instance MI Factory:",
+                  CMGetCharsPtr(st.msg, NULL));
       }
     }
     if (info->type & ASSOCIATION_PROVIDER) {
       st = getAssociationMI(info, (CMPIAssociationMI **) & mi, ctx);
       rc |= st.rc;
       if (st.rc != CMPI_RC_OK && st.msg != NULL) {
-	appendStr(&errstr, "Error from Association MI Factory:",
-		  CMGetCharsPtr(st.msg, NULL));
+        appendStr(&errstr, "Error from Association MI Factory:",
+                  CMGetCharsPtr(st.msg, NULL));
       }
     }
     if (info->type & METHOD_PROVIDER) {
       st = getMethodMI(info, (CMPIMethodMI **) & mi, ctx);
       rc |= st.rc;
       if (st.rc != CMPI_RC_OK && st.msg != NULL) {
-	appendStr(&errstr, "Error from Method MI Factory:",
-		  CMGetCharsPtr(st.msg, NULL));
+        appendStr(&errstr, "Error from Method MI Factory:",
+                  CMGetCharsPtr(st.msg, NULL));
       }
     }
     if (info->type & INDICATION_PROVIDER) {
       st = getIndicationMI(info, (CMPIIndicationMI **) & mi, ctx);
       rc |= st.rc;
       if (st.rc != CMPI_RC_OK && st.msg != NULL) {
-	appendStr(&errstr, "Error from Indication MI Factory:",
-		  CMGetCharsPtr(st.msg, NULL));
+        appendStr(&errstr, "Error from Indication MI Factory:",
+                  CMGetCharsPtr(st.msg, NULL));
       }
     }
     if (info->type & CLASS_PROVIDER) {
       st = getClassMI(info, (CMPIClassMI **) & mi, ctx);
       rc |= st.rc;
       if (st.rc != CMPI_RC_OK && st.msg != NULL) {
-	appendStr(&errstr, "Error from Class MI Factory:",
-		  CMGetCharsPtr(st.msg, NULL));
+        appendStr(&errstr, "Error from Class MI Factory:",
+                  CMGetCharsPtr(st.msg, NULL));
       }
     }
     if (info->type & PROPERTY_PROVIDER) {
       st = getPropertyMI(info, (CMPIPropertyMI **) & mi, ctx);
       rc |= st.rc;
       if (st.rc != CMPI_RC_OK && st.msg != NULL) {
-	appendStr(&errstr, "Error from Property MI Factory:",
-		  CMGetCharsPtr(st.msg, NULL));
+        appendStr(&errstr, "Error from Property MI Factory:",
+                  CMGetCharsPtr(st.msg, NULL));
       }
     }
 #ifdef HAVE_QUALREP
@@ -2824,8 +2808,8 @@ initProvider(ProviderInfo * info, unsigned int sessionId, char **errorStr)
       st = getQualifierDeclMI(info, (CMPIQualifierDeclMI **) & mi, ctx);
       rc |= st.rc;
       if (st.rc != CMPI_RC_OK && st.msg != NULL) {
-	appendStr(&errstr, "Error from Qualifier MI Factory:",
-		  CMGetCharsPtr(st.msg, NULL));
+        appendStr(&errstr, "Error from Qualifier MI Factory:",
+                  CMGetCharsPtr(st.msg, NULL));
       }
     }
 #endif
@@ -2834,15 +2818,15 @@ initProvider(ProviderInfo * info, unsigned int sessionId, char **errorStr)
       rc = -2;
       info->initialized = 0;
       if (errstr != NULL) {
-	*errorStr =
-	    sfcb_snprintf
-	    ("Error initializing provider %s from %s for class %s.  %s",
-	     info->providerName, info->location, info->className, errstr);
+        *errorStr =
+            sfcb_snprintf
+            ("Error initializing provider %s from %s for class %s.  %s",
+             info->providerName, info->location, info->className, errstr);
       } else {
-	*errorStr =
-	    sfcb_snprintf
-	    ("Error initializing provider %s from %s for class %s.",
-	     info->providerName, info->location, info->className);
+        *errorStr =
+            sfcb_snprintf
+            ("Error initializing provider %s from %s for class %s.",
+             info->providerName, info->location, info->className);
       }
     } else {
       *errorStr = NULL;
@@ -2854,7 +2838,6 @@ initProvider(ProviderInfo * info, unsigned int sessionId, char **errorStr)
 
   _SFCB_RETURN(rc);
 }
-
 
 static int
 doLoadProvider(ProviderInfo * info, char *dlName, int dlName_length)
@@ -2874,25 +2857,24 @@ doLoadProvider(ProviderInfo * info, char *dlName, int dlName_length)
     abort();
   }
 
-
   libraryName(NULL, (char *) info->location, dlName, dlName_length);
 
   dircpy = strdup(dirs);
-  fullname_max_length = strlen(dircpy) + strlen(dlName) + 2;	/* sufficient 
-								 */
+  fullname_max_length = strlen(dircpy) + strlen(dlName) + 2;    /* sufficient 
+                                                                 */
   fullname = malloc(fullname_max_length);
   dir = strtok_r(dircpy, " \t", &dirlast);
   info->library = NULL;
   while (dir) {
     libraryName(dir, (char *) info->location, fullname,
-		fullname_max_length);
+                fullname_max_length);
     if (stat(fullname, &stbuf) == 0) {
       info->library = dlopen(fullname, RTLD_NOW | RTLD_GLOBAL);
       if (info->library == NULL) {
-	mlogf(M_ERROR, M_SHOW, "*** dlopen error: %s\n", dlerror());
+        mlogf(M_ERROR, M_SHOW, "*** dlopen error: %s\n", dlerror());
       } else {
-	_SFCB_TRACE(1, ("--- Loaded provider library %s for %s-%d",
-			fullname, info->providerName, currentProc));
+        _SFCB_TRACE(1, ("--- Loaded provider library %s for %s-%d",
+                        fullname, info->providerName, currentProc));
       }
       break;
     }
@@ -2911,7 +2893,6 @@ doLoadProvider(ProviderInfo * info, char *dlName, int dlName_length)
   _SFCB_RETURN(0);
 }
 
-
 static BinResponseHdr *
 loadProvider(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
@@ -2922,9 +2903,9 @@ loadProvider(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   char            dlName[512];
 
   _SFCB_TRACE(1,
-	      ("--- Loading provider %s %s %s",
-	       (char *) req->className.data, (char *) req->provName.data,
-	       (char *) req->libName.data));
+              ("--- Loading provider %s %s %s",
+               (char *) req->className.data, (char *) req->provName.data,
+               (char *) req->libName.data));
 
   info = (ProviderInfo *) calloc(1, sizeof(*info));
 
@@ -2942,7 +2923,7 @@ loadProvider(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   case -1:{
       char            msg[740];
       snprintf(msg, 739, "*** Failed to load %s for %s", dlName,
-	       info->providerName);
+               info->providerName);
       mlogf(M_ERROR, M_SHOW, "%s\n", msg);
       resp = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
       free(info);
@@ -2951,8 +2932,8 @@ loadProvider(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   case -2:{
       char            msg[740];
       snprintf(msg, 739,
-	       "*** Inconsistent provider registration for %s (1)",
-	       info->providerName);
+               "*** Inconsistent provider registration for %s (1)",
+               info->providerName);
       mlogf(M_ERROR, M_SHOW, "%s\n", msg);
       resp = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
       free(info);
@@ -2972,53 +2953,52 @@ loadProvider(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   _SFCB_RETURN(resp);
 }
 
-
 static ProvHandler pHandlers[] = {
-  {opNotSupported},		// dummy
-  {getClass},			// OPS_GetClass 1
-  {getInstance},		// OPS_GetInstance 2
-  {deleteClass},		// OPS_DeleteClass 3
-  {deleteInstance},		// OPS_DeleteInstance 4
-  {createClass},		// OPS_CreateClass 5
-  {createInstance},		// OPS_CreateInstance 6
-  {opNotSupported},		// OPS_ModifyClass 7
-  {modifyInstance},		// OPS_ModifyInstance 8
-  {enumClasses},		// OPS_EnumerateClasses 9
-  {enumClassNames},		// OPS_EnumerateClassNames 10
-  {enumInstances},		// OPS_EnumerateInstances 11
-  {enumInstanceNames},		// OPS_EnumerateInstanceNames 12
-  {execQuery},			// OPS_ExecQuery 13
-  {associators},		// OPS_Associators 14
-  {associatorNames},		// OPS_AssociatorNames 15
-  {references},			// OPS_References 16
-  {referenceNames},		// OPS_ReferenceNames 17
-  {getProperty},		// OPS_GetProperty 18
-  {setProperty},		// OPS_SetProperty 19
+  {opNotSupported},             // dummy
+  {getClass},                   // OPS_GetClass 1
+  {getInstance},                // OPS_GetInstance 2
+  {deleteClass},                // OPS_DeleteClass 3
+  {deleteInstance},             // OPS_DeleteInstance 4
+  {createClass},                // OPS_CreateClass 5
+  {createInstance},             // OPS_CreateInstance 6
+  {opNotSupported},             // OPS_ModifyClass 7
+  {modifyInstance},             // OPS_ModifyInstance 8
+  {enumClasses},                // OPS_EnumerateClasses 9
+  {enumClassNames},             // OPS_EnumerateClassNames 10
+  {enumInstances},              // OPS_EnumerateInstances 11
+  {enumInstanceNames},          // OPS_EnumerateInstanceNames 12
+  {execQuery},                  // OPS_ExecQuery 13
+  {associators},                // OPS_Associators 14
+  {associatorNames},            // OPS_AssociatorNames 15
+  {references},                 // OPS_References 16
+  {referenceNames},             // OPS_ReferenceNames 17
+  {getProperty},                // OPS_GetProperty 18
+  {setProperty},                // OPS_SetProperty 19
 #ifdef HAVE_QUALREP
-  {getQualifier},		// OPS_GetQualifier 20
-  {setQualifier},		// OPS_SetQualifier 21
-  {deleteQualifier},		// OPS_DeleteQualifier 22
-  {enumQualifiers},		// OPS_EnumerateQualifiers 23
+  {getQualifier},               // OPS_GetQualifier 20
+  {setQualifier},               // OPS_SetQualifier 21
+  {deleteQualifier},            // OPS_DeleteQualifier 22
+  {enumQualifiers},             // OPS_EnumerateQualifiers 23
 #else
-  {opNotSupported},		// OPS_GetQualifier 20
-  {opNotSupported},		// OPS_SetQualifier 21
-  {opNotSupported},		// OPS_DeleteQualifier 22
-  {opNotSupported},		// OPS_EnumerateQualifiers 23
+  {opNotSupported},             // OPS_GetQualifier 20
+  {opNotSupported},             // OPS_SetQualifier 21
+  {opNotSupported},             // OPS_DeleteQualifier 22
+  {opNotSupported},             // OPS_EnumerateQualifiers 23
 #endif
-  {invokeMethod},		// OPS_InvokeMethod 24
-  {loadProvider},		// OPS_LoadProvider 25
-  {NULL},			// OPS_PingProvider 26
-  {NULL},			// OPS_IndicationLookup 27
+  {invokeMethod},               // OPS_InvokeMethod 24
+  {loadProvider},               // OPS_LoadProvider 25
+  {NULL},                       // OPS_PingProvider 26
+  {NULL},                       // OPS_IndicationLookup 27
 #ifdef SFCB_INCL_INDICATION_SUPPORT
-  {activateFilter},		// OPS_ActivateFilter 28
-  {deactivateFilter},		// OPS_DeactivateFilter 29
-  {disableIndications},		// OPS_DisableIndications 30
-  {enableIndications}		// OPS_EnableIndications 31
+  {activateFilter},             // OPS_ActivateFilter 28
+  {deactivateFilter},           // OPS_DeactivateFilter 29
+  {disableIndications},         // OPS_DisableIndications 30
+  {enableIndications}           // OPS_EnableIndications 31
 #else
-  {NULL},			// OPS_ActivateFilter 28
-  {NULL},			// OPS_DeactivateFilter 29
-  {NULL},			// OPS_EnableIndications 30
-  {NULL}			// OPS_DisableIndications 31
+  {NULL},                       // OPS_ActivateFilter 28
+  {NULL},                       // OPS_DeactivateFilter 29
+  {NULL},                       // OPS_EnableIndications 30
+  {NULL}                        // OPS_DisableIndications 31
 #endif
 };
 
@@ -3071,32 +3051,32 @@ processProviderInvocationRequestsThread(void *prms)
   char           *errstr = NULL;
 
   _SFCB_ENTER(TRACE_PROVIDERDRV,
-	      "processProviderInvocationRequestsThread");
+              "processProviderInvocationRequestsThread");
 
   for (i = 0; i < req->count; i++)
     if (req->object[i].length)
       req->object[i].data =
-	  (void *) ((long) req->object[i].data + (char *) req);
+          (void *) ((long) req->object[i].data + (char *) req);
     else if (req->object[i].type == MSG_SEG_CHARS)
       req->object[i].data = NULL;
 
   if (req->operation != OPS_LoadProvider) {
     if (req->provId == NULL) {
       mlogf(M_ERROR, M_SHOW,
-	    "-#- no provider id specified for request --- terminating process.\n");
+            "-#- no provider id specified for request --- terminating process.\n");
       exit(-1);
     }
 
     time(&curProvProc->lastActivity);
     for (pInfo = activProvs; pInfo; pInfo = pInfo->next) {
       if (pInfo->provIds.ids == req->provId) {
-	pInfo->lastActivity = curProvProc->lastActivity;
-	break;
+        pInfo->lastActivity = curProvProc->lastActivity;
+        break;
       }
     }
     if (pInfo == NULL) {
       mlogf(M_ERROR, M_SHOW,
-	    "-#- Serious provider id / provider process mismatch --- terminating process.\n");
+            "-#- Serious provider id / provider process mismatch --- terminating process.\n");
       exit(-1);
     }
 
@@ -3124,7 +3104,7 @@ processProviderInvocationRequestsThread(void *prms)
 
   else {
     _SFCB_TRACE(1, ("--- Provider request for op:%s pInfo:%p prov:%x",
-		    opsName[req->operation], pInfo, req->provId));
+                    opsName[req->operation], pInfo, req->provId));
 
     if (req->flags & FL_chunked)
       requestor = parms->requestor;
@@ -3142,12 +3122,12 @@ processProviderInvocationRequestsThread(void *prms)
 
     pthread_mutex_lock(&activeMtx);
     DEQ_FROM_LIST(parms, activeThreadsFirst, activeThreadsLast, next,
-		  prev);
+                  prev);
     pthread_mutex_unlock(&activeMtx);
 
     _SFCB_TRACE(1,
-		("--- Provider request for %s DONE",
-		 opsName[req->operation]));
+                ("--- Provider request for %s DONE",
+                 opsName[req->operation]));
   }
 
   if (resp) {
@@ -3156,7 +3136,7 @@ processProviderInvocationRequestsThread(void *prms)
     } else {
       sendResponse(parms->requestor, resp);
       if (req->operation == OPS_LoadProvider && resp->rc == 2)
-	exit(-1);
+        exit(-1);
     }
     free(resp);
   }
@@ -3166,14 +3146,14 @@ processProviderInvocationRequestsThread(void *prms)
   if (pInfo && idleThreadStartHandled == 0) {
     if (idleThreadStartHandled == 0 && req->operation != OPS_PingProvider) {
       if (pInfo->unload == 0) {
-	pthread_attr_t  tattr;
-	pthread_attr_init(&tattr);
-	pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
-	pthread_create(&pInfo->idleThread, &tattr,
-		       (void *(*)(void *)) providerIdleThread, NULL);
-	idleThreadId = pInfo->idleThread;
+        pthread_attr_t  tattr;
+        pthread_attr_init(&tattr);
+        pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
+        pthread_create(&pInfo->idleThread, &tattr,
+                       (void *(*)(void *)) providerIdleThread, NULL);
+        idleThreadId = pInfo->idleThread;
       } else
-	pInfo->idleThread = 0;
+        pInfo->idleThread = 0;
       idleThreadStartHandled = 1;
     }
     time(&pInfo->lastActivity);
@@ -3216,7 +3196,7 @@ pauseProvider(char *name)
     }
     if ((p = strstr(m, n)) != NULL) {
       if ((p == m || *(p - 1) == ',') && (p[l] == ',' || p[l] == 0))
-	rc = 1;
+        rc = 1;
     }
     free(m);
     free(n);
@@ -3247,38 +3227,38 @@ processProviderInvocationRequests(char *name)
   debugMode = pauseProvider(name);
   for (;;) {
     _SFCB_TRACE(1, ("--- Waiting for provider request to R%d-%lu",
-		    providerSockets.receive,
-		    getInode(providerSockets.receive)));
+                    providerSockets.receive,
+                    getInode(providerSockets.receive)));
     parms = (Parms *) malloc(sizeof(*parms));
 
     rc = spRecvReq(&providerSockets.receive, &parms->requestor,
-		   (void **) &parms->req, &rl, &mqg);
+                   (void **) &parms->req, &rl, &mqg);
     if (mqg.rdone) {
       int             debug_break = 0;
       if (rc != 0)
-	mlogf(M_ERROR, M_SHOW, "oops\n");
+        mlogf(M_ERROR, M_SHOW, "oops\n");
 
       _SFCB_TRACE(1, ("--- Got something op:%d-prov:%p on R%d-%lu",
-		      parms->req->operation, parms->req->provId,
-		      providerSockets.receive,
-		      getInode(providerSockets.receive)));
+                      parms->req->operation, parms->req->provId,
+                      providerSockets.receive,
+                      getInode(providerSockets.receive)));
 
       if (once && debugMode && parms->req->operation != OPS_LoadProvider)
-	for (;;) {
-	  if (debug_break)
-	    break;
-	  fprintf(stdout, "-#- Pausing for provider: %s -pid: %d\n", name,
-		  currentProc);
-	  once = 0;
-	  sleep(5);
-	}
+        for (;;) {
+          if (debug_break)
+            break;
+          fprintf(stdout, "-#- Pausing for provider: %s -pid: %d\n", name,
+                  currentProc);
+          once = 0;
+          sleep(5);
+        }
 
       if (parms->req->operation == OPS_LoadProvider || debugMode) {
-	processProviderInvocationRequestsThread(parms);
+        processProviderInvocationRequestsThread(parms);
       } else {
-	pthread_create(&t, &tattr, (void *(*)(void *))
-		       processProviderInvocationRequestsThread,
-		       (void *) parms);
+        pthread_create(&t, &tattr, (void *(*)(void *))
+                       processProviderInvocationRequestsThread,
+                       (void *) parms);
       }
     } else {
       free(parms);
@@ -3286,3 +3266,8 @@ processProviderInvocationRequests(char *name)
   }
   _SFCB_EXIT();
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

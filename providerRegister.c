@@ -20,7 +20,6 @@
  *
  */
 
-
 #include "utilft.h"
 #include "mlog.h"
 #include <stdio.h>
@@ -44,8 +43,6 @@ ProviderInfo   *classProvInfoPtr = NULL;
 ProviderInfo   *defaultProvInfoPtr = NULL;
 ProviderInfo   *interOpProvInfoPtr = NULL;
 ProviderInfo   *forceNoProvInfoPtr = &forceNotFound;
-
-
 
 static void
 freeInfoPtr(ProviderInfo * info)
@@ -147,7 +144,7 @@ newProviderRegister()
 
   ProviderRegister *br =
       (ProviderRegister *) malloc(sizeof(ProviderRegister) +
-				  sizeof(ProviderBase));
+                                  sizeof(ProviderBase));
   ProviderBase   *bb = (ProviderBase *) (br + 1);
 
   setupControl(configfile);
@@ -166,16 +163,15 @@ newProviderRegister()
       errno = 0;
       passwd = getpwnam(provuser);
       if (passwd) {
-	provuid = passwd->pw_uid;
+        provuid = passwd->pw_uid;
       } else {
-	mlogf(M_ERROR, M_SHOW,
-	      "--- Couldn't find username %s requested in SFCB config file. Errno: %d\n",
-	      provuser, errno);
-	err = 1;
+        mlogf(M_ERROR, M_SHOW,
+              "--- Couldn't find username %s requested in SFCB config file. Errno: %d\n",
+              provuser, errno);
+        err = 1;
       }
     }
   }
-
 
   if (getControlChars("registrationDir", &dir)) {
     dir = "/var/lib/sfcb/registration";
@@ -193,137 +189,137 @@ newProviderRegister()
     br->ft = ProviderRegisterFT;
     bb->fn = strdup(fin);
     bb->ht = UtilFactory->newHashTable(61,
-				       UtilHashTable_charKey |
-				       UtilHashTable_ignoreKeyCase);
+                                       UtilHashTable_charKey |
+                                       UtilHashTable_ignoreKeyCase);
 
     while (fgets(fin, 1024, in)) {
       n++;
       if (stmt)
-	free(stmt);
+        free(stmt);
       stmt = strdup(fin);
       switch (cntlParseStmt(fin, &rv)) {
       case 0:
-	mlogf(M_ERROR, M_SHOW,
-	      "--- registration statement not recognized: \n\t%d: %s\n", n,
-	      stmt);
-	err = 1;
-	break;
+        mlogf(M_ERROR, M_SHOW,
+              "--- registration statement not recognized: \n\t%d: %s\n", n,
+              stmt);
+        err = 1;
+        break;
       case 1:
-	if (info) {
-	  if (classProvInfoPtr == NULL) {
-	    if (strcmp(info->className, "$ClassProvider$") == 0)
-	      classProvInfoPtr = info;
-	  } else if (defaultProvInfoPtr == NULL) {
-	    if (strcmp(info->className, "$DefaultProvider$") == 0)
-	      defaultProvInfoPtr = info;
-	  } else if (interOpProvInfoPtr == NULL) {
-	    if (strcmp(info->className, "$InterOpProvider$") == 0) {
-	      if (exFlags & 2)
-		interOpProvInfoPtr = info;
-	      else
-		interopFound = 1;
-	    }
-	  } else if (qualiProvInfoPtr == NULL) {
-	    if (strcmp(info->className, "$QualifierProvider$") == 0)
-	      qualiProvInfoPtr = info;
-	  }
-	  addProviderToHT(info, ((ProviderBase *) br->hdl)->ht);
-	}
-	info = (ProviderInfo *) calloc(1, sizeof(ProviderInfo));
-	info->className = strdup(rv.id);
-	info->id = ++id;
-	// Set the default provider uid
-	info->uid = provuid;
-	if (!provSFCB)
-	  info->user = strdup(provuser);
-	break;
+        if (info) {
+          if (classProvInfoPtr == NULL) {
+            if (strcmp(info->className, "$ClassProvider$") == 0)
+              classProvInfoPtr = info;
+          } else if (defaultProvInfoPtr == NULL) {
+            if (strcmp(info->className, "$DefaultProvider$") == 0)
+              defaultProvInfoPtr = info;
+          } else if (interOpProvInfoPtr == NULL) {
+            if (strcmp(info->className, "$InterOpProvider$") == 0) {
+              if (exFlags & 2)
+                interOpProvInfoPtr = info;
+              else
+                interopFound = 1;
+            }
+          } else if (qualiProvInfoPtr == NULL) {
+            if (strcmp(info->className, "$QualifierProvider$") == 0)
+              qualiProvInfoPtr = info;
+          }
+          addProviderToHT(info, ((ProviderBase *) br->hdl)->ht);
+        }
+        info = (ProviderInfo *) calloc(1, sizeof(ProviderInfo));
+        info->className = strdup(rv.id);
+        info->id = ++id;
+        // Set the default provider uid
+        info->uid = provuid;
+        if (!provSFCB)
+          info->user = strdup(provuser);
+        break;
       case 2:
-	if (strcmp(rv.id, "provider") == 0)
-	  info->providerName = strdup(cntlGetVal(&rv));
-	else if (strcmp(rv.id, "location") == 0)
-	  info->location = strdup(cntlGetVal(&rv));
-	else if (strcmp(rv.id, "parameters") == 0) {
-	  info->parms = strdup(cntlGetStr(&rv));
-	  for (i = strlen(info->parms); i > 0 && info->parms[i] <= ' ';
-	       i--) {
-	    info->parms[i] = 0;
-	  }
-	} else if (strcmp(rv.id, "user") == 0) {
-	  info->user = strdup(cntlGetVal(&rv));
-	  errno = 0;
-	  passwd = getpwnam(info->user);
-	  if (passwd) {
-	    info->uid = passwd->pw_uid;
-	  } else {
-	    mlogf(M_ERROR, M_SHOW,
-		  "--- Couldn't find username %s requested in providerRegister. Errno: %d\n",
-		  info->user, errno);
-	    err = 1;
-	    break;
-	  }
-	} else if (strcmp(rv.id, "group") == 0)
-	  info->group = strdup(cntlGetVal(&rv));
-	else if (strcmp(rv.id, "unload") == 0) {
-	  char           *u;
-	  info->unload = 0;
-	  while ((u = cntlGetVal(&rv)) != NULL) {
-	    if (strcmp(u, "never") == 0) {
-	      info->unload = -1;
-	    } else {
-	      mlogf(M_ERROR, M_SHOW,
-		    "--- invalid unload specification: \n\t%d: %s\n", n,
-		    stmt);
-	      err = 1;
-	    }
-	  }
-	} else if (strcmp(rv.id, "type") == 0) {
-	  char           *t;
-	  info->type = 0;
-	  while ((t = cntlGetVal(&rv)) != NULL) {
-	    if (strcmp(t, "instance") == 0)
-	      info->type |= INSTANCE_PROVIDER;
-	    else if (strcmp(t, "association") == 0)
-	      info->type |= ASSOCIATION_PROVIDER;
-	    else if (strcmp(t, "method") == 0)
-	      info->type |= METHOD_PROVIDER;
-	    else if (strcmp(t, "indication") == 0)
-	      info->type |= INDICATION_PROVIDER;
-	    else if (strcmp(t, "class") == 0)
-	      info->type |= CLASS_PROVIDER;
-	    else if (strcmp(t, "property") == 0)
-	      info->type |= PROPERTY_PROVIDER;
-	    else if (strcmp(t, "qualifier") == 0)
-	      info->type |= QUALIFIER_PROVIDER;
-	    else {
-	      mlogf(M_ERROR, M_SHOW,
-		    "--- invalid type specification: \n\t%d: %s\n", n,
-		    stmt);
-	      err = 1;
-	    }
-	  }
-	} else if (strcmp(rv.id, "namespace") == 0) {
-	  int             max = 1,
-	      next = 0;
-	  char           *t;
-	  info->ns = (char **) malloc(sizeof(char *) * (max + 1));
-	  while ((t = cntlGetVal(&rv)) != NULL) {
-	    if (next == max) {
-	      max++;
-	      info->ns =
-		  (char **) realloc(info->ns, sizeof(char *) * (max + 1));
-	    }
-	    info->ns[next] = strdup(t);
-	    info->ns[++next] = NULL;
-	  }
-	} else {
-	  mlogf(M_ERROR, M_SHOW,
-		"--- invalid registration statement: \n\t%d: %s\n", n,
-		stmt);
-	  err = 1;
-	}
-	break;
+        if (strcmp(rv.id, "provider") == 0)
+          info->providerName = strdup(cntlGetVal(&rv));
+        else if (strcmp(rv.id, "location") == 0)
+          info->location = strdup(cntlGetVal(&rv));
+        else if (strcmp(rv.id, "parameters") == 0) {
+          info->parms = strdup(cntlGetStr(&rv));
+          for (i = strlen(info->parms); i > 0 && info->parms[i] <= ' ';
+               i--) {
+            info->parms[i] = 0;
+          }
+        } else if (strcmp(rv.id, "user") == 0) {
+          info->user = strdup(cntlGetVal(&rv));
+          errno = 0;
+          passwd = getpwnam(info->user);
+          if (passwd) {
+            info->uid = passwd->pw_uid;
+          } else {
+            mlogf(M_ERROR, M_SHOW,
+                  "--- Couldn't find username %s requested in providerRegister. Errno: %d\n",
+                  info->user, errno);
+            err = 1;
+            break;
+          }
+        } else if (strcmp(rv.id, "group") == 0)
+          info->group = strdup(cntlGetVal(&rv));
+        else if (strcmp(rv.id, "unload") == 0) {
+          char           *u;
+          info->unload = 0;
+          while ((u = cntlGetVal(&rv)) != NULL) {
+            if (strcmp(u, "never") == 0) {
+              info->unload = -1;
+            } else {
+              mlogf(M_ERROR, M_SHOW,
+                    "--- invalid unload specification: \n\t%d: %s\n", n,
+                    stmt);
+              err = 1;
+            }
+          }
+        } else if (strcmp(rv.id, "type") == 0) {
+          char           *t;
+          info->type = 0;
+          while ((t = cntlGetVal(&rv)) != NULL) {
+            if (strcmp(t, "instance") == 0)
+              info->type |= INSTANCE_PROVIDER;
+            else if (strcmp(t, "association") == 0)
+              info->type |= ASSOCIATION_PROVIDER;
+            else if (strcmp(t, "method") == 0)
+              info->type |= METHOD_PROVIDER;
+            else if (strcmp(t, "indication") == 0)
+              info->type |= INDICATION_PROVIDER;
+            else if (strcmp(t, "class") == 0)
+              info->type |= CLASS_PROVIDER;
+            else if (strcmp(t, "property") == 0)
+              info->type |= PROPERTY_PROVIDER;
+            else if (strcmp(t, "qualifier") == 0)
+              info->type |= QUALIFIER_PROVIDER;
+            else {
+              mlogf(M_ERROR, M_SHOW,
+                    "--- invalid type specification: \n\t%d: %s\n", n,
+                    stmt);
+              err = 1;
+            }
+          }
+        } else if (strcmp(rv.id, "namespace") == 0) {
+          int             max = 1,
+              next = 0;
+          char           *t;
+          info->ns = (char **) malloc(sizeof(char *) * (max + 1));
+          while ((t = cntlGetVal(&rv)) != NULL) {
+            if (next == max) {
+              max++;
+              info->ns =
+                  (char **) realloc(info->ns, sizeof(char *) * (max + 1));
+            }
+            info->ns[next] = strdup(t);
+            info->ns[++next] = NULL;
+          }
+        } else {
+          mlogf(M_ERROR, M_SHOW,
+                "--- invalid registration statement: \n\t%d: %s\n", n,
+                stmt);
+          err = 1;
+        }
+        break;
       case 3:
-	break;
+        break;
       }
     }
 
@@ -337,31 +333,31 @@ newProviderRegister()
 
   if (classProvInfoPtr == NULL) {
     mlogf(M_ERROR, M_SHOW,
-	  "--- Class provider definition not found - sfcbd will terminate\n");
+          "--- Class provider definition not found - sfcbd will terminate\n");
     err = 1;
   }
 
   if (defaultProvInfoPtr == NULL)
     mlogf(M_INFO, M_SHOW,
-	  "--- Default provider definition not found - no instance repository available\n");
+          "--- Default provider definition not found - no instance repository available\n");
 
   if (qualiProvInfoPtr == NULL)
     mlogf(M_INFO, M_SHOW,
-	  "--- Qualifier provider definition not found - no qualifier support available\n");
+          "--- Qualifier provider definition not found - no qualifier support available\n");
 
   if (interOpProvInfoPtr == NULL) {
     if (exFlags & 2 && interopFound == 0)
       mlogf(M_INFO, M_SHOW,
-	    "--- InterOp provider definition not found - no InterOp support available\n");
+            "--- InterOp provider definition not found - no InterOp support available\n");
     else if (interopFound)
       mlogf(M_INFO, M_SHOW,
-	    "--- InterOp provider definition found but not started - no InterOp support available\n");
+            "--- InterOp provider definition found but not started - no InterOp support available\n");
     interOpProvInfoPtr = &forceNotFound;
   }
 
   if (err) {
     mlogf(M_ERROR, M_SHOW,
-	  "--- Broker terminated because of previous error(s)\n");
+          "--- Broker terminated because of previous error(s)\n");
     exit(5);
   }
   if (stmt)
@@ -371,7 +367,7 @@ newProviderRegister()
 
 static int
 putProvider(ProviderRegister * br, const char *clsName,
-	    ProviderInfo * info)
+            ProviderInfo * info)
 {
   ProviderBase   *bb = (ProviderBase *) br->hdl;
   return bb->ht->ft->put(bb->ht, clsName, info);
@@ -425,7 +421,7 @@ resetProvider(ProviderRegister * br, int pid)
      */
     while (info) {
       if (info->pid == pid) {
-	info->pid = 0;
+        info->pid = 0;
       }
       info = info->nextInRegister;
     }
@@ -451,3 +447,8 @@ static Provider_Register_FT ift = {
 };
 
 Provider_Register_FT *ProviderRegisterFT = &ift;
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -21,7 +21,6 @@
  *
  */
 
-
 #include "cmpidt.h"
 #include "cmpift.h"
 #include "cmpimacs.h"
@@ -40,7 +39,7 @@
 
 #define LOCALCLASSNAME "ProfileProvider"
 
-extern void     setStatus(CMPIStatus * st, CMPIrc rc, char *msg);
+extern void     setStatus(CMPIStatus *st, CMPIrc rc, char *msg);
 
 /*
  * ------------------------------------------------------------------------- 
@@ -49,18 +48,18 @@ extern void     setStatus(CMPIStatus * st, CMPIrc rc, char *msg);
 static const CMPIBroker *_broker;
 
 typedef struct profile {
-  char           *InstanceID;	/* <OrgID>:<LocalID> */
-  unsigned int    RegisteredOrganization;	/* "other" = 1, DMTF = 2,
-						 * ... */
-  char           *RegisteredName;	/* maxlen 256 */
-  char           *RegisteredVersion;	/* major.minor.update */
-  unsigned int    AdvertiseTypes;	/* other = 1, not = 2, slp = 3 */
+  char           *InstanceID;   /* <OrgID>:<LocalID> */
+  unsigned int    RegisteredOrganization;       /* "other" = 1, DMTF = 2,
+                                                 * ... */
+  char           *RegisteredName;       /* maxlen 256 */
+  char           *RegisteredVersion;    /* major.minor.update */
+  unsigned int    AdvertiseTypes;       /* other = 1, not = 2, slp = 3 */
   /*
    * should be an int[], but we're only supporting 2 or 3 right now 
    */
-  char           *OtherRegisteredOrganzation;	/* only if RegOrg = 1 */
-  char           *AdvertiseTypeDescriptions;	/* only if AdvertiseTypes
-						 * = 1 */
+  char           *OtherRegisteredOrganzation;   /* only if RegOrg = 1 */
+  char           *AdvertiseTypeDescriptions;    /* only if AdvertiseTypes
+                                                 * = 1 */
 } Profile;
 
 /*
@@ -71,13 +70,13 @@ typedef struct profile {
  * checks if an object path is for the /root/interop or /root/pg_interop 
  */
 static int
-interOpNameSpace(const CMPIObjectPath * cop, CMPIStatus * st)
+interOpNameSpace(const CMPIObjectPath * cop, CMPIStatus *st)
 {
   char           *ns = (char *) CMGetNameSpace(cop, NULL)->hdl;
   if (strcasecmp(ns, "root/interop") && strcasecmp(ns, "root/pg_interop")) {
     if (st)
       setStatus(st, CMPI_RC_ERR_FAILED,
-		"Object must reside in root/interop");
+                "Object must reside in root/interop");
     return 0;
   }
   return 1;
@@ -88,7 +87,7 @@ interOpNameSpace(const CMPIObjectPath * cop, CMPIStatus * st)
  */
 
 static CMPIContext *
-prepareUpcall(CMPIContext * ctx)
+prepareUpcall(CMPIContext *ctx)
 {
   /*
    * used to invoke the internal provider in upcalls, otherwise we will be 
@@ -111,24 +110,24 @@ prepareUpcall(CMPIContext * ctx)
  */
 
 static int
-setProfileProperties(const CMPIInstance * in, Profile * prof,
-		     CMPIStatus * st)
+setProfileProperties(const CMPIInstance *in, Profile * prof,
+                     CMPIStatus *st)
 {
   if (in && prof) {
 
     CMSetProperty(in, "InstanceID", prof->InstanceID, CMPI_chars);
     CMSetProperty(in, "RegisteredName", prof->RegisteredName, CMPI_chars);
     CMSetProperty(in, "RegisteredVersion", prof->RegisteredVersion,
-		  CMPI_chars);
+                  CMPI_chars);
     CMSetProperty(in, "RegisteredOrganization",
-		  (CMPIValue *) & (prof->RegisteredOrganization),
-		  CMPI_uint16);
+                  (CMPIValue *) & (prof->RegisteredOrganization),
+                  CMPI_uint16);
 
     CMPIArray      *at = CMNewArray(_broker, 1, CMPI_uint16, st);
     CMSetArrayElementAt(at, 0, (CMPIValue *) & (prof->AdvertiseTypes),
-			CMPI_uint16);
+                        CMPI_uint16);
     CMSetProperty(in, "AdvertiseTypes", (CMPIValue *) & (at),
-		  CMPI_uint16A);
+                  CMPI_uint16A);
 
     return 0;
   } else {
@@ -143,7 +142,7 @@ setProfileProperties(const CMPIInstance * in, Profile * prof,
  */
 
 static void
-initProfiles(const CMPIBroker * broker, const CMPIContext * ctx)
+initProfiles(const CMPIBroker * broker, const CMPIContext *ctx)
 {
 
   CMPIObjectPath *op;
@@ -159,7 +158,7 @@ initProfiles(const CMPIBroker * broker, const CMPIContext * ctx)
    * Add Profile Registration profile 
    */
   op = CMNewObjectPath(broker, "root/interop", "sfcb_registeredprofile",
-		       &st);
+                       &st);
   ci = CMNewInstance(broker, op, &st);
   Profile        *prof = (Profile *) malloc(sizeof(Profile));
   prof->InstanceID = "CIM:SFCB_PR";
@@ -180,7 +179,6 @@ initProfiles(const CMPIBroker * broker, const CMPIContext * ctx)
   _SFCB_EXIT();
 }
 
-
 /*
  * --------------------------------------------------------------------------
  */
@@ -193,7 +191,7 @@ initProfiles(const CMPIBroker * broker, const CMPIContext * ctx)
 
 CMPIStatus
 ProfileProviderCleanup(CMPIInstanceMI * mi,
-		       const CMPIContext * ctx, CMPIBoolean terminate)
+                       const CMPIContext *ctx, CMPIBoolean terminate)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_INDPROVIDER, "ProfileProviderCleanup");
@@ -206,9 +204,9 @@ ProfileProviderCleanup(CMPIInstanceMI * mi,
 
 CMPIStatus
 ProfileProviderEnumInstanceNames(CMPIInstanceMI * mi,
-				 const CMPIContext * ctx,
-				 const CMPIResult * rslt,
-				 const CMPIObjectPath * ref)
+                                 const CMPIContext *ctx,
+                                 const CMPIResult *rslt,
+                                 const CMPIObjectPath * ref)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIEnumeration *enm;
@@ -233,10 +231,10 @@ ProfileProviderEnumInstanceNames(CMPIInstanceMI * mi,
 
 CMPIStatus
 ProfileProviderEnumInstances(CMPIInstanceMI * mi,
-			     const CMPIContext * ctx,
-			     const CMPIResult * rslt,
-			     const CMPIObjectPath * ref,
-			     const char **properties)
+                             const CMPIContext *ctx,
+                             const CMPIResult *rslt,
+                             const CMPIObjectPath * ref,
+                             const char **properties)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIEnumeration *enm;
@@ -246,7 +244,7 @@ ProfileProviderEnumInstances(CMPIInstanceMI * mi,
   ctxLocal = prepareUpcall((CMPIContext *) ctx);
   enm =
       _broker->bft->enumerateInstances(_broker, ctxLocal, ref, properties,
-				       &st);
+                                       &st);
   CMRelease(ctxLocal);
 
   while (enm && enm->ft->hasNext(enm, &st)) {
@@ -263,10 +261,10 @@ ProfileProviderEnumInstances(CMPIInstanceMI * mi,
 
 CMPIStatus
 ProfileProviderGetInstance(CMPIInstanceMI * mi,
-			   const CMPIContext * ctx,
-			   const CMPIResult * rslt,
-			   const CMPIObjectPath * cop,
-			   const char **properties)
+                           const CMPIContext *ctx,
+                           const CMPIResult *rslt,
+                           const CMPIObjectPath * cop,
+                           const char **properties)
 {
 
   CMPIStatus      st = { CMPI_RC_OK, NULL };
@@ -294,10 +292,10 @@ ProfileProviderGetInstance(CMPIInstanceMI * mi,
 
 CMPIStatus
 ProfileProviderCreateInstance(CMPIInstanceMI * mi,
-			      const CMPIContext * ctx,
-			      const CMPIResult * rslt,
-			      const CMPIObjectPath * cop,
-			      const CMPIInstance * ci)
+                              const CMPIContext *ctx,
+                              const CMPIResult *rslt,
+                              const CMPIObjectPath * cop,
+                              const CMPIInstance *ci)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIContext    *ctxLocal;
@@ -306,8 +304,8 @@ ProfileProviderCreateInstance(CMPIInstanceMI * mi,
 
   ctxLocal = prepareUpcall((CMPIContext *) ctx);
   CMReturnObjectPath(rslt,
-		     _broker->bft->createInstance(_broker, ctxLocal, cop,
-						  ci, &st));
+                     _broker->bft->createInstance(_broker, ctxLocal, cop,
+                                                  ci, &st));
   CMRelease(ctxLocal);
 
   _SFCB_RETURN(st);
@@ -319,11 +317,11 @@ ProfileProviderCreateInstance(CMPIInstanceMI * mi,
 
 CMPIStatus
 ProfileProviderModifyInstance(CMPIInstanceMI * mi,
-			      const CMPIContext * ctx,
-			      const CMPIResult * rslt,
-			      const CMPIObjectPath * cop,
-			      const CMPIInstance * ci,
-			      const char **properties)
+                              const CMPIContext *ctx,
+                              const CMPIResult *rslt,
+                              const CMPIObjectPath * cop,
+                              const CMPIInstance *ci,
+                              const char **properties)
 {
   CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
   _SFCB_ENTER(TRACE_INDPROVIDER, "ProfileProviderModifyInstance");
@@ -336,9 +334,9 @@ ProfileProviderModifyInstance(CMPIInstanceMI * mi,
 
 CMPIStatus
 ProfileProviderDeleteInstance(CMPIInstanceMI * mi,
-			      const CMPIContext * ctx,
-			      const CMPIResult * rslt,
-			      const CMPIObjectPath * cop)
+                              const CMPIContext *ctx,
+                              const CMPIResult *rslt,
+                              const CMPIObjectPath * cop)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIContext    *ctxLocal;
@@ -358,16 +356,15 @@ ProfileProviderDeleteInstance(CMPIInstanceMI * mi,
 
 CMPIStatus
 ProfileProviderExecQuery(CMPIInstanceMI * mi,
-			 const CMPIContext * ctx,
-			 const CMPIResult * rslt,
-			 const CMPIObjectPath * cop,
-			 const char *lang, const char *query)
+                         const CMPIContext *ctx,
+                         const CMPIResult *rslt,
+                         const CMPIObjectPath * cop,
+                         const char *lang, const char *query)
 {
   CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
   _SFCB_ENTER(TRACE_INDPROVIDER, "ProfileProviderExecQuery");
   _SFCB_RETURN(st);
 }
-
 
 /*
  * --------------------------------------------------------------------------
@@ -381,8 +378,7 @@ ProfileProviderExecQuery(CMPIInstanceMI * mi,
 
 CMPIStatus
 ProfileProviderMethodCleanup(CMPIMethodMI * mi,
-			     const CMPIContext * ctx,
-			     CMPIBoolean terminate)
+                             const CMPIContext *ctx, CMPIBoolean terminate)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_INDPROVIDER, "ProfileProviderMethodCleanup");
@@ -395,11 +391,11 @@ ProfileProviderMethodCleanup(CMPIMethodMI * mi,
 
 CMPIStatus
 ProfileProviderInvokeMethod(CMPIMethodMI * mi,
-			    const CMPIContext * ctx,
-			    const CMPIResult * rslt,
-			    const CMPIObjectPath * ref,
-			    const char *methodName,
-			    const CMPIArgs * in, CMPIArgs * out)
+                            const CMPIContext *ctx,
+                            const CMPIResult *rslt,
+                            const CMPIObjectPath * ref,
+                            const char *methodName,
+                            const CMPIArgs * in, CMPIArgs * out)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
 
@@ -433,3 +429,8 @@ ProfileProviderInvokeMethod(CMPIMethodMI * mi,
 CMInstanceMIStub(ProfileProvider, ProfileProvider, _broker, CMNoHook);
 
 CMMethodMIStub(ProfileProvider, ProfileProvider, _broker, CMNoHook);
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

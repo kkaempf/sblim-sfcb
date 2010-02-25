@@ -19,18 +19,15 @@
  *
  */
 
-
 #include <stdlib.h>
 #include "avltree.h"
 
-
-static void     freeAvl(AvlTree ** t);
-static void    *insertAvl(AvlTree * this, void *item);
-static void    *findAvl(AvlTree * this, void *item);
-static void    *findMinAvl(AvlTree * this);
-static void    *deleteAvl(AvlTree * this, void *item);
-static void    *deleteMinAvl(AvlTree * this);
-
+static void     freeAvl(AvlTree **t);
+static void    *insertAvl(AvlTree *this, void *item);
+static void    *findAvl(AvlTree *this, void *item);
+static void    *findMinAvl(AvlTree *this);
+static void    *deleteAvl(AvlTree *this, void *item);
+static void    *deleteMinAvl(AvlTree *this);
 
 AvlTree        *
 newAvlTree(int  (*compar) (const void *, const void *))
@@ -52,9 +49,8 @@ newAvlTree(int  (*compar) (const void *, const void *))
   return this;
 }
 
-
 static void
-freeAvl(AvlTree ** this)
+freeAvl(AvlTree **this)
 {
   // printf("1\n");
   AvlTree        *t = *this;
@@ -76,10 +72,10 @@ freeAvl(AvlTree ** this)
 
       p = stack[--tos];
       if (p->left) {
-	stack[tos++] = p->left;
+        stack[tos++] = p->left;
       }
       if (p->right) {
-	stack[tos++] = p->right;
+        stack[tos++] = p->right;
       }
       free(p);
     }
@@ -95,9 +91,8 @@ freeAvl(AvlTree ** this)
 
 }
 
-
 static void    *
-insertAvl(AvlTree * this, void *item)
+insertAvl(AvlTree *this, void *item)
 {
 
   int             (*compar) (const void *, const void *);
@@ -124,23 +119,23 @@ insertAvl(AvlTree * this, void *item)
       stack[tos] = p;
       cmpres = compar(item, p->item);
       if (cmpres < 0) {
-	pathInfo[tos] = -1;
-	tos++;
-	p = p->left;
-	if (!p) {
-	  attachX = &stack[tos - 1]->left;
-	  break;
-	}
+        pathInfo[tos] = -1;
+        tos++;
+        p = p->left;
+        if (!p) {
+          attachX = &stack[tos - 1]->left;
+          break;
+        }
       } else if (cmpres > 0) {
-	pathInfo[tos] = 1;
-	tos++;
-	p = p->right;
-	if (!p) {
-	  attachX = &stack[tos - 1]->right;
-	  break;
-	}
+        pathInfo[tos] = 1;
+        tos++;
+        p = p->right;
+        if (!p) {
+          attachX = &stack[tos - 1]->right;
+          break;
+        }
       } else {
-	return p->item;
+        return p->item;
       }
     }
   } else {
@@ -164,94 +159,92 @@ insertAvl(AvlTree * this, void *item)
     } else {
       p->balance += pathInfo[tos];
       if (p->balance == 0) {
-	break;
+        break;
       } else {
-	q = stack[tos + 1];
-	if (pathInfo[tos] == pathInfo[tos + 1]) {
+        q = stack[tos + 1];
+        if (pathInfo[tos] == pathInfo[tos + 1]) {
 
-	  if (pathInfo[tos] == 1) {
-	    p->right = q->left;
-	    q->left = p;
-	  } else {
-	    p->left = q->right;
-	    q->right = p;
-	  }
+          if (pathInfo[tos] == 1) {
+            p->right = q->left;
+            q->left = p;
+          } else {
+            p->left = q->right;
+            q->right = p;
+          }
 
-	  p->balance = q->balance = 0;
+          p->balance = q->balance = 0;
 
-	  if (tos != 0) {
-	    if (pathInfo[tos - 1] == 1) {
-	      stack[tos - 1]->right = q;
-	    } else {
-	      stack[tos - 1]->left = q;
-	    }
-	  } else {
-	    this->root = q;
-	  }
+          if (tos != 0) {
+            if (pathInfo[tos - 1] == 1) {
+              stack[tos - 1]->right = q;
+            } else {
+              stack[tos - 1]->left = q;
+            }
+          } else {
+            this->root = q;
+          }
 
-	  break;
-	} else {
+          break;
+        } else {
 
-	  if (tos + 2 != stackN) {
-	    r = stack[tos + 2];
-	  } else {
-	    r = x;
-	  }
+          if (tos + 2 != stackN) {
+            r = stack[tos + 2];
+          } else {
+            r = x;
+          }
 
-	  if (pathInfo[tos] == 1) {
-	    q->left = r->right;
-	    p->right = r->left;
-	    r->right = q;
-	    r->left = p;
-	    if (r->balance == 1) {
-	      p->balance = -1;
-	      q->balance = 0;
-	    } else if (r->balance == -1) {
-	      p->balance = 0;
-	      q->balance = 1;
-	    } else {
-	      p->balance = q->balance = 0;
-	    }
-	  } else {
-	    q->right = r->left;
-	    p->left = r->right;
-	    r->left = q;
-	    r->right = p;
-	    if (r->balance == 1) {
-	      p->balance = 0;
-	      q->balance = -1;
-	    } else if (r->balance == -1) {
-	      p->balance = 1;
-	      q->balance = 0;
-	    } else {
-	      p->balance = q->balance = 0;
-	    }
-	  }
-	  r->balance = 0;
+          if (pathInfo[tos] == 1) {
+            q->left = r->right;
+            p->right = r->left;
+            r->right = q;
+            r->left = p;
+            if (r->balance == 1) {
+              p->balance = -1;
+              q->balance = 0;
+            } else if (r->balance == -1) {
+              p->balance = 0;
+              q->balance = 1;
+            } else {
+              p->balance = q->balance = 0;
+            }
+          } else {
+            q->right = r->left;
+            p->left = r->right;
+            r->left = q;
+            r->right = p;
+            if (r->balance == 1) {
+              p->balance = 0;
+              q->balance = -1;
+            } else if (r->balance == -1) {
+              p->balance = 1;
+              q->balance = 0;
+            } else {
+              p->balance = q->balance = 0;
+            }
+          }
+          r->balance = 0;
 
-	  if (tos != 0) {
-	    if (pathInfo[tos - 1] == 1) {
-	      stack[tos - 1]->right = r;
-	    } else {
-	      stack[tos - 1]->left = r;
-	    }
-	  } else {
-	    this->root = r;
-	  }
+          if (tos != 0) {
+            if (pathInfo[tos - 1] == 1) {
+              stack[tos - 1]->right = r;
+            } else {
+              stack[tos - 1]->left = r;
+            }
+          } else {
+            this->root = r;
+          }
 
-	  break;
-	}
+          break;
+        }
       }
     }
   }
 
-
   return res;
 }
 
-
 static void    *
-findAvl(AvlTree * this, void *item)
+findAvl(AvlTree *this, void *item)
 {
   int             (*compar) (const void *, const void *);
   int             cmpres;
@@ -265,11 +258,11 @@ findAvl(AvlTree * this, void *item)
       p = nextP;
       cmpres = compar(item, p->item);
       if (cmpres < 0) {
-	nextP = p->left;
+        nextP = p->left;
       } else if (cmpres > 0) {
-	nextP = p->right;
+        nextP = p->right;
       } else {
-	return p->item;
+        return p->item;
       }
     } while (nextP);
   }
@@ -277,13 +270,11 @@ findAvl(AvlTree * this, void *item)
   return NULL;
 }
 
-
 void           *
-findMinAvl(AvlTree * this)
+findMinAvl(AvlTree *this)
 {
   AvlNode        *p,
                  *nextP;
-
 
   if ((nextP = this->root)) {
     do {
@@ -298,7 +289,7 @@ findMinAvl(AvlTree * this)
 }
 
 static void    *
-deleteAvl(AvlTree * this, void *item)
+deleteAvl(AvlTree *this, void *item)
 {
   void           *res;
   int             (*compar) (const void *, const void *);
@@ -313,7 +304,6 @@ deleteAvl(AvlTree * this, void *item)
   int             tos,
                   stackP;
   signed char    *pathInfo;
-
 
   if (!(p = this->root))
     return NULL;
@@ -342,16 +332,15 @@ deleteAvl(AvlTree * this, void *item)
     }
   }
 
-
   if (!p->left) {
     if (tos == 0) {
       this->root = p->right;
     } else {
       prevP = stack[tos - 1];
       if (p == prevP->left) {
-	prevP->left = p->right;
+        prevP->left = p->right;
       } else {
-	prevP->right = p->right;
+        prevP->right = p->right;
       }
     }
   } else if (!p->right) {
@@ -360,9 +349,9 @@ deleteAvl(AvlTree * this, void *item)
     } else {
       prevP = stack[tos - 1];
       if (p == prevP->left) {
-	prevP->left = p->left;
+        prevP->left = p->left;
       } else {
-	prevP->right = p->left;
+        prevP->right = p->left;
       }
     }
   } else {
@@ -379,15 +368,14 @@ deleteAvl(AvlTree * this, void *item)
     } while (m);
     m = stack[--tos];
 
-
     if (stackP == 0) {
       this->root = m;
     } else {
       prevP = stack[stackP - 1];
       if (p == prevP->left) {
-	prevP->left = m;
+        prevP->left = m;
       } else {
-	prevP->right = m;
+        prevP->right = m;
       }
     }
 
@@ -415,87 +403,85 @@ deleteAvl(AvlTree * this, void *item)
       p->balance -= pathInfo[tos];
 
       if (p->balance != 0) {
-	if (pathInfo[tos] == 1) {
-	  q = p->left;
-	} else {
-	  q = p->right;
-	}
-	if (pathInfo[tos] != q->balance) {
+        if (pathInfo[tos] == 1) {
+          q = p->left;
+        } else {
+          q = p->right;
+        }
+        if (pathInfo[tos] != q->balance) {
 
-	  if (pathInfo[tos] != 1) {
-	    p->right = q->left;
-	    q->left = p;
-	  } else {
-	    p->left = q->right;
-	    q->right = p;
-	  }
+          if (pathInfo[tos] != 1) {
+            p->right = q->left;
+            q->left = p;
+          } else {
+            p->left = q->right;
+            q->right = p;
+          }
 
-	  if (tos != 0) {
-	    if (pathInfo[tos - 1] == 1) {
-	      stack[tos - 1]->right = q;
-	    } else {
-	      stack[tos - 1]->left = q;
-	    }
-	  } else {
-	    this->root = q;
-	  }
+          if (tos != 0) {
+            if (pathInfo[tos - 1] == 1) {
+              stack[tos - 1]->right = q;
+            } else {
+              stack[tos - 1]->left = q;
+            }
+          } else {
+            this->root = q;
+          }
 
-	  if (q->balance == 0) {
-	    p->balance = p->balance > 0 ? 1 : -1;
-	    q->balance = -p->balance;
-	    break;
-	  } else {
-	    p->balance = q->balance = 0;
-	  }
+          if (q->balance == 0) {
+            p->balance = p->balance > 0 ? 1 : -1;
+            q->balance = -p->balance;
+            break;
+          } else {
+            p->balance = q->balance = 0;
+          }
 
+        } else {
 
-	} else {
+          if (pathInfo[tos] != 1) {
+            r = q->left;
+            q->left = r->right;
+            p->right = r->left;
+            r->right = q;
+            r->left = p;
+            if (r->balance == 1) {
+              p->balance = -1;
+              q->balance = 0;
+            } else if (r->balance == -1) {
+              p->balance = 0;
+              q->balance = 1;
+            } else {
+              p->balance = q->balance = 0;
+            }
+          } else {
+            r = q->right;
+            q->right = r->left;
+            p->left = r->right;
+            r->left = q;
+            r->right = p;
+            if (r->balance == 1) {
+              p->balance = 0;
+              q->balance = -1;
+            } else if (r->balance == -1) {
+              p->balance = 1;
+              q->balance = 0;
+            } else {
+              p->balance = q->balance = 0;
+            }
+          }
+          r->balance = 0;
 
-	  if (pathInfo[tos] != 1) {
-	    r = q->left;
-	    q->left = r->right;
-	    p->right = r->left;
-	    r->right = q;
-	    r->left = p;
-	    if (r->balance == 1) {
-	      p->balance = -1;
-	      q->balance = 0;
-	    } else if (r->balance == -1) {
-	      p->balance = 0;
-	      q->balance = 1;
-	    } else {
-	      p->balance = q->balance = 0;
-	    }
-	  } else {
-	    r = q->right;
-	    q->right = r->left;
-	    p->left = r->right;
-	    r->left = q;
-	    r->right = p;
-	    if (r->balance == 1) {
-	      p->balance = 0;
-	      q->balance = -1;
-	    } else if (r->balance == -1) {
-	      p->balance = 1;
-	      q->balance = 0;
-	    } else {
-	      p->balance = q->balance = 0;
-	    }
-	  }
-	  r->balance = 0;
+          if (tos != 0) {
+            if (pathInfo[tos - 1] == 1) {
+              stack[tos - 1]->right = r;
+            } else {
+              stack[tos - 1]->left = r;
+            }
+          } else {
+            this->root = r;
+          }
 
-	  if (tos != 0) {
-	    if (pathInfo[tos - 1] == 1) {
-	      stack[tos - 1]->right = r;
-	    } else {
-	      stack[tos - 1]->left = r;
-	    }
-	  } else {
-	    this->root = r;
-	  }
-
-
-	}
+        }
       }
     }
   }
@@ -503,9 +489,8 @@ deleteAvl(AvlTree * this, void *item)
   return res;
 }
 
-
 static void    *
-deleteMinAvl(AvlTree * this)
+deleteMinAvl(AvlTree *this)
 {
   void           *res;
   AvlNode        *p;
@@ -544,58 +529,60 @@ deleteMinAvl(AvlTree * this)
     } else {
       p->balance++;
 
-
       if (p->balance != 0) {
 
-	q = p->right;
-	if (q->balance != -1) {
-	  p->right = q->left;
-	  q->left = p;
+        q = p->right;
+        if (q->balance != -1) {
+          p->right = q->left;
+          q->left = p;
 
-	  if (tos != 0) {
-	    stack[tos - 1]->left = q;
-	  } else {
-	    this->root = q;
-	  }
+          if (tos != 0) {
+            stack[tos - 1]->left = q;
+          } else {
+            this->root = q;
+          }
 
-	  if (q->balance == 0) {
-	    p->balance = 1;
-	    q->balance = -1;
-	    break;
-	  } else {
-	    p->balance = q->balance = 0;
-	  }
+          if (q->balance == 0) {
+            p->balance = 1;
+            q->balance = -1;
+            break;
+          } else {
+            p->balance = q->balance = 0;
+          }
 
+        } else {
 
-	} else {
+          r = q->left;
+          q->left = r->right;
+          p->right = r->left;
+          r->right = q;
+          r->left = p;
+          if (r->balance == 1) {
+            p->balance = -1;
+            q->balance = 0;
+          } else if (r->balance == -1) {
+            p->balance = 0;
+            q->balance = 1;
+          } else {
+            p->balance = q->balance = 0;
+          }
+          r->balance = 0;
 
-	  r = q->left;
-	  q->left = r->right;
-	  p->right = r->left;
-	  r->right = q;
-	  r->left = p;
-	  if (r->balance == 1) {
-	    p->balance = -1;
-	    q->balance = 0;
-	  } else if (r->balance == -1) {
-	    p->balance = 0;
-	    q->balance = 1;
-	  } else {
-	    p->balance = q->balance = 0;
-	  }
-	  r->balance = 0;
+          if (tos != 0) {
+            stack[tos - 1]->left = r;
+          } else {
+            this->root = r;
+          }
 
-	  if (tos != 0) {
-	    stack[tos - 1]->left = r;
-	  } else {
-	    this->root = r;
-	  }
-
-	}
+        }
       }
     }
   }
 
-
   return res;
 }
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

@@ -20,7 +20,6 @@
  *
  */
 
-
 #define UTIL_FT_VERSION 1
 
 #ifndef _UTILFT_H_
@@ -72,96 +71,101 @@ extern          "C" {
     HashTableIterator *(*getFirst)
                     (UtilHashTable * ht, void **key, void **value);
     HashTableIterator *(*getNext)
+
      
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(UtilHashTable * ht, HashTableIterator * iterator, void **key,
-	 void **value);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (UtilHashTable * ht, HashTableIterator * iterator, void **key,
+         void **value);
 
     void            (*setKeyCmpFunction)
+
      
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(UtilHashTable * ht,
-	 int (*keycomp) (const void *k1, const void *k2));
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (UtilHashTable * ht,
+         int (*keycomp) (const void *k1, const void *k2));
     void            (*setValueCmpFunction)
+
      
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(UtilHashTable * ht,
-	 int (*keycomp) (const void *v1, const void *v2));
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (UtilHashTable * ht,
+         int (*keycomp) (const void *v1, const void *v2));
     void            (*setHashFunction)
+
      
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(UtilHashTable * ht,
-	 unsigned long (*hashFunction) (const void *key));
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (UtilHashTable * ht,
+         unsigned long (*hashFunction) (const void *key));
     void            (*setReleaseFunctions)
+
      
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	(UtilHashTable * ht, void (*keyRelease) (void *key),
-	 void (*valueRelease) (void *value));
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        (UtilHashTable * ht, void (*keyRelease) (void *key),
+         void (*valueRelease) (void *value));
   };
 
 #define UtilHashTable_charKey 1
@@ -172,7 +176,6 @@ extern          "C" {
 #define UtilHashTable_CMPIStyleValue 32
 #define UtilHashTable_ignoreValueCase 64
 #define UtilHashTable_managedValue 128
-
 
   struct _Util_List_FT;
   typedef struct _Util_List_FT Util_List_FT;
@@ -224,7 +227,6 @@ extern          "C" {
                     (UtilList * ul, void *elm);
   };
 
-
   typedef struct _Util_StringBuffer_FT Util_StringBuffer_FT;
   struct _UtilStringBuffer {
     void           *hdl;
@@ -241,30 +243,28 @@ extern          "C" {
     const char     *(*getCharPtr) (UtilStringBuffer * sb);
     unsigned int    (*getSize) (UtilStringBuffer * sb);
     void            (*appendChars) (UtilStringBuffer * sb,
-				    const char *chars);
+                                    const char *chars);
     void            (*reset) (UtilStringBuffer * sb);
     void            (*appendBlock) (UtilStringBuffer * sb, void *,
-				    unsigned int size);
+                                    unsigned int size);
     void            (*append3Chars) (UtilStringBuffer * sb,
-				     const char *chars1,
-				     const char *chars2,
-				     const char *chars3);
+                                     const char *chars1,
+                                     const char *chars2,
+                                     const char *chars3);
     void            (*append5Chars) (UtilStringBuffer * sb,
-				     const char *chars1,
-				     const char *chars2,
-				     const char *chars3,
-				     const char *chars4,
-				     const char *chars5);
+                                     const char *chars1,
+                                     const char *chars2,
+                                     const char *chars3,
+                                     const char *chars4,
+                                     const char *chars5);
     void            (*append6Chars) (UtilStringBuffer * sb,
-				     const char *chars1,
-				     const char *chars2,
-				     const char *chars3,
-				     const char *chars4,
-				     const char *chars5,
-				     const char *chars6);
+                                     const char *chars1,
+                                     const char *chars2,
+                                     const char *chars3,
+                                     const char *chars4,
+                                     const char *chars5,
+                                     const char *chars6);
   };
-
-
 
   struct _Util_Factory_FT;
   typedef struct _Util_Factory_FT Util_Factory_FT;
@@ -282,8 +282,12 @@ extern          "C" {
 
 #define SFCB_APPENDCHARS_BLOCK(sb,c) (sb)->ft->appendBlock((sb),c,sizeof(c)-1)
 
-
 #ifdef __cplusplus
 }
 #endif
-#endif				// _UTILFT_H_
+#endif                          // _UTILFT_H_
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

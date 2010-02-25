@@ -19,7 +19,6 @@
  *
  */
 
-
 #ifndef msgqueue_h
 #define msgqueue_h
 
@@ -103,7 +102,6 @@ typedef enum comCloseOpt {
   cAll = -1
 } ComCloseOpt;
 
-
 #define cRcvSocket(sp) (sp.receive)
 #define cSndSocket(sp) (sp.send)
 
@@ -131,18 +129,18 @@ extern ComSockets getSocketPair(char *by);
 extern void     closeSocket(ComSockets * sp, ComCloseOpt o, char *by);
 
 extern int      spRecvCtlResult(int *s, int *from, void **data,
-				unsigned long *length);
+                                unsigned long *length);
 extern int      spSendCtlResult(int *to, int *from, short code,
-				unsigned long count, void *data,
-				int options);
+                                unsigned long count, void *data,
+                                int options);
 extern int      spSendReq(int *to, int *from, void *data,
-			  unsigned long size, int internal);
+                          unsigned long size, int internal);
 extern int      spRecvResult(int *q, int *from, void **data,
-			     unsigned long *length);
+                             unsigned long *length);
 extern int      spRecvReq(int *q, int *from, void **data,
-			  unsigned long *length, MqgStat * mqg);
+                          unsigned long *length, MqgStat * mqg);
 extern int      spSendResult(int *to, int *from, void *data,
-			     unsigned long size);
+                             unsigned long size);
 extern unsigned long getInode(int fd);
 
 extern void     initSocketPairs(int provs, int https, int shttps);
@@ -213,3 +211,8 @@ extern void     stopLocalConnectServer();
 extern void     localConnectServer();
 
 #endif
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */

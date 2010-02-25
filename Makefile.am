@@ -593,6 +593,13 @@ endif
 test: testprep check testreport
 endif
 
+pretty:
+	for i in `find $(srcdir) -name \*.[ch]`; do \
+          sed -i '/\/\* MODELINES \*\//,$$ d' $$i ; \
+          indent $$i ; \
+	  cat extra/modelines >> $$i ; \
+	done;
+
 postinstall: install-cimschema create-sslkeys
 	test -f $(DESTDIR)$(sfcbstatedir)/registration/providerRegister || $(INSTALL_DATA) $(DESTDIR)$(sfcbstatedir)/stage/default.reg $(DESTDIR)$(sfcbstatedir)/registration/providerRegister 
 if TEST_ENABLED

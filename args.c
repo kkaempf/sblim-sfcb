@@ -21,8 +21,6 @@
  *
  */
 
-
-
 #include <stdio.h>
 #include <string.h>
 
@@ -31,37 +29,36 @@
 #include "msgqueue.h"
 
 struct native_args {
-  CMPIArgs        args;		/* !< the inheriting data structure */
-  int             mem_state;	/* !< states, whether this object is
-				 * registered within the memory
-				 * mangagement or represents a cloned
-				 * object */
+  CMPIArgs        args;         /* !< the inheriting data structure */
+  int             mem_state;    /* !< states, whether this object is
+                                 * registered within the memory
+                                 * mangagement or represents a cloned
+                                 * object */
 };
 
 extern int      ClObjectLocateProperty(ClObjectHdr * hdr, ClSection * prps,
-				       const char *id);
+                                       const char *id);
 extern void     ClArgsFree(ClArgs * arg);
 extern ClArgs  *ClArgsRebuild(ClArgs * arg, void *area);
-extern int      ClArgsGetArgAt(ClArgs * arg, int id, CMPIData * data,
-			       char **name);
+extern int      ClArgsGetArgAt(ClArgs * arg, int id, CMPIData *data,
+                               char **name);
 extern int      ClArgsAddArg(ClArgs * arg, const char *id, CMPIData d);
 extern int      ClArgsGetArgCount(ClArgs * arg);
 extern ClArgs  *ClArgsNew();
 extern unsigned long ClSizeArgs(ClArgs * arg);
 extern void     ClArgsRelocateArgs(ClArgs * arg);
-extern CMPIArray *native_make_CMPIArray(CMPIData * av, CMPIStatus * rc,
-					ClObjectHdr * hdr);
+extern CMPIArray *native_make_CMPIArray(CMPIData *av, CMPIStatus *rc,
+                                        ClObjectHdr * hdr);
 extern CMPIObjectPath *getObjectPath(char *path, char **msg);
 extern const char *ClObjectGetClString(ClObjectHdr * hdr, ClString * id);
-extern CMPIArray *internal_native_make_CMPIArray(CMPIData * av,
-						 CMPIStatus * rc,
-						 ClObjectHdr * hdr,
-						 int mode);
+extern CMPIArray *internal_native_make_CMPIArray(CMPIData *av,
+                                                 CMPIStatus *rc,
+                                                 ClObjectHdr * hdr,
+                                                 int mode);
 static struct native_args *__new_empty_args(int, CMPIStatus *);
 MsgSegment      setArgsMsgSegment(CMPIArgs * args);
 
 /****************************************************************************/
-
 
 static CMPIStatus
 __aft_release(CMPIArgs * args)
@@ -79,9 +76,8 @@ __aft_release(CMPIArgs * args)
   CMReturn(CMPI_RC_ERR_FAILED);
 }
 
-
 static CMPIArgs *
-__aft_clone(const CMPIArgs * args, CMPIStatus * rc)
+__aft_clone(const CMPIArgs * args, CMPIStatus *rc)
 {
   struct native_args *a = (struct native_args *) args;
   struct native_args *na = __new_empty_args(MEM_NOT_TRACKED, rc);
@@ -93,10 +89,9 @@ __aft_clone(const CMPIArgs * args, CMPIStatus * rc)
   return (CMPIArgs *) na;
 }
 
-
 static CMPIStatus
 __aft_addArg(const CMPIArgs * args, const char *name,
-	     const CMPIValue * value, CMPIType type)
+             const CMPIValue * value, CMPIType type)
 {
   ClArgs         *ca = (ClArgs *) args->hdl;
   CMPIData        data = { type, CMPI_goodValue, {0} };
@@ -129,10 +124,9 @@ __aft_addArg(const CMPIArgs * args, const char *name,
   CMReturn(CMPI_RC_OK);
 }
 
-
 static CMPIData
 __aft_getArgAt(const CMPIArgs * args,
-	       unsigned int i, CMPIString ** name, CMPIStatus * rc)
+               unsigned int i, CMPIString **name, CMPIStatus *rc)
 {
   ClArgs         *ca = (ClArgs *) args->hdl;
   char           *n;
@@ -149,13 +143,14 @@ __aft_getArgAt(const CMPIArgs * args,
   } else if (rv.type == CMPI_ref) {
     char           *msg;
     rv.value.ref = getObjectPath((char *)
-				 ClObjectGetClString(&ca->hdr,
-						     (ClString *) & rv.
-						     value.chars), &msg);
+                                 ClObjectGetClString(&ca->hdr,
+                                                     (ClString *) &
+                                                     rv.value.chars),
+                                 &msg);
   } else if (rv.type & CMPI_ARRAY && rv.value.array) {
     rv.value.array =
-	internal_native_make_CMPIArray((CMPIData *) rv.value.array, NULL,
-				       &ca->hdr, MEM_TRACKED);
+        internal_native_make_CMPIArray((CMPIData *) rv.value.array, NULL,
+                                       &ca->hdr, MEM_TRACKED);
   }
   if (name) {
     *name = sfcb_native_new_CMPIString(n, NULL, 0);
@@ -166,7 +161,7 @@ __aft_getArgAt(const CMPIArgs * args,
 }
 
 static CMPIData
-__aft_getArg(const CMPIArgs * args, const char *name, CMPIStatus * rc)
+__aft_getArg(const CMPIArgs * args, const char *name, CMPIStatus *rc)
 {
   ClArgs         *ca = (ClArgs *) args->hdl;
   ClSection      *prps = &ca->properties;
@@ -182,16 +177,14 @@ __aft_getArg(const CMPIArgs * args, const char *name, CMPIStatus * rc)
   return rv;
 }
 
-
 static unsigned int
-__aft_getArgCount(const CMPIArgs * args, CMPIStatus * rc)
+__aft_getArgCount(const CMPIArgs * args, CMPIStatus *rc)
 {
   ClArgs         *ca = (ClArgs *) args->hdl;
   if (rc)
     CMSetStatus(rc, CMPI_RC_OK);
   return (CMPICount) ClArgsGetArgCount(ca);
 }
-
 
 static CMPIArgsFT aft = {
   NATIVE_FT_VERSION,
@@ -204,7 +197,7 @@ static CMPIArgsFT aft = {
 };
 
 static struct native_args *
-__new_empty_args(int mm_add, CMPIStatus * rc)
+__new_empty_args(int mm_add, CMPIStatus *rc)
 {
   static CMPIArgs a = {
     "CMPIArgs",
@@ -223,9 +216,8 @@ __new_empty_args(int mm_add, CMPIStatus * rc)
   return (struct native_args *) tArgs;
 }
 
-
 CMPIArgs       *
-NewCMPIArgs(CMPIStatus * rc)
+NewCMPIArgs(CMPIStatus *rc)
 {
   struct native_args *args = __new_empty_args(MEM_NOT_TRACKED, rc);
   args->args.hdl = ClArgsNew();
@@ -233,7 +225,7 @@ NewCMPIArgs(CMPIStatus * rc)
 }
 
 CMPIArgs       *
-TrackedCMPIArgs(CMPIStatus * rc)
+TrackedCMPIArgs(CMPIStatus *rc)
 {
   struct native_args *args = __new_empty_args(MEM_TRACKED, rc);
   args->args.hdl = ClArgsNew();
@@ -253,7 +245,7 @@ getSerializedArgs(CMPIArgs * args, void *area)
   if (args) {
     memcpy(area, args, sizeof(struct native_args));
     ClArgsRebuild((ClArgs *) args->hdl,
-		  (void *) ((char *) area + sizeof(struct native_args)));
+                  (void *) ((char *) area + sizeof(struct native_args)));
   } else {
 
   }
@@ -280,12 +272,11 @@ setArgsMsgSegment(CMPIArgs * args)
 }
 
 CMPIString     *
-args2String(CMPIArgs * arg, CMPIStatus * rc)
+args2String(CMPIArgs * arg, CMPIStatus *rc)
 {
   char           *argstr = ClArgsToString((ClArgs *) arg->hdl);
   return sfcb_native_new_CMPIString(argstr, NULL, 0);
 }
-
 
 /*****************************************************************************/
 
@@ -293,3 +284,8 @@ args2String(CMPIArgs * arg, CMPIStatus * rc)
 /*** mode: C           ***/
 /*** c-basic-offset: 8 ***/
 /*** End:              ***/
+/* MODELINES */
+/* DO NOT EDIT BELOW THIS COMMENT */
+/* Modelines are added by 'make pretty' */
+/* -*- Mode: C; c-basic-offset: 2; indent-tabs-mode: nil; -*- */
+/* vi:set ts=2 sts=2 sw=2 expandtab: */
