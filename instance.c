@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.45 2008/11/21 20:23:51 mchasal Exp $
+ * $Id: instance.c,v 1.46 2010/03/01 15:40:06 smswehla Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -184,9 +184,8 @@ CMPIData __ift_internal_getPropertyAt(const CMPIInstance * ci, CMPICount i,
       rv.value.string = 
 	 sfcb_native_new_CMPIString(rv.value.string->hdl, NULL,0);
    }  else if (rv.type == CMPI_ref) {
-      char *msg;
       rv.value.ref = getObjectPath(
-         (char*)ClObjectGetClString(&inst->hdr, (ClString*)&rv.value.chars), &msg);
+         (char*)ClObjectGetClString(&inst->hdr, (ClString*)&rv.value.chars), NULL);
    }
    else if (rv.type & CMPI_ARRAY && rv.value.array) {
       rv.value.array =

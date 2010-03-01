@@ -1,6 +1,6 @@
 
 /*
- * $Id: args.c,v 1.13 2007/10/31 15:09:45 sschuetz Exp $
+ * $Id: args.c,v 1.14 2010/03/01 15:40:06 smswehla Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -137,9 +137,8 @@ static CMPIData __aft_getArgAt(const CMPIArgs * args,
       rv.type = CMPI_string;
    }
    else if (rv.type == CMPI_ref) {
-      char *msg;
       rv.value.ref = getObjectPath(
-         (char*)ClObjectGetClString(&ca->hdr, (ClString *) & rv.value.chars), &msg);
+         (char*)ClObjectGetClString(&ca->hdr, (ClString *) & rv.value.chars), NULL);
    }
    else if (rv.type & CMPI_ARRAY && rv.value.array) {
       rv.value.array =
