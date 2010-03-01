@@ -141,12 +141,11 @@ __aft_getArgAt(const CMPIArgs * args,
     rv.value.string = sfcb_native_new_CMPIString(rv.value.chars, NULL, 0);
     rv.type = CMPI_string;
   } else if (rv.type == CMPI_ref) {
-    char           *msg;
     rv.value.ref = getObjectPath((char *)
                                  ClObjectGetClString(&ca->hdr,
                                                      (ClString *) &
                                                      rv.value.chars),
-                                 &msg);
+                                 NULL);
   } else if (rv.type & CMPI_ARRAY && rv.value.array) {
     rv.value.array =
         internal_native_make_CMPIArray((CMPIData *) rv.value.array, NULL,

@@ -145,13 +145,12 @@ getPropertyQualsAt(CMPIConstClass * cc, CMPICount i, CMPIString **name,
     rv.value.string = sfcb_native_new_CMPIString(rv.value.chars, NULL, 0);
     rv.type = CMPI_string;
   } else if (rv.type == CMPI_ref) {
-    char           *msg;
     if ((rv.state & CMPI_nullValue) == 0)
       rv.value.ref = getObjectPath((char *)
                                    ClObjectGetClString(&cls->hdr,
                                                        (ClString *) &
                                                        rv.value.chars),
-                                   &msg);
+                                   NULL);
   }
   if (rv.type & CMPI_ARRAY && rv.value.array) {
     rv.value.array =

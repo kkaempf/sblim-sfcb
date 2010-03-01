@@ -553,8 +553,7 @@ addKey(CMPIObjectPath * op, char *kd, int ref)
   *val = 0;
   val++;
   if (ref) {
-    char           *msg;
-    CMPIObjectPath *keyOp = getObjectPath(val, &msg);
+    CMPIObjectPath *keyOp = getObjectPath(val, NULL);
     op->ft->addKey(op, kd, (CMPIValue *) & keyOp, CMPI_ref);
   } else if (*val == '"') {
     val++;
@@ -649,19 +648,19 @@ getObjectPath(char *path, char **msg)
       break;
     if (*p == '"') {
       if (*(p - 1) != '=') {
-        *msg = "Incorrectly quoted string 1";
+        if (msg) *msg = "Incorrectly quoted string 1";
         free(origu);
         return NULL;
       }
       p++;
       if ((p = strchr(p, '"')) == NULL) {
-        *msg = "Unbalanced quoted string";
+        if (msg) *msg = "Unbalanced quoted string";
         free(origu);
         return NULL;
       }
       p++;
       if (*p != ',' && *p != 0) {
-        *msg = "Incorrectly quoted string 2";
+        if (msg) *msg = "Incorrectly quoted string 2";
         free(origu);
         return NULL;
       }

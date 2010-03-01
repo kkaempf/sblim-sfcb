@@ -223,7 +223,6 @@ InternalProviderEnumInstanceNames(CMPIInstanceMI * mi,
                   ac = 0;
   char            copKey[8192] = "";
   char           *kp;
-  char           *msg;
   CMPIArgs       *in,
                  *out;
   CMPIObjectPath *op;
@@ -252,7 +251,7 @@ InternalProviderEnumInstanceNames(CMPIInstanceMI * mi,
           strcat(copKey, ".");
           strncat(copKey, kp, ekl);
 
-          cop = getObjectPath(copKey, &msg);
+          cop = getObjectPath(copKey, NULL);
           if (cop)
             CMReturnObjectPath(rslt, cop);
           else {

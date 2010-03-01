@@ -192,12 +192,11 @@ __ift_internal_getPropertyAt(const CMPIInstance *ci, CMPICount i,
     rv.value.string =
         sfcb_native_new_CMPIString(rv.value.string->hdl, NULL, 0);
   } else if (rv.type == CMPI_ref) {
-    char           *msg;
     rv.value.ref = getObjectPath((char *)
                                  ClObjectGetClString(&inst->hdr,
                                                      (ClString *) &
                                                      rv.value.chars),
-                                 &msg);
+                                 NULL);
   } else if (rv.type & CMPI_ARRAY && rv.value.array) {
     rv.value.array =
         native_make_CMPIArray((CMPIData *) rv.value.array, NULL,
