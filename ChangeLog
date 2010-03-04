@@ -1,3 +1,8 @@
+2010-03-04 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* Makefile.am in test subdirs
+	[ 2963746 ] Incorrect license in test makefiles
+
 2010-03-01 Sean Swehla <smswehla@linux.vnet.ibm.com>
 
 	* args.c, array.c, constClass.c, instance.c, internalProvider.c, objectpath.c:
