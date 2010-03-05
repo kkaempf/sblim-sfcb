@@ -3,6 +3,7 @@ Changes in 1.4.0
 
 New features:
 
+- 2963601 pywbem tests
 
 Bugs fixed:
 
