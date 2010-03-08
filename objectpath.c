@@ -159,9 +159,8 @@ CMPIData opGetKeyCharsAt(const CMPIObjectPath * op,
       rv.type = CMPI_string;
    }
    else if (rv.type == CMPI_ref) {
-      char *msg="";
       rv.value.ref = getObjectPath(
-         (char*)ClObjectGetClString(&cop->hdr, (ClString *) & rv.value.chars), &msg);
+         (char*)ClObjectGetClString(&cop->hdr, (ClString *) & rv.value.chars), NULL);
    }
    else if (rv.type & CMPI_ARRAY && rv.value.array) {     // should nor occcur
       rv.value.array =
@@ -513,8 +512,7 @@ static void addKey(CMPIObjectPath * op, char *kd, int ref)
    *val = 0;
    val++;
    if (ref) {
-     char * msg;
-     CMPIObjectPath *keyOp = getObjectPath(val,&msg);
+     CMPIObjectPath *keyOp = getObjectPath(val, NULL);
      op->ft->addKey(op, kd, (CMPIValue*)&keyOp, CMPI_ref);
    } else if (*val == '"') {
       val++;
@@ -564,7 +562,7 @@ CMPIObjectPath *getObjectPath(char *path, char **msg)
          if (nname) free(nname);
          return op;
       }
-      *msg = "No className found";
+      if (msg) *msg = "No className found";
       free(origu);
       if (nname) free(nname);
       return NULL;
@@ -597,19 +595,19 @@ CMPIObjectPath *getObjectPath(char *path, char **msg)
          break;
       if (*p == '"') {
          if (*(p - 1) != '=') {
-            *msg = "Incorrectly quoted string 1";
+            if (msg) *msg = "Incorrectly quoted string 1";
             free(origu);
             return NULL;
          }
          p++;
          if ((p = strchr(p, '"')) == NULL) {
-            *msg = "Unbalanced quoted string";
+            if (msg) *msg = "Unbalanced quoted string";
             free(origu);
             return NULL;
          }
          p++;
          if (*p != ',' && *p != 0) {
-            *msg = "Incorrectly quoted string 2";
+            if (msg) *msg = "Incorrectly quoted string 2";
             free(origu);
             return NULL;
          }
