@@ -581,8 +581,9 @@ void * retryExport (void * lctx)
     }
     // Queue went dry, cleanup and exit
     pthread_mutex_unlock(&RQlock);
-    retryRunning=0;
-    return(NULL);
+    retryRunning = 0;
+    ctx->ft->release(ctx);
+    return (NULL);
 }
 
 CMPIStatus IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
