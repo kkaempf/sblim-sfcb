@@ -1,3 +1,8 @@
+2010-03-08  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* httpAdapter.c, sfcBroker.c:
+	[ 2961422 ] Single HTTP Adapter
+
 2010-03-05  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* configure.ac, test/pywbem/Makefile.am, test/pybwme/check_pywbem.py,

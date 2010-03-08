@@ -53,10 +53,7 @@
 static int      startSLP = 1;
 #endif
 
-#ifdef LOCAL_CONNECT_ONLY_ENABLE
-// from httpAdapter.c
 int             sfcBrokerPid = 0;
-#endif                          // LOCAL_CONNECT_ONLY_ENABLE
 
 extern void     setExFlag(unsigned long f);
 extern char    *parseTarget(const char *target);
@@ -65,7 +62,7 @@ extern int      init_sfcBroker();
 extern CMPIBroker *Broker;
 extern void     initProvProcCtl(int);
 extern void     processTerminated(int pid);
-extern int      httpDaemon(int argc, char *argv[], int sslMode, int pid);
+extern int      httpDaemon(int argc, char *argv[], int sslMode);
 extern void     processProviderMgrRequests();
 
 extern int      stopNextProc();
@@ -77,7 +74,6 @@ extern void     sunsetControl();
 extern void     uninitGarbageCollector();
 
 extern TraceId  traceIds[];
-extern int      sfcBrokerPid;
 
 extern unsigned long exFlags;
 static int      startHttp = 0;
@@ -427,7 +423,11 @@ startHttpd(int argc, char *argv[], int sslMode)
         exit(2);
       }
     }
-    httpDaemon(argc, argv, sslMode, sfcPid);
+
+    if (httpDaemon(argc, argv, sslMode)) {
+      kill(sfcPid, 3);          /* if port in use, shutdown */
+    }
+
     closeSocket(&sfcbSockets, cRcv, "startHttpd");
     closeSocket(&resultSockets, cAll, "startHttpd");
   } else {
@@ -786,7 +786,7 @@ main(int argc, char *argv[])
           "--- Max provider process number adjusted to %d\n", pSockets);
   }
 
-  if ((enableHttp && dSockets > 0) || (enableHttps && sSockets > 0)) {
+  if ((enableHttp || enableHttps) && dSockets > 0) {
     startHttp = 1;
   }
 
@@ -807,10 +807,7 @@ main(int argc, char *argv[])
 
 #ifndef LOCAL_CONNECT_ONLY_ENABLE
   if (startHttp) {
-    if (sslMode)
-      startHttpd(argc, argv, 1);
-    if (!sslOMode)
-      startHttpd(argc, argv, 0);
+    startHttpd(argc, argv, sslMode);
   }
 #endif                          // LOCAL_CONNECT_ONLY_ENABLE
 
