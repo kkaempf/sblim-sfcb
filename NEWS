@@ -23,6 +23,7 @@ New features:
 Bugs fixed:
 
 - 2948647 getObjectPath may dereference NULL pointer
+- 2966804 setObjectPath returns uninitialized pointer
 
 
 
