@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.46 2010/03/01 15:40:06 smswehla Exp $
+ * $Id: instance.c,v 1.47 2010/03/09 19:59:39 smswehla Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -303,6 +303,7 @@ static CMPIStatus __ift_setObjectPath(CMPIInstance * inst,
       ns = "*NoNameSpace*";
       cn = "*NoClassName*";
       tmp1.rc=tmp2.rc=tmp3.rc=CMPI_RC_OK;
+      tmp1.msg=tmp2.msg=tmp3.msg=NULL;
    }
 
    if (tmp1.rc != CMPI_RC_OK || tmp2.rc != CMPI_RC_OK || tmp3.rc != CMPI_RC_OK) {
