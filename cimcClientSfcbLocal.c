@@ -1289,8 +1289,9 @@ invokeMethod(Client * mb,
         CMAddArg(out, (char *) name->hdl, &data.value, data.type);
       }
       if (resp->rvValue) {
+        /* check method return value for pass-by-reference types */
         if (resp->rv.type == CMPI_chars) {
-          resp->rv.value.chars = (long) resp->rvEnc.data + (char *) resp;
+          resp->rv.value.chars = strdup((long) resp->rvEnc.data + (char *) resp);
         } else if (resp->rv.type == CMPI_dateTime) {
           resp->rv.value.dateTime =
               NewCMPIDateTimeFromChars((long) resp->rvEnc.data
