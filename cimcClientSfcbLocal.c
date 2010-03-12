@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.33 2010/03/10 22:20:54 smswehla Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.34 2010/03/12 20:14:48 smswehla Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -1222,8 +1222,9 @@ static CMPIData invokeMethod(
             CMAddArg(out,(char*)name->hdl,&data.value,data.type);
          }
          if (resp->rvValue) {
+	    /* check method return value for pass-by-reference types */
             if (resp->rv.type==CMPI_chars) {
-               resp->rv.value.chars=(long)resp->rvEnc.data+(char*)resp;
+               resp->rv.value.chars=strdup((long)resp->rvEnc.data+(char*)resp);
             }
             else if (resp->rv.type==CMPI_dateTime) {
                resp->rv.value.dateTime=
