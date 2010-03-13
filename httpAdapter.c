@@ -1899,6 +1899,7 @@ ccValidate(X509 * certificate, char **principal, int mode)
               dlName);
         result = 0;
       }
+      dlclose(authLib);
     }
   } else {
     mlogf(M_ERROR, M_SHOW,
