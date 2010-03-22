@@ -116,6 +116,8 @@ addProviderToHT(ProviderInfo * info, UtilHashTable * ht)
       freeInfoPtr(info);
       return;
     } else {
+      /* add info to the nIR linked list */
+      info->nextInRegister = checkDummy->nextInRegister;
       checkDummy->nextInRegister = info;
     }
   } else {
