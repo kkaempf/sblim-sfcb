@@ -2291,6 +2291,17 @@ invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
   irc = getProviderContext(&binCtx, (OperationHdr *) req);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
+  if (irc == MSG_X_SFCB_PROVIDER) {
+    if(*req->method == '_') {
+      RespSegments  rs;
+      rs = methodErrResponse(hdr, getErrSegment(CMPI_RC_ERR_ACCESS_DENIED, NULL));
+      closeProviderContext(&binCtx);
+      _SFCB_RETURN(rs);
+    } else {
+      irc = MSG_X_PROVIDER;
+    }
+  }
+                                                
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
     resp = invokeProvider(&binCtx);

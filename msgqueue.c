@@ -374,6 +374,7 @@ spRcvMsg(int *s, int *from, void **data, unsigned long *length,
 
   switch (spMsg.xtra) {
   case MSG_X_PROVIDER:
+  case MSG_X_SFCB_PROVIDER:
     *length = spMsg.segments;
     *data = spMsg.provId;
   case MSG_X_INVALID_NAMESPACE:
