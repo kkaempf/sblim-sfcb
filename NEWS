@@ -30,6 +30,7 @@ Bugs fixed:
 - 2952616 internalProvider is not Threadsafe
 - 2963746 Incorrect license in test makefiles
 - 2969129 Missing dlclose() in httpAdapter.c
+- 2961560 Disallow InvokeMethod calls to internal provider methods
 
 
 
