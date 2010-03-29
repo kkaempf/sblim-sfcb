@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.57 2010/01/15 20:58:33 buccella Exp $
+ * $Id: cimXmlRequest.c,v 1.58 2010/03/29 23:42:31 smswehla Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2106,6 +2106,17 @@ static RespSegments invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
    _SFCB_TRACE(1, ("--- Getting Provider context"));
    irc = getProviderContext(&binCtx, (OperationHdr *) req);
 
+   if (irc == MSG_X_SFCB_PROVIDER) {
+     if(*req->method == '_') {
+       RespSegments  rs;
+       rs = methodErrResponse(hdr, getErrSegment(CMPI_RC_ERR_ACCESS_DENIED, NULL));
+       closeProviderContext(&binCtx);
+       _SFCB_RETURN(rs);
+     } else {
+       irc = MSG_X_PROVIDER;
+     }
+   }
+                                                 
    _SFCB_TRACE(1, ("--- Provider context gotten"));
    if (irc == MSG_X_PROVIDER) {
       RespSegments rs;
