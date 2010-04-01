@@ -99,10 +99,21 @@ static void addProviderToHT(ProviderInfo *info, UtilHashTable *ht)
     /* Another provider is in the register, but the newly found
      * wants to serve the same class - so we do not add it to the
      * register but append it to the one already found or to its master*/
-        if(strcmp(checkDummy->providerName, info->providerName) == 0) {
-           /* double registration - discard */
-          freeInfoPtr(info);
-          return;
+        if (strcmp(checkDummy->providerName, info->providerName) == 0) {
+	    /* classname and provider name match, now check for namespace */
+	    int idx = 0;
+	    while (checkDummy->ns[idx]) {
+	        if (strcmp(checkDummy->ns[idx], info->ns[0]) == 0) {
+		    /* double registration - discard */
+		    freeInfoPtr(info);
+		    return;
+		}
+		++idx;
+	    }
+	    /* additional namespace for existing classname and provider name */
+	    checkDummy->ns=(char**)realloc(checkDummy->ns,sizeof(char*)*(idx+2));
+	    checkDummy->ns[idx] = strdup(info->ns[0]);
+	    checkDummy->ns[++idx] = NULL;
         } else {
             checkDummy->nextInRegister = info;
         }
