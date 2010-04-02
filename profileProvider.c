@@ -164,7 +164,7 @@ initProfiles(const CMPIBroker * broker, const CMPIContext *ctx)
   prof->InstanceID = "CIM:SFCB_PR";
   prof->RegisteredOrganization = 2;
   prof->RegisteredName = "Profile Registration";
-  prof->RegisteredVersion = "1.0.0";
+  prof->RegisteredVersion = "1.1.0";
   prof->AdvertiseTypes = 3;
 
   CMAddKey(op, "InstanceID", prof->InstanceID, CMPI_chars);
