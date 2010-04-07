@@ -36,12 +36,12 @@ handleSSLerror(const char *file, int lineno, const char *msg)
 
 extern int      sfcbSSLMode;
 
+#if defined USE_SSL
 void
 commInit()
 {
   _SFCB_ENTER(TRACE_HTTPDAEMON, "commInit");
 
-#if defined USE_SSL
   if (sfcbSSLMode) {
     _SFCB_TRACE(1, ("--- SSL mode"));
     if (!SSL_library_init()) {
@@ -51,10 +51,10 @@ commInit()
     SSL_load_error_strings();
     RAND_load_file("/dev/urandom", 1024);
   }
-#endif
 
   _SFCB_EXIT();
 }
+#endif
 
 int
 commWrite(CommHndl to, void *data, size_t count)
