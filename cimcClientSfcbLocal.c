@@ -1289,9 +1289,12 @@ invokeMethod(Client * mb,
         CMAddArg(out, (char *) name->hdl, &data.value, data.type);
       }
       if (resp->rvValue) {
-        /* check method return value for pass-by-reference types */
+        /*
+         * check method return value for pass-by-reference types 
+         */
         if (resp->rv.type == CMPI_chars) {
-          resp->rv.value.chars = strdup((long) resp->rvEnc.data + (char *) resp);
+          resp->rv.value.chars =
+              strdup((long) resp->rvEnc.data + (char *) resp);
         } else if (resp->rv.type == CMPI_dateTime) {
           resp->rv.value.dateTime =
               NewCMPIDateTimeFromChars((long) resp->rvEnc.data
@@ -1844,7 +1847,7 @@ _Create_SfcbLocal_Env(char *id)
   env->hdl = NULL;
   env->ft = &localFT;
   // enable logging when called from sfcc
-  startLogging("sfcb", LOG_ERR);
+  startLogging(LOG_ERR);
 
   return env;
 }

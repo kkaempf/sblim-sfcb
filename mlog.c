@@ -27,49 +27,93 @@ const char     *_mlog_id =
 #include <stdarg.h>
 #include <stdio.h>
 #include <errno.h>
+#include <signal.h>
+#include "trace.h"              /* for setSignal() */
 
-// semaphore
-static key_t    logSemKey;
-static int      logSem = -1;
+FILE           *log_w_stream;
+int             logfds[2] = { 0, 0 };
 
+/*
+ * main function for the logger proc. Waits on a pipe and writes to syslog
+ * Will exit when the other side of the pipe closes 
+ */
 void
-startLogging(const char *name, int level)
+runLogger(int listenFd, int level)
 {
-  union semun     sun;
+  FILE           *stream;
+  int             priosysl;
+  char            buf[LOG_MSG_MAX];
 
-  logSemKey = ftok(SFCB_BINARY, getpid());
-
-  // if sem exists, clear it out.
-  if ((logSem = semget(logSemKey, 1, 0600)) != -1)
-    semctl(logSem, 0, IPC_RMID, sun);
-
-  if ((logSem = semget(logSemKey, 1, IPC_CREAT | IPC_EXCL | 0600)) == -1) {
-    char           *emsg = strerror(errno);
-    fprintf(stderr,
-            "\n--- Logging semaphore create key: 0x%x failed: %s\n",
-            logSemKey, emsg);
-    abort();
-  }
-
-  sun.val = 1;
-  semctl(logSem, 0, SETVAL, sun);
-
-  openlog(name, LOG_PID, LOG_DAEMON);
+  openlog("sfcb", LOG_PID, LOG_DAEMON);
   setlogmask(LOG_UPTO(level));
 
+  stream = fdopen(listenFd, "r");
+
+  while (!feof(stream)) {
+
+    fgets(buf, sizeof(buf), stream);
+
+    int             priority = buf[0];
+
+    switch (priority) {
+    case M_DEBUG:
+      priosysl = LOG_DEBUG;
+      break;
+    case M_INFO:
+      priosysl = LOG_INFO;
+      break;
+    case M_ERROR:
+    default:
+      priosysl = LOG_ERR;
+      break;
+    }
+
+    syslog(priosysl, "%s", buf + 1);
+
+  }
+  return;
 }
 
-/** \brief closeLogging - Closes down loggin
+/*
+ * sets up the logging pipe and forks off the logger process 
+ */
+void
+startLogging(int level)
+{
+  pipe(logfds);
+  int             lpid;
+  lpid = fork();
+
+  if (lpid == 0) {
+    close(logfds[1]);           /* close write end */
+    setSignal(SIGINT, SIG_IGN, 0);
+    setSignal(SIGTERM, SIG_IGN, 0);
+    setSignal(SIGHUP, SIG_IGN, 0);
+
+    runLogger(logfds[0], level);
+
+    close(logfds[0]);
+    exit(0);
+  } else if (lpid > 0) {
+    close(logfds[0]);           /* close read end */
+    log_w_stream = fdopen(logfds[1], "w");
+    return;
+  } else {
+    fprintf(stderr, "*** fork of logger proc failed\n");
+    abort();
+  }
+}
+
+/** \brief closeLogging - Closes down logging
  *
- * closeLogging deletes the semaphore and closes out
+ * Closes the pipe used for logging and  closes out
  * the syslog services that are created in startLogging.
  */
 void
 closeLogging()
 {
-  union semun     sun;
-  semctl(logSem, 0, IPC_RMID, sun);
   closelog();
+  close(logfds[1]);
 }
 
 /** \brief mlogf - Create syslog entries
@@ -88,43 +132,51 @@ void
 mlogf(int priority, int errout, const char *fmt, ...)
 {
   va_list         ap;
-  int             priosysl;
 
-  char            buf[4096];
-
-  switch (priority) {
-  case M_DEBUG:
-    priosysl = LOG_DEBUG;
-    break;
-  case M_INFO:
-    priosysl = LOG_INFO;
-    break;
-  case M_ERROR:
-  default:
-    priosysl = LOG_ERR;
-    break;
-  }
-
-  if (semAcquire(logSem, 0)) {
-    char           *emsg = strerror(errno);
-    fprintf(stderr, "\n--- Unable to acquire logging lock: %s\n", emsg);
-    // not aborting since that will kill sfcb, so try to continue
-  }
+  char            buf[LOG_MSG_MAX];
 
   va_start(ap, fmt);
-  vsnprintf(buf, 4096, fmt, ap);
-  syslog(priosysl, "%s", buf);
+  vsnprintf(buf, LOG_MSG_MAX, fmt, ap);
 
+  /*
+   * we sometimes call mlogf when sfcbd isn't started (i.e. via
+   * sfcbinst2mof) 
+   */
+  if (logfds[1] == 0) {
+    fprintf(stderr, "logger not started");
+    int             priosysl;
+    switch (priority) {
+    case M_DEBUG:
+      priosysl = LOG_DEBUG;
+      break;
+    case M_INFO:
+      priosysl = LOG_INFO;
+      break;
+    case M_ERROR:
+    default:
+      priosysl = LOG_ERR;
+      break;
+    }
+    syslog(priosysl, "%s", buf);
+  }
+  /*
+   * if sfcbd is started, the logger proc will be waiting to recv log msg 
+   */
+  else {
+    fprintf(log_w_stream, "%c%s", priority, buf);
+    fflush(log_w_stream);
+  }
+
+  /*
+   * also print out the logg message to stderr if M_SHOW was passed in 
+   */
   if (errout) {
     fprintf(stderr, "%s", buf);
   }
   va_end(ap);
-  if (semRelease(logSem, 0)) {
-    char           *emsg = strerror(errno);
-    fprintf(stderr, "\n--- Unable to release logging lock: %s\n", emsg);
-    // not aborting since that will kill sfcb, so try to continue
-  }
+
 }
+
 /* MODELINES */
 /* DO NOT EDIT BELOW THIS COMMENT */
 /* Modelines are added by 'make pretty' */
