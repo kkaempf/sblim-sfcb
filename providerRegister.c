@@ -119,6 +119,7 @@ static int addProviderToHT(ProviderInfo *info, UtilHashTable *ht)
 	    checkDummy->ns=(char**)realloc(checkDummy->ns,sizeof(char*)*(idx+2));
 	    checkDummy->ns[idx] = strdup(info->ns[0]);
 	    checkDummy->ns[++idx] = NULL;
+	    freeInfoPtr(info);
         } else {
             checkDummy->nextInRegister = info;
         }
@@ -313,8 +314,13 @@ ProviderRegister *newProviderRegister()
 	    break;
       }
 
-      if (info && err == 0) {
-	err = addProviderToHT(info, ((ProviderBase *) br->hdl)->ht);
+      if (info) {
+	if (err == 0) {
+	  err = addProviderToHT(info, ((ProviderBase *) br->hdl)->ht);
+        }
+	else {
+	  freeInfoPtr(info);
+	}
       }
    }
    if (in) {
