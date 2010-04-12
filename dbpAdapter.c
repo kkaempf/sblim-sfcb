@@ -57,7 +57,9 @@
 
 // unsigned long exFlags = 0;
 static char    *name;
-
+#if defined USE_SSL
+static SSL_CTX *ctx;
+#endif
 int             sfcbSSLMode = 0;
 static int      doFork = 0;
 static int      doBa;
@@ -111,6 +113,18 @@ extern int      getControlBool(char *id, int *val);
 extern int      semGetValue(int semid, int semnum);
 
 ResultSet      *rs;
+
+#if defined USE_SSL
+void
+handleSSLerror(const char *file, int lineno, const char *msg)
+{
+  mlogf(M_ERROR, M_SHOW, "\n*** %s:%i %s -- exiting\n", file, lineno, msg);
+#ifdef SFCB_DEBUG
+  ERR_print_errors_fp(stderr);
+#endif
+  exit(-1);
+}
+#endif
 
 void
 initDbpProcCtl(int p)
@@ -555,8 +569,8 @@ int
 dbpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
 {                               // int argc, char *argv[], int sslMode) {
   struct sockaddr_in sin;
-  int             sz,
-                  sin_len,
+  socklen_t       sz;
+  int             sin_len,
                   ru;
   char           *cp;
   long            procs,
