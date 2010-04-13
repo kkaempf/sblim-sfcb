@@ -1,3 +1,9 @@
+2010-04-13  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* dbpAdapter.c, sqlLexer.l, sqlParser.y, sqlStatement.c, sqlStatement.h:
+	[ 2978514 ] Compilation with --enable-jdbc fails
+	(patch by Klaus Kampf)
+
 2010-04-09  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* cimXmlGen.c:
