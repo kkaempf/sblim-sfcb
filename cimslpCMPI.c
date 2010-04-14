@@ -19,8 +19,6 @@
  *
  */
 
-#include <cmci.h>
-
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
@@ -57,7 +55,8 @@ getInterOpNS()
 }
 
 CMPIInstance  **
-myGetInstances(CMCIClient * cc, char *path, char *objectname)
+myGetInstances(const CMPIBroker *_broker, const CMPIContext * ctx,
+               const char *path, const char *objectname)
 {
   CMPIStatus      status;
   CMPIObjectPath *objectpath;
@@ -66,15 +65,15 @@ myGetInstances(CMCIClient * cc, char *path, char *objectname)
 
   _SFCB_ENTER(TRACE_SLP, "myGetInstances");
 
-  objectpath = newCMPIObjectPath(path, objectname, NULL);
+  objectpath = CMNewObjectPath(_broker, path, objectname, NULL);
 
-  enumeration = cc->ft->enumInstances(cc, objectpath, 0, NULL, &status);
+  enumeration = CBEnumInstances(_broker, ctx, objectpath, NULL, &status);
 
-  // severe error, cimom not running etc.
+  // severe error
   if (status.rc == CMPI_RC_ERR_FAILED) {
-    // printf("Fatal error. CIMOM not running? Connection params ok?\n");
     printf
-        ("--- HTTP-Daemon no longer active. Deregistering service with slp\n");
+        ("--- Error enumerating %s. Deregistering service with slp\n",
+         objectname);
     deregisterCIMService();
     if (status.msg)
       CMRelease(status.msg);
@@ -91,17 +90,17 @@ myGetInstances(CMCIClient * cc, char *path, char *objectname)
   }
 
   if (!status.rc) {
-    if (enumeration->ft->hasNext(enumeration, NULL)) {
+    if (CMHasNext(enumeration, NULL)) {
       CMPIArray      *arr;
       int             n,
                       i;
 
-      arr = enumeration->ft->toArray(enumeration, NULL);
+      arr = CMToArray(enumeration, NULL);
       n = CMGetArrayCount(arr, NULL);
       retArr = malloc(sizeof(CMPIInstance *) * (n + 1));
       for (i = 0; i < n; i++) {
         CMPIData        ele = CMGetArrayElementAt(arr, i, NULL);
-        retArr[i] = ele.value.inst->ft->clone(ele.value.inst, NULL);
+        retArr[i] = CMClone(ele.value.inst, NULL);
       }
       retArr[n] = NULL;
     }
@@ -115,8 +114,9 @@ myGetInstances(CMCIClient * cc, char *path, char *objectname)
   _SFCB_RETURN(retArr);
 }
 
+/*
 CMPIConstClass *
-myGetClass(CMCIClient * cc, char *path, char *objectname)
+myGetClass(CMPIContext * ctx, char *path, char *objectname)
 {
   CMPIStatus      status;
   CMPIObjectPath *objectpath;
@@ -142,14 +142,15 @@ myGetClass(CMCIClient * cc, char *path, char *objectname)
   }
 
 }
+*/
 
 cimSLPService
-getSLPData(cimomConfig cfg)
+getSLPData(cimomConfig cfg, const CMPIBroker *_broker,
+           const CMPIContext *ctx)
 {
-  CMCIClient     *cc;
   CMPIInstance  **ci;
-  CMPIStatus      status;
-  CMPIConstClass *ccls;
+  //CMPIStatus      status;
+  //CMPIConstClass *ccls;
   cimSLPService   rs;           // service which is going to be returned
   // to the calling function
   char           *sn;
@@ -182,19 +183,6 @@ getSLPData(cimomConfig cfg)
 
   memset(&rs, 0, sizeof(cimSLPService));
 
-  cc = cmciConnect2(cfg.cimhost,
-                    "SfcbLocal",
-                    cfg.port,
-                    cfg.cimuser,
-                    cfg.cimpassword,
-                    CMCI_VERIFY_PEER,
-                    cfg.trustStore, cfg.certFile, cfg.keyFile, &status);
-
-  if (status.rc) {
-    printf
-        ("Could not connect to CIMOM. Check if it is running as well as your parameters.\n");
-    exit(0);
-  }
   // first of all, get the interop namespace, needed for all further
   // connections
   // this call fills the array as well as sets the global interOpNS
@@ -204,7 +192,7 @@ getSLPData(cimomConfig cfg)
   // extract all relavant stuff for SLP out of CIM_ObjectManager
 
   // construct the server string
-  ci = myGetInstances(cc, interOpNS, "CIM_ObjectManager");
+  ci = myGetInstances(_broker, ctx, interOpNS, "CMPI_ObjectManager");
   if (ci) {
     sn = myGetProperty(ci[0], "SystemName");
 
@@ -229,8 +217,9 @@ getSLPData(cimomConfig cfg)
   }
   // extract all relavant stuff for SLP out of
   // CIM_ObjectManagerCommunicationMechanism
-  ci = myGetInstances(cc, interOpNS,
+  ci = myGetInstances(_broker, ctx, interOpNS,
                       "CIM_ObjectManagerCommunicationMechanism");
+  fprintf(stderr, "SMS - ci[0]->ft points to %p\n", ci[0]->ft);
   if (ci) {
     rs.CommunicationMechanism =
         myGetProperty(ci[0], "CommunicationMechanism");
@@ -247,51 +236,49 @@ getSLPData(cimomConfig cfg)
         myGetPropertyArray(ci[0], "AuthenticationMechanismsSupported");
     rs.AuthenticationMechansimDescriptions =
         myGetPropertyArray(ci[0], "AuthenticationMechansimDescriptions");
+    // do the transformations from numbers to text via the qualifiers
+    CMPIStatus myRc;
+    CMPIObjectPath *myOp = CMGetObjectPath(ci[0], &myRc);
+    CMPIData qd = CMGetPropertyQualifier(myOp, "CommunicationMechanism", "ValueMap", &myRc);
+    fprintf(stderr, "SMS - rc: %d\n", myRc.rc);
+    rs.CommunicationMechanism = transformValue(rs.CommunicationMechanism,
+                                               CMGetObjectPath(ci[0], NULL),
+                                               "CommunicationMechanism");
+    rs.FunctionalProfilesSupported =
+        transformValueArray(rs.FunctionalProfilesSupported,
+                            CMGetObjectPath(ci[0], NULL),
+                            "FunctionalProfilesSupported");
+    rs.AuthenticationMechanismsSupported =
+        transformValueArray(rs.AuthenticationMechanismsSupported,
+                            CMGetObjectPath(ci[0], NULL),
+                            "AuthenticationMechanismsSupported");
     freeInstArr(ci);
   }
   // extract all relavant stuff for SLP out of CIM_Namespace
-  ci = myGetInstances(cc, interOpNS, "CIM_Namespace");
+  ci = myGetInstances(_broker, ctx, interOpNS, "CIM_Namespace");
   if (ci) {
     rs.Namespace = myGetPropertyArrayFromArray(ci, "Name");
     rs.Classinfo = myGetPropertyArrayFromArray(ci, "ClassInfo");
     freeInstArr(ci);
   }
   // extract all relavant stuff for SLP out of CIM_RegisteredProfile
-  ci = myGetInstances(cc, interOpNS, "CIM_RegisteredProfile");
+  ci = myGetInstances(_broker, ctx, interOpNS, "CIM_RegisteredProfile");
   if (ci) {
-    rs.RegisteredProfilesSupported = myGetRegProfiles(ci, cc);
+    rs.RegisteredProfilesSupported = myGetRegProfiles(_broker, ci, ctx);
     freeInstArr(ci);
   }
-  // do the transformations from numbers to text via the qualifiers
-  ccls =
-      myGetClass(cc, interOpNS, "CIM_ObjectManagerCommunicationMechanism");
-  if (ccls) {
-    rs.CommunicationMechanism = transformValue(rs.CommunicationMechanism,
-                                               ccls,
-                                               "CommunicationMechanism");
-    rs.FunctionalProfilesSupported =
-        transformValueArray(rs.FunctionalProfilesSupported, ccls,
-                            "FunctionalProfilesSupported");
-    rs.AuthenticationMechanismsSupported =
-        transformValueArray(rs.AuthenticationMechanismsSupported, ccls,
-                            "AuthenticationMechanismsSupported");
-    CMRelease(ccls);
-  }
-
-  if (cc)
-    CMRelease(cc);
 
   _SFCB_RETURN(rs);
 
 }
 
 char          **
-myGetRegProfiles(CMPIInstance **instances, CMCIClient * cc)
+myGetRegProfiles(const CMPIBroker *_broker, CMPIInstance **instances,
+                 const CMPIContext * ctx)
 {
   CMPIObjectPath *objectpath;
   CMPIEnumeration *enumeration = NULL;
   CMPIStatus      status;
-  CMPIConstClass *ccls;
   char          **retArr;
   int             i,
                   j = 0;
@@ -312,10 +299,6 @@ myGetRegProfiles(CMPIInstance **instances, CMCIClient * cc)
   // involve too much burden and overhead (?)
 
   retArr = (char **) malloc((i + 1) * sizeof(char *));
-
-  // getting the class including qualifiers, needed to resolve
-  // RegisteredOrganization (Values/ValueMap)
-  ccls = myGetClass(cc, interOpNS, "CIM_RegisteredProfile");
 
   for (i = 0; instances[i] != NULL; i++) {
 
@@ -341,14 +324,14 @@ myGetRegProfiles(CMPIInstance **instances, CMCIClient * cc)
 
     if (enumeration)
       CMRelease(enumeration);
-    enumeration = cc->ft->associatorNames(cc,
-                                          objectpath,
-                                          "CIM_SubProfileRequiresProfile",
-                                          NULL, "Dependent", NULL, NULL);
+    enumeration = CBAssociatorNames(_broker, ctx,
+                                    objectpath,
+                                    "CIM_SubProfileRequiresProfile",
+                                    NULL, "Dependent", NULL, NULL);
 
     // if the result is not null, we are operating on a
     // CIM_RegisteredSubProfile, which we don't want
-    if (!enumeration || !enumeration->ft->hasNext(enumeration, &status)) {
+    if (!enumeration || !CMHasNext(enumeration, &status)) {
       CMPIData        propertyData;
 
       propertyData = instances[i]->ft->getProperty(instances[i],
@@ -358,7 +341,8 @@ myGetRegProfiles(CMPIInstance **instances, CMCIClient * cc)
       profilestring = value2Chars(propertyData.type, &propertyData.value);
 
       profilestring =
-          transformValue(profilestring, ccls, "RegisteredOrganization");
+          transformValue(profilestring, CMGetObjectPath(instances[i], NULL),
+                         "RegisteredOrganization");
 
       propertyData = instances[i]->ft->getProperty(instances[i],
                                                    "RegisteredName",
@@ -377,21 +361,21 @@ myGetRegProfiles(CMPIInstance **instances, CMCIClient * cc)
       // now search for a CIM_RegisteredSubProfile for this instance
       if (enumeration)
         CMRelease(enumeration);
-      enumeration = cc->ft->associators(cc,
-                                        objectpath,
-                                        "CIM_SubProfileRequiresProfile",
-                                        NULL,
-                                        "Antecedent", NULL, 0, NULL, NULL);
-      if (!enumeration || !enumeration->ft->hasNext(enumeration, NULL)) {
+      enumeration = CBAssociators(_broker, ctx,
+                                  objectpath,
+                                  "CIM_SubProfileRequiresProfile",
+                                  NULL,
+                                  "Antecedent", NULL, NULL, NULL);
+      if (!enumeration || !CMHasNext(enumeration, NULL)) {
         retArr[j] = strdup(profilestring);
         j++;
       } else
-        while (enumeration->ft->hasNext(enumeration, &status)) {
+        while (CMHasNext(enumeration, &status)) {
           CMPIData        data =
-              enumeration->ft->getNext(enumeration, NULL);
+              CMGetNext(enumeration, NULL);
           propertyData =
-              data.value.inst->ft->getProperty(data.value.inst,
-                                               "RegisteredName", &status);
+              CMGetProperty(data.value.inst,
+                            "RegisteredName", &status);
           char           *subprofilestring = value2Chars(propertyData.type,
                                                          &propertyData.
                                                          value);
@@ -411,8 +395,6 @@ myGetRegProfiles(CMPIInstance **instances, CMCIClient * cc)
 
   if (enumeration)
     CMRelease(enumeration);
-  if (ccls)
-    CMRelease(ccls);
   if (status.msg)
     CMRelease(status.msg);
 
@@ -420,12 +402,12 @@ myGetRegProfiles(CMPIInstance **instances, CMCIClient * cc)
 }
 
 char          **
-transformValueArray(char **cssf, CMPIConstClass * ccls, char *propertyName)
+transformValueArray(char **cssf, CMPIObjectPath * op, char *propertyName)
 {
   int             i;
 
   for (i = 0; cssf[i] != NULL; i++) {
-    cssf[i] = transformValue(cssf[i], ccls, propertyName);
+    cssf[i] = transformValue(cssf[i], op, propertyName);
   }
   return cssf;
 }
@@ -433,7 +415,7 @@ transformValueArray(char **cssf, CMPIConstClass * ccls, char *propertyName)
 // transforms numerical values into their string counterpart
 // utilizing the Values and ValueMap qualifiers
 char           *
-transformValue(char *cssf, CMPIConstClass * ccls, char *propertyName)
+transformValue(char *cssf, CMPIObjectPath * op, char *propertyName)
 // cssf = cimSLPService Field in the struct
 {
   CMPIData        qd;
@@ -442,8 +424,7 @@ transformValue(char *cssf, CMPIConstClass * ccls, char *propertyName)
 
   _SFCB_ENTER(TRACE_SLP, "transformValue");
 
-  qd = ccls->ft->getPropertyQualifier(ccls, propertyName, "ValueMap",
-                                      &status);
+  qd = CMGetPropertyQualifier(op, propertyName, "ValueMap", &status);
   if (status.rc) {
     printf("getPropertyQualifier failed ... Status: %d\n", status.rc);
     _SFCB_RETURN(NULL);
@@ -473,7 +454,7 @@ transformValue(char *cssf, CMPIConstClass * ccls, char *propertyName)
     free(valuestr);
     free(cssf);
     if (j - 1 <= n) {
-      qd = ccls->ft->getPropertyQualifier(ccls, propertyName, "Values",
+      qd = CMGetPropertyQualifier(op, propertyName, "Values",
                                           &status);
       arr = qd.value.array;
       eletyp = qd.type & ~CMPI_ARRAY;

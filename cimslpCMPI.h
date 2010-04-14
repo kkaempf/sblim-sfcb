@@ -22,8 +22,10 @@
 #ifndef _cimslpCMPI_h
 #define _cimslpCMPI_h
 
-#include <cmci.h>
 #include <unistd.h>
+#include <stdio.h>
+#include "cmpidt.h"
+#include "cmpimacs.h"
 
 typedef struct {
   char           *url_syntax;
@@ -58,23 +60,27 @@ typedef struct {
 extern char    *value2Chars(CMPIType type, CMPIValue * value);
 
 void            initializeService(cimSLPService * rs);
-cimSLPService   getSLPData(cimomConfig cfg);
+cimSLPService   getSLPData(cimomConfig cfg, const CMPIBroker *_broker,
+                           const CMPIContext *ctx);
 char           *myGetProperty(CMPIInstance *instance, char *propertyName);
 char          **myGetPropertyArray(CMPIInstance *instance,
                                    char *propertyName);
 char          **myGetPropertyArrayFromArray(CMPIInstance **instances,
                                             char *propertyName);
-CMPIInstance  **myGetInstances(CMCIClient * cc, char *path,
-                               char *objectname);
-CMPIConstClass *myGetClass(CMCIClient * cc, char *path, char *objectname);
-char           *transformValue(char *cssf, CMPIConstClass * ccls,
+CMPIInstance  **myGetInstances(const CMPIBroker *_broker,
+                               const CMPIContext * ctx,
+                               const char *path,
+                               const char *objectname);
+char           *transformValue(char *cssf, CMPIObjectPath * op,
                                char *propertyName);
-char          **transformValueArray(char **cssf, CMPIConstClass * ccls,
+char          **transformValueArray(char **cssf, CMPIObjectPath * op,
                                     char *propertyName);
-char          **myGetRegProfiles(CMPIInstance **instances,
-                                 CMCIClient * cc);
+char          **myGetRegProfiles(const CMPIBroker *_broker,
+                                 CMPIInstance **instances,
+                                 const CMPIContext * ctx);
 char          **getInterOpNS();
 char           *getUrlSyntax(char *sn, char *cs, char *port);
+void            updateSLPReg(const CMPIContext *ctx);
 
 #endif
 /* MODELINES */
