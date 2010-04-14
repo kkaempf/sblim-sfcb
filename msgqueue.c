@@ -343,8 +343,11 @@ spRcvMsg(int *s, int *from, void **data, unsigned long *length,
     do {
       if ((partRecvd =
            spGetMsg(s, NULL, *data + totalRecvd, *length - totalRecvd,
-                    mqg)) == -1)
+                    mqg)) == -1) {
+        free(*data);
+        *data = 0;
         return spHandleError(s, em);
+      }
       totalRecvd += partRecvd;
       if (mqg->teintr)
         mqg->eintr = 1;
@@ -364,8 +367,11 @@ spRcvMsg(int *s, int *from, void **data, unsigned long *length,
     do {
       if ((partRecvd =
            spGetMsg(s, NULL, *data + totalRecvd, *length - totalRecvd,
-                    mqg)) == -1)
+                    mqg)) == -1) {
+        free(*data);
+        *data = 0;
         return spHandleError(s, em);
+      }
       totalRecvd += partRecvd;
       if (mqg->teintr)
         mqg->eintr = 1;
