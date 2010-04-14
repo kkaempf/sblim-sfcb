@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.84 2010/04/07 20:55:49 buccella Exp $
+ * $Id: providerDrv.c,v 1.85 2010/04/14 20:06:24 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2066,7 +2066,25 @@ static BinResponseHdr *activateFilter(BinRequestHdr *hdr, ProviderInfo* info,
       char *lang=(char*)req->language.data;
       type=(char*)req->type.data;
       char *sns=(char*)req->sns.data;
+
       se=(NativeSelectExp*)NewCMPISelectExp(query,lang,sns,NULL,&rci);
+      if (rci.rc != CMPI_RC_OK) {
+	mlogf(M_DEBUG, M_SHOW, "Failed to parse query (%s). Error code(%d).\n", query, rci.rc);
+	resp = errorResp(&rci);
+	_SFCB_RETURN(resp);
+      }
+      else if (se == NULL) {
+	/*
+	 * If se is NULL, rci.rc should have an error code set, but check for
+	 * the NULL case just in case something went wrong.
+	 */
+	mlogf(M_ERROR, M_SHOW, "Unknown error parsing query (%s).\n", query);
+	rci.rc = CMPI_RC_ERR_FAILED;
+	resp = errorResp(&rci);
+	_SFCB_RETURN(resp);
+      }
+
+
       makeActive=1;
       se->filterId=req->filterId;
       prev=se->next=activFilters;

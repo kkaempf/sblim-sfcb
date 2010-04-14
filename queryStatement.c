@@ -1,6 +1,6 @@
 
 /*
- * $Id: queryStatement.c,v 1.15 2010/04/07 21:31:52 buccella Exp $
+ * $Id: queryStatement.c,v 1.16 2010/04/14 20:06:24 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -265,13 +265,8 @@ QLStatement *parseQuery(int mode, const char *query, const char *lang, const cha
    
    *rc=sfcQueryparse(&ctl);
 
-   /* If there was a parser error, we need to restart the lexer, otherwise
-    * the lexer will keep this invalid query and pointers to its tokens in its
-    * state machine, and the next query that comes in will fail to parse as
-    * well. */
-   if (*rc != 0) {
-     sfcQueryrestart(0);
-   }
+   /* Always call restart after parsing. This resets the lexer FSM. */
+   sfcQueryrestart(0);
 
    if (sns) qs->sns=strdup(sns);
    else sns=NULL;
