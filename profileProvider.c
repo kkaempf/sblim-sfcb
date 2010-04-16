@@ -36,6 +36,12 @@
 #include "native.h"
 #include "objectpath.h"
 #include <time.h>
+#include "cimslp.h"
+#include "cimslpCMPI.h"
+
+#ifdef HAVE_SLP
+#include "control.h"
+#endif
 
 #define LOCALCLASSNAME "ProfileProvider"
 
@@ -299,6 +305,7 @@ ProfileProviderCreateInstance(CMPIInstanceMI * mi,
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIContext    *ctxLocal;
+  //cimomConfig     cfg;
 
   _SFCB_ENTER(TRACE_INDPROVIDER, "ProfileProviderCreateInstance");
 
@@ -307,6 +314,8 @@ ProfileProviderCreateInstance(CMPIInstanceMI * mi,
                      _broker->bft->createInstance(_broker, ctxLocal, cop,
                                                   ci, &st));
   CMRelease(ctxLocal);
+  //updateSLPRegistration
+  updateSLPReg(ctx);
 
   _SFCB_RETURN(st);
 }
@@ -346,6 +355,8 @@ ProfileProviderDeleteInstance(CMPIInstanceMI * mi,
   ctxLocal = prepareUpcall((CMPIContext *) ctx);
   st = _broker->bft->deleteInstance(_broker, ctxLocal, cop);
   CMRelease(ctxLocal);
+  //updateSLPRegistration
+  updateSLPReg(ctx);
 
   _SFCB_RETURN(st);
 }
@@ -382,6 +393,9 @@ ProfileProviderMethodCleanup(CMPIMethodMI * mi,
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_INDPROVIDER, "ProfileProviderMethodCleanup");
+  if(terminate) {
+    //deregister SLP advertisements
+  }
   _SFCB_RETURN(st);
 }
 
@@ -418,6 +432,75 @@ ProfileProviderInvokeMethod(CMPIMethodMI * mi,
   _SFCB_RETURN(st);
 }
 
+#ifdef HAVE_SLP
+#define UPDATE_SLP_REG  updateSLPReg(ctx)
+void updateSLPReg(const CMPIContext *ctx)
+{
+  cimSLPService   service;
+  int             slpLifeTime = SLP_LIFETIME_DEFAULT;
+  int             sleepTime;
+  cimomConfig     cfgHttp,
+                  cfgHttps;
+  int             enableHttp,
+                  enableHttps = 0;
+
+  extern char    *configfile;
+
+  _SFCB_ENTER(TRACE_SLP, "slpAgent");
+
+  setupControl(configfile);
+
+  setUpDefaults(&cfgHttp);
+  setUpDefaults(&cfgHttps);
+
+  sleep(1);
+
+  long            i;
+
+  if (!getControlBool("enableHttp", &enableHttp)) {
+    getControlNum("httpPort", &i);
+    free(cfgHttp.port);
+    cfgHttp.port = malloc(6 * sizeof(char));    // portnumber has max. 5
+    // digits
+    sprintf(cfgHttp.port, "%d", (int) i);
+  }
+  if (!getControlBool("enableHttps", &enableHttps)) {
+    free(cfgHttps.commScheme);
+    cfgHttps.commScheme = strdup("https");
+    getControlNum("httpsPort", &i);
+    free(cfgHttps.port);
+    cfgHttps.port = malloc(6 * sizeof(char));   // portnumber has max. 5
+    // digits 
+    sprintf(cfgHttps.port, "%d", (int) i);
+    getControlChars("sslClientTrustStore", &cfgHttps.trustStore);
+    getControlChars("sslCertificateFilePath:", &cfgHttps.certFile);
+    getControlChars("sslKeyFilePath", &cfgHttps.keyFile);
+  }
+
+  getControlNum("slpRefreshInterval", &i);
+  slpLifeTime = (int) i;
+  setUpTimes(&slpLifeTime, &sleepTime);
+
+/* Disable slp registration agent for now,
+ * since it will be going away soon anyhow.
+  if (enableHttp)
+    forkSLPAgent(cfgHttp, slpLifeTime, sleepTime);
+  if (enableHttps)
+    forkSLPAgent(cfgHttps, slpLifeTime, sleepTime);
+*/
+
+  service = getSLPData(cfgHttp, _broker, ctx);
+  registerCIMService(service, slpLifeTime);
+
+  service = getSLPData(cfgHttps, _broker, ctx);
+  registerCIMService(service, slpLifeTime);
+  fprintf(stderr, "SMS - We got here.\n");
+  
+  freeCFG(&cfgHttp);
+  freeCFG(&cfgHttps);
+  return;
+}
+#endif
 /*
  * ------------------------------------------------------------------ *
  * Instance MI Factory NOTE: This is an example using the convenience
@@ -426,7 +509,8 @@ ProfileProviderInvokeMethod(CMPIMethodMI * mi,
  * ------------------------------------------------------------------ 
  */
 
-CMInstanceMIStub(ProfileProvider, ProfileProvider, _broker, CMNoHook);
+//CMInstanceMIStub(ProfileProvider, ProfileProvider, _broker, CMNoHook);
+CMInstanceMIStub(ProfileProvider, ProfileProvider, _broker, UPDATE_SLP_REG);
 
 CMMethodMIStub(ProfileProvider, ProfileProvider, _broker, CMNoHook);
 /* MODELINES */
