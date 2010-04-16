@@ -24,14 +24,11 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include <slp.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <signal.h>
 
 #include "config.h"
-#include "cimslpCMPI.h"
-#include "cimslpSLP.h"
 #include "cimslp.h"
 #include "trace.h"
 
@@ -97,7 +94,7 @@ handleSigHup(int sig)
 void
 forkSLPAgent(cimomConfig cfg, int slpLifeTime, int sleepTime)
 {
-  cimSLPService   service;
+  //cimSLPService   service;
   int             pid;
   pid = fork();
   if (pid < 0) {
@@ -116,8 +113,8 @@ forkSLPAgent(cimomConfig cfg, int slpLifeTime, int sleepTime)
       processName = "SLP Agent for HTTPS Adapter";
     }
     while (1) {
-      service = getSLPData(cfg);
-      registerCIMService(service, slpLifeTime);
+      //service = getSLPData(cfg);
+      //registerCIMService(service, slpLifeTime);
       sleep(sleepTime);
     }
     /*
@@ -126,7 +123,7 @@ forkSLPAgent(cimomConfig cfg, int slpLifeTime, int sleepTime)
     exit(0);
   } else {
     slppid = pid;
-    addStartedAdapter(pid);
+    //addStartedAdapter(pid);
   }
 }
 
@@ -177,10 +174,14 @@ slpAgent()
   slpLifeTime = (int) i;
   setUpTimes(&slpLifeTime, &sleepTime);
 
+/* Disable slp registration agent for now,
+ * since it will be going away soon anyhow.
   if (enableHttp)
     forkSLPAgent(cfgHttp, slpLifeTime, sleepTime);
   if (enableHttps)
     forkSLPAgent(cfgHttps, slpLifeTime, sleepTime);
+*/
+  
   freeCFG(&cfgHttp);
   freeCFG(&cfgHttps);
   _SFCB_RETURN(0);
@@ -272,7 +273,7 @@ main(int argc, char *argv[])
 
   int             rt;
   while (1) {
-    as = getSLPData(cfg);
+    //as = getSLPData(cfg);
     rt = registerCIMService(as, slpLifeTime);
     if (rt == 1) {
       printf
