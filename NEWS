@@ -16,6 +16,7 @@ New features:
 - 2963601 pywbem tests
 - 2961422 Single HTTP Adapter
 - 2980820 Indication Profile 1.1: New attr values.
+- 2990091 Implement getPropertyQualifier in CMPIObjectPath
 
 Bugs fixed:
 
