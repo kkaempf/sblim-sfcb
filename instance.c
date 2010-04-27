@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.48 2010/04/27 19:19:52 buccella Exp $
+ * $Id: instance.c,v 1.49 2010/04/27 19:21:00 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -918,7 +918,6 @@ static void instFillDefaultProperties(struct native_instance *inst,
 	 CMPIData pqd = cc->ft->getPropQualifier(cc, CMGetCharsPtr(pn, NULL), "EmbeddedObject", NULL);
 	 if ((pqd.state == CMPI_goodValue) && (pqd.value.boolean = 1)) {
 	    pd.type = CMPI_instance;
-	    fprintf(stderr, "yes, %s qual of %s is EO\n", CMGetCharPtr(pn), cn);
 	 }
 
 	 if (ps.rc == CMPI_RC_OK && pn ) {
