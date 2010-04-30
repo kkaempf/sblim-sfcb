@@ -39,48 +39,11 @@
 
 #define LOCALCLASSNAME "ProfileProvider"
 
-extern void     setStatus(CMPIStatus *st, CMPIrc rc, char *msg);
-
 /*
  * ------------------------------------------------------------------------- 
  */
 
 static const CMPIBroker *_broker;
-
-typedef struct profile {
-  char           *InstanceID;   /* <OrgID>:<LocalID> */
-  unsigned int    RegisteredOrganization;       /* "other" = 1, DMTF = 2,
-                                                 * ... */
-  char           *RegisteredName;       /* maxlen 256 */
-  char           *RegisteredVersion;    /* major.minor.update */
-  unsigned int    AdvertiseTypes;       /* other = 1, not = 2, slp = 3 */
-  /*
-   * should be an int[], but we're only supporting 2 or 3 right now 
-   */
-  char           *OtherRegisteredOrganzation;   /* only if RegOrg = 1 */
-  char           *AdvertiseTypeDescriptions;    /* only if AdvertiseTypes
-                                                 * = 1 */
-} Profile;
-
-/*
- * ------------------------------------------------------------------------- 
- */
-
-/*
- * checks if an object path is for the /root/interop or /root/pg_interop 
- */
-static int
-interOpNameSpace(const CMPIObjectPath * cop, CMPIStatus *st)
-{
-  char           *ns = (char *) CMGetNameSpace(cop, NULL)->hdl;
-  if (strcasecmp(ns, "root/interop") && strcasecmp(ns, "root/pg_interop")) {
-    if (st)
-      setStatus(st, CMPI_RC_ERR_FAILED,
-                "Object must reside in root/interop");
-    return 0;
-  }
-  return 1;
-}
 
 /*
  * ------------------------------------------------------------------------- 
@@ -101,83 +64,6 @@ prepareUpcall(CMPIContext *ctx)
   return ctxLocal;
 }
 
-/*
- * ------------------------------------------------------------------------- 
- */
-
-/*
- * make a getProfileProperties as well?
- */
-
-static int
-setProfileProperties(const CMPIInstance *in, Profile * prof,
-                     CMPIStatus *st)
-{
-  if (in && prof) {
-
-    CMSetProperty(in, "InstanceID", prof->InstanceID, CMPI_chars);
-    CMSetProperty(in, "RegisteredName", prof->RegisteredName, CMPI_chars);
-    CMSetProperty(in, "RegisteredVersion", prof->RegisteredVersion,
-                  CMPI_chars);
-    CMSetProperty(in, "RegisteredOrganization",
-                  (CMPIValue *) & (prof->RegisteredOrganization),
-                  CMPI_uint16);
-
-    CMPIArray      *at = CMNewArray(_broker, 1, CMPI_uint16, st);
-    CMSetArrayElementAt(at, 0, (CMPIValue *) & (prof->AdvertiseTypes),
-                        CMPI_uint16);
-    CMSetProperty(in, "AdvertiseTypes", (CMPIValue *) & (at),
-                  CMPI_uint16A);
-
-    return 0;
-  } else {
-    return -1;
-  }
-}
-
-/*
- * ------------------------------------------------------------------ *
- * InterOp initialization
- * ------------------------------------------------------------------ 
- */
-
-static void
-initProfiles(const CMPIBroker * broker, const CMPIContext *ctx)
-{
-
-  CMPIObjectPath *op;
-  const CMPIInstance *ci;
-  CMPIContext    *ctxLocal;
-  CMPIStatus      st;
-
-  _SFCB_ENTER(TRACE_INDPROVIDER, "initProfiles");
-
-  ctxLocal = prepareUpcall((CMPIContext *) ctx);
-
-  /*
-   * Add Profile Registration profile 
-   */
-  op = CMNewObjectPath(broker, "root/interop", "sfcb_registeredprofile",
-                       &st);
-  ci = CMNewInstance(broker, op, &st);
-  Profile        *prof = (Profile *) malloc(sizeof(Profile));
-  prof->InstanceID = "CIM:SFCB_PR";
-  prof->RegisteredOrganization = 2;
-  prof->RegisteredName = "Profile Registration";
-  prof->RegisteredVersion = "1.1.0";
-  prof->AdvertiseTypes = 3;
-
-  CMAddKey(op, "InstanceID", prof->InstanceID, CMPI_chars);
-  setProfileProperties(ci, prof, &st);
-
-  broker->bft->createInstance(broker, ctxLocal, op, ci, &st);
-
-  free(prof);
-
-  // should really check if st.rc != 0 or 11...
-
-  _SFCB_EXIT();
-}
 
 /*
  * --------------------------------------------------------------------------
@@ -366,57 +252,6 @@ ProfileProviderExecQuery(CMPIInstanceMI * mi,
   _SFCB_RETURN(st);
 }
 
-/*
- * --------------------------------------------------------------------------
- */
-/*
- * Method Provider Interface 
- */
-/*
- * --------------------------------------------------------------------------
- */
-
-CMPIStatus
-ProfileProviderMethodCleanup(CMPIMethodMI * mi,
-                             const CMPIContext *ctx, CMPIBoolean terminate)
-{
-  CMPIStatus      st = { CMPI_RC_OK, NULL };
-  _SFCB_ENTER(TRACE_INDPROVIDER, "ProfileProviderMethodCleanup");
-  _SFCB_RETURN(st);
-}
-
-/*
- * ------------------------------------------------------------------------- 
- */
-
-CMPIStatus
-ProfileProviderInvokeMethod(CMPIMethodMI * mi,
-                            const CMPIContext *ctx,
-                            const CMPIResult *rslt,
-                            const CMPIObjectPath * ref,
-                            const char *methodName,
-                            const CMPIArgs * in, CMPIArgs * out)
-{
-  CMPIStatus      st = { CMPI_RC_OK, NULL };
-
-  _SFCB_ENTER(TRACE_INDPROVIDER, "ProfileProviderInvokeMethod");
-
-  if (interOpNameSpace(ref, &st) != 1)
-    _SFCB_RETURN(st);
-
-  _SFCB_TRACE(1, ("--- Method: %s", methodName));
-
-  if (strcasecmp(methodName, "_startup") == 0) {
-    initProfiles(_broker, ctx);
-  }
-
-  else {
-    _SFCB_TRACE(1, ("--- Invalid request method: %s", methodName));
-    setStatus(&st, CMPI_RC_ERR_METHOD_NOT_FOUND, "Invalid request method");
-  }
-
-  _SFCB_RETURN(st);
-}
 
 /*
  * ------------------------------------------------------------------ *
@@ -428,7 +263,6 @@ ProfileProviderInvokeMethod(CMPIMethodMI * mi,
 
 CMInstanceMIStub(ProfileProvider, ProfileProvider, _broker, CMNoHook);
 
-CMMethodMIStub(ProfileProvider, ProfileProvider, _broker, CMNoHook);
 /* MODELINES */
 /* DO NOT EDIT BELOW THIS COMMENT */
 /* Modelines are added by 'make pretty' */
