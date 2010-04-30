@@ -42,6 +42,7 @@ Bugs fixed:
 - 2979043 Fix leak in msgqueue.c during an error condition
 - 2979036 Always reset lexer and add error handing to activateFilter()
 - 2993137 CMSetProperty fails for CMPIInstance for EmbeddedObject
+- 2994921 Make RegisteredProfile for PRP a static instance
 
 Changes in 1.3.7
 ================

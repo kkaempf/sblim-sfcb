@@ -1,3 +1,8 @@
+2010-04-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* profileProvider.c, providerMgr.c, 10_interop.mof, default.reg.in:
+	[ 2994921 ] Make RegisteredProfile for PRP a static instance
+
 2010-04-27  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* instance.c, constClass.c:
