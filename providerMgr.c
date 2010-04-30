@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.72 2010/03/29 23:42:31 smswehla Exp $
+ * $Id: providerMgr.c,v 1.73 2010/04/30 20:02:12 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -937,8 +937,6 @@ void processProviderMgrRequests()
    if (interOpProvInfoPtr!=forceNoProvInfoPtr) {
      sleep(2);
      startUpProvider("root/interop","$InterOpProvider$");
-     sleep(2);
-     startUpProvider("root/interop","$ProfileProvider$");
    }   
 #endif
       
