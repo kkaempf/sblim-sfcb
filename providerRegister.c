@@ -93,7 +93,7 @@ pClone(ProviderRegister * br)
   return NULL;
 }
 
-static void
+static int
 addProviderToHT(ProviderInfo * info, UtilHashTable * ht)
 {
   ProviderInfo   *checkDummy;
@@ -110,11 +110,27 @@ addProviderToHT(ProviderInfo * info, UtilHashTable * ht)
      * append it to the one already found or to its master
      */
     if (strcmp(checkDummy->providerName, info->providerName) == 0) {
-      /*
-       * double registration - discard 
-       */
+      if (checkDummy->type != info->type) {
+	mlogf(M_ERROR,M_SHOW,"--- Conflicting registration types for class %s, provider %s\n", info->className, info->providerName);
+	return 1;
+      }
+      /* FIXME: check location, user, group, parms, unload */
+      /* classname and provider name match, now check for namespace */
+      int idx = 0;
+      while (checkDummy->ns[idx]) {
+	if (strcmp(checkDummy->ns[idx], info->ns[0]) == 0) {
+	  /* double registration - discard */
+	  freeInfoPtr(info);
+	  return 0;
+	}
+	++idx;
+      }
+      /* additional namespace for existing classname and provider name */
+      mlogf(M_INFO,M_SHOW,"--- Collating namespaces for registration of class %s, provider %s; consider single providerRegister entry\n", info->className, info->providerName);
+      checkDummy->ns=(char**)realloc(checkDummy->ns,sizeof(char*)*(idx+2));
+      checkDummy->ns[idx] = strdup(info->ns[0]);
+      checkDummy->ns[++idx] = NULL;
       freeInfoPtr(info);
-      return;
     } else {
       /* add info to the nIR linked list */
       info->nextInRegister = checkDummy->nextInRegister;
@@ -123,6 +139,7 @@ addProviderToHT(ProviderInfo * info, UtilHashTable * ht)
   } else {
     ht->ft->put(ht, info->className, info);
   }
+  return 0;
 }
 
 ProviderRegister *
@@ -225,7 +242,8 @@ newProviderRegister()
             if (strcmp(info->className, "$QualifierProvider$") == 0)
               qualiProvInfoPtr = info;
           }
-          addProviderToHT(info, ((ProviderBase *) br->hdl)->ht);
+          err = addProviderToHT(info, ((ProviderBase *) br->hdl)->ht);
+	  if (err)  break;
         }
         info = (ProviderInfo *) calloc(1, sizeof(ProviderInfo));
         info->className = strdup(rv.id);
@@ -323,10 +341,16 @@ newProviderRegister()
       case 3:
         break;
       }
+      if (err)  break;
     }
 
     if (info) {
-      addProviderToHT(info, ((ProviderBase *) br->hdl)->ht);
+      if (err == 0) {
+	addProviderToHT(info, ((ProviderBase *) br->hdl)->ht);
+      }
+      else {
+	freeInfoPtr(info);
+      }
     }
   }
   if (in) {
