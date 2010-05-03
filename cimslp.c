@@ -78,7 +78,7 @@ setUpTimes(int *slpLifeTime, int *sleepTime)
 static void
 handleSigUsr1(int sig)
 {
-  deregisterCIMService();
+  //deregisterCIMService();
   mlogf(M_INFO, M_SHOW, "--- %s terminating %d\n", processName, getpid());
   exit(0);
 }

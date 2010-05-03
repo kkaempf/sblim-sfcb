@@ -61,7 +61,8 @@ extern char    *value2Chars(CMPIType type, CMPIValue * value);
 
 void            initializeService(cimSLPService * rs);
 cimSLPService   getSLPData(cimomConfig cfg, const CMPIBroker *_broker,
-                           const CMPIContext *ctx);
+                           const CMPIContext *ctx,
+                           const char *urlsyntax);
 char           *myGetProperty(CMPIInstance *instance, char *propertyName);
 char          **myGetPropertyArray(CMPIInstance *instance,
                                    char *propertyName);
@@ -70,7 +71,8 @@ char          **myGetPropertyArrayFromArray(CMPIInstance **instances,
 CMPIInstance  **myGetInstances(const CMPIBroker *_broker,
                                const CMPIContext * ctx,
                                const char *path,
-                               const char *objectname);
+                               const char *objectname,
+                               const char *urlsyntax);
 char           *transformValue(char *cssf, CMPIObjectPath * op,
                                char *propertyName);
 char          **transformValueArray(char **cssf, CMPIObjectPath * op,
@@ -80,7 +82,7 @@ char          **myGetRegProfiles(const CMPIBroker *_broker,
                                  const CMPIContext * ctx);
 char          **getInterOpNS();
 char           *getUrlSyntax(char *sn, char *cs, char *port);
-void            updateSLPReg(const CMPIContext *ctx);
+void            updateSLPReg(const CMPIContext *ctx, int slpLifeTime);
 
 #endif
 /* MODELINES */

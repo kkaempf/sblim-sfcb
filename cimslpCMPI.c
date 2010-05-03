@@ -36,6 +36,7 @@ typedef int     (*getSlpHostname) (char **hostname);
 extern void     libraryName(const char *dir, const char *location,
                             const char *fullName, int buf_size);
 extern char    *configfile;
+CMPIContext    *prepareUpcall(const CMPIContext *ctx);
 
 // helper function ... until better solution is found to get to the
 // interop Namespace
@@ -56,7 +57,8 @@ getInterOpNS()
 
 CMPIInstance  **
 myGetInstances(const CMPIBroker *_broker, const CMPIContext * ctx,
-               const char *path, const char *objectname)
+               const char *path, const char *objectname,
+               const char *urlsyntax)
 {
   CMPIStatus      status;
   CMPIObjectPath *objectpath;
@@ -74,7 +76,7 @@ myGetInstances(const CMPIBroker *_broker, const CMPIContext * ctx,
     printf
         ("--- Error enumerating %s. Deregistering service with slp\n",
          objectname);
-    deregisterCIMService();
+    deregisterCIMService(urlsyntax);
     if (status.msg)
       CMRelease(status.msg);
     if (objectpath)
@@ -146,7 +148,7 @@ myGetClass(CMPIContext * ctx, char *path, char *objectname)
 
 cimSLPService
 getSLPData(cimomConfig cfg, const CMPIBroker *_broker,
-           const CMPIContext *ctx)
+           const CMPIContext *ctx, const char *urlsyntax)
 {
   CMPIInstance  **ci;
   //CMPIStatus      status;
@@ -192,7 +194,8 @@ getSLPData(cimomConfig cfg, const CMPIBroker *_broker,
   // extract all relavant stuff for SLP out of CIM_ObjectManager
 
   // construct the server string
-  ci = myGetInstances(_broker, ctx, interOpNS, "CMPI_ObjectManager");
+  ci = myGetInstances(_broker, ctx, interOpNS, "CIM_ObjectManager",
+                      urlsyntax);
   if (ci) {
     sn = myGetProperty(ci[0], "SystemName");
 
@@ -218,8 +221,8 @@ getSLPData(cimomConfig cfg, const CMPIBroker *_broker,
   // extract all relavant stuff for SLP out of
   // CIM_ObjectManagerCommunicationMechanism
   ci = myGetInstances(_broker, ctx, interOpNS,
-                      "CIM_ObjectManagerCommunicationMechanism");
-  fprintf(stderr, "SMS - ci[0]->ft points to %p\n", ci[0]->ft);
+                      "CIM_ObjectManagerCommunicationMechanism",
+                      urlsyntax);
   if (ci) {
     rs.CommunicationMechanism =
         myGetProperty(ci[0], "CommunicationMechanism");
@@ -237,10 +240,9 @@ getSLPData(cimomConfig cfg, const CMPIBroker *_broker,
     rs.AuthenticationMechansimDescriptions =
         myGetPropertyArray(ci[0], "AuthenticationMechansimDescriptions");
     // do the transformations from numbers to text via the qualifiers
-    CMPIStatus myRc;
-    CMPIObjectPath *myOp = CMGetObjectPath(ci[0], &myRc);
-    CMPIData qd = CMGetPropertyQualifier(myOp, "CommunicationMechanism", "ValueMap", &myRc);
-    fprintf(stderr, "SMS - rc: %d\n", myRc.rc);
+    //CMPIStatus myRc;
+    //CMPIObjectPath *myOp = CMGetObjectPath(ci[0], &myRc);
+    //CMPIData qd = CMGetPropertyQualifier(myOp, "CommunicationMechanism", "ValueMap", &myRc);
     rs.CommunicationMechanism = transformValue(rs.CommunicationMechanism,
                                                CMGetObjectPath(ci[0], NULL),
                                                "CommunicationMechanism");
@@ -255,18 +257,20 @@ getSLPData(cimomConfig cfg, const CMPIBroker *_broker,
     freeInstArr(ci);
   }
   // extract all relavant stuff for SLP out of CIM_Namespace
-  ci = myGetInstances(_broker, ctx, interOpNS, "CIM_Namespace");
+  ci = myGetInstances(_broker, ctx, interOpNS, "CIM_Namespace", urlsyntax);
   if (ci) {
     rs.Namespace = myGetPropertyArrayFromArray(ci, "Name");
     rs.Classinfo = myGetPropertyArrayFromArray(ci, "ClassInfo");
     freeInstArr(ci);
   }
   // extract all relavant stuff for SLP out of CIM_RegisteredProfile
-  ci = myGetInstances(_broker, ctx, interOpNS, "CIM_RegisteredProfile");
+  CMPIContext *ctxLocal = prepareUpcall(ctx);
+  ci = myGetInstances(_broker, ctxLocal, interOpNS, "CIM_RegisteredProfile", urlsyntax);
   if (ci) {
-    rs.RegisteredProfilesSupported = myGetRegProfiles(_broker, ci, ctx);
+    rs.RegisteredProfilesSupported = myGetRegProfiles(_broker, ci, ctxLocal);
     freeInstArr(ci);
   }
+  CMRelease(ctxLocal);
 
   _SFCB_RETURN(rs);
 

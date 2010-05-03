@@ -25,8 +25,9 @@
 char           *buildAttrString(char *name, char *value, char *attrstring);
 char           *buildAttrStringFromArray(char *name, char **value,
                                          char *attrstring);
-int             registerCIMService(cimSLPService css, int slpLifeTime);
-void            deregisterCIMService();
+int             registerCIMService(cimSLPService css, int slpLifeTime,
+                                   char **urlsyntax, char **gAttrstring);
+void            deregisterCIMService(const char *urlsyntax);
 
 #endif
 /* MODELINES */
