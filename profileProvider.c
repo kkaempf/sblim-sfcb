@@ -457,6 +457,7 @@ updateSLPReg(const CMPIContext *ctx, int slpLifeTime)
   int             enableHttp,
                   enableHttps = 0;
   long            i;
+  int             errC = 0;
 
   extern char    *configfile;
 
@@ -467,40 +468,39 @@ updateSLPReg(const CMPIContext *ctx, int slpLifeTime)
   setUpDefaults(&cfgHttp);
   setUpDefaults(&cfgHttps);
 
-  sleep(1);
-
-  if (!getControlBool("enableHttp", &enableHttp)) {
+//  sleep(1);
+  getControlBool("enableHttp", &enableHttp);
+  if (enableHttp) {
     getControlNum("httpPort", &i);
     free(cfgHttp.port);
     cfgHttp.port = malloc(6 * sizeof(char));    // portnumber has max. 5
-    // digits
+                                                // digits
     sprintf(cfgHttp.port, "%d", (int) i);
+    service = getSLPData(cfgHttp, _broker, ctx, http_url);
+    if((errC = registerCIMService(service, slpLifeTime,
+                                  &http_url, &http_attr)) != 0) {
+      _SFCB_TRACE(1, ("--- Error registering http with SLP: %d", errC));
+    }
   }
-  if (!getControlBool("enableHttps", &enableHttps)) {
+  getControlBool("enableHttps", &enableHttps);
+  if (enableHttps) {
+    fprintf(stderr, "SMS - enableHttps = %d\n", enableHttps);
     free(cfgHttps.commScheme);
     cfgHttps.commScheme = strdup("https");
     getControlNum("httpsPort", &i);
     free(cfgHttps.port);
     cfgHttps.port = malloc(6 * sizeof(char));   // portnumber has max. 5
-    // digits 
+                                                // digits 
     sprintf(cfgHttps.port, "%d", (int) i);
     getControlChars("sslClientTrustStore", &cfgHttps.trustStore);
     getControlChars("sslCertificateFilePath:", &cfgHttps.certFile);
     getControlChars("sslKeyFilePath", &cfgHttps.keyFile);
-  }
 
-  //CMPIContext *ctxLocal = prepareUpcall(ctx);
-  service = getSLPData(cfgHttp, _broker, ctx, http_url);
-  int errC = 0;
-  if((errC = registerCIMService(service, slpLifeTime,
-                                &http_url, &http_attr)) != 0) {
-    _SFCB_TRACE(1, ("--- Error registering http with SLP: %d", errC));
-  }
-
-  service = getSLPData(cfgHttps, _broker, ctx, https_url);
-  if((errC = registerCIMService(service, slpLifeTime,
-                                &https_url, &https_attr)) != 0) {
-    _SFCB_TRACE(1, ("--- Error registering https with SLP: %d", errC));
+    service = getSLPData(cfgHttps, _broker, ctx, https_url);
+    if((errC = registerCIMService(service, slpLifeTime,
+                                  &https_url, &https_attr)) != 0) {
+      _SFCB_TRACE(1, ("--- Error registering https with SLP: %d", errC));
+    }
   }
   
   freeCFG(&cfgHttp);
