@@ -1,3 +1,22 @@
+2010-04-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* providerRegister.c:
+	[ 2980524 ] providerRegister should collate namespaces
+	(patch by Klaus Kaempf)
+
+	* profileProvider.c, providerMgr.c, 10_interop.mof, default.reg.in:
+	[ 2994921 ] Make RegisteredProfile for PRP a static instance
+
+2010-04-27  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* instance.c, constClass.c:
+	[ 2993137 ] CMSetProperty fails for CMPIInstance for EmbeddedObject
+
+2010-04-20  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* getSchema.sh.pre.in:
+	[ 2990169 ] Bump downloaded CIM schema to 2.25
+
 2010-04-20 Sean Swehla <smswehla@linux.vnet.ibm.com>
 
 	* objecpath.c:
