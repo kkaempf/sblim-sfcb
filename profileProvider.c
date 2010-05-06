@@ -41,7 +41,9 @@
 
 #ifdef HAVE_SLP
 #include "control.h"
-pthread_t slpUpdateThread;
+pthread_t       slpUpdateThread;
+pthread_mutex_t slpUpdateMtx = PTHREAD_MUTEX_INITIALIZER;
+int             slpLifeTime = SLP_LIFETIME_DEFAULT;
 // This is an awfully brutish way
 // to track two adapters.
 char           *http_url = NULL;
@@ -332,7 +334,7 @@ ProfileProviderCreateInstance(CMPIInstanceMI * mi,
                                                   ci, &st));
   CMRelease(ctxLocal);
   //updateSLPRegistration
-  //updateSLPReg(ctx);
+  updateSLPReg(ctx, slpLifeTime);
 
   _SFCB_RETURN(st);
 }
@@ -373,7 +375,7 @@ ProfileProviderDeleteInstance(CMPIInstanceMI * mi,
   st = _broker->bft->deleteInstance(_broker, ctxLocal, cop);
   CMRelease(ctxLocal);
   //updateSLPRegistration
-  //updateSLPReg(ctx);
+  updateSLPReg(ctx, slpLifeTime);
 
   _SFCB_RETURN(st);
 }
@@ -463,6 +465,7 @@ updateSLPReg(const CMPIContext *ctx, int slpLifeTime)
 
   _SFCB_ENTER(TRACE_SLP, "slpAgent");
 
+  pthread_mutex_lock(&slpUpdateMtx);
   setupControl(configfile);
 
   setUpDefaults(&cfgHttp);
@@ -484,7 +487,6 @@ updateSLPReg(const CMPIContext *ctx, int slpLifeTime)
   }
   getControlBool("enableHttps", &enableHttps);
   if (enableHttps) {
-    fprintf(stderr, "SMS - enableHttps = %d\n", enableHttps);
     free(cfgHttps.commScheme);
     cfgHttps.commScheme = strdup("https");
     getControlNum("httpsPort", &i);
@@ -505,6 +507,7 @@ updateSLPReg(const CMPIContext *ctx, int slpLifeTime)
   
   freeCFG(&cfgHttp);
   freeCFG(&cfgHttps);
+  pthread_mutex_unlock(&slpUpdateMtx);
   return;
 }
 
@@ -520,7 +523,6 @@ handle_sig_slp(int signum)
 void *
 slpUpdateForever(void *args)
 {
-  int             slpLifeTime = SLP_LIFETIME_DEFAULT;
   int             sleepTime;
   long            i;
 
@@ -549,8 +551,8 @@ slpUpdateForever(void *args)
             timeLeft, slp_shutting_down ? "true" : "false");
   }
   //End loop
-  deregisterCIMService(http_url);
-  deregisterCIMService(https_url);
+  if(http_url) deregisterCIMService(http_url);
+  if(https_url) deregisterCIMService(https_url);
   return NULL;
 }
 
@@ -563,10 +565,12 @@ spawnUpdateThread(const CMPIContext *ctx)
   void           *thread_args = NULL;
   thread_args = (void *)native_clone_CMPIContext(ctx);
 
+  pthread_mutex_lock(&slpUpdateMtx);
   // create a thread
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
   rc = pthread_create(&slpUpdateThread, &attr, slpUpdateForever, thread_args);
+  pthread_mutex_unlock(&slpUpdateMtx);
   if(rc) {
     // deal with thread creation error
     exit(1);
