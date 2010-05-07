@@ -264,13 +264,15 @@ getSLPData(cimomConfig cfg, const CMPIBroker *_broker,
     freeInstArr(ci);
   }
   // extract all relavant stuff for SLP out of CIM_RegisteredProfile
-  CMPIContext *ctxLocal = prepareUpcall(ctx);
-  ci = myGetInstances(_broker, ctxLocal, interOpNS, "CIM_RegisteredProfile", urlsyntax);
+  //CMPIContext *ctxLocal = prepareUpcall(ctx);
+  //ci = myGetInstances(_broker, ctxLocal, interOpNS, "CIM_RegisteredProfile", urlsyntax);
+  ci = myGetInstances(_broker, ctx, interOpNS, "CIM_RegisteredProfile", urlsyntax);
   if (ci) {
-    rs.RegisteredProfilesSupported = myGetRegProfiles(_broker, ci, ctxLocal);
+    rs.RegisteredProfilesSupported = myGetRegProfiles(_broker, ci, ctx);
+    //rs.RegisteredProfilesSupported = myGetRegProfiles(_broker, ci, ctxLocal);
     freeInstArr(ci);
   }
-  CMRelease(ctxLocal);
+  //CMRelease(ctxLocal);
 
   _SFCB_RETURN(rs);
 
