@@ -42,6 +42,7 @@
 #ifdef HAVE_SLP
 #include "control.h"
 pthread_t       slpUpdateThread;
+pthread_once_t  slpUpdateInitMtx = PTHREAD_ONCE_INIT;
 pthread_mutex_t slpUpdateMtx = PTHREAD_MUTEX_INITIALIZER;
 int             slpLifeTime = SLP_LIFETIME_DEFAULT;
 // This is an awfully brutish way
@@ -520,12 +521,25 @@ handle_sig_slp(int signum)
   slp_shutting_down = 1;
 }
 
+void
+slpUpdateInit(void)
+{
+  slpUpdateThread = pthread_self();
+}
+
 void *
 slpUpdateForever(void *args)
 {
   int             sleepTime;
   long            i;
 
+  // set slpUpdateThread to appropriate thread info
+  pthread_once(&slpUpdateInitMtx, slpUpdateInit);
+  // exit thread if another already exists
+  if(!pthread_equal(slpUpdateThread, pthread_self())) {
+    fprintf(stderr, "SMS - prevented double start\n");
+    return NULL;
+  }
   //Setup signal handlers
   struct sigaction sa;
   sa.sa_handler = handle_sig_slp;
@@ -560,17 +574,16 @@ void
 spawnUpdateThread(const CMPIContext *ctx)
 {
   pthread_attr_t  attr;
+  pthread_t       newThread;
   int             rc = 0;
   //CMPIStatus      st = { 0 , NULL };
   void           *thread_args = NULL;
   thread_args = (void *)native_clone_CMPIContext(ctx);
 
-  pthread_mutex_lock(&slpUpdateMtx);
   // create a thread
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-  rc = pthread_create(&slpUpdateThread, &attr, slpUpdateForever, thread_args);
-  pthread_mutex_unlock(&slpUpdateMtx);
+  rc = pthread_create(&newThread, &attr, slpUpdateForever, thread_args);
   if(rc) {
     // deal with thread creation error
     exit(1);
