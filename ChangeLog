@@ -1,7 +1,11 @@
 2010-05-10  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* 10_interop.mof, default.reg.in, instance.c, instance.h, 
-	  interopProvider.c:
+	  interopProvider.c, 
+	  test/TestProviders/tests/IndTest3CreateSubscription.*,
+	  test/TestProviders/tests/IndTest5DeleteSubscription.xml, 
+	  test/xmltest/Indication03CreateSubscription.OK, 
+	  test/xmltest/Indication11DeleteSubscription.xml:
 	[ 2999667 ] Handle DeliveryFailureTime internally
 
 2010-04-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
