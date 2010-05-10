@@ -16,6 +16,7 @@ New features:
 - 2963601 pywbem tests
 - 2961422 Single HTTP Adapter
 - 2980820 Indication Profile 1.1: New attr values.
+- 2990091 Implement getPropertyQualifier in CMPIObjectPath
 - 2990169 Bump downloaded CIM schema to 2.25
 - 2980524 providerRegister should collate namespaces
 
@@ -44,6 +45,8 @@ Bugs fixed:
 - 2979036 Always reset lexer and add error handing to activateFilter()
 - 2993137 CMSetProperty fails for CMPIInstance for EmbeddedObject
 - 2994921 Make RegisteredProfile for PRP a static instance
+- 2997928 Namespace incorrect in test_providers
+- 2997961 IndRetryTest.sh leaves IndicationSubscription modded
 - 2999667 Handle DeliveryFailureTime internally
 
 Changes in 1.3.7
