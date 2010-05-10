@@ -74,8 +74,4 @@ class DMY_ElementConformsToProfile : CIM_ElementConformsToProfile
 {
 };
 
-class SFCB_IndicationSubscription : CIM_IndicationSubscription
-{
-    uint64 DeliveryFailureTime;
-};
 

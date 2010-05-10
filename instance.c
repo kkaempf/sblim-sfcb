@@ -71,7 +71,7 @@ struct native_instance {
   int             refCount;
   int             mem_state;
   int             filtered;
-  char          **property_list;
+  char          **property_list; /* the filter property list (not list of all props) */
   char          **key_list;
 };
 
@@ -297,6 +297,23 @@ __ift_setProperty(const CMPIInstance *instance,
       CMReturn(-rc);
   }
   CMReturn(CMPI_RC_OK);
+}
+
+CMPIStatus
+filterFlagProperty(CMPIInstance* ci, const char* id) {
+
+  CMPIStatus     st = { CMPI_RC_OK, 0 };
+  ClInstance     *inst = (ClInstance *) ci->hdl;
+  ClSection      *prps = &inst->properties;
+  int             i;
+
+  if ((i = ClObjectLocateProperty(&inst->hdr, prps, id)) != 0) {
+      ClInstanceFilterFlagProperty(inst, i-1);
+  }
+  else
+    st.rc = CMPI_RC_ERR_NOT_FOUND;
+
+  return st;
 }
 
 static CMPIStatus
