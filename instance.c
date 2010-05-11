@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.49 2010/04/27 19:21:00 buccella Exp $
+ * $Id: instance.c,v 1.50 2010/05/11 21:34:55 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -276,6 +276,22 @@ static CMPIStatus __ift_setProperty(const CMPIInstance * instance,
       if (rc<0) CMReturn(-rc);      
    }
    CMReturn(CMPI_RC_OK);
+}
+
+CMPIStatus filterFlagProperty(CMPIInstance* ci, const char* id) {
+
+   CMPIStatus     st = { CMPI_RC_OK, 0 };
+   ClInstance     *inst = (ClInstance *) ci->hdl;
+   ClSection      *prps = &inst->properties;
+   int             i;
+
+   if ((i = ClObjectLocateProperty(&inst->hdr, prps, id)) != 0) {
+      ClInstanceFilterFlagProperty(inst, i-1);
+   }
+   else
+      st.rc = CMPI_RC_ERR_NOT_FOUND;
+
+   return st;
 }
 
 static CMPIStatus __ift_setObjectPath(CMPIInstance * inst,
