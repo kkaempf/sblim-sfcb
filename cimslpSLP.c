@@ -171,16 +171,17 @@ deregisterCIMService(const char *urlsyntax)
   SLPError        callbackerr = 0;
   SLPError        err = 0;
 
+  _SFCB_ENTER(TRACE_SLP, "deregisterCIMService");
   err = SLPOpen("", SLP_FALSE, &hslp);
   if (err != SLP_OK) {
-    printf("Error opening slp handle %i\n", err);
+    _SFCB_TRACE(1, ("Error opening slp handle %i\n", err));
   }
   err = SLPDereg(hslp, urlsyntax, onErrorFnc, &callbackerr);
   if ((err != SLP_OK) || (callbackerr != SLP_OK)) {
     printf
         ("--- Error deregistering service with slp (%i) ... it will now timeout\n",
          err);
-    fprintf(stderr, "SMS - %s\n", urlsyntax);
+    _SFCB_TRACE(4, ("--- urlsyntax: %s\n", urlsyntax));
   }
   SLPClose(hslp);
 }
@@ -214,7 +215,7 @@ registerCIMService(cimSLPService css, int slpLifeTime, char **urlsyntax,
     *urlsyntax = (char *) malloc(strlen(css.url_syntax) + 14);   // ("service:wbem:" 
                                                                 // = 13) + \0
     sprintf(*urlsyntax, "service:wbem:%s", css.url_syntax);
-    fprintf(stderr, "service:wbem:%s\n", css.url_syntax);
+    _SFCB_TRACE(4, ("--- urlsyntax: %s\n", urlsyntax));
   }
 
   attrstring = malloc(sizeof(char) * SIZE);
@@ -289,7 +290,8 @@ registerCIMService(cimSLPService css, int slpLifeTime, char **urlsyntax,
      */
     if (strcmp(*gAttrstring, "NULL")) {
       err = SLPDereg(hslp, *urlsyntax, onErrorFnc, &callbackerr);
-      if(callbackerr != SLP_OK) fprintf(stderr, "SMS - dereg err, *urlsyntax = \"%s\"\n", *urlsyntax);
+      if(callbackerr != SLP_OK)
+        _SFCB_TRACE(2, ("--- SLP deregistration error, *urlsyntax = \"%s\"\n", *urlsyntax));
       free(*gAttrstring);
     }
   }
@@ -297,12 +299,13 @@ registerCIMService(cimSLPService css, int slpLifeTime, char **urlsyntax,
                *urlsyntax,
                slpLifeTime,
                NULL, attrstring, SLP_TRUE, onErrorFnc, &callbackerr);
-  if(callbackerr != SLP_OK) fprintf(stderr, "SMS - reg err, *urlsyntax = \"%s\"\n", *urlsyntax);
+  if(callbackerr != SLP_OK)
+    _SFCB_TRACE(2, ("--- SLP registration error, *urlsyntax = \"%s\"\n", *urlsyntax));
 
-//#ifdef HAVE_SLP_ALONE
+#ifdef HAVE_SLP_ALONE
   printf("url_syntax: %s\n", css.url_syntax);
   printf("attrsting: %s\n", attrstring);
-//#endif
+#endif
 
   if ((err != SLP_OK) || (callbackerr != SLP_OK)) {
     printf("Error registering service with slp %i\n", err);

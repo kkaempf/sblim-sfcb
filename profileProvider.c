@@ -214,12 +214,10 @@ ProfileProviderCleanup(CMPIInstanceMI * mi,
 #ifdef HAVE_SLP
   // Tell SLP update thread that we're shutting down
   _SFCB_TRACE(1, ("--- Stopping SLP thread"));
-  fprintf(stderr, "SMS - here 1\n");
   pthread_kill(slpUpdateThread, SIGUSR2);
   // Wait for thread to complete
   pthread_join(slpUpdateThread, NULL);
   _SFCB_TRACE(1, ("--- SLP Thread stopped"));
-  fprintf(stderr, "SMS - here 2\n");
 #endif // HAVE_SLP
   _SFCB_RETURN(st);
 }
@@ -528,7 +526,7 @@ slpUpdateInit(void)
 }
 
 void *
-slpUpdateForever(void *args)
+slpUpdate(void *args)
 {
   int             sleepTime;
   long            i;
@@ -536,10 +534,8 @@ slpUpdateForever(void *args)
   // set slpUpdateThread to appropriate thread info
   pthread_once(&slpUpdateInitMtx, slpUpdateInit);
   // exit thread if another already exists
-  if(!pthread_equal(slpUpdateThread, pthread_self())) {
-    fprintf(stderr, "SMS - prevented double start\n");
-    return NULL;
-  }
+  if(!pthread_equal(slpUpdateThread, pthread_self())) return NULL;
+  _SFCB_ENTER(TRACE_SLP, "slpUpdate");
   //Setup signal handlers
   struct sigaction sa;
   sa.sa_handler = handle_sig_slp;
@@ -561,12 +557,18 @@ slpUpdateForever(void *args)
     //Sleep for refresh interval
     int timeLeft = sleep(sleepTime);
     if(slp_shutting_down) break;
-    fprintf(stderr, "SMS - timeLeft: %d, slp_shutting_down: %s\n",
-            timeLeft, slp_shutting_down ? "true" : "false");
+    _SFCB_TRACE(4, ("--- timeLeft: %d, slp_shutting_down: %s\n",
+            timeLeft, slp_shutting_down ? "true" : "false"));
   }
   //End loop
-  if(http_url) deregisterCIMService(http_url);
-  if(https_url) deregisterCIMService(https_url);
+  if(http_url) {
+    _SFCB_TRACE(2, ("--- Deregistering http advertisement"));
+    deregisterCIMService(http_url);
+  }
+  if(https_url) {
+    _SFCB_TRACE(2, ("--- Deregistering https advertisement"));
+    deregisterCIMService(https_url);
+  }
   return NULL;
 }
 
@@ -583,7 +585,7 @@ spawnUpdateThread(const CMPIContext *ctx)
   // create a thread
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-  rc = pthread_create(&newThread, &attr, slpUpdateForever, thread_args);
+  rc = pthread_create(&newThread, &attr, slpUpdate, thread_args);
   if(rc) {
     // deal with thread creation error
     exit(1);
