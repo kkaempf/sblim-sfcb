@@ -91,15 +91,16 @@ HTTP_ADAPTER_LIBS = libsfcHttpAdapter.la
 HTTP_ADAPTER_LIBS_LINK = -lsfcHttpAdapter
 endif
 
-if SLP
-SLP_LIBS = libslpAgent.la
-SLP_LIB = -lslpAgent
-SLP_HEADER = cimslpCMPI.h cimslp.h cimslpSLP.h cimslpUtil.h
-else
+# SMS - Moving SLP into profile provider
+# if SLP
+# SLP_LIBS = libslpAgent.la
+# SLP_LIB = -lslpAgent
+# SLP_HEADER = cimslpCMPI.h cimslp.h cimslpSLP.h cimslpUtil.h
+# else
 SLP_LIBS =
 SLP_LIB =
 SLP_HEADER =
-endif
+# endif
 
 if SLP_HOSTNAME_LIB
 SLP_HOSTNAME_LIBS = libsfcSlpHostname.la
@@ -172,18 +173,18 @@ sfcblib_LTLIBRARIES += \
    libTestIndicationProvider.la
 endif
 
-if SLP_ALONE
-SLP_PROGRAMFILES = cimslp
-cimslp_SOURCES = \
-	cimslp.c \
-	cimslpCMPI.c \
-	cimslpSLP.c \
-	cimslpUtil.c 
-
-cimslp_LDADD=-lslp -lcmpisfcc -lsfcBrokerCore
-else
+# if SLP_ALONE
+# SLP_PROGRAMFILES = cimslp
+# cimslp_SOURCES = \
+# 	cimslp.c \
+# 	cimslpCMPI.c \
+# 	cimslpSLP.c \
+# 	cimslpUtil.c 
+# 
+# cimslp_LDADD=-lslp -lcmpisfcc -lsfcBrokerCore
+# else
 SLP_PROGRAMFILES = 
-endif
+# endif
 
 sbin_PROGRAMS = \
    sfcbd 
@@ -329,9 +330,13 @@ libsfcIndCIMXMLHandler_la_DEPENDENCIES=libsfcBrokerCore.la libsfcInternalProvide
 	$(CIMXMLCODEC_LIBS) $(HTTP_ADAPTER_LIBS)
 
 libsfcProfileProvider_la_SOURCES = \
-   profileProvider.c 
-libsfcProfileProvider_la_LIBADD=-lsfcBrokerCore
-libsfcProfileProvider_la_DEPENDENCIES=libsfcBrokerCore.la
+   profileProvider.c \
+   cimslp.c \
+   cimslpCMPI.c \
+   cimslpSLP.c \
+   cimslpUtil.c
+libsfcProfileProvider_la_LIBADD=-lsfcBrokerCore 
+libsfcProfileProvider_la_DEPENDENCIES=libsfcBrokerCore.la 
 
 libsfcElementCapabilitiesProvider_la_SOURCES = \
    elementCapabilitiesProvider.c 
@@ -404,15 +409,15 @@ libsfcCimXmlCodec_la_LIBADD=-lsfcBrokerCore
 libsfcCimXmlCodec_la_DEPENDENCIES=libsfcBrokerCore.la
 endif
 
-if SLP
-libslpAgent_la_CFLAGS = $(AM_CFLAGS)
-libslpAgent_la_SOURCES = \
-    cimslp.c \
-    cimslpCMPI.c \
-    cimslpSLP.c \
-    cimslpUtil.c
-libslpAgent_la_LIBADD=-lslp -lcmpisfcc
-endif
+# if SLP
+# libslpAgent_la_CFLAGS = $(AM_CFLAGS)
+# libslpAgent_la_SOURCES = \
+#     cimslp.c \
+#     cimslpCMPI.c \
+#     cimslpSLP.c \
+#     cimslpUtil.c
+# libslpAgent_la_LIBADD=-lslp
+# endif
 
 if QUALREP
 libsfcQualifierProvider_la_SOURCES = \

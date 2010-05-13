@@ -107,7 +107,7 @@ interOpNameSpace(const CMPIObjectPath * cop, CMPIStatus *st)
  */
 
 static CMPIContext *
-prepareUpcall(CMPIContext *ctx)
+prepareUpcall(const CMPIContext *ctx)
 {
   /*
    * used to invoke the internal provider in upcalls, otherwise we will be 

@@ -50,7 +50,7 @@
 
 #ifdef HAVE_SLP
 #include "cimslp.h"
-static int      startSLP = 1;
+static int      startSLP = 0;
 #endif
 
 int             sfcBrokerPid = 0;

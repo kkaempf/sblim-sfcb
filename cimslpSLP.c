@@ -33,8 +33,7 @@
 #define SIZE 1024
 
 int             size;
-char           *gAttrstring = "NULL";
-char           *urlsyntax = NULL;
+//char           *gAttrstring = "NULL";
 
 void
 freeCSS(cimSLPService css)
@@ -166,27 +165,30 @@ buildAttrStringFromArray(char *name, char **value, char *attrstring)
 }
 
 void
-deregisterCIMService()
+deregisterCIMService(const char *urlsyntax)
 {
   SLPHandle       hslp;
   SLPError        callbackerr = 0;
   SLPError        err = 0;
 
+  _SFCB_ENTER(TRACE_SLP, "deregisterCIMService");
   err = SLPOpen("", SLP_FALSE, &hslp);
   if (err != SLP_OK) {
-    printf("Error opening slp handle %i\n", err);
+    _SFCB_TRACE(1, ("Error opening slp handle %i\n", err));
   }
   err = SLPDereg(hslp, urlsyntax, onErrorFnc, &callbackerr);
   if ((err != SLP_OK) || (callbackerr != SLP_OK)) {
     printf
         ("--- Error deregistering service with slp (%i) ... it will now timeout\n",
          err);
+    _SFCB_TRACE(4, ("--- urlsyntax: %s\n", urlsyntax));
   }
   SLPClose(hslp);
 }
 
 int
-registerCIMService(cimSLPService css, int slpLifeTime)
+registerCIMService(cimSLPService css, int slpLifeTime, char **urlsyntax,
+                   char **gAttrstring)
 {
   SLPHandle       hslp;
   SLPError        err = 0;
@@ -209,13 +211,11 @@ registerCIMService(cimSLPService css, int slpLifeTime)
      * urlsyntax, which is the complete service string as required by slp, e.g.
      *  service:wbem:http://somehost:someport
      */
-    freeStr(urlsyntax);
-    urlsyntax = (char *) malloc(strlen(css.url_syntax) + 14);   // ("service:wbem:" 
-                                                                // 
-    // 
-    // = 13) + 
-    // \0
-    sprintf(urlsyntax, "service:wbem:%s", css.url_syntax);
+    freeStr(*urlsyntax);
+    *urlsyntax = (char *) malloc(strlen(css.url_syntax) + 14);   // ("service:wbem:" 
+                                                                // = 13) + \0
+    sprintf(*urlsyntax, "service:wbem:%s", css.url_syntax);
+    _SFCB_TRACE(4, ("--- urlsyntax: %s\n", urlsyntax));
   }
 
   attrstring = malloc(sizeof(char) * SIZE);
@@ -278,25 +278,29 @@ registerCIMService(cimSLPService css, int slpLifeTime)
     retCode = err;
   }
 
-  if (strcmp(gAttrstring, attrstring)) {
+  if (strcmp(*gAttrstring, attrstring)) {
     /*
      * attrstring changed - dereg the service, and rereg with the new
      * attributes actually, this is also true for the first run, as it
      * changed from NULL to some value. Normally, this should be run only
      * once if nothing changes. Then now further re/dreg is necessary.
-     * That's why I check if gAttrstring is "NULL" before deregging, as it 
+     * That's why I check if *gAttrstring is "NULL" before deregging, as it 
      * would dereg a not existing service otherwise and probably return an 
      * error code 
      */
-    if (strcmp(gAttrstring, "NULL")) {
-      err = SLPDereg(hslp, urlsyntax, onErrorFnc, &callbackerr);
-      free(gAttrstring);
+    if (strcmp(*gAttrstring, "NULL")) {
+      err = SLPDereg(hslp, *urlsyntax, onErrorFnc, &callbackerr);
+      if(callbackerr != SLP_OK)
+        _SFCB_TRACE(2, ("--- SLP deregistration error, *urlsyntax = \"%s\"\n", *urlsyntax));
+      free(*gAttrstring);
     }
   }
   err = SLPReg(hslp,
-               urlsyntax,
+               *urlsyntax,
                slpLifeTime,
                NULL, attrstring, SLP_TRUE, onErrorFnc, &callbackerr);
+  if(callbackerr != SLP_OK)
+    _SFCB_TRACE(2, ("--- SLP registration error, *urlsyntax = \"%s\"\n", *urlsyntax));
 
 #ifdef HAVE_SLP_ALONE
   printf("url_syntax: %s\n", css.url_syntax);
@@ -313,8 +317,8 @@ registerCIMService(cimSLPService css, int slpLifeTime)
     retCode = callbackerr;
   }
   // only save the last state when something changed to not waste mallocs
-  if (strcmp(attrstring, gAttrstring)) {
-    gAttrstring = strdup(attrstring);
+  if (strcmp(attrstring, *gAttrstring)) {
+    *gAttrstring = strdup(attrstring);
   }
 
   free(attrstring);

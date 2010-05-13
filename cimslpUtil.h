@@ -22,8 +22,8 @@
 #ifndef _cimslpUtil_h
 #define _cimslpUtil_h
 
-#include <cmci.h>
-
+#include "cmpidt.h"
+#include "cmpimacs.h"
 /*
  * #define freeArr(arr) \ {int freeStrArrN=0;if (arr) {while
  * (arr[freeStrArrN]) free(arr[freeStrArrN++]);free(arr);}} 

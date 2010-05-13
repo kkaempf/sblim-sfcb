@@ -23,8 +23,15 @@
 #ifndef _cimslp_h
 #define _cimslp_h
 
+#include <slp.h>
+#include "cimslpCMPI.h"
+#include "cimslpSLP.h"
+
 int             slpAgent();
 int             slppid;
+void            setUpDefaults(cimomConfig * cfg);
+void            setUpTimes(int *slpLifeTime, int *sleepTime);
+void            freeCFG(cimomConfig * cfg);
 
 #endif
 /* MODELINES */

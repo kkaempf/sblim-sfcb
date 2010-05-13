@@ -36,6 +36,22 @@
 #include "native.h"
 #include "objectpath.h"
 #include <time.h>
+#include "cimslp.h"
+#include "cimslpCMPI.h"
+
+#ifdef HAVE_SLP
+#include "control.h"
+pthread_t       slpUpdateThread;
+pthread_once_t  slpUpdateInitMtx = PTHREAD_ONCE_INIT;
+pthread_mutex_t slpUpdateMtx = PTHREAD_MUTEX_INITIALIZER;
+int             slpLifeTime = SLP_LIFETIME_DEFAULT;
+// This is an awfully brutish way
+// to track two adapters.
+char           *http_url = NULL;
+char           *http_attr = "NULL";
+char           *https_url = NULL;
+char           *https_attr = "NULL";
+#endif
 
 #define LOCALCLASSNAME "ProfileProvider"
 
@@ -49,8 +65,8 @@ static const CMPIBroker *_broker;
  * ------------------------------------------------------------------------- 
  */
 
-static CMPIContext *
-prepareUpcall(CMPIContext *ctx)
+CMPIContext *
+prepareUpcall(const CMPIContext *ctx)
 {
   /*
    * used to invoke the internal provider in upcalls, otherwise we will be 
@@ -81,6 +97,14 @@ ProfileProviderCleanup(CMPIInstanceMI * mi,
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_INDPROVIDER, "ProfileProviderCleanup");
+#ifdef HAVE_SLP
+  // Tell SLP update thread that we're shutting down
+  _SFCB_TRACE(1, ("--- Stopping SLP thread"));
+  pthread_kill(slpUpdateThread, SIGUSR2);
+  // Wait for thread to complete
+  pthread_join(slpUpdateThread, NULL);
+  _SFCB_TRACE(1, ("--- SLP Thread stopped"));
+#endif // HAVE_SLP
   _SFCB_RETURN(st);
 }
 
@@ -185,6 +209,7 @@ ProfileProviderCreateInstance(CMPIInstanceMI * mi,
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIContext    *ctxLocal;
+  //cimomConfig     cfg;
 
   _SFCB_ENTER(TRACE_INDPROVIDER, "ProfileProviderCreateInstance");
 
@@ -193,6 +218,8 @@ ProfileProviderCreateInstance(CMPIInstanceMI * mi,
                      _broker->bft->createInstance(_broker, ctxLocal, cop,
                                                   ci, &st));
   CMRelease(ctxLocal);
+  //updateSLPRegistration
+  updateSLPReg(ctx, slpLifeTime);
 
   _SFCB_RETURN(st);
 }
@@ -232,6 +259,8 @@ ProfileProviderDeleteInstance(CMPIInstanceMI * mi,
   ctxLocal = prepareUpcall((CMPIContext *) ctx);
   st = _broker->bft->deleteInstance(_broker, ctxLocal, cop);
   CMRelease(ctxLocal);
+  //updateSLPRegistration
+  updateSLPReg(ctx, slpLifeTime);
 
   _SFCB_RETURN(st);
 }
@@ -253,6 +282,152 @@ ProfileProviderExecQuery(CMPIInstanceMI * mi,
 }
 
 
+#ifdef HAVE_SLP
+#define UPDATE_SLP_REG  spawnUpdateThread(ctx)
+void 
+updateSLPReg(const CMPIContext *ctx, int slpLifeTime)
+{
+  cimSLPService   service;
+  cimomConfig     cfgHttp,
+                  cfgHttps;
+  int             enableHttp,
+                  enableHttps = 0;
+  long            i;
+  int             errC = 0;
+
+  extern char    *configfile;
+
+  _SFCB_ENTER(TRACE_SLP, "slpAgent");
+
+  pthread_mutex_lock(&slpUpdateMtx);
+  setupControl(configfile);
+
+  setUpDefaults(&cfgHttp);
+  setUpDefaults(&cfgHttps);
+
+//  sleep(1);
+  getControlBool("enableHttp", &enableHttp);
+  if (enableHttp) {
+    getControlNum("httpPort", &i);
+    free(cfgHttp.port);
+    cfgHttp.port = malloc(6 * sizeof(char));    // portnumber has max. 5
+                                                // digits
+    sprintf(cfgHttp.port, "%d", (int) i);
+    service = getSLPData(cfgHttp, _broker, ctx, http_url);
+    if((errC = registerCIMService(service, slpLifeTime,
+                                  &http_url, &http_attr)) != 0) {
+      _SFCB_TRACE(1, ("--- Error registering http with SLP: %d", errC));
+    }
+  }
+  getControlBool("enableHttps", &enableHttps);
+  if (enableHttps) {
+    free(cfgHttps.commScheme);
+    cfgHttps.commScheme = strdup("https");
+    getControlNum("httpsPort", &i);
+    free(cfgHttps.port);
+    cfgHttps.port = malloc(6 * sizeof(char));   // portnumber has max. 5
+                                                // digits 
+    sprintf(cfgHttps.port, "%d", (int) i);
+    getControlChars("sslClientTrustStore", &cfgHttps.trustStore);
+    getControlChars("sslCertificateFilePath:", &cfgHttps.certFile);
+    getControlChars("sslKeyFilePath", &cfgHttps.keyFile);
+
+    service = getSLPData(cfgHttps, _broker, ctx, https_url);
+    if((errC = registerCIMService(service, slpLifeTime,
+                                  &https_url, &https_attr)) != 0) {
+      _SFCB_TRACE(1, ("--- Error registering https with SLP: %d", errC));
+    }
+  }
+  
+  freeCFG(&cfgHttp);
+  freeCFG(&cfgHttps);
+  pthread_mutex_unlock(&slpUpdateMtx);
+  return;
+}
+
+static int slp_shutting_down = 0;
+
+void
+handle_sig_slp(int signum)
+{
+  //Indicate that slp is shutting down
+  slp_shutting_down = 1;
+}
+
+void
+slpUpdateInit(void)
+{
+  slpUpdateThread = pthread_self();
+}
+
+void *
+slpUpdate(void *args)
+{
+  int             sleepTime;
+  long            i;
+
+  // set slpUpdateThread to appropriate thread info
+  pthread_once(&slpUpdateInitMtx, slpUpdateInit);
+  // exit thread if another already exists
+  if(!pthread_equal(slpUpdateThread, pthread_self())) return NULL;
+  _SFCB_ENTER(TRACE_SLP, "slpUpdate");
+  //Setup signal handlers
+  struct sigaction sa;
+  sa.sa_handler = handle_sig_slp;
+  sa.sa_flags = 0;
+  sigemptyset(&sa.sa_mask);
+  sigaction(SIGUSR2, &sa, NULL);
+ 
+  //Get context from args
+  CMPIContext *ctx = (CMPIContext *)args;
+  //Get configured value for refresh interval
+  getControlNum("slpRefreshInterval", &i);
+  slpLifeTime = (int) i;
+  setUpTimes(&slpLifeTime, &sleepTime);
+  
+  //Start update loop
+  while(1) {
+    //Update reg
+    updateSLPReg(ctx, slpLifeTime);
+    //Sleep for refresh interval
+    int timeLeft = sleep(sleepTime);
+    if(slp_shutting_down) break;
+    _SFCB_TRACE(4, ("--- timeLeft: %d, slp_shutting_down: %s\n",
+            timeLeft, slp_shutting_down ? "true" : "false"));
+  }
+  //End loop
+  if(http_url) {
+    _SFCB_TRACE(2, ("--- Deregistering http advertisement"));
+    deregisterCIMService(http_url);
+  }
+  if(https_url) {
+    _SFCB_TRACE(2, ("--- Deregistering https advertisement"));
+    deregisterCIMService(https_url);
+  }
+  return NULL;
+}
+
+void
+spawnUpdateThread(const CMPIContext *ctx)
+{
+  pthread_attr_t  attr;
+  pthread_t       newThread;
+  int             rc = 0;
+  //CMPIStatus      st = { 0 , NULL };
+  void           *thread_args = NULL;
+  thread_args = (void *)native_clone_CMPIContext(ctx);
+
+  // create a thread
+  pthread_attr_init(&attr);
+  pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+  rc = pthread_create(&newThread, &attr, slpUpdate, thread_args);
+  if(rc) {
+    // deal with thread creation error
+    exit(1);
+  }
+}
+
+#endif // HAVE_SLP
 /*
  * ------------------------------------------------------------------ *
  * Instance MI Factory NOTE: This is an example using the convenience
@@ -261,7 +436,8 @@ ProfileProviderExecQuery(CMPIInstanceMI * mi,
  * ------------------------------------------------------------------ 
  */
 
-CMInstanceMIStub(ProfileProvider, ProfileProvider, _broker, CMNoHook);
+//CMInstanceMIStub(ProfileProvider, ProfileProvider, _broker, CMNoHook);
+CMInstanceMIStub(ProfileProvider, ProfileProvider, _broker, UPDATE_SLP_REG);
 
 /* MODELINES */
 /* DO NOT EDIT BELOW THIS COMMENT */
