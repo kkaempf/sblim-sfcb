@@ -3,6 +3,9 @@
 	* internalProvider.c:
 	[ 3001879 ] Remove SLP sections from internalProvider
 
+	* httpAdapter.c:
+	[ 3001896 ] httpAdapter can crash on bad content length
+	
 2010-05-10 Sean Swehla <smswehla@linux.vnet.ibm.com>
 
 	* Makefile.am, cimslpUtil.h, cimslp.c, cimslp.h,
