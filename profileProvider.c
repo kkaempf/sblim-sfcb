@@ -332,8 +332,10 @@ ProfileProviderCreateInstance(CMPIInstanceMI * mi,
                      _broker->bft->createInstance(_broker, ctxLocal, cop,
                                                   ci, &st));
   CMRelease(ctxLocal);
+#ifdef HAVE_SLP
   //updateSLPRegistration
   updateSLPReg(ctx, slpLifeTime);
+#endif // HAVE_SLP
 
   _SFCB_RETURN(st);
 }
@@ -373,8 +375,10 @@ ProfileProviderDeleteInstance(CMPIInstanceMI * mi,
   ctxLocal = prepareUpcall((CMPIContext *) ctx);
   st = _broker->bft->deleteInstance(_broker, ctxLocal, cop);
   CMRelease(ctxLocal);
+#ifdef HAVE_SLP
   //updateSLPRegistration
   updateSLPReg(ctx, slpLifeTime);
+#endif // HAVE_SLP
 
   _SFCB_RETURN(st);
 }
@@ -592,6 +596,8 @@ spawnUpdateThread(const CMPIContext *ctx)
   }
 }
 
+#else // no HAVE_SLP
+#defing UPDATE_SLP_REG CMNoHook
 #endif // HAVE_SLP
 /*
  * ------------------------------------------------------------------ *
