@@ -432,7 +432,7 @@ spawnUpdateThread(const CMPIContext *ctx)
 }
 
 #else // no HAVE_SLP
-#defing UPDATE_SLP_REG CMNoHook
+#define UPDATE_SLP_REG CMNoHook
 #endif // HAVE_SLP
 /*
  * ------------------------------------------------------------------ *
