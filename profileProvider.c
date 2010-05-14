@@ -36,10 +36,10 @@
 #include "native.h"
 #include "objectpath.h"
 #include <time.h>
-#include "cimslp.h"
-#include "cimslpCMPI.h"
 
 #ifdef HAVE_SLP
+#include "cimslp.h"
+#include "cimslpCMPI.h"
 #include "control.h"
 pthread_t       slpUpdateThread;
 pthread_once_t  slpUpdateInitMtx = PTHREAD_ONCE_INIT;
