@@ -36,8 +36,6 @@
 #include "native.h"
 #include "objectpath.h"
 
-#include "cimslp.h"
-
 #define LOCALCLASSNAME "InternalProvider"
 
 static char    *interopNs = "root/interop";
@@ -516,15 +514,6 @@ InternalProviderCreateInstance(CMPIInstanceMI * mi,
     if (isa(nss, cns, "cim_registeredprofile")) {
       CMPIArray      *atArray;
       atArray = CMGetProperty(ci, "AdvertiseTypes", &st).value.array;
-#ifdef HAVE_SLP
-      if (st.rc == CMPI_RC_OK ||
-          atArray != NULL ||
-          CMGetArrayElementAt(atArray, 0, &st).value.uint16 == 3) {
-        if (slppid > 1)         /* sanity check */
-          kill(slppid, SIGHUP); /* restart SLP to update
-                                 * RegisteredProfiles */
-      }
-#endif
     }
   }
 
@@ -584,11 +573,6 @@ InternalProviderModifyInstance(CMPIInstanceMI * mi,
     if (st.rc == CMPI_RC_OK ||
         atArray != NULL ||
         CMGetArrayElementAt(atArray, 0, &st).value.uint16 == 3) {
-
-#ifdef HAVE_SLP
-      kill(slppid, SIGHUP);     /* restart SLP to update
-                                 * RegisteredProfiles */
-#endif
     }
   }
 
@@ -624,13 +608,6 @@ InternalProviderDeleteInstance(CMPIInstanceMI * mi,
   }
 
   deleteBlob(bnss, cns, key);
-
-#ifdef HAVE_SLP
-  if (isa(nss, cns, "cim_registeredprofile")) {
-    kill(slppid, SIGHUP);       /* restart SLP to update
-                                 * RegisteredProfiles */
-  }
-#endif
 
   free(key);
   _SFCB_RETURN(st);
