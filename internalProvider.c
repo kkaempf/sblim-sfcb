@@ -164,20 +164,6 @@ _getIndex(const char *ns, const char *cn)
     return NULL;
 }
 
-extern int      isChild(const char *ns, const char *parent,
-                        const char *child);
-
-static int
-isa(const char *sns, const char *child, const char *parent)
-{
-  int             rv;
-  _SFCB_ENTER(TRACE_INTERNALPROVIDER, "isa");
-
-  if (strcasecmp(child, parent) == 0)
-    return 1;
-  rv = isChild(sns, parent, child);
-  _SFCB_RETURN(rv);
-}
 
 /*
  * ------------------------------------------------------------------ *
@@ -511,10 +497,6 @@ InternalProviderCreateInstance(CMPIInstanceMI * mi,
 
   if (rslt) {
     CMReturnObjectPath(rslt, cop);
-    if (isa(nss, cns, "cim_registeredprofile")) {
-      CMPIArray      *atArray;
-      atArray = CMGetProperty(ci, "AdvertiseTypes", &st).value.array;
-    }
   }
 
   free(key);
@@ -566,16 +548,6 @@ InternalProviderModifyInstance(CMPIInstanceMI * mi,
   getSerializedInstance(ci, blob);
   addBlob(bnss, cns, key, blob, (int) len);
   free(blob);
-
-  if (isa(nss, cns, "cim_registeredprofile")) {
-    CMPIArray      *atArray;
-    atArray = CMGetProperty(ci, "AdvertiseTypes", &st).value.array;
-    if (st.rc == CMPI_RC_OK ||
-        atArray != NULL ||
-        CMGetArrayElementAt(atArray, 0, &st).value.uint16 == 3) {
-    }
-  }
-
   free(key);
   _SFCB_RETURN(st);
 }
