@@ -11,6 +11,8 @@
 
 	* httpAdapter.c:
 	[ 3001896 ] httpAdapter can crash on bad content length
+
+	[ 3001915 ] Possible heap corruption in httpAdapter
 	
 2010-05-10 Sean Swehla <smswehla@linux.vnet.ibm.com>
 
