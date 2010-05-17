@@ -1019,6 +1019,7 @@ processProviderMgrRequests()
     startUpProvider("root/interop", "$InterOpProvider$");
   }
 #endif
+  startUpProvider("root/interop", "$ProfileProvider$");
 
   for (;;) {
     MgrHandler      hdlr;

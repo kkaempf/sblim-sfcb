@@ -285,6 +285,29 @@ ProfileProviderExecQuery(CMPIInstanceMI * mi,
   _SFCB_RETURN(st);
 }
 
+CMPIStatus
+ProfileProviderInvokeMethod(CMPIMethodMI * mi,
+                         const CMPIContext *ctx,
+                         const CMPIResult *rslt,
+                         const CMPIObjectPath * ref,
+                         const char *methodName,
+                         const CMPIArgs * in, CMPIArgs * out)
+{
+  _SFCB_ENTER(TRACE_INDPROVIDER, "ProfileProviderInvokeMethod");
+  CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
+  if (strcmp(methodName, "_startup"))
+    st.rc = CMPI_RC_OK;
+  _SFCB_RETURN(st);
+}
+
+CMPIStatus ProfileProviderMethodCleanup(CMPIMethodMI * mi,  
+					const CMPIContext * ctx, CMPIBoolean terminate)  
+{  
+  CMPIStatus st = { CMPI_RC_OK, NULL };  
+  _SFCB_ENTER(TRACE_INDPROVIDER, "ProfileProviderMethodCleanup");  
+  _SFCB_RETURN(st);  
+}
+
 
 #ifdef HAVE_SLP
 #define UPDATE_SLP_REG  spawnUpdateThread(ctx)
@@ -444,6 +467,7 @@ spawnUpdateThread(const CMPIContext *ctx)
 
 //CMInstanceMIStub(ProfileProvider, ProfileProvider, _broker, CMNoHook);
 CMInstanceMIStub(ProfileProvider, ProfileProvider, _broker, UPDATE_SLP_REG);
+CMMethodMIStub(ProfileProvider, ProfileProvider, _broker, CMNoHook);
 
 /* MODELINES */
 /* DO NOT EDIT BELOW THIS COMMENT */
