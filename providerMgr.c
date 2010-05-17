@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.73 2010/04/30 20:02:12 buccella Exp $
+ * $Id: providerMgr.c,v 1.74 2010/05/17 20:24:08 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -939,6 +939,8 @@ void processProviderMgrRequests()
      startUpProvider("root/interop","$InterOpProvider$");
    }   
 #endif
+
+   startUpProvider("root/interop","$ProfileProvider$");
       
    for (;;) {
       MgrHandler hdlr; 
