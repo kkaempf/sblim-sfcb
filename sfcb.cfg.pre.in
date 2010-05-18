@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.20 2009/12/04 21:41:00 buccella Exp $
+# $Id: sfcb.cfg.pre.in,v 1.21 2010/05/18 20:14:13 buccella Exp $
 ##
 ## Sample Configuration for Small Footprint CIM Broker
 ## 
@@ -47,8 +47,8 @@ useChunking:    true
 #chunkSize: 50000
 
 ## Maximum ContentLength of an HTTP request allowed.
-## Default is 0 (no limit)
-#httpMaxContentLength: 0
+## Default is 100000000
+#httpMaxContentLength: 100000000
 
 ## Enable basic authentication for HTTP and HTTPS connections
 ## Default is false
