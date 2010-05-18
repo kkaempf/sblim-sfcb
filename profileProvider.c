@@ -319,16 +319,23 @@ updateSLPReg(const CMPIContext *ctx, int slpLifeTime)
                   cfgHttps;
   int             enableHttp,
                   enableHttps = 0;
+  int             enableSlp = 0;
   long            i;
   int             errC = 0;
 
   extern char    *configfile;
 
-  _SFCB_ENTER(TRACE_SLP, "slpAgent");
+  _SFCB_ENTER(TRACE_SLP, "updateSLPReg");
 
   pthread_mutex_lock(&slpUpdateMtx);
   setupControl(configfile);
 
+  getControlBool("enableSlp", &enableSlp);
+  if(!enableSlp) {
+    _SFCB_TRACE(1, ("--- SLP disabled"));
+    pthread_mutex_unlock(&slpUpdateMtx);
+    _SFCB_EXIT();
+  }
   setUpDefaults(&cfgHttp);
   setUpDefaults(&cfgHttps);
 
@@ -392,6 +399,8 @@ slpUpdate(void *args)
 {
   int             sleepTime;
   long            i;
+  extern char    *configfile;
+  int             enableSlp = 0;
 
   // set slpUpdateThread to appropriate thread info
   pthread_once(&slpUpdateInitMtx, slpUpdateInit);
@@ -407,6 +416,14 @@ slpUpdate(void *args)
  
   //Get context from args
   CMPIContext *ctx = (CMPIContext *)args;
+  // Get enableSlp config value
+  setupControl(configfile);
+  getControlBool("enableSlp", &enableSlp);
+  // If enableSlp is false, we don't really need this thread
+  if(!enableSlp) {
+    _SFCB_TRACE(1, ("--- SLP disabled in config. Update thread not starting."));
+    _SFCB_RETURN(NULL);
+  }
   //Get configured value for refresh interval
   getControlNum("slpRefreshInterval", &i);
   slpLifeTime = (int) i;
@@ -431,7 +448,7 @@ slpUpdate(void *args)
     _SFCB_TRACE(2, ("--- Deregistering https advertisement"));
     deregisterCIMService(https_url);
   }
-  return NULL;
+  _SFCB_RETURN(NULL);
 }
 
 void
