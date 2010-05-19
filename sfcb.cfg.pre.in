@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.21 2010/05/18 20:14:13 buccella Exp $
+# $Id: sfcb.cfg.pre.in,v 1.22 2010/05/19 19:13:08 buccella Exp $
 ##
 ## Sample Configuration for Small Footprint CIM Broker
 ## 
@@ -144,10 +144,6 @@ enableHttps:    @SFCB_CONF_HTTPS@
 ## The HTTP port that SFCB should listen on for secure connections. 
 ## Default is 5989
 httpsPort:      5989
-
-## Max number of HTTP processes for HTTPS.  
-## Default is 8
-httpsProcs:     8
 
 ## Filename containing the private key for the server's certificate. The file 
 ## must be in PEM format and may not be passphrase-protected. 
