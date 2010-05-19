@@ -57,6 +57,7 @@ Bugs fixed:
 - 3002851 SLP needs to register at startup
 - 3004232 configure.ac allows slp-standalone and checks for sfcc
 - 3004257 slp information in README is not current
+- 3004358 indCIMXMLHanlder ci can leak on error condition
 
 Changes in 1.3.7
 ================
