@@ -56,6 +56,7 @@ Bugs fixed:
 - 3001915 Possible heap corruption in httpAdapter
 - 3002851 SLP needs to register at startup
 - 3004232 configure.ac allows slp-standalone and checks for sfcc
+- 3004257 slp information in README is not current
 
 Changes in 1.3.7
 ================
