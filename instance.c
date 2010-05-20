@@ -1042,7 +1042,7 @@ instFillDefaultProperties(struct native_instance *inst,
 
       /* if this prop is an EmbeddedObject, force type to CMPI_instance to allow CMSetProperty with a CMPI_Instance */
       CMPIData pqd = cc->ft->getPropQualifier(cc, CMGetCharsPtr(pn, NULL), "EmbeddedObject", NULL);
-      if ((pqd.state == CMPI_goodValue) && (pqd.value.boolean = 1)) {
+      if ((pqd.state == CMPI_goodValue) && (pqd.value.boolean == 1)) {
 	pd.type = CMPI_instance;
       }
       
