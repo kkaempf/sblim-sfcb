@@ -1,6 +1,6 @@
 Process Nametags patch: allows for easy identification of loaded providers
 
-After patching, start sfcb like so:
+After patching (with -p1), start sfcb like so:
 
 sfcbd xxxxxxxxxxxxxx <sfcbd options...>
 
@@ -19,109 +19,115 @@ The number of 'x's supplied determines the length of the "nametag".
 Tested and working on x86 with glibc.
 
 
-Index: httpAdapter.c
-===================================================================
-RCS file: /cvsroot/sblim/sfcb/httpAdapter.c,v
-retrieving revision 1.80
-diff -u -p -r1.80 httpAdapter.c
---- httpAdapter.c	17 Sep 2009 18:04:27 -0000	1.80
-+++ httpAdapter.c	24 Sep 2009 17:26:09 -0000
-@@ -125,6 +125,8 @@ extern int inet_aton(const char *cp, str
- int sfcBrokerPid=0;
+
+diff --git a/httpAdapter.c b/httpAdapter.c
+index abb0096..d6960f0 100644
+--- a/httpAdapter.c
++++ b/httpAdapter.c
+@@ -130,6 +130,10 @@ extern int      inet_aton(const char *cp, struct in_addr *inp);
  static unsigned int sessionId;
- extern char *opsName[];
-+char* nametag;
-+int nametaglen;
+ extern char    *opsName[];
  
- typedef int (*Authenticate)(char* principal, char* pwd);
++// sfcb-proc-nametags.patch
++char           *nametag;
++int            nametaglen;
++
+ typedef int     (*Authenticate) (char *principal, char *pwd);
  
-@@ -1337,6 +1339,7 @@ static void handleHttpRequest(int connFd
-       if (r==0) {
-          currentProc=getpid();
-          processName="CIMXML-Processor";
-+         strncpy(nametag,processName,nametaglen);
-          semRelease(httpProcSem,0);
-          semAcquireUnDo(httpProcSem,0);
-          semReleaseUnDo(httpProcSem,httpProcIdX+1);
-Index: sfcBroker.c
-===================================================================
-RCS file: /cvsroot/sblim/sfcb/sfcBroker.c,v
-retrieving revision 1.50
-diff -u -p -r1.50 sfcBroker.c
---- sfcBroker.c	24 Sep 2009 14:53:13 -0000	1.50
-+++ sfcBroker.c	24 Sep 2009 17:26:09 -0000
-@@ -113,6 +113,9 @@ static int adaptersStopped=0,providersSt
+ typedef struct _buffer {
+@@ -1164,6 +1168,10 @@ handleHttpRequest(int connFd, int sslMode)
+     if (r == 0) {
+       currentProc = getpid();
+       processName = "CIMXML-Processor";
++
++      // sfcb-proc-nametags.patch
++      strncpy(nametag,processName,nametaglen);
++
+       semRelease(httpProcSem, 0);
+       semAcquireUnDo(httpProcSem, 0);
+       semReleaseUnDo(httpProcSem, httpProcIdX + 1);
+diff --git a/providerDrv.c b/providerDrv.c
+index 6042093..8ade560 100644
+--- a/providerDrv.c
++++ b/providerDrv.c
+@@ -146,6 +146,10 @@ unsigned long   provTimeoutInterval = 25;
+ unsigned        provAutoGroup = 0;
+ static int      stopping = 0;
  
- extern char * configfile;
++// sfcb-proc-nametags.patch
++char            * nametag;
++int             nametaglen;
++
+ void            uninitProvProcCtl();
+ extern void     uninitSocketPairs();
+ extern void     sunsetControl();
+@@ -755,6 +759,9 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
  
-+extern char* nametag;   /* this will hold argv[1] if argv[1] = xxxxxxx... */
-+extern int nametaglen;  /* the number of x's if above is true */
+       if (info->pid == 0) {
+ 
++        // sfcb-proc-nametags.patch
++        strncpy(nametag,info->providerName,nametaglen);
++
+         currentProc = getpid();
+         setSignal(SIGCHLD, SIG_DFL, 0);
+         setSignal(SIGTERM, SIG_IGN, 0);
+diff --git a/sfcBroker.c b/sfcBroker.c
+index 5c589d8..68e3e22 100644
+--- a/sfcBroker.c
++++ b/sfcBroker.c
+@@ -99,6 +99,10 @@ static int      adaptersStopped = 0,
+ 
+ extern char    *configfile;
+ 
++// sfcb-proc-nametags.patch
++extern char   * nametag;   /* this will hold argv[1] if argv[1] = xxxxxxx... */
++extern int    nametaglen;  /* the number of x's if above is true */
 +
  typedef struct startedAdapter {
-    struct startedAdapter *next;
-    int stopped;
-@@ -483,6 +486,7 @@ static int startHttpd(int argc, char *ar
-               exit(2);
-           }
+   struct startedAdapter *next;
+   int             stopped;
+@@ -424,6 +428,8 @@ startHttpd(int argc, char *argv[], int sslMode)
        }
-+      strncpy(nametag,"httpd",nametaglen);
-       httpDaemon(argc, argv, sslMode, sfcPid);
-       closeSocket(&sfcbSockets,cRcv,"startHttpd");
-       closeSocket(&resultSockets,cAll,"startHttpd");
-@@ -597,6 +601,13 @@ int main(int argc, char *argv[])
-    if (name != NULL) ++name;
-    else name = argv[0];
+     }
  
-+   if (argc > 1 && strchr(argv[1],'x')) {
-+     nametag = argv[1];
-+     nametaglen = strlen(argv[1]);
-+     memset(nametag, ' ', nametaglen);
-+     strncpy(nametag,"main",nametaglen);
-+   }
++    // sfcb-proc-nametags.patch
++    strncpy(nametag,"httpd",nametaglen);
+     if (httpDaemon(argc, argv, sslMode)) {
+       kill(sfcPid, 3);          /* if port in use, shutdown */
+     }
+@@ -557,6 +563,14 @@ main(int argc, char *argv[])
+   else
+     name = argv[0];
+ 
++  // sfcb-proc-nametags.patch
++  if (argc > 1 && strchr(argv[1],'x')) {
++    nametag = argv[1];
++    nametaglen = strlen(argv[1]);
++    memset(nametag, ' ', nametaglen);
++    strncpy(nametag,"main",nametaglen);
++  }
 +
-    collectStat=0;
-    colorTrace=0;
-    processName="sfcbd";
-@@ -685,11 +696,11 @@ int main(int argc, char *argv[])
-        }
-    }
+   collectStat = 0;
+   colorTrace = 0;
+   processName = "sfcbd";
+@@ -651,11 +665,12 @@ main(int argc, char *argv[])
+     }
+   }
  
--   if (optind < argc)
--   {
--      fprintf(stderr,"SFCB not started: unrecognized config property %s\n",argv[optind]);
--      usage(1);
--   }
-+//    if (optind < argc)
-+//    {
-+//       fprintf(stderr,"SFCB not started: unrecognized config property %s\n",argv[optind]);
-+//       usage(1);
-+//    }
+-  if (optind < argc) {
+-    fprintf(stderr, "SFCB not started: unrecognized config property %s\n",
+-            argv[optind]);
+-    usage(1);
+-  }
++// sfcb-proc-nametags.patch
++//  if (optind < argc) {
++//    fprintf(stderr, "SFCB not started: unrecognized config property %s\n",
++//            argv[optind]);
++//    usage(1);
++//  }
  
-    startLogging("sfcb",syslogLevel);
+   startLogging(syslogLevel);
  
-Index: providerDrv.c
-===================================================================
-RCS file: /cvsroot/sblim/sfcb/providerDrv.c,v
-retrieving revision 1.79
-diff -u -p -r1.79 providerDrv.c
---- providerDrv.c	24 Aug 2009 18:57:58 -0000	1.79
-+++ providerDrv.c	24 Sep 2009 17:26:09 -0000
-@@ -142,6 +142,9 @@ unsigned long provTimeoutInterval=25;
- unsigned      provAutoGroup=0;
- static int stopping=0;
- 
-+char* nametag;
-+int nametaglen;
-+
- void uninitProvProcCtl();
- extern void uninitSocketPairs();
- extern void sunsetControl();
-@@ -602,7 +605,7 @@ static int getProcess(ProviderInfo * inf
-          }
- 
-          if (info->pid == 0) {
--
-+	    strncpy(nametag,info->providerName,nametaglen);
-             currentProc=getpid();
-             setSignal(SIGCHLD, SIG_DFL,0);
-             setSignal(SIGTERM, SIG_IGN,0);
+-- 
+1.6.3.3
+
