@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.50 2010/05/11 21:34:55 buccella Exp $
+ * $Id: instance.c,v 1.51 2010/05/20 23:45:20 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -932,7 +932,7 @@ static void instFillDefaultProperties(struct native_instance *inst,
 
 	 /* if this prop is an EmbeddedObject, force type to CMPI_instance to allow CMSetProperty with a CMPI_Instance */
 	 CMPIData pqd = cc->ft->getPropQualifier(cc, CMGetCharsPtr(pn, NULL), "EmbeddedObject", NULL);
-	 if ((pqd.state == CMPI_goodValue) && (pqd.value.boolean = 1)) {
+	 if ((pqd.state == CMPI_goodValue) && (pqd.value.boolean == 1)) {
 	    pd.type = CMPI_instance;
 	 }
 
