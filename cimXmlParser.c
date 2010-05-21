@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlParser.c,v 1.33 2009/06/05 20:09:34 buccella Exp $
+ * $Id: cimXmlParser.c,v 1.34 2010/05/21 16:23:13 buccella Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -1994,4 +1994,6 @@ void freeCimXmlRequest(RequestHdr hdr)
     }
     free (hdr.cimRequest);
   }
+  if (hdr.errMsg)
+    free(hdr.errMsg);
 }
