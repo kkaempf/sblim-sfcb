@@ -661,7 +661,7 @@ retryExport(void *lctx)
           _SFCB_TRACE(1,("--- Indication succeeded."));
           sfc = 0;
           CMSetProperty(sub, "DeliveryFailureTime", &sfc, CMPI_uint64);
-          CBModifyInstance(_broker, ctx, cur->sub, sub, NULL);
+          InternalProviderModifyInstance(_broker, ctx, NULL, cur->sub, sub, NULL);
         }
         // remove from queue in either case
         _SFCB_TRACE(1,("--- Indication removed."));
@@ -703,7 +703,7 @@ retryExport(void *lctx)
             _SFCB_TRACE(1,("--- Subscription threshold reached, disable."));
             CMPIUint16      sst = 4;
             CMSetProperty(sub, "SubscriptionState", &sst, CMPI_uint16);
-            InternalProviderModifyInstance(_broker, ctx, NULL, cur->sub, sub, NULL);
+            CBModifyInstance(_broker, ctx, cur->sub, sub, NULL);
             purge = cur;
             cur = cur->next;
             dqRetry(ctx,purge);
