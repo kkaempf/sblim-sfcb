@@ -585,6 +585,7 @@ retryExport(void *lctx)
   CMPIArgs       *in;
   CMPIInstance   *sub;
   CMPIContext    *ctx = (CMPIContext *) lctx;
+  CMPIContext    *ctxLocal;
   RTElement      *cur,
                  *purge;
   struct timeval  tv;
@@ -598,6 +599,8 @@ retryExport(void *lctx)
   CMPIEnumeration *isenm = NULL;
 
   CMPIStatus      st = { CMPI_RC_OK, NULL };
+
+  ctxLocal = prepareUpcall(ctx);
 
   // Get the retry params from IndService
   op = CMNewObjectPath(_broker, "root/interop", "CIM_IndicationService",
@@ -661,7 +664,7 @@ retryExport(void *lctx)
           _SFCB_TRACE(1,("--- Indication succeeded."));
           sfc = 0;
           CMSetProperty(sub, "DeliveryFailureTime", &sfc, CMPI_uint64);
-          InternalProviderModifyInstance(_broker, ctx, NULL, cur->sub, sub, NULL);
+          CBModifyInstance(_broker, ctxLocal, cur->sub, sub, NULL);
         }
         // remove from queue in either case
         _SFCB_TRACE(1,("--- Indication removed."));
@@ -678,7 +681,7 @@ retryExport(void *lctx)
         CMPIInstance * indele=internalProviderGetInstance(cur->SFCBIndEle,&st);
         CMSetProperty(indele,"LastDelivery",&cur->lasttry,CMPI_sint32);
         CMSetProperty(indele,"RetryCount",&cur->count,CMPI_uint32);
-        InternalProviderModifyInstance(_broker, ctx, NULL, cur->SFCBIndEle, indele, NULL);
+        CBModifyInstance(_broker, ctxLocal, cur->SFCBIndEle, indele, NULL);
 
         CMPIData        sfcp =
             CMGetProperty(sub, "DeliveryFailureTime", NULL);
@@ -688,7 +691,7 @@ retryExport(void *lctx)
           sfc = tv.tv_sec;
           cur = cur->next;
           CMSetProperty(sub, "DeliveryFailureTime", &sfc, CMPI_uint64);
-          InternalProviderModifyInstance(_broker, ctx, NULL, cur->sub, sub, NULL);
+          CBModifyInstance(_broker, ctxLocal, cur->sub, sub, NULL);
         } else if (sfc + rtint < tv.tv_sec) {
           // Exceeded subscription removal threshold, if action is:
           // 2, delete the sub; 3, disable the sub; otherwise, nothing
@@ -718,7 +721,8 @@ retryExport(void *lctx)
   _SFCB_TRACE(1,("--- Indication retry queue empty, thread exitting."));
   pthread_mutex_unlock(&RQlock);
   retryRunning = 0;
-  ctx->ft->release(ctx);
+  CMRelease(ctxLocal);
+  CMRelease(ctx);
   _SFCB_RETURN(NULL);
 }
 
