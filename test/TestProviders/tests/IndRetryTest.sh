@@ -265,8 +265,14 @@ cleanup
 init
 lim=1000
 echo -n  "  Indication flood: "
-#odir make
 ./GenMI.pl 10 3 300 1
+if [ $? -ne 0 ] 
+then
+    echo " GenMI.pl FAILED"
+    exit 1; 
+fi
+sendxml RIModIS.XML /dev/null
+
 i=0
 j=0
 while [ $j -lt $lim ]
