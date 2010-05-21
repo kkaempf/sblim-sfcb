@@ -2121,6 +2121,8 @@ freeCimXmlRequest(RequestHdr hdr)
     }
     free(hdr.cimRequest);
   }
+  if (hdr.errMsg)
+    free(hdr.errMsg);
 }
 /* MODELINES */
 /* DO NOT EDIT BELOW THIS COMMENT */
