@@ -22,6 +22,7 @@ New features:
 - 2980524 providerRegister should collate namespaces
 - 2987170 Handle SLP in a provider
 - 2994969 Persist failing indications
+- 2964568 Indication stress test
 
 Bugs fixed:
 
