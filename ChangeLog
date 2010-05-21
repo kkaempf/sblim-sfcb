@@ -3,6 +3,10 @@
 	* cimXmlParser.c:
 	[ 3005424 ] Memory leak on error responses
 
+	* Makefile.am:
+	[ 2987170 ] Handle SLP in a provider
+	(missing cimslp headers in no_inst_HEADERS)
+
 2010-05-20 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* test/TestProviders/tests/IndRetryTest.sh:
