@@ -111,8 +111,6 @@ then
     exit 1 
 fi
 
-if [ 1 -eq 0 ] # MCS 
-then
 ###
 # Check that indications don't retry when disabled
 ###
@@ -260,7 +258,6 @@ else
     fi
 fi
 
-fi # MCS
 ###
 # Flood
 ###
