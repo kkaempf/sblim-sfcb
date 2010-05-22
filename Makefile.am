@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.107 2010/05/22 01:18:49 buccella Exp $  
+# $Id: Makefile.am,v 1.108 2010/05/22 01:26:13 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -400,6 +400,13 @@ SLP_SRC = cimslp.c \
           cimslpCMPI.c \
           cimslpSLP.c \
           cimslpUtil.c
+SLP_INC = cimslp.h \
+          cimslpCMPI.h \
+          cimslpSLP.h \
+          cimslpUtil.h
+
+else
+SLP_INC =
 endif
 
 if QUALREP
@@ -424,7 +431,7 @@ classSchema2c_SOURCES=classSchema2c.c
 classSchema2c_LDADD=-lsfcBrokerCore
 classSchema2c_DEPENDENCIES=libsfcBrokerCore.la
 
-noinst_HEADERS=array.h   httpComm.h control.h    providerMgr.h \
+noinst_HEADERS=array.h $(SLP_INC) httpComm.h control.h    providerMgr.h \
 	constClass.h   msgqueue.h     providerRegister.h \
 	cimXmlParser.h    native.h       support.h cimXmlGen.h \
 	cimXmlRequest.h  genericlist.h  objectImpl.h   trace.h \
