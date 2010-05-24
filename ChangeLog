@@ -1,3 +1,8 @@
+2010-05-24  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimslpCMPI.c, cimslpCMPI.h:
+	[ 3006687 ] ProfileProvider depends on sfcc
+
 2010-05-21 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* indCIMXMLHandler.c:
 	[ 3005508 ] Warning in indCIMXMLHandler.c 
