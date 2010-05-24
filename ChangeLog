@@ -1,3 +1,9 @@
+2010-05-24 Sean Swehla <smswehla@linux.vnet.ibm.com>
+
+	* profileProvider.c
+	[ 2994737 ] cimslp fails to get sslCertificateFilePath config value
+        (patch by Klaus Kämpf)
+
 2010-05-21 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* indCIMXMLHandler.c:
 	[ 3005508 ] Warning in indCIMXMLHandler.c 
