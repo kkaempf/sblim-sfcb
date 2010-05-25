@@ -48,11 +48,6 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_SLP
-#include "cimslp.h"
-static int      startSLP = 0;
-#endif
-
 int             sfcBrokerPid = 0;
 
 extern void     setExFlag(unsigned long f);
@@ -468,17 +463,6 @@ startDbpd(int argc, char *argv[], int sslMode)
 
 #endif
 
-#ifdef HAVE_SLP
-
-static int
-startSLPAgent()
-{
-  slpAgent();
-  return 0;
-}
-
-#endif
-
 static void
 usage(int status)
 {
@@ -818,13 +802,6 @@ main(int argc, char *argv[])
       startDbpd(argc, argv, 1);
     if (!sslOMode)
       startDbpd(argc, argv, 0);
-  }
-#endif
-
-#ifdef HAVE_SLP
-  // Start SLP Agent
-  if (startSLP) {
-    startSLPAgent();
   }
 #endif
 
