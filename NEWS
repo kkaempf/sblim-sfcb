@@ -9,6 +9,15 @@ Bugs fixed:
 - 2955916 Pretty print
 - 3003508 slpTests.sh uses bash-isms
 
+Changes in 1.3.9
+================
+
+New features:
+- NO NEW FEATURES
+
+Bugs fixed:
+
+- 2994737 cimslp fails to get sslCertificateFilePath config value
 
 Changes in 1.3.8
 ================
@@ -66,7 +75,6 @@ Bugs fixed:
 - 3005574 make clean does not remove cimXmlParserProcessed.c
 - 3006687 ProfileProvider depends on sfcc
 - 3006690 Remove startSLPAgent sections from sfcBroker
-- 2994737 cimslp fails to get sslCertificateFilePath config value
 
 Changes in 1.3.7
 ================
