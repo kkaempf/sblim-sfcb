@@ -320,7 +320,7 @@ registerCIMService(cimSLPService css, int slpLifeTime, char **urlsyntax,
   }
   // only save the last state when something changed to not waste mallocs
   if(changed) {
-    gAttrstring = attrstring;
+    *gAttrstring = attrstring;
   } else {
     free(attrstring);
   }
