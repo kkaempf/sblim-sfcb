@@ -156,6 +156,8 @@ typedef struct _buffer {
 #define USE_INET6
 #endif
 
+#define SET_HDR_CP(member, val)   member = val + strspn(val, " \t"); \
+
 void
 initHttpProcCtl(int p)
 {
@@ -905,9 +907,7 @@ doHttpRequest(CommHndl conn_fd)
     if (hdr[0] == 0)
       break;
     else if (strncasecmp(hdr, "Authorization:", 14) == 0) {
-      cp = &hdr[14];
-      cp += strspn(cp, " \t");
-      inBuf.authorization = cp;
+      SET_HDR_CP(inBuf.authorization, &hdr[14]);
     } else if (strncasecmp(hdr, "Content-Length:", 15) == 0) {
       cp = &hdr[15];
       cp += strspn(cp, " \t");
@@ -943,13 +943,10 @@ doHttpRequest(CommHndl conn_fd)
       }
       inBuf.content_length = clen;
     } else if (strncasecmp(hdr, "Content-Type:", 13) == 0) {
-      cp = &hdr[13];
-      cp += strspn(cp, " \t");
-      inBuf.content_type = cp;
+      SET_HDR_CP(inBuf.content_type, &hdr[13]);
     } else if (strncasecmp(hdr, "Host:", 5) == 0) {
-      cp = &hdr[5];
-      cp += strspn(cp, " \t");
-      inBuf.host = cp;
+      SET_HDR_CP(inBuf.host, &hdr[5]);
+
       if (strchr(inBuf.host, '/') != NULL || inBuf.host[0] == '.') {
         if (!discardInput) {
           genError(conn_fd, &inBuf, 400, "Bad Request", NULL);
@@ -957,9 +954,7 @@ doHttpRequest(CommHndl conn_fd)
         }
       }
     } else if (strncasecmp(hdr, "User-Agent:", 11) == 0) {
-      cp = &hdr[11];
-      cp += strspn(cp, " \t");
-      inBuf.useragent = cp;
+      SET_HDR_CP(inBuf.useragent, &hdr[11]);
     } else if (strncasecmp(hdr, "TE:", 3) == 0) {
       char           *cp = &hdr[3];
       cp += strspn(cp, " \t");

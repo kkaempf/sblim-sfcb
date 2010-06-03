@@ -1,3 +1,8 @@
+2010-06-03  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* httpAdapter.c:
+	[ 3011256 ] Add macro to set inBuf value
+
 2010-05-27 Sean Swehla <smswehla@linux.vnet.ibm.com>
 
 	* cimslpSLP.c:
