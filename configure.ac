@@ -113,6 +113,13 @@ AC_ARG_ENABLE(uds,
 	[AC_HELP_STRING([--enable-uds],
 		[Enable UDS authentication.])])
 
+AC_ARG_ENABLE(cim-rs,
+	[AC_HELP_STRING([--enable-cim-rs],
+		[include CIM-RS support for SFCB.])],
+	[enable_cim_rs=$enableval],
+	[enable_cim_rs="no"]
+	)
+
 # Size checks
 AC_CHECK_SIZEOF(void*)
 AC_CHECK_SIZEOF(int)
@@ -431,6 +438,14 @@ if test "$enable_slp"; then
 	AC_CHECK_LIB(slp,SLPReg,[],[AC_MSG_ERROR(no. Sorry cannot find libslp.)])
 fi
 
+if test "$enable_cim_rs" = "yes"; then
+   AC_DEFINE(CIM_RS,1,[CIM-RS enabled.])
+   SFCB_CIM_RS=true
+else
+   SFCB_CIM_RS=false
+fi
+AC_SUBST(SFCB_CIM_RS)
+
 # Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
@@ -497,6 +512,7 @@ AM_CONDITIONAL(DOCS,[test "$enable_docs" == "yes"])
 AM_CONDITIONAL(IPV6,[test "$enable_ipv6" == "yes"])
 AM_CONDITIONAL(LOCAL_CONNECT_NO_INDICATION,[test "$enable_local_connect_only" == "yes" -a "$enable_indications" == "no"])
 AM_CONDITIONAL(LOCAL_CONNECT_ONLY,[test "$enable_local_connect_only" == "yes"])
+AM_CONDITIONAL(CIM_RS,[test "$enable_cim_rs" == "yes"]) 
 
 AC_CONFIG_FILES([Makefile sfcb.spec sfcbrepos.sh sfcbstage.sh sfcbunstage.sh 
 	         sfcbuuid.sh sfcb.cfg.pre getSchema.sh.pre 
@@ -524,6 +540,7 @@ echo -e "default instance properties"\\t"${enable_default_properties}"
 echo -e "uds"\\t\\t\\t\\t"${enable_uds:-no}"
 echo -e "tests"\\t\\t\\t\\t"${enable_tests:-no}"
 echo -e "debug"\\t\\t\\t\\t"${enable_debug:-no}"
+echo -e "CIM-RS"\\t\\t\\t\\t"${enable_cim_rs:-no}"
 echo =================================================================
 echo
 echo "sfcb configuration complete.  you may now run 'make'"
