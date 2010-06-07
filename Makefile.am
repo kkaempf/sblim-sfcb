@@ -79,6 +79,9 @@ if LOCAL_CONNECT_NO_INDICATION
 CIMXMLCODEC_LIBS =
 CIMXMLCODEC_LIBS_LINK =
 
+CIMRSCODEC_LIBS =
+CIMRSCODEC_LIBS_LINK =
+
 HTTP_ADAPTER_LIBS =
 HTTP_ADAPTER_LIBS_LINK =
 
@@ -86,6 +89,9 @@ INDICATION_LIBS =
 else
 CIMXMLCODEC_LIBS = libsfcCimXmlCodec.la
 CIMXMLCODEC_LIBS_LINK = -lsfcCimXmlCodec
+
+CIMRSCODEC_LIBS = libsfcCimRsCodec.la
+CIMRSCODEC_LIBS_LINK = -lsfcCimRsCodec
 
 HTTP_ADAPTER_LIBS = libsfcHttpAdapter.la
 HTTP_ADAPTER_LIBS_LINK = -lsfcHttpAdapter
@@ -141,6 +147,7 @@ sfcblib_LTLIBRARIES = \
    libsfcClassProviderSf.la \
    libsfcClassProviderMem.la \
    $(CIMXMLCODEC_LIBS) \
+   $(CIMRSCODEC_LIBS) \
    $(HTTP_ADAPTER_LIBS) \
    libsfcBasicAuthentication.la \
    libsfcCertificateAuthentication.la \
@@ -270,8 +277,8 @@ if !LOCAL_CONNECT_NO_INDICATION
 libsfcHttpAdapter_la_SOURCES = \
    httpAdapter.c \
    httpComm.c
-libsfcHttpAdapter_la_LIBADD=-lsfcBrokerCore $(CIMXMLCODEC_LIBS_LINK)
-libsfcHttpAdapter_la_DEPENDENCIES=libsfcBrokerCore.la $(CIMXMLCODEC_LIBS)
+libsfcHttpAdapter_la_LIBADD=-lsfcBrokerCore $(CIMXMLCODEC_LIBS_LINK) $(CIMRSCODEC_LIBS_LINK)
+libsfcHttpAdapter_la_DEPENDENCIES=libsfcBrokerCore.la $(CIMXMLCODEC_LIBS) $(CIMRSCODEC_LIBS)
 endif
 
 #if SLP_HOSTNAME_LIB
@@ -314,9 +321,9 @@ libsfcInteropServerProvider_la_DEPENDENCIES=libsfcBrokerCore.la
 libsfcIndCIMXMLHandler_la_SOURCES = \
    indCIMXMLHandler.c \
    indCIMXMLExport.c 
-libsfcIndCIMXMLHandler_la_LIBADD=-lsfcBrokerCore -lsfcInternalProvider $(CIMXMLCODEC_LIBS_LINK) $(HTTP_ADAPTER_LIBS_LINK)
+libsfcIndCIMXMLHandler_la_LIBADD=-lsfcBrokerCore -lsfcInternalProvider $(CIMXMLCODEC_LIBS_LINK) $(CIMRSCODEC_LIBS_LINK) $(HTTP_ADAPTER_LIBS_LINK)
 libsfcIndCIMXMLHandler_la_DEPENDENCIES=libsfcBrokerCore.la libsfcInternalProvider.la \
-	$(CIMXMLCODEC_LIBS) $(HTTP_ADAPTER_LIBS)
+	$(CIMXMLCODEC_LIBS) $(CIMRSCODEC_LIBS) $(HTTP_ADAPTER_LIBS)
 
 libsfcProfileProvider_la_SOURCES = \
    profileProvider.c \
@@ -393,6 +400,12 @@ libsfcCimXmlCodec_la_SOURCES = \
    cimXmlRequest.c 
 libsfcCimXmlCodec_la_LIBADD=-lsfcBrokerCore 
 libsfcCimXmlCodec_la_DEPENDENCIES=libsfcBrokerCore.la
+
+libsfcCimRsCodec_la_SOURCES = \
+   cimRsRequest.c 
+libsfcCimRsCodec_la_LIBADD=-lsfcBrokerCore 
+libsfcCimRsCodec_la_DEPENDENCIES=libsfcBrokerCore.la
+
 endif
 
 if SLP
@@ -417,8 +430,8 @@ libsfcQualifierProvider_la_DEPENDENCIES=libsfcBrokerCore.la libsfcFileRepository
 endif
 
 sfcbd_SOURCES=sfcBroker.c
-sfcbd_LDADD=-lsfcBrokerCore $(CIMXMLCODEC_LIBS_LINK) $(HTTP_ADAPTER_LIBS_LINK)
-sfcbd_DEPENDENCIES=libsfcBrokerCore.la $(CIMXMLCODEC_LIBS) $(HTTP_ADAPTER_LIBS)
+sfcbd_LDADD=-lsfcBrokerCore $(CIMXMLCODEC_LIBS_LINK) $(CIMRSCODEC_LIBS_LINK) $(HTTP_ADAPTER_LIBS_LINK)
+sfcbd_DEPENDENCIES=libsfcBrokerCore.la $(CIMXMLCODEC_LIBS) $(CIMRSCODEC_LIBS) $(HTTP_ADAPTER_LIBS)
 
 sfcbmofpp_SOURCES=mofpp.c
 

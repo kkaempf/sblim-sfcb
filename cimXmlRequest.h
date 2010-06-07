@@ -47,6 +47,12 @@ typedef struct expSegments {
 } ExpSegments;
 
 typedef struct cimXmlRequestContext {
+#ifdef CIM_RS
+  char           *method;
+  char           *path;
+  char           *content;
+  unsigned int    length;
+#endif
   char           *cimXmlDoc;
   char           *principal;
   char           *host;
@@ -61,6 +67,10 @@ typedef struct cimXmlRequestContext {
 
 extern RespSegments handleCimXmlRequest(CimXmlRequestContext * ctx);
 extern int      cleanupCimXmlRequest(RespSegments * rs);
+#ifdef CIM_RS
+extern RespSegments handleCimRsRequest(CimXmlRequestContext * ctx);
+extern int      cleanupCimRsRequest(RespSegments * rs);
+#endif
 
 #endif
 /* MODELINES */

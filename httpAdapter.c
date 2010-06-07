@@ -147,6 +147,10 @@ typedef struct _buffer {
                  *useragent;
   char           *principal;
   char           *protocol;
+#ifdef CIM_RS
+  char           *method;
+  char           *path;
+#endif
 #if defined USE_SSL
   X509           *certificate;
 #endif
@@ -692,6 +696,14 @@ static ChunkFunctions httpChunkFunctions = {
 #define hdrBufsize 5000
 #define hdrLimmit 5000
 
+/*
+ * 
+ * returns: 1: error
+ *          2: bad request
+ *          3: timeout, incomplete header, read error, socket not ready
+ * 
+ */
+
 static int
 getHdrs(CommHndl conn_fd, Buffer * b, char *cmd)
 {
@@ -741,7 +753,7 @@ getHdrs(CommHndl conn_fd, Buffer * b, char *cmd)
     /*
      * on first run through, ensure that this is a POST req. 
      */
-    if (r && first) {
+    if (r && first && cmd) {
       if (strncasecmp(buf, cmd, strlen(cmd)) != 0) {
         /*
          * not what we expected - still continue to read to not confuse
@@ -844,8 +856,13 @@ doHttpRequest(CommHndl conn_fd)
   inBuf.host = NULL;
   inBuf.useragent = "";
   int             badReq = 0;
-
+#ifdef CIM_RS
+  inBuf.method = NULL;
+  inBuf.path = NULL;
+  rc = getHdrs(conn_fd, &inBuf, NULL);
+#else
   rc = getHdrs(conn_fd, &inBuf, "POST ");
+#endif
 
   if (rc == 1) {
     genError(conn_fd, &inBuf, 501, "Not Implemented", NULL);
@@ -881,9 +898,15 @@ doHttpRequest(CommHndl conn_fd)
     path = strpbrk(inBuf.httpHdr, " \t\r\n");
     if (path == NULL)
       break;
+#ifdef CIM_RS
+    inBuf.method = inBuf.httpHdr;
+#endif
     *path++ = 0;
     _SFCB_TRACE(1, ("--- Header: %s", inBuf.httpHdr));
     path += strspn(path, " \t\r\n");
+#ifdef CIM_RS
+    inBuf.path = path;
+#endif
     inBuf.protocol = strpbrk(path, " \t\r\n");
     if (inBuf.protocol == NULL)
       break;
@@ -968,6 +991,9 @@ doHttpRequest(CommHndl conn_fd)
     }
   }
 
+fprintf(stderr, "Method '%s'\n", inBuf.method);
+fprintf(stderr, "Path '%s'\n", inBuf.path);
+
 #if defined USE_SSL
   if (doBa && sfcbSSLMode) {
     if (ccVerifyMode != CC_VERIFY_IGNORE) {
@@ -1033,6 +1059,12 @@ doHttpRequest(CommHndl conn_fd)
 
   len = inBuf.content_length;
   if (len == UINT_MAX) {
+#ifdef CIM_RS
+    if ((strncasecmp(inBuf.method, "GET", 3) == 0)
+        || (strncasecmp(inBuf.method, "DELETE", 6) == 0)) {
+       inBuf.content_length = 0;
+    } else {
+#endif
     if (!discardInput) {
       genError(conn_fd, &inBuf, 411, "Length Required", NULL);
     }
@@ -1040,6 +1072,9 @@ doHttpRequest(CommHndl conn_fd)
     commClose(conn_fd);
     freeBuffer(&inBuf);
     exit(1);
+#ifdef CIM_RS
+    }
+#endif
   }
 
   hdr = (char *) malloc(strlen(inBuf.authorization) + 64);
@@ -1064,12 +1099,21 @@ doHttpRequest(CommHndl conn_fd)
   msgs[0].length = hl;
   msgs[1].data = inBuf.content;
   msgs[1].length = len - hl;
-
+#ifdef CIM_RS
+  if (strncasecmp(inBuf.path, "/cimrs/", 7) == 0) {
+    ctx.method = inBuf.method;
+    ctx.path = inBuf.path + 6; /* skip '/cimrs' */
+  }
+#endif
   ctx.cimXmlDoc = inBuf.content;
   ctx.principal = inBuf.principal;
   ctx.host = inBuf.host;
   ctx.teTrailers = inBuf.trailers;
   ctx.cimXmlDocLength = len - hl;
+#ifdef CIM_RS
+  ctx.length = ctx.cimXmlDocLength;
+  ctx.content = ctx.cimXmlDoc;
+#endif
   ctx.commHndl = &conn_fd;
 
   if (msgs[1].length > 0) {
@@ -1094,6 +1138,11 @@ doHttpRequest(CommHndl conn_fd)
     }
 #endif
 
+#ifdef CIM_RS
+    if (ctx.path != NULL)
+      response = handleCimRsRequest(&ctx);		  
+    else
+#endif
     response = handleCimXmlRequest(&ctx);
   } else {
     response = nullResponse;
@@ -1103,6 +1152,11 @@ doHttpRequest(CommHndl conn_fd)
   _SFCB_TRACE(1, ("--- Generate http response"));
   if (response.chunkedMode == 0)
     writeResponse(conn_fd, response);
+#ifdef CIM_RS
+    if (ctx.path != NULL)
+      cleanupCimRsRequest(&response);
+    else
+#endif
   cleanupCimXmlRequest(&response);
 
 #ifdef SFCB_DEBUG
