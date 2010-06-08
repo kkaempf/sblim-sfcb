@@ -25,7 +25,7 @@ class Sfcb
     if @pid.nil?
       # child
       Dir.chdir File.expand_path("..", File.dirname(__FILE__))
-      exec "#{EXECFILE}", "-c", "#{@cfgfile.path}"
+      exec "#{EXECFILE}", "-c", "#{@cfgfile.path}", "-t", "0x200000"
     end
     @pid
   end
