@@ -146,6 +146,7 @@ int             colorTrace;
 #define TRACE_RESPONSETIMING    262144
 #define TRACE_DBPDAEMON         524288
 #define TRACE_SLP               1048576
+#define TRACE_CIMRS             2097152
 
 typedef void    sigHandler(int);
 

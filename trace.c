@@ -76,6 +76,9 @@ TraceId         traceIds[] = {
   {"responseTiming", TRACE_RESPONSETIMING},
   {"dbpdaemon", TRACE_DBPDAEMON},
   {"slp", TRACE_SLP},
+#ifdef CIM_RS
+  {"cimrs", TRACE_CIMRS},
+#endif
   {NULL, 0}
 };
 
