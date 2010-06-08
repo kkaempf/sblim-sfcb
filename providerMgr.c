@@ -115,7 +115,9 @@ static UtilList *_getConstClassChildren(const char *ns, const char *cn);
 static CMPIConstClass *_getConstClass(const char *ns, const char *cn,
                                       CMPIStatus *st);
 static UtilList *_getAssocClassNames(const char *ns);
-
+#ifdef CIM_RS
+static UtilList *_getNameSpaces(const char *ns);
+#endif
 static void
 notSupported(int *requestor, OperationHdr * req)
 {
@@ -1832,6 +1834,56 @@ _getAssocClassNames(const char *ns)
 
   _SFCB_RETURN(ul);
 }
+
+#ifdef CIM_RS
+static UtilList *
+_getNameSpaces(const char *ns)
+{
+  _SFCB_ENTER(TRACE_PROVIDERMGR, "_getNameSpaces");
+
+  CMPIObjectPath *path;
+  BinRequestContext binCtx;
+  OperationHdr    req = { OPS_InvokeMethod, 1 };
+  CMPIArgs       *in = NewCMPIArgs(NULL);
+  CMPIArgs       *out = NULL;
+  CMPIData        data;
+  CMPIArray      *ar;
+  CMPIStatus      rc;
+  UtilList       *ul = NULL;
+  int             i,
+                  m,
+                  irc;
+
+  _SFCB_TRACE(1, ("--- for %s", ns));
+  path = NewCMPIObjectPath(ns, "$ClassProvider$", &rc);
+  req.nameSpace = setCharsMsgSegment((char *) ns);
+  req.className = setCharsMsgSegment("$ClassProvider$");
+
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+  irc = _methProvider(&binCtx, &req);
+
+  if (irc == MSG_X_PROVIDER) {
+    data = localInvokeMethod(&binCtx, path, "getnamespaces", in, &out, &rc, 0);
+    if (out) {
+      ar = CMGetArg(out, "namespaces", &rc).value.array;
+      ul = UtilFactory->newList();
+      for (i = 0, m = CMGetArrayCount(ar, NULL); i < m; i++) {
+        char           *name =
+            CMGetArrayElementAt(ar, i, NULL).value.string->hdl;
+        if (name)
+          ul->ft->append(ul, name);
+        _SFCB_TRACE(1, ("--- namespace %s", name));
+      }
+    }
+  }
+  CMRelease(path);
+  if (out)
+    CMRelease(out);
+  CMRelease(in);
+
+  _SFCB_RETURN(ul);
+}
+#endif
 
 /*
  ************************************************************************************** */
