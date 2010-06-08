@@ -150,6 +150,7 @@ typedef struct _buffer {
 #ifdef CIM_RS
   char           *method;
   char           *path;
+  char           *accept;
 #endif
 #if defined USE_SSL
   X509           *certificate;
@@ -859,6 +860,7 @@ doHttpRequest(CommHndl conn_fd)
 #ifdef CIM_RS
   inBuf.method = NULL;
   inBuf.path = NULL;
+  inBuf.accept = NULL;
   rc = getHdrs(conn_fd, &inBuf, NULL);
 #else
   rc = getHdrs(conn_fd, &inBuf, "POST ");
@@ -988,11 +990,12 @@ doHttpRequest(CommHndl conn_fd)
         genError(conn_fd, &inBuf, 417, "Expectation Failed", NULL);     // more);
         discardInput = 2;
       }
+#ifdef CIM_RS
+    } else if (strncasecmp(hdr, "Accept:", 7) == 0) {
+      SET_HDR_CP(inBuf.accept, &hdr[7]);
+#endif
     }
   }
-
-fprintf(stderr, "Method '%s'\n", inBuf.method);
-fprintf(stderr, "Path '%s'\n", inBuf.path);
 
 #if defined USE_SSL
   if (doBa && sfcbSSLMode) {
@@ -1103,7 +1106,11 @@ fprintf(stderr, "Path '%s'\n", inBuf.path);
   if (strncasecmp(inBuf.path, "/cimrs/", 7) == 0) {
     ctx.method = inBuf.method;
     ctx.path = inBuf.path + 6; /* skip '/cimrs' */
+    ctx.accept = inBuf.accept;
   }
+  else {
+    ctx.path = NULL;
+  }		
 #endif
   ctx.cimXmlDoc = inBuf.content;
   ctx.principal = inBuf.principal;

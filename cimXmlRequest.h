@@ -49,6 +49,7 @@ typedef struct expSegments {
 typedef struct cimXmlRequestContext {
 #ifdef CIM_RS
   char           *method;
+  char           *accept;
   char           *path;
   char           *content;
   unsigned int    length;

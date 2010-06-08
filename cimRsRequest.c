@@ -2870,6 +2870,7 @@ handleCimRsRequest(CimXmlRequestContext * ctx)
 #endif
 
   fprintf(stderr, "handleCimRsRequest(%s:%s)\n", ctx->method, ctx->path);
+  fprintf(stderr, "Accept(%s)\n", ctx->accept);
 	
   hdr = scanCimXmlRequest(ctx->cimXmlDoc);
 
