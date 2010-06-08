@@ -1226,6 +1226,32 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
     st.rc = traverseChildren(cReg, parent, chldn);
   }
 
+  else if (strcasecmp(methodName, "namespaces") == 0) {
+    HashTableIterator *it;
+    ClassRegister  *cReg;
+    char           *cn;
+
+fprintf(stderr,"\n\t**classProvider.namespaces\n");
+    for (it = nsHt->ft->getFirst(nsHt, (void **) &cn, (void **) &cReg); it;
+         it = nsHt->ft->getNext(nsHt, it, (void **) &cn, (void **) &cReg)) {
+#if 0
+      ClassBase      *cb;
+      UtilHashTable  *ct,
+      cb = (ClassBase *) (cReg + 1);
+      ct = cb->ht;
+      for (ii = ct->ft->getFirst(ct, (void **) &cn, (void **) &cc); ii;
+           ii = ct->ft->getNext(ct, ii, (void **) &cn, (void **) &cc)) {
+        cc->ft->release(cc);
+      }
+      it = cb->it;
+      for (ii = it->ft->getFirst(it, (void **) &cn, (void **) &ul); ii;
+           ii = it->ft->getNext(it, ii, (void **) &cn, (void **) &ul)) {
+        ul->ft->release(ul);
+      }
+#endif
+    }
+  }
+
   else if (strcasecmp(methodName, "_startup") == 0) {
     st.rc = CMPI_RC_OK;
   }
