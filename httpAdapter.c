@@ -1105,8 +1105,11 @@ doHttpRequest(CommHndl conn_fd)
 #ifdef CIM_RS
   if (strncasecmp(inBuf.path, "/cimrs/", 7) == 0) {
     ctx.method = inBuf.method;
-    ctx.path = inBuf.path + 6; /* skip '/cimrs' */
+    ctx.path = inBuf.path + 7; /* skip '/cimrs/' */
     ctx.accept = inBuf.accept;
+    ctx.keepaliveTimeout = keepaliveTimeout;
+    ctx.keepaliveMaxRequest = keepaliveMaxRequest;
+    ctx.numRequest = numRequest;
   }
   else {
     ctx.path = NULL;
@@ -1147,7 +1150,7 @@ doHttpRequest(CommHndl conn_fd)
 
 #ifdef CIM_RS
     if (ctx.path != NULL)
-      response = handleCimRsRequest(&ctx);		  
+      handleCimRsRequest(&ctx);
     else
 #endif
     response = handleCimXmlRequest(&ctx);
@@ -1157,14 +1160,16 @@ doHttpRequest(CommHndl conn_fd)
   free(hdr);
 
   _SFCB_TRACE(1, ("--- Generate http response"));
+#ifdef CIM_RS
+  if (ctx.path == NULL) {
+#endif
   if (response.chunkedMode == 0)
     writeResponse(conn_fd, response);
-#ifdef CIM_RS
-    if (ctx.path != NULL)
-      cleanupCimRsRequest(&response);
-    else
-#endif
+
   cleanupCimXmlRequest(&response);
+#ifdef CIM_RS
+  }
+#endif
 
 #ifdef SFCB_DEBUG
   if (uset && (_sfcb_trace_mask & TRACE_RESPONSETIMING)) {

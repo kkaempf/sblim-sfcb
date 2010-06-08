@@ -20,9 +20,7 @@
 
 #include "cmpidt.h"
 #include "cmpidtx.h"
-#include "cimXmlGen.h"
 #include "cimXmlRequest.h"
-#include "cimXmlParser.h"
 #include "msgqueue.h"
 #include "cmpidt.h"
 #include "constClass.h"
@@ -42,14 +40,48 @@
 #include "config.h"
 #include "control.h"
 
+#include "providerMgr.h"
 
 #ifdef LOCAL_CONNECT_ONLY_ENABLE
 // from httpAdapter.c
 int             noChunking = 0;
 #endif                          // LOCAL_CONNECT_ONLY_ENABLE
 
+enum http_method {
+  HTTP_GET = 1,
+  HTTP_PUT = 2,
+  HTTP_POST = 4,
+  HTTP_DELETE = 8
+};
+
+typedef struct requestHdr {
+  int rc;
+  const char *msg;
+  int code;      /* http response code */
+  int allowed;   /* if code == 405, bitmask of methods for 'Allowed:' header */
+
+  const char *ns;
+  int seen_ns;
+  const char *className;
+  int seen_className;
+  const char **keys;
+  enum http_method method;
+  char *query;
+  char *query_lang;
+  const char *qualifier;
+  int seen_qualifier;
+} RequestHdr;
+
+typedef struct cim_rs_response {
+  int rc;
+  const char *msg;
+  int code; /* http response code */
+  int allowed;           /* if code == 405, bitmask of methods for 'Allowed:' header */
+  int json;   /* 0: xml, 1: json */
+} CimRsResponse;
+
 typedef struct handler {
-  RespSegments(*handler) (CimXmlRequestContext *, RequestHdr * hdr);
+  CimRsResponse* (*handler) (CimXmlRequestContext *, RequestHdr *hdr);
 } Handler;
 
 extern int      noChunking;
@@ -101,56 +133,6 @@ static char    *cimMsg[] = {
   "The extrinsic Method could not be executed",
   "The specified extrinsic Method does not exist"
 };
-/*
- * static char *cimMsgId[] = { "", "CIM_ERR_FAILED",
- * "CIM_ERR_ACCESS_DENIED", "CIM_ERR_INVALID_NAMESPACE",
- * "CIM_ERR_INVALID_PARAMETER", "CIM_ERR_INVALID_CLASS",
- * "CIM_ERR_NOT_FOUND", "CIM_ERR_NOT_SUPPORTED",
- * "CIM_ERR_CLASS_HAS_CHILDREN", "CIM_ERR_CLASS_HAS_INSTANCES",
- * "CIM_ERR_INVALID_SUPERCLASS", "CIM_ERR_ALREADY_EXISTS",
- * "CIM_ERR_NO_SUCH_PROPERTY", "CIM_ERR_TYPE_MISMATCH",
- * "CIM_ERR_QUERY_LANGUAGE_NOT_SUPPORTED", "CIM_ERR_INVALID_QUERY",
- * "CIM_ERR_METHOD_NOT_AVAILABLE", "CIM_ERR_METHOD_NOT_FOUND", }; 
- */
-static char     iResponseIntro1[] =
-    "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"
-    "<CIM CIMVERSION=\"2.0\" DTDVERSION=\"2.0\">\n" "<MESSAGE ID=\"";
-static char     iResponseIntro2[] =
-    "\" PROTOCOLVERSION=\"1.0\">\n"
-    "<SIMPLERSP>\n" "<IMETHODRESPONSE NAME=\"";
-static char     iResponseIntro3Error[] = "\">\n";
-static char     iResponseIntro3[] = "\">\n" "<IRETURNVALUE>\n";
-static char     iResponseTrailer1Error[] =
-    "</IMETHODRESPONSE>\n" "</SIMPLERSP>\n" "</MESSAGE>\n" "</CIM>";
-static char     iResponseTrailer1[] =
-    "</IRETURNVALUE>\n"
-    "</IMETHODRESPONSE>\n" "</SIMPLERSP>\n" "</MESSAGE>\n" "</CIM>";
-
-static char     responseIntro1[] =
-    "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"
-    "<CIM CIMVERSION=\"2.0\" DTDVERSION=\"2.0\">\n" "<MESSAGE ID=\"";
-static char     responseIntro2[] =
-    "\" PROTOCOLVERSION=\"1.0\">\n"
-    "<SIMPLERSP>\n" "<METHODRESPONSE NAME=\"";
-static char     responseIntro3Error[] = "\">\n";
-static char     responseIntro3[] = "\">\n";     // "<RETURNVALUE>\n";
-static char     responseTrailer1Error[] =
-    "</METHODRESPONSE>\n" "</SIMPLERSP>\n" "</MESSAGE>\n" "</CIM>";
-static char     responseTrailer1[] =
-    // "</RETURNVALUE>\n"
-    "</METHODRESPONSE>\n" "</SIMPLERSP>\n" "</MESSAGE>\n" "</CIM>";
-
-static char     exportIndIntro1[] =
-    "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"
-    "<CIM CIMVERSION=\"2.0\" DTDVERSION=\"2.0\">\n" "<MESSAGE ID=\"";
-static char     exportIndIntro2[] =
-    "\" PROTOCOLVERSION=\"1.0\">\n"
-    "<SIMPLEEXPREQ>\n"
-    "<EXPMETHODCALL NAME=\"ExportIndication\">\n"
-    "<EXPPARAMVALUE NAME=\"NewIndication\">\n";
-static char     exportIndTrailer1[] =
-    "</EXPPARAMVALUE>\n"
-    "</EXPMETHODCALL>\n" "</SIMPLEEXPREQ>\n" "</MESSAGE>\n" "</CIM>";
 
 static char    *
 paramType(CMPIType type)
@@ -234,186 +216,55 @@ segments2stringBuffer(RespSegment * rs)
   return sb;
 }
 
-static char    *
-getErrSegment(int rc, char *m)
+static CimRsResponse *
+createRsResponse(int rc, const char *msg, int code)
 {
-  char           *msg;
-  char           *escapedMsg;
+  CimRsResponse *resp = (CimRsResponse *)malloc(sizeof(CimRsResponse));
 
-  if (m && *m) {
-    escapedMsg = XMLEscape(m, NULL);
-    msg = sfcb_snprintf("<ERROR CODE=\"%d\" DESCRIPTION=\"%s\"/>\n",
-                        rc, escapedMsg);
-    free(escapedMsg);
-  } else if (rc > 0 && rc < 18) {
-    msg = sfcb_snprintf("<ERROR CODE=\"%d\" DESCRIPTION=\"%s\"/>\n",
-                        rc, cimMsg[rc]);
-  } else {
-    msg = sfcb_snprintf("<ERROR CODE=\"%d\"/>\n", rc);
-  }
-  return msg;
-}
-/*
- * static char *getErrorSegment(CMPIStatus rc) { if (rc.msg &&
- * rc.msg->hdl) { return getErrSegment(rc.rc, (char *) rc.msg->hdl); }
- * return getErrSegment(rc.rc, NULL); } 
- */
-char           *
-getErrTrailer(int id, int rc, char *m)
-{
-  char           *msg;
+  resp->rc = rc;
+  if (msg) resp->msg = msg;
+  resp->code = code;
 
-  if (m && *m)
-    msg = sfcb_snprintf("CIMStatusCodeDescription: %s\r\n", m);
-  else if (rc > 0 && rc < 18)
-    msg = sfcb_snprintf("CIMStatusCodeDescription: %s\r\n", cimMsg[rc]);
-  else
-    msg = strdup("CIMStatusCodeDescription: *Unknown*\r\n");
-  return msg;
+  return resp;
 }
 
-static          RespSegments
-iMethodErrResponse(RequestHdr * hdr, char *error)
+static CimRsResponse *
+ctxErrResponse(RequestHdr * hdr, BinRequestContext * ctx)
 {
-  RespSegments    rs = {
-    NULL, 0, 0, NULL,
-    {{0, iResponseIntro1},
-     {0, hdr->id},
-     {0, iResponseIntro2},
-     {0, hdr->iMethod},
-     {0, iResponseIntro3Error},
-     {1, error},
-     {0, iResponseTrailer1Error},
-     }
-  };
+  CimRsResponse *resp;
 
-  return rs;
-};
-
-static          RespSegments
-methodErrResponse(RequestHdr * hdr, char *error)
-{
-  RespSegments    rs = {
-    NULL, 0, 0, NULL,
-    {{0, responseIntro1},
-     {0, hdr->id},
-     {0, responseIntro2},
-     {0, hdr->iMethod},
-     {0, responseIntro3Error},
-     {1, error},
-     {0, responseTrailer1Error},
-     }
-  };
-
-  return rs;
-};
-
-static          RespSegments
-ctxErrResponse(RequestHdr * hdr, BinRequestContext * ctx, int meth)
-{
-  MsgXctl        *xd = ctx->ctlXdata;
-  char            msg[256];
-  CMPIrc          err;
-
+  if (ctx->rc) {
   switch (ctx->rc) {
   case MSG_X_NOT_SUPPORTED:
-    hdr->errMsg = strdup("Operation not supported yy");
-    err = CMPI_RC_ERR_NOT_SUPPORTED;
+    resp = createRsResponse(CMPI_RC_ERR_NOT_SUPPORTED, "Operation not supported", 501); /* not implemented */
     break;
   case MSG_X_INVALID_CLASS:
-    hdr->errMsg = strdup("Class not found");
-    err = CMPI_RC_ERR_INVALID_CLASS;
+    resp = createRsResponse(CMPI_RC_ERR_INVALID_CLASS, "Class not found", 404); /* not found */
     break;
   case MSG_X_INVALID_NAMESPACE:
-    hdr->errMsg = strdup("Invalid namespace");
-    err = CMPI_RC_ERR_INVALID_NAMESPACE;
+    resp = createRsResponse(CMPI_RC_ERR_INVALID_NAMESPACE, "Invalid namespace", 400); /* bad request */
     break;
   case MSG_X_PROVIDER_NOT_FOUND:
-    hdr->errMsg = strdup("Provider not found or not loadable");
-    err = CMPI_RC_ERR_NOT_FOUND;
+    resp = createRsResponse(CMPI_RC_ERR_NOT_FOUND, "Provider not found or not loadable", 404); /* not found */
     break;
-  case MSG_X_FAILED:
-    hdr->errMsg = strdup(xd->data);
-    err = CMPI_RC_ERR_FAILED;
+  case MSG_X_FAILED: {
+    MsgXctl        *xd = ctx->ctlXdata;
+    resp = createRsResponse(CMPI_RC_ERR_FAILED, xd->data, 500); /* internal error */
     break;
-  default:
-    sprintf(msg, "Internal error - %d\n", ctx->rc);
-    hdr->errMsg = strdup(msg);
-    err = CMPI_RC_ERR_FAILED;
   }
-  if (meth)
-    return methodErrResponse(hdr, getErrSegment(err, hdr->errMsg));
-  return iMethodErrResponse(hdr, getErrSegment(err, hdr->errMsg));
+  default: {
+    char            msg[256];
+    sprintf(msg, "Internal error - %d\n", ctx->rc);
+    resp = createRsResponse(CMPI_RC_ERR_FAILED, msg, 500); /* internal error */
+  }
+  }
+  }
+  else {
+    resp = createRsResponse(0, NULL, 200); /* OK */
+  }
+  return resp;
 };
 
-static          RespSegments
-iMethodGetTrailer(UtilStringBuffer * sb)
-{
-  RespSegments    rs = { NULL, 0, 0, NULL,
-    {{2, (char *) sb},
-     {0, iResponseTrailer1},
-     {0, NULL},
-     {0, NULL},
-     {0, NULL},
-     {0, NULL},
-     {0, NULL}}
-  };
-
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "iMethodGetTrailer");
-  _SFCB_RETURN(rs);
-}
-
-static          RespSegments
-iMethodResponse(RequestHdr * hdr, UtilStringBuffer * sb)
-{
-  RespSegments    rs = { NULL, 0, 0, NULL,
-    {{0, iResponseIntro1},
-     {0, hdr->id},
-     {0, iResponseIntro2},
-     {0, hdr->iMethod},
-     {0, iResponseIntro3},
-     {2, (char *) sb},
-     {0, iResponseTrailer1}}
-  };
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "iMethodResponse");
-  _SFCB_RETURN(rs);
-};
-
-static          RespSegments
-methodResponse(RequestHdr * hdr, UtilStringBuffer * sb)
-{
-  RespSegments    rs = { NULL, 0, 0, NULL,
-    {{0, responseIntro1},
-     {0, hdr->id},
-     {0, responseIntro2},
-     {0, hdr->iMethod},
-     {0, responseIntro3},
-     {2, (char *) sb},
-     {0, responseTrailer1}}
-  };
-
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "methodResponse");
-  _SFCB_RETURN(rs);
-};
-
-ExpSegments
-exportIndicationReq(CMPIInstance *ci, char *id)
-{
-  UtilStringBuffer *sb = UtilFactory->newStrinBuffer(1024);
-  ExpSegments     xs = {
-    {{0, exportIndIntro1},
-     {0, id},
-     {0, exportIndIntro2},
-     {0, NULL},
-     {0, NULL},
-     {2, (char *) sb},
-     {0, exportIndTrailer1}}
-  };
-
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "exportIndicationReq");
-  instance2xml(ci, sb, 0);
-  _SFCB_RETURN(xs);
-};
 
 static UtilStringBuffer *
 genEnumResponses(BinRequestContext * binCtx,
@@ -428,7 +279,7 @@ genEnumResponses(BinRequestContext * binCtx,
   CMPIEnumeration *enm;
   CMPIStatus      rc;
 
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "genEnumResponses");
+  _SFCB_ENTER(TRACE_CIMRS, "genEnumResponses");
 
   ar = TrackedCMPIArray(arrLen, binCtx->type, NULL);
 
@@ -449,22 +300,22 @@ genEnumResponses(BinRequestContext * binCtx,
 
   enm = sfcb_native_new_CMPIEnumeration(ar, NULL);
   sb = UtilFactory->newStrinBuffer(1024);
-
+/*FIXME
   if (binCtx->oHdr->type == OPS_EnumerateClassNames)
     enum2xml(enm, sb, binCtx->type, XML_asClassName, binCtx->bHdr->flags);
   else if (binCtx->oHdr->type == OPS_EnumerateClasses)
     enum2xml(enm, sb, binCtx->type, XML_asClass, binCtx->bHdr->flags);
   else
     enum2xml(enm, sb, binCtx->type, binCtx->xmlAs, binCtx->bHdr->flags);
-
+*/
   _SFCB_RETURN(sb);
 }
 
-static          RespSegments
+static          CimRsResponse*
 genResponses(BinRequestContext * binCtx,
              BinResponseHdr ** resp, int arrlen)
 {
-  RespSegments    rs;
+  CimRsResponse    *rs;
   UtilStringBuffer *sb;
   void           *genheap;
 #ifdef SFCB_DEBUG
@@ -479,14 +330,12 @@ genResponses(BinRequestContext * binCtx,
   }
 #endif
 
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "genResponses");
+  _SFCB_ENTER(TRACE_CIMRS, "genResponses");
 
   genheap = markHeap();
   sb = genEnumResponses(binCtx, resp, arrlen);
 
-  rs = iMethodResponse(binCtx->rHdr, sb);
-  if (binCtx->pDone < binCtx->pCount)
-    rs.segments[6].txt = NULL;
+  rs = createRsResponse(0, (char *)sb, 200);
 #ifdef SFCB_DEBUG
   if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
     gettimeofday(&ev, NULL);
@@ -506,10 +355,10 @@ genResponses(BinRequestContext * binCtx,
 }
 
 #ifdef HAVE_QUALREP
-static          RespSegments
+static          CimRsResponse*
 genQualifierResponses(BinRequestContext * binCtx, BinResponseHdr * resp)
 {
-  RespSegments    rs;
+  CimRsResponse*    rs;
   UtilStringBuffer *sb;
   CMPIArray      *ar;
   int             j;
@@ -518,7 +367,7 @@ genQualifierResponses(BinRequestContext * binCtx, BinResponseHdr * resp)
   CMPIStatus      rc;
   void           *genheap;
 
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "genQualifierResponses");
+  _SFCB_ENTER(TRACE_CIMRS, "genQualifierResponses");
   genheap = markHeap();
   ar = TrackedCMPIArray(resp->count, binCtx->type, NULL);
 
@@ -530,88 +379,67 @@ genQualifierResponses(BinRequestContext * binCtx, BinResponseHdr * resp)
 
   enm = sfcb_native_new_CMPIEnumeration(ar, NULL);
   sb = UtilFactory->newStrinBuffer(1024);
-
+/*FIXME
   qualiEnum2xml(enm, sb);
-  rs = iMethodResponse(binCtx->rHdr, sb);
+ */
+  rs = createRsResponse(0, (char *)sb, 200);
   releaseHeap(genheap);
   _SFCB_RETURN(rs);
 }
 #endif
 
-RespSegments
+CimRsResponse*
 genFirstChunkResponses(BinRequestContext * binCtx,
                        BinResponseHdr ** resp, int arrlen, int moreChunks)
 {
   UtilStringBuffer *sb;
-  RespSegments    rs;
-
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "genResponses");
 
   sb = genEnumResponses(binCtx, resp, arrlen);
 
-  rs = iMethodResponse(binCtx->rHdr, sb);
-  if (moreChunks || binCtx->pDone < binCtx->pCount)
-    rs.segments[6].txt = NULL;
-  _SFCB_RETURN(rs);
+  return createRsResponse(0, (char *)sb, 200);
 }
 
-RespSegments
+CimRsResponse*
 genChunkResponses(BinRequestContext * binCtx,
                   BinResponseHdr ** resp, int arrlen)
 {
-  RespSegments    rs = { NULL, 0, 0, NULL,
-    {{2, NULL},
-     {0, NULL},
-     {0, NULL},
-     {0, NULL},
-     {0, NULL},
-     {0, NULL},
-     {0, NULL}}
-  };
+  return createRsResponse(0, (char *) genEnumResponses(binCtx, resp, arrlen), 200);
 
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "genChunkResponses");
-  rs.segments[0].txt = (char *) genEnumResponses(binCtx, resp, arrlen);
-  _SFCB_RETURN(rs);
 }
 
-RespSegments
+CimRsResponse*
 genLastChunkResponses(BinRequestContext * binCtx,
                       BinResponseHdr ** resp, int arrlen)
 {
   UtilStringBuffer *sb;
-  RespSegments    rs;
-
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "genResponses");
 
   sb = genEnumResponses(binCtx, resp, arrlen);
 
-  rs = iMethodGetTrailer(sb);
-  _SFCB_RETURN(rs);
+  return createRsResponse(0, (char *)sb, 200);
 }
 
-RespSegments
+CimRsResponse*
 genFirstChunkErrorResponse(BinRequestContext * binCtx, int rc, char *msg)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "genFirstChunkErrorResponse");
-  _SFCB_RETURN(iMethodErrResponse(binCtx->rHdr, getErrSegment(rc, msg)));
+  return createRsResponse(rc, msg, 500);
 }
 
-static          RespSegments
+static          CimRsResponse*
 getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "getClass");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   CMPIConstClass *cls;
   UtilStringBuffer *sb;
   int             irc,
                   i,
                   sreqSize = sizeof(GetClassReq);       // -sizeof(MsgSegment);
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
   GetClassReq    *sreq;
 
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "getClass");
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokGetClass   *req = (XtokGetClass *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -645,7 +473,7 @@ getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     resp = invokeProvider(&binCtx);
     closeProviderContext(&binCtx);
     resp->rc--;
@@ -670,22 +498,22 @@ getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
   }
   free(sreq);
   closeProviderContext(&binCtx);
-
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "deleteClass");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
   DeleteClassReq  sreq;
 
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "deleteClass");
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokDeleteClass *req = (XtokDeleteClass *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -713,7 +541,7 @@ deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     resp = invokeProvider(&binCtx);
     closeProviderContext(&binCtx);
     resp->rc--;
@@ -732,19 +560,22 @@ deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "createClass");
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "createClass");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   CMPIConstClass  cls;
   ClClass        *cl;
   ClClass        *tmp;
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
   CreateClassReq  sreq = BINREQ(OPS_CreateClass, 3);
 
@@ -759,8 +590,6 @@ createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
   XtokClass      *c;
   CMPIData        d;
   CMPIParameter   pa;
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokCreateClass *req = (XtokCreateClass *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -890,7 +719,7 @@ createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     resp = invokeProvider(&binCtx);
     closeProviderContext(&binCtx);
     resp->rc--;
@@ -909,24 +738,25 @@ createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 enumClassNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "enumClassNames");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   EnumClassNamesReq sreq = BINREQ(OPS_EnumerateClassNames, 2);
   int             irc,
                   l = 0,
       err = 0;
   BinResponseHdr **resp;
-  BinRequestContext binCtx;
-  RespSegments    rs;
+  CimRsResponse*    rs;
 
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "enumClassNames");
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokEnumClassNames *req = (XtokEnumClassNames *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -970,23 +800,24 @@ enumClassNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 enumClasses(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "enumClasses");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   EnumClassesReq  sreq = BINREQ(OPS_EnumerateClasses, 2);
   int             irc,
                   l = 0,
       err = 0;
   BinResponseHdr **resp;
-  BinRequestContext binCtx;
 
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "enumClasses");
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokEnumClasses *req = (XtokEnumClasses *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -1021,7 +852,7 @@ enumClasses(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     _SFCB_TRACE(1, ("--- Calling Providers"));
     resp = invokeProviders(&binCtx, &err, &l);
     _SFCB_TRACE(1, ("--- Back from Provider"));
@@ -1048,13 +879,17 @@ enumClasses(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "getInstance");
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "getInstance");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   CMPIInstance   *inst;
   CMPIType        type;
@@ -1065,12 +900,9 @@ getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
                   i,
                   m,
                   sreqSize = sizeof(GetInstanceReq);    // -sizeof(MsgSegment);
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
-  RespSegments    rsegs;
+  CimRsResponse*    rsegs;
   GetInstanceReq *sreq;
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokGetInstance *req = (XtokGetInstance *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -1113,7 +945,7 @@ getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     resp = invokeProvider(&binCtx);
     closeProviderContext(&binCtx);
     resp->rc--;
@@ -1139,14 +971,17 @@ getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
   }
   free(sreq);
   closeProviderContext(&binCtx);
-
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 deleteInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "deleteInstance");
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "deleteInstance");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   CMPIType        type;
   CMPIValue       val,
@@ -1154,11 +989,9 @@ deleteInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
   int             irc,
                   i,
                   m;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
   DeleteInstanceReq sreq = BINREQ(OPS_DeleteInstance, 2);
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokDeleteInstance *req = (XtokDeleteInstance *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -1190,7 +1023,7 @@ deleteInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     resp = invokeProvider(&binCtx);
     closeProviderContext(&binCtx);
     resp->rc--;
@@ -1209,25 +1042,27 @@ deleteInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 createInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "createInst");
+  _SFCB_ENTER(TRACE_CIMRS, "createInst");
+  BinRequestContext binCtx;
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   CMPIInstance   *inst;
   CMPIValue       val;
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   UtilStringBuffer *sb;
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
   CreateInstanceReq sreq = BINREQ(OPS_CreateInstance, 3);
   XtokProperty   *p = NULL;
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokCreateInstance *req = (XtokCreateInstance *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -1271,7 +1106,7 @@ createInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     resp = invokeProvider(&binCtx);
     closeProviderContext(&binCtx);
     resp->rc--;
@@ -1293,13 +1128,17 @@ createInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "modifyInstance");
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "modifyInstance");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   CMPIInstance   *inst;
   CMPIType        type;
@@ -1309,14 +1148,12 @@ modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
                   i,
                   m,
                   sreqSize = sizeof(ModifyInstanceReq); // -sizeof(MsgSegment);
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
   ModifyInstanceReq *sreq;
   XtokInstance   *xci;
   XtokInstanceName *xco;
   XtokProperty   *p = NULL;
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokModifyInstance *req = (XtokModifyInstance *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -1371,7 +1208,7 @@ modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     resp = invokeProvider(&binCtx);
     closeProviderContext(&binCtx);
     free(sreq);
@@ -1392,25 +1229,24 @@ modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
   }
   closeProviderContext(&binCtx);
   free(sreq);
-
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 enumInstanceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "enumInstanceNames");
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "enumInstanceNames");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   EnumInstanceNamesReq sreq = BINREQ(OPS_EnumerateInstanceNames, 2);
   int             irc,
                   l = 0,
       err = 0;
   BinResponseHdr **resp;
-  BinRequestContext binCtx;
-  RespSegments    rs;
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-
+  CimRsResponse*    rs;
   XtokEnumInstanceNames *req = (XtokEnumInstanceNames *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -1454,13 +1290,17 @@ enumInstanceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "enumInstances");
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "enumInstances");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
 
   CMPIObjectPath *path;
   EnumInstancesReq *sreq;
@@ -1470,10 +1310,6 @@ enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
       i,
       sreqSize = sizeof(EnumInstancesReq);      // -sizeof(MsgSegment);
   BinResponseHdr **resp;
-  BinRequestContext binCtx;
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-
   XtokEnumInstances *req = (XtokEnumInstances *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -1519,7 +1355,7 @@ enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_TRACE(1, ("--- Provider context gotten irc: %d", irc));
 
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     _SFCB_TRACE(1, ("--- Calling Providers"));
     resp = invokeProviders(&binCtx, &err, &l);
     _SFCB_TRACE(1, ("--- Back from Providers"));
@@ -1547,13 +1383,17 @@ enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
   }
   closeProviderContext(&binCtx);
   free(sreq);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "execQuery");
+  _SFCB_ENTER(TRACE_CIMRS, "execQuery");
+  BinRequestContext binCtx;
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
 
   CMPIObjectPath *path;
   ExecQueryReq    sreq = BINREQ(OPS_ExecQuery, 4);
@@ -1561,11 +1401,9 @@ execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
                   l = 0,
       err = 0;
   BinResponseHdr **resp;
-  BinRequestContext binCtx;
   QLStatement    *qs = NULL;
   char          **fCls;
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokExecQuery  *req = (XtokExecQuery *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -1620,7 +1458,7 @@ execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_TRACE(1, ("--- Provider context gotten"));
 
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     _SFCB_TRACE(1, ("--- Calling Provider"));
     resp = invokeProviders(&binCtx, &err, &l);
     _SFCB_TRACE(1, ("--- Back from Provider"));
@@ -1645,13 +1483,17 @@ execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 associatorNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "associatorNames");
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "associatorNames");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   AssociatorNamesReq sreq = BINREQ(OPS_AssociatorNames, 6);
   int             irc,
@@ -1660,12 +1502,10 @@ associatorNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
                   l = 0,
       err = 0;
   BinResponseHdr **resp;
-  BinRequestContext binCtx;
   CMPIType        type;
   CMPIValue       val,
                  *valp;
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokAssociatorNames *req = (XtokAssociatorNames *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -1722,7 +1562,7 @@ associatorNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_TRACE(1, ("--- Provider context gotten"));
 
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     _SFCB_TRACE(1, ("--- Calling Providers"));
     resp = invokeProviders(&binCtx, &err, &l);
     _SFCB_TRACE(1, ("--- Back from Providers"));
@@ -1740,14 +1580,18 @@ associatorNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "associators");
+  _SFCB_ENTER(TRACE_CIMRS, "associators");
 
+  BinRequestContext binCtx;
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   AssociatorsReq *sreq;
   int             irc,
@@ -1757,12 +1601,10 @@ associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
       err = 0,
       sreqSize = sizeof(AssociatorsReq);        // -sizeof(MsgSegment);
   BinResponseHdr **resp;
-  BinRequestContext binCtx;
   CMPIType        type;
   CMPIValue       val,
                  *valp;
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokAssociators *req = (XtokAssociators *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -1839,7 +1681,7 @@ associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     _SFCB_TRACE(1, ("--- Calling Provider"));
     resp = invokeProviders(&binCtx, &err, &l);
     _SFCB_TRACE(1, ("--- Back from Provider"));
@@ -1869,14 +1711,18 @@ associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
   }
   free(sreq);
   closeProviderContext(&binCtx);
-
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+
+static          CimRsResponse*
 referenceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "referenceNames");
+  _SFCB_ENTER(TRACE_CIMRS, "referenceNames");
+  BinRequestContext binCtx;
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   ReferenceNamesReq sreq = BINREQ(OPS_ReferenceNames, 4);
   int             irc,
@@ -1885,12 +1731,10 @@ referenceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
                   l = 0,
       err = 0;
   BinResponseHdr **resp;
-  BinRequestContext binCtx;
   CMPIType        type;
   CMPIValue       val,
                  *valp;
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokReferenceNames *req = (XtokReferenceNames *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -1945,7 +1789,7 @@ referenceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_TRACE(1, ("--- Provider context gotten"));
 
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     _SFCB_TRACE(1, ("--- Calling Providers"));
     resp = invokeProviders(&binCtx, &err, &l);
     _SFCB_TRACE(1, ("--- Back from Providers"));
@@ -1963,14 +1807,18 @@ referenceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 references(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "references");
+  _SFCB_ENTER(TRACE_CIMRS, "references");
 
+  BinRequestContext binCtx;
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   ReferencesReq  *sreq;
   int             irc,
@@ -1980,12 +1828,10 @@ references(CimXmlRequestContext * ctx, RequestHdr * hdr)
       err = 0,
       sreqSize = sizeof(ReferencesReq); // -sizeof(MsgSegment);
   BinResponseHdr **resp;
-  BinRequestContext binCtx;
   CMPIType        type;
   CMPIValue       val,
                  *valp;
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokReferences *req = (XtokReferences *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -2060,7 +1906,7 @@ references(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     _SFCB_TRACE(1, ("--- Calling Provider"));
     resp = invokeProviders(&binCtx, &err, &l);
     _SFCB_TRACE(1, ("--- Back from Provider"));
@@ -2088,16 +1934,16 @@ references(CimXmlRequestContext * ctx, RequestHdr * hdr)
   }
   closeProviderContext(&binCtx);
   free(sreq);
-
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
 int
 updateMethodParamTypes(RequestHdr * hdr)
 {
 
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "updateMethodParamTypes");
-
+  _SFCB_ENTER(TRACE_CIMRS, "updateMethodParamTypes");
+#if 0
   CMPIConstClass *cls = NULL;
   ClMethod       *meth;
   ClParameter    *param = NULL;
@@ -2195,13 +2041,17 @@ updateMethodParamTypes(RequestHdr * hdr)
       _SFCB_RETURN(CMPI_RC_ERR_TYPE_MISMATCH);
     }
   }
+#endif
   _SFCB_RETURN(CMPI_RC_OK);
 }
 
-static          RespSegments
+static          CimRsResponse*
 invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "invokeMethod");
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "invokeMethod");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   CMPIArgs       *out;
   CMPIType        type;
@@ -2213,14 +2063,12 @@ invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
                   m,
                   rc,
                   vmpt = 0;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
-  RespSegments    rsegs;
+  CimRsResponse*    rsegs;
   InvokeMethodReq sreq = BINREQ(OPS_InvokeMethod, 5);
   CMPIArgs       *in = TrackedCMPIArgs(NULL);
   XtokParamValue *p;
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokMethodCall *req = (XtokMethodCall *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -2285,7 +2133,7 @@ invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_SFCB_PROVIDER) {
     if(*req->method == '_') {
-      RespSegments  rs;
+      CimRsResponse*  rs;
       rs = methodErrResponse(hdr, getErrSegment(CMPI_RC_ERR_ACCESS_DENIED, NULL));
       closeProviderContext(&binCtx);
       _SFCB_RETURN(rs);
@@ -2295,7 +2143,7 @@ invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
   }
                                                 
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     resp = invokeProvider(&binCtx);
     closeProviderContext(&binCtx);
     resp->rc--;
@@ -2333,14 +2181,17 @@ invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 1));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "getProperty");
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "getProperty");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   CMPIInstance   *inst;
   CMPIData        data;
@@ -2348,12 +2199,10 @@ getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
   UtilStringBuffer *sb;
   CMPIString     *tmpString = NewCMPIString(NULL, NULL);
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
-  RespSegments    rsegs;
+  CimRsResponse*    rsegs;
   GetPropertyReq  sreq = BINREQ(OPS_GetProperty, 3);
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokGetProperty *req = (XtokGetProperty *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -2378,7 +2227,7 @@ getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     resp = invokeProvider(&binCtx);
     closeProviderContext(&binCtx);
     resp->rc--;
@@ -2406,25 +2255,26 @@ getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
   }
   CMRelease(tmpString);
   closeProviderContext(&binCtx);
-
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "setProperty");
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "setProperty");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   CMPIInstance   *inst;
   CMPIType        t;
   CMPIStatus      rc;
   CMPIValue       val;
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
   SetPropertyReq  sreq = BINREQ(OPS_SetProperty, 3);
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokSetProperty *req = (XtokSetProperty *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -2469,7 +2319,7 @@ setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_TRACE(1, ("--- Provider context gotten"));
 
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     resp = invokeProvider(&binCtx);
     closeProviderContext(&binCtx);
     resp->rc--;
@@ -2488,22 +2338,24 @@ setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
 #ifdef HAVE_QUALREP
-static          RespSegments
+static          CimRsResponse*
 enumQualifiers(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
+  BinRequestContext binCtx;
+
+  _SFCB_ENTER(TRACE_CIMRS, "enumQualifiers");
+
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   EnumClassNamesReq sreq = BINREQ(OPS_EnumerateQualifiers, 2);
   int             irc;
   BinResponseHdr *resp;
-  BinRequestContext binCtx;
-
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "enumQualifiers");
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokEnumQualifiers *req = (XtokEnumQualifiers *) hdr->cimRequest;
 
   path = TrackedCMPIObjectPath(req->op.nameSpace.data, NULL, NULL);
@@ -2526,7 +2378,7 @@ enumQualifiers(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     _SFCB_TRACE(1, ("--- Calling Providers"));
     resp = invokeProvider(&binCtx);
     _SFCB_TRACE(1, ("--- Back from Provider"));
@@ -2545,24 +2397,26 @@ enumQualifiers(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 getQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "getQualifier");
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "getQualifier");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   CMPIQualifierDecl *qual;
   CMPIStatus      rc;
   UtilStringBuffer *sb;
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
-  RespSegments    rsegs;
+  CimRsResponse*    rsegs;
   GetQualifierReq sreq = BINREQ(OPS_GetQualifier, 2);
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokGetQualifier *req = (XtokGetQualifier *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -2590,7 +2444,7 @@ getQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     resp = invokeProvider(&binCtx);
     closeProviderContext(&binCtx);
     resp->rc--;
@@ -2613,22 +2467,23 @@ getQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 deleteQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "deleteQualifier");
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "deleteQualifier");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   CMPIStatus      rc;
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
   DeleteQualifierReq sreq = BINREQ(OPS_DeleteQualifier, 2);
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokDeleteQualifier *req = (XtokDeleteQualifier *) hdr->cimRequest;
   hdr->className = req->op.className.data;
 
@@ -2656,7 +2511,7 @@ deleteQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     resp = invokeProvider(&binCtx);
     closeProviderContext(&binCtx);
     resp->rc--;
@@ -2675,24 +2530,25 @@ deleteQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
-
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
-static          RespSegments
+static          CimRsResponse*
 setQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "setQualifier");
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "setQualifier");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
   CMPIObjectPath *path;
   CMPIQualifierDecl qual;
   CMPIData        d;
   ClQualifierDeclaration *q;
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
   SetQualifierReq sreq = BINREQ(OPS_SetQualifier, 3);
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokSetQualifier *req = (XtokSetQualifier *) hdr->cimRequest;
 
   path = TrackedCMPIObjectPath(req->op.nameSpace.data, NULL, NULL);
@@ -2783,7 +2639,7 @@ setQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_TRACE(1, ("--- Provider context gotten"));
 
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
+    CimRsResponse*    rs;
     resp = invokeProvider(&binCtx);
     closeProviderContext(&binCtx);
     qual.ft->release(&qual);
@@ -2804,15 +2660,15 @@ setQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
   }
   closeProviderContext(&binCtx);
   qual.ft->release(&qual);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+	#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 #endif
 
-static          RespSegments
+static          CimRsResponse*
 notSupported(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  return iMethodErrResponse(hdr, strdup
-                            ("<ERROR CODE=\"7\" DESCRIPTION=\"Operation not supported xx\"/>\n"));
+  return createRsResponse(7, "Operation not supported xx", 501);
 }
 
 static Handler  handlers[] = {
@@ -2850,53 +2706,284 @@ static Handler  handlers[] = {
   {invokeMethod},               // OPS_InvokeMethod 24
 };
 
-RespSegments
+
+static          CimRsResponse*
+enumNameSpaces(CimXmlRequestContext * ctx, RequestHdr * hdr)
+{
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "enumNameSpaces");
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
+  CMPIObjectPath *path;
+  EnumClassNamesReq sreq = BINREQ(OPS_EnumerateClassNames, 2);
+  int             irc,
+                  l = 0,
+      err = 0;
+  BinResponseHdr **resp;
+  CimRsResponse*    rs;
+
+
+  XtokEnumClassNames *req = (XtokEnumClassNames *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  sreq.objectPath = setObjectPathMsgSegment(path);
+  sreq.principal = setCharsMsgSegment(ctx->principal);
+  sreq.hdr.flags = req->flags;
+  sreq.hdr.sessionId = ctx->sessionId;
+
+  binCtx.oHdr = (OperationHdr *) req;
+  binCtx.bHdr = &sreq.hdr;
+  binCtx.bHdr->flags = req->flags;
+  binCtx.rHdr = hdr;
+  binCtx.bHdrSize = sizeof(sreq);
+  binCtx.commHndl = ctx->commHndl;
+  binCtx.type = CMPI_ref;
+  binCtx.xmlAs = binCtx.noResp = 0;
+  binCtx.chunkedMode = 0;
+  binCtx.pAs = NULL;
+
+  _SFCB_TRACE(1, ("--- Getting Provider context"));
+  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+
+  _SFCB_TRACE(1, ("--- Provider context gotten"));
+  if (irc == MSG_X_PROVIDER) {
+    _SFCB_TRACE(1, ("--- Calling Providers"));
+    resp = invokeProviders(&binCtx, &err, &l);
+    _SFCB_TRACE(1, ("--- Back from Provider"));
+    closeProviderContext(&binCtx);
+    if (err == 0) {
+      rs = genResponses(&binCtx, resp, l);
+    } else {
+      rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
+                                                 (char *) resp[err -
+                                                               1]->object
+                                                 [0].data));
+    }
+    freeResponseHeaders(resp, &binCtx);
+    _SFCB_RETURN(rs);
+  }
+  closeProviderContext(&binCtx);
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
+}
+
+static const char *
+urlelement(char *path, char **next)
+{
+  char *slash;
+  if (path != NULL
+      && *path != '\0') {
+    slash = strchr(path, '/');
+    if (slash) *slash++ = '\0';
+  }
+  else {
+    slash = NULL;
+  }
+  if (next) *next = slash;
+  return path;
+}
+
+
+static RequestHdr *
+scanCimRsRequest(const char *method, char *path)
+{
+  RequestHdr *hdr = (RequestHdr *)calloc(1, sizeof(RequestHdr));
+
+  const char *e; /* url element */
+  char *next; /* ptr to next element in path */
+  char *q; /* url query */
+	
+  _SFCB_ENTER(TRACE_CIMRS, "scanCimRsRequest");
+
+  _SFCB_TRACE(1, ("--- method '%s', path '%s'", method, path));
+
+  hdr->rc = 0;
+	
+  /*
+   * check the method
+   * 
+   */
+
+  if (strcasecmp(method, "GET") == 0) {
+    hdr->method = HTTP_GET;
+  }
+  else if (strcasecmp(method, "PUT") == 0) {
+    hdr->method = HTTP_PUT;
+  }
+  else if (strcasecmp(method, "POST") == 0) {
+    hdr->method = HTTP_POST;
+  }
+  else if (strcasecmp(method, "DELETE") == 0) {
+    hdr->method = HTTP_DELETE;
+  }
+  else {
+    hdr->rc = 1;
+    hdr->code = 405; /* method not allowed */
+    hdr->allowed = HTTP_GET|HTTP_PUT|HTTP_POST|HTTP_DELETE;
+    _SFCB_RETURN(hdr);
+  }
+
+
+  /*
+   * split off the query
+   * 
+   */
+
+  q = strchr(path, '?');
+  if (q) *q++ = '\0';
+	
+  /*
+   * parse the path
+   * 
+   */
+
+  if (strcasecmp(urlelement(path,&next), "namespaces") != 0) {
+    hdr->rc = 1;
+    hdr->msg = "path must start with /namespaces";
+    _SFCB_RETURN(hdr);
+  }
+  hdr->seen_ns = 1;
+  hdr->ns = urlelement(next, &next);
+  fprintf(stderr, "namespaces '%s'\n", hdr->ns);
+
+  e = urlelement(next, &next);
+  if (strcasecmp(e, "classes") == 0) {
+    hdr->seen_className = 1;
+    hdr->className = urlelement(next, &next);
+    fprintf(stderr, "classes '%s'\n", hdr->className);
+    if (hdr->className) {
+      /*
+       * seen /classes/{classname}/
+       */
+      e = urlelement(next, &next);
+      if (strcasecmp(e, "associators") == 0) {
+      }
+      else if (strcasecmp(e, "references") == 0) {
+      }
+      else if (strcasecmp(e, "methods") == 0) {
+      }
+      else if (strcasecmp(e, "instances") == 0) {
+      }
+      else {
+      }
+    }
+    else if (q) {
+    }
+  }
+  else if (strcasecmp(e, "qualifiers") == 0) {
+    hdr->seen_qualifier = 1;
+    hdr->qualifier = urlelement(next, &next);
+    fprintf(stderr, "qualifiers '%s'\n", hdr->qualifier);
+  }
+  else if (strcasecmp(e, "query") == 0) {
+    hdr->className = urlelement(next, &next);
+    fprintf(stderr, "classes '%s'\n", hdr->className);
+  }
+  else {
+    /*
+     * -> just 'namespaces'
+     */
+    if (hdr->method != HTTP_GET) {
+      hdr->rc = 1;
+      hdr->code = 405;
+      hdr->allowed = HTTP_GET;
+      _SFCB_RETURN(hdr);
+    }
+  }
+/*static          CimRsResponse*
+enumNameSpaces(CimXmlRequestContext * ctx, RequestHdr * hdr)
+*/
+  _SFCB_RETURN(hdr);
+}
+
+
+static void
+writeResponse(CimXmlRequestContext *ctx, CimRsResponse *resp)
+{
+
+  static char     cont[] =
+      { "Content-Type: application/xml; charset=\"utf-8\"\r\n" };
+  static char     cach[] = { "Cache-Control: no-cache\r\n" };
+  static char     cclose[] = "Connection: close\r\n";
+  static char     end[] = { "\r\n" };
+  char            str[256];
+  int             len;
+
+  struct commHndl conn_fd = *ctx->commHndl;
+
+  _SFCB_ENTER(TRACE_CIMRS, "writeResponse");
+
+  if (resp->msg)
+    len = strlen(resp->msg);
+  else
+    len = 0;
+
+  sprintf(str, "HTTP/1.1 %d OK\r\n", resp->code);
+  if (resp->code == 405) {
+    char out[256];
+    char *o = out;
+    struct allowed { int code; char *method; } a[] = {
+      { HTTP_GET, "GET" },
+      { HTTP_PUT, "PUT" },
+      { HTTP_POST, "POST" },
+      { HTTP_DELETE, "DELETE" },
+      { 0, NULL }	    
+    };
+    struct allowed *b;
+    b = a;
+    while (b->code) {
+      if (b->code & resp->allowed) {
+	if (o > out) *o++ = ',';
+	strcat(o, b->method);
+	o += strlen(b->method);
+      }
+      b++;
+    }
+    *o++ = '\0';
+    sprintf(str, "Allowed: %s\r\n", out);
+  }
+     
+  commWrite(conn_fd, str, strlen(str));
+  commWrite(conn_fd, cont, strlen(cont));
+  sprintf(str, "Content-Length: %d\r\n", len);
+  commWrite(conn_fd, str, strlen(str));
+  commWrite(conn_fd, cach, strlen(cach));
+  if (ctx->keepaliveTimeout == 0 || ctx->numRequest >= ctx->keepaliveMaxRequest) {
+    commWrite(conn_fd, cclose, strlen(cclose));
+  }
+  commWrite(conn_fd, end, strlen(end));
+
+  if (resp->msg)
+     commWrite(conn_fd, (char *)resp->msg, strlen(resp->msg));
+  commWrite(conn_fd, end, strlen(end));
+  commFlush(conn_fd);
+
+  _SFCB_EXIT();
+}
+
+
+void
 handleCimRsRequest(CimXmlRequestContext * ctx)
 {
-  RespSegments    rs;
-  RequestHdr      hdr;
-  Handler         hdlr;
-  HeapControl    *hc;
-#ifdef SFCB_DEBUG
-  struct rusage   us,
-                  ue;
-  struct timeval  sv,
-                  ev;
+  CimRsResponse  *resp;
+  RequestHdr     *hdr;
 
-  if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
-    gettimeofday(&sv, NULL);
-    getrusage(RUSAGE_SELF, &us);
+  hdr = scanCimRsRequest(ctx->method, ctx->path);
+  if (hdr->rc) {
+    resp = createRsResponse(hdr->rc, hdr->msg, hdr->code);
+    resp->allowed = hdr->allowed;
   }
-#endif
-
-  fprintf(stderr, "handleCimRsRequest(%s:%s)\n", ctx->method, ctx->path);
-  fprintf(stderr, "Accept(%s)\n", ctx->accept);
-	
-  hdr = scanCimXmlRequest(ctx->cimXmlDoc);
-
-#ifdef SFCB_DEBUG
-  if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
-    gettimeofday(&ev, NULL);
-    getrusage(RUSAGE_SELF, &ue);
-    _sfcb_trace(1, __FILE__, __LINE__,
-                _sfcb_format_trace
-                ("-#- XML Parsing %.5u %s-%s real: %f user: %f sys: %f \n",
-                 ctx->sessionId, opsName[hdr.opType], "n/a",
-                 timevalDiff(&sv, &ev), timevalDiff(&us.ru_utime,
-                                                    &ue.ru_utime),
-                 timevalDiff(&us.ru_stime, &ue.ru_stime)));
+  else {
+    resp = createRsResponse(0, NULL, 200);
   }
-#endif
+#if 0
+  else {
+    HeapControl    *hc;
+    Handler         hdlr;
 
-  if (hdr.rc) {
-    if (hdr.methodCall) {
-      rs = methodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
-                                                 "invalid methodcall XML"));
-    } else {
-      rs = iMethodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
-                                                  "invalid imethodcall XML"));
-    }
-  } else {
     hc = markHeap();
     hdlr = handlers[hdr.opType];
     rs = hdlr.handler(ctx, &hdr);
@@ -2906,20 +2993,13 @@ handleCimRsRequest(CimXmlRequestContext * ctx)
     ctx->operation = hdr.opType;
   }
   rs.buffer = hdr.xmlBuffer;
-
-  freeCimXmlRequest(hdr);
-
-  return rs;
+#endif
+  free(hdr);
+  writeResponse(ctx, resp);
+  free(resp);
+  return;
 }
 
-int
-cleanupCimRsRequest(RespSegments * rs)
-{
-  XmlBuffer      *xmb = (XmlBuffer *) rs->buffer;
-  free(xmb->base);
-  free(xmb);
-  return 0;
-}
 /* MODELINES */
 /* DO NOT EDIT BELOW THIS COMMENT */
 /* Modelines are added by 'make pretty' */

@@ -53,6 +53,9 @@ typedef struct cimXmlRequestContext {
   char           *path;
   char           *content;
   unsigned int    length;
+  long   keepaliveTimeout;
+  long   keepaliveMaxRequest;
+  long   numRequest;
 #endif
   char           *cimXmlDoc;
   char           *principal;
@@ -69,8 +72,7 @@ typedef struct cimXmlRequestContext {
 extern RespSegments handleCimXmlRequest(CimXmlRequestContext * ctx);
 extern int      cleanupCimXmlRequest(RespSegments * rs);
 #ifdef CIM_RS
-extern RespSegments handleCimRsRequest(CimXmlRequestContext * ctx);
-extern int      cleanupCimRsRequest(RespSegments * rs);
+extern void handleCimRsRequest(CimXmlRequestContext * ctx);
 #endif
 
 #endif
