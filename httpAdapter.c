@@ -1063,10 +1063,11 @@ doHttpRequest(CommHndl conn_fd)
   len = inBuf.content_length;
   if (len == UINT_MAX) {
 #ifdef CIM_RS
-    if ((strncasecmp(inBuf.method, "GET", 3) == 0)
-        || (strncasecmp(inBuf.method, "DELETE", 6) == 0)) {
+    if ((strncasecmp(inBuf.method, "PUT", 3) != 0)
+        && (strncasecmp(inBuf.method, "POST", 4) != 0)) {
        inBuf.content_length = 0;
-    } else {
+    }
+    else {
 #endif
     if (!discardInput) {
       genError(conn_fd, &inBuf, 411, "Length Required", NULL);
