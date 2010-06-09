@@ -33,19 +33,26 @@ class StartStopTest < Test::Unit::TestCase
     assert_equal "405", resp.code
     assert_equal "GET", resp["Allowed"]
   end
-#    resp = @http.get "/cimrs/namespaces"
-#    resp = @http.post "/cimrs/namespaces"
-#    resp = @http.delete "/cimrs/namespaces"
-#    assert resp
-#  end
+  
+  def test_post_namespaces
+    resp = @http.post "/cimrs/namespaces", "foo"
+    assert_equal "405", resp.code
+    assert_equal "GET", resp["Allowed"]
+  end
 
-#  def test_get_namespace_root_cimv2
-#    resp = @http.get "/cimrs/namespaces/root%2Fcimv2"
-#    assert resp
-#  end
+  def test_delete_namespaces
+    resp = @http.delete "/cimrs/namespaces"
+    assert_equal "405", resp.code
+    assert_equal "GET", resp["Allowed"]
+  end
 
-#  def test_get_classes_root_cimv2
-#    resp = @http.get "/cimrs/namespaces/root%2Fcimv2/classes"
-#    assert resp
-#  end
+  def test_get_namespace_root_cimv2
+    resp = @http.get "/cimrs/namespaces/root%2Fcimv2"
+    assert_equal "200", resp.code
+  end
+
+  def test_get_classes_root_cimv2
+    resp = @http.get "/cimrs/namespaces/root%2Fcimv2/classes"
+    assert_equal "200", resp.code
+  end
 end
