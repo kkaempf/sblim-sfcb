@@ -2770,6 +2770,20 @@ enumNameSpaces(CimXmlRequestContext * ctx, RequestHdr * hdr)
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
+
+static int
+method_allowed(RequestHdr *hdr, int methods)
+{
+  if ((hdr->method & methods) == 0) {
+    hdr->rc = 1;
+    hdr->code = 405;
+    hdr->allowed = methods;
+    return 0;
+  }
+  return 1;
+}
+
+
 static const char *
 urlelement(char *path, char **next)
 {
@@ -2801,6 +2815,7 @@ scanCimRsRequest(const char *method, char *path)
   _SFCB_TRACE(1, ("--- method '%s', path '%s'", method, path));
 
   hdr->rc = 0;
+  hdr->code = 200;
 	
   /*
    * check the method
@@ -2820,9 +2835,7 @@ scanCimRsRequest(const char *method, char *path)
     hdr->method = HTTP_DELETE;
   }
   else {
-    hdr->rc = 1;
-    hdr->code = 405; /* method not allowed */
-    hdr->allowed = HTTP_GET|HTTP_PUT|HTTP_POST|HTTP_DELETE;
+    method_allowed(hdr, HTTP_GET|HTTP_PUT|HTTP_POST|HTTP_DELETE);
     _SFCB_RETURN(hdr);
   }
 
@@ -2842,6 +2855,7 @@ scanCimRsRequest(const char *method, char *path)
 
   if (strcasecmp(urlelement(path,&next), "namespaces") != 0) {
     hdr->rc = 1;
+    hdr->code = 404;
     hdr->msg = "path must start with /namespaces";
     _SFCB_RETURN(hdr);
   }
@@ -2850,7 +2864,15 @@ scanCimRsRequest(const char *method, char *path)
   fprintf(stderr, "namespaces '%s'\n", hdr->ns);
 
   e = urlelement(next, &next);
-  if (strcasecmp(e, "classes") == 0) {
+  if (e == NULL) {
+    /*
+     * -> just 'namespaces'
+     */
+    if (!method_allowed(hdr,HTTP_GET)) {
+      _SFCB_RETURN(hdr);
+    }
+  }
+  else if (strcasecmp(e, "classes") == 0) {
     hdr->seen_className = 1;
     hdr->className = urlelement(next, &next);
     fprintf(stderr, "classes '%s'\n", hdr->className);
@@ -2883,15 +2905,8 @@ scanCimRsRequest(const char *method, char *path)
     fprintf(stderr, "classes '%s'\n", hdr->className);
   }
   else {
-    /*
-     * -> just 'namespaces'
-     */
-    if (hdr->method != HTTP_GET) {
-      hdr->rc = 1;
-      hdr->code = 405;
-      hdr->allowed = HTTP_GET;
-      _SFCB_RETURN(hdr);
-    }
+    hdr->rc = 1;
+    hdr->code = 404;
   }
 /*static          CimRsResponse*
 enumNameSpaces(CimXmlRequestContext * ctx, RequestHdr * hdr)
@@ -2922,6 +2937,9 @@ writeResponse(CimXmlRequestContext *ctx, CimRsResponse *resp)
     len = 0;
 
   sprintf(str, "HTTP/1.1 %d OK\r\n", resp->code);
+  commWrite(conn_fd, str, strlen(str));
+  _SFCB_TRACE(1, ("---> %s", str));
+
   if (resp->code == 405) {
     char out[256];
     char *o = out;
@@ -2937,16 +2955,17 @@ writeResponse(CimXmlRequestContext *ctx, CimRsResponse *resp)
     while (b->code) {
       if (b->code & resp->allowed) {
 	if (o > out) *o++ = ',';
-	strcat(o, b->method);
+	strcpy(o, b->method);
 	o += strlen(b->method);
       }
       b++;
     }
     *o++ = '\0';
     sprintf(str, "Allowed: %s\r\n", out);
+    commWrite(conn_fd, str, strlen(str));
+    _SFCB_TRACE(1, ("---> %s", str));
   }
      
-  commWrite(conn_fd, str, strlen(str));
   commWrite(conn_fd, cont, strlen(cont));
   sprintf(str, "Content-Length: %d\r\n", len);
   commWrite(conn_fd, str, strlen(str));
