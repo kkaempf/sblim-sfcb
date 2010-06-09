@@ -23,6 +23,13 @@ class StartStopTest < Test::Unit::TestCase
     assert_equal "404", resp.code
   end
 
+  def test_head_root
+
+    resp = @http.head "/cimrs/"
+    assert_equal "405", resp.code
+    assert_equal "GET,PUT,POST,DELETE", resp["Allowed"]
+  end
+
   def test_get_namespaces
     resp = @http.get "/cimrs/namespaces"
     assert_equal "200", resp.code
