@@ -16,7 +16,6 @@ class Sfcb
     @cfgfile.puts "enableHttps:    false"
     @cfgfile.close
     @pid = 0
-    puts "EXEC #{EXECFILE}"
   end
   
   def start
