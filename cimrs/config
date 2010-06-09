@@ -1,0 +1,3 @@
+enableHttp:     true
+httpPort:       27163
+enableHttps:    false
