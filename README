@@ -311,6 +311,12 @@ Options:
                 Valid tests are "commands,unit,xml,wbemcli,gcov,slp,providers"
                 Default=no
 
+        --enable-content-types[=TYPES]
+                Enable the listed content types for incoming requests. If none
+                are listed, all types are enabled.
+                Valid types are "cimxml,cimrs".
+                Default=All types enabled.
+
         --enable-uds
                 Enables UDS authentication for the http server.
                 Default=no

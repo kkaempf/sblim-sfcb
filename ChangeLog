@@ -1,3 +1,7 @@
+2010-06-10 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	* configure.ac, sfcBroker.c:
+	[ 3014530 ] configure option for request
+
 2010-06-03  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* httpAdapter.c:
