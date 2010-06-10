@@ -113,6 +113,10 @@ AC_ARG_ENABLE(uds,
 	[AC_HELP_STRING([--enable-uds],
 		[Enable UDS authentication.])])
 
+AC_ARG_ENABLE(request-types,
+	[AC_HELP_STRING([--enable-request-types(=TYPES)],
+		[Enable support of listed request types. If none are listed, all are enabled.])])
+
 # Size checks
 AC_CHECK_SIZEOF(void*)
 AC_CHECK_SIZEOF(int)
@@ -295,6 +299,39 @@ if [test "$test_gcov" == "yes"]; then
     SFCB_CPPFLAGS="-D SFCB_GCOV $SFCB_CPPFLAGS"
 fi
 # End of test configuration 
+
+# Check and configure requested handlers.
+if test "$enable_request_types" == "yes"; then
+    enable_request_types="cimxml,cimrs"
+fi
+if test "$enable_request_types" == ""; then
+    enable_request_types="cimxml,cimrs"
+fi
+OLDIFS="$IFS"
+IFS=","
+for rt in $enable_request_types;
+do
+    case $rt in
+        cimxml|CIMxml|CIMXML|cimXML)
+            handler_CIMXML=yes;;
+        cimrs|CIMrs|CIMRS|cimRS)
+            handler_CIMRS=yes;;
+        *)
+            handler_ERROR=yes
+            echo "Unknown request type $rt";;
+    esac
+done
+IFS="$OLDIFS"
+if test "$handler_ERROR" == "yes"; then
+   AC_MSG_ERROR([Unknown request type.])
+fi
+if test "$handler_CIMXML" == "yes"; then
+   AC_DEFINE(HANDLER_CIMXML,,["CIMxml handler enabled"])
+fi
+if test "$handler_CIMRS" == "yes"; then
+   AC_DEFINE(HANDLER_CIMRS,,["CIMrs handler enabled"])
+fi
+# End of parser config
 
 if test "$enable_uds" == "yes"; then
    AC_DEFINE(HAVE_UDS,,[UDS authentication enabled])
@@ -524,6 +561,7 @@ echo -e "default instance properties"\\t"${enable_default_properties}"
 echo -e "uds"\\t\\t\\t\\t"${enable_uds:-no}"
 echo -e "tests"\\t\\t\\t\\t"${enable_tests:-no}"
 echo -e "debug"\\t\\t\\t\\t"${enable_debug:-no}"
+echo -e "Request types"\\t\\t\\t"${enable_request_types}"
 echo =================================================================
 echo
 echo "sfcb configuration complete.  you may now run 'make'"

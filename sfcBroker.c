@@ -795,6 +795,16 @@ main(int argc, char *argv[])
   }
 #endif                          // LOCAL_CONNECT_ONLY_ENABLE
 
+  // Display the configured request handlers
+  char rtmsg[20]=" ";
+#ifdef HANDLER_CIMXML
+  strcat(rtmsg,"CIMxml ");
+#endif
+#ifdef HANDLER_CIMRS
+  strcat(rtmsg,"CIMrs ");
+#endif
+mlogf(M_INFO, M_SHOW, "--- Request handlers enabled:%s\n",rtmsg);
+
 #ifdef HAVE_JDBC
   // Start dbProtocol-Daemon
   if (startDbp) {
