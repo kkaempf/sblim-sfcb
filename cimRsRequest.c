@@ -54,22 +54,44 @@ enum http_method {
   HTTP_DELETE = 8
 };
 
+/*
+ * URI operations
+ * 
+ */
+
+enum cimrs_op {
+  OP_NONE = 0,
+  OP_NAMESPACES,          /* /namespaces/{namespace} */
+  OP_CLASSES,             /* /namespaces/{namespace}/classes[?sc={classname}] */
+  OP_CLASS,               /* /namespaces/{namespace}/classes/{classname} */
+  OP_CLASS_ASSOCIATORS,   /* /namespaces/{namespace}/classes/{classname}/associators */
+  OP_CLASS_REFERENCES,    /* /namespaces/{namespace}/classes/{classname}/references */
+  OP_CLASS_METHODS,       /* /namespaces/{namespace}/classes/{classname}/methods/{methodname} */
+  OP_INSTANCE,            /* /namespaces/{namespace}/classes/{classname}/instances */
+  OP_INSTANCE_ASSOCIATORS,/* /namespaces/{namespace}/classes/{classname}/instances/{keylist}/associators */
+  OP_INSTANCE_REFERENCES, /* /namespaces/{namespace}/classes/{classname}/instances/{keylist}/references */
+  OP_INSTANCE_METHODS,    /* /namespaces/{namespace}/classes/{classname}/instances/{keylist}/methods/{methodname} */
+  OP_QUALIFIERS,          /* /namespaces/{namespace}/qualifiers/{qualifiername} */
+  OP_QUERY,               /* /namespaces/{namespace}/query?ql={lang}&qs={query} */
+  OP_MAX
+};
+
 typedef struct requestHdr {
   int rc;
   const char *msg;
-  int code;      /* http response code */
-  int allowed;   /* if code == 405, bitmask of methods for 'Allowed:' header */
+  int code;          /* http response code */
+  int allowed;       /* if code == 405, bitmask of methods for 'Allowed:' header */
+  enum http_method http_meth;
+  char *uri_q;       /* ...?foo= at end of url */
+  enum cimrs_op op;  /* operation detected by parsing the uri */
 
   const char *ns;
-  int seen_ns;
-  const char *className;
-  int seen_className;
-  const char **keys;
-  enum http_method method;
+  const char *classname;
+  const char *keys;
+  const char *method;
   char *query;
   char *query_lang;
   const char *qualifier;
-  int seen_qualifier;
 } RequestHdr;
 
 typedef struct cim_rs_response {
@@ -79,10 +101,6 @@ typedef struct cim_rs_response {
   int allowed;           /* if code == 405, bitmask of methods for 'Allowed:' header */
   int json;   /* 0: xml, 1: json */
 } CimRsResponse;
-
-typedef struct handler {
-  CimRsResponse* (*handler) (CimXmlRequestContext *, RequestHdr *hdr);
-} Handler;
 
 extern int      noChunking;
 
@@ -133,6 +151,26 @@ static char    *cimMsg[] = {
   "The extrinsic Method could not be executed",
   "The specified extrinsic Method does not exist"
 };
+
+/*
+ * check if HTTP method is allowed
+ * fill error information in hdr if not
+ * 
+ */
+
+static int
+method_allowed(RequestHdr *hdr, int methods)
+{
+  if ((hdr->http_meth & methods) == 0) {
+    hdr->rc = 1;
+    hdr->code = 405;
+    hdr->allowed = methods;
+    fprintf (stderr,"--- method BAD\n");
+    return 0;
+  }
+  return 1;
+}
+
 
 static char    *
 paramType(CMPIType type)
@@ -216,6 +254,12 @@ segments2stringBuffer(RespSegment * rs)
   return sb;
 }
 
+
+/*
+ * create generic response
+ * 
+ */
+
 static CimRsResponse *
 createRsResponse(int rc, const char *msg, int code)
 {
@@ -228,36 +272,42 @@ createRsResponse(int rc, const char *msg, int code)
   return resp;
 }
 
+
+/*
+ * create error response
+ * 
+ */
+
 static CimRsResponse *
 ctxErrResponse(RequestHdr * hdr, BinRequestContext * ctx)
 {
   CimRsResponse *resp;
 
   if (ctx->rc) {
-  switch (ctx->rc) {
-  case MSG_X_NOT_SUPPORTED:
-    resp = createRsResponse(CMPI_RC_ERR_NOT_SUPPORTED, "Operation not supported", 501); /* not implemented */
+    switch (ctx->rc) {
+    case MSG_X_NOT_SUPPORTED:
+      resp = createRsResponse(CMPI_RC_ERR_NOT_SUPPORTED, "Operation not supported", 501); /* not implemented */
     break;
-  case MSG_X_INVALID_CLASS:
+    case MSG_X_INVALID_CLASS:
     resp = createRsResponse(CMPI_RC_ERR_INVALID_CLASS, "Class not found", 404); /* not found */
     break;
-  case MSG_X_INVALID_NAMESPACE:
+    case MSG_X_INVALID_NAMESPACE:
     resp = createRsResponse(CMPI_RC_ERR_INVALID_NAMESPACE, "Invalid namespace", 400); /* bad request */
     break;
-  case MSG_X_PROVIDER_NOT_FOUND:
+    case MSG_X_PROVIDER_NOT_FOUND:
     resp = createRsResponse(CMPI_RC_ERR_NOT_FOUND, "Provider not found or not loadable", 404); /* not found */
     break;
-  case MSG_X_FAILED: {
-    MsgXctl        *xd = ctx->ctlXdata;
-    resp = createRsResponse(CMPI_RC_ERR_FAILED, xd->data, 500); /* internal error */
-    break;
-  }
-  default: {
-    char            msg[256];
-    sprintf(msg, "Internal error - %d\n", ctx->rc);
-    resp = createRsResponse(CMPI_RC_ERR_FAILED, msg, 500); /* internal error */
-  }
-  }
+    case MSG_X_FAILED: {
+      MsgXctl        *xd = ctx->ctlXdata;
+      resp = createRsResponse(CMPI_RC_ERR_FAILED, xd->data, 500); /* internal error */
+      break;
+      }
+    default: {
+      char            msg[256];
+      sprintf(msg, "Internal error - %d\n", ctx->rc);
+      resp = createRsResponse(CMPI_RC_ERR_FAILED, msg, 500); /* internal error */
+      }
+    }
   }
   else {
     resp = createRsResponse(0, NULL, 200); /* OK */
@@ -735,68 +785,6 @@ createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
     if (resp) {
       free(resp);
     }
-    _SFCB_RETURN(rs);
-  }
-  closeProviderContext(&binCtx);
-#endif
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
-}
-
-static          CimRsResponse*
-enumClassNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
-{
-  BinRequestContext binCtx;
-  _SFCB_ENTER(TRACE_CIMRS, "enumClassNames");
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-#if 0
-  CMPIObjectPath *path;
-  EnumClassNamesReq sreq = BINREQ(OPS_EnumerateClassNames, 2);
-  int             irc,
-                  l = 0,
-      err = 0;
-  BinResponseHdr **resp;
-  CimRsResponse*    rs;
-
-  XtokEnumClassNames *req = (XtokEnumClassNames *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-                            NULL);
-  sreq.objectPath = setObjectPathMsgSegment(path);
-  sreq.principal = setCharsMsgSegment(ctx->principal);
-  sreq.hdr.flags = req->flags;
-  sreq.hdr.sessionId = ctx->sessionId;
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq.hdr;
-  binCtx.bHdr->flags = req->flags;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sizeof(sreq);
-  binCtx.commHndl = ctx->commHndl;
-  binCtx.type = CMPI_ref;
-  binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.chunkedMode = 0;
-  binCtx.pAs = NULL;
-
-  _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
-
-  _SFCB_TRACE(1, ("--- Provider context gotten"));
-  if (irc == MSG_X_PROVIDER) {
-    _SFCB_TRACE(1, ("--- Calling Providers"));
-    resp = invokeProviders(&binCtx, &err, &l);
-    _SFCB_TRACE(1, ("--- Back from Provider"));
-    closeProviderContext(&binCtx);
-    if (err == 0) {
-      rs = genResponses(&binCtx, resp, l);
-    } else {
-      rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
-                                                 (char *) resp[err -
-                                                               1]->object
-                                                 [0].data));
-    }
-    freeResponseHeaders(resp, &binCtx);
     _SFCB_RETURN(rs);
   }
   closeProviderContext(&binCtx);
@@ -2671,54 +2659,39 @@ notSupported(CimXmlRequestContext * ctx, RequestHdr * hdr)
   return createRsResponse(7, "Operation not supported xx", 501);
 }
 
-static Handler  handlers[] = {
-  {notSupported},               // dummy
-  {getClass},                   // OPS_GetClass 1
-  {getInstance},                // OPS_GetInstance 2
-  {deleteClass},                // OPS_DeleteClass 3
-  {deleteInstance},             // OPS_DeleteInstance 4
-  {createClass},                // OPS_CreateClass 5
-  {createInstance},             // OPS_CreateInstance 6
-  {notSupported},               // OPS_ModifyClass 7
-  {modifyInstance},             // OPS_ModifyInstance 8
-  {enumClasses},                // OPS_EnumerateClasses 9
-  {enumClassNames},             // OPS_EnumerateClassNames 10
-  {enumInstances},              // OPS_EnumerateInstances 11
-  {enumInstanceNames},          // OPS_EnumerateInstanceNames 12
-  {execQuery},                  // OPS_ExecQuery 13
-  {associators},                // OPS_Associators 14
-  {associatorNames},            // OPS_AssociatorNames 15
-  {references},                 // OPS_References 16
-  {referenceNames},             // OPS_ReferenceNames 17
-  {getProperty},                // OPS_GetProperty 18
-  {setProperty},                // OPS_SetProperty 19
-#ifdef HAVE_QUALREP
-  {getQualifier},               // OPS_GetQualifier 20
-  {setQualifier},               // OPS_SetQualifier 21
-  {deleteQualifier},            // OPS_DeleteQualifier 22
-  {enumQualifiers},             // OPS_EnumerateQualifiers 23
-#else
-  {notSupported},               // OPS_GetQualifier 20
-  {notSupported},               // OPS_SetQualifier 21
-  {notSupported},               // OPS_DeleteQualifier 22
-  {notSupported},               // OPS_EnumerateQualifiers 23
-#endif
-  {invokeMethod},               // OPS_InvokeMethod 24
-};
+/*
+ * opNamespaces()
+ * 
+ * operate on namespaces
+ * 
+ * hdr: request header (contains op)
+ * 
+ * returns: CimRsResponse if ok
+ *          NULL on error (fills error information in hdr)
+ * 
+ */
 
-
-static          CimRsResponse*
-enumNameSpaces(CimXmlRequestContext * ctx, RequestHdr * hdr)
+static CimRsResponse*
+opNamespaces(RequestHdr * hdr, CimXmlRequestContext * ctx )
 {
   BinRequestContext binCtx;
-  _SFCB_ENTER(TRACE_CIMRS, "enumNameSpaces");
+  _SFCB_ENTER(TRACE_CIMRS, "opNamespaces");
+  _SFCB_TRACE(1, ("--- method %04x", hdr->http_meth));
+	
+  if (!method_allowed(hdr, HTTP_GET)) {
+    _SFCB_RETURN(NULL);
+  }
   memset(&binCtx, 0, sizeof(BinRequestContext));
+
+  _SFCB_TRACE(1, ("--- method good"));
+
+  hdr->code = 200;
 #if 0
   CMPIObjectPath *path;
   EnumClassNamesReq sreq = BINREQ(OPS_EnumerateClassNames, 2);
   int             irc,
                   l = 0,
-      err = 0;
+                  err = 0;
   BinResponseHdr **resp;
   CimRsResponse*    rs;
 
@@ -2771,18 +2744,90 @@ enumNameSpaces(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 
-static int
-method_allowed(RequestHdr *hdr, int methods)
+/*
+ * opClasses()
+ * 
+ * operate on classes
+ * 
+ * hdr: request header (contains op)
+ * 
+ * returns: CimRsResponse if ok
+ *          NULL on error (fills error information in hdr)
+ * 
+ */
+
+static CimRsResponse*
+opClasses(RequestHdr * hdr, CimXmlRequestContext * ctx)
 {
-  if ((hdr->method & methods) == 0) {
-    hdr->rc = 1;
-    hdr->code = 405;
-    hdr->allowed = methods;
-    return 0;
+  BinRequestContext binCtx;
+  _SFCB_ENTER(TRACE_CIMRS, "opClasses");
+  if (!method_allowed(hdr, HTTP_GET)) {
+    _SFCB_RETURN(NULL);
   }
-  return 1;
+  memset(&binCtx, 0, sizeof(BinRequestContext));
+#if 0
+  CMPIObjectPath *path;
+  EnumClassNamesReq sreq = BINREQ(OPS_EnumerateClassNames, 2);
+  int             irc,
+                  l = 0,
+      err = 0;
+  BinResponseHdr **resp;
+  CimRsResponse*    rs;
+
+  XtokEnumClassNames *req = (XtokEnumClassNames *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  sreq.objectPath = setObjectPathMsgSegment(path);
+  sreq.principal = setCharsMsgSegment(ctx->principal);
+  sreq.hdr.flags = req->flags;
+  sreq.hdr.sessionId = ctx->sessionId;
+
+  binCtx.oHdr = (OperationHdr *) req;
+  binCtx.bHdr = &sreq.hdr;
+  binCtx.bHdr->flags = req->flags;
+  binCtx.rHdr = hdr;
+  binCtx.bHdrSize = sizeof(sreq);
+  binCtx.commHndl = ctx->commHndl;
+  binCtx.type = CMPI_ref;
+  binCtx.xmlAs = binCtx.noResp = 0;
+  binCtx.chunkedMode = 0;
+  binCtx.pAs = NULL;
+
+  _SFCB_TRACE(1, ("--- Getting Provider context"));
+  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+
+  _SFCB_TRACE(1, ("--- Provider context gotten"));
+  if (irc == MSG_X_PROVIDER) {
+    _SFCB_TRACE(1, ("--- Calling Providers"));
+    resp = invokeProviders(&binCtx, &err, &l);
+    _SFCB_TRACE(1, ("--- Back from Provider"));
+    closeProviderContext(&binCtx);
+    if (err == 0) {
+      rs = genResponses(&binCtx, resp, l);
+    } else {
+      rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
+                                                 (char *) resp[err -
+                                                               1]->object
+                                                 [0].data));
+    }
+    freeResponseHeaders(resp, &binCtx);
+    _SFCB_RETURN(rs);
+  }
+  closeProviderContext(&binCtx);
+#endif
+  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
 
+/*==================================================================*/
+
+/*
+ * extract element from url path
+ * and advance *next ptr to end of element+1
+ * 
+ */
 
 static const char *
 urlelement(char *path, char **next)
@@ -2807,15 +2852,14 @@ scanCimRsRequest(const char *method, char *path)
   RequestHdr *hdr = (RequestHdr *)calloc(1, sizeof(RequestHdr));
 
   const char *e; /* url element */
-  char *next; /* ptr to next element in path */
-  char *q; /* url query */
+  char *next; /* ptr to next (slash-separated) element in path */
 	
   _SFCB_ENTER(TRACE_CIMRS, "scanCimRsRequest");
 
   _SFCB_TRACE(1, ("--- method '%s', path '%s'", method, path));
 
   hdr->rc = 0;
-  hdr->code = 200;
+  hdr->op = OP_NONE;
 	
   /*
    * check the method
@@ -2823,16 +2867,16 @@ scanCimRsRequest(const char *method, char *path)
    */
 
   if (strcasecmp(method, "GET") == 0) {
-    hdr->method = HTTP_GET;
+    hdr->http_meth = HTTP_GET;
   }
   else if (strcasecmp(method, "PUT") == 0) {
-    hdr->method = HTTP_PUT;
+    hdr->http_meth = HTTP_PUT;
   }
   else if (strcasecmp(method, "POST") == 0) {
-    hdr->method = HTTP_POST;
+    hdr->http_meth = HTTP_POST;
   }
   else if (strcasecmp(method, "DELETE") == 0) {
-    hdr->method = HTTP_DELETE;
+    hdr->http_meth = HTTP_DELETE;
   }
   else {
     method_allowed(hdr, HTTP_GET|HTTP_PUT|HTTP_POST|HTTP_DELETE);
@@ -2845,9 +2889,9 @@ scanCimRsRequest(const char *method, char *path)
    * 
    */
 
-  q = strchr(path, '?');
-  if (q) *q++ = '\0';
-	
+  hdr->uri_q = strchr(path, '?');
+  if (hdr->uri_q) *hdr->uri_q++ = '\0';
+
   /*
    * parse the path
    * 
@@ -2859,58 +2903,86 @@ scanCimRsRequest(const char *method, char *path)
     hdr->msg = "path must start with /namespaces";
     _SFCB_RETURN(hdr);
   }
-  hdr->seen_ns = 1;
   hdr->ns = urlelement(next, &next);
-  fprintf(stderr, "namespaces '%s'\n", hdr->ns);
 
   e = urlelement(next, &next);
   if (e == NULL) {
-    /*
-     * -> just 'namespaces'
-     */
-    if (!method_allowed(hdr,HTTP_GET)) {
-      _SFCB_RETURN(hdr);
-    }
+    hdr->op = OP_NAMESPACES;
   }
   else if (strcasecmp(e, "classes") == 0) {
-    hdr->seen_className = 1;
-    hdr->className = urlelement(next, &next);
-    fprintf(stderr, "classes '%s'\n", hdr->className);
-    if (hdr->className) {
+    hdr->classname = urlelement(next, &next);
+    if (hdr->classname == NULL) {
       /*
-       * seen /classes/{classname}/
+       * seen /classes
+       */
+      hdr->op = OP_CLASSES;
+    }
+    else {
+      /*
+       * seen /classes/{classname}
        */
       e = urlelement(next, &next);
-      if (strcasecmp(e, "associators") == 0) {
+      if (e == NULL) {
+	hdr->op = OP_CLASS;
+      }
+      else if (strcasecmp(e, "associators") == 0) {
+	hdr->op = OP_CLASS_ASSOCIATORS;
       }
       else if (strcasecmp(e, "references") == 0) {
+	hdr->op = OP_CLASS_REFERENCES;
       }
       else if (strcasecmp(e, "methods") == 0) {
+	hdr->op = OP_CLASS_METHODS;
+	hdr->method = urlelement(next, &next);
       }
       else if (strcasecmp(e, "instances") == 0) {
+        /*
+         * seen /classes/{classname}/instances
+         */
+        hdr->keys = urlelement(next, &next);
+        e = urlelement(next, &next);
+	if (e == NULL) {
+	  hdr->op = OP_INSTANCE;
+	}
+        else if (strcasecmp(e, "associators") == 0) {
+	  hdr->op = OP_INSTANCE_ASSOCIATORS;
+        }
+        else if (strcasecmp(e, "references") == 0) {
+	  hdr->op = OP_INSTANCE_REFERENCES;
+        }
+        else if (strcasecmp(e, "methods") == 0) {
+	  hdr->op = OP_INSTANCE_METHODS;
+	  hdr->method = urlelement(next, &next);
+        }
+        else {
+	  hdr->rc = 1;
+          hdr->code = 404;
+	  hdr->msg = "Unknown operation on instance";
+        }
       }
       else {
+	hdr->rc = 1;
+        hdr->code = 404;
+	hdr->msg = "Unknown operation on class";
       }
     }
-    else if (q) {
-    }
   }
+#ifdef HAVE_QUALREP
   else if (strcasecmp(e, "qualifiers") == 0) {
-    hdr->seen_qualifier = 1;
     hdr->qualifier = urlelement(next, &next);
-    fprintf(stderr, "qualifiers '%s'\n", hdr->qualifier);
+    hdr->op = OP_QUALIFIERS;
   }
+#endif
   else if (strcasecmp(e, "query") == 0) {
-    hdr->className = urlelement(next, &next);
-    fprintf(stderr, "classes '%s'\n", hdr->className);
+    hdr->classname = urlelement(next, &next);
+    hdr->op = OP_QUERY;
   }
   else {
+    _SFCB_TRACE(1, ("--- path unrecognized", path));
     hdr->rc = 1;
     hdr->code = 404;
   }
-/*static          CimRsResponse*
-enumNameSpaces(CimXmlRequestContext * ctx, RequestHdr * hdr)
-*/
+
   _SFCB_RETURN(hdr);
 }
 
@@ -2996,23 +3068,43 @@ handleCimRsRequest(CimXmlRequestContext * ctx)
     resp->allowed = hdr->allowed;
   }
   else {
-    resp = createRsResponse(0, NULL, 200);
-  }
-#if 0
-  else {
     HeapControl    *hc;
-    Handler         hdlr;
 
     hc = markHeap();
-    hdlr = handlers[hdr.opType];
-    rs = hdlr.handler(ctx, &hdr);
-    releaseHeap(hc);
 
-    ctx->className = hdr.className;
-    ctx->operation = hdr.opType;
-  }
-  rs.buffer = hdr.xmlBuffer;
+    switch (hdr->op) {
+    case OP_NONE:
+      resp = createRsResponse(1, "Bad cim-rs operation", 404);
+      break;
+    case OP_NAMESPACES:          /* /namespaces/{namespace} */
+      resp = opNamespaces(hdr, ctx);
+      break;
+    case OP_CLASSES:             /* /namespaces/{namespace}/classes[?sc={classname}] */
+      resp = opClasses(hdr, ctx);
+      break;
+    case OP_CLASS:               /* /namespaces/{namespace}/classes/{classname} */
+    case OP_CLASS_ASSOCIATORS:   /* /namespaces/{namespace}/classes/{classname}/associators */
+    case OP_CLASS_REFERENCES:    /* /namespaces/{namespace}/classes/{classname}/references */
+    case OP_CLASS_METHODS:       /* /namespaces/{namespace}/classes/{classname}/methods/{methodname} */
+    case OP_INSTANCE:            /* /namespaces/{namespace}/classes/{classname}/instances */
+    case OP_INSTANCE_ASSOCIATORS:/* /namespaces/{namespace}/classes/{classname}/instances/{keylist}/associators */
+    case OP_INSTANCE_REFERENCES: /* /namespaces/{namespace}/classes/{classname}/instances/{keylist}/references */
+    case OP_INSTANCE_METHODS:    /* /namespaces/{namespace}/classes/{classname}/instances/{keylist}/methods/{methodname} */
+#ifdef HAVE_QUALREP
+    case OP_QUALIFIERS:          /* /namespaces/{namespace}/qualifiers/{qualifiername} */
 #endif
+    case OP_QUERY:               /* /namespaces/{namespace}/query?ql={lang}&qs={query} */
+    default:
+      resp = createRsResponse(1, "Unsupported cim-rs operation", 404);
+      break;
+    }
+    releaseHeap(hc);
+  }
+
+  if (resp == NULL) {
+    resp = createRsResponse(hdr->rc, hdr->msg, hdr->code);
+    if (hdr->code == 405) resp->allowed = hdr->allowed;
+  }
   free(hdr);
   writeResponse(ctx, resp);
   free(resp);
