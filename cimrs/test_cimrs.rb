@@ -5,11 +5,10 @@ require File.join(File.dirname(__FILE__), "sfcb.rb")
 
 class StartStopTest < Test::Unit::TestCase
   def setup
-    @sfcb = Sfcb.new
+    @http = Net::HTTP.start "localhost", "27163"
 #    @sfcb.start
 #    sleep 3
 #    puts "\n\t*** Started"
-    @http = Net::HTTP.start "localhost", "#{@sfcb.port}"
   end
   def teardown
 #    puts "\n\t*** Stopping"
@@ -18,13 +17,11 @@ class StartStopTest < Test::Unit::TestCase
   end
   
   def test_get_root
-
     resp = @http.get "/cimrs/"
     assert_equal "404", resp.code
   end
 
   def test_head_root
-
     resp = @http.head "/cimrs/"
     assert_equal "405", resp.code
     assert_equal "GET,PUT,POST,DELETE", resp["Allowed"]
