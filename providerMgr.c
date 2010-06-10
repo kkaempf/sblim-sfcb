@@ -512,6 +512,18 @@ processIndProviderList(int *requestor, OperationHdr * req)
 
 #endif
 
+static void
+nameSpaceList(int *requestor, OperationHdr * req)
+{
+  _SFCB_ENTER(TRACE_PROVIDERMGR, "nameSpaceList");
+  _getNameSpaces(req->nameSpace.data);
+  spSendCtlResult(requestor, &classProvInfoPtr->providerSockets.send,
+                  MSG_X_PROVIDER, 0, getProvIds(classProvInfoPtr).ids,
+                  req->options);
+  _SFCB_EXIT();
+}
+
+
 /*
  * ------------- --- Association Provider support --- ------------- 
  */
@@ -997,6 +1009,7 @@ static MgrHandler mHandlers[] = {
   {NULL},                       // OPS_DeactivateFilter 29
   {NULL},                       // OPS_DisableIndications 30
   {NULL},                       // OPS_EnableIndications 31
+  {nameSpaceList},              // OPS_EnumerateNamespaces 32
 };
 
 void
@@ -1034,8 +1047,11 @@ processProviderMgrRequests()
          spRecvReq(&sfcbSockets.receive, &requestor, (void **) &req, &rl,
                    &mqg)) == 0) {
       if (mqg.rdone) {
-        req->nameSpace.data =
-            (void *) ((long) req->nameSpace.data + (char *) req);
+        if (req->nameSpace.length)
+          req->nameSpace.data =
+              (void *) ((long) req->nameSpace.data + (char *) req);
+        else
+          req->nameSpace.data = NULL;
         if (req->className.length)
           req->className.data =
               (void *) ((long) req->className.data + (char *) req);
@@ -1087,6 +1103,7 @@ closeProviderContext(BinRequestContext * ctx)
   }
   if (ctx->pAs)
     free(ctx->pAs);
+  _SFCB_EXIT();
 }
 
 static void
@@ -1115,13 +1132,19 @@ getProviderContext(BinRequestContext * ctx, OperationHdr * ohdr)
 {
   unsigned long int l;
   int             rc = 0,
-      i,
-      x;
+      i;
   char           *buf;
   ProvAddr       *as;
   ComSockets      sockets;
 
   _SFCB_ENTER(TRACE_PROVIDERMGR, "internalGetProviderContext");
+	
+  /*
+   * Serialize OperationHdr
+   * 
+   * alloc for OperationHdr + namespace + classname
+   *
+   */
 
   l = sizeof(*ohdr) + ohdr->nameSpace.length + ohdr->className.length;
   buf = (char *) malloc(l + 8);
@@ -1137,7 +1160,6 @@ getProviderContext(BinRequestContext * ctx, OperationHdr * ohdr)
   ((OperationHdr *) buf)->nameSpace.data = (void *) l;
   l += ohdr->nameSpace.length;
   memcpy(buf + l, ohdr->className.data, ohdr->className.length);
-  x = l;
   ((OperationHdr *) buf)->className.data = (void *) l;
   l += ohdr->className.length;
 
@@ -1862,9 +1884,12 @@ _getNameSpaces(const char *ns)
   memset(&binCtx, 0, sizeof(BinRequestContext));
   irc = _methProvider(&binCtx, &req);
 
+  _SFCB_TRACE(1, ("--- got _methProvider $ClassProvider$"));
   if (irc == MSG_X_PROVIDER) {
+    _SFCB_TRACE(1, ("--- invoking 'getnamespaces'"));
     data = localInvokeMethod(&binCtx, path, "getnamespaces", in, &out, &rc, 0);
     if (out) {
+      _SFCB_TRACE(1, ("--- got 'getnamespaces' result"));
       ar = CMGetArg(out, "namespaces", &rc).value.array;
       ul = UtilFactory->newList();
       for (i = 0, m = CMGetArrayCount(ar, NULL); i < m; i++) {

@@ -60,6 +60,8 @@
 #define OPS_DisableIndications 30
 #define OPS_EnableIndications  31
 
+#define OPS_EnumerateNamespaces 32
+
 // this macro must be adjusted when when BinRequestHdr is changed
 #define BINREQ(oper,count) {{oper,0,NULL,0,0,count}}
 
@@ -156,6 +158,12 @@ typedef struct binRequestContext {
 typedef struct chunkFunctions {
   void            (*writeChunk) (BinRequestContext *, BinResponseHdr *);
 } ChunkFunctions;
+
+typedef struct enumNamespacesReq {
+  BinRequestHdr   hdr;
+  MsgSegment      principal;
+  MsgSegment      objectPath;
+} EnumNamespacesReq;
 
 typedef struct getClassReq {
   BinRequestHdr   hdr;

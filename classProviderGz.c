@@ -1016,7 +1016,37 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
   _SFCB_ENTER(TRACE_PROVIDERS, "ClassProviderInvokeMethod");
 
   cReg = getNsReg(ref, &rc);
+  _SFCB_TRACE(1, ("--- cReg %p, nsHt %p", cReg, nsHt));
   if (cReg == NULL) {
+    _SFCB_TRACE(1, ("--- methodName '%s'", methodName));
+#ifdef CIM_RS
+    if (strcasecmp(methodName, "getnamespaces") == 0) {
+      _SFCB_TRACE(1, ("--- getnamespaces!"));
+      if (nsHt) {
+	HashTableIterator *it;
+	void *key;
+	void *value;
+	
+	it = nsHt->ft->getFirst(nsHt, &key, &value);
+	if (it) {
+	  int l, i = 0;
+	  l = nsHt->ft->size(nsHt);
+
+	  _SFCB_TRACE(1, ("--- iterating %d elements", l));
+          ar = CMNewArray(_broker, l, CMPI_string, NULL);
+
+	  while (it) {
+            _SFCB_TRACE(1, ("--- nsHt %s:%p", (char *)key, value));
+            CMSetArrayElementAt(ar, i++, key, CMPI_chars);
+	    it = nsHt->ft->getNext(nsHt, it, &key, &value);
+	  }
+	  _SFCB_TRACE(1, ("--- done, last %p", it));
+	  st = CMAddArg(out, "namespaces", &ar, CMPI_stringA);
+          _SFCB_RETURN(st);
+	}
+      }
+    }
+#endif
     CMPIStatus      st = { CMPI_RC_ERR_INVALID_NAMESPACE, NULL };
     _SFCB_RETURN(st);
   }
