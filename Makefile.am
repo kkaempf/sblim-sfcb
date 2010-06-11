@@ -402,6 +402,7 @@ libsfcCimXmlCodec_la_LIBADD=-lsfcBrokerCore
 libsfcCimXmlCodec_la_DEPENDENCIES=libsfcBrokerCore.la
 
 libsfcCimRsCodec_la_SOURCES = \
+   cimJsonGen.c \
    cimRsRequest.c 
 libsfcCimRsCodec_la_LIBADD=-lsfcBrokerCore 
 libsfcCimRsCodec_la_DEPENDENCIES=libsfcBrokerCore.la
@@ -446,7 +447,7 @@ classSchema2c_DEPENDENCIES=libsfcBrokerCore.la
 
 noinst_HEADERS=array.h $(SLP_INC) httpComm.h control.h    providerMgr.h \
 	constClass.h   msgqueue.h     providerRegister.h \
-	cimXmlParser.h    native.h       support.h cimXmlGen.h \
+	cimXmlParser.h    native.h       support.h cimXmlGen.h  cimJsonGen.h \
 	cimXmlRequest.h  genericlist.h  objectImpl.h   trace.h \
 	sfcUtil/hashtable.h      sfcUtil/utilft.h mlog.h \
 	cmpidt.h cmpift.h cmpiftx.h cmpimacs.h cmpimacsx.h cmpios.h cmpipl.h \
