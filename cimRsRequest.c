@@ -20,6 +20,7 @@
 
 #include "cmpidt.h"
 #include "cmpidtx.h"
+#include "cimJsonGen.h"
 #include "cimXmlRequest.h"
 #include "msgqueue.h"
 #include "cmpidt.h"
@@ -336,36 +337,44 @@ genEnumResponses(BinRequestContext * binCtx,
 
   ar = TrackedCMPIArray(arrLen, binCtx->type, NULL);
 
+  _SFCB_TRACE(1, ("--- array %p, arrLen %d, rcount %d, type %04x", ar, arrLen, binCtx->rCount, binCtx->type));
   for (c = 0, i = 0; i < binCtx->rCount; i++) {
+    _SFCB_TRACE(1, ("--- resp[%d] count %d", i, resp[i]->count));
     for (j = 0; j < resp[i]->count; c++, j++) {
       if (binCtx->type == CMPI_ref)
         object = relocateSerializedObjectPath(resp[i]->object[j].data);
       else if (binCtx->type == CMPI_instance)
         object = relocateSerializedInstance(resp[i]->object[j].data);
-      else if (binCtx->type == CMPI_class) {
-        object = relocateSerializedConstClass(resp[i]->object[j].data);
+      else if (binCtx->type == CMPI_string) {
+        object = CMNewString(Broker, resp[i]->object[j].data, NULL);
       }
-
+      else if (binCtx->type == CMPI_class)
+        object = relocateSerializedConstClass(resp[i]->object[j].data);
+      else
+	_SFCB_TRACE(1, ("--- *** unhandled"));
+        
       rc = arraySetElementNotTrackedAt(ar, c, (CMPIValue *) & object,
                                        binCtx->type);
     }
   }
 
+  /* Array -> Enumeration */
   enm = sfcb_native_new_CMPIEnumeration(ar, NULL);
   sb = UtilFactory->newStrinBuffer(1024);
-/*FIXME
+
   if (binCtx->oHdr->type == OPS_EnumerateClassNames)
-    enum2xml(enm, sb, binCtx->type, XML_asClassName, binCtx->bHdr->flags);
+    enum2json(enm, sb, binCtx->type, "classname", binCtx->bHdr->flags);
   else if (binCtx->oHdr->type == OPS_EnumerateClasses)
-    enum2xml(enm, sb, binCtx->type, XML_asClass, binCtx->bHdr->flags);
+    enum2json(enm, sb, binCtx->type, "class", binCtx->bHdr->flags);
+  else if (binCtx->oHdr->type == OPS_EnumerateNamespaces)
+    enum2json(enm, sb, binCtx->type, "namespaces", binCtx->bHdr->flags);
   else
-    enum2xml(enm, sb, binCtx->type, binCtx->xmlAs, binCtx->bHdr->flags);
-*/
+    enum2json(enm, sb, binCtx->type, "enum", binCtx->bHdr->flags);
+
   _SFCB_RETURN(sb);
 }
 
-#if 0
-static          CimRsResponse*
+static CimRsResponse*
 genResponses(BinRequestContext * binCtx,
              BinResponseHdr ** resp, int arrlen)
 {
@@ -389,7 +398,7 @@ genResponses(BinRequestContext * binCtx,
   genheap = markHeap();
   sb = genEnumResponses(binCtx, resp, arrlen);
 
-  rs = createRsResponse(0, (char *)sb, 200);
+  rs = createRsResponse(0, sb->ft->getCharPtr(sb), 200);
 #ifdef SFCB_DEBUG
   if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
     gettimeofday(&ev, NULL);
@@ -408,6 +417,7 @@ genResponses(BinRequestContext * binCtx,
   // _SFCB_RETURN(iMethodResponse(binCtx->rHdr, sb));
 }
 
+#if 0
 #ifdef HAVE_QUALREP
 static          CimRsResponse*
 genQualifierResponses(BinRequestContext * binCtx, BinResponseHdr * resp)
@@ -499,6 +509,7 @@ opNamespaces(RequestHdr * hdr, CimXmlRequestContext * ctx )
   BinRequestContext binCtx;
   OperationHdr ophdr;
   int irc;
+  EnumNamespacesReq sreq = BINREQ(OPS_EnumerateNamespaces, 2);
 
   _SFCB_ENTER(TRACE_CIMRS, "opNamespaces");
   _SFCB_TRACE(1, ("--- method %04x", hdr->http_meth));
@@ -516,7 +527,6 @@ opNamespaces(RequestHdr * hdr, CimXmlRequestContext * ctx )
    * Set up incoming req information
    */
 
-  EnumNamespacesReq sreq = BINREQ(OPS_EnumerateNamespaces, 2);
   sreq.principal = setCharsMsgSegment(ctx->principal);
   sreq.hdr.flags = 0;
   sreq.hdr.sessionId = ctx->sessionId;
@@ -526,11 +536,13 @@ opNamespaces(RequestHdr * hdr, CimXmlRequestContext * ctx )
   ophdr.count = 0;
 
   ophdr.nameSpace.data = (char *)hdr->ns;
-  ophdr.nameSpace.type = CMPI_chars;
-	ophdr.nameSpace.length = hdr->ns ? strlen(hdr->ns) : 0;
+  ophdr.nameSpace.type = CMPI_string;
+  ophdr.nameSpace.length = hdr->ns ? strlen(hdr->ns) : 0;
   ophdr.className.data = NULL;
   ophdr.className.type = 0;
   ophdr.className.length = 0;
+
+  sreq.ns = setCharsMsgSegment(ophdr.nameSpace.data);
 
   binCtx.oHdr = &ophdr;
   binCtx.bHdr = &sreq.hdr;
@@ -538,7 +550,7 @@ opNamespaces(RequestHdr * hdr, CimXmlRequestContext * ctx )
   binCtx.rHdr = hdr;
   binCtx.bHdrSize = sizeof(sreq);
   binCtx.commHndl = ctx->commHndl;
-  binCtx.type = CMPI_ref;
+  binCtx.type = CMPI_string;
   binCtx.xmlAs = binCtx.noResp = 0;
   binCtx.chunkedMode = 0;
   binCtx.pAs = NULL;
@@ -547,28 +559,24 @@ opNamespaces(RequestHdr * hdr, CimXmlRequestContext * ctx )
   irc = getProviderContext(&binCtx, &ophdr);
 
   _SFCB_TRACE(1, ("--- Provider context gotten: %d", irc));
-#if 0
+
   if (irc == MSG_X_PROVIDER) {
     BinResponseHdr **resp;
-    int err, l;
+    CimRsResponse *rs;
+    int l = 0, err = 0;
 
-    _SFCB_TRACE(1, ("--- Calling Providers"));
     resp = invokeProviders(&binCtx, &err, &l);
-    _SFCB_TRACE(1, ("--- Back from Provider"));
+    if (err == 0)
+      rs = genResponses(&binCtx, resp, l);
+    else {
+      rs = NULL;
+      _SFCB_TRACE(1, ("--- Error getting namespaces"));
+    }
     closeProviderContext(&binCtx);
 
-    if (err == 0) {
-      rs = genResponses(&binCtx, resp, l);
-    } else {
-      rs = iMethodErrResponse(hdr,
-			      getErrSegment(resp[err - 1]->rc,
-					    (char *) resp[err - 1]->object
-					    [0].data));
-    }
-    freeResponseHeaders(resp, &binCtx);
     _SFCB_RETURN(rs);
   }
-#endif
+
   closeProviderContext(&binCtx);
   _SFCB_RETURN(ctxErrResponse(hdr, &binCtx));
 }
@@ -837,6 +845,7 @@ writeResponse(CimXmlRequestContext *ctx, CimRsResponse *resp)
     len = strlen(resp->msg);
   else
     len = 0;
+  _SFCB_TRACE(1, ("--- msg len %d", len));
 
   sprintf(str, "HTTP/1.1 %d OK\r\n", resp->code);
   commWrite(conn_fd, str, strlen(str));
@@ -877,8 +886,10 @@ writeResponse(CimXmlRequestContext *ctx, CimRsResponse *resp)
   }
   commWrite(conn_fd, end, strlen(end));
 
-  if (resp->msg)
+  if (resp->msg) {
+     _SFCB_TRACE(1, ("--- msg '%s'", resp->msg));
      commWrite(conn_fd, (char *)resp->msg, strlen(resp->msg));
+  }
   commWrite(conn_fd, end, strlen(end));
   commFlush(conn_fd);
 

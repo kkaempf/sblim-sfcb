@@ -20,6 +20,10 @@
  *
  */
 
+#include <ctype.h>
+#include <unistd.h>
+#include <limits.h>
+
 #include "cmpidt.h"
 #include "cimJsonGen.h"
 #include "msgqueue.h"
@@ -45,7 +49,7 @@ extern CMPIData __ift_internal_getPropertyAt(const CMPIInstance *ci,
 const char     *opGetClassNameChars(CMPIObjectPath * cop);
 
 #define DATA2JSON(data,obj,name,refname,btag,etag,sb,qsb,inst,param)    \
-  DATA2JSON((data),(obj),(name),(refname),(btag),sizeof(btag)-1,(etag), \
+  data2json((data),(obj),(name),(refname),(btag),sizeof(btag)-1,(etag), \
 	   sizeof(etag)-1,(sb),(qsb),(inst),(param))
 
 char           *
@@ -107,6 +111,7 @@ JsonEscape(char *in, int *outlen)
   _SFCB_RETURN(out);
 }
 
+#if 0
 /** Takes a string representation of type and value, creates corresponding 
   * CMPI data type.
   *
@@ -196,6 +201,7 @@ getKeyValueTypePtr(char *type, char *value, XtokValueReference * ref,
   *typ = CMPI_chars;
   return (CMPIValue *) value;
 }
+#endif
 
 static char    *
 dataType(CMPIType type)
@@ -237,7 +243,6 @@ dataType(CMPIType type)
   }
   mlogf(M_ERROR, M_SHOW, "%s(%d): invalid data type %d %x\n", __FILE__,
         __LINE__, (int) type, (int) type);
-  SFCB_ASM("int $3");
   abort();
   return "*??*";
 }
@@ -266,7 +271,6 @@ keyType(CMPIType type)
   }
   mlogf(M_ERROR, M_SHOW, "%s(%d): invalid key data type %d %x\n", __FILE__,
         __LINE__, (int) type, (int) type);
-  SFCB_ASM("int $3");
   abort();
   return "*??*";
 }
@@ -294,6 +298,7 @@ guessType(char *val)
   return CMPI_string;
 }
 
+#if 0
 CMPIValue
 makeFromEmbeddedObject(XtokValue value, char *ns)
 {
@@ -320,7 +325,9 @@ makeFromEmbeddedObject(XtokValue value, char *ns)
   }
   return val;
 }
+#endif
 
+#if 0
 CMPIValue
 str2CMPIValue(CMPIType type, XtokValue val, XtokValueReference * ref,
               char *ns)
@@ -428,6 +435,7 @@ str2CMPIValue(CMPIType type, XtokValue val, XtokValueReference * ref,
   }
   return value;
 }
+#endif
 
 int
 value2json(CMPIData d, UtilStringBuffer * sb, int wv)
@@ -647,12 +655,12 @@ method2json(CMPIType type, CMPIString *name, char *bTag, char *eTag,
 }
 
 void
-DATA2JSON(CMPIData *data, void *obj, CMPIString *name,
+data2json(CMPIData *data, void *obj, CMPIString *name,
          CMPIString *refName, char *bTag, int bTagLen, char *eTag,
          int eTagLen, UtilStringBuffer * sb, UtilStringBuffer * qsb,
          int inst, int param)
 {
-  _SFCB_ENTER(TRACE_CIMRS, "DATA2JSON");
+  _SFCB_ENTER(TRACE_CIMRS, "data2json");
 
   char           *type;
 
@@ -794,7 +802,7 @@ param2json(CMPIParameter * pdata, CMPIConstClass * cls, ClParameter * parm,
   char           *etag = "</PARAMETER>\n";
   UtilStringBuffer *qsb = NULL;
 
-  if (flags & FL_includeQualifiers) {
+  if (flags & CMPI_FLAG_IncludeQualifiers) {
     m = ClClassGetMethParamQualifierCount(cl, parm);
     if (m)
       qsb = UtilFactory->newStrinBuffer(1024);
@@ -881,22 +889,20 @@ cls2json(CMPIConstClass * cls, UtilStringBuffer * sb, unsigned int flags)
     sb->ft->appendChars(sb, superCls);
   }
   SFCB_APPENDCHARS_BLOCK(sb, "\">\n");
-  if (flags & FL_includeQualifiers)
+  if (flags & CMPI_FLAG_IncludeQualifiers) {
     quals2json(cl->quals, sb);
 
-  if (flags & FL_includeQualifiers)
     for (i = 0, m = ClClassGetQualifierCount(cl); i < m; i++) {
       data = cls->ft->getQualifierAt(cls, i, &name, NULL);
       DATA2JSON(&data, cls, name, NULL, "<QUALIFIER NAME=\"",
                "</QUALIFIER>\n", sb, NULL, 0, 0);
     }
-
+  }
   for (i = 0, m = ClClassGetPropertyCount(cl); i < m; i++) {
     qsb->ft->reset(qsb);
     data = getPropertyQualsAt(cls, i, &name, &quals, &refName, NULL);
-    if (flags & FL_includeQualifiers)
+    if (flags & CMPI_FLAG_IncludeQualifiers) {
       quals2json(quals << 8, qsb);
-    if (flags & FL_includeQualifiers)
       for (q = 0, qm = ClClassGetPropQualifierCount(cl, i); q < qm; q++) {
         qdata = internalGetPropQualAt(cls, i, q, &qname, NULL);
         DATA2JSON(&qdata, cls, qname, NULL, "<QUALIFIER NAME=\"",
@@ -904,6 +910,7 @@ cls2json(CMPIConstClass * cls, UtilStringBuffer * sb, unsigned int flags)
         CMRelease(qname);
         sfcb_native_release_CMPIValue(qdata.type, &qdata.value);
       }
+    }
     if (data.type & CMPI_ARRAY)
       DATA2JSON(&data, cls, name, NULL, "<PROPERTY.ARRAY NAME=\"",
                "</PROPERTY.ARRAY>\n", sb, qsb, 0, 0);
@@ -932,7 +939,7 @@ cls2json(CMPIConstClass * cls, UtilStringBuffer * sb, unsigned int flags)
     mname = sfcb_native_new_CMPIString(smname, NULL, 2);
     meth = ((ClMethod *) ClObjectGetClSection(&cl->hdr, &cl->methods)) + i;
 
-    if (flags & FL_includeQualifiers) {
+    if (flags & CMPI_FLAG_IncludeQualifiers) {
       for (q = 0, qm = ClClassGetMethQualifierCount(cl, i); q < qm; q++) {
         ClClassGetMethQualifierAt(cl, meth, q, &qdata, &sname);
         name = sfcb_native_new_CMPIString(sname, NULL, 2);
@@ -975,7 +982,7 @@ instance2json(CMPIInstance *ci, UtilStringBuffer * sb, unsigned int flags)
   sb->ft->appendChars(sb, instGetClassName(ci));
   SFCB_APPENDCHARS_BLOCK(sb, "\">\n");
 
-  if (flags & FL_includeQualifiers)
+  if (flags & CMPI_FLAG_IncludeQualifiers)
     quals2json(inst->quals, sb);
 
   for (i = 0; i < m; i++) {
@@ -1096,44 +1103,41 @@ enum2json(CMPIEnumeration *enm, UtilStringBuffer * sb, CMPIType type,
   CMPIConstClass *cl;
 
   _SFCB_ENTER(TRACE_CIMRS, "enum2json");
+  _SFCB_TRACE(1, ("--- type %04x", type));
+  sb->ft->append3Chars(sb, "\"", name, "\" : [\n");
 
   while (CMHasNext(enm, NULL)) {
-    if (type == CMPI_ref) {
+    switch(type) {
+    case CMPI_string: {
+      CMPIString *s = CMGetNext(enm, NULL).value.string;
+      sb->ft->append3Chars(sb, "\"", s->hdl, "\"");
+    }
+    break;
+    case CMPI_ref:
       cop = CMGetNext(enm, NULL).value.ref;
-      if (xmlAs == XML_asClassName)
-        className2json(cop, sb);
-      else if (xmlAs == XML_asObjectPath) {
-        SFCB_APPENDCHARS_BLOCK(sb, "<OBJECTPATH>\n");
-        SFCB_APPENDCHARS_BLOCK(sb, "<INSTANCEPATH>\n");
-        nsPath2json(cop, sb);
-        instanceName2json(cop, sb);
-        SFCB_APPENDCHARS_BLOCK(sb, "</INSTANCEPATH>\n");
-        SFCB_APPENDCHARS_BLOCK(sb, "</OBJECTPATH>\n");
-      } else
-        instanceName2json(cop, sb);
-    } else if (type == CMPI_class) {
+      refValue2json(cop, sb);
+    break;
+    case CMPI_class:
       cl = (CMPIConstClass *) CMGetNext(enm, NULL).value.inst;
       cls2json(cl, sb, flags);
-    } else if (type == CMPI_instance) {
+    break;
+    case CMPI_instance:
       ci = CMGetNext(enm, NULL).value.inst;
       cop = CMGetObjectPath(ci, NULL);
-      if (xmlAs == XML_asObj) {
-        SFCB_APPENDCHARS_BLOCK(sb, "<VALUE.OBJECTWITHPATH>\n");
-        SFCB_APPENDCHARS_BLOCK(sb, "<INSTANCEPATH>\n");
-        nsPath2json(cop, sb);
-      } else
-        SFCB_APPENDCHARS_BLOCK(sb, "<VALUE.NAMEDINSTANCE>\n");
       instanceName2json(cop, sb);
-      if (xmlAs == XML_asObj)
-        SFCB_APPENDCHARS_BLOCK(sb, "</INSTANCEPATH>\n");
+      SFCB_APPENDCHARS_BLOCK(sb, "\ninstance: ");
       instance2json(ci, sb, flags);
-      if (xmlAs == XML_asObj)
-        SFCB_APPENDCHARS_BLOCK(sb, "</VALUE.OBJECTWITHPATH>\n");
-      else
-        SFCB_APPENDCHARS_BLOCK(sb, "</VALUE.NAMEDINSTANCE>\n");
       cop->ft->release(cop);
+    break;
+    default:
+      _SFCB_TRACE(1, ("--- type unknown"));
+      CMGetNext(enm, NULL);
+    break;
     }
+    if (CMHasNext(enm, NULL))
+      SFCB_APPENDCHARS_BLOCK(sb, ", ");
   }
+  SFCB_APPENDCHARS_BLOCK(sb, "\n]");
 
   _SFCB_RETURN(0);
 }
