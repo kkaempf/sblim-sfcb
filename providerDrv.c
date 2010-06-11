@@ -2722,6 +2722,66 @@ disableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 
 #endif
 
+#ifdef CIM_RS
+static BinResponseHdr *
+enumNamespaces(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+{
+  TIMING_PREP EnumNamespacesReq *req = (EnumNamespacesReq *) hdr;
+  CMPIObjectPath *path;
+  CMPIStatus      rci = { CMPI_RC_OK, NULL };
+  CMPIArray      *r;
+  CMPIResult     *result = native_new_CMPIResult(0, 1, NULL);
+  CMPIContext    *ctx = native_new_CMPIContext(MEM_TRACKED, info);
+  CMPIArgs       *in = CMNewArgs(Broker, NULL);;
+  CMPIArgs       *out = TrackedCMPIArgs(NULL);
+  BinResponseHdr *resp;
+  CMPIFlags       flgs = req->hdr.flags;
+
+  _SFCB_ENTER(TRACE_PROVIDERDRV, "enumNamespaces");
+
+  ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
+                    CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIPrincipal, (CMPIValue *) req->principal.data,
+                    CMPI_chars);
+  ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
+                    CMPI_uint32);
+
+  _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
+  path = NewCMPIObjectPath(req->ns.data, "", NULL);
+	
+  TIMING_START(hdr, info)
+      rci = info->methodMI->ft->invokeMethod(info->methodMI, ctx, result,
+					     path, "getnamespaces", in, out);
+  TIMING_STOP(hdr, info)
+      r = native_result2array(result);
+
+  _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
+
+  if (rci.rc == CMPI_RC_OK) {
+    CMPICount count;
+    int i;
+    if (r)
+      count = CMGetArrayCount(r, NULL);
+    else
+      count = 0;
+    _SFCB_TRACE(1, ("--- result %p, count %d", r, count));
+    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
+                                     ((count ? count -
+                                       1 : 0) * sizeof(MsgSegment)));
+    resp->moreChunks = 0;
+    resp->rc = 1;
+    resp->count = count;
+    for (i = 0; i < count; i++)
+      resp->object[i] =
+          setCharsMsgSegment(CMGetArrayElementAt(r, i, NULL).value.chars);
+  } else
+    resp = errorResp(&rci);
+
+  CMRelease(path);
+  _SFCB_RETURN(resp);
+}
+#endif /* CIM_RS */
+	
 static BinResponseHdr *
 opNotSupported(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
@@ -3017,6 +3077,9 @@ static ProvHandler pHandlers[] = {
   {NULL},                       // OPS_EnableIndications 30
   {NULL}                        // OPS_DisableIndications 31
 #endif
+#ifdef CIM_RS
+  ,{enumNamespaces}             // OPS_EnumerateNamespaces 32
+#endif
 };
 
 char           *opsName[] = {
@@ -3052,6 +3115,9 @@ char           *opsName[] = {
   "DeactivateFilter",
   "EnableIndications",
   "DisableIndications",
+#ifdef CIM_RS
+  "EnumerateNamespaces",
+#endif
 };
 
 static void    *

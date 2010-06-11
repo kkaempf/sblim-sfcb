@@ -162,7 +162,7 @@ typedef struct chunkFunctions {
 typedef struct enumNamespacesReq {
   BinRequestHdr   hdr;
   MsgSegment      principal;
-  MsgSegment      objectPath;
+  MsgSegment      ns;
 } EnumNamespacesReq;
 
 typedef struct getClassReq {

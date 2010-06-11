@@ -1029,19 +1029,16 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
 	
 	it = nsHt->ft->getFirst(nsHt, &key, &value);
 	if (it) {
-	  int l, i = 0;
-	  l = nsHt->ft->size(nsHt);
-
-	  _SFCB_TRACE(1, ("--- iterating %d elements", l));
-          ar = CMNewArray(_broker, l, CMPI_string, NULL);
 
 	  while (it) {
+	    CMPIString *rval;
             _SFCB_TRACE(1, ("--- nsHt %s:%p", (char *)key, value));
-            CMSetArrayElementAt(ar, i++, key, CMPI_chars);
+	    rval = CMNewString(_broker, key, NULL);
+	    CMReturnData(rslt, rval, CMPI_string);
 	    it = nsHt->ft->getNext(nsHt, it, &key, &value);
 	  }
+	  CMReturnDone(rslt);
 	  _SFCB_TRACE(1, ("--- done, last %p", it));
-	  st = CMAddArg(out, "namespaces", &ar, CMPI_stringA);
           _SFCB_RETURN(st);
 	}
       }
