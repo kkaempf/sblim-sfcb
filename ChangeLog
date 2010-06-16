@@ -1,3 +1,8 @@
+2010-06-16  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* [ 3016295 ] Initialise refcount in CMPIInstance clone
+	(patch by Tim Potter)
+
 2010-06-10 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* configure.ac, sfcBroker.c:
 	[ 3014530 ] configure option for request
