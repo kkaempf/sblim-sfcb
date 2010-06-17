@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.85 2010/04/14 20:06:24 buccella Exp $
+ * $Id: providerDrv.c,v 1.86 2010/06/17 21:51:43 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2604,8 +2604,8 @@ static ProvHandler pHandlers[] = {
 #else
    {NULL},                      //OPS_ActivateFilter     28
    {NULL},                      //OPS_DeactivateFilter   29
-   {NULL},                      //OPS_EnableIndications  30
-   {NULL}                       //OPS_DisableIndications 31
+   {NULL},                      //OPS_DisableIndications  30
+   {NULL}                       //OPS_EnableIndications 31
 #endif   
 };
 
@@ -2640,8 +2640,8 @@ char *opsName[] = {
    "IndicationLookup",
    "ActivateFilter",
    "DeactivateFilter",
-   "EnableIndications",
    "DisableIndications",
+   "EnableIndications",
 };
 
 static void *processProviderInvocationRequestsThread(void *prms)
