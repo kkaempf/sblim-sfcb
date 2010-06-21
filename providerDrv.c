@@ -3070,12 +3070,16 @@ processProviderInvocationRequestsThread(void *prms)
   _SFCB_ENTER(TRACE_PROVIDERDRV,
               "processProviderInvocationRequestsThread");
 
-  for (i = 0; i < req->count; i++)
+  /* Convert offsets in request header back into
+   * real pointers. Set empty chars segments to
+   * NULL. */
+  for (i = 0; i < req->count; i++) {
     if (req->object[i].length)
       req->object[i].data =
           (void *) ((long) req->object[i].data + (char *) req);
     else if (req->object[i].type == MSG_SEG_CHARS)
       req->object[i].data = NULL;
+  }
 
   if (req->operation != OPS_LoadProvider) {
     if (req->provId == NULL) {
@@ -3084,6 +3088,8 @@ processProviderInvocationRequestsThread(void *prms)
       exit(-1);
     }
 
+    /* Update lastActivity time for the process and for
+     * the specific provider being requested. */
     time(&curProvProc->lastActivity);
     for (pInfo = activProvs; pInfo; pInfo = pInfo->next) {
       if (pInfo->provIds.ids == req->provId) {
@@ -3097,19 +3103,18 @@ processProviderInvocationRequestsThread(void *prms)
       exit(-1);
     }
 
-    if (pInfo && pInfo->library == NULL) {
+    if (pInfo->library == NULL) {
       char            dlName[512];
       mlogf(M_INFO, M_SHOW, "--- Reloading provider\n");
       doLoadProvider(pInfo, dlName, 512);
     }
 
-    if (pInfo) {
-      initRc = initProvider(pInfo, req->sessionId, &errstr);
-      _SFCB_TRACE(1, ("--- Provider initialization rc %d", initRc));
-    }
+    initRc = initProvider(pInfo, req->sessionId, &errstr);
+    _SFCB_TRACE(1, ("--- Provider initialization rc %d", initRc));
 
-  } else
+  } else {
     pInfo = NULL;
+  }
 
   if (initRc) {
     mlogf(M_ERROR, M_SHOW, "%s", errstr);
@@ -3117,9 +3122,7 @@ processProviderInvocationRequestsThread(void *prms)
     resp = errorCharsResp(CMPI_RC_ERR_FAILED, errstr);
     free(errstr);
     errstr = NULL;
-  }
-
-  else {
+  } else {
     _SFCB_TRACE(1, ("--- Provider request for op:%s pInfo:%p prov:%x",
                     opsName[req->operation], pInfo, req->provId));
 
