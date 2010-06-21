@@ -346,8 +346,7 @@ typedef struct setPropertyReq {
                                  * * property msg segment */
 } SetPropertyReq;
 
-int             getProviderContext(BinRequestContext * ctx,
-                                   OperationHdr * ohdr);
+int             getProviderContext(BinRequestContext * ctx);
 BinResponseHdr **invokeProviders(BinRequestContext * binCtx, int *err,
                                  int *count);
 BinResponseHdr *invokeProvider(BinRequestContext * ctx);

@@ -649,7 +649,7 @@ getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -717,7 +717,7 @@ deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -894,7 +894,7 @@ createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -958,7 +958,7 @@ enumClassNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -1025,7 +1025,7 @@ enumClasses(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -1117,7 +1117,7 @@ getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -1194,7 +1194,7 @@ deleteInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -1275,7 +1275,7 @@ createInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -1375,7 +1375,7 @@ modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -1441,7 +1441,7 @@ enumInstanceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -1523,7 +1523,7 @@ enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
   _SFCB_TRACE(1, ("--- Provider context gotten irc: %d", irc));
 
   if (irc == MSG_X_PROVIDER) {
@@ -1623,7 +1623,7 @@ execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
 
@@ -1726,7 +1726,7 @@ associatorNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
   _SFCB_TRACE(1, ("--- Provider context gotten"));
 
   if (irc == MSG_X_PROVIDER) {
@@ -1843,7 +1843,7 @@ associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
   }
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -1949,7 +1949,7 @@ referenceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
   _SFCB_TRACE(1, ("--- Provider context gotten"));
 
   if (irc == MSG_X_PROVIDER) {
@@ -2064,7 +2064,7 @@ references(CimXmlRequestContext * ctx, RequestHdr * hdr)
   }
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -2288,7 +2288,7 @@ invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_SFCB_PROVIDER) {
@@ -2382,7 +2382,7 @@ getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -2472,7 +2472,7 @@ setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
 
@@ -2530,7 +2530,7 @@ enumQualifiers(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -2594,7 +2594,7 @@ getQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -2660,7 +2660,7 @@ deleteQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -2786,7 +2786,7 @@ setQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
 

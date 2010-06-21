@@ -1109,7 +1109,7 @@ setInuseSem(void *id)
 }
 
 int
-getProviderContext(BinRequestContext * ctx, OperationHdr * ohdr)
+getProviderContext(BinRequestContext * ctx)
 {
   unsigned long int l;
   int             rc = 0,
@@ -1118,6 +1118,7 @@ getProviderContext(BinRequestContext * ctx, OperationHdr * ohdr)
   char           *buf;
   ProvAddr       *as;
   ComSockets      sockets;
+  OperationHdr   *ohdr = ctx->oHdr;
 
   _SFCB_ENTER(TRACE_PROVIDERMGR, "internalGetProviderContext");
 
@@ -1241,6 +1242,8 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
   }
 #endif
 
+  /* If we can store the provId in the binRequestHdr,
+     why don't we do that in the first place? */
   hdr->provId = ctx->provA.ids.ids;
 
   for (l = size, i = 0; i < hdr->count; i++) {
@@ -1531,7 +1534,7 @@ getConstClass(const char *ns, const char *cn)
 
   lockUpCall(Broker);
 
-  irc = getProviderContext(&binCtx, &req);
+  irc = getProviderContext(&binCtx);
 
   if (irc) {
     _SFCB_TRACE(1, ("--- Invoking Provider"));

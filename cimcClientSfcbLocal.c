@@ -377,7 +377,7 @@ enumInstanceNames(Client * mb, CMPIObjectPath * cop, CMPIStatus *rc)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
   CMRelease(ns);
   CMRelease(cn);
 
@@ -460,7 +460,7 @@ enumInstances(Client * mb,
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
   CMRelease(cn);
@@ -553,7 +553,7 @@ getInstance(Client * mb,
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
   CMRelease(cn);
@@ -626,7 +626,7 @@ createInstance(Client * mb,
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
   CMRelease(cn);
@@ -712,7 +712,7 @@ modifyInstance(Client * mb,
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
   CMRelease(cn);
@@ -773,7 +773,7 @@ deleteInstance(Client * mb, CMPIObjectPath * cop)
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
   CMRelease(cn);
@@ -853,7 +853,7 @@ execQuery(Client * mb,
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
   CMRelease(ns);
 
   if (irc == MSG_X_PROVIDER) {
@@ -952,7 +952,7 @@ associators(Client * mb,
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
   CMRelease(cn);
@@ -1049,7 +1049,7 @@ references(Client * mb,
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
   CMRelease(cn);
@@ -1128,7 +1128,7 @@ associatorNames(Client * mb,
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
 
@@ -1197,7 +1197,7 @@ referenceNames(Client * mb,
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
 
@@ -1267,7 +1267,7 @@ invokeMethod(Client * mb,
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
   CMRelease(cn);
@@ -1394,7 +1394,7 @@ getClass(Client * mb,
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
@@ -1465,7 +1465,7 @@ enumClassNames(Client * mb,
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
   CMRelease(cn);
@@ -1535,7 +1535,7 @@ enumClasses(Client * mb,
   binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
   CMRelease(cn);
@@ -1978,7 +1978,7 @@ enumInstancesThrd(thrdInfo * passedInInfo)
   binCtx.enm = enm;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
   CMRelease(cn);
@@ -2113,7 +2113,7 @@ enumInstanceNamesThrd(thrdInfo * passedInInfo)
   binCtx.enm = enm;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
   CMRelease(ns);
   CMRelease(cn);
 
@@ -2247,7 +2247,7 @@ enumClassNamesThrd(thrdInfo * passedInInfo)
   binCtx.enm = enm;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
   CMRelease(cn);
@@ -2379,7 +2379,7 @@ enumClassesThrd(thrdInfo * passedInInfo)
   binCtx.enm = enm;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx, (OperationHdr *) & oHdr);
+  irc = getProviderContext(&binCtx);
 
   CMRelease(ns);
   CMRelease(cn);
