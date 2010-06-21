@@ -816,7 +816,7 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
 // I think we should break this function into two subfunctions:
 // something like isLoaded() and doForkProvider()
 int
-forkProvider(ProviderInfo * info, OperationHdr * req, char **msg)
+forkProvider(ProviderInfo * info, char **msg)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "forkProvider");
   ProviderProcess *proc;
@@ -865,8 +865,6 @@ forkProvider(ProviderInfo * info, OperationHdr * req, char **msg)
     sreq.unload = info->unload;
     sreq.hdr.provId = getProvIds(info).ids;
 
-    if (req)
-      binCtx.oHdr = (OperationHdr *) req;
     binCtx.bHdr = &sreq.hdr;
     binCtx.bHdrSize = sizeof(sreq);
     binCtx.provA.socket = info->providerSockets.send;
