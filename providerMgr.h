@@ -92,7 +92,8 @@ typedef struct binRequestHdr {
   unsigned int    sessionId;
   unsigned int    flags;
   unsigned long   count;        // maps to MsgList
-  MsgSegment      object[0];
+  MsgSegment      object[0]; /* points to the start of alloc'd array of MsgSegments 
+                                representing params for request ( */
 } BinRequestHdr;
 
 typedef struct binResponseHdr {
