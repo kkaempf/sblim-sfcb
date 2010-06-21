@@ -1101,7 +1101,8 @@ static BinResponseHdr *
 deleteClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "deleteClass");
-  TIMING_PREP DeleteClassReq *req = (DeleteClassReq *) hdr;
+  TIMING_PREP;
+  DeleteClassReq *req = (DeleteClassReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1138,7 +1139,8 @@ deleteClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 static BinResponseHdr *
 getClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
-  TIMING_PREP GetClassReq *req = (GetClassReq *) hdr;
+  TIMING_PREP;
+  GetClassReq *req = (GetClassReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1204,7 +1206,8 @@ static BinResponseHdr *
 createClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "createClass");
-  TIMING_PREP CreateClassReq *req = (CreateClassReq *) hdr;
+  TIMING_PREP;
+  CreateClassReq *req = (CreateClassReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIConstClass *cls = relocateSerializedConstClass(req->cls.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1242,7 +1245,8 @@ createClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 static BinResponseHdr *
 enumClassNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
-  TIMING_PREP EnumClassNamesReq *req = (EnumClassNamesReq *) hdr;
+  TIMING_PREP;
+  EnumClassNamesReq *req = (EnumClassNamesReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1300,7 +1304,8 @@ static BinResponseHdr *
 enumClasses(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "enumClasses");
-  TIMING_PREP EnumClassesReq *req = (EnumClassesReq *) hdr;
+  TIMING_PREP;
+  EnumClassesReq *req = (EnumClassesReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1343,7 +1348,8 @@ static BinResponseHdr *
 enumQualifiers(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "enumQualifiers");
-  TIMING_PREP EnumQualifiersReq *req = (EnumQualifiersReq *) hdr;
+  TIMING_PREP;
+  EnumQualifiersReq *req = (EnumQualifiersReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   CMPIArray      *r;
@@ -1399,7 +1405,8 @@ static BinResponseHdr *
 setQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "setQualifier");
-  TIMING_PREP SetQualifierReq *req = (SetQualifierReq *) hdr;
+  TIMING_PREP;
+  SetQualifierReq *req = (SetQualifierReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIQualifierDecl *q = relocateSerializedQualifier(req->qualifier.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1438,7 +1445,8 @@ static BinResponseHdr *
 getQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getQualifier");
-  TIMING_PREP GetQualifierReq *req = (GetQualifierReq *) hdr;
+  TIMING_PREP;
+  GetQualifierReq *req = (GetQualifierReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   CMPIArray      *r;
@@ -1487,7 +1495,8 @@ static BinResponseHdr *
 deleteQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "deleteQualifier");
-  TIMING_PREP DeleteQualifierReq *req = (DeleteQualifierReq *) hdr;
+  TIMING_PREP;
+  DeleteQualifierReq *req = (DeleteQualifierReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIResult     *result = native_new_CMPIResult(0, 1, NULL);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1526,7 +1535,8 @@ static BinResponseHdr *
 getProperty(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getProperty");
-  TIMING_PREP GetPropertyReq *req = (GetPropertyReq *) hdr;
+  TIMING_PREP;
+  GetPropertyReq *req = (GetPropertyReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   CMPIArray      *r;
@@ -1584,7 +1594,8 @@ static BinResponseHdr *
 setProperty(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "setProperty");
-  TIMING_PREP SetPropertyReq *req = (SetPropertyReq *) hdr;
+  TIMING_PREP;
+  SetPropertyReq *req = (SetPropertyReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIInstance   *inst = relocateSerializedInstance(req->inst.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1635,7 +1646,8 @@ static BinResponseHdr *
 invokeMethod(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "invokeMethod");
-  TIMING_PREP InvokeMethodReq *req = (InvokeMethodReq *) hdr;
+  TIMING_PREP;
+  InvokeMethodReq *req = (InvokeMethodReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   char           *method = (char *) req->method.data;
@@ -1710,7 +1722,8 @@ static BinResponseHdr *
 getInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getInstance");
-  TIMING_PREP GetInstanceReq *req = (GetInstanceReq *) hdr;
+  TIMING_PREP;
+  GetInstanceReq *req = (GetInstanceReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1779,7 +1792,8 @@ static BinResponseHdr *
 deleteInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "deleteInstance");
-  TIMING_PREP DeleteInstanceReq *req = (DeleteInstanceReq *) hdr;
+  TIMING_PREP;
+  DeleteInstanceReq *req = (DeleteInstanceReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1818,7 +1832,8 @@ static BinResponseHdr *
 createInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "createInstance");
-  TIMING_PREP CreateInstanceReq *req = (CreateInstanceReq *) hdr;
+  TIMING_PREP;
+  CreateInstanceReq *req = (CreateInstanceReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIInstance   *inst = relocateSerializedInstance(req->instance.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1867,7 +1882,8 @@ static BinResponseHdr *
 modifyInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "modifyInstance");
-  TIMING_PREP ModifyInstanceReq *req = (ModifyInstanceReq *) hdr;
+  TIMING_PREP;
+  ModifyInstanceReq *req = (ModifyInstanceReq *) hdr;
   CMPIObjectPath *path = relocateSerializedObjectPath(req->path.data);
   CMPIInstance   *inst = relocateSerializedInstance(req->instance.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1920,7 +1936,8 @@ static BinResponseHdr *
 enumInstances(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "enumInstances");
-  TIMING_PREP EnumInstancesReq *req = (EnumInstancesReq *) hdr;
+  TIMING_PREP;
+  EnumInstancesReq *req = (EnumInstancesReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -1992,7 +2009,8 @@ static BinResponseHdr *
 enumInstanceNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "enumInstanceNames");
-  TIMING_PREP EnumInstanceNamesReq *req = (EnumInstanceNamesReq *) hdr;
+  TIMING_PREP;
+  EnumInstanceNamesReq *req = (EnumInstanceNamesReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -2114,7 +2132,8 @@ static BinResponseHdr *
 execQuery(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "execQuery");
-  TIMING_PREP ExecQueryReq *req = (ExecQueryReq *) hdr;
+  TIMING_PREP;
+  ExecQueryReq *req = (ExecQueryReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -2211,7 +2230,8 @@ static BinResponseHdr *
 associators(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "associators");
-  TIMING_PREP AssociatorsReq *req = (AssociatorsReq *) hdr;
+  TIMING_PREP;
+  AssociatorsReq *req = (AssociatorsReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -2265,7 +2285,8 @@ static BinResponseHdr *
 references(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "references");
-  TIMING_PREP ReferencesReq *req = (ReferencesReq *) hdr;
+  TIMING_PREP;
+  ReferencesReq *req = (ReferencesReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -2316,7 +2337,8 @@ static BinResponseHdr *
 associatorNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "associatorNames");
-  TIMING_PREP AssociatorNamesReq *req = (AssociatorNamesReq *) hdr;
+  TIMING_PREP;
+  AssociatorNamesReq *req = (AssociatorNamesReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -2361,7 +2383,8 @@ static BinResponseHdr *
 referenceNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "referenceNames");
-  TIMING_PREP ReferenceNamesReq *req = (ReferenceNamesReq *) hdr;
+  TIMING_PREP;
+  ReferenceNamesReq *req = (ReferenceNamesReq *) hdr;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
@@ -2404,7 +2427,8 @@ static BinResponseHdr *
 activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV | TRACE_INDPROVIDER, "activateFilter");
-  TIMING_PREP IndicationReq *req = (IndicationReq *) hdr;
+  TIMING_PREP;
+  IndicationReq *req = (IndicationReq *) hdr;
   BinResponseHdr *resp = NULL;
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   NativeSelectExp *se = NULL,
@@ -2551,7 +2575,8 @@ static BinResponseHdr *
 deactivateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV | TRACE_INDPROVIDER, "deactivateFilter");
-  TIMING_PREP IndicationReq *req = (IndicationReq *) hdr;
+  TIMING_PREP;
+  IndicationReq *req = (IndicationReq *) hdr;
   BinResponseHdr *resp = NULL;
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   NativeSelectExp *se = NULL,
@@ -2629,7 +2654,8 @@ static BinResponseHdr *
 enableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV | TRACE_INDPROVIDER, "enableIndications");
-  TIMING_PREP IndicationReq *req = (IndicationReq *) hdr;
+  TIMING_PREP;
+  IndicationReq *req = (IndicationReq *) hdr;
   BinResponseHdr *resp = NULL;
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   // CMPIObjectPath *path =
@@ -2675,7 +2701,8 @@ static BinResponseHdr *
 disableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV | TRACE_INDPROVIDER, "disableIndications");
-  TIMING_PREP IndicationReq *req = (IndicationReq *) hdr;
+  TIMING_PREP;
+  IndicationReq *req = (IndicationReq *) hdr;
   BinResponseHdr *resp = NULL;
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   // CMPIObjectPath *path =
@@ -3068,12 +3095,16 @@ processProviderInvocationRequestsThread(void *prms)
   _SFCB_ENTER(TRACE_PROVIDERDRV,
               "processProviderInvocationRequestsThread");
 
-  for (i = 0; i < req->count; i++)
+  /* Convert offsets in request header back into
+   * real pointers. Set empty chars segments to
+   * NULL. */
+  for (i = 0; i < req->count; i++) {
     if (req->object[i].length)
       req->object[i].data =
           (void *) ((long) req->object[i].data + (char *) req);
     else if (req->object[i].type == MSG_SEG_CHARS)
       req->object[i].data = NULL;
+  }
 
   if (req->operation != OPS_LoadProvider) {
     if (req->provId == NULL) {
@@ -3082,6 +3113,8 @@ processProviderInvocationRequestsThread(void *prms)
       exit(-1);
     }
 
+    /* Update lastActivity time for the process and for
+     * the specific provider being requested. */
     time(&curProvProc->lastActivity);
     for (pInfo = activProvs; pInfo; pInfo = pInfo->next) {
       if (pInfo->provIds.ids == req->provId) {
@@ -3095,19 +3128,18 @@ processProviderInvocationRequestsThread(void *prms)
       exit(-1);
     }
 
-    if (pInfo && pInfo->library == NULL) {
+    if (pInfo->library == NULL) {
       char            dlName[512];
       mlogf(M_INFO, M_SHOW, "--- Reloading provider\n");
       doLoadProvider(pInfo, dlName, 512);
     }
 
-    if (pInfo) {
-      initRc = initProvider(pInfo, req->sessionId, &errstr);
-      _SFCB_TRACE(1, ("--- Provider initialization rc %d", initRc));
-    }
+    initRc = initProvider(pInfo, req->sessionId, &errstr);
+    _SFCB_TRACE(1, ("--- Provider initialization rc %d", initRc));
 
-  } else
+  } else {
     pInfo = NULL;
+  }
 
   if (initRc) {
     mlogf(M_ERROR, M_SHOW, "%s", errstr);
@@ -3115,9 +3147,7 @@ processProviderInvocationRequestsThread(void *prms)
     resp = errorCharsResp(CMPI_RC_ERR_FAILED, errstr);
     free(errstr);
     errstr = NULL;
-  }
-
-  else {
+  } else {
     _SFCB_TRACE(1, ("--- Provider request for op:%s pInfo:%p prov:%x",
                     opsName[req->operation], pInfo, req->provId));
 

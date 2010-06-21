@@ -1113,7 +1113,7 @@ setInuseSem(void *id)
  */
 
 int
-getProviderContext(BinRequestContext * ctx, OperationHdr * ohdr)
+getProviderContext(BinRequestContext * ctx)
 {
   unsigned long int l;
   int             rc = 0,
@@ -1122,6 +1122,7 @@ getProviderContext(BinRequestContext * ctx, OperationHdr * ohdr)
   char           *buf;
   ProvAddr       *as;
   ComSockets      sockets;
+  OperationHdr   *ohdr = ctx->oHdr;
 
   _SFCB_ENTER(TRACE_PROVIDERMGR, "internalGetProviderContext");
 
@@ -1245,6 +1246,8 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
   }
 #endif
 
+  /* If we can store the provId in the binRequestHdr,
+     why don't we do that in the first place? */
   hdr->provId = ctx->provA.ids.ids;
 
   for (l = size, i = 0; i < hdr->count; i++) {
@@ -1318,16 +1321,12 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
                getInode(ctx->provA.socket), resultSockets.send,
                getInode(resultSockets.send)));
 
-  for (;;) {
-    // rc=spSendReq(&ctx->provA.socket, &sesultSockets.send, buf, l);
-    rc = spSendReq(&ctx->provA.socket, &sockets.send, buf, l, localMode);
-    if (rc == -2) {
-      mlogf(M_ERROR, M_SHOW, "--- need to reload provider ??\n");
-      SFCB_ASM("int $3");
-      // reloadProviderRequest(ctx);
-      exit(3);
-    } else
-      break;
+  rc = spSendReq(&ctx->provA.socket, &sockets.send, buf, l, localMode);
+  if (rc == -2) {
+    mlogf(M_ERROR, M_SHOW, "--- need to reload provider ??\n");
+    SFCB_ASM("int $3");
+    // reloadProviderRequest(ctx);
+    exit(3);
   }
 
   free(buf);
@@ -1535,7 +1534,7 @@ getConstClass(const char *ns, const char *cn)
 
   lockUpCall(Broker);
 
-  irc = getProviderContext(&binCtx, &req);
+  irc = getProviderContext(&binCtx);
 
   if (irc) {
     _SFCB_TRACE(1, ("--- Invoking Provider"));

@@ -67,7 +67,6 @@ typedef struct operationHdr {
   unsigned short  type;
   unsigned short  options;
 #define OH_Internal 2
-  unsigned long   count;        // maps to MsgList
   MsgSegment      nameSpace;
   MsgSegment      className;
   union {
@@ -103,7 +102,7 @@ typedef struct binResponseHdr {
   unsigned char   rvValue,
                   chunkedMode,
                   moreChunks;
-  unsigned long   count;        // maps to MsgList
+  unsigned long   count;        // number of MsgSegments in response
   MsgSegment      object[1];
 } BinResponseHdr;
 
@@ -347,8 +346,7 @@ typedef struct setPropertyReq {
                                  * * property msg segment */
 } SetPropertyReq;
 
-int             getProviderContext(BinRequestContext * ctx,
-                                   OperationHdr * ohdr);
+int             getProviderContext(BinRequestContext * ctx);
 BinResponseHdr **invokeProviders(BinRequestContext * binCtx, int *err,
                                  int *count);
 BinResponseHdr *invokeProvider(BinRequestContext * ctx);

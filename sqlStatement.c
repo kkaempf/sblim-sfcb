@@ -69,8 +69,7 @@ extern CMPIStatus arraySetElementNotTrackedAt(CMPIArray *array,
                                               CMPIType type);
 extern void     closeProviderContext(BinRequestContext * ctx);
 extern BinResponseHdr *invokeProvider(BinRequestContext * ctx);
-extern int      getProviderContext(BinRequestContext * ctx,
-                                   OperationHdr * ohdr);
+extern int      getProviderContext(BinRequestContext * ctx);
 extern MsgSegment setCharsMsgSegment(const char *str);
 extern MsgSegment setArgsMsgSegment(CMPIArgs * args);
 
@@ -2880,7 +2879,7 @@ enumInstances(const char *ns, const char *cn)
   hdr->chunkedMode = binCtx.chunkedMode = 0;
   binCtx.pAs = NULL;
 
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
   // printf("msgx %d\n",irc);
   if (irc == MSG_X_PROVIDER) {
 
@@ -2964,7 +2963,7 @@ createInstance(const char *ns, const char *cn, UtilList * ins)
   binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
   binCtx.pAs = NULL;
   // printf("3\n");
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
   // printf("4 irc %d\n",irc);
   if (irc == MSG_X_PROVIDER) {
     resp = invokeProvider(&binCtx);
@@ -3084,7 +3083,7 @@ createClass(const char *ns, const char *cn, const char *scn, UtilList * colDef)
   binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
   binCtx.pAs = NULL;
 
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
   // printf("2 %d %s %s\n",irc,ns,cn);
 
   if (irc == MSG_X_PROVIDER) {
@@ -3154,7 +3153,7 @@ deleteClass(const char *ns, const char *cn)
   binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
   binCtx.pAs = NULL;
 
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
 
   if (irc == MSG_X_PROVIDER) {
     resp = invokeProvider(&binCtx);
@@ -3295,7 +3294,7 @@ deleteInstance(const char *ns, const char *cn, UtilList * al)
   binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
   binCtx.pAs = NULL;
 
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
   // printf("irc %d\n",irc);
 
   if (irc == MSG_X_PROVIDER) {
@@ -3400,7 +3399,7 @@ updateInstance(const char *ns, const char *cn, UtilList * al, UtilList * kl)
   binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
   binCtx.pAs = NULL;
   printf("7\n");
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
   // printf("irc %d should be: %d\n",irc,MSG_X_PROVIDER);
   if (irc == MSG_X_PROVIDER) {
     resp = invokeProvider(&binCtx);
@@ -3470,7 +3469,7 @@ getClassNames(const char *ns, const char *filter)
   binCtx.chunkedMode = 0;
   binCtx.pAs = NULL;
 
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
   // printf("irc %d\n",irc);
   if (irc == MSG_X_PROVIDER) {
     resp = invokeProviders(&binCtx, &err, &l);
@@ -3580,7 +3579,7 @@ invokeMethod(const char *ns, const char *cn, const char *mn, UtilList * pl, Util
   binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
   binCtx.pAs = NULL;
 
-  irc = getProviderContext(&binCtx, (OperationHdr *) req);
+  irc = getProviderContext(&binCtx);
   // printf("irc %d\n",irc);
   if (irc == MSG_X_PROVIDER) {
     resp = invokeProvider(&binCtx);

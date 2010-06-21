@@ -9,6 +9,7 @@ Bugs fixed:
 - 2955916 Pretty print
 - 3003508 slpTests.sh uses bash-isms
 - 3011256 Add macro to set inBuf value
+- 3018141 Code Cleanup Friday #1
 
 Changes in 1.3.9
 ================

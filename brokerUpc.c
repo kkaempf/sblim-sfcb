@@ -375,7 +375,7 @@ genericEnumRequest(const CMPIBroker * broker,
 
     checkReroute(broker, context, oHdr);
 
-    irc = getProviderContext(&binCtx, oHdr);
+    irc = getProviderContext(&binCtx);
 
     if (irc == MSG_X_PROVIDER) {
       BinResponseHdr *resp;
@@ -582,7 +582,7 @@ getInstance(const CMPIBroker * broker,
       sreq->properties[ps] = setCharsMsgSegment(*p);
     }
 
-    irc = getProviderContext(&binCtx, &oHdr);
+    irc = getProviderContext(&binCtx);
 
     if (irc == MSG_X_PROVIDER) {
       for (pInfo = activProvs; pInfo; pInfo = pInfo->next) {
@@ -678,7 +678,7 @@ createInstance(const CMPIBroker * broker,
 
     checkReroute(broker, context, &oHdr);
 
-    irc = getProviderContext(&binCtx, &oHdr);
+    irc = getProviderContext(&binCtx);
 
     if (irc == MSG_X_PROVIDER) {
       for (pInfo = activProvs; pInfo; pInfo = pInfo->next) {
@@ -777,7 +777,7 @@ modifyInstance(const CMPIBroker * broker,
     for (ps = 0, p = props; p && *p; p++, ps++)
       sreq->properties[ps] = setCharsMsgSegment(*p);
 
-    irc = getProviderContext(&binCtx, &oHdr);
+    irc = getProviderContext(&binCtx);
 
     if (irc == MSG_X_PROVIDER) {
       for (pInfo = activProvs; pInfo; pInfo = pInfo->next) {
@@ -850,7 +850,7 @@ deleteInstance(const CMPIBroker * broker,
 
     checkReroute(broker, context, &oHdr);
 
-    irc = getProviderContext(&binCtx, &oHdr);
+    irc = getProviderContext(&binCtx);
 
     if (irc == MSG_X_PROVIDER) {
       for (pInfo = activProvs; pInfo; pInfo = pInfo->next) {
@@ -923,7 +923,7 @@ execQuery(const CMPIBroker * broker,
     sreq.query = setCharsMsgSegment(query);
     sreq.queryLang = setCharsMsgSegment(lang);
 
-    irc = getProviderContext(&binCtx, &oHdr);
+    irc = getProviderContext(&binCtx);
 
     if (irc == MSG_X_PROVIDER) {
       BinResponseHdr *resp;
@@ -1172,7 +1172,7 @@ invokeMethod(const CMPIBroker * broker, const CMPIContext *context,
         }
       }
 
-    irc = getProviderContext(&binCtx, &oHdr);
+    irc = getProviderContext(&binCtx);
 
     if (irc == MSG_X_PROVIDER) {
 

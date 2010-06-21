@@ -434,7 +434,7 @@ genericSubscriptionRequest(const char *principal,
 
   _SFCB_TRACE(1, ("--- getProviderContext for %s-%s", fi->sns, cn));
 
-  irc = getProviderContext(&binCtx, &req);
+  irc = getProviderContext(&binCtx);
 
   if (irc == MSG_X_PROVIDER) {
     _SFCB_TRACE(1, ("--- Invoking Providers"));
