@@ -83,11 +83,6 @@ typedef struct msgXctl {
 #define MSG_SEG_ARGS 5
 #define MSG_SEG_QUALIFIER 6
 
-typedef struct msgList {
-  long            count;
-  MsgSegment      list[1];
-} MsgList;
-
 typedef struct sockRequest {
   int             req;
   char            msg[60];
