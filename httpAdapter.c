@@ -1220,8 +1220,7 @@ handleHttpRequest(int connFd, int sslMode)
               strerror(errno));
       }
     }
-    if (sslMode) {
-#if defined USE_SSL
+ #if defined USE_SSL
       BIO            *sslb;
       BIO            *sb;
       long            flags = fcntl(connFd, F_GETFL);
@@ -1280,13 +1279,11 @@ handleHttpRequest(int connFd, int sslMode)
       } else {
         conn_fd.bio = NULL;
       }
-#endif
     } else {
-#if defined USE_SSL
       conn_fd.bio = NULL;
       conn_fd.ssl = NULL;
-#endif
     }
+#endif
 
     numRequest = 0;
     FD_ZERO(&httpfds);
