@@ -1317,16 +1317,12 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
                getInode(ctx->provA.socket), resultSockets.send,
                getInode(resultSockets.send)));
 
-  for (;;) {
-    // rc=spSendReq(&ctx->provA.socket, &sesultSockets.send, buf, l);
-    rc = spSendReq(&ctx->provA.socket, &sockets.send, buf, l, localMode);
-    if (rc == -2) {
-      mlogf(M_ERROR, M_SHOW, "--- need to reload provider ??\n");
-      SFCB_ASM("int $3");
-      // reloadProviderRequest(ctx);
-      exit(3);
-    } else
-      break;
+  rc = spSendReq(&ctx->provA.socket, &sockets.send, buf, l, localMode);
+  if (rc == -2) {
+    mlogf(M_ERROR, M_SHOW, "--- need to reload provider ??\n");
+    SFCB_ASM("int $3");
+    // reloadProviderRequest(ctx);
+    exit(3);
   }
 
   free(buf);
