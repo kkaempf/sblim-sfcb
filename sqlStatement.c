@@ -23,10 +23,10 @@
 #include "utilft.h"
 
 #include "cimXmlParser.h"       // Provider operationen
-#include "cmpidt.h"
+#include "cmpi/cmpidt.h"
 
 #include "objectImpl.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpimacs.h"
 #include "config.h"
 
 #include <stdio.h>

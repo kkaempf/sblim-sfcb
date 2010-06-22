@@ -28,7 +28,7 @@
 #include <sys/stat.h>
 
 #include "trace.h"
-#include "cmpidt.h"
+#include "cmpi/cmpidt.h"
 #include "providerMgr.h"
 #include "providerRegister.h"
 #include "utilft.h"

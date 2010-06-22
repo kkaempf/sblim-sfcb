@@ -21,7 +21,7 @@
 
 #include "utilft.h"
 
-#include "cmpimacs.h"
+#include "cmpi/cmpimacs.h"
 #include "avltree.h"
 
 #define DEFAULTDB "root/cimv2"

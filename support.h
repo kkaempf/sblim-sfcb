@@ -32,10 +32,10 @@
 #ifndef CMPI_TOOL_H
 #define CMPI_TOOL_H
 
-#include "cmpidt.h"
-#include "cmpift.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpift.h"
 #include "cmpiftx.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpimacs.h"
 #include <time.h>
 #include <sys/time.h>
 #include <dlfcn.h>

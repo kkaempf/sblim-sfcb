@@ -22,9 +22,9 @@
 #ifndef _CMPIC_H_
 #define _CMPIC_H_
 
-#include "cmpidt.h"
-#include "cmpift.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpift.h"
+#include "cmpi/cmpimacs.h"
 #include "constClass.h"
 
 #ifdef __cplusplus

@@ -24,7 +24,7 @@
 #include <time.h>
 #include <pthread.h>
 
-#include "cmpidt.h"
+#include "cmpi/cmpidt.h"
 #include "providerRegister.h"
 #include "providerMgr.h"
 #include "utilft.h"

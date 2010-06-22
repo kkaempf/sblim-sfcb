@@ -23,8 +23,8 @@
 #define _CMPIMACSX_H_
 
 #ifndef DOC_ONLY
-#include "cmpidt.h"
-#include "cmpift.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpift.h"
 #include "cmpiftx.h"
 #endif
 

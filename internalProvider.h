@@ -24,7 +24,7 @@
 #define INTERNAL_PROVIDER_H
 
 #include "utilft.h"
-#include "cmpidt.h"
+#include "cmpi/cmpidt.h"
 
 CMPIStatus      InternalProviderEnumInstanceNames(CMPIInstanceMI * mi,
                                                   const CMPIContext *ctx,

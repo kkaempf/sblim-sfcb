@@ -20,13 +20,12 @@
  *
  */
 
-#include "cmpidt.h"
+#include "cmpi/cmpidt.h"
 #include "cmpidtx.h"
 #include "cimXmlGen.h"
 #include "cimXmlRequest.h"
 #include "cimXmlParser.h"
 #include "msgqueue.h"
-#include "cmpidt.h"
 #include "constClass.h"
 
 #ifdef HAVE_QUALREP
