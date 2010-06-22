@@ -1128,8 +1128,8 @@ doHttpRequest(CommHndl conn_fd)
     *inBuf.protocol++ = 0;
 
     //    fprintf(stderr, "path is '%s'\n", path);
-    ctx.path = path;
-    ctx.httpOp = tmp;
+//     ctx.path = path;
+//     ctx.httpOp = tmp;
 
 //     CimRsReq req = {0, NULL, NULL, NULL, NULL};
 //     int prc = parseCimRsPath(path, &req);
