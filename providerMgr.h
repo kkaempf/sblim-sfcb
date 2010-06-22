@@ -77,6 +77,7 @@ typedef struct operationHdr {
     MsgSegment      role;
     MsgSegment      queryLang;
   };
+  int count;
   MsgSegment      assocClass;
   MsgSegment      resultRole;
 } OperationHdr;
