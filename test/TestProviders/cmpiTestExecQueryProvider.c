@@ -4,9 +4,9 @@
 #include <ctype.h>
 #include <stdarg.h>
 
-#include "cmpidt.h"
-#include "cmpift.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpift.h"
+#include "cmpi/cmpimacs.h"
 #include "trace.h"
 
 #define _ClassName "Test_Query"
