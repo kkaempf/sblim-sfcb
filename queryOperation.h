@@ -22,9 +22,9 @@
 #ifndef qlOperation_h
 #define qlOperation_h
 
-#include "cmpidt.h"
-#include "cmpift.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpift.h"
+#include "cmpi/cmpimacs.h"
 #include "support.h"
 
 #define qsAllocNew(qs,strct) (strct*)qsAlloc(qs,sizeof(strct))

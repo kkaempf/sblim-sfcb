@@ -20,12 +20,11 @@
  *
  */
 
-#include "cmpidt.h"
+#include "cmpi/cmpidt.h"
 #include "cimXmlRequest.h"
 #include "cimXmlParser.h"
 #include "cimXmlGen.h"
 #include "msgqueue.h"
-#include "cmpidt.h"
 #include "constClass.h"
 #include "objectImpl.h"
 

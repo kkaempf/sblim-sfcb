@@ -33,9 +33,9 @@
 #include <errno.h>
 
 #include "trace.h"
-#include "cmpimacs.h"
-#include "cmpidt.h"
-#include "cmpift.h"
+#include "cmpi/cmpimacs.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpift.h"
 #include "fileRepository.h"
 #include "mlog.h"
 #include "control.h"

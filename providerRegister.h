@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 #include <sys/types.h>
-#include "cmpift.h"
+#include "cmpi/cmpift.h"
 #include "cmpiftx.h"
 #include "msgqueue.h"
 #include "utilft.h"

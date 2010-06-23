@@ -32,10 +32,10 @@
 #include "trace.h"
 #include "control.h"
 
-#include "cmpidt.h"
-#include "cmpift.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpift.h"
 #include "cmpiftx.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpimacs.h"
 #include "cmpimacsx.h"
 #include "objectImpl.h"
 #include "mrwlock.h"

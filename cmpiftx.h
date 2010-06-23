@@ -25,7 +25,7 @@
 
 #include "constClass.h"
 #include "qualifier.h"
-#include "cmpidt.h"
+#include "cmpi/cmpidt.h"
 
 #ifdef __cplusplus
 extern          "C" {

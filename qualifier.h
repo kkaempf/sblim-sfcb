@@ -23,7 +23,7 @@
 #ifndef CMPI_qualifier_h
 #define CMPI_qualifier_h
 
-#include "cmpidt.h"
+#include "cmpi/cmpidt.h"
 // #include "objectImpl.h" -> causes compile error...circular dependency ?
 #include "msgqueue.h"
 
