@@ -48,7 +48,7 @@ AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sfcbconfdir)\" \
         @SFCB_CMPI_PLATFORM@ 
 AM_LDFLAGS=@SFCB_LDFLAGS@
 
-SUBDIRS=. $(MOFC_DIR) test
+SUBDIRS=. $(MOFC_DIR) $(CMPIDEV_DIR) test
 
 if GCOV
 AM_CFLAGS=@SFCB_CFLAGS@ -ftest-coverage -fprofile-arcs

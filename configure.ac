@@ -523,6 +523,12 @@ if test -d $srcdir/mofc; then
    AC_SUBST(MOFC_DIR)
 fi
 
+if test -d $srcdir/cmpi-devel; then
+   CMPIDEV_DIR=cmpi-devel
+   AC_CONFIG_SUBDIRS([cmpi-devel])
+   AC_SUBST(CMPIDEV_DIR)
+fi
+
 AM_CONDITIONAL(INDICATIONS,[test "$enable_indications" == "yes"]) 
 AM_CONDITIONAL(JDBC,[test "$enable_jdbc" == "yes"]) 
 AM_CONDITIONAL(SSL,[test "$enable_ssl" == "yes"]) 
