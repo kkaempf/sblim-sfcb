@@ -1,3 +1,17 @@
+2010-06-24 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	* Makefile.am, configure.ac, cimXmlGen.c, cimXmlParser.c, cimXmlParser.h,
+		cimXmlRequest.c, cimcClientSfcbLocal.c, cimcClientSfcbLocal.h,
+		cimslpCMPI.h, cimslpUtil.h, classProviderCommon.h, classSchema2c.c,
+		cmpidt.h, cmpift.h, cmpiftx.h, cmpimacs.h, cmpimacsx.h, constClass.h,
+		dbpAdapter.c, elementCapabilitiesProvider.c, fileRepository.c,
+		httpAdapter.c, httpComm.c, indCIMXMLHandler.c, internalProvider.c,
+		internalProvider.h, interopProvider.c, interopServerProvider.c,
+		msgqueue.c, native.h, objectImpl.h, profileProvider.c, providerDrv.c,
+		providerMgr.c, providerRegister.h, qualifier.h, qualifierProvider.c,
+		queryOperation.h, sfcbinst2mof.c, sqlStatement.c, sqlStatement.h,
+		support.h, cmpios.h, cmpipl.h, test/TestProviders/*.c
+	[ 3019898 ] Remove cmpi headers
+
 2010-06-22  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* providerMgr.h, providerDrv.c, providerMgr.c:
