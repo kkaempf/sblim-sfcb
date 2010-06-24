@@ -67,6 +67,7 @@ typedef struct operationHdr {
   unsigned short  type;
   unsigned short  options;
 #define OH_Internal 2
+  unsigned long   count;
   MsgSegment      nameSpace;
   MsgSegment      className;
   union {
@@ -77,7 +78,6 @@ typedef struct operationHdr {
     MsgSegment      role;
     MsgSegment      queryLang;
   };
-  int count;
   MsgSegment      assocClass;
   MsgSegment      resultRole;
 } OperationHdr;
