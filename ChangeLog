@@ -9,7 +9,8 @@
 		msgqueue.c, native.h, objectImpl.h, profileProvider.c, providerDrv.c,
 		providerMgr.c, providerRegister.h, qualifier.h, qualifierProvider.c,
 		queryOperation.h, sfcbinst2mof.c, sqlStatement.c, sqlStatement.h,
-		support.h, cmpios.h, cmpipl.h, test/TestProviders/*.c
+		support.h, cmpios.h, cmpipl.h, test/TestProviders/*.c, README,
+		autoconfiscate.sh
 	[ 3019898 ] Remove cmpi headers
 
 2010-06-22  Chris Buccella  <buccella@linux.vnet.ibm.com>
