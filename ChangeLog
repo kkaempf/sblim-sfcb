@@ -1,3 +1,7 @@
+2010-06-25 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	* string.c:
+	[ 3019898 ] Remove cmpi headers, cleanup warning
+
 2010-06-24 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* Makefile.am, configure.ac, cimXmlGen.c, cimXmlParser.c, cimXmlParser.h,
 		cimXmlRequest.c, cimcClientSfcbLocal.c, cimcClientSfcbLocal.h,

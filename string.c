@@ -60,10 +60,10 @@ __sft_clone(const CMPIString *string, CMPIStatus *rc)
                    0);
 }
 
-static char    *
+static const char    *
 __sft_getCharPtr(const CMPIString *string, CMPIStatus *rc)
 {
-  return (char *) string->hdl;
+  return (const char *) string->hdl;
 }
 
 static CMPIStringFT sft = {
