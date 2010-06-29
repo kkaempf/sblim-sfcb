@@ -11,6 +11,7 @@ Bugs fixed:
 - 3011256 Add macro to set inBuf value
 - 3018141 Code Cleanup Friday #1
 - 3019898 Remove cmpi headers
+- 3023072 Remove extra getStrBufPtr call in replaceClString
 
 Changes in 1.3.9
 ================

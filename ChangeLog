@@ -3,6 +3,9 @@
 	* objectImpl.c:
 	[ 3016863 ] Data corruption when replacing array properties
 
+	[ 3023072 ] Remove extra getStrBufPtr call in replaceClString
+	
+	
 2010-06-25 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* string.c:
 	[ 3019898 ] Remove cmpi headers, cleanup warning

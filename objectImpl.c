@@ -528,7 +528,6 @@ replaceClString(ClObjectHdr * hdr, int id, const char *str)
   free(ts);
 
   i = addClString(hdr, str);
-  fb = getStrBufPtr(hdr);
   fb->iUsed--;
   fb->indexPtr[id - 1] = fb->indexPtr[i - 1];
 
@@ -544,39 +543,42 @@ replaceClObject(ClObjectHdr * hdr, int id, const void *obj, int size)
   objectSize = 0;
 }
 
+/*
+ * replace array currently at position id in object hdr with array d
+ */
 static void
 replaceClArray(ClObjectHdr * hdr, int id, CMPIData d)
 {
   _SFCB_ENTER(TRACE_OBJECTIMPL, "replaceClArray");
 
-  CMPIData       *ts,
-                 *fs;
+  CMPIData       *ts,  /* hold the arrays we don't need to replace */
+                 *fs;  /* hold the address of hdr's ArrayBuf */
   long            i,
                   l,
                   u;
-  ClArrayBuf     *fb;
+  ClArrayBuf     *fb;  /* the arrayBuf of this object (hdr) */
 
   fb = getArrayBufPtr(hdr);
   ts = (CMPIData *) malloc(fb->bUsed * sizeof(CMPIData));
   fs = &fb->buf[0];
 
+  /* copy the arrays in fb that /aren't/ being replaced */
   for (u = i = 0; i < fb->iUsed; i++) {
     if (i != id - 1) {
-      CMPIData       *f = fs + fb->indexPtr[i];
-      l = (f->value.sint32 + 1) * sizeof(CMPIData);
+      CMPIData       *f = fs + fb->indexPtr[i];  /* get the array at this position */
+      l = (f->value.sint32 + 1) * sizeof(CMPIData);  /* f->value.sint32 is the number of members in current array */
       fb->indexPtr[i] = u;
-      memcpy(ts + u, f, l);
+      memcpy(ts + u, f, l);   /* copy array into temporary space */
       u += f->value.sint32 + 1;
     }
   }
-  memcpy(fs, ts, u * sizeof(CMPIData));
+  memcpy(fs, ts, u * sizeof(CMPIData));   /* now copy all temp stuff into real buffer */
   fb->bUsed = u;
   free(ts);
 
-  i = addClArray(hdr, d);
-  fb = getArrayBufPtr(hdr);
+  i = addClArray(hdr, d);  /* and add the new array */
   fb->iUsed--;
-  fb->indexPtr[id - 1] = fb->indexPtr[i-1];
+  fb->indexPtr[id - 1] = fb->indexPtr[i-1];   /* the position where the CMPI array at id starts internally */
 
   _SFCB_EXIT();
 }
