@@ -4,7 +4,9 @@
 	[ 3016863 ] Data corruption when replacing array properties
 
 	[ 3023072 ] Remove extra getStrBufPtr call in replaceClString
-	
+
+	* cimslp.c, cimslpSLP.c:
+	[ 3022941 ] Remove HAVE_SLP_ALONE sections
 	
 2010-06-25 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* string.c:
