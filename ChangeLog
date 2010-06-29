@@ -7,6 +7,9 @@
 
 	* cimslp.c, cimslpSLP.c:
 	[ 3022941 ] Remove HAVE_SLP_ALONE sections
+
+	* profileProvider.c, cimslpCMPI.c:
+	[ 3022934 ] SLP code calls setupControl more than once
 	
 2010-06-25 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* string.c:
