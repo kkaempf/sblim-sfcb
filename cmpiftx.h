@@ -91,22 +91,6 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*enumClassNames)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
          CMPIObjectPath * op);
 
@@ -118,22 +102,6 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*enumClasses)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
          CMPIObjectPath * op);
 
@@ -148,22 +116,6 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*getClass)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
          CMPIObjectPath * op, char **properties);
 
@@ -176,22 +128,6 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*createClass)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
          CMPIObjectPath * op, CMPIConstClass * cls);
 
@@ -204,22 +140,6 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*setClass)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
          CMPIObjectPath * op, CMPIConstClass * cls);
 
@@ -231,22 +151,6 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*deleteClass)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
          CMPIObjectPath * op);
   };
@@ -311,22 +215,6 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*enumQualifiers)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (CMPIQualifierDeclMI * mi, CMPIContext *ctx, CMPIResult *rslt,
          CMPIObjectPath * op);
 
@@ -339,22 +227,6 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*getQualifier)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (CMPIQualifierDeclMI * mi, CMPIContext *ctx, CMPIResult *rslt,
          CMPIObjectPath * op);
 
@@ -367,22 +239,6 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*setQualifier)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (CMPIQualifierDeclMI * mi, CMPIContext *ctx, CMPIResult *rslt,
          CMPIObjectPath * op, CMPIQualifierDecl * qualifier);
 
@@ -395,22 +251,6 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*deleteQualifier)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (CMPIQualifierDeclMI * mi, CMPIContext *ctx, CMPIResult *rslt,
          CMPIObjectPath * op);
   };
