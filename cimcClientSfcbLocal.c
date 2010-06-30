@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.35 2010/04/07 20:54:10 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.36 2010/06/30 14:31:18 buccella Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -1175,7 +1175,7 @@ static CMPIData invokeMethod(
    CMPIData retval={0,CMPI_notFound,{0l}};
    if (rc) CMSetStatus(rc, CMPI_RC_OK);
    
-   _SFCB_ENTER(TRACE_CIMXMLPROC, "referenceNames");
+   _SFCB_ENTER(TRACE_CIMXMLPROC, "invokeMethod");
 
    
    CMPIString *ns=cop->ft->getNameSpace(cop,NULL);
