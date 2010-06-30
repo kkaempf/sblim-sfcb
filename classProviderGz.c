@@ -630,7 +630,7 @@ Class_Register_FT *ClassRegisterFT = &ift;
  */
 
 static CMPIStatus
-ClassProviderCleanup(CMPIClassMI * mi, CMPIContext *ctx)
+ClassProviderCleanup(CMPIClassMI * mi, const CMPIContext *ctx)
 {
   /*
    * ClassBase *cb; UtilHashTable *ct; HashTableIterator *i;
@@ -654,7 +654,7 @@ ClassProviderCleanup(CMPIClassMI * mi, CMPIContext *ctx)
  */
 
 static void
-loopOnChildNames(ClassRegister * cReg, char *cn, CMPIResult *rslt)
+loopOnChildNames(ClassRegister * cReg, char *cn, const CMPIResult *rslt)
 {
   CMPIObjectPath *op;
   UtilList       *ul = getChildren(cReg, cn);
@@ -670,8 +670,8 @@ loopOnChildNames(ClassRegister * cReg, char *cn, CMPIResult *rslt)
 
 static CMPIStatus
 ClassProviderEnumClassNames(CMPIClassMI * mi,
-                            CMPIContext *ctx,
-                            CMPIResult *rslt, CMPIObjectPath * ref)
+                            const CMPIContext *ctx,
+                            const CMPIResult *rslt, const CMPIObjectPath * ref)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   char           *cn = NULL;
@@ -749,7 +749,7 @@ ClassProviderEnumClassNames(CMPIClassMI * mi,
 }
 
 static void
-loopOnChildren(ClassRegister * cReg, char *cn, CMPIResult *rslt)
+loopOnChildren(ClassRegister * cReg, char *cn, const CMPIResult *rslt)
 {
   UtilList       *ul = getChildren(cReg, cn);
   char           *child;
@@ -768,8 +768,8 @@ loopOnChildren(ClassRegister * cReg, char *cn, CMPIResult *rslt)
 
 static CMPIStatus
 ClassProviderEnumClasses(CMPIClassMI * mi,
-                         CMPIContext *ctx,
-                         CMPIResult *rslt, CMPIObjectPath * ref)
+                         const CMPIContext *ctx,
+                         const CMPIResult *rslt, const CMPIObjectPath * ref)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   char           *cn = NULL;
@@ -840,9 +840,9 @@ ClassProviderEnumClasses(CMPIClassMI * mi,
 
 static CMPIStatus
 ClassProviderGetClass(CMPIClassMI * mi,
-                      CMPIContext *ctx,
-                      CMPIResult *rslt,
-                      CMPIObjectPath * ref, char **properties)
+                      const CMPIContext *ctx,
+                      const CMPIResult *rslt,
+                      const CMPIObjectPath * ref, const char **properties)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIString     *cn = CMGetClassName(ref, NULL);
@@ -886,9 +886,9 @@ ClassProviderGetClass(CMPIClassMI * mi,
 
 static CMPIStatus
 ClassProviderCreateClass(CMPIClassMI * mi,
-                         CMPIContext *ctx,
-                         CMPIResult *rslt,
-                         CMPIObjectPath * ref, CMPIConstClass * cc)
+                         const CMPIContext *ctx,
+                         const CMPIResult *rslt,
+                         const CMPIObjectPath * ref, const CMPIConstClass * cc)
 {
   CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
   return st;
@@ -896,9 +896,9 @@ ClassProviderCreateClass(CMPIClassMI * mi,
 
 static CMPIStatus
 ClassProviderSetClass(CMPIClassMI * mi,
-                      CMPIContext *ctx,
-                      CMPIResult *rslt,
-                      CMPIObjectPath * cop, CMPIConstClass * ci)
+                      const CMPIContext *ctx,
+                      const CMPIResult *rslt,
+                      const CMPIObjectPath * cop, const CMPIConstClass * ci)
 {
   CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
   return st;
@@ -906,8 +906,8 @@ ClassProviderSetClass(CMPIClassMI * mi,
 
 static CMPIStatus
 ClassProviderDeleteClass(CMPIClassMI * mi,
-                         CMPIContext *ctx,
-                         CMPIResult *rslt, CMPIObjectPath * cop)
+                         const CMPIContext *ctx,
+                         const CMPIResult *rslt, const CMPIObjectPath * cop)
 {
   CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
   return st;

@@ -81,7 +81,7 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*cleanup)
-                    (CMPIClassMI * mi, CMPIContext *ctx);
+                    (CMPIClassMI * mi, const CMPIContext *ctx);
 
        /** Enumerate ObjectPaths of Classes serviced by this provider.
 	 @param mi Provider this pointer.
@@ -91,8 +91,8 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*enumClassNames)
-        (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
-         CMPIObjectPath * op);
+        (CMPIClassMI * mi, const CMPIContext *ctx, const CMPIResult *rslt,
+         const CMPIObjectPath * op);
 
        /** Enumerate the Classes serviced by this provider.
 	 @param mi Provider this pointer.
@@ -102,8 +102,8 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*enumClasses)
-        (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
-         CMPIObjectPath * op);
+        (CMPIClassMI * mi, const CMPIContext *ctx, const CMPIResult *rslt,
+        const  CMPIObjectPath * op);
 
        /** Get the Class defined by &lt;op&gt;.
 	 @param mi Provider this pointer.
@@ -116,8 +116,8 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*getClass)
-        (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
-         CMPIObjectPath * op, char **properties);
+        (CMPIClassMI * mi, const CMPIContext *ctx, const CMPIResult *rslt,
+         const CMPIObjectPath * op, const char **properties);
 
        /** Create Class from &lt;cls&gt; using &lt;op&gt; as reference.
 	 @param mi Provider this pointer.
@@ -128,8 +128,8 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*createClass)
-        (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
-         CMPIObjectPath * op, CMPIConstClass * cls);
+        (CMPIClassMI * mi, const CMPIContext *ctx, const CMPIResult *rslt,
+         const CMPIObjectPath * op, const CMPIConstClass * cls);
 
        /** Replace an existing Class from &lt;cls&gt; using &lt;op&gt; as reference.
 	 @param mi Provider this pointer.
@@ -140,8 +140,8 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*setClass)
-        (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
-         CMPIObjectPath * op, CMPIConstClass * cls);
+        (CMPIClassMI * mi, const CMPIContext *ctx, const CMPIResult *rslt,
+         const CMPIObjectPath * op, const CMPIConstClass * cls);
 
        /** Delete an existing Class defined by &lt;op&gt;.
 	 @param mi Provider this pointer.
@@ -151,8 +151,8 @@ extern          "C" {
 	 @return Function return status.
       */
     CMPIStatus      (*deleteClass)
-        (CMPIClassMI * mi, CMPIContext *ctx, CMPIResult *rslt,
-         CMPIObjectPath * op);
+        (CMPIClassMI * mi, const CMPIContext *ctx, const CMPIResult *rslt,
+         const CMPIObjectPath * op);
   };
 
   // ---------------------------------------------------

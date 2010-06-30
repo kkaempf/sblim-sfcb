@@ -1178,7 +1178,7 @@ getClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
       rci =
-      info->classMI->ft->getClass(info->classMI, ctx, result, path, props);
+    info->classMI->ft->getClass(info->classMI, ctx, result, path, (const char**) props);
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 

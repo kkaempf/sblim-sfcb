@@ -12,6 +12,7 @@ Bugs fixed:
 - 3018141 Code Cleanup Friday #1
 - 3019898 Remove cmpi headers
 - 3023072 Remove extra getStrBufPtr call in replaceClString
+- 1765781 sfcb: intrinsic ClassMI prototypes omit const qualifier
 
 Changes in 1.3.9
 ================
