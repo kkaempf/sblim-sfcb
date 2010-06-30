@@ -1243,7 +1243,7 @@ invokeMethod(Client * mb,
   if (rc)
     CMSetStatus(rc, CMPI_RC_OK);
 
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "referenceNames");
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "invokeMethod");
 
   CMPIString     *ns = cop->ft->getNameSpace(cop, NULL);
   CMPIString     *cn = cop->ft->getClassName(cop, NULL);
