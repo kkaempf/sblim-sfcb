@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.58 2010/03/29 23:42:31 smswehla Exp $
+ * $Id: cimXmlRequest.c,v 1.59 2010/06/30 19:37:07 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -874,7 +874,7 @@ static RespSegments createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
    
    tmp = cl;
    cl = ClClassRebuildClass(cl,NULL); 
-   free(tmp);
+   ClClassFreeClass(tmp);
    cls=initConstClass(cl);
 
    sreq.principal = setCharsMsgSegment(ctx->principal);
@@ -898,6 +898,7 @@ static RespSegments createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
       resp = invokeProvider(&binCtx);
       closeProviderContext(&binCtx);
       resp->rc--;
+      ClClassFreeClass(cl);
       if (resp->rc == CMPI_RC_OK) {
 	if (resp) {
 	  free(resp);
