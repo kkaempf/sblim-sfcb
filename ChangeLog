@@ -1,3 +1,9 @@
+2010-07-01  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* brokerUpc.c:
+	[ 3004385 ] Improve performance for association upcall
+	(patch by Wenhua Liu)
+
 2010-06-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* classProvider.c classProviderGz.c classProviderSf.c classProviderMem.c

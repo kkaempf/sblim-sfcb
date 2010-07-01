@@ -375,6 +375,11 @@ genericEnumRequest(const CMPIBroker * broker,
 
     checkReroute(broker, context, oHdr);
 
+    if (optype == OPS_Associators || optype == OPS_AssociatorNames)
+      oHdr->className = setCharsMsgSegment(assocclass);
+    else if (optype == OPS_References || optype == OPS_ReferenceNames)
+      oHdr->className = setCharsMsgSegment(resultclass);
+
     irc = getProviderContext(&binCtx);
 
     if (irc == MSG_X_PROVIDER) {
