@@ -4,6 +4,11 @@
 	[ 3004385 ] Improve performance for association upcall
 	(patch by Wenhua Liu)
 
+2010-06-30 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	* test/unittest/Makefile.am, test/unittest/genericlist.c:
+	[ 2859885 ] New XML Test Cases
+	(removed genericlist.c as it was not useful.)
+
 2010-06-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* classProvider.c classProviderGz.c classProviderSf.c classProviderMem.c
