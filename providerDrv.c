@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.87 2010/07/01 20:51:50 buccella Exp $
+ * $Id: providerDrv.c,v 1.88 2010/07/01 23:08:55 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -277,8 +277,8 @@ static void stopProc(void *p)
       if (pInfo->associationMI) pInfo->associationMI->ft->cleanup(pInfo->associationMI, ctx, 1);
       if (pInfo->methodMI) pInfo->methodMI->ft->cleanup(pInfo->methodMI, ctx, 1);
       if (pInfo->indicationMI) {
-	pInfo->indicationMI->ft->cleanup(pInfo->indicationMI, ctx, 1);
 	pInfo->indicationMI->ft->disableIndications(pInfo->indicationMI, ctx);
+	pInfo->indicationMI->ft->cleanup(pInfo->indicationMI, ctx, 1);
       }
       //dlclose(pInfo->library);
     }
