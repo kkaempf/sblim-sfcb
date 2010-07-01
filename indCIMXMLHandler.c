@@ -322,8 +322,12 @@ IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
                        "cim_indicationsubscription", &st);
   rv = CBInvokeMethod(_broker, ctx, op, "_addHandler", in, out, &st);
 
-  if (st.rc == CMPI_RC_OK)
+  if (st.rc == CMPI_RC_OK) {
     st = InternalProviderCreateInstance(NULL, ctx, rslt, cop, ciLocal);
+  }
+  else {
+    rv=CBInvokeMethod(_broker,ctx,op,"_removeHandler",in,out,NULL);
+  }
 
   CMRelease(ciLocal);
   _SFCB_RETURN(st);
