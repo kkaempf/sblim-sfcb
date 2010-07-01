@@ -13,6 +13,7 @@ Bugs fixed:
 - 3019898 Remove cmpi headers
 - 3023072 Remove extra getStrBufPtr call in replaceClString
 - 1765781 sfcb: intrinsic ClassMI prototypes omit const qualifier
+- 2859885 New XML Test Case, removed genericlist.c
 
 Changes in 1.3.9
 ================
