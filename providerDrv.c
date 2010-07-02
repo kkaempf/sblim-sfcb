@@ -472,9 +472,9 @@ providerIdleThread()
                  currentProc));
     pthread_mutex_lock(&idleMtx);
     rc = pthread_cond_timedwait(&idleCnd, &idleMtx, &idleTime);
-    if (stopping)
+    if (stopping)  /* sfcb main told us we're shutting down */
       return NULL;
-    if (rc == ETIMEDOUT) {
+    if (rc == ETIMEDOUT) {  /* we hit providerSampleInterval timeout */
       time_t          now;
       time(&now);
       pInfo = activProvs;
@@ -485,13 +485,17 @@ providerIdleThread()
         proc = curProvProc;
         if (proc) {
           semAcquireUnDo(sfcbSem, PROV_GUARD(proc->id));
-          if ((val = semGetValue(sfcbSem, PROV_INUSE(proc->id))) == 0) {
-            if ((now - proc->lastActivity) > provTimeoutInterval) {
+          if ((val = semGetValue(sfcbSem, PROV_INUSE(proc->id))) == 0) { 
+	    /* providerTimeoutInterval reached? */
+            if ((now - proc->lastActivity) > provTimeoutInterval) { 
               ctx = native_new_CMPIContext(MEM_TRACKED, NULL);
               noBreak = 0;
+	      /* loop through all provs in proc & perform cleanup as needed */
               for (crc.rc = 0, pInfo = activProvs; pInfo;
                    pInfo = pInfo->next) {
+		/* loop through provs in this proc */
                 for (temp = activProvs; temp; temp = temp->next) {
+		  /* break out on classname mismatch */
                   if ((strcmp(temp->providerName, pInfo->providerName) ==
                        0)
                       && (strcmp(temp->className, pInfo->className) != 0))
@@ -517,7 +521,7 @@ providerIdleThread()
                               ("--- Cleanup rc: %d %s-%d", crc.rc,
                                processName, currentProc));
                   if (crc.rc == CMPI_RC_NEVER_UNLOAD)
-                    doNotExit = 1;
+                    doNotExit = 1; /* stop idle monitoring */
                   if (crc.rc == CMPI_RC_DO_NOT_UNLOAD)
                     doNotExit = noBreak = 1;
                   if (crc.rc == 0) {
@@ -535,6 +539,7 @@ providerIdleThread()
                     doNotExit = 1;
                 }
               }
+	      /* exit unless prov asks us not to, or returned bad cleanup rc */
               if (doNotExit == 0) {
                 dumpTiming(currentProc);
                 _SFCB_TRACE(1,
@@ -2440,7 +2445,6 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIContext    *ctx = native_new_CMPIContext(MEM_TRACKED, info);
   CMPIResult     *result = native_new_CMPIResult(0, 1, NULL);
   CMPIFlags       flgs = 0;
-  int             makeActive = 0;
   char           *type = NULL;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
@@ -2483,7 +2487,6 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
       _SFCB_RETURN(resp);
     }
 
-    makeActive = 1;
     se->filterId = req->filterId;
     prev = se->next = activFilters;
     activFilters = se;
@@ -3199,7 +3202,7 @@ processProviderInvocationRequestsThread(void *prms)
         pthread_create(&pInfo->idleThread, &tattr,
                        (void *(*)(void *)) providerIdleThread, NULL);
         idleThreadId = pInfo->idleThread;
-      } else
+      } else /* provider is marked "unload: never" in providerRegister */
         pInfo->idleThread = 0;
       idleThreadStartHandled = 1;
     }
