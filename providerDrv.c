@@ -502,8 +502,6 @@ providerIdleThread()
                     break;
                   if (pInfo->library == NULL)
                     continue;
-                  if (pInfo->indicationMI != NULL)
-                    continue;
                   if (crc.rc == 0 && pInfo->instanceMI)
                     crc =
                         pInfo->instanceMI->ft->cleanup(pInfo->instanceMI,
@@ -516,6 +514,10 @@ providerIdleThread()
                   if (crc.rc == 0 && pInfo->methodMI)
                     crc =
                         pInfo->methodMI->ft->cleanup(pInfo->methodMI, ctx,
+                                                     0);
+                  if (crc.rc == 0 && pInfo->indicationMI)
+                    crc =
+                        pInfo->indicationMI->ft->cleanup(pInfo->indicationMI, ctx,
                                                      0);
                   _SFCB_TRACE(1,
                               ("--- Cleanup rc: %d %s-%d", crc.rc,
