@@ -164,3 +164,9 @@ Till Steinbach
 Wenhua Liu, VMWare
 ------------------
 07/01/2010 [ 3004385 ] Improve performance for association upcall
+
+sto (SF id)
+------------------
+07/08/2010 [ 3003509 ] sfcb must configure IndicationFilterName 
+
+
