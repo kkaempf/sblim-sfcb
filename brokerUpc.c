@@ -1,5 +1,5 @@
 /*
- * $Id: brokerUpc.c,v 1.31 2009/11/09 21:49:11 buccella Exp $
+ * $Id: brokerUpc.c,v 1.32 2010/07/12 19:17:23 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -39,7 +39,6 @@
 
 #ifdef SFCB_INCL_INDICATION_SUPPORT 
 #include "selectexp.h"
-extern int indicationEnabled;
 #endif
 
 extern MsgSegment setArgsMsgSegment(const CMPIArgs * args);
@@ -116,13 +115,6 @@ static CMPIStatus deliverIndication(const CMPIBroker* mb, const CMPIContext* ctx
    CMPIObjectPath *op=NULL;
    
    _SFCB_ENTER(TRACE_INDPROVIDER | TRACE_UPCALLS, "deliverIndication");
-   
-   if (indicationEnabled==0) {      
-      _SFCB_TRACE(1,("--- Provider not enabled for indications"));
-      printf("Provider not enabled for indications\n");
-      setStatus(&st,CMPI_RC_ERR_FAILED, "Provider not enabled for indications");
-      _SFCB_RETURN(st);
-   }
 
    NativeSelectExp *se=activFilters;
    
