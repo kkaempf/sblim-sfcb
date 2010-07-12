@@ -70,3 +70,9 @@ test/unittest/Makefile.in
 test/wbemcli/Makefile.in
 test/xmltest/Makefile.in
 ylwrap
+test/unittest/EmbeddedTests
+test/unittest/newCMPIInstance
+test/unittest/newDateTime
+test/unittest/xmlUnescape
+m4/
+*gcda
