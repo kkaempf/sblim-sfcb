@@ -402,6 +402,11 @@ IndCIMXMLHandlerExecQuery(CMPIInstanceMI * mi,
  * ---------------------------------------------------------------------------
  */
 
+static int      retryRunning = 0;
+static pthread_mutex_t RQlock = PTHREAD_MUTEX_INITIALIZER;
+pthread_t t;
+pthread_attr_t tattr;
+
 CMPIStatus
 IndCIMXMLHandlerMethodCleanup(CMPIMethodMI * mi,
                               const CMPIContext *ctx,
@@ -409,6 +414,13 @@ IndCIMXMLHandlerMethodCleanup(CMPIMethodMI * mi,
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_INDPROVIDER, "IndCIMXMLHandlerMethodCleanup");
+  if (retryRunning == 1) {
+    _SFCB_TRACE(1, ("--- Stopping indication retry thread"));
+    pthread_kill(t, SIGUSR2);
+    // Wait for thread to complete
+    pthread_join(t, NULL);
+    _SFCB_TRACE(1, ("--- Indication retry thread stopped"));
+  }
   _SFCB_RETURN(st);
 }
 
@@ -472,10 +484,6 @@ typedef struct rtelement {
 } RTElement;
 static RTElement *RQhead,
                *RQtail;
-static int      retryRunning = 0;
-static pthread_mutex_t RQlock = PTHREAD_MUTEX_INITIALIZER;
-pthread_t t;
-pthread_attr_t tattr;
 
 /** \brief enqRetry - Add to retry queue
  *
@@ -573,6 +581,16 @@ dqRetry(CMPIContext * ctx, RTElement * cur)
   _SFCB_RETURN(0);
 }
 
+static int retryShutdown = 0;
+
+void
+handle_sig_retry(int signum)
+{
+  _SFCB_ENTER(TRACE_INDPROVIDER, "handle_sig_retry");
+  //Indicate provider is shutting down
+  retryShutdown = 1;
+}
+
 /** \brief retryExport - Manages retries
  *
  *  Spawned as a thread when a retry queue exists to
@@ -602,6 +620,13 @@ retryExport(void *lctx)
   CMPIObjectPath *op;
   CMPIEnumeration *isenm = NULL;
 
+  //Setup signal handlers
+  struct sigaction sa;
+  sa.sa_handler = handle_sig_retry;
+  sa.sa_flags = 0;
+  sigemptyset(&sa.sa_mask);
+  sigaction(SIGUSR2, &sa, NULL);
+
   CMPIStatus      st = { CMPI_RC_OK, NULL };
 
   ctxLocal = prepareUpcall(ctx);
@@ -630,6 +655,7 @@ retryExport(void *lctx)
   pthread_mutex_lock(&RQlock);
   cur = RQhead;
   while (RQhead != NULL) {
+    if(retryShutdown) break; // Provider shutdown
     ref = cur->ref;
     // Build the CMPIArgs that deliverInd needs
     CMPIInstance *iinst=internalProviderGetInstance(cur->ind,&st);
@@ -658,6 +684,7 @@ retryExport(void *lctx)
         // and sleep for an interval, then relock
         pthread_mutex_unlock(&RQlock);
         sleep(rint);
+        if(retryShutdown) break; // Provider shutdown
         pthread_mutex_lock(&RQlock);
       }
       st = deliverInd(ref, in);
