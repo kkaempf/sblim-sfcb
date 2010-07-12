@@ -139,7 +139,6 @@ static int      provProcMax = 0;
 static int      idleThreadStartHandled = 0;
 
 ProviderInfo   *activProvs = NULL;
-int             indicationEnabled = 0;
 
 unsigned long   provSampleInterval = 10;
 unsigned long   provTimeoutInterval = 25;
@@ -2552,13 +2551,6 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
     TIMING_STOP(hdr, info)
         _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
-    /*
-     * if (indicationEnabled==0 && rci.rc==CMPI_RC_OK) {
-     * indicationEnabled=1; TIMING_START(hdr,info)
-     * info->indicationMI->ft->enableIndications(info->indicationMI,ctx);
-     * TIMING_STOP(hdr,info) }
-     */
-
     if (rci.rc == CMPI_RC_OK) {
       resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
       resp->rc = 1;
@@ -2616,7 +2608,7 @@ deactivateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
         _SFCB_TRACE(1,
                     ("--- Calling disableIndications %s",
                      info->providerName));
-        indicationEnabled = 0;
+        info->indicationEnabled = 0;
         TIMING_START(hdr, info)
             info->indicationMI->ft->disableIndications(info->indicationMI,
                                                        ctx);
@@ -2685,8 +2677,8 @@ enableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
     _SFCB_RETURN(resp);
   }
 
-  if (indicationEnabled == 0 && rci.rc == CMPI_RC_OK) {
-    indicationEnabled = 1;
+  if (info->indicationEnabled == 0 && rci.rc == CMPI_RC_OK) {
+    info->indicationEnabled = 1;
     TIMING_START(hdr, info)
         info->indicationMI->ft->enableIndications(info->indicationMI, ctx);
     TIMING_STOP(hdr, info)
@@ -2732,8 +2724,8 @@ disableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
     _SFCB_RETURN(resp);
   }
 
-  if (indicationEnabled == 1 && rci.rc == CMPI_RC_OK) {
-    indicationEnabled = 0;
+  if (info->indicationEnabled == 1 && rci.rc == CMPI_RC_OK) {
+    info->indicationEnabled = 0;
     TIMING_START(hdr, info)
         info->indicationMI->ft->disableIndications(info->indicationMI,
                                                    ctx);
