@@ -2,6 +2,7 @@
 
 	* brokerUpc.c, providerDrv.c, providerRegister.h:
 	[ 3012365 ] enableIndications() only called once per provider group
+	(patch by Tim Potter)
 
 2010-07-08 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* interopProvider.c
