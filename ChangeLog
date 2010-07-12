@@ -1,3 +1,7 @@
+2010-07-08 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	* indCIMXMLHandler.c
+	[3005429] indCIMXMLHandler provider should cleanup nicely
+
 2010-07-12  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* brokerUpc.c, providerDrv.c, providerRegister.h:

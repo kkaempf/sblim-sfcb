@@ -15,6 +15,7 @@ Bugs fixed:
 - 1765781 sfcb: intrinsic ClassMI prototypes omit const qualifier
 - 3004385 Improve performance for association upcall
 - 2859885 New XML Test Case, removed genericlist.c
+- 3005429 indCIMXMLHandler provider should cleanup nicely
 
 Changes in 1.3.9
 ================
