@@ -21,9 +21,9 @@
  *
  */
 
-#include "cmpidt.h"
-#include "cmpift.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpift.h"
+#include "cmpi/cmpimacs.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -323,12 +323,11 @@ updateSLPReg(const CMPIContext *ctx, int slpLifeTime)
   long            i;
   int             errC = 0;
 
-  extern char    *configfile;
-
   _SFCB_ENTER(TRACE_SLP, "updateSLPReg");
 
   pthread_mutex_lock(&slpUpdateMtx);
-  setupControl(configfile);
+
+  void* hc = markHeap();
 
   getControlBool("enableSlp", &enableSlp);
   if(!enableSlp) {
@@ -375,6 +374,7 @@ updateSLPReg(const CMPIContext *ctx, int slpLifeTime)
   
   freeCFG(&cfgHttp);
   freeCFG(&cfgHttps);
+  releaseHeap(hc);
   pthread_mutex_unlock(&slpUpdateMtx);
   return;
 }
@@ -440,6 +440,7 @@ slpUpdate(void *args)
             timeLeft, slp_shutting_down ? "true" : "false"));
   }
   //End loop
+  CMRelease(ctx);
   if(http_url) {
     _SFCB_TRACE(2, ("--- Deregistering http advertisement"));
     deregisterCIMService(http_url);

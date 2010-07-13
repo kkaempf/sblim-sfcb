@@ -472,6 +472,7 @@ fi
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS([fcntl.h limits.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h unistd.h zlib.h])
+AC_CHECK_HEADERS([cmpi/cmpimacs.h cmpi/cmpift.h cmpi/cmpidt.h],[],[AC_MSG_ERROR([Could not find required CPMI header.])])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_BIGENDIAN
@@ -520,6 +521,12 @@ if test -d $srcdir/mofc; then
    export enable_namespace_kludge=yes
    AC_CONFIG_SUBDIRS([mofc])
    AC_SUBST(MOFC_DIR)
+fi
+
+if test -d $srcdir/cmpi-devel; then
+   CMPIDEV_DIR=cmpi-devel
+   AC_CONFIG_SUBDIRS([cmpi-devel])
+   AC_SUBST(CMPIDEV_DIR)
 fi
 
 AM_CONDITIONAL(INDICATIONS,[test "$enable_indications" == "yes"]) 

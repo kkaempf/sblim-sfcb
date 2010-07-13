@@ -19,7 +19,7 @@
  *
  */
 
-#include "cmpidt.h"
+#include "cmpi/cmpidt.h"
 #include "httpComm.h"
 
 #if defined USE_SSL

@@ -31,10 +31,10 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#include "cmpidt.h"
-#include "cmpift.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpift.h"
 #include "constClass.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpimacs.h"
 #include "msgqueue.h"
 
 #include "support.h"

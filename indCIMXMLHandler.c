@@ -19,9 +19,9 @@
  *
  */
 
-#include "cmpidt.h"
-#include "cmpift.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpift.h"
+#include "cmpi/cmpimacs.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -284,8 +284,8 @@ IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
   } else {                      /* if no scheme is given, assume http (as
                                  * req. for param by mof) */
     char           *ds = CMGetCharPtr(dest);
-    if (strchr(ds, ':') == NULL) {
-      char           *prefix = "http:";
+    if (strstr(ds, "://") == NULL) {
+      char           *prefix = "http://";
       int             n = strlen(ds) + strlen(prefix) + 1;
       char           *newdest = (char *) malloc(n * sizeof(char));
       strcpy(newdest, prefix);
@@ -322,8 +322,12 @@ IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
                        "cim_indicationsubscription", &st);
   rv = CBInvokeMethod(_broker, ctx, op, "_addHandler", in, out, &st);
 
-  if (st.rc == CMPI_RC_OK)
+  if (st.rc == CMPI_RC_OK) {
     st = InternalProviderCreateInstance(NULL, ctx, rslt, cop, ciLocal);
+  }
+  else {
+    rv=CBInvokeMethod(_broker,ctx,op,"_removeHandler",in,out,NULL);
+  }
 
   CMRelease(ciLocal);
   _SFCB_RETURN(st);
@@ -398,6 +402,11 @@ IndCIMXMLHandlerExecQuery(CMPIInstanceMI * mi,
  * ---------------------------------------------------------------------------
  */
 
+static int      retryRunning = 0;
+static pthread_mutex_t RQlock = PTHREAD_MUTEX_INITIALIZER;
+pthread_t t;
+pthread_attr_t tattr;
+
 CMPIStatus
 IndCIMXMLHandlerMethodCleanup(CMPIMethodMI * mi,
                               const CMPIContext *ctx,
@@ -405,6 +414,13 @@ IndCIMXMLHandlerMethodCleanup(CMPIMethodMI * mi,
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_INDPROVIDER, "IndCIMXMLHandlerMethodCleanup");
+  if (retryRunning == 1) {
+    _SFCB_TRACE(1, ("--- Stopping indication retry thread"));
+    pthread_kill(t, SIGUSR2);
+    // Wait for thread to complete
+    pthread_join(t, NULL);
+    _SFCB_TRACE(1, ("--- Indication retry thread stopped"));
+  }
   _SFCB_RETURN(st);
 }
 
@@ -468,10 +484,6 @@ typedef struct rtelement {
 } RTElement;
 static RTElement *RQhead,
                *RQtail;
-static int      retryRunning = 0;
-static pthread_mutex_t RQlock = PTHREAD_MUTEX_INITIALIZER;
-pthread_t t;
-pthread_attr_t tattr;
 
 /** \brief enqRetry - Add to retry queue
  *
@@ -569,6 +581,16 @@ dqRetry(CMPIContext * ctx, RTElement * cur)
   _SFCB_RETURN(0);
 }
 
+static int retryShutdown = 0;
+
+void
+handle_sig_retry(int signum)
+{
+  _SFCB_ENTER(TRACE_INDPROVIDER, "handle_sig_retry");
+  //Indicate provider is shutting down
+  retryShutdown = 1;
+}
+
 /** \brief retryExport - Manages retries
  *
  *  Spawned as a thread when a retry queue exists to
@@ -598,6 +620,13 @@ retryExport(void *lctx)
   CMPIObjectPath *op;
   CMPIEnumeration *isenm = NULL;
 
+  //Setup signal handlers
+  struct sigaction sa;
+  sa.sa_handler = handle_sig_retry;
+  sa.sa_flags = 0;
+  sigemptyset(&sa.sa_mask);
+  sigaction(SIGUSR2, &sa, NULL);
+
   CMPIStatus      st = { CMPI_RC_OK, NULL };
 
   ctxLocal = prepareUpcall(ctx);
@@ -626,6 +655,7 @@ retryExport(void *lctx)
   pthread_mutex_lock(&RQlock);
   cur = RQhead;
   while (RQhead != NULL) {
+    if(retryShutdown) break; // Provider shutdown
     ref = cur->ref;
     // Build the CMPIArgs that deliverInd needs
     CMPIInstance *iinst=internalProviderGetInstance(cur->ind,&st);
@@ -654,6 +684,7 @@ retryExport(void *lctx)
         // and sleep for an interval, then relock
         pthread_mutex_unlock(&RQlock);
         sleep(rint);
+        if(retryShutdown) break; // Provider shutdown
         pthread_mutex_lock(&RQlock);
       }
       st = deliverInd(ref, in);

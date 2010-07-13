@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "cmpidt.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpimacs.h"
 #include "fileRepository.h"
 #include "instance.h"
 #include "objectImpl.h"

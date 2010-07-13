@@ -19,10 +19,10 @@
  *
  */
 
-#include "cmpidt.h"
+#include "cmpi/cmpidt.h"
 #include "cmpidtx.h"
 #include "cmpiftx.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpimacs.h"
 #include "cmpimacsx.h"
 #include "qualifier.h"
 #include "native.h"

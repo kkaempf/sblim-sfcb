@@ -321,7 +321,7 @@ sfcb_setAlignedValue(CMPIValue * target, const CMPIValue * source,
 }
 
 static int
-extended_strcmp(char *s1, char *s2)
+extended_strcmp(const char *s1, const char *s2)
 {
   if (s1 == NULL && s2 == NULL)
     return 0;

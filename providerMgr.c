@@ -24,7 +24,7 @@
 #include <time.h>
 #include <pthread.h>
 
-#include "cmpidt.h"
+#include "cmpi/cmpidt.h"
 #include "providerRegister.h"
 #include "providerMgr.h"
 #include "utilft.h"
@@ -100,8 +100,7 @@ extern CMPIArgs *relocateSerializedArgs(void *area);
 extern MsgSegment setArgsMsgSegment(CMPIArgs * args);
 extern void     dump(char *msg, void *a, int l);
 extern void     showClHdr(void *ihdr);
-extern int      forkProvider(ProviderInfo * info, OperationHdr * req,
-                             char **msg);
+extern int      forkProvider(ProviderInfo * info, char **msg);
 
 static int      startUpProvider(const char *ns, const char *name);
 
@@ -408,7 +407,7 @@ lookupProviderList(long type, int *requestor, OperationHdr * req)
       for (info = providers->ft->getFirst(providers); info;
            info = providers->ft->getNext(providers), n--) {
         if (info->type != FORCE_PROVIDER_NOTFOUND &&
-            (rc = forkProvider(info, req, NULL)) == CMPI_RC_OK) {
+            (rc = forkProvider(info, NULL)) == CMPI_RC_OK) {
           _SFCB_TRACE(1,
                       ("--- responding with  %s %p %d", info->providerName,
                        info, count));
@@ -455,7 +454,7 @@ findProvider(long type, int *requestor, OperationHdr * req)
 
   if ((info = lookupProvider(type, className, nameSpace, &st)) != NULL) {
     if (info->type != FORCE_PROVIDER_NOTFOUND &&
-        (rc = forkProvider(info, req, NULL)) == CMPI_RC_OK) {
+        (rc = forkProvider(info, NULL)) == CMPI_RC_OK) {
       spSendCtlResult(requestor, &info->providerSockets.send,
                       MSG_X_PROVIDER, 0, getProvIds(info).ids,
                       req->options);
@@ -690,7 +689,7 @@ assocProviderList(int *requestor, OperationHdr * req)
       for (info = providers->ft->getFirst(providers); info;
            info = providers->ft->getNext(providers)) {
         if (info->type != FORCE_PROVIDER_NOTFOUND &&
-            (rc = forkProvider(info, req, NULL)) == CMPI_RC_OK) {
+            (rc = forkProvider(info, NULL)) == CMPI_RC_OK) {
           _SFCB_TRACE(1,
                       ("--- responding with  %s %p %d", info->providerName,
                        info, count));
@@ -714,7 +713,7 @@ assocProviderList(int *requestor, OperationHdr * req)
      * produce an error message. So we return the default provider and
      * expect it to produce a nice and empty result 
      */
-    if ((rc = forkProvider(defaultProvInfoPtr, req, NULL)) == CMPI_RC_OK) {
+    if ((rc = forkProvider(defaultProvInfoPtr, NULL)) == CMPI_RC_OK) {
       _SFCB_TRACE(1, ("--- responding with  %s %p %d",
                       defaultProvInfoPtr->providerName,
                       defaultProvInfoPtr, count));
@@ -807,7 +806,7 @@ classProvider(int *requestor, OperationHdr * req)
 {
   int             rc;
   _SFCB_ENTER(TRACE_PROVIDERMGR, "classProvider");
-  rc = forkProvider(classProvInfoPtr, req, NULL);
+  rc = forkProvider(classProvInfoPtr, NULL);
   if (rc != CMPI_RC_OK) {
     mlogf(M_ERROR, M_SHOW, "--- forkProvider failed in classProvider\n");
     /*
@@ -833,7 +832,7 @@ qualiProvider(int *requestor, OperationHdr * req)
 {
   int             rc;
   _SFCB_ENTER(TRACE_PROVIDERMGR, "qualiProvider");
-  rc = forkProvider(qualiProvInfoPtr, req, NULL);
+  rc = forkProvider(qualiProvInfoPtr, NULL);
   if (rc != CMPI_RC_OK) {
     mlogf(M_ERROR, M_SHOW, "--- forkProvider failed in qualiProvider\n");
     /*
@@ -868,7 +867,7 @@ methProvider(int *requestor, OperationHdr * req)
   else if ((info = getMethodProvider(className, nameSpace)) != NULL) {
     rc = CMPI_RC_OK;
     if (info->type != FORCE_PROVIDER_NOTFOUND &&
-        (rc = forkProvider(info, req, NULL)) == CMPI_RC_OK) {
+        (rc = forkProvider(info, NULL)) == CMPI_RC_OK) {
       _SFCB_TRACE(1,
                   ("--- responding with  %s %p", info->providerName,
                    info));
@@ -909,7 +908,7 @@ _methProvider(BinRequestContext * ctx, OperationHdr * req)
 
   ctx->chunkedMode = ctx->xmlAs = 0;
   if (strcmp(className, "$ClassProvider$") == 0) {
-    rc = forkProvider(classProvInfoPtr, req, NULL);
+    rc = forkProvider(classProvInfoPtr, NULL);
     if (rc != CMPI_RC_OK) {
       mlogf(M_ERROR, M_SHOW,
             "--- forkProvider failed in _methProvider (%s)\n", className);
@@ -924,7 +923,7 @@ _methProvider(BinRequestContext * ctx, OperationHdr * req)
     ctx->pAs = NULL;
     _SFCB_RETURN(MSG_X_PROVIDER);
   } else if (strcmp(className, "$InterOpProvider$") == 0) {
-    rc = forkProvider(interOpProvInfoPtr, req, NULL);
+    rc = forkProvider(interOpProvInfoPtr, NULL);
     if (rc != CMPI_RC_OK) {
       mlogf(M_ERROR, M_SHOW,
             "--- forkProvider failed in _methProvider (%s)\n", className);
@@ -939,7 +938,7 @@ _methProvider(BinRequestContext * ctx, OperationHdr * req)
     ctx->pAs = NULL;
     _SFCB_RETURN(MSG_X_PROVIDER);
   } else if ((info = getMethodProvider(className, nameSpace)) != NULL) {
-    if ((rc = forkProvider(info, req, NULL)) == CMPI_RC_OK) {
+    if ((rc = forkProvider(info, NULL)) == CMPI_RC_OK) {
       ctx->provA.ids = getProvIds(info);
       ctx->provA.socket = info->providerSockets.send;
       ctx->pAs = NULL;
@@ -1107,6 +1106,11 @@ setInuseSem(void *id)
   semRelease(sfcbSem, PROV_GUARD(ids.procId));
   _SFCB_EXIT();
 }
+
+/*
+ ctx is passed in to receive response information (provider id, etc)
+ ohdr is passed in to build the request to providerMgr proc
+ */
 
 int
 getProviderContext(BinRequestContext * ctx)
@@ -1404,7 +1408,7 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
                 _sfcb_format_trace
                 ("-#- Provider Remote Invocation %.5u %s-%s real: %f user: %f sys: %f \n",
                  hdr->sessionId, opsName[hdr->operation],
-                 ctx->oHdr->className.data, timevalDiff(&sv, &ev),
+                 "<className>", timevalDiff(&sv, &ev),
                  timevalDiff(&us.ru_utime, &ue.ru_utime),
                  timevalDiff(&us.ru_stime, &ue.ru_stime)));
   }
@@ -1577,7 +1581,7 @@ _getConstClass(const char *ns, const char *cn, CMPIStatus *st)
   req.nameSpace = setCharsMsgSegment((char *) ns);
   req.className = setCharsMsgSegment((char *) cn);
 
-  irc = forkProvider(classProvInfoPtr, &req, NULL);
+  irc = forkProvider(classProvInfoPtr, NULL);
   if (irc != CMPI_RC_OK) {
     mlogf(M_ERROR, M_SHOW,
           "--- forkProvider failed in _getConstClass(%s:%s)\n", ns, cn);

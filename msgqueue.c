@@ -21,7 +21,7 @@
 
 #include <string.h>
 #include <errno.h>
-#include "cmpidt.h"
+#include "cmpi/cmpidt.h"
 #include "providerMgr.h"
 #include "msgqueue.h"
 #include "trace.h"

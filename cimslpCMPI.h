@@ -24,8 +24,8 @@
 
 #include <unistd.h>
 #include <stdio.h>
-#include "cmpidt.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpimacs.h"
 
 typedef struct {
   char           *url_syntax;

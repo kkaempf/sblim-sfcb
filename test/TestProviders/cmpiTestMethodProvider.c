@@ -1,7 +1,7 @@
 #include <string.h>
-#include "cmpidt.h"
-#include "cmpift.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpift.h"
+#include "cmpi/cmpimacs.h"
 
 static const CMPIBroker *_broker;
 

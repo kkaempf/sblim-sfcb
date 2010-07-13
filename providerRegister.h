@@ -25,7 +25,7 @@
 
 #include <stdio.h>
 #include <sys/types.h>
-#include "cmpift.h"
+#include "cmpi/cmpift.h"
 #include "cmpiftx.h"
 #include "msgqueue.h"
 #include "utilft.h"
@@ -61,6 +61,7 @@ extern          "C" {
     pthread_mutex_t initMtx;
     time_t          lastActivity;
     int             startSeq;
+    int             indicationEnabled;
     struct _ProviderInfo *next;
     struct _ProviderInfo *nextInRegister;       /* not actually next in
                                                  * Register,but pointer to 

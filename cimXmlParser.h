@@ -27,9 +27,9 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "cmpidt.h"
-#include "cmpift.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpift.h"
+#include "cmpi/cmpimacs.h"
 
 #include <msgqueue.h>
 #include <providerMgr.h>

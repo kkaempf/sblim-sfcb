@@ -19,9 +19,9 @@
  *
  */
 
-#include "cmpidt.h"
-#include "cmpift.h"
-#include "cmpimacs.h"
+#include "cmpi/cmpidt.h"
+#include "cmpi/cmpift.h"
+#include "cmpi/cmpimacs.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -1254,6 +1254,7 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
                             const CMPIArgs * in, CMPIArgs * out)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
+  CMPIStatus      fn_st = { CMPI_RC_ERR_FAILED, NULL};
 
   _SFCB_ENTER(TRACE_INDPROVIDER, "InteropProviderInvokeMethod");
 
@@ -1266,6 +1267,7 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
     HashTableIterator *i;
     Subscription   *su;
     char           *suName;
+    char           *filtername = NULL;
     CMPIArgs       *hin = CMNewArgs(_broker, NULL);
     CMPIInstance   *ind = CMGetArg(in, "indication", NULL).value.inst;
     void           *filterId =
@@ -1278,6 +1280,17 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
     char           *ns =
         (char *) CMGetArg(in, "namespace", NULL).value.string->hdl;
 
+    // Add indicationFilterName to the indication
+    Filter *filter = filterId;
+    CMPIData cd_name = CMGetProperty(filter->fci, "name", &fn_st);
+    if (fn_st.rc == CMPI_RC_OK) {
+      filtername = cd_name.value.string->hdl;
+      _SFCB_TRACE(1,("--- %s: filter=%p, filter->sns=%s, filter->name=%s, filter namespace: %s", __FUNCTION__, filter, filter->sns, filtername, ns));
+      fn_st = CMSetProperty(ind, "IndicationFilterName", filtername, CMPI_chars);
+      if (fn_st.rc != CMPI_RC_OK) {
+        _SFCB_TRACE(1,("--- %s: failed to add IndicationFilterName = %s rc=%d", __FUNCTION__, filtername, fn_st.rc));
+      }
+    }
     CMAddArg(hin, "indication", &ind, CMPI_instance);
     CMAddArg(hin, "nameSpace", ns, CMPI_chars);
 

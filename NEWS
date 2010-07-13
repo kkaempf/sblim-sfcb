@@ -10,6 +10,12 @@ Bugs fixed:
 - 3003508 slpTests.sh uses bash-isms
 - 3011256 Add macro to set inBuf value
 - 3018141 Code Cleanup Friday #1
+- 3019898 Remove cmpi headers
+- 3023072 Remove extra getStrBufPtr call in replaceClString
+- 1765781 sfcb: intrinsic ClassMI prototypes omit const qualifier
+- 3004385 Improve performance for association upcall
+- 2859885 New XML Test Case, removed genericlist.c
+- 3005429 indCIMXMLHandler provider should cleanup nicely
 
 Changes in 1.3.9
 ================
@@ -23,6 +29,20 @@ Bugs fixed:
 - 2984485 Possible access to freed memory in cimslpSLP.c
 - 3016295 Initialise refcount in CMPIInstance clone
 - 2950521 Provider operations are wrongly traced
+- 3016863 Data corruption when replacing array properties
+- 3022941 Remove HAVE_SLP_ALONE sections
+- 3022934 SLP code calls setupControl more than once
+- 3023079 slpUpdate does not release ctx on exit
+- 2920363 make test fails if sfcb is running under valgrind
+- 2950545 indCIMXMLHandler destination schema correction wrong
+- 2968599 Wrong trace msg for invokeMethod (local interface)
+- 3023502 Memory leak on CreateClass
+- 3022919 profileProvider (SLP) has increasing memory usage over time
+- 2952628 Handler is not removed from interop-Hashtable when CI fails
+- 3017845 disableIndications not called on provider shutdown
+- 3010272 Indication providers always unloaded when idle
+- 3003509 sfcb must configure IndicationFilterName 
+- 3012365 enableIndications() only called once per provider group
 
 Changes in 1.3.8
 ================

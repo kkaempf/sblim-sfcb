@@ -23,7 +23,7 @@
 #ifndef CMPI_constClass_h
 #define CMPI_constClass_h
 
-#include "cmpidt.h"
+#include "cmpi/cmpidt.h"
 
 #define MALLOCED(a) (((a) & 0xff000000)!=0xff000000)
 
@@ -85,8 +85,8 @@ struct _CMPIConstClass_FT {
   CMPIArray      *(*getKeyList) (CMPIConstClass * cc);
   char           *(*toString) (CMPIConstClass * cc);
   void            (*relocate) (CMPIConstClass * cc);
-  const char     *(*getCharClassName) (CMPIConstClass * br);
-  const char     *(*getCharSuperClassName) (CMPIConstClass * br);
+  const char     *(*getCharClassName) (const CMPIConstClass * br);
+  const char     *(*getCharSuperClassName) (const CMPIConstClass * br);
   CMPIBoolean     (*isAssociation) (CMPIConstClass * cc);
   CMPIBoolean     (*isAbstract) (CMPIConstClass * cc);
   CMPIBoolean     (*isIndication) (CMPIConstClass * cc);

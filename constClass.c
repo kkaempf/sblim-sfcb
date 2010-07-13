@@ -59,7 +59,7 @@ relocate(CMPIConstClass * cc)
 }
 
 static const char *
-getCharClassName(CMPIConstClass * cc)
+getCharClassName(const CMPIConstClass * cc)
 {
   ClClass        *cls = (ClClass *) cc->hdl;
   if (cls->name.id)
@@ -75,7 +75,7 @@ getClassName(CMPIConstClass * cc, CMPIStatus *rc)
 }
 
 static const char *
-getCharSuperClassName(CMPIConstClass * cc)
+getCharSuperClassName(const CMPIConstClass * cc)
 {
   ClClass        *cls = (ClClass *) cc->hdl;
   if (cls->parent.id)

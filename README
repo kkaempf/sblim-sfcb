@@ -110,7 +110,8 @@ are already installed on your Linux/Unix system:
 	bison >= 1.85
 	curl >= 7.11.1-1
 	curl-devel >= 7.11.1-1
-        flex
+	flex
+	cmpi-devel >= 2.0.1
 
 If you want to enable SSL support, the following packages are needed as well:
 
@@ -163,7 +164,7 @@ See NEWS file of the sfcb package
 Option 1:
 --------
 
-You can download and extract the tarball containing both sfcb and mofc
+You can download and extract the tarball containing both sfcb, cmpi-devel and mofc
 ready to build:
 
 	http://sourceforge.net/projects/sblim/
@@ -172,7 +173,7 @@ and click on the sblim-sfcb package to download.  Then unpack:
 
 	tar jxf sblim-sfcb-x.y.z.tar.bz2
 
-You are now ready to build sfcb and mofc (see Section 6 below).
+You are now ready to build sfcb, cmpi-devel and mofc (see Section 6 below).
 
 Option 2:
 --------
@@ -187,22 +188,28 @@ the sfcb source directory:
 	cd sfcb
 	cvs -z3 -d:pserver:anonymous:@sblim.cvs.sourceforge.net/cvsroot/sblim co -P mofc
 
+If you don't already have it installed, you can also download the required cmpi-devel 
+package INTO the sfcb source directory:
+
+	cd sfcb
+	cvs -z3 -d:pserver:anonymous:@sblim.cvs.sourceforge.net/cvsroot/sblim co -P cmpi-devel
+
 Then run autoconfiscate to setup the autoconf files.  From the sfcb directory:
 
 	./autoconfiscate.sh
 
-You are now ready to build sfcb and mofc (see Section 6 below).
+You are now ready to build sfcb, cmpi-devel and mofc (see Section 6 below).
 
 
-6. Building sfcb and mofc
+6. Building sfcb, cmpi-devel and mofc
 =========================
 sfcb and its supporting packages have been 'autoconfiscated' to simplify
 building and installing them on different Linux/Unix systems. In most cases
 the autoconf scripts will determine the correct build/compile options for
 your system.
 
-After downloading the sfcb and mofc, either from CVS or tarball, build the
-packages by:
+After downloading the sfcb, cmpi-devel and mofc, either from CVS or tarball, 
+build the packages by:
 
         ./configure
         make

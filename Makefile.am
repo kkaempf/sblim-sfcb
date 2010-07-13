@@ -48,7 +48,7 @@ AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sfcbconfdir)\" \
         @SFCB_CMPI_PLATFORM@ 
 AM_LDFLAGS=@SFCB_LDFLAGS@
 
-SUBDIRS=. $(MOFC_DIR) test
+SUBDIRS=. $(MOFC_DIR) $(CMPIDEV_DIR) test
 
 if GCOV
 AM_CFLAGS=@SFCB_CFLAGS@ -ftest-coverage -fprofile-arcs
@@ -436,7 +436,7 @@ noinst_HEADERS=array.h $(SLP_INC) httpComm.h control.h    providerMgr.h \
 	cimXmlParser.h    native.h       support.h cimXmlGen.h \
 	cimXmlRequest.h  genericlist.h  objectImpl.h   trace.h \
 	sfcUtil/hashtable.h      sfcUtil/utilft.h mlog.h \
-	cmpidt.h cmpift.h cmpiftx.h cmpimacs.h cmpimacsx.h cmpios.h cmpipl.h \
+	cmpiftx.h cmpimacsx.h \
 	fileRepository.h internalProvider.h \
 	selectexp.h queryOperation.h \
 	sfcVersion.h mrwlock.h sqlStatement.h avltree.h \
@@ -447,7 +447,7 @@ man_MANS=$(MANFILES)
 
 EXTRA_DIST=sfcb.cfg.pre.in sfcb.spec sfcbrepos.sh.in sfcbstage.sh.in \
 	sfcbunstage.sh.in sfcbuuid.sh.in sfcb.init-redhat.in sfcb.init-suse.in \
-	sfcb.init-none.in cimXmlParser.c footprint.pl test
+	sfcb.init-none.in cimXmlParser.c footprint.pl test cmpi-devel
 
 dist_sfcbdata_SCRIPTS=genSslCert.sh getSchema.sh test/stageschema.sh
 
