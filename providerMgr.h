@@ -25,6 +25,7 @@
 
 #include "msgqueue.h"
 #include "httpComm.h"
+#include "cmpidt.h"
 
 #define OPS_GetClass 1
 #define OPS_GetInstance 2
@@ -67,6 +68,7 @@ typedef struct operationHdr {
   unsigned short  type;
   unsigned short  options;
 #define OH_Internal 2
+  unsigned long   count;
   MsgSegment      nameSpace;
   MsgSegment      className;
   union {

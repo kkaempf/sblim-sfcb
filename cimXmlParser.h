@@ -33,6 +33,7 @@
 
 #include <msgqueue.h>
 #include <providerMgr.h>
+#include "cimXmlRequest.h"
 
 #define FL_localOnly CMPI_FLAG_LocalOnly
 #define FL_deepInheritance CMPI_FLAG_DeepInheritance
@@ -89,9 +90,14 @@ typedef struct requestHdr {
   unsigned long   cimRequestLength;
   char           *errMsg;
   char           *className;
+  BinRequestContext  *binCtx;
+/* These don't really belong here, but it's *
+ * an easy way to get them to the parser.   */
+  char           *principal;
+  unsigned int    sessionId;
 } RequestHdr;
 
-extern RequestHdr scanCimXmlRequest(char *xmlData);
+extern RequestHdr scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData);
 extern void     freeCimXmlRequest(RequestHdr hdr);
 
 typedef struct xtokNameSpace {
