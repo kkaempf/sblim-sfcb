@@ -10,13 +10,15 @@
 #define CMPI_PLATFORM_LINUX_GENERIC_GNU
 
 #include <cimXmlParser.h>
+#include <cimXmlRequest.h>
 
-extern RequestHdr scanCimXmlRequest(char *xmlData);
+extern RequestHdr scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData);
 
 int
 main(void)
 {
   int             rval = 0;
+  CimXmlRequestContext ctx;
 
   // we'll wrap our test inside a VALUE tag, call scan, and check the
   // results
@@ -33,7 +35,7 @@ main(void)
   // 2xcrlf:\n\n
   // wORLD.&#invalidstring;&#no_semi_so_not_valid&#another_invalid_with_invalid_follow#20;<after_invalid>&#invalid_at_end</VALUE>";
 
-  RequestHdr      results = scanCimXmlRequest(thestr);
+  RequestHdr      results = scanCimXmlRequest(&ctx, thestr);
 
   printf("\"sfcXmlerror: syntax error\" above is expected.\n");
   rval = strcmp(results.xmlBuffer->base, expectedResults);
