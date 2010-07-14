@@ -25,7 +25,7 @@
 
 #include "msgqueue.h"
 #include "httpComm.h"
-#include "cmpidt.h"
+#include "cmpi/cmpidt.h"
 
 #define OPS_GetClass 1
 #define OPS_GetInstance 2
