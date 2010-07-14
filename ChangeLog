@@ -1,3 +1,8 @@
+2010-07-14  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* providerDrv.c:
+	[ 3026606 ] Prov idle unload may not call all cleanup functions
+
 2010-07-08 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* indCIMXMLHandler.c
 	[3005429] indCIMXMLHandler provider should cleanup nicely
