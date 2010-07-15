@@ -606,64 +606,30 @@ genFirstChunkErrorResponse(BinRequestContext * binCtx, int rc, char *msg)
 static          RespSegments
 getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  CMPIObjectPath *path;
-  CMPIConstClass *cls;
   UtilStringBuffer *sb;
-  int             irc,
-                  i,
-                  sreqSize = sizeof(GetClassReq);       // -sizeof(MsgSegment);
-  BinRequestContext binCtx;
+  int             irc;
   BinResponseHdr *resp;
-  GetClassReq    *sreq;
+  CMPIConstClass *cls;
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "getClass");
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokGetClass   *req = (XtokGetClass *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  if (req->properties)
-    sreqSize += req->properties * sizeof(MsgSegment);
-  sreq = calloc(1, sreqSize);
-  sreq->hdr.operation = OPS_GetClass;
-  sreq->hdr.count = req->properties + 2;
-
-  path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-                            NULL);
-  sreq->objectPath = setObjectPathMsgSegment(path);
-  sreq->principal = setCharsMsgSegment(ctx->principal);
-  sreq->hdr.sessionId = ctx->sessionId;
-
-  for (i = 0; i < req->properties; i++)
-    sreq->properties[i] =
-        setCharsMsgSegment(req->propertyList.values[i].value);
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq->hdr;
-  binCtx.bHdr->flags = req->flags;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sreqSize;
-  binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.pAs = NULL;
-
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
-    resp = invokeProvider(&binCtx);
-    closeProviderContext(&binCtx);
+    resp = invokeProvider(hdr->binCtx);
+    closeProviderContext(hdr->binCtx);
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       cls = relocateSerializedConstClass(resp->object[0].data);
       sb = UtilFactory->newStrinBuffer(1024);
-      cls2xml(cls, sb, binCtx.bHdr->flags);
+      cls2xml(cls, sb, hdr->binCtx->bHdr->flags);
       if (resp) {
         free(resp);
       }
-      free(sreq);
+      free(hdr->binCtx->bHdr);
       _SFCB_RETURN(iMethodResponse(hdr, sb));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
@@ -672,13 +638,13 @@ getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
     if (resp) {
       free(resp);
     }
-    free(sreq);
+    free(hdr->binCtx->bHdr);
     _SFCB_RETURN(rs);
   }
-  free(sreq);
-  closeProviderContext(&binCtx);
+  free(hdr->binCtx->bHdr);
+  closeProviderContext(hdr->binCtx);
 
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments

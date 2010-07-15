@@ -117,6 +117,51 @@ buildGetInstanceRequest(void *parm)
   binCtx->pAs = NULL;
 }
 
+static void
+buildGetClassRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIConstClass *cls;
+  UtilStringBuffer *sb;
+  int             irc,
+                  i,
+                  sreqSize = sizeof(GetClassReq);       // -sizeof(MsgSegment);
+  GetClassReq    *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "getClass");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokGetClass   *req = (XtokGetClass *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  if (req->properties)
+    sreqSize += req->properties * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_GetClass;
+  sreq->hdr.count = req->properties + 2;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  for (i = 0; i < req->properties; i++)
+    sreq->properties[i] =
+        setCharsMsgSegment(req->propertyList.values[i].value);
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
 static void addProperty(XtokProperties *ps, XtokProperty *p)
 {
    XtokProperty *np;
@@ -1031,6 +1076,7 @@ getClass
        $$.properties=0;
 
        setRequest(parm,&$$,sizeof(XtokGetClass),OPS_GetClass);
+       buildGetClassRequest(parm);
     }
     | localNameSpacePath getClassParmsList
     {
@@ -1044,6 +1090,7 @@ getClass
        $$.properties=$2.properties;
 
        setRequest(parm,&$$,sizeof(XtokGetClass),OPS_GetClass);
+       buildGetClassRequest(parm);
     }
 ;
 
