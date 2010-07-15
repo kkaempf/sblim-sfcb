@@ -121,10 +121,7 @@ static void
 buildGetClassRequest(void *parm)
 {
   CMPIObjectPath *path;
-  CMPIConstClass *cls;
-  UtilStringBuffer *sb;
-  int             irc,
-                  i,
+  int             i,
                   sreqSize = sizeof(GetClassReq);       // -sizeof(MsgSegment);
   GetClassReq    *sreq;
   RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
@@ -158,6 +155,38 @@ buildGetClassRequest(void *parm)
   binCtx->bHdr->flags = req->flags;
   binCtx->rHdr = hdr;
   binCtx->bHdrSize = sreqSize;
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildDeleteClassRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  DeleteClassReq  sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokDeleteClass *req = (XtokDeleteClass *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  memset(&sreq, 0, sizeof(sreq));
+  sreq.hdr.operation = OPS_DeleteClass;
+  sreq.hdr.count = 2;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  sreq.objectPath = setObjectPathMsgSegment(path);
+  sreq.principal = setCharsMsgSegment(hdr->principal);
+  sreq.hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq.hdr;
+  binCtx->bHdr->flags = 0;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(sreq);
   binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
   binCtx->pAs = NULL;
 }
@@ -1628,6 +1657,7 @@ deleteClass
        $$.op.className=setCharsMsgSegment(NULL);
 
        setRequest(parm,&$$,sizeof(XtokDeleteClass),OPS_DeleteClass);
+       buildDeleteClassRequest(parm);
     }
     | localNameSpacePath deleteClassParm
     {
@@ -1638,6 +1668,7 @@ deleteClass
        $$.className = $2.className;
 
        setRequest(parm,&$$,sizeof(XtokDeleteClass),OPS_DeleteClass);
+       buildDeleteClassRequest(parm);
     }
 ;
 

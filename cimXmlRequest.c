@@ -650,45 +650,19 @@ getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 static          RespSegments
 deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  CMPIObjectPath *path;
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
-  DeleteClassReq  sreq;
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "deleteClass");
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokDeleteClass *req = (XtokDeleteClass *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  memset(&sreq, 0, sizeof(sreq));
-  sreq.hdr.operation = OPS_DeleteClass;
-  sreq.hdr.count = 2;
-
-  path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-                            NULL);
-  sreq.objectPath = setObjectPathMsgSegment(path);
-  sreq.principal = setCharsMsgSegment(ctx->principal);
-  sreq.hdr.sessionId = ctx->sessionId;
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq.hdr;
-  binCtx.bHdr->flags = 0;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sizeof(sreq);
-  binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.pAs = NULL;
-
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
-    resp = invokeProvider(&binCtx);
-    closeProviderContext(&binCtx);
+    resp = invokeProvider(hdr->binCtx);
+    closeProviderContext(hdr->binCtx);
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       if (resp) {
@@ -704,8 +678,8 @@ deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
     }
     _SFCB_RETURN(rs);
   }
-  closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  closeProviderContext(hdr->binCtx);
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments
