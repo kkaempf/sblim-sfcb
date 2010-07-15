@@ -668,6 +668,7 @@ deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
       if (resp) {
         free(resp);
       }
+      free(hdr->binCtx->bHdr);
       _SFCB_RETURN(iMethodResponse(hdr, NULL));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
@@ -676,9 +677,11 @@ deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
     if (resp) {
       free(resp);
     }
+    free(hdr->binCtx->bHdr);
     _SFCB_RETURN(rs);
   }
   closeProviderContext(hdr->binCtx);
+  free(hdr->binCtx->bHdr);
   _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
