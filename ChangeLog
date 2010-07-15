@@ -1,3 +1,8 @@
+2010-07-15  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* wbemcat:
+	[ 3030289 ] Update wbemcat to make REST requests
+
 2010-07-14  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* providerDrv.c:
