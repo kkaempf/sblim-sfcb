@@ -48,6 +48,7 @@ my $file = @ARGV[0];
 
 # Read all the XML data from the input file
 my @payload;
+my $payloadstr;
 if ($file) {
   open(XMLFILE,"<$file") || die "Cannot open $file: $!";
   @payload = (<XMLFILE>);
@@ -56,6 +57,8 @@ if ($file) {
   # If no input file specified then read payload data from stdin
   @payload = (<STDIN>);
 }
+
+$payloadstr = join("", @payload);
 
 if ( $user && $password )
 {
@@ -77,9 +80,10 @@ if ($content_type eq "application/xml") {
 }
 else {
     $req->header("Host" => $host,
-                 "Accept" => $content_type);
+                 "Accept" => $content_type, 
+                 "Content-Length" => length($payloadstr));
 }
-$req->content(join("", @payload));
+$req->content($payloadstr);
 
 my $res = $ua->request($req);
 if($res->is_success) {
