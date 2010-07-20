@@ -4,13 +4,16 @@ use strict;
 use Getopt::Long;
 use LWP::UserAgent;
 
-my $version = "1.0.0";
+my $version = "1.1.0";
 my $port = 5988;
 my $host = "localhost";
 my $protocol = "http";
 my $user="";
 my $password="";
 my $cred_host="";
+my $content_type = "application/xml";  #default for xml requests
+my $path = "/cimom";  #default for xml requests
+my $method= "POST";   #default for xml requests
 
 # Usage description
 sub usage {
@@ -18,18 +21,25 @@ sub usage {
    print "Send FILE containing CIM-XML data to CIMOM and display returned data.\n";
    print "If no input FILE specified then read the data from stdin.\n";
    print "\nOptions:\n";
-   print "  -t, --protocol=PROTOCOL\tProtocol with which to connect. Default=$protocol\n";
-   print "  -h, --host=HOSTNAME\tName of host running the CIMOM. Default=$host\n";
-   print "  -p, --port=PORT\tPort that the CIMOM is listening on. Default=$port\n";
-   print "  -u, --user=USER\tUser Name for authentication\n";
+   print "  -t,   --protocol=PROTOCOL\tProtocol with which to connect. Default=$protocol\n";
+   print "  -h,   --host=HOSTNAME\t\tName of host running the CIMOM. Default=$host\n";
+   print "  -p,   --port=PORT\t\tPort that the CIMOM is listening on. Default=$port\n";
+   print "        --path=PATH\t\tPath for request. Default=$path\n";
+   print "  -m    --method=METHOD\t\tHTTP method type. Default=$method\n";
+   print "        --type=CONTENT_TYPE\tContent-Type of the payload. Default=$content_type\n";
+   print "  -u,   --user=USER\t\tUser Name for authentication\n";
    print "  -pwd, --password=PASSWORD\tPassword for authentication\n";
-   print "  -?, --help\t\tDisplay this help and exit\n";
+
+   print "  -?,   --help\t\t\tDisplay this help and exit\n";
    exit;
 }
 
 # Process command line options, if any
 GetOptions("host|h=s" => \$host,
            "port|p=i" => \$port,
+           "method|m=s" => \$method,
+           "type=s" => \$content_type,
+           "path=s" => \$path,
            "protocol|t=s" => \$protocol,
            "user|u=s" => \$user,
            "password|pwd=s" => \$password,
@@ -37,15 +47,18 @@ GetOptions("host|h=s" => \$host,
 my $file = @ARGV[0];
 
 # Read all the XML data from the input file
-my @xml;
+my @payload;
+my $payloadstr;
 if ($file) {
   open(XMLFILE,"<$file") || die "Cannot open $file: $!";
-  @xml = (<XMLFILE>);
+  @payload = (<XMLFILE>);
   close(XMLFILE) || warn "Cannot close $file: $!";
 } else {
-  # If no input file specified then read XML data from stdin
-  @xml = (<STDIN>);
+  # If no input file specified then read payload data from stdin
+  @payload = (<STDIN>);
 }
+
+$payloadstr = join("", @payload);
 
 if ( $user && $password )
 {
@@ -59,11 +72,18 @@ else
 my $ua = LWP::UserAgent->new;
 $ua->agent("wbemcat $version");
 
-my $req = HTTP::Request->new(POST => "$protocol://$cred_host:$port/cimom");
-$req->content_type("application/xml");
-$req->header("CIMProtocolVersion" => "1.0",
-             "CIMOperation" => "MethodCall");
-$req->content(join("", @xml));
+my $req = HTTP::Request->new($method, "$protocol://$cred_host:$port$path");
+$req->content_type($content_type);
+if ($content_type eq "application/xml") {
+    $req->header("CIMProtocolVersion" => "1.0",
+		 "CIMOperation" => "MethodCall");
+}
+else {
+    $req->header("Host" => $host,
+                 "Accept" => $content_type, 
+                 "Content-Length" => length($payloadstr));
+}
+$req->content($payloadstr);
 
 my $res = $ua->request($req);
 if($res->is_success) {

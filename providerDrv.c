@@ -343,33 +343,86 @@ stopNextProc()
   return 0;
 }
 
+ static int getActivProvCount() {
+   ProviderInfo* tmp;
+   int count = 0;
+   for (tmp = activProvs; tmp; tmp = tmp->next)
+     count++;
+   return count;
+ }
+
+ typedef struct _provLibAndTypes {
+   void* lib;
+#define INST  1
+#define ASSOC 2
+#define METH  4
+#define IND   8
+   int types; /* bitmask for each type */
+ } ProvLibAndTypes;
+
+ /* hasBeenCleaned returns < 0 if the cleanup function for type for a provider
+   (represented by plib, the handle from it's dlopen()) has been called
+
+   index is an out param; it's the index for plib in list (or the next available
+   position if it's not yet in list)
+
+   Details:
+   we need to take special care when cleaning up, since we only want to call
+   the cleanup function (for each MI) only once, even if there are multiple
+   classes handled by the same provider.  Also, we can't just toggle a
+   "cleanedUp" flag for the whole proc, since we may be grouping. So we need
+   to track cleanup calls for each type for each provider in the proc.
+ */
+
+ static int hasBeenCleaned(ProvLibAndTypes* list, int type, void* plib, int* index) {
+   int rc = 0;
+   int i;
+   for (i=0; list[i].lib > 0; i++) {
+     if (list[i].lib == plib) {
+       rc = list[i].types & type;
+       break;
+     }
+   }
+   *index = i;
+   return rc;
+ }
+
 static void
 stopProc(void *p)
 {
-  ProviderInfo   *pInfo,
-                 *temp;
+  ProviderInfo   *pInfo;
   CMPIContext    *ctx = NULL;
 
+  int apc = getActivProvCount();
+  ProvLibAndTypes cleanedProvs[apc];
+  int i;
+  for (i=0; i < apc; i++) { cleanedProvs[i].lib = 0; cleanedProvs[i].types = 0; }
+  int cpli = 0; /* the index into cleanedProvs for a given prov lib */
+
   ctx = native_new_CMPIContext(MEM_NOT_TRACKED, NULL);
-  // for (pInfo=curProvProc->firstProv; pInfo; pInfo=pInfo->next) {
-  for (pInfo = activProvs; pInfo; pInfo = pInfo->next) {
-    for (temp = activProvs; temp; temp = temp->next) {
-      if ((strcmp(temp->providerName, pInfo->providerName) == 0)
-          && (strcmp(temp->className, pInfo->className) != 0))
-        break;
-      if (pInfo->classMI)
-        pInfo->classMI->ft->cleanup(pInfo->classMI, ctx);
-      if (pInfo->instanceMI)
-        pInfo->instanceMI->ft->cleanup(pInfo->instanceMI, ctx, 1);
-      if (pInfo->associationMI)
-        pInfo->associationMI->ft->cleanup(pInfo->associationMI, ctx, 1);
-      if (pInfo->methodMI)
-        pInfo->methodMI->ft->cleanup(pInfo->methodMI, ctx, 1);
-      if (pInfo->indicationMI) {
-        pInfo->indicationMI->ft->disableIndications(pInfo->indicationMI,
-                                                       ctx);
-        pInfo->indicationMI->ft->cleanup(pInfo->indicationMI, ctx, 1);
-      }
+  for (pInfo = activProvs; pInfo; pInfo = pInfo->next,cpli++) {
+    if (pInfo->classMI ) pInfo->classMI->ft->cleanup(pInfo->classMI, ctx);
+    if (pInfo->instanceMI && (hasBeenCleaned(cleanedProvs, INST, pInfo->library, &cpli) == 0)) {
+      pInfo->instanceMI->ft->cleanup(pInfo->instanceMI, ctx, 1);
+      cleanedProvs[cpli].lib = pInfo->library;
+      cleanedProvs[cpli].types |= INST;
+    }
+    if (pInfo->associationMI && (hasBeenCleaned(cleanedProvs, ASSOC, pInfo->library, &cpli) == 0)) {
+      pInfo->associationMI->ft->cleanup(pInfo->associationMI, ctx, 1);
+      cleanedProvs[cpli].lib = pInfo->library;
+      cleanedProvs[cpli].types |= ASSOC;
+    }
+    if (pInfo->methodMI && (hasBeenCleaned(cleanedProvs, METH, pInfo->library, &cpli) == 0)) {
+      pInfo->methodMI->ft->cleanup(pInfo->methodMI, ctx, 1);
+      cleanedProvs[cpli].lib = pInfo->library;
+      cleanedProvs[cpli].types |= METH;
+    }
+    if (pInfo->indicationMI && (hasBeenCleaned(cleanedProvs, IND, pInfo->library, &cpli) == 0)) {
+      pInfo->indicationMI->ft->disableIndications(pInfo->indicationMI,
+						  ctx);
+      pInfo->indicationMI->ft->cleanup(pInfo->indicationMI, ctx, 1);
+      cleanedProvs[cpli].lib = pInfo->library;
+      cleanedProvs[cpli].types |= IND;
     }
   }
   mlogf(M_INFO, M_SHOW, "---  stopped %s %d\n", processName, getpid());
@@ -452,8 +505,7 @@ providerIdleThread()
                   val,
                   doNotExit,
                   noBreak = 1;
-  ProviderInfo   *pInfo,
-                 *temp;
+  ProviderInfo   *pInfo;
   ProviderProcess *proc;
   CMPIContext    *ctx = NULL;
   CMPIStatus      crc;
@@ -489,35 +541,57 @@ providerIdleThread()
             if ((now - proc->lastActivity) > provTimeoutInterval) { 
               ctx = native_new_CMPIContext(MEM_TRACKED, NULL);
               noBreak = 0;
+
+	      int apc = getActivProvCount();
+	      ProvLibAndTypes cleanedProvs[apc];
+	      int i;
+	      for (i=0; i < apc; i++) { cleanedProvs[i].lib = 0; cleanedProvs[i].types = 0; }
+	      int cpli = 0; /* the index into cleanedProvs for a given prov lib */
+
 	      /* loop through all provs in proc & perform cleanup as needed */
               for (crc.rc = 0, pInfo = activProvs; pInfo;
-                   pInfo = pInfo->next) {
-		/* loop through provs in this proc */
-                for (temp = activProvs; temp; temp = temp->next) {
-		  /* break out on classname mismatch */
-                  if ((strcmp(temp->providerName, pInfo->providerName) ==
-                       0)
-                      && (strcmp(temp->className, pInfo->className) != 0))
-                    break;
+                   pInfo = pInfo->next,cpli++) {
                   if (pInfo->library == NULL)
                     continue;
-                  if (crc.rc == 0 && pInfo->instanceMI)
+
+                  if (crc.rc == 0 && pInfo->instanceMI && (hasBeenCleaned(cleanedProvs, INST, pInfo->library, &cpli) == 0)) {
                     crc =
                         pInfo->instanceMI->ft->cleanup(pInfo->instanceMI,
                                                        ctx, 0);
-                  if (crc.rc == 0 && pInfo->associationMI)
+		    if (crc.rc==CMPI_RC_OK) {
+		      cleanedProvs[cpli].lib = pInfo->library;
+		      cleanedProvs[cpli].types |= INST;
+		    }
+		  }
+                  if (crc.rc == 0 && pInfo->associationMI && (hasBeenCleaned(cleanedProvs, ASSOC, pInfo->library, &cpli) == 0)) {
                     crc =
                         pInfo->associationMI->ft->cleanup(pInfo->
                                                           associationMI,
                                                           ctx, 0);
-                  if (crc.rc == 0 && pInfo->methodMI)
+		    if (crc.rc==CMPI_RC_OK) {
+		      cleanedProvs[cpli].lib = pInfo->library;
+		      cleanedProvs[cpli].types |= ASSOC;
+		    }
+		  }
+                  if (crc.rc == 0 && pInfo->methodMI && (hasBeenCleaned(cleanedProvs, METH, pInfo->library, &cpli) == 0)) {
                     crc =
                         pInfo->methodMI->ft->cleanup(pInfo->methodMI, ctx,
                                                      0);
-                  if (crc.rc == 0 && pInfo->indicationMI)
+		    if (crc.rc==CMPI_RC_OK) {
+		      cleanedProvs[cpli].lib = pInfo->library;
+		      cleanedProvs[cpli].types |= METH;
+		    }
+		  }
+                  if (crc.rc == 0 && pInfo->indicationMI && (hasBeenCleaned(cleanedProvs, IND, pInfo->library, &cpli) == 0)) {
                     crc =
                         pInfo->indicationMI->ft->cleanup(pInfo->indicationMI, ctx,
                                                      0);
+		    if (crc.rc==CMPI_RC_OK) {
+		      cleanedProvs[cpli].lib = pInfo->library;
+		      cleanedProvs[cpli].types |= IND;
+		    }
+		  }
+
                   _SFCB_TRACE(1,
                               ("--- Cleanup rc: %d %s-%d", crc.rc,
                                processName, currentProc));
@@ -525,7 +599,7 @@ providerIdleThread()
                     doNotExit = 1; /* stop idle monitoring */
                   if (crc.rc == CMPI_RC_DO_NOT_UNLOAD)
                     doNotExit = noBreak = 1;
-                  if (crc.rc == 0) {
+                  if (crc.rc == CMPI_RC_OK) {
                     _SFCB_TRACE(1,
                                 ("--- Unloading provider %s-%d",
                                  pInfo->providerName, currentProc));
@@ -534,12 +608,12 @@ providerIdleThread()
                     pInfo->instanceMI = NULL;
                     pInfo->associationMI = NULL;
                     pInfo->methodMI = NULL;
+                    pInfo->indicationMI = NULL;
                     pInfo->initialized = 0;
                     pthread_mutex_destroy(&pInfo->initMtx);
                   } else
                     doNotExit = 1;
                 }
-              }
 	      /* exit unless prov asks us not to, or returned bad cleanup rc */
               if (doNotExit == 0) {
                 dumpTiming(currentProc);
