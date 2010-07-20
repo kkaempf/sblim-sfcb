@@ -1,3 +1,10 @@
+2010-07-20 Sean Swehla <smswehla@linux.vnet.ibm.com>
+
+	*  cimXmlOps.y, cimXmlParser.c, cimXmlParser.h, cimXmlRequest.c,
+           providerMgr.h, test/unittest/xmlUnescape.c
+ 
+	[ 3031827 ] Parser does not create BinRequestContext
+
 2010-07-15  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* wbemcat:
