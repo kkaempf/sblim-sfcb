@@ -190,7 +190,7 @@ if test "$enable_local_connect_only" == "yes"; then
     enable_tests="localtests,gcov"
 else
     # This means all tests should be on
-    enable_tests="unit,gcov,wbemcli,xml,commands,slp,providers"
+    enable_tests="unit,gcov,wbemcli,xml,commands,slp,providers,cimrs"
 fi
 fi
 
@@ -209,6 +209,8 @@ do
             test_unit=yes;;
         xml|xmltest)
             test_xml=yes;;
+        cimrs)
+            test_cimrs=yes;;
         commands|command|cmd|cmds)
             test_cmd=yes;;
 	slp)
@@ -231,6 +233,7 @@ AM_CONDITIONAL(UNITTEST,[test "$test_unit" == "yes"])
 AM_CONDITIONAL(GCOV,[test "$test_gcov" == "yes"])
 AM_CONDITIONAL(WCTEST,[test "$test_wbemcli" == "yes"])
 AM_CONDITIONAL(XMLTEST,[test "$test_xml" == "yes"])
+AM_CONDITIONAL(CIMRSTEST,[test "$test_cimrs" == "yes"])
 AM_CONDITIONAL(PYWBEMTEST,[test "$test_pywbem" == "yes"])
 AM_CONDITIONAL(UDSTEST,[test "$enable_uds" == "yes"])
 AM_CONDITIONAL(CMDTEST,[test "$test_cmd" == "yes"])
@@ -266,6 +269,11 @@ if [test "$enable_tests"]; then
     if [test "$test_xml" == "yes"]; then
         TEST_SUBDIRS="$TEST_SUBDIRS xmltest"
         AC_CONFIG_FILES([test/xmltest/Makefile])
+    fi
+
+    if [test "$test_cimrs" == "yes"]; then
+        TEST_SUBDIRS="$TEST_SUBDIRS cimrstest"
+        AC_CONFIG_FILES([test/cimrstest/Makefile])
     fi
 
     if [test "$test_unit" == "yes"]; then
