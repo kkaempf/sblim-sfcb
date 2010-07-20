@@ -32,7 +32,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "cimXmlGen.h"
 #include "cimXmlParser.h"
+#include "native.h"
 
 
 //
@@ -59,6 +61,132 @@ static void setRequest(void *parm, void *req, unsigned long size, int type)
    ((ParserControl*)parm)->reqHdr.cimRequest=malloc(size);
    memcpy(((ParserControl*)parm)->reqHdr.cimRequest,req,size);
    ((ParserControl*)parm)->reqHdr.opType = type;
+}
+
+static void
+buildGetInstanceRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIValue       val;
+  CMPIType        type;
+  GetInstanceReq *sreq;
+  int             sreqSize = sizeof(GetInstanceReq);
+  CMPIValue      *valp;
+  int             i,
+                  m;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  XtokGetInstance *req = (XtokGetInstance *)hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  if (req->properties)
+    sreqSize += req->properties * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_GetInstance;
+  sreq->hdr.count = req->properties + 2;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+
+  for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
+    valp =
+        getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
+                           req->instanceName.bindings.keyBindings[i].value,
+                           &req->instanceName.bindings.keyBindings[i].ref,
+                           &val, &type, req->op.nameSpace.data);
+    CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp,
+             type);
+  }
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  for (i = 0; i < req->properties; i++) {
+    sreq->properties[i] =
+        setCharsMsgSegment(req->propertyList.values[i].value);
+  }
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildGetClassRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  int             i,
+                  sreqSize = sizeof(GetClassReq);       // -sizeof(MsgSegment);
+  GetClassReq    *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokGetClass   *req = (XtokGetClass *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  if (req->properties)
+    sreqSize += req->properties * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_GetClass;
+  sreq->hdr.count = req->properties + 2;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  for (i = 0; i < req->properties; i++)
+    sreq->properties[i] =
+        setCharsMsgSegment(req->propertyList.values[i].value);
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildDeleteClassRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  DeleteClassReq *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokDeleteClass *req = (XtokDeleteClass *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  sreq = calloc(1, sizeof(DeleteClassReq));
+  sreq->hdr.operation = OPS_DeleteClass;
+  sreq->hdr.count = 2;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = 0;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
 }
 
 static void addProperty(XtokProperties *ps, XtokProperty *p)
@@ -975,6 +1103,7 @@ getClass
        $$.properties=0;
 
        setRequest(parm,&$$,sizeof(XtokGetClass),OPS_GetClass);
+       buildGetClassRequest(parm);
     }
     | localNameSpacePath getClassParmsList
     {
@@ -988,6 +1117,7 @@ getClass
        $$.properties=$2.properties;
 
        setRequest(parm,&$$,sizeof(XtokGetClass),OPS_GetClass);
+       buildGetClassRequest(parm);
     }
 ;
 
@@ -1247,6 +1377,7 @@ getInstance
        $$.instNameSet = 0;
 
        setRequest(parm,&$$,sizeof(XtokGetInstance),OPS_GetInstance);
+       buildGetInstanceRequest(parm);
     }
     | localNameSpacePath getInstanceParmsList
     {
@@ -1261,6 +1392,7 @@ getInstance
        $$.properties=$2.properties;
 
        setRequest(parm,&$$,sizeof(XtokGetInstance),OPS_GetInstance);
+       buildGetInstanceRequest(parm);
     }
 ;
 
@@ -1523,6 +1655,7 @@ deleteClass
        $$.op.className=setCharsMsgSegment(NULL);
 
        setRequest(parm,&$$,sizeof(XtokDeleteClass),OPS_DeleteClass);
+       buildDeleteClassRequest(parm);
     }
     | localNameSpacePath deleteClassParm
     {
@@ -1533,6 +1666,7 @@ deleteClass
        $$.className = $2.className;
 
        setRequest(parm,&$$,sizeof(XtokDeleteClass),OPS_DeleteClass);
+       buildDeleteClassRequest(parm);
     }
 ;
 
