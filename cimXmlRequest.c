@@ -606,64 +606,30 @@ genFirstChunkErrorResponse(BinRequestContext * binCtx, int rc, char *msg)
 static          RespSegments
 getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  CMPIObjectPath *path;
-  CMPIConstClass *cls;
   UtilStringBuffer *sb;
-  int             irc,
-                  i,
-                  sreqSize = sizeof(GetClassReq);       // -sizeof(MsgSegment);
-  BinRequestContext binCtx;
+  int             irc;
   BinResponseHdr *resp;
-  GetClassReq    *sreq;
+  CMPIConstClass *cls;
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "getClass");
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokGetClass   *req = (XtokGetClass *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  if (req->properties)
-    sreqSize += req->properties * sizeof(MsgSegment);
-  sreq = calloc(1, sreqSize);
-  sreq->hdr.operation = OPS_GetClass;
-  sreq->hdr.count = req->properties + 2;
-
-  path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-                            NULL);
-  sreq->objectPath = setObjectPathMsgSegment(path);
-  sreq->principal = setCharsMsgSegment(ctx->principal);
-  sreq->hdr.sessionId = ctx->sessionId;
-
-  for (i = 0; i < req->properties; i++)
-    sreq->properties[i] =
-        setCharsMsgSegment(req->propertyList.values[i].value);
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq->hdr;
-  binCtx.bHdr->flags = req->flags;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sreqSize;
-  binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.pAs = NULL;
-
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
-    resp = invokeProvider(&binCtx);
-    closeProviderContext(&binCtx);
+    resp = invokeProvider(hdr->binCtx);
+    closeProviderContext(hdr->binCtx);
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       cls = relocateSerializedConstClass(resp->object[0].data);
       sb = UtilFactory->newStrinBuffer(1024);
-      cls2xml(cls, sb, binCtx.bHdr->flags);
+      cls2xml(cls, sb, hdr->binCtx->bHdr->flags);
       if (resp) {
         free(resp);
       }
-      free(sreq);
+      free(hdr->binCtx->bHdr);
       _SFCB_RETURN(iMethodResponse(hdr, sb));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
@@ -672,62 +638,37 @@ getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
     if (resp) {
       free(resp);
     }
-    free(sreq);
+    free(hdr->binCtx->bHdr);
     _SFCB_RETURN(rs);
   }
-  free(sreq);
-  closeProviderContext(&binCtx);
+  free(hdr->binCtx->bHdr);
+  closeProviderContext(hdr->binCtx);
 
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments
 deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  CMPIObjectPath *path;
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
-  DeleteClassReq  sreq;
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "deleteClass");
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokDeleteClass *req = (XtokDeleteClass *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  memset(&sreq, 0, sizeof(sreq));
-  sreq.hdr.operation = OPS_DeleteClass;
-  sreq.hdr.count = 2;
-
-  path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-                            NULL);
-  sreq.objectPath = setObjectPathMsgSegment(path);
-  sreq.principal = setCharsMsgSegment(ctx->principal);
-  sreq.hdr.sessionId = ctx->sessionId;
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq.hdr;
-  binCtx.bHdr->flags = 0;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sizeof(sreq);
-  binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.pAs = NULL;
-
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
-    resp = invokeProvider(&binCtx);
-    closeProviderContext(&binCtx);
+    resp = invokeProvider(hdr->binCtx);
+    closeProviderContext(hdr->binCtx);
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       if (resp) {
         free(resp);
       }
+      free(hdr->binCtx->bHdr);
       _SFCB_RETURN(iMethodResponse(hdr, NULL));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
@@ -736,10 +677,12 @@ deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
     if (resp) {
       free(resp);
     }
+    free(hdr->binCtx->bHdr);
     _SFCB_RETURN(rs);
   }
-  closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  closeProviderContext(hdr->binCtx);
+  free(hdr->binCtx->bHdr);
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments
@@ -1063,80 +1006,31 @@ static          RespSegments
 getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "getInstance");
-  CMPIObjectPath *path;
   CMPIInstance   *inst;
-  CMPIType        type;
-  CMPIValue       val,
-                 *valp;
   UtilStringBuffer *sb;
-  int             irc,
-                  i,
-                  m,
-                  sreqSize = sizeof(GetInstanceReq);    // -sizeof(MsgSegment);
-  BinRequestContext binCtx;
+  int             irc;
   BinResponseHdr *resp;
-  RespSegments    rsegs;
-  GetInstanceReq *sreq;
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokGetInstance *req = (XtokGetInstance *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  if (req->properties)
-    sreqSize += req->properties * sizeof(MsgSegment);
-  sreq = calloc(1, sreqSize);
-  sreq->hdr.operation = OPS_GetInstance;
-  sreq->hdr.count = req->properties + 2;
-
-  path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-                            NULL);
-  for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
-    valp =
-        getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
-                           req->instanceName.bindings.keyBindings[i].value,
-                           &req->instanceName.bindings.keyBindings[i].ref,
-                           &val, &type, req->op.nameSpace.data);
-    CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp,
-             type);
-  }
-  sreq->objectPath = setObjectPathMsgSegment(path);
-  sreq->principal = setCharsMsgSegment(ctx->principal);
-  sreq->hdr.sessionId = ctx->sessionId;
-
-  for (i = 0; i < req->properties; i++)
-    sreq->properties[i] =
-        setCharsMsgSegment(req->propertyList.values[i].value);
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq->hdr;
-  binCtx.bHdr->flags = req->flags;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sreqSize;
-  binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
-
+  irc = getProviderContext(hdr->binCtx);
   _SFCB_TRACE(1, ("--- Provider context gotten"));
+
   if (irc == MSG_X_PROVIDER) {
-    RespSegments    rs;
-    resp = invokeProvider(&binCtx);
-    closeProviderContext(&binCtx);
+    resp = invokeProvider(hdr->binCtx);
+    closeProviderContext(hdr->binCtx);
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       inst = relocateSerializedInstance(resp->object[0].data);
       sb = UtilFactory->newStrinBuffer(1024);
-      instance2xml(inst, sb, binCtx.bHdr->flags);
-      rsegs = iMethodResponse(hdr, sb);
-      free(sreq);
+      instance2xml(inst, sb, hdr->binCtx->bHdr->flags);
+      free(hdr->binCtx->bHdr);
       if (resp) {
         free(resp);
       }
-      _SFCB_RETURN(rsegs);
+      _SFCB_RETURN(iMethodResponse(hdr, sb));
     }
-    free(sreq);
+    free(hdr->binCtx->bHdr);
+    RespSegments    rs;
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
                                                (char *) resp->object[0].
                                                data));
@@ -1145,10 +1039,10 @@ getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
     }
     _SFCB_RETURN(rs);
   }
-  free(sreq);
-  closeProviderContext(&binCtx);
+  free(hdr->binCtx->bHdr);
+  closeProviderContext(hdr->binCtx);
 
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments
@@ -2877,7 +2771,11 @@ handleCimXmlRequest(CimXmlRequestContext * ctx)
   }
 #endif
 
-  hdr = scanCimXmlRequest(ctx->cimXmlDoc);
+  /* Sending both params is a bit redundant, but it
+     saves having to rework all of the operations
+     at once. This should be changed after all ops
+     are handled in the parser. */
+  hdr = scanCimXmlRequest(ctx, ctx->cimXmlDoc);
 
 #ifdef SFCB_DEBUG
   if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {

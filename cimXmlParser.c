@@ -1671,7 +1671,7 @@ yyerror(char *s)
 }
 
 RequestHdr
-scanCimXmlRequest(char *xmlData)
+scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData)
 {
   ParserControl   control;
 
@@ -1681,6 +1681,9 @@ scanCimXmlRequest(char *xmlData)
   control.reqHdr.cimRequest = NULL;
   control.reqHdr.iMethod = NULL;
   control.reqHdr.errMsg = NULL;
+  control.reqHdr.binCtx = calloc(1, sizeof(BinRequestContext));
+  control.reqHdr.principal = ctx->principal;
+  control.reqHdr.sessionId = ctx->sessionId;
   control.paramValues.last = control.paramValues.first = NULL;
   control.properties.last = control.properties.first = NULL;
   control.qualifiers.last = control.qualifiers.first = NULL;
