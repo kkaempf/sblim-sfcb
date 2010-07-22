@@ -1,0 +1,31 @@
+  "$ref": "/cimrs/namespaces/root%2Finterop/classes/CIM_ObjectManager",
+  "name": "CIM_ManagedElement",
+  "superclass": "CIM_WBEMService",
+  "qualifiers": [
+    { "name": "Version",
+      "value": "2.8.0" },
+    { "name": "UMLPackagePath",
+      "value": "CIM::Interop" },
+  ],
+  "properties": [
+    { "name": "Name",
+      "type": "string",
+      "qualifiers": [
+        { "name": "Override",
+          "value": "Name" },
+      ]
+    },
+    { "name": "ElementName",
+      "type": "string",
+      "qualifiers": [
+        { "name": "Override",
+          "value": "ElementName" },
+      ]
+    },
+    { "name": "Description",
+      "type": "string",
+      "qualifiers": [
+        { "name": "Override",
+          "value": "Description" },
+      ]
+    }
