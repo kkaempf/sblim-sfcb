@@ -1,3 +1,9 @@
+2010-07-22  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* test/cimrstest/*
+
+	Initial add of cimrs tests and lines result files
+
 2010-07-20 Sean Swehla <smswehla@linux.vnet.ibm.com>
 
 	*  cimXmlOps.y, cimXmlParser.c, cimXmlParser.h, cimXmlRequest.c,
