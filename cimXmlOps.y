@@ -34,8 +34,12 @@
 #include <ctype.h>
 #include "cimXmlGen.h"
 #include "cimXmlParser.h"
+#include "objectImpl.h"
+#include "constClass.h"
 #include "native.h"
 
+extern CMPIConstClass initConstClass(ClClass * cl);
+extern MsgSegment setConstClassMsgSegment(CMPIConstClass * cl);
 
 //
 // Define the global parser state object:
@@ -185,6 +189,160 @@ buildDeleteClassRequest(void *parm)
   binCtx->bHdr->flags = 0;
   binCtx->rHdr = hdr;
   binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildCreateClassRequest(void *parm)
+{
+  CMPIConstClass *cls;
+  CMPIObjectPath *path;
+  ClClass        *cl;
+  ClClass        *tmp;
+  CreateClassReq *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  XtokProperty   *p = NULL;
+  XtokProperties *ps = NULL;
+  XtokQualifier  *q = NULL;
+  XtokQualifiers *qs = NULL;
+  XtokMethod     *m = NULL;
+  XtokMethods    *ms = NULL;
+  XtokParam      *r = NULL;
+  XtokParams     *rs = NULL;
+  XtokClass      *c;
+  CMPIData        d;
+  CMPIParameter   pa;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokCreateClass *req = (XtokCreateClass *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+
+  cl = ClClassNew(req->op.className.data,
+                  req->superClass ? req->superClass : NULL);
+  c = &req->cls;
+
+  qs = &c->qualifiers;
+  for (q = qs->first; q; q = q->next) {
+    if (q->value.value == NULL) {
+      d.state = CMPI_nullValue;
+      d.value.uint64 = 0;
+    } else {
+      d.state = CMPI_goodValue;
+      d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+    }
+    d.type = q->type;
+    ClClassAddQualifier(&cl->hdr, &cl->qualifiers, q->name, d);
+  }
+
+  ps = &c->properties;
+  for (p = ps->first; p; p = p->next) {
+    ClProperty     *prop;
+    int             propId;
+    if (p->val.val.value == NULL) {
+      d.state = CMPI_nullValue;
+      d.value.uint64 = 0;
+    } else {
+      d.state = CMPI_goodValue;
+      d.value =
+          str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
+                        req->op.nameSpace.data);
+    }
+    d.type = p->valueType;
+    propId = ClClassAddProperty(cl, p->name, d, p->referenceClass);
+
+    qs = &p->val.qualifiers;
+    prop =
+        ((ClProperty *) ClObjectGetClSection(&cl->hdr, &cl->properties)) +
+        propId - 1;
+    for (q = qs->first; q; q = q->next) {
+      if (q->value.value == NULL) {
+        d.state = CMPI_nullValue;
+        d.value.uint64 = 0;
+      } else {
+        d.state = CMPI_goodValue;
+        d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+      }
+      d.type = q->type;
+      ClClassAddPropertyQualifier(&cl->hdr, prop, q->name, d);
+    }
+  }
+
+  ms = &c->methods;
+  for (m = ms->first; m; m = m->next) {
+    ClMethod       *meth;
+    ClParameter    *parm;
+    int             methId,
+                    parmId;
+
+    methId = ClClassAddMethod(cl, m->name, m->type);
+    meth =
+        ((ClMethod *) ClObjectGetClSection(&cl->hdr, &cl->methods)) +
+        methId - 1;
+
+    qs = &m->qualifiers;
+    for (q = qs->first; q; q = q->next) {
+      if (q->value.value == NULL) {
+        d.state = CMPI_nullValue;
+        d.value.uint64 = 0;
+      } else {
+        d.state = CMPI_goodValue;
+        d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+      }
+      d.type = q->type;
+      ClClassAddMethodQualifier(&cl->hdr, meth, q->name, d);
+    }
+
+    rs = &m->params;
+    for (r = rs->first; r; r = r->next) {
+      pa.type = r->type;
+      pa.arraySize = (unsigned int) r->arraySize;
+      pa.refName = r->refClass;
+      parmId = ClClassAddMethParameter(&cl->hdr, meth, r->name, pa);
+      parm = ((ClParameter *)
+              ClObjectGetClSection(&cl->hdr,
+                                   &meth->parameters)) + methId - 1;
+
+      qs = &r->qualifiers;
+      for (q = qs->first; q; q = q->next) {
+        if (q->value.value == NULL) {
+          d.state = CMPI_nullValue;
+          d.value.uint64 = 0;
+        } else {
+          d.state = CMPI_goodValue;
+          d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+        }
+        d.type = q->type;
+        ClClassAddMethParamQualifier(&cl->hdr, parm, q->name, d);
+      }
+    }
+  }
+
+  tmp = cl;
+  cl = ClClassRebuildClass(cl, NULL);
+  ClClassFreeClass(tmp);
+  cls = calloc(1, sizeof(*cls));
+  *cls = initConstClass(cl);
+
+  int sreqSize = sizeof(*sreq) + (3 * sizeof(MsgSegment));
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_CreateClass;
+  sreq->hdr.count = 3;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->path = setObjectPathMsgSegment(path);
+  sreq->cls = setConstClassMsgSegment(cls);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
   binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
   binCtx->pAs = NULL;
 }
@@ -1492,6 +1650,7 @@ createClass
        $$.superClass=NULL;
 
        setRequest(parm,&$$,sizeof(XtokCreateClass),OPS_CreateClass);
+       buildCreateClassRequest(parm);
     }
     | localNameSpacePath createClassParm
     {
@@ -1503,6 +1662,7 @@ createClass
        $$.cls = $2.cls;
 
        setRequest(parm,&$$,sizeof(XtokCreateClass),OPS_CreateClass);
+       buildCreateClassRequest(parm);
     }
 ;
 

@@ -689,162 +689,24 @@ static          RespSegments
 createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "createClass");
-  CMPIObjectPath *path;
-  CMPIConstClass  cls;
-  ClClass        *cl;
-  ClClass        *tmp;
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
-  CreateClassReq  sreq = BINREQ(OPS_CreateClass, 3);
-
-  XtokProperty   *p = NULL;
-  XtokProperties *ps = NULL;
-  XtokQualifier  *q = NULL;
-  XtokQualifiers *qs = NULL;
-  XtokMethod     *m = NULL;
-  XtokMethods    *ms = NULL;
-  XtokParam      *r = NULL;
-  XtokParams     *rs = NULL;
-  XtokClass      *c;
-  CMPIData        d;
-  CMPIParameter   pa;
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokCreateClass *req = (XtokCreateClass *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-                            NULL);
-
-  cl = ClClassNew(req->op.className.data,
-                  req->superClass ? req->superClass : NULL);
-  c = &req->cls;
-
-  qs = &c->qualifiers;
-  for (q = qs->first; q; q = q->next) {
-    if (q->value.value == NULL) {
-      d.state = CMPI_nullValue;
-      d.value.uint64 = 0;
-    } else {
-      d.state = CMPI_goodValue;
-      d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
-    }
-    d.type = q->type;
-    ClClassAddQualifier(&cl->hdr, &cl->qualifiers, q->name, d);
-  }
-
-  ps = &c->properties;
-  for (p = ps->first; p; p = p->next) {
-    ClProperty     *prop;
-    int             propId;
-    if (p->val.val.value == NULL) {
-      d.state = CMPI_nullValue;
-      d.value.uint64 = 0;
-    } else {
-      d.state = CMPI_goodValue;
-      d.value =
-          str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
-                        req->op.nameSpace.data);
-    }
-    d.type = p->valueType;
-    propId = ClClassAddProperty(cl, p->name, d, p->referenceClass);
-
-    qs = &p->val.qualifiers;
-    prop =
-        ((ClProperty *) ClObjectGetClSection(&cl->hdr, &cl->properties)) +
-        propId - 1;
-    for (q = qs->first; q; q = q->next) {
-      if (q->value.value == NULL) {
-        d.state = CMPI_nullValue;
-        d.value.uint64 = 0;
-      } else {
-        d.state = CMPI_goodValue;
-        d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
-      }
-      d.type = q->type;
-      ClClassAddPropertyQualifier(&cl->hdr, prop, q->name, d);
-    }
-  }
-
-  ms = &c->methods;
-  for (m = ms->first; m; m = m->next) {
-    ClMethod       *meth;
-    ClParameter    *parm;
-    int             methId,
-                    parmId;
-
-    methId = ClClassAddMethod(cl, m->name, m->type);
-    meth =
-        ((ClMethod *) ClObjectGetClSection(&cl->hdr, &cl->methods)) +
-        methId - 1;
-
-    qs = &m->qualifiers;
-    for (q = qs->first; q; q = q->next) {
-      if (q->value.value == NULL) {
-        d.state = CMPI_nullValue;
-        d.value.uint64 = 0;
-      } else {
-        d.state = CMPI_goodValue;
-        d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
-      }
-      d.type = q->type;
-      ClClassAddMethodQualifier(&cl->hdr, meth, q->name, d);
-    }
-
-    rs = &m->params;
-    for (r = rs->first; r; r = r->next) {
-      pa.type = r->type;
-      pa.arraySize = (unsigned int) r->arraySize;
-      pa.refName = r->refClass;
-      parmId = ClClassAddMethParameter(&cl->hdr, meth, r->name, pa);
-      parm = ((ClParameter *)
-              ClObjectGetClSection(&cl->hdr,
-                                   &meth->parameters)) + methId - 1;
-
-      qs = &r->qualifiers;
-      for (q = qs->first; q; q = q->next) {
-        if (q->value.value == NULL) {
-          d.state = CMPI_nullValue;
-          d.value.uint64 = 0;
-        } else {
-          d.state = CMPI_goodValue;
-          d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
-        }
-        d.type = q->type;
-        ClClassAddMethParamQualifier(&cl->hdr, parm, q->name, d);
-      }
-    }
-  }
-
-  tmp = cl;
-  cl = ClClassRebuildClass(cl, NULL);
-  ClClassFreeClass(tmp);
-  cls = initConstClass(cl);
-
-  sreq.principal = setCharsMsgSegment(ctx->principal);
-  sreq.path = setObjectPathMsgSegment(path);
-  sreq.cls = setConstClassMsgSegment(&cls);
-  sreq.hdr.sessionId = ctx->sessionId;
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq.hdr;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sizeof(sreq);
-  binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
-    resp = invokeProvider(&binCtx);
-    closeProviderContext(&binCtx);
+    resp = invokeProvider(hdr->binCtx);
+    closeProviderContext(hdr->binCtx);
     resp->rc--;
-    ClClassFreeClass(cl);
+// TODO: How will we free this, now that it's getting
+// built somewhere else?
+    CMPIConstClass *cl = ((CMPIConstClass *)
+                         ((CreateClassReq *)(hdr->binCtx->bHdr))
+                         ->cls.data);
+    ClClassFreeClass(cl->hdl);
     if (resp->rc == CMPI_RC_OK) {
       if (resp) {
         free(resp);
@@ -859,8 +721,8 @@ createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
     }
     _SFCB_RETURN(rs);
   }
-  closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  closeProviderContext(hdr->binCtx);
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments
