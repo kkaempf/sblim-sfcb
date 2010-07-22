@@ -40,6 +40,7 @@
 
 extern CMPIConstClass initConstClass(ClClass * cl);
 extern MsgSegment setConstClassMsgSegment(CMPIConstClass * cl);
+extern MsgSegment setInstanceMsgSegment(CMPIInstance *ci);
 
 //
 // Define the global parser state object:
@@ -337,6 +338,75 @@ buildCreateClassRequest(void *parm)
   sreq->principal = setCharsMsgSegment(hdr->principal);
   sreq->path = setObjectPathMsgSegment(path);
   sreq->cls = setConstClassMsgSegment(cls);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildModifyInstanceRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIInstance   *inst;
+  CMPIType        type;
+  CMPIValue       val,
+                 *valp;
+  int             i,
+                  m,
+                  sreqSize = sizeof(ModifyInstanceReq); // -sizeof(MsgSegment);
+  ModifyInstanceReq *sreq;
+  XtokInstance   *xci;
+  XtokInstanceName *xco;
+  XtokProperty   *p = NULL;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokModifyInstance *req = (XtokModifyInstance *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  if (req->properties)
+    sreqSize += req->properties * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_ModifyInstance;
+  sreq->hdr.count = req->properties + 3;
+
+  for (i = 0; i < req->properties; i++) {
+    sreq->properties[i] =
+        setCharsMsgSegment(req->propertyList.values[i].value);
+  }
+  xci = &req->namedInstance.instance;
+  xco = &req->namedInstance.path;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  for (i = 0, m = xco->bindings.next; i < m; i++) {
+    valp = getKeyValueTypePtr(xco->bindings.keyBindings[i].type,
+                              xco->bindings.keyBindings[i].value,
+                              &xco->bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
+
+    CMAddKey(path, xco->bindings.keyBindings[i].name, valp, type);
+  }
+
+  inst = TrackedCMPIInstance(path, NULL);
+  for (p = xci->properties.first; p; p = p->next) {
+    if (p->val.val.value) {
+      val =
+          str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
+                        req->op.nameSpace.data);
+      CMSetProperty(inst, p->name, &val, p->valueType);
+    }
+  }
+  sreq->instance = setInstanceMsgSegment(inst);
+  sreq->path = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
   sreq->hdr.sessionId = hdr->sessionId;
 
   binCtx->oHdr = (OperationHdr *) req;
@@ -1726,6 +1796,7 @@ modifyInstance
        $$.properties=0;
 
        setRequest(parm,&$$,sizeof(XtokModifyInstance),OPS_ModifyInstance);
+       buildModifyInstanceRequest(parm);
     }
     | localNameSpacePath modifyInstanceParmsList
     {
@@ -1739,6 +1810,7 @@ modifyInstance
        $$.properties=$2.properties;
 
        setRequest(parm,&$$,sizeof(XtokModifyInstance),OPS_ModifyInstance);
+       buildModifyInstanceRequest(parm);
     }
 ;
 

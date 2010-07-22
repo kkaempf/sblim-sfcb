@@ -1064,81 +1064,17 @@ static          RespSegments
 modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "modifyInstance");
-  CMPIObjectPath *path;
-  CMPIInstance   *inst;
-  CMPIType        type;
-  CMPIValue       val,
-                 *valp;
-  int             irc,
-                  i,
-                  m,
-                  sreqSize = sizeof(ModifyInstanceReq); // -sizeof(MsgSegment);
-  BinRequestContext binCtx;
+  int             irc;
   BinResponseHdr *resp;
-  ModifyInstanceReq *sreq;
-  XtokInstance   *xci;
-  XtokInstanceName *xco;
-  XtokProperty   *p = NULL;
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokModifyInstance *req = (XtokModifyInstance *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  if (req->properties)
-    sreqSize += req->properties * sizeof(MsgSegment);
-  sreq = calloc(1, sreqSize);
-  sreq->hdr.operation = OPS_ModifyInstance;
-  sreq->hdr.count = req->properties + 3;
-
-  for (i = 0; i < req->properties; i++) {
-    sreq->properties[i] =
-        setCharsMsgSegment(req->propertyList.values[i].value);
-  }
-  xci = &req->namedInstance.instance;
-  xco = &req->namedInstance.path;
-
-  path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-                            NULL);
-  for (i = 0, m = xco->bindings.next; i < m; i++) {
-    valp = getKeyValueTypePtr(xco->bindings.keyBindings[i].type,
-                              xco->bindings.keyBindings[i].value,
-                              &xco->bindings.keyBindings[i].ref,
-                              &val, &type, req->op.nameSpace.data);
-
-    CMAddKey(path, xco->bindings.keyBindings[i].name, valp, type);
-  }
-
-  inst = TrackedCMPIInstance(path, NULL);
-  for (p = xci->properties.first; p; p = p->next) {
-    if (p->val.val.value) {
-      val =
-          str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
-                        req->op.nameSpace.data);
-      CMSetProperty(inst, p->name, &val, p->valueType);
-    }
-  }
-  sreq->instance = setInstanceMsgSegment(inst);
-  sreq->path = setObjectPathMsgSegment(path);
-  sreq->principal = setCharsMsgSegment(ctx->principal);
-  sreq->hdr.sessionId = ctx->sessionId;
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq->hdr;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sreqSize;
-  binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.pAs = NULL;
-
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
-    resp = invokeProvider(&binCtx);
-    closeProviderContext(&binCtx);
-    free(sreq);
+    resp = invokeProvider(hdr->binCtx);
+    closeProviderContext(hdr->binCtx);
+    free(hdr->binCtx->bHdr);
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       if (resp) {
@@ -1154,10 +1090,10 @@ modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
     }
     _SFCB_RETURN(rs);
   }
-  closeProviderContext(&binCtx);
-  free(sreq);
+  closeProviderContext(hdr->binCtx);
+  free(hdr->binCtx->bHdr);
 
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments
