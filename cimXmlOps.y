@@ -189,6 +189,53 @@ buildDeleteClassRequest(void *parm)
   binCtx->pAs = NULL;
 }
 
+static void
+buildDeleteInstanceRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  int             i, m;
+  CMPIType        type;
+  CMPIValue       val,
+                  *valp;
+  DeleteInstanceReq *sreq;
+  int             sreqSize = sizeof(DeleteInstanceReq);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+  memset(binCtx, 0, sizeof(BinRequestContext));
+
+  XtokDeleteInstance *req = (XtokDeleteInstance *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_DeleteInstance;
+  sreq->hdr.count = 2;
+
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
+    valp =
+        getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
+                           req->instanceName.bindings.keyBindings[i].value,
+                           &req->instanceName.bindings.keyBindings[i].ref,
+                           &val, &type, req->op.nameSpace.data);
+    CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp,
+             type);
+  }
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+
+}
+
 static void addProperty(XtokProperties *ps, XtokProperty *p)
 {
    XtokProperty *np;
@@ -1692,6 +1739,7 @@ deleteInstance
        $$.op.className=setCharsMsgSegment(NULL);
 
        setRequest(parm,&$$,sizeof(XtokDeleteInstance),OPS_DeleteInstance);
+       buildDeleteInstanceRequest(parm);
     }
     | localNameSpacePath deleteInstanceParm
     {
@@ -1702,6 +1750,7 @@ deleteInstance
        $$.instanceName = $2.instanceName;
 
        setRequest(parm,&$$,sizeof(XtokDeleteInstance),OPS_DeleteInstance);
+       buildDeleteInstanceRequest(parm);
     }
 ;
 

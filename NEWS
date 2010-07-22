@@ -4,6 +4,7 @@ Changes in 1.4.0
 New features:
 - 3014530 configure option for request
 - 3030289 Update wbemcat to make REST requests
+- 3031827 Parser does not create BinRequestContext
 
 Bugs fixed:
 
