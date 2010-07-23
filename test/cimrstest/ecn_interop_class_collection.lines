@@ -1,0 +1,4 @@
+"$ref": "CIM_ObjectManager",
+"$ref": "CIM_WBEMService",
+"$ref": "CIM_ListenerDestinatation",
+"$ref": "CIM_Service",
