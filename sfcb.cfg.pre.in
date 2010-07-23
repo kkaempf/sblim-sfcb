@@ -182,11 +182,11 @@ certificateAuthLib:   sfcCertificateAuthentication
 
 ## Enable connections via Unix domain sockets. 
 ## Default is false
-#enableUds:      false
+enableUds:      true
 
 ## Enable authentication for Unix domain sockets connections
-## Default is true
-#doUdsAuth:      true
+## Default is false
+doUdsAuth:      true
 
 
 ##------------------------------------- JDBC ----------------------------------
