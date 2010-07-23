@@ -123,27 +123,30 @@ int colorTrace;
 
 #define MAX_MSG_SIZE 1024 /* max length of trace message */
 
-#define TRACE_PROVIDERMGR       1
-#define TRACE_PROVIDERDRV       2
-#define TRACE_CIMXMLPROC        4
-#define TRACE_HTTPDAEMON        8
-#define TRACE_UPCALLS           16
-#define TRACE_ENCCALLS          32
-#define TRACE_PROVIDERINSTMGR   64
-#define TRACE_PROVIDERASSOCMGR  128
-#define TRACE_PROVIDERS         256
-#define TRACE_INDPROVIDER       512
-#define TRACE_INTERNALPROVIDER  1024
-#define TRACE_OBJECTIMPL        2048
-#define TRACE_XMLIN             4096
-#define TRACE_XMLOUT            8192
-#define TRACE_SOCKETS           16384
-#define TRACE_MEMORYMGR         32768
-#define TRACE_MSGQUEUE          65536
-#define TRACE_XMLPARSING        131072  
-#define TRACE_RESPONSETIMING    262144       
-#define TRACE_DBPDAEMON         524288
-#define TRACE_SLP               1048576
+#define TRACE_PROVIDERMGR       1       /* 0x00.0001 */
+#define TRACE_PROVIDERDRV       2       /* 0x00.0002 */
+#define TRACE_CIMXMLPROC        4       /* 0x00.0004 */
+#define TRACE_HTTPDAEMON        8       /* 0x00.0008 */
+#define TRACE_UPCALLS           16      /* 0x00.0010 */
+#define TRACE_ENCCALLS          32      /* 0x00.0020 */
+#define TRACE_PROVIDERINSTMGR   64      /* 0x00.0040 */
+#define TRACE_PROVIDERASSOCMGR  128     /* 0x00.0080 */
+#define TRACE_PROVIDERS         256     /* 0x00.0100 */
+#define TRACE_INDPROVIDER       512     /* 0x00.0200 */
+#define TRACE_INTERNALPROVIDER  1024    /* 0x00.0400 */
+#define TRACE_OBJECTIMPL        2048    /* 0x00.0800 */
+#define TRACE_XMLIN             4096    /* 0x00.1000 */
+#define TRACE_XMLOUT            8192    /* 0x00.2000 */
+#define TRACE_SOCKETS           16384   /* 0x00.4000 */
+#define TRACE_MEMORYMGR         32768   /* 0x00.8000 */
+#define TRACE_MSGQUEUE          65536   /* 0x01.0000 */
+#define TRACE_XMLPARSING        131072  /* 0x02.0000 */
+#define TRACE_RESPONSETIMING    262144  /* 0x04.0000 */
+#define TRACE_DBPDAEMON         524288  /* 0x08.0000 */
+#define TRACE_SLP               1048576 /* 0x10.0000 */
+#define TRACE_SEMAPHORE         2097152 /* 0x20.0000 */
+/* 4194304 0x40.000 */
+/* 8388608 0x80.000 */
 
 typedef void sigHandler(int);
 

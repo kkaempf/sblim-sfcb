@@ -655,8 +655,13 @@ int main(int argc, char *argv[])
 	       if (*optarg == '?') {
 		   fprintf(stdout, "---   Traceable Components:     Int       Hex\n");
 		   for (i = 0; traceIds[i].id; i++)
-		       fprintf(stdout, "--- \t%18s:    %d\t0x%05X\n", traceIds[i].id, traceIds[i].code, traceIds[i].code);
+		       fprintf(stdout, "--- \t%18s:    %d\t0x%07X\n", traceIds[i].id, traceIds[i].code, traceIds[i].code);
 		   exit(0);
+	       } else if (*optarg == 0 && *(optarg+1) == 'x') {
+		   if (sscanf(optarg,"0x%lx",&tmask) != 1) {
+		     fprintf(stderr,"-t argument not proper hex value\n");
+		     exit(1);
+		   }
 	       } else if (isdigit(*optarg)) {
 		   char *ep;
 		   tmask = strtol(optarg, &ep, 0);
