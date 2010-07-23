@@ -173,9 +173,9 @@ static int spHandleError(int *s, char *m)
 {
    _SFCB_ENTER(TRACE_MSGQUEUE, "handleError");
    char *emsg=strerror(errno);
-   mlogf(M_ERROR,M_SHOW,"%s %d %d-%d %s\n", m, *s, currentProc, errno,emsg);
-   //   _SFCB_ABORT();
-   return -1;
+   mlogf(M_ERROR,M_SHOW,"%s %d pid:%d-errno:%d : %s\n", m, *s, currentProc, errno,emsg);
+   _SFCB_ABORT();
+   //return -1;
 }
 
 
