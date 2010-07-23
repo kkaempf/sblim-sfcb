@@ -1086,63 +1086,17 @@ createInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "createInst");
   CMPIObjectPath *path;
-  CMPIInstance   *inst;
-  CMPIValue       val;
-  CMPIStatus      st = { CMPI_RC_OK, NULL };
   UtilStringBuffer *sb;
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
-  CreateInstanceReq sreq = BINREQ(OPS_CreateInstance, 3);
-  XtokProperty   *p = NULL;
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokCreateInstance *req = (XtokCreateInstance *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-                            NULL);
-  inst = TrackedCMPIInstance(path, NULL);
-
-  for (p = req->instance.properties.first; p; p = p->next) {
-    if (p->val.val.value) {
-      val =
-          str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
-                        req->op.nameSpace.data);
-      CMSetProperty(inst, p->name, &val, p->valueType);
-    }
-  }
-
-  sreq.instance = setInstanceMsgSegment(inst);
-  sreq.principal = setCharsMsgSegment(ctx->principal);
-  sreq.hdr.sessionId = ctx->sessionId;
-
-  path = inst->ft->getObjectPath(inst, &st);
-  /*
-   * if st.rc is set the class was probably not found and the path is
-   * NULL, so we don't set it. Let the provider manager handle unknown
-   * class. 
-   */
-  if (!st.rc) {
-    sreq.path = setObjectPathMsgSegment(path);
-  }
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq.hdr;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sizeof(sreq);
-  binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
-
+  irc = getProviderContext(hdr->binCtx);
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
-    resp = invokeProvider(&binCtx);
-    closeProviderContext(&binCtx);
+    resp = invokeProvider(hdr->binCtx);
+    closeProviderContext(hdr->binCtx);
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       path = relocateSerializedObjectPath(resp->object[0].data);
@@ -1151,6 +1105,7 @@ createInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
       if (resp) {
         free(resp);
       }
+      free(hdr->binCtx->bHdr);
       _SFCB_RETURN(iMethodResponse(hdr, sb));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
@@ -1159,10 +1114,12 @@ createInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
     if (resp) {
       free(resp);
     }
+    free(hdr->binCtx->bHdr);
     _SFCB_RETURN(rs);
   }
-  closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  closeProviderContext(hdr->binCtx);
+  free(hdr->binCtx->bHdr);
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments

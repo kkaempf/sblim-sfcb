@@ -53,6 +53,7 @@
 
 extern int yyerror(char*);
 extern int yylex (void *lvalp, ParserControl *parm);
+extern MsgSegment setInstanceMsgSegment(const CMPIInstance *ci);
 
 
 static void setRequest(void *parm, void *req, unsigned long size, int type)
@@ -63,6 +64,64 @@ static void setRequest(void *parm, void *req, unsigned long size, int type)
    ((ParserControl*)parm)->reqHdr.opType = type;
 }
 
+static void
+buildCreateInstanceRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIInstance   *inst;
+  CMPIValue       val;
+  CMPIStatus      st = { CMPI_RC_OK, NULL };
+  CreateInstanceReq *sreq;
+  XtokProperty   *p = NULL;
+
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokCreateInstance *req = (XtokCreateInstance *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  inst = TrackedCMPIInstance(path, NULL);
+
+  sreq = calloc(1, sizeof(CreateInstanceReq));
+  sreq->hdr.operation = OPS_CreateInstance;
+  sreq->hdr.count = 3;
+
+
+  for (p = req->instance.properties.first; p; p = p->next) {
+    if (p->val.val.value) {
+      val =
+          str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
+                        req->op.nameSpace.data);
+      CMSetProperty(inst, p->name, &val, p->valueType);
+    }
+  }
+
+  sreq->instance = setInstanceMsgSegment(inst);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  path = inst->ft->getObjectPath(inst, &st);
+  /*
+   * if st.rc is set the class was probably not found and the path is
+   * NULL, so we don't set it. Let the provider manager handle unknown
+   * class. 
+   */
+  if (!st.rc) {
+    sreq->path = setObjectPathMsgSegment(path);
+  }
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+
+}
 static void
 buildGetInstanceRequest(void *parm)
 {
@@ -1575,6 +1634,7 @@ createInstance
        $$.op.className=setCharsMsgSegment(NULL);
 
        setRequest(parm,&$$,sizeof(XtokCreateInstance),OPS_CreateInstance);
+       buildCreateInstanceRequest(parm);
     }
     | localNameSpacePath createInstanceParm
     {
@@ -1585,6 +1645,7 @@ createInstance
        $$.instance = $2.instance;
 
        setRequest(parm,&$$,sizeof(XtokCreateInstance),OPS_CreateInstance);
+       buildCreateInstanceRequest(parm);
     }
 ;
 

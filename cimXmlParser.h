@@ -511,6 +511,8 @@ typedef struct xtokCreateInstance {
   OperationHdr    op;
   XtokInstance    instance;
   char           *className;
+  int             properties;
+  XtokValueArray  propertyList;
 } XtokCreateInstance;
 
 /*
