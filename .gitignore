@@ -69,3 +69,6 @@ test/unittest/Makefile.in
 test/wbemcli/Makefile.in
 test/xmltest/Makefile.in
 ylwrap
+*~
+core
+compile
