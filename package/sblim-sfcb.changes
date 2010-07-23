@@ -1,0 +1,347 @@
+-------------------------------------------------------------------
+Thu Apr 29 11:34:04 UTC 2010 - kkaempf@novell.com
+
+- remove conflicting directory tree from 3rd party package, will
+  be replaced by cim-schema package (bnc#590196)
+
+-------------------------------------------------------------------
+Wed Apr 21 10:13:35 UTC 2010 - kkaempf@novell.com
+
+- Match startLogging and closeLogging calls
+  (bnc#591060, upstream #2984436)
+
+-------------------------------------------------------------------
+Fri Apr  9 14:08:08 UTC 2010 - kkaempf@novell.com
+
+- Plug memory leak in SLP operation, use "http" interface.
+  (bnc#593168, upstream #2978930)
+
+-------------------------------------------------------------------
+Fri Apr  9 09:08:03 UTC 2010 - kkaempf@novell.com
+
+- Prevent double free error in associator handling
+  (bnc#595258, upstream #2984214)
+
+-------------------------------------------------------------------
+Fri Apr  2 11:23:32 UTC 2010 - kkaempf@novell.com
+
+- Check for conflicting registrations when collating namespaces
+  (bnc#591396, upstream #2980524)
+
+-------------------------------------------------------------------
+Thu Apr  1 12:46:17 UTC 2010 - kkaempf@novell.com
+
+- Collate namespaces in providerRegister correctly
+  (bnc#591396, upstream #2980524)
+
+-------------------------------------------------------------------
+Thu Mar 11 14:20:00 UTC 2010 - kkaempf@novell.com
+
+- clone CMPI_chars return value from invokeMethod called via
+  local interface (bnc#578189, upstream #2968656)
+
+-------------------------------------------------------------------
+Wed Mar 10 20:14:07 UTC 2010 - kkaempf@novell.com
+
+- prefer CMPI_chars over CMPI_classNameString
+  (bnc#578189, upstream #2968198)
+
+-------------------------------------------------------------------
+Tue Mar  9 13:16:49 UTC 2010 - kkaempf@novell.com
+
+- Backport patches from 1.3.8
+
+   * args.c, array.c, constClass.c, instance.c, internalProvider.c,
+     objectpath.c:
+     [ 2948647 ] getObjectPath may dereference NULL pointer
+   * internalProvider.c:
+     [ 2952616 ] internalProvider is not Threadsafe
+     (bnc#580804)
+   * providerMgr.c:
+     [ 2952912 ] resultSockets variable is not used threadsafe
+     (bnc#580802)
+   * indCIMXMLHandler.c:
+     [ 2950773 ] Leak in indCIMXMLHandler.c
+   * interopServerProvider.c:
+     [ 2949454 ] Memory leak in ServerProviderInitInstances()
+
+-------------------------------------------------------------------
+Mon Feb 22 19:29:16 UTC 2010 - kkaempf@novell.com
+
+- Update to 1.3.7
+  (numbers are from the sourceforge.net bug tracker)
+  New features:
+  - 2920773 Tests for reliable indications
+ 
+  Bugs fixed:
+
+  - 2891367 Error processing content-length
+  - 2933087 Small leak in cimXmlRequest:getProperty()
+  - 2932809 sfcb 1.3.6 crashes when provider user is set to sfcb
+  - 2934540 sfcb may respond with incorrect association provider
+  - 2935931 Indications to file:// urls never fail.
+  - 2937577 Some SLP-specific code not ifdef'd
+  - 2939874 Serious provider id mismatch after provider reload
+  - 2655854 Common Provider invokes Init and CleanUp more than once
+  - 2875050 default MOFs should allow for multiple files
+  - 2945277 SFCB crashes on subscription without filter or handler prop
+  - 2946106 possible race condition initializing providers
+  - 2931327 sblim-sfcb-1.3.6 tarball is incomplete
+  - 2946885 BEAM errors found in cimXmlGen
+  - 2946890 classProvider may try to closedir(NULL)
+  - 2948812 footprint.pl missing from release tarball
+
+-------------------------------------------------------------------
+Fri Jan 15 13:26:05 UTC 2010 - kkaempf@novell.com
+
+- 0420-minimal-postinstall.patch: ensure providerRegister
+  is installed
+- 0430-fileRepository-opendir-error: print the directory path
+  if opendir() fails
+
+-------------------------------------------------------------------
+Fri Jan 15 12:37:17 UTC 2010 - kkaempf@novell.com
+
+- check provuser before strdup (bnc#570943, sblim#2932809)
+
+-------------------------------------------------------------------
+Thu Jan 14 10:11:55 UTC 2010 - kkaempf@novell.com
+
+- Adapt 0007-automake.patch to apply without fuzz
+
+-------------------------------------------------------------------
+Thu Jan 14 07:51:45 UTC 2010 - kkaempf@novell.com
+
+- Upgrade to 1.3.6
+  - regular quarterly release, and includes the usual
+    bugfixes related to function, stability, and memory usage
+  - Compliance for Indication Profile 1.0.0 (DSP1054).
+  - [Experimental] Reduced class repositories (~90% reduction
+    in disk footprint of classSchema file]
+  - move all libraries to /usr/lib(64)/sfcb/*
+
+-------------------------------------------------------------------
+Thu Dec 17 10:27:48 CET 2009 - kukuk@suse.de
+
+- Don't start by default, will be handled by YaST2 module
+
+-------------------------------------------------------------------
+Thu Dec  3 13:22:05 UTC 2009 - kkaempf@novell.com
+
+- Added configuration for SUSEfirewall (fate#305583)
+
+-------------------------------------------------------------------
+Wed Nov  4 16:10:04 MST 2009 - bwhiteley@suse.de
+
+- Upgrade to 1.3.5 (fate#307413)
+- Reduce PAM messages in syslog (fate#306380, bnc#497043, 
+  sblim bug#2762848)
+- Start sfcbd by default (fate#305583)
+- Enable SLP (fate#307088)
+- Fix objectImplc.c:dataValueToString() (bnc#483396)
+
+-------------------------------------------------------------------
+Tue Jun 23 09:47:25 CEST 2009 - kkaempf@suse.de
+
+- Fix memory corruption in CMSetProperty. (bnc#483526)
+
+-------------------------------------------------------------------
+Thu Jun 18 16:25:15 CEST 2009 - kkaempf@suse.de
+
+- 'cimcli' sends 'Content-length:' header attribute with leading
+  zeroes which got interpreted as octal. (bnc#507249)
+
+-------------------------------------------------------------------
+Tue Feb  3 14:17:39 CET 2009 - meissner@suse.de
+
+- enhanced tmprace patch a bit (bnc#470203)
+
+-------------------------------------------------------------------
+Wed Jan 28 17:43:16 CET 2009 - kkaempf@suse.de
+
+- Fix tmp race during ssl cert gen (bnc#470203)
+
+-------------------------------------------------------------------  
+Wed Jan 28 09:30:52 MST 2009 - bwhiteley@suse.de  
+  
+- Fix missing qualifiers on REF params. (bnc#466666)  
+
+-------------------------------------------------------------------
+Fri Jan 16 17:28:19 CET 2009 - kkaempf@suse.de
+
+- Fix memory corruption (bnc#458641):
+  - check limit when parsing valueList, valueRefList and
+    keyBindings
+  - increase max valueList/valueRefList size to 512
+  - increase max keyBindings to 32
+
+-------------------------------------------------------------------
+Wed Jan  7 13:56:58 MST 2009 - bwhiteley@suse.de
+
+- Restart sfcbd when package is upgraded (bnc#463993)
+
+-------------------------------------------------------------------
+Tue Jan  6 11:14:19 MST 2009 - bwhiteley@suse.de
+
+- Fix output of /etc/init.d/sfcb status (bnc#463799)
+
+-------------------------------------------------------------------
+Mon Dec 22 15:00:35 MST 2008 - bwhiteley@suse.de
+
+- Disabled sfcbd daemon by default (bnc#460650)
+
+-------------------------------------------------------------------
+Fri Dec 19 15:11:31 MST 2008 - npaxton@novell.com
+
+- Preserve static instances during repository creation. 
+  (bnc#457366, sblim tracker #2140807)
+
+-------------------------------------------------------------------
+Wed Dec 17 23:32:43 CET 2008 - bwhiteley@suse.de
+
+- Improved patch for configurable access control. (bnc#444403)
+
+-------------------------------------------------------------------
+Tue Dec 16 15:56:42 CET 2008 - kkaempf@suse.de
+
+- Adjust padding to siezof(void *) on ia64 (bnc#457768)
+
+-------------------------------------------------------------------
+Mon Dec  8 11:03:54 MST 2008 - bwhiteley@suse.de
+
+- Fix location of docs (bnc#457195)
+
+-------------------------------------------------------------------
+Mon Dec  8 10:22:07 MST 2008 - bwhiteley@suse.de
+
+- Adjust pam configuration to SUSE standard (bnc#457266)
+
+-------------------------------------------------------------------
+Fri Dec  5 22:36:43 MST 2008 - bwhiteley@suse.de
+
+- Fix startup deadlock (bnc#445795, sblim tracker #2095972).
+- Limit message size (bnc#425457, sblim tracker #2169514)
+- Better fix for content length check (bnc#425457, 
+  sblim tracker #2172888)
+
+-------------------------------------------------------------------
+Thu Dec  4 09:19:47 MST 2008 - bwhiteley@suse.de
+
+- Configurable access control. (bnc#444403)
+- Fix some calls to mlogf (sblim tracker #2390100, bnc#425457)
+- Check for empty string in decode64 (sblim tracker #2391132, 
+  bnc#425457)
+
+-------------------------------------------------------------------
+Wed Nov 19 17:21:48 MST 2008 - bwhiteley@suse.de
+
+- Fix unix socket bind problem. (bnc#445334)
+
+-------------------------------------------------------------------
+Fri Nov  7 14:39:22 MST 2008 - bwhiteley@suse.de
+
+- Better patch for HTTP connection close -- sblim tracker #2193250
+- Handle more escaped chars in XML (bnc#435882, sblim#2169807)
+
+-------------------------------------------------------------------
+Wed Oct 29 14:15:17 MDT 2008 - bwhiteley@suse.de
+
+- Better patch for shutdown deadlock -- sblim tracker #2185304
+
+-------------------------------------------------------------------
+Wed Oct 22 14:57:46 MDT 2008 - bwhiteley@suse.de
+
+- The following bugs from the sblim tracker address bnc#425457
+ - [ 2164750 ] sfcb does not handle some malformed HTTP requests correctly
+ - [ 2172888 ] http content-length is not constrained
+ - [ 2169514 ] spRcvMsg doesn't check malloc return
+ - [ 2169527 ] Some XML parsing error strings do not have sufficient space
+ - [ 2169607 ] sqlLexer assumes line lengths under MAXBUF
+ - [ 2175426 ] possible int overflow
+ - [ 2158198 ] syslog call incorrect
+ - [ 2172023 ] mlogf call cleanups
+ - [ 2175507 ] sockaddr_un not allocated for localconnect server
+- Some code cleanup. 
+- SBLIM tracker #2189391 fork() race condition in providerDrv.c:getProcess()
+- SBLIM tracker #2192023 sfcb deadlocks on nsHt initialization
+- SBLIM tracker #2185304 SFCB doesn't shut down properly a good portion 
+                         of the time. 
+- bnc:438758, SBLIM tracker #2189234 wrong minimal provider check
+
+-------------------------------------------------------------------
+Wed Oct 15 11:08:52 CEST 2008 - kkaempf@suse.de
+
+- help Buildservice executing shell scripts.
+
+-------------------------------------------------------------------
+Tue Oct 14 15:35:31 CEST 2008 - kkaempf@suse.de
+
+- Fix compiler warnings (on 64bit systems) (bnc#435043)
+- Adapt for latest autotools
+- Fix rpmlint warnings in .spec (%preun/%postun)
+
+-------------------------------------------------------------------
+Tue Oct  7 10:51:16 CEST 2008 - schwab@suse.de
+
+- Fix alignment.
+- Rebuild configure to get fixed AC_FUNC_MKTIME.
+- Don't run configure twice.
+
+-------------------------------------------------------------------
+Mon Oct  6 21:57:50 CEST 2008 - bwhiteley@suse.de
+
+- Update to official 1.3.2 release. 
+
+-------------------------------------------------------------------
+Wed Aug 27 10:11:54 MDT 2008 - bwhiteley@suse.de
+
+- update to 1.3.2preview
+- Added RTLD_GLOBAL to ldflags when loading providers. 
+
+-------------------------------------------------------------------
+Mon Aug 18 11:16:01 MDT 2008 - bwhiteley@suse.de
+
+- don't remove buildroot in %install
+
+-------------------------------------------------------------------
+Mon Aug 11 16:47:52 MDT 2008 - bwhiteley@suse.de
+
+- Added RequiredStart and RequiredStop to init script. 
+
+-------------------------------------------------------------------
+Tue Jul 22 15:14:57 MDT 2008 - bwhiteley@suse.de
+
+- Fix SSL options to disable SSLv2 and weak ciphers. 
+- Fix XML parser to unescape newlines. 
+
+-------------------------------------------------------------------
+Mon Jul 21 16:37:50 MDT 2008 - bwhiteley@suse.de
+
+- Fixed limited length error strings in XML.
+
+-------------------------------------------------------------------
+Thu May 29 15:10:06 MDT 2008 - bwhiteley@suse.de
+
+- Enhanced to support HTTP connections over unix domain sockets, 
+  including unix socket peer credential authentication without
+  passwords. 
+- Changed authentication module to only allow users with uid 0
+  to log in. 
+
+-------------------------------------------------------------------
+Fri May 16 16:42:30 MDT 2008 - bwhiteley@suse.de
+
+- Moved back to 1.3.0.  1.3.1 has problems.  Removed schema 
+  package, and placed a dependency on cim-schema package
+  instead. 
+
+-------------------------------------------------------------------
+Tue May 13 14:07:12 MDT 2008 - bwhiteley@suse.de
+
+- Updated to 1.3.1.  Other packaging changes. 
+
+-------------------------------------------------------------------
+Fri May  2 15:02:25 MDT 2008 - bwhiteley@suse.de
+
+- Initial checkin
+
