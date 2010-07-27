@@ -531,7 +531,7 @@ buildEnumClassesRequest(void *parm)
   RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
   BinRequestContext *binCtx = hdr->binCtx;
 
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "enumClasses");
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildEnumClassesRequest");
 
   memset(binCtx, 0, sizeof(BinRequestContext));
   XtokEnumClasses *req = (XtokEnumClasses *) hdr->cimRequest;
@@ -556,6 +556,42 @@ buildEnumClassesRequest(void *parm)
   binCtx->bHdrSize = sizeof(*sreq);
   binCtx->type = CMPI_class;
   binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildEnumClassNamesRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  EnumClassNamesReq *sreq;// = BINREQ(OPS_EnumerateClassNames, 2);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "enumClassNames");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokEnumClassNames *req = (XtokEnumClassNames *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.operation = OPS_EnumerateClassNames;
+  sreq->hdr.count = 2;
+  sreq->hdr.flags = req->flags;
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->type = CMPI_ref;
+  binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->chunkedMode = 0;
   binCtx->pAs = NULL;
 }
 
@@ -1586,6 +1622,7 @@ enumClassNames
        $$.flags = 0;
 
        setRequest(parm,&$$,sizeof(XtokEnumClassNames),OPS_EnumerateClassNames);
+       buildEnumClassNamesRequest(parm);
     }
     | localNameSpacePath enumClassNamesParmsList
     {
@@ -1596,6 +1633,7 @@ enumClassNames
        $$.flags = $2.flags;
 
        setRequest(parm,&$$,sizeof(XtokEnumClassNames),OPS_EnumerateClassNames);
+       buildEnumClassNamesRequest(parm);
     }
 ;
 
