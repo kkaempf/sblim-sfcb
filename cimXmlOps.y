@@ -34,8 +34,13 @@
 #include <ctype.h>
 #include "cimXmlGen.h"
 #include "cimXmlParser.h"
+#include "objectImpl.h"
+#include "constClass.h"
 #include "native.h"
 
+extern CMPIConstClass initConstClass(ClClass * cl);
+extern MsgSegment setConstClassMsgSegment(CMPIConstClass * cl);
+extern MsgSegment setInstanceMsgSegment(CMPIInstance *ci);
 
 //
 // Define the global parser state object:
@@ -53,7 +58,7 @@
 
 extern int yyerror(char*);
 extern int yylex (void *lvalp, ParserControl *parm);
-extern MsgSegment setInstanceMsgSegment(const CMPIInstance *ci);
+//extern MsgSegment setInstanceMsgSegment(const CMPIInstance *ci);
 
 
 static void setRequest(void *parm, void *req, unsigned long size, int type)
@@ -269,7 +274,6 @@ buildDeleteInstanceRequest(void *parm)
   sreq->hdr.operation = OPS_DeleteInstance;
   sreq->hdr.count = 2;
 
-
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
                             NULL);
@@ -292,7 +296,267 @@ buildDeleteInstanceRequest(void *parm)
   binCtx->bHdrSize = sreqSize;
   binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
   binCtx->pAs = NULL;
+}
 
+static void
+buildCreateClassRequest(void *parm)
+{
+  CMPIConstClass *cls;
+  CMPIObjectPath *path;
+  ClClass        *cl;
+  ClClass        *tmp;
+  CreateClassReq *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  XtokProperty   *p = NULL;
+  XtokProperties *ps = NULL;
+  XtokQualifier  *q = NULL;
+  XtokQualifiers *qs = NULL;
+  XtokMethod     *m = NULL;
+  XtokMethods    *ms = NULL;
+  XtokParam      *r = NULL;
+  XtokParams     *rs = NULL;
+  XtokClass      *c;
+  CMPIData        d;
+  CMPIParameter   pa;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokCreateClass *req = (XtokCreateClass *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+
+  cl = ClClassNew(req->op.className.data,
+                  req->superClass ? req->superClass : NULL);
+  c = &req->cls;
+
+  qs = &c->qualifiers;
+  for (q = qs->first; q; q = q->next) {
+    if (q->value.value == NULL) {
+      d.state = CMPI_nullValue;
+      d.value.uint64 = 0;
+    } else {
+      d.state = CMPI_goodValue;
+      d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+    }
+    d.type = q->type;
+    ClClassAddQualifier(&cl->hdr, &cl->qualifiers, q->name, d);
+  }
+
+  ps = &c->properties;
+  for (p = ps->first; p; p = p->next) {
+    ClProperty     *prop;
+    int             propId;
+    if (p->val.val.value == NULL) {
+      d.state = CMPI_nullValue;
+      d.value.uint64 = 0;
+    } else {
+      d.state = CMPI_goodValue;
+      d.value =
+          str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
+                        req->op.nameSpace.data);
+    }
+    d.type = p->valueType;
+    propId = ClClassAddProperty(cl, p->name, d, p->referenceClass);
+
+    qs = &p->val.qualifiers;
+    prop =
+        ((ClProperty *) ClObjectGetClSection(&cl->hdr, &cl->properties)) +
+        propId - 1;
+    for (q = qs->first; q; q = q->next) {
+      if (q->value.value == NULL) {
+        d.state = CMPI_nullValue;
+        d.value.uint64 = 0;
+      } else {
+        d.state = CMPI_goodValue;
+        d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+      }
+      d.type = q->type;
+      ClClassAddPropertyQualifier(&cl->hdr, prop, q->name, d);
+    }
+  }
+
+  ms = &c->methods;
+  for (m = ms->first; m; m = m->next) {
+    ClMethod       *meth;
+    ClParameter    *cl_parm;
+    int             methId,
+                    parmId;
+
+    methId = ClClassAddMethod(cl, m->name, m->type);
+    meth =
+        ((ClMethod *) ClObjectGetClSection(&cl->hdr, &cl->methods)) +
+        methId - 1;
+
+    qs = &m->qualifiers;
+    for (q = qs->first; q; q = q->next) {
+      if (q->value.value == NULL) {
+        d.state = CMPI_nullValue;
+        d.value.uint64 = 0;
+      } else {
+        d.state = CMPI_goodValue;
+        d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+      }
+      d.type = q->type;
+      ClClassAddMethodQualifier(&cl->hdr, meth, q->name, d);
+    }
+
+    rs = &m->params;
+    for (r = rs->first; r; r = r->next) {
+      pa.type = r->type;
+      pa.arraySize = (unsigned int) r->arraySize;
+      pa.refName = r->refClass;
+      parmId = ClClassAddMethParameter(&cl->hdr, meth, r->name, pa);
+      cl_parm = ((ClParameter *)
+              ClObjectGetClSection(&cl->hdr,
+                                   &meth->parameters)) + methId - 1;
+
+      qs = &r->qualifiers;
+      for (q = qs->first; q; q = q->next) {
+        if (q->value.value == NULL) {
+          d.state = CMPI_nullValue;
+          d.value.uint64 = 0;
+        } else {
+          d.state = CMPI_goodValue;
+          d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+        }
+        d.type = q->type;
+        ClClassAddMethParamQualifier(&cl->hdr, cl_parm, q->name, d);
+      }
+    }
+  }
+
+  tmp = cl;
+  cl = ClClassRebuildClass(cl, NULL);
+  ClClassFreeClass(tmp);
+  cls = calloc(1, sizeof(*cls));
+  *cls = initConstClass(cl);
+
+  int sreqSize = sizeof(*sreq) + (3 * sizeof(MsgSegment));
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_CreateClass;
+  sreq->hdr.count = 3;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->path = setObjectPathMsgSegment(path);
+  sreq->cls = setConstClassMsgSegment(cls);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildModifyInstanceRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIInstance   *inst;
+  CMPIType        type;
+  CMPIValue       val,
+                 *valp;
+  int             i,
+                  m,
+                  sreqSize = sizeof(ModifyInstanceReq); // -sizeof(MsgSegment);
+  ModifyInstanceReq *sreq;
+  XtokInstance   *xci;
+  XtokInstanceName *xco;
+  XtokProperty   *p = NULL;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokModifyInstance *req = (XtokModifyInstance *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  if (req->properties)
+    sreqSize += req->properties * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_ModifyInstance;
+  sreq->hdr.count = req->properties + 3;
+
+  for (i = 0; i < req->properties; i++) {
+    sreq->properties[i] =
+        setCharsMsgSegment(req->propertyList.values[i].value);
+  }
+  xci = &req->namedInstance.instance;
+  xco = &req->namedInstance.path;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+
+  for (i = 0, m = xco->bindings.next; i < m; i++) {
+    valp = getKeyValueTypePtr(xco->bindings.keyBindings[i].type,
+                              xco->bindings.keyBindings[i].value,
+                              &xco->bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
+
+    CMAddKey(path, xco->bindings.keyBindings[i].name, valp, type);
+  }
+
+  inst = TrackedCMPIInstance(path, NULL);
+  for (p = xci->properties.first; p; p = p->next) {
+    if (p->val.val.value) {
+      val =
+          str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
+                        req->op.nameSpace.data);
+      CMSetProperty(inst, p->name, &val, p->valueType);
+    }
+  }
+  sreq->instance = setInstanceMsgSegment(inst);
+  sreq->path = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildEnumClassesRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  EnumClassesReq *sreq;
+  int             sreqSize;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "enumClasses");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokEnumClasses *req = (XtokEnumClasses *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  sreqSize = sizeof(*sreq);// + 2 * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_EnumerateClasses;
+  sreq->hdr.count = 2;
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.flags = req->flags;
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->type = CMPI_class;
+  binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
 }
 
 static void addProperty(XtokProperties *ps, XtokProperty *p)
@@ -1386,6 +1650,7 @@ enumClasses
        $$.flags = FL_localOnly;
 
        setRequest(parm,&$$,sizeof(XtokEnumClasses),OPS_EnumerateClasses);
+       buildEnumClassesRequest(parm);
     }
     | localNameSpacePath enumClassesParmsList
     {
@@ -1396,6 +1661,7 @@ enumClasses
        $$.flags = ($2.flags & $2.flagsSet) | ((~$2.flagsSet) & FL_localOnly);
 
        setRequest(parm,&$$,sizeof(XtokEnumClasses),OPS_EnumerateClasses);
+       buildEnumClassesRequest(parm);
     }
 ;
 
@@ -1598,6 +1864,7 @@ createClass
        $$.superClass=NULL;
 
        setRequest(parm,&$$,sizeof(XtokCreateClass),OPS_CreateClass);
+       buildCreateClassRequest(parm);
     }
     | localNameSpacePath createClassParm
     {
@@ -1609,6 +1876,7 @@ createClass
        $$.cls = $2.cls;
 
        setRequest(parm,&$$,sizeof(XtokCreateClass),OPS_CreateClass);
+       buildCreateClassRequest(parm);
     }
 ;
 
@@ -1674,6 +1942,7 @@ modifyInstance
        $$.properties=0;
 
        setRequest(parm,&$$,sizeof(XtokModifyInstance),OPS_ModifyInstance);
+       buildModifyInstanceRequest(parm);
     }
     | localNameSpacePath modifyInstanceParmsList
     {
@@ -1687,6 +1956,7 @@ modifyInstance
        $$.properties=$2.properties;
 
        setRequest(parm,&$$,sizeof(XtokModifyInstance),OPS_ModifyInstance);
+       buildModifyInstanceRequest(parm);
     }
 ;
 
