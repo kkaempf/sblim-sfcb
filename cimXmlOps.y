@@ -651,6 +651,41 @@ buildEnumClassNamesRequest(void *parm)
   binCtx->pAs = NULL;
 }
 
+static void
+buildEnumInstanceNamesRequest(void *parm)
+{
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildEnumInstanceNamesRequest");
+  CMPIObjectPath *path;
+  EnumInstanceNamesReq *sreq;// = BINREQ(OPS_EnumerateInstanceNames, 2);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+
+  XtokEnumInstanceNames *req = (XtokEnumInstanceNames *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.operation = OPS_EnumerateInstanceNames;
+  sreq->hdr.count = 2;
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = 0;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->type = CMPI_ref;
+  binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->chunkedMode = 0;
+  binCtx->pAs = NULL;
+}
+
 static void addProperty(XtokProperties *ps, XtokProperty *p)
 {
    XtokProperty *np;
@@ -2202,6 +2237,7 @@ enumInstanceNames
        $$.op.className=setCharsMsgSegment($3);
 
        setRequest(parm,&$$,sizeof(XtokEnumInstanceNames),OPS_EnumerateInstanceNames);
+       buildEnumInstanceNamesRequest(parm);
     }
 ;
 
