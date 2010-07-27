@@ -789,79 +789,55 @@ enumClassNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 static          RespSegments
 enumClasses(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  CMPIObjectPath *path;
-  EnumClassesReq  sreq = BINREQ(OPS_EnumerateClasses, 2);
-  int             irc,
-                  l = 0,
-      err = 0;
+  int             l = 0,
+                  irc,
+                  err = 0;
   BinResponseHdr **resp;
-  BinRequestContext binCtx;
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "enumClasses");
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokEnumClasses *req = (XtokEnumClasses *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-                            NULL);
-  sreq.objectPath = setObjectPathMsgSegment(path);
-  sreq.principal = setCharsMsgSegment(ctx->principal);
-  sreq.hdr.flags = req->flags;
-  sreq.hdr.sessionId = ctx->sessionId;
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq.hdr;
-  binCtx.bHdr->flags = req->flags;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sizeof(sreq);
-  binCtx.commHndl = ctx->commHndl;
-  binCtx.type = CMPI_class;
-  binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.chunkFncs = ctx->chunkFncs;
-
   if (noChunking || ctx->teTrailers == 0)
-    hdr->chunkedMode = binCtx.chunkedMode = 0;
+    hdr->chunkedMode = hdr->binCtx->chunkedMode = 0;
   else {
-    sreq.hdr.flags |= FL_chunked;
-    hdr->chunkedMode = binCtx.chunkedMode = 1;
+    hdr->binCtx->bHdr->flags |= FL_chunked;
+    hdr->chunkedMode = hdr->binCtx->chunkedMode = 1;
   }
-  binCtx.pAs = NULL;
+
+  hdr->binCtx->commHndl = ctx->commHndl;
+  hdr->binCtx->chunkFncs = ctx->chunkFncs;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
     _SFCB_TRACE(1, ("--- Calling Providers"));
-    resp = invokeProviders(&binCtx, &err, &l);
+    resp = invokeProviders(hdr->binCtx, &err, &l);
     _SFCB_TRACE(1, ("--- Back from Provider"));
 
-    closeProviderContext(&binCtx);
+    closeProviderContext(hdr->binCtx);
 
     if (noChunking || ctx->teTrailers == 0) {
       if (err == 0) {
-        rs = genResponses(&binCtx, resp, l);
+        rs = genResponses(hdr->binCtx, resp, l);
       } else {
         rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
                                                    (char *) resp[err -
                                                                  1]->object
                                                    [0].data));
       }
-      freeResponseHeaders(resp, &binCtx);
+      freeResponseHeaders(resp, hdr->binCtx);
       _SFCB_RETURN(rs);
     }
-    freeResponseHeaders(resp, &binCtx);
+    freeResponseHeaders(resp, hdr->binCtx);
 
     rs.chunkedMode = 1;
     rs.rc = err;
     rs.errMsg = NULL;
     _SFCB_RETURN(rs);
   }
-  closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  closeProviderContext(hdr->binCtx);
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments
@@ -2574,6 +2550,14 @@ handleCimXmlRequest(CimXmlRequestContext * ctx)
      at once. This should be changed after all ops
      are handled in the parser. */
   hdr = scanCimXmlRequest(ctx, ctx->cimXmlDoc);
+
+  /* This needs to be assigned here since hdr was
+     returned by value. That means we can probably
+     stop assigning it in the parser. It is also
+     possible that we might not need this cycle in
+     the data structure if we make some minor changes
+     to the params we pass around. */
+  hdr.binCtx->rHdr = &hdr;
 
 #ifdef SFCB_DEBUG
   if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {

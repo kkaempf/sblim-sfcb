@@ -278,7 +278,7 @@ buildCreateClassRequest(void *parm)
   ms = &c->methods;
   for (m = ms->first; m; m = m->next) {
     ClMethod       *meth;
-    ClParameter    *parm;
+    ClParameter    *cl_parm;
     int             methId,
                     parmId;
 
@@ -306,7 +306,7 @@ buildCreateClassRequest(void *parm)
       pa.arraySize = (unsigned int) r->arraySize;
       pa.refName = r->refClass;
       parmId = ClClassAddMethParameter(&cl->hdr, meth, r->name, pa);
-      parm = ((ClParameter *)
+      cl_parm = ((ClParameter *)
               ClObjectGetClSection(&cl->hdr,
                                    &meth->parameters)) + methId - 1;
 
@@ -320,7 +320,7 @@ buildCreateClassRequest(void *parm)
           d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
         }
         d.type = q->type;
-        ClClassAddMethParamQualifier(&cl->hdr, parm, q->name, d);
+        ClClassAddMethParamQualifier(&cl->hdr, cl_parm, q->name, d);
       }
     }
   }
@@ -414,6 +414,43 @@ buildModifyInstanceRequest(void *parm)
   binCtx->rHdr = hdr;
   binCtx->bHdrSize = sreqSize;
   binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildEnumClassesRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  EnumClassesReq *sreq;
+  int             sreqSize;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "enumClasses");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokEnumClasses *req = (XtokEnumClasses *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  sreqSize = sizeof(*sreq);// + 2 * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_EnumerateClasses;
+  sreq->hdr.count = 2;
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.flags = req->flags;
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->type = CMPI_class;
+  binCtx->xmlAs = binCtx->noResp = 0;
   binCtx->pAs = NULL;
 }
 
@@ -1508,6 +1545,7 @@ enumClasses
        $$.flags = FL_localOnly;
 
        setRequest(parm,&$$,sizeof(XtokEnumClasses),OPS_EnumerateClasses);
+       buildEnumClassesRequest(parm);
     }
     | localNameSpacePath enumClassesParmsList
     {
@@ -1518,6 +1556,7 @@ enumClasses
        $$.flags = ($2.flags & $2.flagsSet) | ((~$2.flagsSet) & FL_localOnly);
 
        setRequest(parm,&$$,sizeof(XtokEnumClasses),OPS_EnumerateClasses);
+       buildEnumClassesRequest(parm);
     }
 ;
 
