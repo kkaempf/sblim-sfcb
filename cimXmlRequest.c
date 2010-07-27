@@ -1288,92 +1288,55 @@ enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "enumInstances");
 
-  CMPIObjectPath *path;
-  EnumInstancesReq *sreq;
   int             irc,
                   l = 0,
-      err = 0,
-      i,
-      sreqSize = sizeof(EnumInstancesReq);      // -sizeof(MsgSegment);
+                  err = 0;
   BinResponseHdr **resp;
-  BinRequestContext binCtx;
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-
-  XtokEnumInstances *req = (XtokEnumInstances *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  if (req->properties)
-    sreqSize += req->properties * sizeof(MsgSegment);
-  sreq = calloc(1, sreqSize);
-  sreq->hdr.operation = OPS_EnumerateInstances;
-  sreq->hdr.count = req->properties + 2;
-
-  path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-                            NULL);
-  sreq->principal = setCharsMsgSegment(ctx->principal);
-  sreq->objectPath = setObjectPathMsgSegment(path);
-  sreq->hdr.sessionId = ctx->sessionId;
-
-  for (i = 0; i < req->properties; i++) {
-    sreq->properties[i] =
-        setCharsMsgSegment(req->propertyList.values[i].value);
-  }
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq->hdr;
-  binCtx.bHdr->flags = req->flags;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sreqSize;
-  binCtx.commHndl = ctx->commHndl;
-
-  binCtx.type = CMPI_instance;
-  binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.chunkFncs = ctx->chunkFncs;
 
   if (noChunking || ctx->teTrailers == 0)
-    hdr->chunkedMode = binCtx.chunkedMode = 0;
+    hdr->chunkedMode = hdr->binCtx->chunkedMode = 0;
   else {
-    sreq->hdr.flags |= FL_chunked;
-    hdr->chunkedMode = binCtx.chunkedMode = 1;
+    hdr->binCtx->bHdr->flags |= FL_chunked;
+    hdr->chunkedMode = hdr->binCtx->chunkedMode = 1;
   }
-  binCtx.pAs = NULL;
+
+  hdr->binCtx->commHndl = ctx->commHndl;
+  hdr->binCtx->chunkFncs = ctx->chunkFncs;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
   _SFCB_TRACE(1, ("--- Provider context gotten irc: %d", irc));
 
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
     _SFCB_TRACE(1, ("--- Calling Providers"));
-    resp = invokeProviders(&binCtx, &err, &l);
+    resp = invokeProviders(hdr->binCtx, &err, &l);
     _SFCB_TRACE(1, ("--- Back from Providers"));
-    closeProviderContext(&binCtx);
+    closeProviderContext(hdr->binCtx);
 
     if (noChunking || ctx->teTrailers == 0) {
       if (err == 0) {
-        rs = genResponses(&binCtx, resp, l);
+        rs = genResponses(hdr->binCtx, resp, l);
       } else {
         rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
                                                    (char *) resp[err -
                                                                  1]->object
                                                    [0].data));
       }
-      freeResponseHeaders(resp, &binCtx);
-      free(sreq);
+      freeResponseHeaders(resp, hdr->binCtx);
+      free(hdr->binCtx->bHdr);
       _SFCB_RETURN(rs);
     }
-    freeResponseHeaders(resp, &binCtx);
-    free(sreq);
+    freeResponseHeaders(resp, hdr->binCtx);
+    free(hdr->binCtx->bHdr);
     rs.chunkedMode = 1;
     rs.rc = err;
     rs.errMsg = NULL;
     _SFCB_RETURN(rs);
   }
-  closeProviderContext(&binCtx);
-  free(sreq);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  closeProviderContext(hdr->binCtx);
+  free(hdr->binCtx->bHdr);
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments

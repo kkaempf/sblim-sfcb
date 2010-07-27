@@ -51,6 +51,14 @@
 #define VALUEREFARRAY_MAX_START 32
 #define KEYBINDING_MAX_START 12
 
+#ifdef LOCAL_CONNECT_ONLY_ENABLE
+// from httpAdapter.c
+int             noChunking = 0;
+#endif                          // LOCAL_CONNECT_ONLY_ENABLE
+extern int      noChunking;
+
+
+
 extern int yyerror(char*);
 extern int yylex (void *lvalp, ParserControl *parm);
 extern MsgSegment setInstanceMsgSegment(const CMPIInstance *ci);
@@ -63,6 +71,54 @@ static void setRequest(void *parm, void *req, unsigned long size, int type)
    memcpy(((ParserControl*)parm)->reqHdr.cimRequest,req,size);
    ((ParserControl*)parm)->reqHdr.opType = type;
 }
+
+
+static void
+buildEnumInstanceRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  EnumInstancesReq *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  int    i,
+      sreqSize = sizeof(EnumInstancesReq);      // -sizeof(MsgSegment);
+  BinRequestContext *binCtx = hdr->binCtx;
+  
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildEnumInstancesRequest");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokEnumInstances *req = (XtokEnumInstances *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  if (req->properties)
+    sreqSize += req->properties * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_EnumerateInstances;
+  sreq->hdr.count = req->properties + 2;
+
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  for (i = 0; i < req->properties; i++) {
+    sreq->properties[i] =
+        setCharsMsgSegment(req->propertyList.values[i].value);
+  }
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+
+  binCtx->type = CMPI_instance;
+  binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+
+}
+
 
 static void
 buildCreateInstanceRequest(void *parm)
@@ -1859,6 +1915,7 @@ enumInstances
        $$.properties=0;
 
        setRequest(parm,&$$,sizeof(XtokEnumInstances),OPS_EnumerateInstances);
+       buildEnumInstanceRequest(parm);
     }
     | localNameSpacePath enumInstancesParmsList
     {
@@ -1871,6 +1928,7 @@ enumInstances
        $$.properties=$2.properties;
 
        setRequest(parm,&$$,sizeof(XtokEnumInstances),OPS_EnumerateInstances);
+       buildEnumInstanceRequest(parm);
     }
 ;
 
