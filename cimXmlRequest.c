@@ -719,9 +719,11 @@ createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
     if (resp) {
       free(resp);
     }
+    free(hdr->binCtx->bHdr);
     _SFCB_RETURN(rs);
   }
   closeProviderContext(hdr->binCtx);
+  free(hdr->binCtx->bHdr);
   _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
@@ -756,9 +758,11 @@ enumClassNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
                                                  [0].data));
     }
     freeResponseHeaders(resp, hdr->binCtx);
+    free(hdr->binCtx->bHdr);
     _SFCB_RETURN(rs);
   }
   closeProviderContext(hdr->binCtx);
+  free(hdr->binCtx->bHdr);
   _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
@@ -810,9 +814,11 @@ enumClasses(CimXmlRequestContext * ctx, RequestHdr * hdr)
     rs.chunkedMode = 1;
     rs.rc = err;
     rs.errMsg = NULL;
+    free(hdr->binCtx->bHdr);
     _SFCB_RETURN(rs);
   }
   closeProviderContext(hdr->binCtx);
+  free(hdr->binCtx->bHdr);
   _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
@@ -1001,9 +1007,11 @@ enumInstanceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
                                                  [0].data));
     }
     freeResponseHeaders(resp, hdr->binCtx);
+    free(hdr->binCtx->bHdr);
     _SFCB_RETURN(rs);
   }
   closeProviderContext(hdr->binCtx);
+  free(hdr->binCtx->bHdr);
   _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
