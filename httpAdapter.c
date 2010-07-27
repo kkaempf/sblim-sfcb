@@ -1108,7 +1108,7 @@ doHttpRequest(CommHndl conn_fd)
 
   /* get the protocol and path */
   inBuf.httpHdr = getNextHdr(&inBuf);
-  fprintf(stderr, "httpHdr = %s\n", inBuf.httpHdr);
+  //fprintf(stderr, "httpHdr = %s\n", inBuf.httpHdr);
   char* tmp;
   for (badReq = 1;;) {
     if (inBuf.httpHdr == NULL)
