@@ -1,3 +1,8 @@
+2010-07-27 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	*  cimXmlOps.y, cimXmlParser.h, cimXmlRequest.c:
+	[ 3031827 ] Parser does not create BinRequestContext
+	Changes for EnumInstances
+
 2010-07-23 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	*  cimXmlOps.y, cimXmlParser.h, cimXmlRequest.c:
 	[ 3031827 ] Parser does not create BinRequestContext
