@@ -102,6 +102,19 @@ buildAssociatorsRequest(void *parm)
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
                             NULL);
 
+  if (req->objectName.bindings.next == 0) {
+    free(hdr->binCtx->bHdr);
+    hdr->rc = CMPI_RC_ERR_NOT_SUPPORTED;
+    hdr->errMsg = strdup("Associator operation for classes not supported.");
+    return;
+  }
+  if (!req->objNameSet) {
+    free(hdr->binCtx->bHdr);
+    hdr->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    hdr->errMsg = strdup("ObjectName parameter required.");
+    return;
+  }
+
   if (req->properties)
     sreqSize += req->properties * sizeof(MsgSegment);
   sreq = calloc(1, sreqSize);

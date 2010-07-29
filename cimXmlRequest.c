@@ -1232,24 +1232,6 @@ associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
   BinResponseHdr **resp;
   XtokAssociators *req = (XtokAssociators *) hdr->cimRequest;
 
-  if (req->objectName.bindings.next == 0) {
-    freeResponseHeaders(resp, hdr->binCtx);
-    free(sreq);
-    free(hdr->binCtx->bHdr);
-    _SFCB_RETURN(iMethodErrResponse
-                 (hdr,
-                  getErrSegment(CMPI_RC_ERR_NOT_SUPPORTED,
-                                "Associator operation for classes not supported")));
-  }
-  if (!req->objNameSet) {
-    freeResponseHeaders(resp, hdr->binCtx);
-    free(sreq);
-    free(hdr->binCtx->bHdr);
-    _SFCB_RETURN(iMethodErrResponse(hdr, getErrSegment
-                                    (CMPI_RC_ERR_INVALID_PARAMETER,
-                                     "ObjectName parameter required")));
-  }
-
   hdr->binCtx->commHndl = ctx->commHndl;
   hdr->binCtx->chunkFncs = ctx->chunkFncs;
 
