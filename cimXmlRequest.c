@@ -1113,97 +1113,53 @@ execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "execQuery");
 
-  CMPIObjectPath *path;
-  ExecQueryReq    sreq = BINREQ(OPS_ExecQuery, 4);
   int             irc,
                   l = 0,
       err = 0;
   BinResponseHdr **resp;
-  BinRequestContext binCtx;
-  QLStatement    *qs = NULL;
-  char          **fCls;
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokExecQuery  *req = (XtokExecQuery *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  qs = parseQuery(MEM_TRACKED, (char *) req->op.query.data,
-                  (char *) req->op.queryLang.data, NULL, &irc);
-
-  fCls = qs->ft->getFromClassList(qs);
-  if (irc) {
-    _SFCB_RETURN(iMethodErrResponse(hdr,
-                                    getErrSegment
-                                    (CMPI_RC_ERR_INVALID_QUERY,
-                                     "syntax error in query.")));
-  }
-  if (fCls == NULL || *fCls == NULL) {
-    _SFCB_RETURN(iMethodErrResponse(hdr,
-                                    getErrSegment
-                                    (CMPI_RC_ERR_INVALID_QUERY,
-                                     "required from clause is missing.")));
-  }
-  req->op.className = setCharsMsgSegment(*fCls);
-
-  path = TrackedCMPIObjectPath(req->op.nameSpace.data, *fCls, NULL);
-
-  sreq.objectPath = setObjectPathMsgSegment(path);
-  sreq.principal = setCharsMsgSegment(ctx->principal);
-  sreq.query = setCharsMsgSegment((char *) req->op.query.data);
-  sreq.queryLang = setCharsMsgSegment((char *) req->op.queryLang.data);
-  sreq.hdr.sessionId = ctx->sessionId;
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq.hdr;
-  binCtx.bHdr->flags = 0;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sizeof(sreq);
-  binCtx.commHndl = ctx->commHndl;
-  binCtx.type = CMPI_instance;
-  binCtx.xmlAs = XML_asObj;
-  binCtx.noResp = 0;
-  binCtx.chunkFncs = ctx->chunkFncs;
+  hdr->binCtx->commHndl = ctx->commHndl;
+  hdr->binCtx->chunkFncs = ctx->chunkFncs;
 
   if (noChunking || ctx->teTrailers == 0)
-    hdr->chunkedMode = binCtx.chunkedMode = 0;
+    hdr->chunkedMode = hdr->binCtx->chunkedMode = 0;
   else {
-    sreq.hdr.flags |= FL_chunked;
-    hdr->chunkedMode = binCtx.chunkedMode = 1;
+    hdr->binCtx->bHdr->flags |= FL_chunked;
+    hdr->chunkedMode = hdr->binCtx->chunkedMode = 1;
   }
-  binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
 
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
     _SFCB_TRACE(1, ("--- Calling Provider"));
-    resp = invokeProviders(&binCtx, &err, &l);
+    resp = invokeProviders(hdr->binCtx, &err, &l);
     _SFCB_TRACE(1, ("--- Back from Provider"));
-    closeProviderContext(&binCtx);
+    closeProviderContext(hdr->binCtx);
 
     if (noChunking || ctx->teTrailers == 0) {
       if (err == 0) {
-        rs = genResponses(&binCtx, resp, l);
+        rs = genResponses(hdr->binCtx, resp, l);
       } else {
         rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
                                                    (char *) resp[err -
                                                                  1]->object
                                                    [0].data));
       }
-      freeResponseHeaders(resp, &binCtx);
+      freeResponseHeaders(resp, hdr->binCtx);
       _SFCB_RETURN(rs);
     }
-    freeResponseHeaders(resp, &binCtx);
+    freeResponseHeaders(resp, hdr->binCtx);
     rs.chunkedMode = 1;
     rs.rc = err;
     rs.errMsg = NULL;
     _SFCB_RETURN(rs);
   }
-  closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  closeProviderContext(hdr->binCtx);
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments
@@ -2460,8 +2416,11 @@ handleCimXmlRequest(CimXmlRequestContext * ctx)
       rs = methodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
                                                  "invalid methodcall XML"));
     } else {
-      rs = iMethodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
-                                                  "invalid imethodcall XML"));
+      if(!hdr.errMsg) hdr.errMsg = strdup("invalid imethodcall XML");
+      rs = iMethodErrResponse(&hdr, getErrSegment(hdr.rc,
+                                                  hdr.errMsg));
+//      rs = iMethodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
+//                                                  "invalid imethodcall XML"));
     }
   } else {
     hc = markHeap();

@@ -630,6 +630,59 @@ buildEnumInstanceNamesRequest(void *parm)
   binCtx->pAs = NULL;
 }
 
+static void
+buildExecQueryRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  ExecQueryReq   *sreq;// = BINREQ(OPS_ExecQuery, 4);
+  int             irc;
+  QLStatement    *qs = NULL;
+  char          **fCls;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokExecQuery  *req = (XtokExecQuery *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  qs = parseQuery(MEM_TRACKED, (char *) req->op.query.data,
+                  (char *) req->op.queryLang.data, NULL, &irc);
+
+  fCls = qs->ft->getFromClassList(qs);
+  if (irc) {
+    hdr->rc = CMPI_RC_ERR_INVALID_QUERY;
+    hdr->errMsg = strdup("syntax error in query.");
+    return;
+  }
+  if (fCls == NULL || *fCls == NULL) {
+    hdr->rc = CMPI_RC_ERR_INVALID_QUERY;
+    hdr->errMsg = strdup("required from clause is missing.");
+    return;
+  }
+  req->op.className = setCharsMsgSegment(*fCls);
+
+  path = TrackedCMPIObjectPath(req->op.nameSpace.data, *fCls, NULL);
+
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_ExecQuery;
+  sreq->hdr.count = 4;
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->query = setCharsMsgSegment((char *) req->op.query.data);
+  sreq->queryLang = setCharsMsgSegment((char *) req->op.queryLang.data);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = 0;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->type = CMPI_instance;
+  binCtx->xmlAs = XML_asObj;
+  binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
 static void addProperty(XtokProperties *ps, XtokProperty *p)
 {
    XtokProperty *np;
@@ -2329,6 +2382,7 @@ execQuery
        $$.op.queryLang=setCharsMsgSegment($6.value);
 
        setRequest(parm,&$$,sizeof(XtokExecQuery),OPS_ExecQuery);
+       buildExecQueryRequest(parm);
     }        
     | localNameSpacePath 
           XTOK_IP_QUERYLANG value ZTOK_IPARAMVALUE
@@ -2341,6 +2395,7 @@ execQuery
        $$.op.queryLang=setCharsMsgSegment($3.value);
 
        setRequest(parm,&$$,sizeof(XtokExecQuery),OPS_ExecQuery);
+       buildExecQueryRequest(parm);
     }        
 ;    
     
