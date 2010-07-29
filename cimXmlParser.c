@@ -1680,6 +1680,7 @@ scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData)
   control.reqHdr.xmlBuffer = xmb;
   control.reqHdr.cimRequest = NULL;
   control.reqHdr.iMethod = NULL;
+  control.reqHdr.rc = 0;
   control.reqHdr.errMsg = NULL;
   control.reqHdr.binCtx = calloc(1, sizeof(BinRequestContext));
   control.reqHdr.principal = ctx->principal;
@@ -1701,7 +1702,9 @@ scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData)
     return control.reqHdr;
   }
 
-  control.reqHdr.rc = yyparse(&control);
+  // If we hit a syntax error, use CMPI_ERR_FAILED,
+  // otherwise assume the parser set an rc
+  if(yyparse(&control)) control.reqHdr.rc = CMPI_RC_ERR_FAILED;
 
   return control.reqHdr;
 }
