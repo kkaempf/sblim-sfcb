@@ -79,6 +79,73 @@ static void setRequest(void *parm, void *req, unsigned long size, int type)
 
 
 static void
+buildAssociatorsRequest(void *parm)
+{
+
+  CMPIObjectPath *path;
+  AssociatorsReq *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  int             i,m,
+      sreqSize = sizeof(AssociatorsReq);        // -sizeof(MsgSegment);
+  BinRequestContext *binCtx = hdr->binCtx;
+  CMPIType        type;
+  CMPIValue       val,
+                 *valp;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildAssociatorsRequest");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokAssociators *req = (XtokAssociators *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+
+  if (req->properties)
+    sreqSize += req->properties * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_Associators;
+  sreq->hdr.count = req->properties + 6;
+
+  for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
+    valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
+                              req->objectName.bindings.keyBindings[i].
+                              value,
+                              &req->objectName.bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
+    CMAddKey(path, req->objectName.bindings.keyBindings[i].name, valp,
+             type);
+  }
+
+  sreq->objectPath = setObjectPathMsgSegment(path);
+
+  sreq->resultClass = req->op.resultClass;
+  sreq->role = req->op.role;
+  sreq->assocClass = req->op.assocClass;
+  sreq->resultRole = req->op.resultRole;
+  sreq->hdr.flags = req->flags;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  for (i = 0; i < req->properties; i++)
+    sreq->properties[i] =
+        setCharsMsgSegment(req->propertyList.values[i].value);
+
+  req->op.className = req->op.assocClass;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->type = CMPI_instance;
+  binCtx->xmlAs = XML_asObj;
+  binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+
+}
+static void
 buildEnumInstanceRequest(void *parm)
 {
   CMPIObjectPath *path;
@@ -2425,6 +2492,7 @@ associators
        $$.properties=0;
 
        setRequest(parm,&$$,sizeof(XtokAssociators),OPS_Associators);
+       buildAssociatorsRequest(parm);
     }
     | localNameSpacePath associatorsParmsList
     {
@@ -2443,6 +2511,7 @@ associators
        $$.properties=$2.properties;
 
        setRequest(parm,&$$,sizeof(XtokAssociators),OPS_Associators);
+       buildAssociatorsRequest(parm);
     }
 ;
 
