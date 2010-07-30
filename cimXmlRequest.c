@@ -1129,95 +1129,44 @@ static          RespSegments
 associatorNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "associatorNames");
-  CMPIObjectPath *path;
-  AssociatorNamesReq sreq = BINREQ(OPS_AssociatorNames, 6);
+  AssociatorNamesReq *sreq;
   int             irc,
-                  i,
-                  m,
                   l = 0,
       err = 0;
   BinResponseHdr **resp;
-  BinRequestContext binCtx;
-  CMPIType        type;
-  CMPIValue       val,
-                 *valp;
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokAssociatorNames *req = (XtokAssociatorNames *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-                            NULL);
-  for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
-    valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
-                              req->objectName.bindings.keyBindings[i].
-                              value,
-                              &req->objectName.bindings.keyBindings[i].ref,
-                              &val, &type, req->op.nameSpace.data);
-    CMAddKey(path, req->objectName.bindings.keyBindings[i].name, valp,
-             type);
-  }
-
-  if (req->objectName.bindings.next == 0) {
-    _SFCB_RETURN(iMethodErrResponse
-                 (hdr,
-                  getErrSegment(CMPI_RC_ERR_NOT_SUPPORTED,
-                                "AssociatorNames operation for classes not supported")));
-  }
-  if (!req->objNameSet) {
-    _SFCB_RETURN(iMethodErrResponse(hdr, getErrSegment
-                                    (CMPI_RC_ERR_INVALID_PARAMETER,
-                                     "ObjectName parameter required")));
-  }
-
-  sreq.objectPath = setObjectPathMsgSegment(path);
-
-  sreq.resultClass = req->op.resultClass;
-  sreq.role = req->op.role;
-  sreq.assocClass = req->op.assocClass;
-  sreq.resultRole = req->op.resultRole;
-  sreq.principal = setCharsMsgSegment(ctx->principal);
-  sreq.hdr.sessionId = ctx->sessionId;
-
-  req->op.className = req->op.assocClass;
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq.hdr;
-  binCtx.bHdr->flags = 0;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sizeof(sreq);
-  binCtx.commHndl = ctx->commHndl;
-  binCtx.type = CMPI_ref;
-  binCtx.xmlAs = XML_asObjectPath;
-  binCtx.noResp = 0;
-  binCtx.chunkedMode = 0;
-  binCtx.pAs = NULL;
+  hdr->binCtx->commHndl = ctx->commHndl;
+  hdr->binCtx->chunkFncs = ctx->chunkFncs;
+  hdr->chunkedMode = hdr->binCtx->chunkedMode = 0;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
   _SFCB_TRACE(1, ("--- Provider context gotten"));
 
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
     _SFCB_TRACE(1, ("--- Calling Providers"));
-    resp = invokeProviders(&binCtx, &err, &l);
+    resp = invokeProviders(hdr->binCtx, &err, &l);
     _SFCB_TRACE(1, ("--- Back from Providers"));
 
-    closeProviderContext(&binCtx);
+    closeProviderContext(hdr->binCtx);
     if (err == 0) {
-      rs = genResponses(&binCtx, resp, l);
+      rs = genResponses(hdr->binCtx, resp, l);
     } else {
       rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
                                                  (char *) resp[err -
                                                                1]->object
                                                  [0].data));
     }
-    freeResponseHeaders(resp, &binCtx);
+    freeResponseHeaders(resp, hdr->binCtx);
+    free(sreq);
+    free(hdr->binCtx->bHdr);
     _SFCB_RETURN(rs);
   }
-  closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  free(sreq);
+  free(hdr->binCtx->bHdr);
+  closeProviderContext(hdr->binCtx);
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments
@@ -1225,7 +1174,6 @@ associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "associators");
 
-  AssociatorsReq *sreq;
   int             irc,
                   l = 0,
                   err = 0;
@@ -1264,20 +1212,17 @@ associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
                                                    [0].data));
       }
       freeResponseHeaders(resp, hdr->binCtx);
-      free(sreq);
       free(hdr->binCtx->bHdr);
       _SFCB_RETURN(rs);
     }
 
     freeResponseHeaders(resp, hdr->binCtx);
-    free(sreq);
     free(hdr->binCtx->bHdr);
     rs.chunkedMode = 1;
     rs.rc = err;
     rs.errMsg = NULL;
     _SFCB_RETURN(rs);
   }
-  free(sreq);
   free(hdr->binCtx->bHdr);
   closeProviderContext(hdr->binCtx);
 

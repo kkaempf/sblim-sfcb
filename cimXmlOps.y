@@ -79,6 +79,77 @@ static void setRequest(void *parm, void *req, unsigned long size, int type)
 
 
 static void
+buildAssociatorNamesRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  AssociatorNamesReq *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  int       i, m;
+  BinRequestContext *binCtx = hdr->binCtx;
+  CMPIType        type;
+  CMPIValue       val,
+                 *valp;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildAssociatorNamesRequest");
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokAssociatorNames *req = (XtokAssociatorNames *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
+    valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
+                              req->objectName.bindings.keyBindings[i].
+                              value,
+                              &req->objectName.bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
+    CMAddKey(path, req->objectName.bindings.keyBindings[i].name, valp,
+             type);
+  }
+
+  if (req->objectName.bindings.next == 0) {
+    free(hdr->binCtx->bHdr);
+    hdr->rc = CMPI_RC_ERR_NOT_SUPPORTED;
+    hdr->errMsg = strdup("AssociatorNames operation for classes not supported.");
+    return;
+  }
+  if (!req->objNameSet) {
+    free(hdr->binCtx->bHdr);
+    hdr->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    hdr->errMsg = strdup("ObjectName parameter required.");
+    return;
+  }
+  sreq = calloc(1, sizeof(*sreq)); //right size MCS
+  sreq->hdr.operation = OPS_AssociatorNames;
+  sreq->hdr.count = 2; //MCS
+
+  sreq->objectPath = setObjectPathMsgSegment(path);
+
+  sreq->resultClass = req->op.resultClass;
+  sreq->role = req->op.role;
+  sreq->assocClass = req->op.assocClass;
+  sreq->resultRole = req->op.resultRole;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  req->op.className = req->op.assocClass;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq); //MCS
+  //binCtx->commHndl = ctx->commHndl;
+  binCtx->type = CMPI_ref;
+  binCtx->xmlAs = XML_asObjectPath;
+  binCtx->noResp = 0;
+  //binCtx->chunkedMode = 0;
+  binCtx->pAs = NULL;
+
+}
+
+static void
 buildAssociatorsRequest(void *parm)
 {
 
@@ -2885,6 +2956,7 @@ associatorNames
        $$.objNameSet = 0;
 
        setRequest(parm,&$$,sizeof(XtokAssociatorNames),OPS_AssociatorNames);
+       buildAssociatorNamesRequest(parm);
     }
     | localNameSpacePath associatorNamesParmsList
     {
@@ -2899,6 +2971,7 @@ associatorNames
        $$.objectName = $2.objectName;
        $$.objNameSet = $2.objNameSet;
        setRequest(parm,&$$,sizeof(XtokAssociatorNames),OPS_AssociatorNames);
+       buildAssociatorNamesRequest(parm);
     }
 ;
 

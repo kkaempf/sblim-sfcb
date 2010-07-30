@@ -635,6 +635,8 @@ typedef struct xtokAssociatorNames {
   OperationHdr    op;
   XtokInstanceName objectName;
   int             objNameSet;
+  unsigned int    flags;
+  int             properties;
 } XtokAssociatorNames;
 
 /*
