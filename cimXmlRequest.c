@@ -1230,7 +1230,6 @@ associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
                   l = 0,
                   err = 0;
   BinResponseHdr **resp;
-  XtokAssociators *req = (XtokAssociators *) hdr->cimRequest;
 
   hdr->binCtx->commHndl = ctx->commHndl;
   hdr->binCtx->chunkFncs = ctx->chunkFncs;
@@ -1382,125 +1381,56 @@ references(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "references");
 
-  CMPIObjectPath *path;
-  ReferencesReq  *sreq;
   int             irc,
-                  i,
-                  m,
                   l = 0,
-      err = 0,
-      sreqSize = sizeof(ReferencesReq); // -sizeof(MsgSegment);
+                  err = 0;
   BinResponseHdr **resp;
-  BinRequestContext binCtx;
-  CMPIType        type;
-  CMPIValue       val,
-                 *valp;
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokReferences *req = (XtokReferences *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  if (req->properties)
-    sreqSize += req->properties * sizeof(MsgSegment);
-  sreq = calloc(1, sreqSize);
-  sreq->hdr.operation = OPS_References;
-  sreq->hdr.count = req->properties + 4;
-
-  path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
-                            NULL);
-  for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
-    valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
-                              req->objectName.bindings.keyBindings[i].
-                              value,
-                              &req->objectName.bindings.keyBindings[i].ref,
-                              &val, &type, req->op.nameSpace.data);
-    CMAddKey(path, req->objectName.bindings.keyBindings[i].name, valp,
-             type);
-  }
-
-  if (req->objectName.bindings.next == 0) {
-    free(sreq);
-    _SFCB_RETURN(iMethodErrResponse
-                 (hdr,
-                  getErrSegment(CMPI_RC_ERR_NOT_SUPPORTED,
-                                "References operation for classes not supported")));
-  }
-  if (!req->objNameSet) {
-    free(sreq);
-    _SFCB_RETURN(iMethodErrResponse(hdr, getErrSegment
-                                    (CMPI_RC_ERR_INVALID_PARAMETER,
-                                     "ObjectName parameter required")));
-  }
-
-  sreq->objectPath = setObjectPathMsgSegment(path);
-
-  sreq->resultClass = req->op.resultClass;
-  sreq->role = req->op.role;
-  sreq->hdr.flags = req->flags;
-  sreq->principal = setCharsMsgSegment(ctx->principal);
-  sreq->hdr.sessionId = ctx->sessionId;
-
-  for (i = 0; i < req->properties; i++)
-    sreq->properties[i] =
-        setCharsMsgSegment(req->propertyList.values[i].value);
-
-  req->op.className = req->op.resultClass;
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq->hdr;
-  binCtx.bHdr->flags = req->flags;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sreqSize;
-  binCtx.commHndl = ctx->commHndl;
-  binCtx.type = CMPI_instance;
-  binCtx.xmlAs = XML_asObj;
-  binCtx.noResp = 0;
-  binCtx.pAs = NULL;
-  binCtx.chunkFncs = ctx->chunkFncs;
+  hdr->binCtx->commHndl = ctx->commHndl;
+  hdr->binCtx->chunkFncs = ctx->chunkFncs;
 
   if (noChunking || ctx->teTrailers == 0)
-    hdr->chunkedMode = binCtx.chunkedMode = 0;
+    hdr->chunkedMode = hdr->binCtx->chunkedMode = 0;
   else {
-    sreq->hdr.flags |= FL_chunked;
-    hdr->chunkedMode = binCtx.chunkedMode = 1;
+    hdr->binCtx->bHdr->flags |= FL_chunked;
+    hdr->chunkedMode = hdr->binCtx->chunkedMode = 1;
   }
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
     _SFCB_TRACE(1, ("--- Calling Provider"));
-    resp = invokeProviders(&binCtx, &err, &l);
+    resp = invokeProviders(hdr->binCtx, &err, &l);
     _SFCB_TRACE(1, ("--- Back from Provider"));
-    closeProviderContext(&binCtx);
+    closeProviderContext(hdr->binCtx);
 
     if (noChunking || ctx->teTrailers == 0) {
       if (err == 0) {
-        rs = genResponses(&binCtx, resp, l);
+        rs = genResponses(hdr->binCtx, resp, l);
       } else {
         rs = iMethodErrResponse(hdr, getErrSegment(resp[err - 1]->rc,
                                                    (char *) resp[err -
                                                                  1]->object
                                                    [0].data));
       }
-      freeResponseHeaders(resp, &binCtx);
-      free(sreq);
+      freeResponseHeaders(resp, hdr->binCtx);
+      free(hdr->binCtx->bHdr);
       _SFCB_RETURN(rs);
     }
-    freeResponseHeaders(resp, &binCtx);
-    free(sreq);
+    freeResponseHeaders(resp, hdr->binCtx);
+    free(hdr->binCtx->bHdr);
     rs.chunkedMode = 1;
     rs.rc = err;
     rs.errMsg = NULL;
     _SFCB_RETURN(rs);
   }
-  closeProviderContext(&binCtx);
-  free(sreq);
+  closeProviderContext(hdr->binCtx);
+  free(hdr->binCtx->bHdr);
 
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 int
