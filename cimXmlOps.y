@@ -962,6 +962,71 @@ buildReferencesRequest(void *parm)
   binCtx->pAs = NULL;
 }
 
+static void
+buildReferenceNamesRequest(void *parm)
+{
+  CMPIObjectPath *path = NULL;
+  ReferenceNamesReq *sreq;// = BINREQ(OPS_ReferenceNames, 4);
+  int             i,
+                  m;
+  CMPIType        type;
+  CMPIValue       val,
+                 *valp;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokReferenceNames *req = (XtokReferenceNames *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
+    valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
+                              req->objectName.bindings.keyBindings[i].
+                              value,
+                              &req->objectName.bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
+    CMAddKey(path, req->objectName.bindings.keyBindings[i].name, valp,
+             type);
+  }
+
+  if (req->objectName.bindings.next == 0) {
+    hdr->rc = CMPI_RC_ERR_NOT_SUPPORTED;
+    hdr->errMsg = "ReferenceNames operation for classes not supported";
+    return;
+  }
+  if (!req->objNameSet) {
+    hdr->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    hdr->errMsg = "ObjectName parameter required";
+    return;
+  }
+
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_ReferenceNames;
+  sreq->hdr.count = 4;
+  sreq->objectPath = setObjectPathMsgSegment(path);
+
+  sreq->resultClass = req->op.resultClass;
+  sreq->role = req->op.role;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  req->op.className = req->op.resultClass;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = 0;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->type = CMPI_ref;
+  binCtx->xmlAs = XML_asObjectPath;
+  binCtx->noResp = 0;
+  binCtx->chunkedMode = 0;
+  binCtx->pAs = NULL;
+}
+
 static void addProperty(XtokProperties *ps, XtokProperty *p)
 {
    XtokProperty *np;
@@ -3142,6 +3207,7 @@ referenceNames
        $$.objNameSet = 0;
 
        setRequest(parm,&$$,sizeof(XtokReferenceNames),OPS_ReferenceNames);
+       buildReferenceNamesRequest(parm);
     }
     | localNameSpacePath referenceNamesParmsList
     {
@@ -3155,6 +3221,7 @@ referenceNames
        $$.objNameSet = $2.objNameSet;
 
        setRequest(parm,&$$,sizeof(XtokReferenceNames),OPS_ReferenceNames);
+       buildReferenceNamesRequest(parm);
     }
 ;
 
