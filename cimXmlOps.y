@@ -77,7 +77,6 @@ static void setRequest(void *parm, void *req, unsigned long size, int type)
    ((ParserControl*)parm)->reqHdr.opType = type;
 }
 
-
 static void
 buildAssociatorNamesRequest(void *parm)
 {
@@ -227,8 +226,8 @@ buildAssociatorsRequest(void *parm)
   binCtx->xmlAs = XML_asObj;
   binCtx->noResp = 0;
   binCtx->pAs = NULL;
-
 }
+
 static void
 buildEnumInstanceRequest(void *parm)
 {
@@ -272,9 +271,7 @@ buildEnumInstanceRequest(void *parm)
   binCtx->type = CMPI_instance;
   binCtx->xmlAs = binCtx->noResp = 0;
   binCtx->pAs = NULL;
-
 }
-
 
 static void
 buildCreateInstanceRequest(void *parm)
@@ -332,8 +329,8 @@ buildCreateInstanceRequest(void *parm)
   binCtx->bHdrSize = sizeof(*sreq);
   binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
   binCtx->pAs = NULL;
-
 }
+
 static void
 buildGetInstanceRequest(void *parm)
 {
@@ -884,6 +881,81 @@ buildExecQueryRequest(void *parm)
   binCtx->bHdr->flags = 0;
   binCtx->rHdr = hdr;
   binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->type = CMPI_instance;
+  binCtx->xmlAs = XML_asObj;
+  binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildReferencesRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  ReferencesReq  *sreq;
+  int             i,
+                  m,
+                  sreqSize = sizeof(ReferencesReq);
+  CMPIType        type;
+  CMPIValue       val,
+                 *valp;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokReferences *req = (XtokReferences *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  if (req->properties)
+    sreqSize += req->properties * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_References;
+  sreq->hdr.count = req->properties + 4;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
+    valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
+                              req->objectName.bindings.keyBindings[i].
+                              value,
+                              &req->objectName.bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
+    CMAddKey(path, req->objectName.bindings.keyBindings[i].name, valp,
+             type);
+  }
+
+  if (req->objectName.bindings.next == 0) {
+    free(sreq);
+    hdr->rc = CMPI_RC_ERR_NOT_SUPPORTED;
+    hdr->errMsg = "References operation for classes not supported";
+    return;
+  }
+  if (!req->objNameSet) {
+    free(sreq);
+    hdr->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    hdr->errMsg = "ObjectName parameter required";
+    return;
+  }
+
+  sreq->objectPath = setObjectPathMsgSegment(path);
+
+  sreq->resultClass = req->op.resultClass;
+  sreq->role = req->op.role;
+  sreq->hdr.flags = req->flags;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  for (i = 0; i < req->properties; i++)
+    sreq->properties[i] =
+        setCharsMsgSegment(req->propertyList.values[i].value);
+
+  req->op.className = req->op.resultClass;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
   binCtx->type = CMPI_instance;
   binCtx->xmlAs = XML_asObj;
   binCtx->noResp = 0;
@@ -2811,6 +2883,7 @@ references
        $$.properties=0;
 
        setRequest(parm,&$$,sizeof(XtokReferences),OPS_References);
+       buildReferencesRequest(parm);
     }
     | localNameSpacePath referencesParmsList
     {
@@ -2827,6 +2900,7 @@ references
        $$.properties=$2.properties;
 
        setRequest(parm,&$$,sizeof(XtokReferences),OPS_References);
+       buildReferencesRequest(parm);
     }
 ;
 
