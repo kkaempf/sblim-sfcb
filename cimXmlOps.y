@@ -1027,6 +1027,61 @@ buildReferenceNamesRequest(void *parm)
   binCtx->pAs = NULL;
 }
 
+static void
+buildSetPropertyRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIInstance   *inst;
+  CMPIType        t;
+  CMPIStatus      rc;
+  CMPIValue       val;
+  SetPropertyReq *sreq;// = BINREQ(OPS_SetProperty, 3);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokSetProperty *req = (XtokSetProperty *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data,
+                            req->instanceName.className, &rc);
+
+  inst = internal_new_CMPIInstance(MEM_TRACKED, NULL, NULL, 1);
+
+  if (req->newVal.type == 0) {
+    t = guessType(req->newVal.val.value);
+  } else if (req->newVal.type == CMPI_ARRAY) {
+    t = guessType(req->newVal.arr.values[0].value) | CMPI_ARRAY;
+  } else {
+    t = req->newVal.type;
+  }
+  if (t != CMPI_null) {
+    val =
+        str2CMPIValue(t, req->newVal.val, &req->newVal.ref,
+                      req->op.nameSpace.data);
+    CMSetProperty(inst, req->propertyName, &val, t);
+  } else {
+    val.string = 0;
+    CMSetProperty(inst, req->propertyName, 0, t);
+  }
+
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_SetProperty;
+  sreq->hdr.count = 3;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->path = setObjectPathMsgSegment(path);
+  sreq->inst = setInstanceMsgSegment(inst);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
 static void addProperty(XtokProperties *ps, XtokProperty *p)
 {
    XtokProperty *np;
@@ -1756,6 +1811,7 @@ setProperty
        $$.propertyName = NULL;
 
        setRequest(parm,&$$,sizeof(XtokSetProperty),OPS_SetProperty);
+       buildSetPropertyRequest(parm);
 	}
 	| localNameSpacePath setPropertyParmsList
 	{
@@ -1768,6 +1824,7 @@ setProperty
        $$.propertyName = $2.propertyName;
        
        setRequest(parm,&$$,sizeof(XtokSetProperty),OPS_SetProperty);
+       buildSetPropertyRequest(parm);
 	}
 ;
 
