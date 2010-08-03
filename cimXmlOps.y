@@ -41,6 +41,7 @@
 extern CMPIConstClass initConstClass(ClClass * cl);
 extern MsgSegment setConstClassMsgSegment(CMPIConstClass * cl);
 extern MsgSegment setInstanceMsgSegment(CMPIInstance *ci);
+extern CMPIQualifierDecl initQualifier(ClQualifierDeclaration * qual);
 
 //
 // Define the global parser state object:
@@ -1112,7 +1113,8 @@ buildGetQualifierRequest(void *parm)
   binCtx->pAs = NULL;
 }
 
-static void buildDeleteQualifierRequest(void *parm)
+static void
+buildDeleteQualifierRequest(void *parm)
 {
   CMPIObjectPath *path;
   CMPIStatus      rc;
@@ -1133,6 +1135,106 @@ static void buildDeleteQualifierRequest(void *parm)
   sreq->principal = setCharsMsgSegment(hdr->principal);
   sreq->path = setObjectPathMsgSegment(path);
   sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildSetQualifierRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIQualifierDecl *qual;
+  CMPIData        d;
+  ClQualifierDeclaration *q;
+  SetQualifierReq *sreq;// = BINREQ(OPS_SetQualifier, 3);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokSetQualifier *req = (XtokSetQualifier *) hdr->cimRequest;
+
+  path = TrackedCMPIObjectPath(req->op.nameSpace.data, NULL, NULL);
+  q = ClQualifierDeclarationNew(req->op.nameSpace.data,
+                                req->qualifierdeclaration.name);
+
+  if (req->qualifierdeclaration.overridable)
+    q->flavor |= ClQual_F_Overridable;
+  if (req->qualifierdeclaration.tosubclass)
+    q->flavor |= ClQual_F_ToSubclass;
+  if (req->qualifierdeclaration.toinstance)
+    q->flavor |= ClQual_F_ToInstance;
+  if (req->qualifierdeclaration.translatable)
+    q->flavor |= ClQual_F_Translatable;
+  if (req->qualifierdeclaration.isarray)
+    q->type |= CMPI_ARRAY;
+
+  if (req->qualifierdeclaration.type)
+    q->type |= req->qualifierdeclaration.type;
+
+  if (req->qualifierdeclaration.scope.class)
+    q->scope |= ClQual_S_Class;
+  if (req->qualifierdeclaration.scope.association)
+    q->scope |= ClQual_S_Association;
+  if (req->qualifierdeclaration.scope.reference)
+    q->scope |= ClQual_S_Reference;
+  if (req->qualifierdeclaration.scope.property)
+    q->scope |= ClQual_S_Property;
+  if (req->qualifierdeclaration.scope.method)
+    q->scope |= ClQual_S_Method;
+  if (req->qualifierdeclaration.scope.parameter)
+    q->scope |= ClQual_S_Parameter;
+  if (req->qualifierdeclaration.scope.indication)
+    q->scope |= ClQual_S_Indication;
+  q->arraySize = req->qualifierdeclaration.arraySize;
+
+  if (req->qualifierdeclaration.data.value.value) {     // default value
+    // is set
+    d.state = CMPI_goodValue;
+    d.type = q->type;           // "specified" type
+    d.type |= req->qualifierdeclaration.data.type;      // actual type
+
+    // default value declared - isarray attribute must match, if set
+    if (req->qualifierdeclaration.isarrayIsSet)
+      if (!req->qualifierdeclaration.
+          isarray ^ !(req->qualifierdeclaration.data.type & CMPI_ARRAY))
+        hdr->rc = CMPI_RC_ERROR;
+        hdr->errMsg = "ISARRAY attribute and default value conflict";
+        return;
+
+    d.value = str2CMPIValue(d.type, req->qualifierdeclaration.data.value,
+                            (XtokValueReference *) &
+                            req->qualifierdeclaration.data.valueArray,
+                            NULL);
+    ClQualifierAddQualifier(&q->hdr, &q->qualifierData,
+                            req->qualifierdeclaration.name, d);
+  } else {                      // no default value - rely on ISARRAY
+    // attr, check if it's set
+    /*
+     * if(!req->qualifierdeclaration.isarrayIsSet)
+     * _SFCB_RETURN(iMethodErrResponse(hdr, getErrSegment(CMPI_RC_ERROR,
+     * "ISARRAY attribute MUST be present if the Qualifier declares no
+     * default value")));
+     */
+    q->qualifierData.sectionOffset = 0;
+    q->qualifierData.used = 0;
+    q->qualifierData.max = 0;
+  }
+
+  qual = malloc(sizeof(*qual));
+  *qual = initQualifier(q);
+
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_SetQualifier;
+  sreq->hdr.count = 3;
+  sreq->qualifier = setQualifierMsgSegment(qual);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+  sreq->path = setObjectPathMsgSegment(path);
 
   binCtx->oHdr = (OperationHdr *) req;
   binCtx->bHdr = &sreq->hdr;
@@ -2032,6 +2134,7 @@ setQualifier
        $$.qualifierdeclaration = $2.qualifierdeclaration;
 
        setRequest(parm,&$$,sizeof(XtokSetQualifier),OPS_SetQualifier);
+       buildSetQualifierRequest(parm);
     }
 ;
 

@@ -82,7 +82,6 @@ extern CMPIStatus arraySetElementNotTrackedAt(CMPIArray *array,
                                               CMPIValue * val,
                                               CMPIType type);
 extern CMPIConstClass initConstClass(ClClass * cl);
-extern CMPIQualifierDecl initQualifier(ClQualifierDeclaration * qual);
 extern CMPIString *NewCMPIString(const char *ptr, CMPIStatus *rc);
 
 extern char    *opsName[];
@@ -1819,110 +1818,22 @@ static          RespSegments
 setQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "setQualifier");
-  CMPIObjectPath *path;
-  CMPIQualifierDecl qual;
-  CMPIData        d;
-  ClQualifierDeclaration *q;
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
-  SetQualifierReq sreq = BINREQ(OPS_SetQualifier, 3);
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokSetQualifier *req = (XtokSetQualifier *) hdr->cimRequest;
-
-  path = TrackedCMPIObjectPath(req->op.nameSpace.data, NULL, NULL);
-  q = ClQualifierDeclarationNew(req->op.nameSpace.data,
-                                req->qualifierdeclaration.name);
-
-  if (req->qualifierdeclaration.overridable)
-    q->flavor |= ClQual_F_Overridable;
-  if (req->qualifierdeclaration.tosubclass)
-    q->flavor |= ClQual_F_ToSubclass;
-  if (req->qualifierdeclaration.toinstance)
-    q->flavor |= ClQual_F_ToInstance;
-  if (req->qualifierdeclaration.translatable)
-    q->flavor |= ClQual_F_Translatable;
-  if (req->qualifierdeclaration.isarray)
-    q->type |= CMPI_ARRAY;
-
-  if (req->qualifierdeclaration.type)
-    q->type |= req->qualifierdeclaration.type;
-
-  if (req->qualifierdeclaration.scope.class)
-    q->scope |= ClQual_S_Class;
-  if (req->qualifierdeclaration.scope.association)
-    q->scope |= ClQual_S_Association;
-  if (req->qualifierdeclaration.scope.reference)
-    q->scope |= ClQual_S_Reference;
-  if (req->qualifierdeclaration.scope.property)
-    q->scope |= ClQual_S_Property;
-  if (req->qualifierdeclaration.scope.method)
-    q->scope |= ClQual_S_Method;
-  if (req->qualifierdeclaration.scope.parameter)
-    q->scope |= ClQual_S_Parameter;
-  if (req->qualifierdeclaration.scope.indication)
-    q->scope |= ClQual_S_Indication;
-  q->arraySize = req->qualifierdeclaration.arraySize;
-
-  if (req->qualifierdeclaration.data.value.value) {     // default value
-    // is set
-    d.state = CMPI_goodValue;
-    d.type = q->type;           // "specified" type
-    d.type |= req->qualifierdeclaration.data.type;      // actual type
-
-    // default value declared - isarray attribute must match, if set
-    if (req->qualifierdeclaration.isarrayIsSet)
-      if (!req->qualifierdeclaration.
-          isarray ^ !(req->qualifierdeclaration.data.type & CMPI_ARRAY))
-        _SFCB_RETURN(iMethodErrResponse
-                     (hdr,
-                      getErrSegment(CMPI_RC_ERROR,
-                                    "ISARRAY attribute and default value conflict")));
-
-    d.value = str2CMPIValue(d.type, req->qualifierdeclaration.data.value,
-                            (XtokValueReference *) &
-                            req->qualifierdeclaration.data.valueArray,
-                            NULL);
-    ClQualifierAddQualifier(&q->hdr, &q->qualifierData,
-                            req->qualifierdeclaration.name, d);
-  } else {                      // no default value - rely on ISARRAY
-    // attr, check if it's set
-    /*
-     * if(!req->qualifierdeclaration.isarrayIsSet)
-     * _SFCB_RETURN(iMethodErrResponse(hdr, getErrSegment(CMPI_RC_ERROR,
-     * "ISARRAY attribute MUST be present if the Qualifier declares no
-     * default value")));
-     */
-    q->qualifierData.sectionOffset = 0;
-    q->qualifierData.used = 0;
-    q->qualifierData.max = 0;
-  }
-
-  qual = initQualifier(q);
-
-  sreq.qualifier = setQualifierMsgSegment(&qual);
-  sreq.principal = setCharsMsgSegment(ctx->principal);
-  sreq.hdr.sessionId = ctx->sessionId;
-  sreq.path = setObjectPathMsgSegment(path);
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq.hdr;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sizeof(sreq);
-  binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.pAs = NULL;
+  CMPIQualifierDecl *qual = (CMPIQualifierDecl *)
+                            (((SetQualifierReq *)
+                              (hdr->binCtx->bHdr))->qualifier.data);
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
 
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
-    resp = invokeProvider(&binCtx);
-    closeProviderContext(&binCtx);
-    qual.ft->release(&qual);
+    resp = invokeProvider(hdr->binCtx);
+    closeProviderContext(hdr->binCtx);
+    qual->ft->release(qual);
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       if (resp) {
@@ -1938,9 +1849,9 @@ setQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
     }
     _SFCB_RETURN(rs);
   }
-  closeProviderContext(&binCtx);
-  qual.ft->release(&qual);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  closeProviderContext(hdr->binCtx);
+  qual->ft->release(qual);
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 #endif
 
