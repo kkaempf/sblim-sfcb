@@ -1112,6 +1112,36 @@ buildGetQualifierRequest(void *parm)
   binCtx->pAs = NULL;
 }
 
+static void buildDeleteQualifierRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIStatus      rc;
+  DeleteQualifierReq *sreq;// = BINREQ(OPS_DeleteQualifier, 2);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokDeleteQualifier *req = (XtokDeleteQualifier *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  /* abuse classname for qualifier name */
+  path = TrackedCMPIObjectPath(req->op.nameSpace.data, req->name, &rc);
+
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_DeleteQualifier;
+  sreq->hdr.count = 2;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->path = setObjectPathMsgSegment(path);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
 static void addProperty(XtokProperties *ps, XtokProperty *p)
 {
    XtokProperty *np;
@@ -1963,6 +1993,7 @@ deleteQualifier
        $$.op.className=setCharsMsgSegment(NULL);
        $$.name = $2.name;
        setRequest(parm,&$$,sizeof(XtokDeleteQualifier),OPS_DeleteQualifier);
+       buildDeleteQualifierRequest(parm);
     }
 ;
 

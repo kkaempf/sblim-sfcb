@@ -1782,49 +1782,23 @@ static          RespSegments
 deleteQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "deleteQualifier");
-  CMPIObjectPath *path;
-  CMPIStatus      rc;
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
-  DeleteQualifierReq sreq = BINREQ(OPS_DeleteQualifier, 2);
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokDeleteQualifier *req = (XtokDeleteQualifier *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  path = TrackedCMPIObjectPath(req->op.nameSpace.data, req->name, &rc); // abuse 
-                                                                        // 
-  // 
-  // classname 
-  // for 
-  // qualifier 
-  // name
-
-  sreq.principal = setCharsMsgSegment(ctx->principal);
-  sreq.path = setObjectPathMsgSegment(path);
-  sreq.hdr.sessionId = ctx->sessionId;
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq.hdr;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sizeof(sreq);
-  binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
-    resp = invokeProvider(&binCtx);
-    closeProviderContext(&binCtx);
+    resp = invokeProvider(hdr->binCtx);
+    closeProviderContext(hdr->binCtx);
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       if (resp) {
         free(resp);
       }
+      free(hdr->binCtx->bHdr);
       _SFCB_RETURN(iMethodResponse(hdr, NULL));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
@@ -1833,11 +1807,12 @@ deleteQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
     if (resp) {
       free(resp);
     }
+    free(hdr->binCtx->bHdr);
     _SFCB_RETURN(rs);
   }
-  closeProviderContext(&binCtx);
-
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  closeProviderContext(hdr->binCtx);
+  free(hdr->binCtx->bHdr);
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments
