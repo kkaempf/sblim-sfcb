@@ -32,6 +32,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "cmpidtx.h"
 #include "cimXmlGen.h"
 #include "cimXmlParser.h"
 #include "objectImpl.h"
@@ -1244,6 +1245,37 @@ buildSetQualifierRequest(void *parm)
   binCtx->pAs = NULL;
 }
 
+static void
+buildEnumQualifiersRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  EnumClassNamesReq *sreq;// = BINREQ(OPS_EnumerateQualifiers, 2);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "enumQualifiers");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokEnumQualifiers *req = (XtokEnumQualifiers *) hdr->cimRequest;
+
+  path = TrackedCMPIObjectPath(req->op.nameSpace.data, NULL, NULL);
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_EnumerateQualifiers;
+  sreq->hdr.count = 2;
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->type = CMPI_qualifierDecl;
+  binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->chunkedMode = 0;
+  binCtx->pAs = NULL;
+}
+
 static void addProperty(XtokProperties *ps, XtokProperty *p)
 {
    XtokProperty *np;
@@ -2117,6 +2149,7 @@ enumQualifiers
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
        setRequest(parm,&$$,sizeof(XtokEnumQualifiers),OPS_EnumerateQualifiers);
+       buildEnumQualifiersRequest(parm);
     }
 ;
 /*

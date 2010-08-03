@@ -21,7 +21,6 @@
  */
 
 #include "cmpi/cmpidt.h"
-#include "cmpidtx.h"
 #include "cimXmlGen.h"
 #include "cimXmlRequest.h"
 #include "cimXmlParser.h"
@@ -1680,45 +1679,26 @@ setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
 static          RespSegments
 enumQualifiers(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
-  CMPIObjectPath *path;
-  EnumClassNamesReq sreq = BINREQ(OPS_EnumerateQualifiers, 2);
   int             irc;
   BinResponseHdr *resp;
-  BinRequestContext binCtx;
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "enumQualifiers");
 
-  memset(&binCtx, 0, sizeof(BinRequestContext));
-  XtokEnumQualifiers *req = (XtokEnumQualifiers *) hdr->cimRequest;
-
-  path = TrackedCMPIObjectPath(req->op.nameSpace.data, NULL, NULL);
-  sreq.objectPath = setObjectPathMsgSegment(path);
-  sreq.principal = setCharsMsgSegment(ctx->principal);
-  sreq.hdr.sessionId = ctx->sessionId;
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq.hdr;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sizeof(sreq);
-  binCtx.commHndl = ctx->commHndl;
-  binCtx.type = CMPI_qualifierDecl;
-  binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.chunkedMode = 0;
-  binCtx.pAs = NULL;
+  hdr->binCtx->commHndl = ctx->commHndl;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
     _SFCB_TRACE(1, ("--- Calling Providers"));
-    resp = invokeProvider(&binCtx);
+    resp = invokeProvider(hdr->binCtx);
     _SFCB_TRACE(1, ("--- Back from Provider"));
-    closeProviderContext(&binCtx);
+    closeProviderContext(hdr->binCtx);
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
-      rs = genQualifierResponses(&binCtx, resp);
+      rs = genQualifierResponses(hdr->binCtx, resp);
     } else {
       rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
                                                  (char *) resp->object[0].
@@ -1727,10 +1707,12 @@ enumQualifiers(CimXmlRequestContext * ctx, RequestHdr * hdr)
     if (resp) {
       free(resp);
     }
+    free(hdr->binCtx->bHdr);
     _SFCB_RETURN(rs);
   }
-  closeProviderContext(&binCtx);
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  closeProviderContext(hdr->binCtx);
+  free(hdr->binCtx->bHdr);
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments
