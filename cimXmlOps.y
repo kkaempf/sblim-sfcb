@@ -38,12 +38,15 @@
 #include "objectImpl.h"
 #include "constClass.h"
 #include "native.h"
+#include "control.h"
 
 extern CMPIConstClass initConstClass(ClClass * cl);
 extern MsgSegment setConstClassMsgSegment(CMPIConstClass * cl);
 extern MsgSegment setInstanceMsgSegment(CMPIInstance *ci);
 extern CMPIQualifierDecl initQualifier(ClQualifierDeclaration * qual);
+extern MsgSegment setArgsMsgSegment(CMPIArgs * args);
 
+int updateMethodParamTypes(RequestHdr * hdr);
 //
 // Define the global parser state object:
 //
@@ -1276,6 +1279,193 @@ buildEnumQualifiersRequest(void *parm)
   binCtx->pAs = NULL;
 }
 
+static void
+buildInvokeMethodRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIType        type;
+  CMPIValue       val,
+                 *valp;
+  int             i,
+                  m,
+                  rc,
+                  vmpt = 0;
+  InvokeMethodReq *sreq;// = BINREQ(OPS_InvokeMethod, 5);
+  CMPIArgs       *in = TrackedCMPIArgs(NULL);
+  XtokParamValue *p;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokMethodCall *req = (XtokMethodCall *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  if (req->instName)
+    for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
+      valp =
+          getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].
+                             type,
+                             req->instanceName.bindings.keyBindings[i].
+                             value,
+                             &req->instanceName.bindings.keyBindings[i].
+                             ref, &val, &type, req->op.nameSpace.data);
+      CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp,
+               type);
+    }
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_InvokeMethod;
+  sreq->hdr.count = 5;
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  if (getControlBool("validateMethodParamTypes", &vmpt))
+    vmpt = 1;
+
+  for (p = req->paramValues.first; p; p = p->next) {
+    /*
+     * Update untyped params (p->type==0) and verify those that were
+     * specified 
+     */
+    if (p->type == 0 || vmpt) {
+      rc = updateMethodParamTypes(hdr);
+
+      if (rc != CMPI_RC_OK) {
+        hdr->rc = rc;
+        hdr->errMsg = NULL;
+        return;
+      }
+    }
+
+    if (p->value.value) {
+      CMPIValue       val = str2CMPIValue(p->type, p->value, &p->valueRef,
+                                          req->op.nameSpace.data);
+      CMAddArg(in, p->name, &val, p->type);
+    }
+  }
+
+  sreq->in = setArgsMsgSegment(in);
+  sreq->out = setArgsMsgSegment(NULL);
+  sreq->method = setCharsMsgSegment(req->method);
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = 0;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+int
+updateMethodParamTypes(RequestHdr * hdr)
+{
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "updateMethodParamTypes");
+
+  CMPIConstClass *cls = NULL;
+  ClMethod       *meth;
+  ClParameter    *param = NULL;
+  int             i,
+                  m;
+  ClClass        *cl;
+  char           *mname;
+  XtokParamValue *ptok;
+  int             p,
+                  pm;
+
+  XtokMethodCall *req = (XtokMethodCall *) hdr->cimRequest;
+  cls =
+      getConstClass((char *) req->op.nameSpace.data,
+                    (char *) req->op.className.data);
+  if (!cls) {
+    _SFCB_RETURN(CMPI_RC_ERR_INVALID_CLASS);
+  }
+
+  cl = (ClClass *) cls->hdl;
+
+  /*
+   * check that the method specified in req exists in class 
+   */
+  for (i = 0, m = ClClassGetMethodCount(cl); i < m; i++) {
+    ClClassGetMethodAt(cl, i, NULL, &mname, NULL);
+    if (strcasecmp(req->method, mname) == 0) {
+      break;
+    }
+  }
+  if (i == m) {
+    _SFCB_RETURN(CMPI_RC_ERR_METHOD_NOT_FOUND);
+  }
+
+  meth = ((ClMethod *) ClObjectGetClSection(&cl->hdr, &cl->methods)) + i;
+
+  /*
+   * loop through all params from parsed req 
+   */
+  for (ptok = req->paramValues.first; ptok; ptok = ptok->next) {
+    CMPIParameter   pdata;
+    char           *sname;
+
+    /*
+     * loop through all params for meth 
+     */
+    for (p = 0, pm = ClClassGetMethParameterCount(cl, i); p < pm; p++) {
+      ClClassGetMethParameterAt(cl, meth, p, &pdata, &sname);
+
+      if (strcasecmp(sname, ptok->name) == 0) {
+        // fprintf(stderr, "%s matches %s", sname, ptok->name);
+        param = ((ClParameter *)
+                 ClObjectGetClSection(&cl->hdr, &meth->parameters)) + p;
+        break;
+      }
+    }
+    if (p == pm) {
+      _SFCB_RETURN(CMPI_RC_ERR_INVALID_PARAMETER);
+    }
+    // fprintf(stderr, " pdata.type=%u (expec), ptok->type=%u\n",
+    // pdata.type, ptok->type);
+    /*
+     * special case: EmbeddedInstance. Parser will set type to instance,
+     * but repository would have type as string. Check here to not fail
+     * the else-if below. 
+     */
+    if (param && (ptok->type & CMPI_instance)) {
+      int             isEI = 0;
+      int             qcount =
+          ClClassGetMethParmQualifierCount(cl, meth, i);
+      for (; qcount > 0; qcount--) {
+        char           *qname;
+        ClClassGetMethParamQualifierAt(cl, param, qcount, NULL, &qname);
+        if (strcmp(qname, "EmbeddedInstance") == 0) {
+          // fprintf(stderr, " is EmbeddedInstance\n");
+          isEI = 1;
+          break;
+        }
+      }
+      if (isEI)
+        continue;
+    }
+
+    if (ptok->type == 0) {
+      /*
+       * Type was unknown, fill it in 
+       */
+      // printf("parameter %s missing type, using %s\n", sname,
+      // paramType(pdata.type));
+      ptok->type = pdata.type;
+    } else if (ptok->type != pdata.type) {
+      /*
+       * Parameter type mismatch 
+       */
+      _SFCB_RETURN(CMPI_RC_ERR_TYPE_MISMATCH);
+    }
+  }
+  _SFCB_RETURN(CMPI_RC_OK);
+}
+
 static void addProperty(XtokProperties *ps, XtokProperty *p)
 {
    XtokProperty *np;
@@ -1870,6 +2060,7 @@ methodCall
        $$.paramValues.last=NULL;
        
        setRequest(parm,&$$,sizeof(XtokMethodCall),OPS_InvokeMethod);
+       buildInvokeMethodRequest(parm);
     }   
     | localClassPath paramValues
     {
@@ -1881,6 +2072,7 @@ methodCall
        $$.paramValues=$2;
        
        setRequest(parm,&$$,sizeof(XtokMethodCall),OPS_InvokeMethod);
+       buildInvokeMethodRequest(parm);
     }   
     | localInstancePath 
     {
@@ -1894,6 +2086,7 @@ methodCall
        $$.paramValues.last=NULL;
        
        setRequest(parm,&$$,sizeof(XtokMethodCall),OPS_InvokeMethod);
+       buildInvokeMethodRequest(parm);
     }   
     | localInstancePath paramValues
     {
@@ -1906,6 +2099,7 @@ methodCall
        $$.paramValues=$2;
               
        setRequest(parm,&$$,sizeof(XtokMethodCall),OPS_InvokeMethod);
+       buildInvokeMethodRequest(parm);
     }   
 ;    
 
