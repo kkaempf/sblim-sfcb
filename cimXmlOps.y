@@ -126,7 +126,7 @@ buildAssociatorNamesRequest(void *parm)
   }
   sreq = calloc(1, sizeof(*sreq)); 
   sreq->hdr.operation = OPS_AssociatorNames;
-  sreq->hdr.count = 2; 
+  sreq->hdr.count = 6; 
 
   sreq->objectPath = setObjectPathMsgSegment(path);
 
