@@ -124,9 +124,9 @@ buildAssociatorNamesRequest(void *parm)
     hdr->errMsg = strdup("ObjectName parameter required.");
     return;
   }
-  sreq = calloc(1, sizeof(*sreq)); //right size MCS
+  sreq = calloc(1, sizeof(*sreq)); 
   sreq->hdr.operation = OPS_AssociatorNames;
-  sreq->hdr.count = 2; //MCS
+  sreq->hdr.count = 2; 
 
   sreq->objectPath = setObjectPathMsgSegment(path);
 
@@ -143,12 +143,10 @@ buildAssociatorNamesRequest(void *parm)
   binCtx->bHdr = &sreq->hdr;
   binCtx->bHdr->flags = req->flags;
   binCtx->rHdr = hdr;
-  binCtx->bHdrSize = sizeof(*sreq); //MCS
-  //binCtx->commHndl = ctx->commHndl;
+  binCtx->bHdrSize = sizeof(*sreq); 
   binCtx->type = CMPI_ref;
   binCtx->xmlAs = XML_asObjectPath;
   binCtx->noResp = 0;
-  //binCtx->chunkedMode = 0;
   binCtx->pAs = NULL;
 
 }
@@ -1030,6 +1028,43 @@ buildReferenceNamesRequest(void *parm)
   binCtx->noResp = 0;
   binCtx->chunkedMode = 0;
   binCtx->pAs = NULL;
+}
+
+static void
+buildGetPropertyRequest(void *parm)
+{
+
+  CMPIObjectPath *path;
+  CMPIStatus      rc;
+  GetPropertyReq  *sreq;//BINREQ(OPS_GetProperty, 3);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildGetPropertyRequest");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokGetProperty *req = (XtokGetProperty *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data,
+                            req->instanceName.className, &rc);
+
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_GetProperty;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->path = setObjectPathMsgSegment(path);
+  sreq->name = setCharsMsgSegment(req->name);
+  sreq->hdr.sessionId = hdr->sessionId;
+  sreq->hdr.count = 3;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+
 }
 
 static void
@@ -2169,6 +2204,7 @@ getProperty
        $$.name = $2.name;
        $$.instanceName = $2.instanceName;
        setRequest(parm,&$$,sizeof(XtokGetProperty),OPS_GetProperty);
+       buildGetPropertyRequest(parm);
 	}
 ;
 

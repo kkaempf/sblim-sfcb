@@ -1394,46 +1394,23 @@ static          RespSegments
 getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "getProperty");
-  CMPIObjectPath *path;
   CMPIInstance   *inst;
   CMPIData        data;
-  CMPIStatus      rc;
   UtilStringBuffer *sb;
   CMPIString     *tmpString = NewCMPIString(NULL, NULL);
   int             irc;
-  BinRequestContext binCtx;
   BinResponseHdr *resp;
   RespSegments    rsegs;
-  GetPropertyReq  sreq = BINREQ(OPS_GetProperty, 3);
-
-  memset(&binCtx, 0, sizeof(BinRequestContext));
   XtokGetProperty *req = (XtokGetProperty *) hdr->cimRequest;
-  hdr->className = req->op.className.data;
-
-  path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data,
-                            req->instanceName.className, &rc);
-
-  sreq.principal = setCharsMsgSegment(ctx->principal);
-  sreq.path = setObjectPathMsgSegment(path);
-  sreq.name = setCharsMsgSegment(req->name);
-  sreq.hdr.sessionId = ctx->sessionId;
-
-  binCtx.oHdr = (OperationHdr *) req;
-  binCtx.bHdr = &sreq.hdr;
-  binCtx.rHdr = hdr;
-  binCtx.bHdrSize = sizeof(sreq);
-  binCtx.chunkedMode = binCtx.xmlAs = binCtx.noResp = 0;
-  binCtx.pAs = NULL;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
-  irc = getProviderContext(&binCtx);
+  irc = getProviderContext(hdr->binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;
-    resp = invokeProvider(&binCtx);
-    closeProviderContext(&binCtx);
+    resp = invokeProvider(hdr->binCtx);
+    closeProviderContext(hdr->binCtx);
     resp->rc--;
     if (resp->rc == CMPI_RC_OK) {
       inst = relocateSerializedInstance(resp->object[0].data);
@@ -1446,6 +1423,7 @@ getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
       if (resp) {
         free(resp);
       }
+      free(hdr->binCtx->bHdr);
       _SFCB_RETURN(rsegs);
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
@@ -1455,12 +1433,14 @@ getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
       free(resp);
     }
     CMRelease(tmpString);
+    free(hdr->binCtx->bHdr);
     _SFCB_RETURN(rs);
   }
   CMRelease(tmpString);
-  closeProviderContext(&binCtx);
+  free(hdr->binCtx->bHdr);
+  closeProviderContext(hdr->binCtx);
 
-  _SFCB_RETURN(ctxErrResponse(hdr, &binCtx, 0));
+  _SFCB_RETURN(ctxErrResponse(hdr, hdr->binCtx, 0));
 }
 
 static          RespSegments
