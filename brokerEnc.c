@@ -219,19 +219,21 @@ __beft_getMessage(const CMPIBroker * broker,
 
 static CMPIStatus __beft_logMessage
     (const CMPIBroker * broker, int severity, const char *id,
-     const char *text, const CMPIString *string) {
-  CMPIStatus      rc = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
-  _SFCB_ENTER(TRACE_ENCCALLS, "logMessage");
-  _SFCB_TRACE(1, ("This operation is not yet supported."));
+     const char *text, const CMPIString *string)
+{
+  CMPIStatus rc = {CMPI_RC_OK,NULL};
+  _SFCB_ENTER(TRACE_ENCCALLS,id);
+  _SFCB_TRACE(severity,((char *)text));
   _SFCB_RETURN(rc);
 }
 
 static CMPIStatus __beft_trace
     (const CMPIBroker * broker, int level, const char *component,
-     const char *text, const CMPIString *string) {
-  CMPIStatus      rc = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
-  _SFCB_ENTER(TRACE_ENCCALLS, "trace");
-  _SFCB_TRACE(1, ("This operation is not yet supported."));
+     const char *text, const CMPIString *string)
+{
+  CMPIStatus rc = {CMPI_RC_OK,NULL};
+  _SFCB_ENTER(TRACE_ENCCALLS,component);
+  _SFCB_TRACE(level,((char *)text));
   _SFCB_RETURN(rc);
 }
 
