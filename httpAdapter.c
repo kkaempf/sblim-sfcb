@@ -1473,6 +1473,7 @@ handleHttpRequest(int connFd, int sslMode)
       }
     }
  #if defined USE_SSL
+    if(sslMode) {
       BIO            *sslb;
       BIO            *sb;
       long            flags = fcntl(connFd, F_GETFL);
