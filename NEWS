@@ -18,6 +18,7 @@ Bugs fixed:
 - 3004385 Improve performance for association upcall
 - 2859885 New XML Test Case, removed genericlist.c
 - 3005429 indCIMXMLHandler provider should cleanup nicely
+- 3042731 git master doesn't build with --enable-ssl
 
 Changes in 1.3.9
 ================

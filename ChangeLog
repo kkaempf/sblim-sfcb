@@ -1,3 +1,8 @@
+2010-08-09 Sean Swehla <smswehla@linux.vnet.ibm.com>
+	*  httpAdapter.c:
+	[ 3042731 ] git master doesn't build with --enable-ssl
+	(Patch by Klaus Kaempf)
+
 2010-08-04 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	*  cimXmlOps.y:
 	[ 3031827 ] Parser does not create BinRequestContext
