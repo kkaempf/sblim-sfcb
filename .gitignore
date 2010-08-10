@@ -3,6 +3,9 @@
 *.lo
 *.o
 *~
+*.swp
+*.gcno
+*.patch
 queryLexer.c
 queryParser.c
 queryParser.h
