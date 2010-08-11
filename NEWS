@@ -5,6 +5,7 @@ New features:
 - 3014530 configure option for request
 - 3030289 Update wbemcat to make REST requests
 - 3031827 Parser does not create BinRequestContext
+- 3043331 Implement Pulled Enumerations
 
 Bugs fixed:
 

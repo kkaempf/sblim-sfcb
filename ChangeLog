@@ -1,3 +1,8 @@
+2010-08-11 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	*  test/xmltest/xmltest.sh, test/xmltest/PE_OpenEnumInstances*:
+	[ 3043331 ] Implement Pulled Enumerations
+	Tests for OpenEnumInstances, support for staged tests
+
 2010-08-11 Sean Swehla <smswehla@linux.vnet.ibm.com>
 
 	*  xmltests/ec_comment.xml, xmltests/ec_comment.lines:

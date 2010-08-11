@@ -1,0 +1,4 @@
+<IMETHODRESPONSE NAME="OpenEnumerateInstances">
+!<ERROR CODE=
+<INSTANCE CLASSNAME="SFCB_RegisteredProfile">
+<PROPERTY.ARRAY NAME="AdvertiseTypes" TYPE="uint16">
