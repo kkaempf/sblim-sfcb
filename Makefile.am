@@ -547,8 +547,8 @@ clean-local:
 	rm -f sfcbrepos sfcbstage sfcbunstage sfcbuuid sfcb.cfg getSchema.sh sfcb \
 		sfcb.init-redhat sfcb.init-suse sfcb.init-none sfcb-dox.conf \
                 cimXmlParserProcessed.c \
-		*.gcno *.gcda *.gcov $(MANFILES)
-	rm -rf doc/* coverage/
+		*.gcno *.gcda *.gcov $(MANFILES) test/TestProviders/tests/RIModIS.XML
+	rm -rf doc/* coverage/ 
 
 dist-hook:
 	test -d "$(distdir)" &&	rm -rf `find $(distdir) -type d -name CVS`

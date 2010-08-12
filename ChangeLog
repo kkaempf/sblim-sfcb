@@ -1,14 +1,63 @@
+2010-08-11 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	*  test/xmltest/xmltest.sh, test/xmltest/PE_OpenEnumInstances*:
+	[ 3043331 ] Implement Pulled Enumerations
+	Tests for OpenEnumInstances, support for staged tests
+
+2010-08-11 Sean Swehla <smswehla@linux.vnet.ibm.com>
+
+	*  xmltests/ec_comment.xml, xmltests/ec_comment.lines:
+	[ 3043324 ] xml tests don't test xml comments
+
+2010-08-09 Sean Swehla <smswehla@linux.vnet.ibm.com>
+	*  httpAdapter.c:
+	[ 3042731 ] git master doesn't build with --enable-ssl
+	(Patch by Klaus Kaempf)
+
+2010-08-04 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	*  cimXmlOps.y:
+	[ 3031827 ] Parser does not create BinRequestContext
+	Fix to AssociatorNames
+
+2010-08-04 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	*  cimXmlOps.y, cimXmlRequest.c:
+	[ 3031827 ] Parser does not create BinRequestContext
+	Changes for GetProperty
+
+2010-07-30 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	*  cimXmlOps.y, cimXmlParser.h, cimXmlRequest.c:
+	[ 3031827 ] Parser does not create BinRequestContext
+	Changes for AssociatorNames
+
+2010-07-29 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	*  cimXmlOps.y, cimXmlRequest.c:
+	[ 3031827 ] Parser does not create BinRequestContext
+	Changes for Associators
+
+2010-07-27 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	*  cimXmlOps.y, cimXmlParser.h, cimXmlRequest.c:
+	[ 3031827 ] Parser does not create BinRequestContext
+	Changes for EnumInstances
+
+2010-07-23 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	*  cimXmlOps.y, cimXmlParser.h, cimXmlRequest.c:
+	[ 3031827 ] Parser does not create BinRequestContext
+	Changes for CreateInstance
+
 2010-07-22  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* test/cimrstest/*
 
 	Initial add of cimrs tests and lines result files
 
+2010-07-21 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	*  cimXmlOps.y, cimXmlParser.c, cimXmlParser.h, cimXmlRequest.c:
+	[ 3031827 ] Parser does not create BinRequestContext
+	Changes for DeleteInstance
+
 2010-07-20 Sean Swehla <smswehla@linux.vnet.ibm.com>
 
 	*  cimXmlOps.y, cimXmlParser.c, cimXmlParser.h, cimXmlRequest.c,
-           providerMgr.h, test/unittest/xmlUnescape.c
- 
+		providerMgr.h, test/unittest/xmlUnescape.c:
 	[ 3031827 ] Parser does not create BinRequestContext
 
 2010-07-15  Chris Buccella  <buccella@linux.vnet.ibm.com>

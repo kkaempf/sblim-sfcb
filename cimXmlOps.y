@@ -32,11 +32,21 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "cmpidtx.h"
 #include "cimXmlGen.h"
 #include "cimXmlParser.h"
+#include "objectImpl.h"
+#include "constClass.h"
 #include "native.h"
+#include "control.h"
 
+extern CMPIConstClass initConstClass(ClClass * cl);
+extern MsgSegment setConstClassMsgSegment(CMPIConstClass * cl);
+extern MsgSegment setInstanceMsgSegment(CMPIInstance *ci);
+extern CMPIQualifierDecl initQualifier(ClQualifierDeclaration * qual);
+extern MsgSegment setArgsMsgSegment(CMPIArgs * args);
 
+int updateMethodParamTypes(RequestHdr * hdr);
 //
 // Define the global parser state object:
 //
@@ -51,8 +61,17 @@
 #define VALUEREFARRAY_MAX_START 32
 #define KEYBINDING_MAX_START 12
 
+#ifdef LOCAL_CONNECT_ONLY_ENABLE
+// from httpAdapter.c
+int             noChunking = 0;
+#endif                          // LOCAL_CONNECT_ONLY_ENABLE
+extern int      noChunking;
+
+
+
 extern int yyerror(char*);
 extern int yylex (void *lvalp, ParserControl *parm);
+//extern MsgSegment setInstanceMsgSegment(const CMPIInstance *ci);
 
 
 static void setRequest(void *parm, void *req, unsigned long size, int type)
@@ -61,6 +80,258 @@ static void setRequest(void *parm, void *req, unsigned long size, int type)
    ((ParserControl*)parm)->reqHdr.cimRequest=malloc(size);
    memcpy(((ParserControl*)parm)->reqHdr.cimRequest,req,size);
    ((ParserControl*)parm)->reqHdr.opType = type;
+}
+
+static void
+buildAssociatorNamesRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  AssociatorNamesReq *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  int       i, m;
+  BinRequestContext *binCtx = hdr->binCtx;
+  CMPIType        type;
+  CMPIValue       val,
+                 *valp;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildAssociatorNamesRequest");
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokAssociatorNames *req = (XtokAssociatorNames *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
+    valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
+                              req->objectName.bindings.keyBindings[i].
+                              value,
+                              &req->objectName.bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
+    CMAddKey(path, req->objectName.bindings.keyBindings[i].name, valp,
+             type);
+  }
+
+  if (req->objectName.bindings.next == 0) {
+    free(hdr->binCtx->bHdr);
+    hdr->rc = CMPI_RC_ERR_NOT_SUPPORTED;
+    hdr->errMsg = strdup("AssociatorNames operation for classes not supported.");
+    return;
+  }
+  if (!req->objNameSet) {
+    free(hdr->binCtx->bHdr);
+    hdr->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    hdr->errMsg = strdup("ObjectName parameter required.");
+    return;
+  }
+  sreq = calloc(1, sizeof(*sreq)); 
+  sreq->hdr.operation = OPS_AssociatorNames;
+  sreq->hdr.count = 6; 
+
+  sreq->objectPath = setObjectPathMsgSegment(path);
+
+  sreq->resultClass = req->op.resultClass;
+  sreq->role = req->op.role;
+  sreq->assocClass = req->op.assocClass;
+  sreq->resultRole = req->op.resultRole;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  req->op.className = req->op.assocClass;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq); 
+  binCtx->type = CMPI_ref;
+  binCtx->xmlAs = XML_asObjectPath;
+  binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+
+}
+
+static void
+buildAssociatorsRequest(void *parm)
+{
+
+  CMPIObjectPath *path;
+  AssociatorsReq *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  int             i,m,
+      sreqSize = sizeof(AssociatorsReq);        // -sizeof(MsgSegment);
+  BinRequestContext *binCtx = hdr->binCtx;
+  CMPIType        type;
+  CMPIValue       val,
+                 *valp;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildAssociatorsRequest");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokAssociators *req = (XtokAssociators *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+
+  if (req->objectName.bindings.next == 0) {
+    free(hdr->binCtx->bHdr);
+    hdr->rc = CMPI_RC_ERR_NOT_SUPPORTED;
+    hdr->errMsg = strdup("Associator operation for classes not supported.");
+    return;
+  }
+  if (!req->objNameSet) {
+    free(hdr->binCtx->bHdr);
+    hdr->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    hdr->errMsg = strdup("ObjectName parameter required.");
+    return;
+  }
+
+  if (req->properties)
+    sreqSize += req->properties * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_Associators;
+  sreq->hdr.count = req->properties + 6;
+
+  for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
+    valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
+                              req->objectName.bindings.keyBindings[i].
+                              value,
+                              &req->objectName.bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
+    CMAddKey(path, req->objectName.bindings.keyBindings[i].name, valp,
+             type);
+  }
+
+  sreq->objectPath = setObjectPathMsgSegment(path);
+
+  sreq->resultClass = req->op.resultClass;
+  sreq->role = req->op.role;
+  sreq->assocClass = req->op.assocClass;
+  sreq->resultRole = req->op.resultRole;
+  sreq->hdr.flags = req->flags;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  for (i = 0; i < req->properties; i++)
+    sreq->properties[i] =
+        setCharsMsgSegment(req->propertyList.values[i].value);
+
+  req->op.className = req->op.assocClass;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->type = CMPI_instance;
+  binCtx->xmlAs = XML_asObj;
+  binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildEnumInstanceRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  EnumInstancesReq *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  int    i,
+      sreqSize = sizeof(EnumInstancesReq);      // -sizeof(MsgSegment);
+  BinRequestContext *binCtx = hdr->binCtx;
+  
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildEnumInstancesRequest");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokEnumInstances *req = (XtokEnumInstances *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  if (req->properties)
+    sreqSize += req->properties * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_EnumerateInstances;
+  sreq->hdr.count = req->properties + 2;
+
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  for (i = 0; i < req->properties; i++) {
+    sreq->properties[i] =
+        setCharsMsgSegment(req->propertyList.values[i].value);
+  }
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+
+  binCtx->type = CMPI_instance;
+  binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildCreateInstanceRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIInstance   *inst;
+  CMPIValue       val;
+  CMPIStatus      st = { CMPI_RC_OK, NULL };
+  CreateInstanceReq *sreq;
+  XtokProperty   *p = NULL;
+
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokCreateInstance *req = (XtokCreateInstance *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  inst = TrackedCMPIInstance(path, NULL);
+
+  sreq = calloc(1, sizeof(CreateInstanceReq));
+  sreq->hdr.operation = OPS_CreateInstance;
+  sreq->hdr.count = 3;
+
+
+  for (p = req->instance.properties.first; p; p = p->next) {
+    if (p->val.val.value) {
+      val =
+          str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
+                        req->op.nameSpace.data);
+      CMSetProperty(inst, p->name, &val, p->valueType);
+    }
+  }
+
+  sreq->instance = setInstanceMsgSegment(inst);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  path = inst->ft->getObjectPath(inst, &st);
+  /*
+   * if st.rc is set the class was probably not found and the path is
+   * NULL, so we don't set it. Let the provider manager handle unknown
+   * class. 
+   */
+  if (!st.rc) {
+    sreq->path = setObjectPathMsgSegment(path);
+  }
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
 }
 
 static void
@@ -210,7 +481,6 @@ buildDeleteInstanceRequest(void *parm)
   sreq->hdr.operation = OPS_DeleteInstance;
   sreq->hdr.count = 2;
 
-
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
                             NULL);
@@ -233,7 +503,1002 @@ buildDeleteInstanceRequest(void *parm)
   binCtx->bHdrSize = sreqSize;
   binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
   binCtx->pAs = NULL;
+}
 
+static void
+buildCreateClassRequest(void *parm)
+{
+  CMPIConstClass *cls;
+  CMPIObjectPath *path;
+  ClClass        *cl;
+  ClClass        *tmp;
+  CreateClassReq *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  XtokProperty   *p = NULL;
+  XtokProperties *ps = NULL;
+  XtokQualifier  *q = NULL;
+  XtokQualifiers *qs = NULL;
+  XtokMethod     *m = NULL;
+  XtokMethods    *ms = NULL;
+  XtokParam      *r = NULL;
+  XtokParams     *rs = NULL;
+  XtokClass      *c;
+  CMPIData        d;
+  CMPIParameter   pa;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokCreateClass *req = (XtokCreateClass *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+
+  cl = ClClassNew(req->op.className.data,
+                  req->superClass ? req->superClass : NULL);
+  c = &req->cls;
+
+  qs = &c->qualifiers;
+  for (q = qs->first; q; q = q->next) {
+    if (q->value.value == NULL) {
+      d.state = CMPI_nullValue;
+      d.value.uint64 = 0;
+    } else {
+      d.state = CMPI_goodValue;
+      d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+    }
+    d.type = q->type;
+    ClClassAddQualifier(&cl->hdr, &cl->qualifiers, q->name, d);
+  }
+
+  ps = &c->properties;
+  for (p = ps->first; p; p = p->next) {
+    ClProperty     *prop;
+    int             propId;
+    if (p->val.val.value == NULL) {
+      d.state = CMPI_nullValue;
+      d.value.uint64 = 0;
+    } else {
+      d.state = CMPI_goodValue;
+      d.value =
+          str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
+                        req->op.nameSpace.data);
+    }
+    d.type = p->valueType;
+    propId = ClClassAddProperty(cl, p->name, d, p->referenceClass);
+
+    qs = &p->val.qualifiers;
+    prop =
+        ((ClProperty *) ClObjectGetClSection(&cl->hdr, &cl->properties)) +
+        propId - 1;
+    for (q = qs->first; q; q = q->next) {
+      if (q->value.value == NULL) {
+        d.state = CMPI_nullValue;
+        d.value.uint64 = 0;
+      } else {
+        d.state = CMPI_goodValue;
+        d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+      }
+      d.type = q->type;
+      ClClassAddPropertyQualifier(&cl->hdr, prop, q->name, d);
+    }
+  }
+
+  ms = &c->methods;
+  for (m = ms->first; m; m = m->next) {
+    ClMethod       *meth;
+    ClParameter    *cl_parm;
+    int             methId,
+                    parmId;
+
+    methId = ClClassAddMethod(cl, m->name, m->type);
+    meth =
+        ((ClMethod *) ClObjectGetClSection(&cl->hdr, &cl->methods)) +
+        methId - 1;
+
+    qs = &m->qualifiers;
+    for (q = qs->first; q; q = q->next) {
+      if (q->value.value == NULL) {
+        d.state = CMPI_nullValue;
+        d.value.uint64 = 0;
+      } else {
+        d.state = CMPI_goodValue;
+        d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+      }
+      d.type = q->type;
+      ClClassAddMethodQualifier(&cl->hdr, meth, q->name, d);
+    }
+
+    rs = &m->params;
+    for (r = rs->first; r; r = r->next) {
+      pa.type = r->type;
+      pa.arraySize = (unsigned int) r->arraySize;
+      pa.refName = r->refClass;
+      parmId = ClClassAddMethParameter(&cl->hdr, meth, r->name, pa);
+      cl_parm = ((ClParameter *)
+              ClObjectGetClSection(&cl->hdr,
+                                   &meth->parameters)) + methId - 1;
+
+      qs = &r->qualifiers;
+      for (q = qs->first; q; q = q->next) {
+        if (q->value.value == NULL) {
+          d.state = CMPI_nullValue;
+          d.value.uint64 = 0;
+        } else {
+          d.state = CMPI_goodValue;
+          d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+        }
+        d.type = q->type;
+        ClClassAddMethParamQualifier(&cl->hdr, cl_parm, q->name, d);
+      }
+    }
+  }
+
+  tmp = cl;
+  cl = ClClassRebuildClass(cl, NULL);
+  ClClassFreeClass(tmp);
+  cls = calloc(1, sizeof(*cls));
+  *cls = initConstClass(cl);
+
+  int sreqSize = sizeof(*sreq) + (3 * sizeof(MsgSegment));
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_CreateClass;
+  sreq->hdr.count = 3;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->path = setObjectPathMsgSegment(path);
+  sreq->cls = setConstClassMsgSegment(cls);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildModifyInstanceRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIInstance   *inst;
+  CMPIType        type;
+  CMPIValue       val,
+                 *valp;
+  int             i,
+                  m,
+                  sreqSize = sizeof(ModifyInstanceReq); // -sizeof(MsgSegment);
+  ModifyInstanceReq *sreq;
+  XtokInstance   *xci;
+  XtokInstanceName *xco;
+  XtokProperty   *p = NULL;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokModifyInstance *req = (XtokModifyInstance *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  if (req->properties)
+    sreqSize += req->properties * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_ModifyInstance;
+  sreq->hdr.count = req->properties + 3;
+
+  for (i = 0; i < req->properties; i++) {
+    sreq->properties[i] =
+        setCharsMsgSegment(req->propertyList.values[i].value);
+  }
+  xci = &req->namedInstance.instance;
+  xco = &req->namedInstance.path;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+
+  for (i = 0, m = xco->bindings.next; i < m; i++) {
+    valp = getKeyValueTypePtr(xco->bindings.keyBindings[i].type,
+                              xco->bindings.keyBindings[i].value,
+                              &xco->bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
+
+    CMAddKey(path, xco->bindings.keyBindings[i].name, valp, type);
+  }
+
+  inst = TrackedCMPIInstance(path, NULL);
+  for (p = xci->properties.first; p; p = p->next) {
+    if (p->val.val.value) {
+      val =
+          str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
+                        req->op.nameSpace.data);
+      CMSetProperty(inst, p->name, &val, p->valueType);
+    }
+  }
+  sreq->instance = setInstanceMsgSegment(inst);
+  sreq->path = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildEnumClassesRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  EnumClassesReq *sreq;
+  int             sreqSize;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildEnumClassesRequest");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokEnumClasses *req = (XtokEnumClasses *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  sreqSize = sizeof(*sreq);// + 2 * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_EnumerateClasses;
+  sreq->hdr.count = 2;
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.flags = req->flags;
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->type = CMPI_class;
+  binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildEnumClassNamesRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  EnumClassNamesReq *sreq;// = BINREQ(OPS_EnumerateClassNames, 2);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "enumClassNames");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokEnumClassNames *req = (XtokEnumClassNames *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.operation = OPS_EnumerateClassNames;
+  sreq->hdr.count = 2;
+  sreq->hdr.flags = req->flags;
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->type = CMPI_ref;
+  binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->chunkedMode = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildEnumInstanceNamesRequest(void *parm)
+{
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildEnumInstanceNamesRequest");
+  CMPIObjectPath *path;
+  EnumInstanceNamesReq *sreq;// = BINREQ(OPS_EnumerateInstanceNames, 2);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+
+  XtokEnumInstanceNames *req = (XtokEnumInstanceNames *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.operation = OPS_EnumerateInstanceNames;
+  sreq->hdr.count = 2;
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = 0;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->type = CMPI_ref;
+  binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->chunkedMode = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildExecQueryRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  ExecQueryReq   *sreq;// = BINREQ(OPS_ExecQuery, 4);
+  int             irc;
+  QLStatement    *qs = NULL;
+  char          **fCls;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokExecQuery  *req = (XtokExecQuery *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  qs = parseQuery(MEM_TRACKED, (char *) req->op.query.data,
+                  (char *) req->op.queryLang.data, NULL, &irc);
+
+  fCls = qs->ft->getFromClassList(qs);
+  if (irc) {
+    hdr->rc = CMPI_RC_ERR_INVALID_QUERY;
+    hdr->errMsg = strdup("syntax error in query.");
+    return;
+  }
+  if (fCls == NULL || *fCls == NULL) {
+    hdr->rc = CMPI_RC_ERR_INVALID_QUERY;
+    hdr->errMsg = strdup("required from clause is missing.");
+    return;
+  }
+  req->op.className = setCharsMsgSegment(*fCls);
+
+  path = TrackedCMPIObjectPath(req->op.nameSpace.data, *fCls, NULL);
+
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_ExecQuery;
+  sreq->hdr.count = 4;
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->query = setCharsMsgSegment((char *) req->op.query.data);
+  sreq->queryLang = setCharsMsgSegment((char *) req->op.queryLang.data);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = 0;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->type = CMPI_instance;
+  binCtx->xmlAs = XML_asObj;
+  binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildReferencesRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  ReferencesReq  *sreq;
+  int             i,
+                  m,
+                  sreqSize = sizeof(ReferencesReq);
+  CMPIType        type;
+  CMPIValue       val,
+                 *valp;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokReferences *req = (XtokReferences *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  if (req->properties)
+    sreqSize += req->properties * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_References;
+  sreq->hdr.count = req->properties + 4;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
+    valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
+                              req->objectName.bindings.keyBindings[i].
+                              value,
+                              &req->objectName.bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
+    CMAddKey(path, req->objectName.bindings.keyBindings[i].name, valp,
+             type);
+  }
+
+  if (req->objectName.bindings.next == 0) {
+    free(sreq);
+    hdr->rc = CMPI_RC_ERR_NOT_SUPPORTED;
+    hdr->errMsg = "References operation for classes not supported";
+    return;
+  }
+  if (!req->objNameSet) {
+    free(sreq);
+    hdr->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    hdr->errMsg = "ObjectName parameter required";
+    return;
+  }
+
+  sreq->objectPath = setObjectPathMsgSegment(path);
+
+  sreq->resultClass = req->op.resultClass;
+  sreq->role = req->op.role;
+  sreq->hdr.flags = req->flags;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  for (i = 0; i < req->properties; i++)
+    sreq->properties[i] =
+        setCharsMsgSegment(req->propertyList.values[i].value);
+
+  req->op.className = req->op.resultClass;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->type = CMPI_instance;
+  binCtx->xmlAs = XML_asObj;
+  binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildReferenceNamesRequest(void *parm)
+{
+  CMPIObjectPath *path = NULL;
+  ReferenceNamesReq *sreq;// = BINREQ(OPS_ReferenceNames, 4);
+  int             i,
+                  m;
+  CMPIType        type;
+  CMPIValue       val,
+                 *valp;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokReferenceNames *req = (XtokReferenceNames *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
+    valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
+                              req->objectName.bindings.keyBindings[i].
+                              value,
+                              &req->objectName.bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
+    CMAddKey(path, req->objectName.bindings.keyBindings[i].name, valp,
+             type);
+  }
+
+  if (req->objectName.bindings.next == 0) {
+    hdr->rc = CMPI_RC_ERR_NOT_SUPPORTED;
+    hdr->errMsg = "ReferenceNames operation for classes not supported";
+    return;
+  }
+  if (!req->objNameSet) {
+    hdr->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    hdr->errMsg = "ObjectName parameter required";
+    return;
+  }
+
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_ReferenceNames;
+  sreq->hdr.count = 4;
+  sreq->objectPath = setObjectPathMsgSegment(path);
+
+  sreq->resultClass = req->op.resultClass;
+  sreq->role = req->op.role;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  req->op.className = req->op.resultClass;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = 0;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->type = CMPI_ref;
+  binCtx->xmlAs = XML_asObjectPath;
+  binCtx->noResp = 0;
+  binCtx->chunkedMode = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildGetPropertyRequest(void *parm)
+{
+
+  CMPIObjectPath *path;
+  CMPIStatus      rc;
+  GetPropertyReq  *sreq;//BINREQ(OPS_GetProperty, 3);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildGetPropertyRequest");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokGetProperty *req = (XtokGetProperty *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data,
+                            req->instanceName.className, &rc);
+
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_GetProperty;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->path = setObjectPathMsgSegment(path);
+  sreq->name = setCharsMsgSegment(req->name);
+  sreq->hdr.sessionId = hdr->sessionId;
+  sreq->hdr.count = 3;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+
+}
+
+static void
+buildSetPropertyRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIInstance   *inst;
+  CMPIType        t;
+  CMPIStatus      rc;
+  CMPIValue       val;
+  SetPropertyReq *sreq;// = BINREQ(OPS_SetProperty, 3);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokSetProperty *req = (XtokSetProperty *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data,
+                            req->instanceName.className, &rc);
+
+  inst = internal_new_CMPIInstance(MEM_TRACKED, NULL, NULL, 1);
+
+  if (req->newVal.type == 0) {
+    t = guessType(req->newVal.val.value);
+  } else if (req->newVal.type == CMPI_ARRAY) {
+    t = guessType(req->newVal.arr.values[0].value) | CMPI_ARRAY;
+  } else {
+    t = req->newVal.type;
+  }
+  if (t != CMPI_null) {
+    val =
+        str2CMPIValue(t, req->newVal.val, &req->newVal.ref,
+                      req->op.nameSpace.data);
+    CMSetProperty(inst, req->propertyName, &val, t);
+  } else {
+    val.string = 0;
+    CMSetProperty(inst, req->propertyName, 0, t);
+  }
+
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_SetProperty;
+  sreq->hdr.count = 3;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->path = setObjectPathMsgSegment(path);
+  sreq->inst = setInstanceMsgSegment(inst);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildGetQualifierRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIStatus      rc;
+  GetQualifierReq *sreq;// = BINREQ(OPS_GetQualifier, 2);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokGetQualifier *req = (XtokGetQualifier *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path = TrackedCMPIObjectPath(req->op.nameSpace.data, req->name, &rc);
+
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_GetQualifier;
+  sreq->hdr.count = 2;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->path = setObjectPathMsgSegment(path);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildDeleteQualifierRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIStatus      rc;
+  DeleteQualifierReq *sreq;// = BINREQ(OPS_DeleteQualifier, 2);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokDeleteQualifier *req = (XtokDeleteQualifier *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  /* abuse classname for qualifier name */
+  path = TrackedCMPIObjectPath(req->op.nameSpace.data, req->name, &rc);
+
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_DeleteQualifier;
+  sreq->hdr.count = 2;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->path = setObjectPathMsgSegment(path);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildSetQualifierRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIQualifierDecl *qual;
+  CMPIData        d;
+  ClQualifierDeclaration *q;
+  SetQualifierReq *sreq;// = BINREQ(OPS_SetQualifier, 3);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokSetQualifier *req = (XtokSetQualifier *) hdr->cimRequest;
+
+  path = TrackedCMPIObjectPath(req->op.nameSpace.data, NULL, NULL);
+  q = ClQualifierDeclarationNew(req->op.nameSpace.data,
+                                req->qualifierdeclaration.name);
+
+  if (req->qualifierdeclaration.overridable)
+    q->flavor |= ClQual_F_Overridable;
+  if (req->qualifierdeclaration.tosubclass)
+    q->flavor |= ClQual_F_ToSubclass;
+  if (req->qualifierdeclaration.toinstance)
+    q->flavor |= ClQual_F_ToInstance;
+  if (req->qualifierdeclaration.translatable)
+    q->flavor |= ClQual_F_Translatable;
+  if (req->qualifierdeclaration.isarray)
+    q->type |= CMPI_ARRAY;
+
+  if (req->qualifierdeclaration.type)
+    q->type |= req->qualifierdeclaration.type;
+
+  if (req->qualifierdeclaration.scope.class)
+    q->scope |= ClQual_S_Class;
+  if (req->qualifierdeclaration.scope.association)
+    q->scope |= ClQual_S_Association;
+  if (req->qualifierdeclaration.scope.reference)
+    q->scope |= ClQual_S_Reference;
+  if (req->qualifierdeclaration.scope.property)
+    q->scope |= ClQual_S_Property;
+  if (req->qualifierdeclaration.scope.method)
+    q->scope |= ClQual_S_Method;
+  if (req->qualifierdeclaration.scope.parameter)
+    q->scope |= ClQual_S_Parameter;
+  if (req->qualifierdeclaration.scope.indication)
+    q->scope |= ClQual_S_Indication;
+  q->arraySize = req->qualifierdeclaration.arraySize;
+
+  if (req->qualifierdeclaration.data.value.value) {     // default value
+    // is set
+    d.state = CMPI_goodValue;
+    d.type = q->type;           // "specified" type
+    d.type |= req->qualifierdeclaration.data.type;      // actual type
+
+    // default value declared - isarray attribute must match, if set
+    if (req->qualifierdeclaration.isarrayIsSet)
+      if (!req->qualifierdeclaration.
+          isarray ^ !(req->qualifierdeclaration.data.type & CMPI_ARRAY))
+        hdr->rc = CMPI_RC_ERROR;
+        hdr->errMsg = "ISARRAY attribute and default value conflict";
+        return;
+
+    d.value = str2CMPIValue(d.type, req->qualifierdeclaration.data.value,
+                            (XtokValueReference *) &
+                            req->qualifierdeclaration.data.valueArray,
+                            NULL);
+    ClQualifierAddQualifier(&q->hdr, &q->qualifierData,
+                            req->qualifierdeclaration.name, d);
+  } else {                      // no default value - rely on ISARRAY
+    // attr, check if it's set
+    /*
+     * if(!req->qualifierdeclaration.isarrayIsSet)
+     * _SFCB_RETURN(iMethodErrResponse(hdr, getErrSegment(CMPI_RC_ERROR,
+     * "ISARRAY attribute MUST be present if the Qualifier declares no
+     * default value")));
+     */
+    q->qualifierData.sectionOffset = 0;
+    q->qualifierData.used = 0;
+    q->qualifierData.max = 0;
+  }
+
+  qual = malloc(sizeof(*qual));
+  *qual = initQualifier(q);
+
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_SetQualifier;
+  sreq->hdr.count = 3;
+  sreq->qualifier = setQualifierMsgSegment(qual);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+  sreq->path = setObjectPathMsgSegment(path);
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildEnumQualifiersRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  EnumClassNamesReq *sreq;// = BINREQ(OPS_EnumerateQualifiers, 2);
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "enumQualifiers");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokEnumQualifiers *req = (XtokEnumQualifiers *) hdr->cimRequest;
+
+  path = TrackedCMPIObjectPath(req->op.nameSpace.data, NULL, NULL);
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_EnumerateQualifiers;
+  sreq->hdr.count = 2;
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->type = CMPI_qualifierDecl;
+  binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->chunkedMode = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildInvokeMethodRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  CMPIType        type;
+  CMPIValue       val,
+                 *valp;
+  int             i,
+                  m,
+                  rc,
+                  vmpt = 0;
+  InvokeMethodReq *sreq;// = BINREQ(OPS_InvokeMethod, 5);
+  CMPIArgs       *in = TrackedCMPIArgs(NULL);
+  XtokParamValue *p;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokMethodCall *req = (XtokMethodCall *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  if (req->instName)
+    for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
+      valp =
+          getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].
+                             type,
+                             req->instanceName.bindings.keyBindings[i].
+                             value,
+                             &req->instanceName.bindings.keyBindings[i].
+                             ref, &val, &type, req->op.nameSpace.data);
+      CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp,
+               type);
+    }
+  sreq = calloc(1, sizeof(*sreq));
+  sreq->hdr.operation = OPS_InvokeMethod;
+  sreq->hdr.count = 5;
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  if (getControlBool("validateMethodParamTypes", &vmpt))
+    vmpt = 1;
+
+  for (p = req->paramValues.first; p; p = p->next) {
+    /*
+     * Update untyped params (p->type==0) and verify those that were
+     * specified 
+     */
+    if (p->type == 0 || vmpt) {
+      rc = updateMethodParamTypes(hdr);
+
+      if (rc != CMPI_RC_OK) {
+        hdr->rc = rc;
+        hdr->errMsg = NULL;
+        return;
+      }
+    }
+
+    if (p->value.value) {
+      CMPIValue       val = str2CMPIValue(p->type, p->value, &p->valueRef,
+                                          req->op.nameSpace.data);
+      CMAddArg(in, p->name, &val, p->type);
+    }
+  }
+
+  sreq->in = setArgsMsgSegment(in);
+  sreq->out = setArgsMsgSegment(NULL);
+  sreq->method = setCharsMsgSegment(req->method);
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = 0;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sizeof(*sreq);
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+int
+updateMethodParamTypes(RequestHdr * hdr)
+{
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "updateMethodParamTypes");
+
+  CMPIConstClass *cls = NULL;
+  ClMethod       *meth;
+  ClParameter    *param = NULL;
+  int             i,
+                  m;
+  ClClass        *cl;
+  char           *mname;
+  XtokParamValue *ptok;
+  int             p,
+                  pm;
+
+  XtokMethodCall *req = (XtokMethodCall *) hdr->cimRequest;
+  cls =
+      getConstClass((char *) req->op.nameSpace.data,
+                    (char *) req->op.className.data);
+  if (!cls) {
+    _SFCB_RETURN(CMPI_RC_ERR_INVALID_CLASS);
+  }
+
+  cl = (ClClass *) cls->hdl;
+
+  /*
+   * check that the method specified in req exists in class 
+   */
+  for (i = 0, m = ClClassGetMethodCount(cl); i < m; i++) {
+    ClClassGetMethodAt(cl, i, NULL, &mname, NULL);
+    if (strcasecmp(req->method, mname) == 0) {
+      break;
+    }
+  }
+  if (i == m) {
+    _SFCB_RETURN(CMPI_RC_ERR_METHOD_NOT_FOUND);
+  }
+
+  meth = ((ClMethod *) ClObjectGetClSection(&cl->hdr, &cl->methods)) + i;
+
+  /*
+   * loop through all params from parsed req 
+   */
+  for (ptok = req->paramValues.first; ptok; ptok = ptok->next) {
+    CMPIParameter   pdata;
+    char           *sname;
+
+    /*
+     * loop through all params for meth 
+     */
+    for (p = 0, pm = ClClassGetMethParameterCount(cl, i); p < pm; p++) {
+      ClClassGetMethParameterAt(cl, meth, p, &pdata, &sname);
+
+      if (strcasecmp(sname, ptok->name) == 0) {
+        // fprintf(stderr, "%s matches %s", sname, ptok->name);
+        param = ((ClParameter *)
+                 ClObjectGetClSection(&cl->hdr, &meth->parameters)) + p;
+        break;
+      }
+    }
+    if (p == pm) {
+      _SFCB_RETURN(CMPI_RC_ERR_INVALID_PARAMETER);
+    }
+    // fprintf(stderr, " pdata.type=%u (expec), ptok->type=%u\n",
+    // pdata.type, ptok->type);
+    /*
+     * special case: EmbeddedInstance. Parser will set type to instance,
+     * but repository would have type as string. Check here to not fail
+     * the else-if below. 
+     */
+    if (param && (ptok->type & CMPI_instance)) {
+      int             isEI = 0;
+      int             qcount =
+          ClClassGetMethParmQualifierCount(cl, meth, i);
+      for (; qcount > 0; qcount--) {
+        char           *qname;
+        ClClassGetMethParamQualifierAt(cl, param, qcount, NULL, &qname);
+        if (strcmp(qname, "EmbeddedInstance") == 0) {
+          // fprintf(stderr, " is EmbeddedInstance\n");
+          isEI = 1;
+          break;
+        }
+      }
+      if (isEI)
+        continue;
+    }
+
+    if (ptok->type == 0) {
+      /*
+       * Type was unknown, fill it in 
+       */
+      // printf("parameter %s missing type, using %s\n", sname,
+      // paramType(pdata.type));
+      ptok->type = pdata.type;
+    } else if (ptok->type != pdata.type) {
+      /*
+       * Parameter type mismatch 
+       */
+      _SFCB_RETURN(CMPI_RC_ERR_TYPE_MISMATCH);
+    }
+  }
+  _SFCB_RETURN(CMPI_RC_OK);
 }
 
 static void addProperty(XtokProperties *ps, XtokProperty *p)
@@ -830,6 +2095,7 @@ methodCall
        $$.paramValues.last=NULL;
        
        setRequest(parm,&$$,sizeof(XtokMethodCall),OPS_InvokeMethod);
+       buildInvokeMethodRequest(parm);
     }   
     | localClassPath paramValues
     {
@@ -841,6 +2107,7 @@ methodCall
        $$.paramValues=$2;
        
        setRequest(parm,&$$,sizeof(XtokMethodCall),OPS_InvokeMethod);
+       buildInvokeMethodRequest(parm);
     }   
     | localInstancePath 
     {
@@ -854,6 +2121,7 @@ methodCall
        $$.paramValues.last=NULL;
        
        setRequest(parm,&$$,sizeof(XtokMethodCall),OPS_InvokeMethod);
+       buildInvokeMethodRequest(parm);
     }   
     | localInstancePath paramValues
     {
@@ -866,6 +2134,7 @@ methodCall
        $$.paramValues=$2;
               
        setRequest(parm,&$$,sizeof(XtokMethodCall),OPS_InvokeMethod);
+       buildInvokeMethodRequest(parm);
     }   
 ;    
 
@@ -935,6 +2204,7 @@ getProperty
        $$.name = $2.name;
        $$.instanceName = $2.instanceName;
        setRequest(parm,&$$,sizeof(XtokGetProperty),OPS_GetProperty);
+       buildGetPropertyRequest(parm);
 	}
 ;
 
@@ -965,6 +2235,7 @@ setProperty
        $$.propertyName = NULL;
 
        setRequest(parm,&$$,sizeof(XtokSetProperty),OPS_SetProperty);
+       buildSetPropertyRequest(parm);
 	}
 	| localNameSpacePath setPropertyParmsList
 	{
@@ -977,6 +2248,7 @@ setProperty
        $$.propertyName = $2.propertyName;
        
        setRequest(parm,&$$,sizeof(XtokSetProperty),OPS_SetProperty);
+       buildSetPropertyRequest(parm);
 	}
 ;
 
@@ -1062,6 +2334,7 @@ getQualifier
        $$.op.className=setCharsMsgSegment(NULL);
        $$.name = $2.name;
        setRequest(parm,&$$,sizeof(XtokGetQualifier),OPS_GetQualifier);
+       buildGetQualifierRequest(parm);
     }
 ;
 
@@ -1084,6 +2357,7 @@ deleteQualifier
        $$.op.className=setCharsMsgSegment(NULL);
        $$.name = $2.name;
        setRequest(parm,&$$,sizeof(XtokDeleteQualifier),OPS_DeleteQualifier);
+       buildDeleteQualifierRequest(parm);
     }
 ;
 
@@ -1105,6 +2379,7 @@ enumQualifiers
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
        setRequest(parm,&$$,sizeof(XtokEnumQualifiers),OPS_EnumerateQualifiers);
+       buildEnumQualifiersRequest(parm);
     }
 ;
 /*
@@ -1122,6 +2397,7 @@ setQualifier
        $$.qualifierdeclaration = $2.qualifierdeclaration;
 
        setRequest(parm,&$$,sizeof(XtokSetQualifier),OPS_SetQualifier);
+       buildSetQualifierRequest(parm);
     }
 ;
 
@@ -1263,6 +2539,7 @@ enumClassNames
        $$.flags = 0;
 
        setRequest(parm,&$$,sizeof(XtokEnumClassNames),OPS_EnumerateClassNames);
+       buildEnumClassNamesRequest(parm);
     }
     | localNameSpacePath enumClassNamesParmsList
     {
@@ -1273,6 +2550,7 @@ enumClassNames
        $$.flags = $2.flags;
 
        setRequest(parm,&$$,sizeof(XtokEnumClassNames),OPS_EnumerateClassNames);
+       buildEnumClassNamesRequest(parm);
     }
 ;
 
@@ -1327,6 +2605,7 @@ enumClasses
        $$.flags = FL_localOnly;
 
        setRequest(parm,&$$,sizeof(XtokEnumClasses),OPS_EnumerateClasses);
+       buildEnumClassesRequest(parm);
     }
     | localNameSpacePath enumClassesParmsList
     {
@@ -1337,6 +2616,7 @@ enumClasses
        $$.flags = ($2.flags & $2.flagsSet) | ((~$2.flagsSet) & FL_localOnly);
 
        setRequest(parm,&$$,sizeof(XtokEnumClasses),OPS_EnumerateClasses);
+       buildEnumClassesRequest(parm);
     }
 ;
 
@@ -1539,6 +2819,7 @@ createClass
        $$.superClass=NULL;
 
        setRequest(parm,&$$,sizeof(XtokCreateClass),OPS_CreateClass);
+       buildCreateClassRequest(parm);
     }
     | localNameSpacePath createClassParm
     {
@@ -1550,6 +2831,7 @@ createClass
        $$.cls = $2.cls;
 
        setRequest(parm,&$$,sizeof(XtokCreateClass),OPS_CreateClass);
+       buildCreateClassRequest(parm);
     }
 ;
 
@@ -1575,6 +2857,7 @@ createInstance
        $$.op.className=setCharsMsgSegment(NULL);
 
        setRequest(parm,&$$,sizeof(XtokCreateInstance),OPS_CreateInstance);
+       buildCreateInstanceRequest(parm);
     }
     | localNameSpacePath createInstanceParm
     {
@@ -1585,6 +2868,7 @@ createInstance
        $$.instance = $2.instance;
 
        setRequest(parm,&$$,sizeof(XtokCreateInstance),OPS_CreateInstance);
+       buildCreateInstanceRequest(parm);
     }
 ;
 
@@ -1613,6 +2897,7 @@ modifyInstance
        $$.properties=0;
 
        setRequest(parm,&$$,sizeof(XtokModifyInstance),OPS_ModifyInstance);
+       buildModifyInstanceRequest(parm);
     }
     | localNameSpacePath modifyInstanceParmsList
     {
@@ -1626,6 +2911,7 @@ modifyInstance
        $$.properties=$2.properties;
 
        setRequest(parm,&$$,sizeof(XtokModifyInstance),OPS_ModifyInstance);
+       buildModifyInstanceRequest(parm);
     }
 ;
 
@@ -1777,6 +3063,7 @@ enumInstanceNames
        $$.op.className=setCharsMsgSegment($3);
 
        setRequest(parm,&$$,sizeof(XtokEnumInstanceNames),OPS_EnumerateInstanceNames);
+       buildEnumInstanceNamesRequest(parm);
     }
 ;
 
@@ -1798,6 +3085,7 @@ enumInstances
        $$.properties=0;
 
        setRequest(parm,&$$,sizeof(XtokEnumInstances),OPS_EnumerateInstances);
+       buildEnumInstanceRequest(parm);
     }
     | localNameSpacePath enumInstancesParmsList
     {
@@ -1810,6 +3098,7 @@ enumInstances
        $$.properties=$2.properties;
 
        setRequest(parm,&$$,sizeof(XtokEnumInstances),OPS_EnumerateInstances);
+       buildEnumInstanceRequest(parm);
     }
 ;
 
@@ -1924,6 +3213,7 @@ execQuery
        $$.op.queryLang=setCharsMsgSegment($6.value);
 
        setRequest(parm,&$$,sizeof(XtokExecQuery),OPS_ExecQuery);
+       buildExecQueryRequest(parm);
     }        
     | localNameSpacePath 
           XTOK_IP_QUERYLANG value ZTOK_IPARAMVALUE
@@ -1936,6 +3226,7 @@ execQuery
        $$.op.queryLang=setCharsMsgSegment($3.value);
 
        setRequest(parm,&$$,sizeof(XtokExecQuery),OPS_ExecQuery);
+       buildExecQueryRequest(parm);
     }        
 ;    
     
@@ -1962,6 +3253,7 @@ associators
        $$.properties=0;
 
        setRequest(parm,&$$,sizeof(XtokAssociators),OPS_Associators);
+       buildAssociatorsRequest(parm);
     }
     | localNameSpacePath associatorsParmsList
     {
@@ -1980,6 +3272,7 @@ associators
        $$.properties=$2.properties;
 
        setRequest(parm,&$$,sizeof(XtokAssociators),OPS_Associators);
+       buildAssociatorsRequest(parm);
     }
 ;
 
@@ -2140,6 +3433,7 @@ references
        $$.properties=0;
 
        setRequest(parm,&$$,sizeof(XtokReferences),OPS_References);
+       buildReferencesRequest(parm);
     }
     | localNameSpacePath referencesParmsList
     {
@@ -2156,6 +3450,7 @@ references
        $$.properties=$2.properties;
 
        setRequest(parm,&$$,sizeof(XtokReferences),OPS_References);
+       buildReferencesRequest(parm);
     }
 ;
 
@@ -2285,6 +3580,7 @@ associatorNames
        $$.objNameSet = 0;
 
        setRequest(parm,&$$,sizeof(XtokAssociatorNames),OPS_AssociatorNames);
+       buildAssociatorNamesRequest(parm);
     }
     | localNameSpacePath associatorNamesParmsList
     {
@@ -2299,6 +3595,7 @@ associatorNames
        $$.objectName = $2.objectName;
        $$.objNameSet = $2.objNameSet;
        setRequest(parm,&$$,sizeof(XtokAssociatorNames),OPS_AssociatorNames);
+       buildAssociatorNamesRequest(parm);
     }
 ;
 
@@ -2395,6 +3692,7 @@ referenceNames
        $$.objNameSet = 0;
 
        setRequest(parm,&$$,sizeof(XtokReferenceNames),OPS_ReferenceNames);
+       buildReferenceNamesRequest(parm);
     }
     | localNameSpacePath referenceNamesParmsList
     {
@@ -2408,6 +3706,7 @@ referenceNames
        $$.objNameSet = $2.objNameSet;
 
        setRequest(parm,&$$,sizeof(XtokReferenceNames),OPS_ReferenceNames);
+       buildReferenceNamesRequest(parm);
     }
 ;
 

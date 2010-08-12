@@ -47,8 +47,13 @@ do
    echo -n "  Testing $_TESTNAME..."
    # Check if there's a .prereq file and if so, run it. Skip this
    # test if it returns "1"
-   if [ ! -f $_TESTPREREQ ] ||  eval ./$_TESTPREREQ  ; then
-
+   preRC=0
+   if [ -f $_TESTPREREQ ] ; then
+        ./$_TESTPREREQ
+        preRC=$?
+   fi
+   if [ $preRC -eq 0 ] || [ $preRC -eq 2 ] ; then
+       trc=0
        # Remove any old test result file
        rm -f $_TESTRESULT
 
@@ -62,8 +67,8 @@ do
        fi
 
        if [ $? -ne 0 ]; then
-          echo "FAILED to send CIM-XML request"
-          _RC=1
+          echo -n "FAILED to send CIM-XML request"
+          trc=1
           continue
        fi
     
@@ -71,13 +76,13 @@ do
        # Either using a full copy of the expected output (testname.OK)
        if [ -f $_TESTOK ] ; then
             if ! diff --brief $_TESTOK $_TESTRESULT > /dev/null; then
-                echo "FAILED output not as expected"
-                _RC=1;
+                echo -n "FAILED output not as expected"
+                trc=1;
                 continue
     
             # We got the expected response XML
             else
-                echo "PASSED"
+                echo -n "PASSED"
                 rm -f $_TESTRESULT
             fi
        fi
@@ -93,9 +98,9 @@ do
                 text=$(echo $line | awk '{ line=substr($line, 2); print line; }' )
                 if  grep --q "$text" $_TESTRESULT  ; then
                     if [ $passed -eq 0 ] ; then
-                        echo "FAILED disallowed line found"
+                        echo -n "FAILED disallowed line found"
                         passed=1
-                        _RC=1;
+                        trc=1;
                     fi
                     echo "FAILED disallowed line found" >> ./tmpfail
                     echo "\t$text" >> ./tmpfail
@@ -104,9 +109,9 @@ do
                 # Check for required lines
                 if ! grep --q "$line" $_TESTRESULT  ; then
                     if [ $passed -eq 0 ] ; then
-                        echo "FAILED required line not found"
+                        echo -n "FAILED required line not found"
                         passed=1
-                        _RC=1;
+                        trc=1;
                     fi
                     echo "FAILED: required line not found" >> ./tmpfail
                     echo "\t$line" >> ./tmpfail
@@ -120,10 +125,18 @@ do
             fi
     
             if [ $passed -eq 0 ] ;  then
-                echo "PASSED"
+                echo -n "PASSED"
                 rm -f $_TESTRESULT
             fi
-                
+       fi
+       if [ $preRC -eq 2 ] ; then
+            # This test is staged, so don't fail if it fails.
+            echo " (STAGED)"
+       else 
+            if [ $trc -eq 1 ] ; then
+               _RC=1
+            fi
+            echo 
        fi
    else 
         # Prereq test failed, so skip this test.

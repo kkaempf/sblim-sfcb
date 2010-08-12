@@ -511,6 +511,8 @@ typedef struct xtokCreateInstance {
   OperationHdr    op;
   XtokInstance    instance;
   char           *className;
+  int             properties;
+  XtokValueArray  propertyList;
 } XtokCreateInstance;
 
 /*
@@ -633,6 +635,8 @@ typedef struct xtokAssociatorNames {
   OperationHdr    op;
   XtokInstanceName objectName;
   int             objNameSet;
+  unsigned int    flags;
+  int             properties;
 } XtokAssociatorNames;
 
 /*
