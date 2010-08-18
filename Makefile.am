@@ -554,11 +554,15 @@ dist-hook:
 
 install-cimschema: getSchema.sh
 	test -d $(DESTDIR)$(sfcbdatadir) || $(mkdir_p) $(DESTDIR)$(sfcbdatadir)
-	sh getSchema.sh -f $(DESTDIR)$(sfcbdatadir)
+	if test ! -f /.buildenv; then \
+	  sh getSchema.sh -f $(DESTDIR)$(sfcbdatadir); \
+	fi;
 
 create-sslkeys:
 if SSL
-	$(sfcbdatadir)/genSslCert.sh $(sfcbconfdir)
+	if test ! -f /.buildenv; then \
+	  $(sfcbdatadir)/genSslCert.sh $(sfcbconfdir); \
+	fi;
 endif
 
 footprint-sloc:
