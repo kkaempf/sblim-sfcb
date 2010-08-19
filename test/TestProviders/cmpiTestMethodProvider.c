@@ -83,9 +83,7 @@ TestMethodProviderInvokeMethod(CMPIMethodMI * mi,
     } else if (!strcmp("CheckArrayNoType", methodName)) {
       data = CMGetArg(in, "IntArray", &rc);
       CMPIType atype=data.value.array->ft->getSimpleType(data.value.array,&rc); 
-      CMPIData adata=data.value.array->ft->getElementAt(data.value.array,0,&rc);
-      sprintf(result,"Datatype is %u rc:%d Value is %d type is %d",atype,rc.rc,adata.value.uint32,adata.type);
-      //strcat(result, "Got DataType");
+      sprintf(result,"Datatype is %u",atype);
       str1 = CMNewString(_broker, result, &rc);
       val1.string = str1;
     }

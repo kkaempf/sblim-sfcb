@@ -1484,7 +1484,7 @@ updateMethodParamTypes(RequestHdr * hdr)
         continue;
     }
 
-    if (ptok->type == 0) {
+    if ((ptok->type == 0) || (ptok->type == 8192)) {
       /*
        * Type was unknown, fill it in 
        */
