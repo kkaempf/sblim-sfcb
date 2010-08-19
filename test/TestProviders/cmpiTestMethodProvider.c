@@ -33,6 +33,7 @@ TestMethodProviderInvokeMethod(CMPIMethodMI * mi,
   CMPIString     *str2;
   CMPIValue       val1,
                   val2;
+
   /*
    * get the class name from object-path 
    */
@@ -79,6 +80,14 @@ TestMethodProviderInvokeMethod(CMPIMethodMI * mi,
        * Adds a value of str2 string to out array argument 
        */
       rc = CMAddArg(out, argName, &val2, CMPI_string);
+    } else if (!strcmp("CheckArrayNoType", methodName)) {
+      data = CMGetArg(in, "IntArray", &rc);
+      CMPIType atype=data.value.array->ft->getSimpleType(data.value.array,&rc); 
+      CMPIData adata=data.value.array->ft->getElementAt(data.value.array,0,&rc);
+      sprintf(result,"Datatype is %u rc:%d Value is %d type is %d",atype,rc.rc,adata.value.uint32,adata.type);
+      //strcat(result, "Got DataType");
+      str1 = CMNewString(_broker, result, &rc);
+      val1.string = str1;
     }
   }
   CMReturnData(rslt, (CMPIValue *) & val1, CMPI_string);
