@@ -1,3 +1,8 @@
+2010-08-19  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* getSchema.sh.pre.in
+	[ 3048944 ] Bump downloaded CIM schema to 2.26
+
 2010-08-11 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	*  test/xmltest/xmltest.sh, test/xmltest/PE_OpenEnumInstances*:
 	[ 3043331 ] Implement Pulled Enumerations
