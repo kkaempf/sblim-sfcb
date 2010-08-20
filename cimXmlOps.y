@@ -1365,7 +1365,7 @@ buildInvokeMethodRequest(void *parm)
      * Update untyped params (p->type==0) and verify those that were
      * specified 
      */
-    if (p->type == 0 || vmpt) {
+    if (p->type == 0 || p->type == CMPI_ARRAY || vmpt) {
       rc = updateMethodParamTypes(hdr);
 
       if (rc != CMPI_RC_OK) {
@@ -1484,7 +1484,7 @@ updateMethodParamTypes(RequestHdr * hdr)
         continue;
     }
 
-    if ((ptok->type == 0) || (ptok->type == 8192)) {
+    if ((ptok->type == 0) || (ptok->type == CMPI_ARRAY)) {
       /*
        * Type was unknown, fill it in 
        */
