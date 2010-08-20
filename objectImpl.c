@@ -52,6 +52,10 @@ static char    *addQualifierToString(stringControl * sc, ClObjectHdr * hdr,
 static int      addClQualifier(ClObjectHdr * hdr, ClSection * qlfs,
                                const char *id, CMPIData d,
                                ClObjectHdr * arrHdr);
+			       
+static long addClStringN(ClObjectHdr * hdr, const char *str, unsigned int length);
+static void replaceClStringN(ClObjectHdr * hdr, int id, const char *str, unsigned int length);
+			       
 // static int insQualifier(ClObjectHdr * hdr, ClSection * qlfs,ClQualifier 
 // 
 // 
@@ -73,7 +77,6 @@ extern CMPIArray *native_make_CMPIArray(CMPIData *av, CMPIStatus *rc,
 extern int      instance2xml(CMPIInstance *ci, UtilStringBuffer * sb,
                              unsigned int flags);
 static ClString nls = { 0 };
-static int      objectSize = 0;
 
 ClVersionRecord
 ClBuildVersionRecord(unsigned short opt, int endianMode, long *size)
@@ -199,7 +202,12 @@ ensureClSpace(ClObjectHdr * hdr, ClSection * sct, int size, int iSize)
 }
 
 long
-addClString(ClObjectHdr * hdr, const char *str)
+addClString(ClObjectHdr * hdr, const char *str){
+  return addClStringN(hdr, str, 0);
+}
+
+static long
+addClStringN(ClObjectHdr * hdr, const char *str, unsigned int length)
 {
   _SFCB_ENTER(TRACE_OBJECTIMPL, "addClString");
 
@@ -207,8 +215,8 @@ addClString(ClObjectHdr * hdr, const char *str)
       l;
 
   // see addClObject - hack to get anything into a stringbuffer
-  if (objectSize) {
-    l = objectSize;
+  if (length) {
+    l = length;
   } else {
     l = strlen(str) + 1;
   }
@@ -287,10 +295,8 @@ addClString(ClObjectHdr * hdr, const char *str)
 static long
 addClObject(ClObjectHdr * hdr, const void *obj, int size)
 {
-  objectSize = size;
   long            retCode;
-  retCode = addClString(hdr, obj);
-  objectSize = 0;
+  retCode = addClStringN(hdr, obj,size);
   return (retCode);
 }
 
@@ -499,7 +505,12 @@ sizeArrayBuf(ClObjectHdr * hdr)
 }
 
 static void
-replaceClString(ClObjectHdr * hdr, int id, const char *str)
+replaceClString(ClObjectHdr * hdr, int id, const char *str){
+  return replaceClStringN(hdr, id, str, 0);
+}
+
+static void
+replaceClStringN(ClObjectHdr * hdr, int id, const char *str, unsigned int length)
 {
   _SFCB_ENTER(TRACE_OBJECTIMPL, "replaceClString");
 
@@ -527,7 +538,7 @@ replaceClString(ClObjectHdr * hdr, int id, const char *str)
   fb->bUsed = u;
   free(ts);
 
-  i = addClString(hdr, str);
+  i = addClStringN(hdr, str, length);
   fb->iUsed--;
   fb->indexPtr[id - 1] = fb->indexPtr[i - 1];
 
@@ -538,9 +549,7 @@ replaceClString(ClObjectHdr * hdr, int id, const char *str)
 static void
 replaceClObject(ClObjectHdr * hdr, int id, const void *obj, int size)
 {
-  objectSize = size;
-  replaceClString(hdr, id, obj);
-  objectSize = 0;
+  replaceClStringN(hdr, id, obj, size);
 }
 
 /*
