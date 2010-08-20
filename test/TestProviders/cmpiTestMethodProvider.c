@@ -7,6 +7,46 @@ static const CMPIBroker *_broker;
 
 #define _ClassName "Sample_Method"
 
+static char *paramType(CMPIType type)
+{
+   switch (type & ~CMPI_ARRAY) {
+   case CMPI_chars:
+   case CMPI_string:
+   case CMPI_instance:
+      return "string";
+   case CMPI_sint64:
+      return "sint64";
+   case CMPI_uint64:
+      return "uint64";
+   case CMPI_sint32:
+      return "sint32";
+   case CMPI_uint32:
+      return "uint32";
+   case CMPI_sint16:
+      return "sint16";
+   case CMPI_uint16:
+      return "uint16";
+   case CMPI_uint8:
+      return "uint8";
+   case CMPI_sint8:
+      return "sint8";
+   case CMPI_boolean:
+      return "boolean";
+   case CMPI_char16:
+      return "char16";
+   case CMPI_real32:
+      return "real32";
+   case CMPI_real64:
+      return "real64";
+   case CMPI_dateTime:
+      return "datetime";
+   case CMPI_ref:
+      return "reference";
+   }
+   printf("Invalid data type %d %x\n",(int) type, (int) type);
+   return "*??*";
+}
+
 CMPIStatus
 TestMethodProviderMethodCleanup(CMPIMethodMI * mi,
                                 const CMPIContext *ctx, CMPIBoolean term)
@@ -83,7 +123,7 @@ TestMethodProviderInvokeMethod(CMPIMethodMI * mi,
     } else if (!strcmp("CheckArrayNoType", methodName)) {
       data = CMGetArg(in, "IntArray", &rc);
       CMPIType atype=data.value.array->ft->getSimpleType(data.value.array,&rc); 
-      sprintf(result,"Datatype is %u",atype);
+      sprintf(result,"Datatype is %s",paramType(atype));
       str1 = CMNewString(_broker, result, &rc);
       val1.string = str1;
     }
