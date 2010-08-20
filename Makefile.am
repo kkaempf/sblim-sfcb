@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.108 2010/05/22 01:26:13 buccella Exp $  
+# $Id: Makefile.am,v 1.109 2010/08/20 20:00:17 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -148,7 +148,8 @@ sfcblib_LTLIBRARIES = \
    libcimcClientSfcbLocal.la \
    $(QUALREP_LIBS) \
    $(INDICATION_LIBS) \
-   $(PAM_LIBS) 
+   $(PAM_LIBS) \
+   $(SLP_HOSTNAME_LIBS)
 
 if TEST_ENABLED 
 sfcblib_LTLIBRARIES += \
