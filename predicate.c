@@ -1,6 +1,6 @@
 
 /*
- * $Id: predicate.c,v 1.7 2007/10/02 09:02:11 mihajlov Exp $
+ * $Id: predicate.c,v 1.8 2010/08/23 18:41:36 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -76,8 +76,16 @@ static CMPIStatus __eft_getData(const CMPIPredicate* pred, CMPIType* type,
          else  if (o->rhod && o->rhod->type!=QL_PropertyName) 
             type=o->rhod->type;     
          if (opc) *opc=o->opr;
-         if (lhs) *lhs= sfcb_native_new_CMPIString(o->lhod->ft->toString(o->lhod),NULL, 0);  
-         if (rhs) *rhs= sfcb_native_new_CMPIString(o->rhod->ft->toString(o->rhod),NULL, 0);  
+         if (lhs) {
+	   char* lstr = o->lhod->ft->toString(o->lhod); 
+	   *lhs= sfcb_native_new_CMPIString(lstr, NULL, 0);
+	   free(lstr);
+	 }
+         if (rhs) {
+	   char* rstr = o->rhod->ft->toString(o->rhod);
+	   *rhs= sfcb_native_new_CMPIString(rstr,NULL, 0);
+	   free(rstr);
+	 }
       }
       else {
          printf("--- NOT QL_bin\n");
