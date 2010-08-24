@@ -21,7 +21,6 @@
  */
 
 #include "cmpi/cmpidt.h"
-#include "cimXmlRequest.h"
 #include "cimXmlParser.h"
 #include "cimXmlGen.h"
 #include "msgqueue.h"

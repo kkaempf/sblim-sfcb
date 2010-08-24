@@ -25,7 +25,7 @@
 
 #include "cimXmlParser.h"
 #include "cimXmlOps.h"
-#include "cimXmlRequest.h"
+#include "cimRequest.h"
 #include "trace.h"
 
 static int      attrsOk(XmlBuffer * xb, const XmlElement * e, XmlAttr * r,
@@ -1671,13 +1671,13 @@ yyerror(char *s)
 }
 
 RequestHdr
-scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData)
+scanCimXmlRequest(CimRequestContext *ctx, char *xmlData)
 {
   ParserControl   control;
 
   XmlBuffer      *xmb = newXmlBuffer(xmlData);
   control.xmb = xmb;
-  control.reqHdr.xmlBuffer = xmb;
+  control.reqHdr.buffer = xmb;
   control.reqHdr.cimRequest = NULL;
   control.reqHdr.iMethod = NULL;
   control.reqHdr.rc = 0;

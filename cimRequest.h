@@ -1,6 +1,6 @@
 
 /*
- * cimXmlRequest.h
+ * cimRequest.h
  *
  * (C) Copyright IBM Corp. 2005
  *
@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef handleCimXmlRequest_h
-#define handleCimXmlRequest_h
+#ifndef handleCimRequest_h
+#define handleCimRequest_h
 
 #include "msgqueue.h"
 #include "providerMgr.h"
@@ -46,21 +46,21 @@ typedef struct expSegments {
   RespSegment     segments[7];
 } ExpSegments;
 
-typedef struct cimXmlRequestContext {
-  char           *cimXmlDoc;
+typedef struct cimRequestContext {
+  char           *cimDoc;
   char           *principal;
   char           *host;
   int             teTrailers;
   unsigned int    sessionId;
-  unsigned long   cimXmlDocLength;
+  unsigned long   cimDocLength;
   struct commHndl *commHndl;
   struct chunkFunctions *chunkFncs;
   char           *className;
   int             operation;
-} CimXmlRequestContext;
+} CimRequestContext;
 
-extern RespSegments handleCimXmlRequest(CimXmlRequestContext * ctx);
-extern int      cleanupCimXmlRequest(RespSegments * rs);
+extern RespSegments handleCimRequest(CimRequestContext * ctx);
+extern int      cleanupCimRequest(RespSegments * rs);
 
 #endif
 /* MODELINES */

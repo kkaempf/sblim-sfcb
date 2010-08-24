@@ -43,7 +43,7 @@
 #include "msgqueue.h"
 #include "utilft.h"
 #include "trace.h"
-#include "cimXmlRequest.h"
+#include "cimRequest.h"
 #include "support.h"
 
 #include <pthread.h>
@@ -1058,7 +1058,7 @@ doHttpRequest(CommHndl conn_fd)
                   ue;
   struct timeval  sv,
                   ev;
-  CimXmlRequestContext ctx;
+  CimRequestContext ctx;
   int             breakloop;
   _SFCB_ENTER(TRACE_HTTPDAEMON, "doHttpRequest");
 
@@ -1317,11 +1317,11 @@ doHttpRequest(CommHndl conn_fd)
   msgs[1].data = inBuf.content;
   msgs[1].length = len - hl;
 
-  ctx.cimXmlDoc = inBuf.content;
+  ctx.cimDoc = inBuf.content;
   ctx.principal = inBuf.principal;
   ctx.host = inBuf.host;
   ctx.teTrailers = inBuf.trailers;
-  ctx.cimXmlDocLength = len - hl;
+  ctx.cimDocLength = len - hl;
   ctx.commHndl = &conn_fd;
 
   if (msgs[1].length > 0) {
@@ -1346,7 +1346,7 @@ doHttpRequest(CommHndl conn_fd)
     }
 #endif
 
-    response = handleCimXmlRequest(&ctx);
+    response = handleCimRequest(&ctx);
   } else {
     response = nullResponse;
   }
@@ -1392,7 +1392,7 @@ handleHttpRequest(int connFd, int sslMode)
 
   _SFCB_ENTER(TRACE_HTTPDAEMON, "handleHttpRequest");
 
-  _SFCB_TRACE(1, ("--- Forking xml handler"));
+  _SFCB_TRACE(1, ("--- Forking request processor"));
 
   if (doFork) {
     semAcquire(httpWorkSem, 0);
@@ -1410,7 +1410,7 @@ handleHttpRequest(int connFd, int sslMode)
      */
     if (r == 0) {
       currentProc = getpid();
-      processName = "CIMXML-Processor";
+      processName = "CIMREQ-Processor";
       semRelease(httpProcSem, 0);
       semAcquireUnDo(httpProcSem, 0);
       semReleaseUnDo(httpProcSem, httpProcIdX + 1);
@@ -1443,10 +1443,10 @@ handleHttpRequest(int connFd, int sslMode)
      * child's thread of execution || doFork=0 
      */
     if (doFork) {
-      _SFCB_TRACE(1, ("--- Forked xml handler %d", currentProc))
+      _SFCB_TRACE(1, ("--- Forked request processor %d", currentProc))
     }
 
-    _SFCB_TRACE(1, ("--- Started xml handler %d %d", currentProc,
+    _SFCB_TRACE(1, ("--- Started request processor %d %d", currentProc,
                     resultSockets.receive));
 
     if (getenv("SFCB_PAUSE_HTTP"))
@@ -1579,7 +1579,7 @@ handleHttpRequest(int connFd, int sslMode)
     if (!doFork)
       return;
 
-    _SFCB_TRACE(1, ("--- Xml handler exiting %d", currentProc));
+    _SFCB_TRACE(1, ("--- Request processor exiting %d", currentProc));
     dumpTiming(currentProc);
     exit(0);
   }
