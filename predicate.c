@@ -81,14 +81,16 @@ __eft_getData(const CMPIPredicate *pred, CMPIType *type,
         type = o->rhod->type;
       if (opc)
         *opc = o->opr;
-      if (lhs)
-        *lhs =
-            sfcb_native_new_CMPIString(o->lhod->ft->toString(o->lhod),
-                                       NULL, 0);
-      if (rhs)
-        *rhs =
-            sfcb_native_new_CMPIString(o->rhod->ft->toString(o->rhod),
-                                       NULL, 0);
+      if (lhs) {
+	char* lstr = o->lhod->ft->toString(o->lhod);
+        *lhs = sfcb_native_new_CMPIString(lstr, NULL, 0);
+	free(lstr);
+      }
+      if (rhs) {
+	char* rstr = o->rhod->ft->toString(o->rhod);
+        *rhs = sfcb_native_new_CMPIString(rstr, NULL, 0);
+	free(rstr);
+      }
     } else {
       printf("--- NOT QL_bin\n");
       CMSetStatusWithString(&irc, CMPI_RC_ERR_FAILED,

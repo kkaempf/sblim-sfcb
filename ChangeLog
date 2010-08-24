@@ -1,3 +1,27 @@
+2010-08-23  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* predicate.c:
+	[ 3051707 ] Leak in predicate.c
+
+2010-08-20  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* Makefile.am:
+	[ 3049645 ] SLP hostname lib won't build
+
+	* objectImpl.c
+	[ 3035165 ] objectSize in objectImpl.c is not used thread safe
+	(patch by Till Steinbach)
+
+2010-08-20 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	*  cimXmlOps.y test/TestProviders/cmpiTestMethodProvider.c,
+		test/schema/root/cimv2/Test_Method.mof 
+	[ 3048960 ] method array types not filled in
+
+2010-08-19  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* getSchema.sh.pre.in
+	[ 3048944 ] Bump downloaded CIM schema to 2.26
+
 2010-08-11 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	*  test/xmltest/xmltest.sh, test/xmltest/PE_OpenEnumInstances*:
 	[ 3043331 ] Implement Pulled Enumerations
