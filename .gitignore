@@ -66,6 +66,7 @@ stamp-h1
 test/Makefile
 test/Makefile.in
 test/TestProviders/tests/Makefile.in
+test/TestProviders/tests/*.result
 test/commands/Makefile.in
 test/finaltest/Makefile.in
 test/slptest/Makefile.in
@@ -78,7 +79,6 @@ test/unittest/newCMPIInstance
 test/unittest/newDateTime
 test/unittest/xmlUnescape
 test/TestProviders/tests/RIModIS.XML
-test/xmltest/PE_OpenEnumInstances0.result
-test/xmltest/PE_OpenEnumInstances1.result
+test/xmltest/*.result
 m4/
 *gcda
