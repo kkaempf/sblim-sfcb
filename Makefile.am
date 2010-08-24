@@ -390,7 +390,7 @@ if !LOCAL_CONNECT_NO_INDICATION
 libsfcCimXmlCodec_la_SOURCES = \
    cimXmlOps.y \
    cimXmlParserProcessed.c \
-   cimXmlRequest.c 
+   cimRequest.c 
 libsfcCimXmlCodec_la_LIBADD=-lsfcBrokerCore 
 libsfcCimXmlCodec_la_DEPENDENCIES=libsfcBrokerCore.la
 endif
@@ -434,7 +434,7 @@ classSchema2c_DEPENDENCIES=libsfcBrokerCore.la
 noinst_HEADERS=array.h $(SLP_INC) httpComm.h control.h    providerMgr.h \
 	constClass.h   msgqueue.h     providerRegister.h \
 	cimXmlParser.h    native.h       support.h cimXmlGen.h \
-	cimXmlRequest.h  genericlist.h  objectImpl.h   trace.h \
+	cimRequest.h genericlist.h  objectImpl.h   trace.h \
 	sfcUtil/hashtable.h      sfcUtil/utilft.h mlog.h \
 	cmpiftx.h cmpimacsx.h \
 	fileRepository.h internalProvider.h \

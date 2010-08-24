@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.57 2010/01/15 20:58:33 buccella Exp $
+ * $Id: cimRequest.c,v 1.57 2010/01/15 20:58:33 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -22,7 +22,7 @@
 
 #include "cmpi/cmpidt.h"
 #include "cimXmlGen.h"
-#include "cimXmlRequest.h"
+#include "cimRequest.h"
 #include "cimXmlParser.h"
 #include "msgqueue.h"
 #include "constClass.h"
@@ -54,7 +54,7 @@ int             noChunking = 0;
 #endif                          // LOCAL_CONNECT_ONLY_ENABLE
 
 typedef struct handler {
-  RespSegments(*handler) (CimXmlRequestContext *, RequestHdr * hdr);
+  RespSegments(*handler) (CimRequestContext *, RequestHdr * hdr);
 } Handler;
 
 extern int      noChunking;
@@ -601,7 +601,7 @@ genFirstChunkErrorResponse(BinRequestContext * binCtx, int rc, char *msg)
 }
 
 static          RespSegments
-getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
+getClass(CimRequestContext * ctx, RequestHdr * hdr)
 {
   UtilStringBuffer *sb;
   int             irc;
@@ -645,7 +645,7 @@ getClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
+deleteClass(CimRequestContext * ctx, RequestHdr * hdr)
 {
   int             irc;
   BinResponseHdr *resp;
@@ -683,7 +683,7 @@ deleteClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
+createClass(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "createClass");
   int             irc;
@@ -725,7 +725,7 @@ createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-enumClassNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
+enumClassNames(CimRequestContext * ctx, RequestHdr * hdr)
 {
   int             irc,
                   l = 0,
@@ -764,7 +764,7 @@ enumClassNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-enumClasses(CimXmlRequestContext * ctx, RequestHdr * hdr)
+enumClasses(CimRequestContext * ctx, RequestHdr * hdr)
 {
   int             l = 0,
                   irc,
@@ -820,7 +820,7 @@ enumClasses(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
+getInstance(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "getInstance");
   CMPIInstance   *inst;
@@ -863,7 +863,7 @@ getInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-deleteInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
+deleteInstance(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "deleteInstance");
   int             irc;
@@ -899,7 +899,7 @@ deleteInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-createInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
+createInstance(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "createInst");
   CMPIObjectPath *path;
@@ -940,7 +940,7 @@ createInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
+modifyInstance(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "modifyInstance");
   int             irc;
@@ -976,7 +976,7 @@ modifyInstance(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-enumInstanceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
+enumInstanceNames(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "enumInstanceNames");
   int             irc,
@@ -1013,7 +1013,7 @@ enumInstanceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
+enumInstances(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "enumInstances");
 
@@ -1069,7 +1069,7 @@ enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
+execQuery(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "execQuery");
 
@@ -1123,7 +1123,7 @@ execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-associatorNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
+associatorNames(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "associatorNames");
   int             irc,
@@ -1164,7 +1164,7 @@ associatorNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
+associators(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "associators");
 
@@ -1223,7 +1223,7 @@ associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-referenceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
+referenceNames(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "referenceNames");
   int             irc,
@@ -1262,7 +1262,7 @@ referenceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-references(CimXmlRequestContext * ctx, RequestHdr * hdr)
+references(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "references");
 
@@ -1319,7 +1319,7 @@ references(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
+invokeMethod(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "invokeMethod");
   int             irc;
@@ -1391,7 +1391,7 @@ invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
+getProperty(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "getProperty");
   CMPIInstance   *inst;
@@ -1444,7 +1444,7 @@ getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
+setProperty(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "setProperty");
   int             irc;
@@ -1483,7 +1483,7 @@ setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
 #ifdef HAVE_QUALREP
 static          RespSegments
-enumQualifiers(CimXmlRequestContext * ctx, RequestHdr * hdr)
+enumQualifiers(CimRequestContext * ctx, RequestHdr * hdr)
 {
   int             irc;
   BinResponseHdr *resp;
@@ -1522,7 +1522,7 @@ enumQualifiers(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-getQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
+getQualifier(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "getQualifier");
   CMPIQualifierDecl *qual;
@@ -1566,7 +1566,7 @@ getQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-deleteQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
+deleteQualifier(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "deleteQualifier");
   int             irc;
@@ -1603,7 +1603,7 @@ deleteQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-setQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
+setQualifier(CimRequestContext * ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "setQualifier");
   int             irc;
@@ -1644,7 +1644,7 @@ setQualifier(CimXmlRequestContext * ctx, RequestHdr * hdr)
 #endif
 
 static          RespSegments
-notSupported(CimXmlRequestContext * ctx, RequestHdr * hdr)
+notSupported(CimRequestContext * ctx, RequestHdr * hdr)
 {
   return iMethodErrResponse(hdr, strdup
                             ("<ERROR CODE=\"7\" DESCRIPTION=\"Operation not supported xx\"/>\n"));
@@ -1686,7 +1686,7 @@ static Handler  handlers[] = {
 };
 
 RespSegments
-handleCimXmlRequest(CimXmlRequestContext * ctx)
+handleCimRequest(CimRequestContext * ctx)
 {
   RespSegments    rs;
   RequestHdr      hdr;
@@ -1708,7 +1708,7 @@ handleCimXmlRequest(CimXmlRequestContext * ctx)
      saves having to rework all of the operations
      at once. This should be changed after all ops
      are handled in the parser. */
-  hdr = scanCimXmlRequest(ctx, ctx->cimXmlDoc);
+  hdr = scanCimXmlRequest(ctx, ctx->cimDoc);
 
   /* This needs to be assigned here since hdr was
      returned by value. That means we can probably
@@ -1752,8 +1752,8 @@ handleCimXmlRequest(CimXmlRequestContext * ctx)
     ctx->className = hdr.className;
     ctx->operation = hdr.opType;
   }
-  rs.buffer = hdr.xmlBuffer;
 
+  // This will be dependent on the type of request being processed.
   freeCimXmlRequest(hdr);
 
   return rs;
@@ -1762,7 +1762,7 @@ handleCimXmlRequest(CimXmlRequestContext * ctx)
 int
 cleanupCimXmlRequest(RespSegments * rs)
 {
-  XmlBuffer      *xmb = (XmlBuffer *) rs->buffer;
+  XmlBuffer *xmb = (XmlBuffer *)rs->buffer;
   free(xmb->base);
   free(xmb);
   return 0;

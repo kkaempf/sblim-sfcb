@@ -23,7 +23,7 @@
 #ifndef array_h
 #define array_h
 
-#include "cimXmlRequest.h"
+#include "cimRequest.h"
 #include "cimXmlParser.h"
 #include "msgqueue.h"
 #include "constClass.h"
