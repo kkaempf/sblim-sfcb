@@ -77,5 +77,8 @@ test/unittest/EmbeddedTests
 test/unittest/newCMPIInstance
 test/unittest/newDateTime
 test/unittest/xmlUnescape
+test/TestProviders/tests/RIModIS.XML
+test/xmltest/PE_OpenEnumInstances0.result
+test/xmltest/PE_OpenEnumInstances1.result
 m4/
 *gcda
