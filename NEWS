@@ -21,6 +21,7 @@ Bugs fixed:
 - 3005429 indCIMXMLHandler provider should cleanup nicely
 - 3042731 git master doesn't build with --enable-ssl
 - 3043324 xml tests don't test xml comments
+- 3053830 Indication rc lost
 
 Changes in 1.3.9
 ================
