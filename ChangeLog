@@ -1,3 +1,7 @@
+2010-08-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* [ 3053240 ] Leak on indication delivery
+
 2010-08-27 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* indCIMXMLHandler.c
 	[ 3053830 ] Indication rc lost
