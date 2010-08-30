@@ -50,6 +50,7 @@ typedef struct cimXmlRequestContext {
   char           *cimXmlDoc;
   char           *principal;
   char           *host;
+  char           *contentType;
   int             teTrailers;
   unsigned int    sessionId;
   unsigned long   cimXmlDocLength;

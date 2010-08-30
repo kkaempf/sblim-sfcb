@@ -1323,6 +1323,7 @@ doHttpRequest(CommHndl conn_fd)
   ctx.teTrailers = inBuf.trailers;
   ctx.cimXmlDocLength = len - hl;
   ctx.commHndl = &conn_fd;
+  ctx.contentType = inBuf.content_type;
 
   if (msgs[1].length > 0) {
     ctx.chunkFncs = &httpChunkFunctions;
