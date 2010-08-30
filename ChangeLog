@@ -1,6 +1,11 @@
 2010-08-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
-	* [ 3053240 ] Leak on indication delivery
+	* inteorpProvider.c:
+	[ 3053240 ] Leak on indication delivery
+
+	predicate.c:
+	Undo changes for 3051707 until a better solution is found
+
 
 2010-08-27 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* indCIMXMLHandler.c
