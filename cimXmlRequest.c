@@ -1697,6 +1697,7 @@ handleCimXmlRequest(CimXmlRequestContext * ctx)
                   ue;
   struct timeval  sv,
                   ev;
+  int             parserc;
 
   if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
     gettimeofday(&sv, NULL);
@@ -1708,7 +1709,7 @@ handleCimXmlRequest(CimXmlRequestContext * ctx)
      saves having to rework all of the operations
      at once. This should be changed after all ops
      are handled in the parser. */
-  hdr = scanCimXmlRequest(ctx, ctx->cimXmlDoc);
+  hdr = scanCimXmlRequest(ctx, ctx->cimXmlDoc,&parserc);
 
   /* This needs to be assigned here since hdr was
      returned by value. That means we can probably

@@ -97,7 +97,7 @@ typedef struct requestHdr {
   unsigned int    sessionId;
 } RequestHdr;
 
-extern RequestHdr scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData);
+extern RequestHdr scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData, int *rc);
 extern void     freeCimXmlRequest(RequestHdr hdr);
 
 typedef struct xtokNameSpace {
