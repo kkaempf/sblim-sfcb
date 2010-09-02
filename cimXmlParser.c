@@ -1697,7 +1697,7 @@ scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData, int *rc)
   control.MQs = 0;
   control.MPQs = 0;
 
-  if (strcmp(ctx->contentType,"application/xml") !=0 ) {
+  if (strncmp(ctx->contentType,"application/xml",15) !=0 ) {
     *rc=1;
     return control.reqHdr;
   }
