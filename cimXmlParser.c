@@ -1671,9 +1671,10 @@ yyerror(char *s)
 }
 
 RequestHdr
-scanCimXmlRequest(CimRequestContext *ctx, char *xmlData)
+scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData, int *rc)
 {
   ParserControl   control;
+  *rc=0;
 
   XmlBuffer      *xmb = newXmlBuffer(xmlData);
   control.xmb = xmb;
@@ -1695,6 +1696,11 @@ scanCimXmlRequest(CimRequestContext *ctx, char *xmlData)
   control.MPs = 0;
   control.MQs = 0;
   control.MPQs = 0;
+
+  if (strncmp(ctx->contentType,"application/xml",15) !=0 ) {
+    *rc=1;
+    return control.reqHdr;
+  }
 
   if (setjmp(control.env)) {
     // printf("--- setjmp caught !!\n");

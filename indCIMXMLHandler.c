@@ -815,6 +815,7 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
   _SFCB_ENTER(TRACE_INDPROVIDER, "IndCIMXMLHandlerInvokeMethod");
 
   CMPIStatus      st = { CMPI_RC_OK, NULL };
+  CMPIStatus      circ = { CMPI_RC_OK, NULL };
   struct timeval tv;
   struct timezone tz;
   static unsigned int indID=1;
@@ -857,9 +858,9 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
         element->count=0;
         gettimeofday(&tv, &tz);
         element->lasttry=tv.tv_sec;
-        CBCreateInstance(_broker, ctx, iop, ind, &st);
-        if (st.rc != 0) {
-            mlogf(M_ERROR,M_SHOW,"Pushing indication instance to repository failed, rc:%d\n",st.rc);
+        CBCreateInstance(_broker, ctx, iop, ind, &circ);
+        if (circ.rc != 0) {
+            mlogf(M_ERROR,M_SHOW,"Pushing indication instance to repository failed, rc:%d\n",circ.rc);
         }
         indID++;
         // Add it to the retry queue

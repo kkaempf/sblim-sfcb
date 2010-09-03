@@ -1269,7 +1269,8 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
     char           *suName;
     char           *filtername = NULL;
     CMPIArgs       *hin = CMNewArgs(_broker, NULL);
-    CMPIInstance   *ind = CMGetArg(in, "indication", NULL).value.inst;
+    CMPIInstance   *indo = CMGetArg(in, "indication", NULL).value.inst;
+    CMPIInstance   *ind = CMClone(indo, NULL); 
     void           *filterId =
         (void *) CMGetArg(in, "filterid", NULL).value.
 #if SIZEOF_INT == SIZEOF_VOIDP
@@ -1292,6 +1293,7 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
       }
     }
     CMAddArg(hin, "indication", &ind, CMPI_instance);
+    CMRelease(ind);
     CMAddArg(hin, "nameSpace", ns, CMPI_chars);
 
     if (subscriptionHt)

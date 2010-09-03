@@ -1323,6 +1323,7 @@ doHttpRequest(CommHndl conn_fd)
   ctx.teTrailers = inBuf.trailers;
   ctx.cimDocLength = len - hl;
   ctx.commHndl = &conn_fd;
+  ctx.contentType = inBuf.content_type;
 
   if (msgs[1].length > 0) {
     ctx.chunkFncs = &httpChunkFunctions;
@@ -1353,8 +1354,14 @@ doHttpRequest(CommHndl conn_fd)
   free(hdr);
 
   _SFCB_TRACE(1, ("--- Generate http response"));
-  if (response.chunkedMode == 0)
-    writeResponse(conn_fd, response);
+  if (response.chunkedMode == 0) {
+    if (response.rc == 1) {
+      // The content type in the payload was unrecognized.
+      genError(conn_fd, &inBuf, 400, "Bad Request, unrecognized content type", NULL);
+    } else
+      writeResponse(conn_fd, response);
+  }
+
   cleanupCimXmlRequest(&response);
 
 #ifdef SFCB_DEBUG

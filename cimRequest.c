@@ -1697,60 +1697,85 @@ handleCimRequest(CimRequestContext * ctx)
                   ue;
   struct timeval  sv,
                   ev;
+  int             parserc; /* scanner recognition code
+                           0 = format understood
+                           1 = format not understood */
 
   if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
     gettimeofday(&sv, NULL);
     getrusage(RUSAGE_SELF, &us);
   }
 #endif
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "handleCimXmlRequest");
 
-  /* Sending both params is a bit redundant, but it
+  // Define the function array, be sure to adjust the size when
+  // adding entries
+  RequestHdr (*parseArray[1])(CimXmlRequestContext*, char*,int*)={NULL};
+  parseArray[0]=&scanCimXmlRequest;
+  int i=0;
+  int asize=sizeof(parseArray)/sizeof(RequestHdr*);
+  while (i < asize) {
+    /* Sending both params is a bit redundant, but it
      saves having to rework all of the operations
      at once. This should be changed after all ops
      are handled in the parser. */
-  hdr = scanCimXmlRequest(ctx, ctx->cimDoc);
-
-  /* This needs to be assigned here since hdr was
+    hdr = parseArray[i](ctx, ctx->cimXmlDoc,&parserc);
+    if (parserc == 0) {
+      break;
+    }
+    i++;
+  }
+  if (parserc == 0) {
+    // Found a valid parser
+    /* This needs to be assigned here since hdr was
      returned by value. That means we can probably
      stop assigning it in the parser. It is also
      possible that we might not need this cycle in
      the data structure if we make some minor changes
      to the params we pass around. */
-  hdr.binCtx->rHdr = &hdr;
+    hdr.binCtx->rHdr = &hdr;
 
 #ifdef SFCB_DEBUG
-  if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
-    gettimeofday(&ev, NULL);
-    getrusage(RUSAGE_SELF, &ue);
-    _sfcb_trace(1, __FILE__, __LINE__,
+    if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
+      gettimeofday(&ev, NULL);
+      getrusage(RUSAGE_SELF, &ue);
+      _sfcb_trace(1, __FILE__, __LINE__,
                 _sfcb_format_trace
-                ("-#- XML Parsing %.5u %s-%s real: %f user: %f sys: %f \n",
+                ("-#- Content Parsing %.5u %s-%s real: %f user: %f sys: %f \n",
                  ctx->sessionId, opsName[hdr.opType], "n/a",
                  timevalDiff(&sv, &ev), timevalDiff(&us.ru_utime,
                                                     &ue.ru_utime),
                  timevalDiff(&us.ru_stime, &ue.ru_stime)));
-  }
+    }
 #endif
 
-  if (hdr.rc) {
-    if (hdr.methodCall) {
-      rs = methodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
-                                                 "invalid methodcall XML"));
-    } else {
-      if(!hdr.errMsg) hdr.errMsg = strdup("invalid imethodcall XML");
-      rs = iMethodErrResponse(&hdr, getErrSegment(hdr.rc,
+    if (hdr.rc) {
+      if (hdr.methodCall) {
+        rs = methodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
+                                                 "invalid methodcall payload"));
+      } else {
+        if(!hdr.errMsg) hdr.errMsg = strdup("invalid imethodcall payload");
+        rs = iMethodErrResponse(&hdr, getErrSegment(hdr.rc,
                                                   hdr.errMsg));
 //      rs = iMethodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
 //                                                  "invalid imethodcall XML"));
     }
-  } else {
-    hc = markHeap();
-    hdlr = handlers[hdr.opType];
-    rs = hdlr.handler(ctx, &hdr);
-    releaseHeap(hc);
+    } else {
+      hc = markHeap();
+      hdlr = handlers[hdr.opType];
+      rs = hdlr.handler(ctx, &hdr);
+      releaseHeap(hc);
 
-    ctx->className = hdr.className;
-    ctx->operation = hdr.opType;
+      ctx->className = hdr.className;
+      ctx->operation = hdr.opType;
+    }
+    rs.buffer = hdr.xmlBuffer;
+    rs.rc=0;
+  } else {
+    // No valid parser found
+    hdr.errMsg = strdup("Unrecognized content type");
+    rs = iMethodErrResponse(&hdr, getErrSegment(hdr.rc, hdr.errMsg));
+    rs.rc=1;
   }
 
   // This will be dependent on the type of request being processed.
