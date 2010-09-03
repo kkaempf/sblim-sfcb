@@ -74,8 +74,6 @@ extern char    *sfcb_pathToChars(CMPIObjectPath * cop, CMPIStatus *rc,
 extern void     dump(char *msg, void *a, int l);
 extern CMPIArray *native_make_CMPIArray(CMPIData *av, CMPIStatus *rc,
                                         ClObjectHdr * hdr);
-extern int      instance2xml(CMPIInstance *ci, UtilStringBuffer * sb,
-                             unsigned int flags);
 static ClString nls = { 0 };
 
 ClVersionRecord
