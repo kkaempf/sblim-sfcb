@@ -699,9 +699,8 @@ static ChunkFunctions httpChunkFunctions = {
 static int
 getHdrs(CommHndl conn_fd, Buffer * b)
 {
-  int             first = 1,
-      total = 0,
-      isReady;
+  int             total = 0,
+                  isReady;
   fd_set          httpfds;
   int             state = 0;
 

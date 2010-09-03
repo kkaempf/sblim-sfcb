@@ -61,7 +61,7 @@ typedef struct cimRequestContext {
 } CimRequestContext;
 
 extern RespSegments handleCimRequest(CimRequestContext * ctx);
-extern int      cleanupCimRequest(RespSegments * rs);
+extern int      cleanupCimXmlRequest(RespSegments * rs);
 
 #endif
 /* MODELINES */
