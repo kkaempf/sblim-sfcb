@@ -25,7 +25,7 @@
 
 #include "cimXmlParser.h"
 #include "cimXmlOps.h"
-#include "cimXmlRequest.h"
+#include "cimRequest.h"
 #include "trace.h"
 
 static int      attrsOk(XmlBuffer * xb, const XmlElement * e, XmlAttr * r,
@@ -1671,13 +1671,14 @@ yyerror(char *s)
 }
 
 RequestHdr
-scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData)
+scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData, int *rc)
 {
   ParserControl   control;
+  *rc=0;
 
   XmlBuffer      *xmb = newXmlBuffer(xmlData);
   control.xmb = xmb;
-  control.reqHdr.xmlBuffer = xmb;
+  control.reqHdr.buffer = xmb;
   control.reqHdr.cimRequest = NULL;
   control.reqHdr.iMethod = NULL;
   control.reqHdr.rc = 0;
@@ -1695,6 +1696,11 @@ scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData)
   control.MPs = 0;
   control.MQs = 0;
   control.MPQs = 0;
+
+  if (strncmp(ctx->contentType,"application/xml",15) !=0 ) {
+    *rc=1;
+    return control.reqHdr;
+  }
 
   if (setjmp(control.env)) {
     // printf("--- setjmp caught !!\n");

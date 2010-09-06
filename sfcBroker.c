@@ -36,7 +36,6 @@
 #include "msgqueue.h"
 #include <pthread.h>
 
-#include "cimXmlRequest.h"
 #include "sfcVersion.h"
 #include "control.h"
 

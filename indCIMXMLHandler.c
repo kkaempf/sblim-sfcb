@@ -31,7 +31,7 @@
 #include "fileRepository.h"
 #include "providerMgr.h"
 #include "internalProvider.h"
-#include "cimXmlRequest.h"
+#include "cimRequest.h"
 #include "native.h"
 
 extern void     closeProviderContext(BinRequestContext * ctx);

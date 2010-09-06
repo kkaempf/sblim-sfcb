@@ -33,7 +33,7 @@
 
 #include <msgqueue.h>
 #include <providerMgr.h>
-#include "cimXmlRequest.h"
+#include "cimRequest.h"
 
 #define FL_localOnly CMPI_FLAG_LocalOnly
 #define FL_deepInheritance CMPI_FLAG_DeepInheritance
@@ -78,7 +78,7 @@ typedef struct xmlAttr {
 } XmlAttr;
 
 typedef struct requestHdr {
-  XmlBuffer      *xmlBuffer;
+  void           *buffer;
   int             rc;
   int             opType;
   int             simple;
@@ -97,7 +97,7 @@ typedef struct requestHdr {
   unsigned int    sessionId;
 } RequestHdr;
 
-extern RequestHdr scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData);
+extern RequestHdr scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData, int *rc);
 extern void     freeCimXmlRequest(RequestHdr hdr);
 
 typedef struct xtokNameSpace {

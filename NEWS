@@ -6,6 +6,7 @@ New features:
 - 3030289 Update wbemcat to make REST requests
 - 3031827 Parser does not create BinRequestContext
 - 3043331 Implement Pulled Enumerations
+- 3056234 Allow multiple parsers
 
 Bugs fixed:
 
@@ -22,6 +23,8 @@ Bugs fixed:
 - 3042731 git master doesn't build with --enable-ssl
 - 3043324 xml tests don't test xml comments
 - 3053830 Indication rc lost
+- 3058803 objectImpl externs unneeded func
+- 3058806 unused variable in getHdrs
 
 Changes in 1.3.9
 ================

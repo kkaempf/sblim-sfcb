@@ -43,7 +43,7 @@
 #include "msgqueue.h"
 #include "utilft.h"
 #include "trace.h"
-#include "cimXmlRequest.h"
+#include "cimRequest.h"
 #include "support.h"
 
 #include <pthread.h>
@@ -699,9 +699,8 @@ static ChunkFunctions httpChunkFunctions = {
 static int
 getHdrs(CommHndl conn_fd, Buffer * b)
 {
-  int             first = 1,
-      total = 0,
-      isReady;
+  int             total = 0,
+                  isReady;
   fd_set          httpfds;
   int             state = 0;
 
@@ -1058,7 +1057,7 @@ doHttpRequest(CommHndl conn_fd)
                   ue;
   struct timeval  sv,
                   ev;
-  CimXmlRequestContext ctx;
+  CimRequestContext ctx;
   int             breakloop;
   _SFCB_ENTER(TRACE_HTTPDAEMON, "doHttpRequest");
 
@@ -1317,12 +1316,13 @@ doHttpRequest(CommHndl conn_fd)
   msgs[1].data = inBuf.content;
   msgs[1].length = len - hl;
 
-  ctx.cimXmlDoc = inBuf.content;
+  ctx.cimDoc = inBuf.content;
   ctx.principal = inBuf.principal;
   ctx.host = inBuf.host;
   ctx.teTrailers = inBuf.trailers;
-  ctx.cimXmlDocLength = len - hl;
+  ctx.cimDocLength = len - hl;
   ctx.commHndl = &conn_fd;
+  ctx.contentType = inBuf.content_type;
 
   if (msgs[1].length > 0) {
     ctx.chunkFncs = &httpChunkFunctions;
@@ -1346,15 +1346,21 @@ doHttpRequest(CommHndl conn_fd)
     }
 #endif
 
-    response = handleCimXmlRequest(&ctx);
+    response = handleCimRequest(&ctx);
   } else {
     response = nullResponse;
   }
   free(hdr);
 
   _SFCB_TRACE(1, ("--- Generate http response"));
-  if (response.chunkedMode == 0)
-    writeResponse(conn_fd, response);
+  if (response.chunkedMode == 0) {
+    if (response.rc == 1) {
+      // The content type in the payload was unrecognized.
+      genError(conn_fd, &inBuf, 400, "Bad Request, unrecognized content type", NULL);
+    } else
+      writeResponse(conn_fd, response);
+  }
+
   cleanupCimXmlRequest(&response);
 
 #ifdef SFCB_DEBUG
@@ -1392,7 +1398,7 @@ handleHttpRequest(int connFd, int sslMode)
 
   _SFCB_ENTER(TRACE_HTTPDAEMON, "handleHttpRequest");
 
-  _SFCB_TRACE(1, ("--- Forking xml handler"));
+  _SFCB_TRACE(1, ("--- Forking request processor"));
 
   if (doFork) {
     semAcquire(httpWorkSem, 0);
@@ -1410,7 +1416,7 @@ handleHttpRequest(int connFd, int sslMode)
      */
     if (r == 0) {
       currentProc = getpid();
-      processName = "CIMXML-Processor";
+      processName = "CIMREQ-Processor";
       semRelease(httpProcSem, 0);
       semAcquireUnDo(httpProcSem, 0);
       semReleaseUnDo(httpProcSem, httpProcIdX + 1);
@@ -1443,10 +1449,10 @@ handleHttpRequest(int connFd, int sslMode)
      * child's thread of execution || doFork=0 
      */
     if (doFork) {
-      _SFCB_TRACE(1, ("--- Forked xml handler %d", currentProc))
+      _SFCB_TRACE(1, ("--- Forked request processor %d", currentProc))
     }
 
-    _SFCB_TRACE(1, ("--- Started xml handler %d %d", currentProc,
+    _SFCB_TRACE(1, ("--- Started request processor %d %d", currentProc,
                     resultSockets.receive));
 
     if (getenv("SFCB_PAUSE_HTTP"))
@@ -1579,7 +1585,7 @@ handleHttpRequest(int connFd, int sslMode)
     if (!doFork)
       return;
 
-    _SFCB_TRACE(1, ("--- Xml handler exiting %d", currentProc));
+    _SFCB_TRACE(1, ("--- Request processor exiting %d", currentProc));
     dumpTiming(currentProc);
     exit(0);
   }
