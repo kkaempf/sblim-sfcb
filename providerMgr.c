@@ -53,6 +53,12 @@
 #define SFCB_ASM(x)
 #endif
 
+extern int getEnumState(CMPIEnumeration *enumeration);
+extern CMPIArray *getEnumDatap(CMPIEnumeration *enumeration);
+extern void incLastValid(CMPIEnumeration *enumeration);
+extern void setEnumArray(CMPIEnumeration *enumeration, CMPIArray *array);
+extern void setEnumState(CMPIEnumeration *enumeration, int new_state);
+
 static pthread_mutex_t resultsocketMutex = PTHREAD_MUTEX_INITIALIZER;
 
 extern CMPIBroker *Broker;
