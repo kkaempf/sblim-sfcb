@@ -1671,7 +1671,7 @@ yyerror(char *s)
 }
 
 RequestHdr
-scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData, int *rc)
+scanCimXmlRequest(CimRequestContext *ctx, char *xmlData, int *rc)
 {
   ParserControl   control;
   *rc=0;

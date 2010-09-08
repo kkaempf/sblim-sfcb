@@ -1710,7 +1710,7 @@ handleCimRequest(CimRequestContext * ctx)
 
   // Define the function array, be sure to adjust the size when
   // adding entries
-  RequestHdr (*parseArray[1])(CimXmlRequestContext*, char*,int*)={NULL};
+  RequestHdr (*parseArray[1])(CimRequestContext*, char*,int*)={NULL};
   parseArray[0]=&scanCimXmlRequest;
   int i=0;
   int asize=sizeof(parseArray)/sizeof(RequestHdr*);
@@ -1719,7 +1719,7 @@ handleCimRequest(CimRequestContext * ctx)
      saves having to rework all of the operations
      at once. This should be changed after all ops
      are handled in the parser. */
-    hdr = parseArray[i](ctx, ctx->cimXmlDoc,&parserc);
+    hdr = parseArray[i](ctx, ctx->cimDoc,&parserc);
     if (parserc == 0) {
       break;
     }
@@ -1769,7 +1769,7 @@ handleCimRequest(CimRequestContext * ctx)
       ctx->className = hdr.className;
       ctx->operation = hdr.opType;
     }
-    rs.buffer = hdr.xmlBuffer;
+    rs.buffer = hdr.buffer;
     rs.rc=0;
   } else {
     // No valid parser found

@@ -1,3 +1,7 @@
+2010-10-08 Sean Swehla <smswehla@linux.vnet.ibm.com>
+	* cimRequest.c, cimXmlParser.h, cimXmlParser.c
+	[ 3062122 ] Bad merge reverted some data types
+
 2010-09-03 Sean Swehla <smswehla@linux.vnet.ibm.com>
 	* httpAdapter.c
 	[ 3058806 ] unused variable in getHdrs
