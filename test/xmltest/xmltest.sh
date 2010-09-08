@@ -67,7 +67,7 @@ do
        fi
 
        if [ $? -ne 0 ]; then
-          echo -n "FAILED to send CIM-XML request"
+          echo "FAILED to send CIM-XML request"
           trc=1
           continue
        fi
@@ -78,8 +78,6 @@ do
             if ! diff --brief $_TESTOK $_TESTRESULT > /dev/null; then
                 echo -n "FAILED output not as expected"
                 trc=1;
-                continue
-    
             # We got the expected response XML
             else
                 echo -n "PASSED"
