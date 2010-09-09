@@ -114,7 +114,7 @@ fi
 
 while [ $i -lt $index ]
 do
-     sh $scriptDir/ABTScript $SFCB_ROOT "${TESTNAME[$i]}"  "${TESTCONFIG[$i]}"
+     sh -x $scriptDir/ABTScript $SFCB_ROOT "${TESTNAME[$i]}"  "${TESTCONFIG[$i]}"
      if [ $? -eq 0 ] ; then
          let testCount="$testCount + 1"
      fi

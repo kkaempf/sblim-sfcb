@@ -56,23 +56,23 @@ SFCB_CLEAN()
 REPO_CHECK_OUT()
 {
     cd ${BASE_DIR}
-    if ${SFCBREPO_CMD} 1>"$REPORTDIR"/$REPO_OUT 2>&1
+    if $SFCBREPO_CMD 1>"$REPORTDIR"/$REPO_CO 2>&1
     then
         RC=0
-        DUALOUT "SFCB check-out : SUCCESS" "./$REPO_OUT"
+        DUALOUT "SFCB check-out : SUCCESS" "./$REPO_CO"
         cd sfcb
-        if ${MOFCREPO_CMD} 1>"$REPORTDIR"/$REPO_OUT 2>&1
+        if $MOFCREPO_CMD 1>"$REPORTDIR"/$REPO_CO 2>&1
         then
             RC=0
-            DUALOUT "MOFC check-out : SUCCESS" "./$REPO_OUT"
+            DUALOUT "MOFC check-out : SUCCESS" "./$REPO_CO"
         else
             RC=1
-            DUALOUT "MOFC check-out : FAILURE" "./$REPO_OUT"
+            DUALOUT "MOFC check-out : FAILURE" "./$REPO_CO"
             exit $RC
         fi
     else
         RC=1
-        DUALOUT "SFCB check-out : FAILURE" "./$REPO_OUT"
+        DUALOUT "SFCB check-out : FAILURE" "./$REPO_CO"
         exit $RC
     fi
 }
