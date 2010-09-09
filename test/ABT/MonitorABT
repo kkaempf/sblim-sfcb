@@ -95,8 +95,11 @@ export DISTRO="$IDISTRO $RELEASE"
 export MID=$machineID
 
 #Check the config options
-if [ ! $CVSROOT ] ; then
-    export CVSROOT=":pserver:anonymous:@sblim.cvs.sourceforge.net/cvsroot/sblim"
+if [ ! $SFCBREPO_CMD ] ; then
+    export SFCBREPO_CMD="git clone git://sblim.git.sourceforge.net/gitroot/sblim/sfcb/"
+fi
+if [ ! $MOFCREPO_CMD ] ; then
+    export MOFCREPO_CMD="git clone git://sblim.git.sourceforge.net/gitroot/sblim/mofc/"
 fi
 
 export SFCB_ROOT=$scriptDir/sfcbBuild
