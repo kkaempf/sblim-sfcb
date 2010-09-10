@@ -114,7 +114,7 @@ fi
 
 while [ $i -lt $index ]
 do
-     sh -x $scriptDir/ABTScript $SFCB_ROOT "${TESTNAME[$i]}"  "${TESTCONFIG[$i]}"
+     sh  $scriptDir/ABTScript $SFCB_ROOT "${TESTNAME[$i]}"  "${TESTCONFIG[$i]}"
      if [ $? -eq 0 ] ; then
          let testCount="$testCount + 1"
      fi
@@ -133,16 +133,12 @@ let  failureNo="$index - $testCount"
 if [  $REMOTE_USER_ID ]; then
    if [ $REMOTE_HOST ]; then
       if [ $SFCB_REMOTE_DESTINATION ]; then
-         if [ $SFCB_LOCAL_SOURCE ]; then
-            scp -r $SFCB_LOCAL_SOURCE  $REMOTE_USER_ID@$REMOTE_HOST:$SFCB_REMOTE_DESTINATION
+            scp -r $SFCB_ROOT/"report$DATE"  $REMOTE_USER_ID@$REMOTE_HOST:$SFCB_REMOTE_DESTINATION
             if [ $? -eq 0 ] ; then
               echo "SCP Success"  >> $SFCB_ROOT/$reportSummary
             else 
               echo "SCP Failure"  >> $SFCB_ROOT/$reportSummary
             fi
-         else
-            echo "Provide Source location" >> $SFCB_ROOT/$reportSummary
-         fi
       else
          echo "Provide Remote Destination"  >> $SFCB_ROOT/$reportSummary
       fi
