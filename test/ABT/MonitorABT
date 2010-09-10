@@ -71,7 +71,7 @@ fi
 
 if [ $selfUpdateDone == "no" ]; then
     cd $scriptDir
-    cvs -d :pserver:anonymous:@sblim.cvs.sourceforge.net:/cvsroot/sblim co sfcb/test/ABT/
+    $SFCBREPO_CMD 
     cd -
     cp $scriptDir/sfcb/test/ABT/* $scriptDir
     cp $scriptDir/MonitorABT $0
@@ -149,7 +149,9 @@ else
    echo "Provide Remote Machine User ID"  >> $SFCB_ROOT/$reportSummary
 fi
 
+echo "http://sblim.sourceforge.net/NBAT/" >> $SFCB_ROOT/$reportSummary 
+
 # Mail the report
 
 zip -r $SFCB_ROOT/$zipFile $SFCB_ROOT/"report$DATE"
-mutt -a $SFCB_ROOT/$zipFile -s "SFCB NBT: $STATUS: $TESTSUITE: $MID: $DISTRO: $DATE: ($testCount OK,$failureNo FAIL)" $MAIL_IDS < $SFCB_ROOT/$reportSummary
+mutt -s "SFCB NBT: $STATUS: $TESTSUITE: $MID: $DISTRO: $DATE: ($testCount OK,$failureNo FAIL)" $MAIL_IDS < $SFCB_ROOT/$reportSummary
