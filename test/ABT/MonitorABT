@@ -69,7 +69,7 @@ if [ $sdStatus -eq 0 ]; then
     USAGE
 fi
 
-if [ $selfUpdateDone == "no" ]; then
+if [ $selfUpdateDone = "no" ]; then
     cd $scriptDir
     if $SFCBREPO_CMD 1>/dev/null 2>&1
     then
@@ -91,7 +91,7 @@ if [ $confFileStatus -eq 0 ] ; then
     confFile=$scriptDir/sfcb.config
 fi
 
-if [ "$machineID" == "" ] ; then
+if [ "$machineID" = "" ] ; then
     machineID=`hostname`
 fi
 RELEASE=`lsb_release -r -s`
