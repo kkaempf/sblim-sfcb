@@ -71,11 +71,20 @@ fi
 
 if [ $selfUpdateDone == "no" ]; then
     cd $scriptDir
-    $SFCBREPO_CMD 
-    cd -
-    cp $scriptDir/sfcb/test/ABT/* $scriptDir
-    cp $scriptDir/MonitorABT $0
-    exec $0 -ud $params
+    if $SFCBREPO_CMD 1>"$REPORTDIR"/$REPO_CO 2>&1
+    then
+        RC=0
+        DUALOUT "ABT check-out : SUCCESS" "./$REPO_CO"
+    	$SFCBREPO_CMD 
+    	cd -
+    	cp $scriptDir/sfcb/test/ABT/* $scriptDir
+    	cp $scriptDir/MonitorABT $0
+    	exec $0 -ud $params
+    else
+        RC=1
+        DUALOUT "ABT check-out : FAILURE" "./$REPO_CO"
+        exit $RC
+    fi
 fi
 
 if [ $confFileStatus -eq 0 ] ; then
