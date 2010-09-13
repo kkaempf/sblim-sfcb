@@ -68,6 +68,7 @@ if [ $sdStatus -eq 0 ]; then
     echo "Provide ABT scripts Location"
     USAGE
 fi
+source $confFile
 
 if [ "$selfUpdateDone" = "no" ]; then
     cd $scriptDir
@@ -79,6 +80,7 @@ if [ "$selfUpdateDone" = "no" ]; then
     	cp $scriptDir/sfcb/test/ABT/* $scriptDir
     	cp $scriptDir/MonitorABT $0
     	exec $0 -ud $params
+	rm -rf $scriptDir/sfcb/
     else
         RC=1
         echo "ABT selfupdate failed"
@@ -97,18 +99,11 @@ fi
 RELEASE=`lsb_release -r -s`
 IDISTRO=`lsb_release -i -s`
 
-source $confFile
 
 export DISTRO="$IDISTRO $RELEASE"
 export MID=$machineID
 
 #Check the config options
-if [ ! $SFCBREPO_CMD ] ; then
-    export SFCBREPO_CMD="git clone git://sblim.git.sourceforge.net/gitroot/sblim/sfcb/"
-fi
-if [ ! $MOFCREPO_CMD ] ; then
-    export MOFCREPO_CMD="git clone git://sblim.git.sourceforge.net/gitroot/sblim/mofc/"
-fi
 
 export SFCB_ROOT=$scriptDir/sfcbBuild
 
@@ -122,7 +117,7 @@ fi
 
 while [ $i -lt $index ]
 do
-     sh  $scriptDir/ABTScript $SFCB_ROOT "${TESTNAME[$i]}"  "${TESTCONFIG[$i]}"
+     bash  $scriptDir/ABTScript $SFCB_ROOT "${TESTNAME[$i]}"  "${TESTCONFIG[$i]}"
      if [ $? -eq 0 ] ; then
          let testCount="$testCount + 1"
      fi
