@@ -2,7 +2,7 @@
 
 # Status files
 
-CVS_CO_OUT=cvsco.out
+CVS_CO_OUT=repoco.out
 AUTO_CONFISCATE=autoconfiscate.out
 CONFIGURE_OUT=configure.out
 MAKE_OUT=make.out
@@ -55,14 +55,13 @@ SFCB_CLEAN()
 
 CVS_CHECK_OUT()
 {
-    cvs login
     cd ${BASE_DIR}
-    if cvs co sfcb 1>"$REPORTDIR"/$CVS_CO_OUT 2>&1
+    if $SFCBREPO_CMD 1>"$REPORTDIR"/$CVS_CO_OUT 2>&1
     then
         RC=0
         DUALOUT "SFCB check-out : SUCCESS" "./$CVS_CO_OUT"
         cd sfcb
-        if cvs co mofc 1>"$REPORTDIR"/$CVS_CO_OUT 2>&1
+        if $MOFCREPO_CMD 1>"$REPORTDIR"/$CVS_CO_OUT 2>&1
         then
             RC=0
             DUALOUT "MOFC check-out : SUCCESS" "./$CVS_CO_OUT"
