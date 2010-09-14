@@ -17,7 +17,7 @@ machineID=""
 zipFile="report.zip"
 reportSummary="report.summary"
 testCount=0
-DATE=`date -u +%y%m%d`
+DATE=`date -u +%y%m%d_%R`
 STATUS="SUCCESS"
 
 selfUpdateDone="no"
