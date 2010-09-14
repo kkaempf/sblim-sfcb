@@ -2,7 +2,7 @@
 
 # Status files
 
-REPO_CO=repoco.out
+CVS_CO_OUT=cvsco.out
 AUTO_CONFISCATE=autoconfiscate.out
 CONFIGURE_OUT=configure.out
 MAKE_OUT=make.out
@@ -31,7 +31,7 @@ fi
 DUALOUT()
 {
     echo $1 >> $BASE_DIR/$REPORT_SUMMARY
-    if [ $2 ] 
+    if [[ $2 ]] 
     then
         #If a link was given, make the text hot
         echo "<a href=$2>$1</a><br>" >> $HTMLFILE
@@ -51,28 +51,29 @@ SFCB_CLEAN()
     fi
 }
 
-# check-out the code from the repository
+# check-out the code from CVS
 
-REPO_CHECK_OUT()
+CVS_CHECK_OUT()
 {
+    cvs login
     cd ${BASE_DIR}
-    if $SFCBREPO_CMD 1>"$REPORTDIR"/$REPO_CO 2>&1
+    if cvs co sfcb 1>"$REPORTDIR"/$CVS_CO_OUT 2>&1
     then
         RC=0
-        DUALOUT "SFCB check-out : SUCCESS" "./$REPO_CO"
+        DUALOUT "SFCB check-out : SUCCESS" "./$CVS_CO_OUT"
         cd sfcb
-        if $MOFCREPO_CMD 1>"$REPORTDIR"/$REPO_CO 2>&1
+        if cvs co mofc 1>"$REPORTDIR"/$CVS_CO_OUT 2>&1
         then
             RC=0
-            DUALOUT "MOFC check-out : SUCCESS" "./$REPO_CO"
+            DUALOUT "MOFC check-out : SUCCESS" "./$CVS_CO_OUT"
         else
             RC=1
-            DUALOUT "MOFC check-out : FAILURE" "./$REPO_CO"
+            DUALOUT "MOFC check-out : FAILURE" "./$CVS_CO_OUT"
             exit $RC
         fi
     else
         RC=1
-        DUALOUT "SFCB check-out : FAILURE" "./$REPO_CO"
+        DUALOUT "SFCB check-out : FAILURE" "./$CVS_CO_OUT"
         exit $RC
     fi
 }
@@ -193,7 +194,7 @@ DUALOUT "CONFIG OPTIONS: $CONFIGOPTIONS"
 
 SFCB_CLEAN
 if [ ! -d $BASE_DIR/sfcb ]; then
-    REPO_CHECK_OUT
+    CVS_CHECK_OUT
     AUTO_CONF
 fi
 CONFIGURE_SFCB
