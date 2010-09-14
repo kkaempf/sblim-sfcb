@@ -135,7 +135,7 @@ let  failureNo="$index - $testCount"
 if [  $REMOTE_USER_ID ]; then
    if [ $REMOTE_HOST ]; then
       if [ $SFCB_REMOTE_DESTINATION ]; then
-	    #ssh -t $REMOTE_USER_ID,SBLIM@$REMOTE_HOST create
+            ssh -nt $REMOTE_USER_ID,sblim@$REMOTE_HOST create
             scp -r $SFCB_ROOT/"report$DATE"  $REMOTE_USER_ID@$REMOTE_HOST:$SFCB_REMOTE_DESTINATION
             if [ $? -eq 0 ] ; then
               echo "SCP Success"  >> $SFCB_ROOT/$reportSummary
