@@ -71,11 +71,20 @@ fi
 
 if [ $selfUpdateDone == "no" ]; then
     cd $scriptDir
-    cvs -d :pserver:anonymous:@sblim.cvs.sourceforge.net:/cvsroot/sblim co sfcb/test/ABT/
-    cd -
-    cp $scriptDir/sfcb/test/ABT/* $scriptDir
-    cp $scriptDir/MonitorABT $0
-    exec $0 -ud $params
+    if $SFCBREPO_CMD 1>/dev/null 2>&1
+    then
+        RC=0
+        $SFCBREPO_CMD
+        cd -
+        cp $scriptDir/sfcb/test/ABT/* $scriptDir
+        cp $scriptDir/MonitorABT $0
+        exec $0 -ud $params
+        rm -rf $scriptDir/sfcb/
+    else
+        RC=1
+        echo "ABT selfupdate failed"
+        exit $RC
+    fi
 fi
 
 if [ $confFileStatus -eq 0 ] ; then
@@ -95,9 +104,6 @@ export DISTRO="$IDISTRO $RELEASE"
 export MID=$machineID
 
 #Check the config options
-if [ ! $CVSROOT ] ; then
-    export CVSROOT=":pserver:anonymous:@sblim.cvs.sourceforge.net/cvsroot/sblim"
-fi
 
 export SFCB_ROOT=$scriptDir/sfcbBuild
 
@@ -111,7 +117,7 @@ fi
 
 while [ $i -lt $index ]
 do
-     sh $scriptDir/ABTScript $SFCB_ROOT "${TESTNAME[$i]}"  "${TESTCONFIG[$i]}"
+     bash $scriptDir/ABTScript $SFCB_ROOT "${TESTNAME[$i]}"  "${TESTCONFIG[$i]}"
      if [ $? -eq 0 ] ; then
          let testCount="$testCount + 1"
      fi
@@ -130,16 +136,13 @@ let  failureNo="$index - $testCount"
 if [  $REMOTE_USER_ID ]; then
    if [ $REMOTE_HOST ]; then
       if [ $SFCB_REMOTE_DESTINATION ]; then
-         if [ $SFCB_LOCAL_SOURCE ]; then
-            scp -r $SFCB_LOCAL_SOURCE  $REMOTE_USER_ID@$REMOTE_HOST:$SFCB_REMOTE_DESTINATION
+	    #ssh -t $REMOTE_USER_ID,SBLIM@$REMOTE_HOST create
+            scp -r $SFCB_ROOT/"report$DATE"  $REMOTE_USER_ID@$REMOTE_HOST:$SFCB_REMOTE_DESTINATION
             if [ $? -eq 0 ] ; then
               echo "SCP Success"  >> $SFCB_ROOT/$reportSummary
             else 
               echo "SCP Failure"  >> $SFCB_ROOT/$reportSummary
             fi
-         else
-            echo "Provide Source location" >> $SFCB_ROOT/$reportSummary
-         fi
       else
          echo "Provide Remote Destination"  >> $SFCB_ROOT/$reportSummary
       fi
