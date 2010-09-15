@@ -18,6 +18,7 @@ zipFile="report.zip"
 reportSummary="report.summary"
 testCount=0
 DATE=`date +%y%m%d_%R`
+REPORT_DIR=$SFCB_ROOT/"report$DATE"
 STATUS="SUCCESS"
 
 selfUpdateDone="no"
@@ -116,7 +117,7 @@ fi
 
 while [ $i -lt $index ]
 do
-     bash $scriptDir/ABTScript $SFCB_ROOT "${TESTNAME[$i]}"  "${TESTCONFIG[$i]}"
+     bash $scriptDir/ABTScript $SFCB_ROOT "${TESTNAME[$i]}" $REPORT_DIR  "${TESTCONFIG[$i]}"
      if [ $? -eq 0 ] ; then
          let testCount="$testCount + 1"
      fi
@@ -136,7 +137,7 @@ if [  $REMOTE_USER_ID ]; then
    if [ $REMOTE_HOST ]; then
       if [ $SFCB_REMOTE_DESTINATION ]; then
             ssh -nt $REMOTE_USER_ID,sblim@$REMOTE_HOST create
-            scp -r $SFCB_ROOT/"report$DATE"  $REMOTE_USER_ID@$REMOTE_HOST:$SFCB_REMOTE_DESTINATION
+            scp -r $REPORT_DIR  $REMOTE_USER_ID@$REMOTE_HOST:$SFCB_REMOTE_DESTINATION
             if [ $? -eq 0 ] ; then
               echo "SCP Success"  >> $SFCB_ROOT/$reportSummary
             else 
@@ -155,5 +156,5 @@ echo "Reports available: http://sblim.sourceforge.net/NBAT/"  >> $SFCB_ROOT/$rep
 
 # Mail the report
 
-zip -r $SFCB_ROOT/$zipFile $SFCB_ROOT/"report$DATE"
+zip -r $SFCB_ROOT/$zipFile $REPORT_DIR
 mutt -s "SFCB NBT: $STATUS: $TESTSUITE: $MID: $DISTRO: $DATE: ($testCount OK,$failureNo FAIL)" $MAIL_IDS < $SFCB_ROOT/$reportSummary
