@@ -18,7 +18,6 @@ zipFile="report.zip"
 reportSummary="report.summary"
 testCount=0
 DATE=`date +%y%m%d_%R`
-REPORT_DIR=$SFCB_ROOT/"report$DATE"
 STATUS="SUCCESS"
 
 selfUpdateDone="no"
@@ -106,6 +105,7 @@ export MID=$machineID
 #Check the config options
 
 export SFCB_ROOT=$scriptDir/sfcbBuild
+REPORT_DIR=$SFCB_ROOT/"report$DATE"
 
 index=${#TESTCONFIG[@]}
 
