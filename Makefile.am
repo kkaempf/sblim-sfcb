@@ -581,7 +581,8 @@ endif
 
 testreport:
 if GCOV
-	lcov --capture --directory .libs --output-file ./coverage/lcovtest.info --ignore-errors gcov,source
+    # Ignore errors from lcov since it always seems to have a problem
+	- lcov --capture --directory .libs --output-file ./coverage/lcovtest.info --ignore-errors gcov,source
 	lcov --remove ./coverage/lcovtest.info "/usr*" --output-file ./coverage/cov_stripped.info
 	genhtml --output-directory ./coverage ./coverage/cov_stripped.info
 	@echo "****** Coverage report generated in ./coverage/index.html"
