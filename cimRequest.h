@@ -58,6 +58,7 @@ typedef struct cimRequestContext {
   struct chunkFunctions *chunkFncs;
   char           *className;
   int             operation;
+  char           *path;
 } CimRequestContext;
 
 extern RespSegments handleCimRequest(CimRequestContext * ctx);
