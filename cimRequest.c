@@ -22,11 +22,21 @@
 
 #include "cmpi/cmpidt.h"
 #include "cimXmlGen.h"
-#include "cimRequest.h"
 #include "cimXmlParser.h"
 #include "msgqueue.h"
 #include "constClass.h"
 
+#ifdef HANDLER_CIMXML
+#include "cimRequest.h"
+#endif
+  
+#ifdef HANDLER_CIMRS
+#include "cimRsRequest.h"
+#endif
+  
+#ifdef HAVE_QUALREP
+#include "qualifier.h"
+#endif
 #ifdef HAVE_QUALREP
 #include "qualifier.h"
 #endif
@@ -1690,11 +1700,11 @@ static Handler  handlers[] = {
 };
 
 static Scanner scanners[] = {
-#ifdef HAVE_CIMXML
-  {scanCimXmlRequest},
-#endif
-#ifdef HAVE_CIMRS
+#ifdef HANDLER_CIMRS
   {scanCimRsRequest},
+#endif
+#ifdef HANDLER_CIMXML
+  {scanCimXmlRequest},
 #endif
 };
 
@@ -1725,11 +1735,13 @@ handleCimRequest(CimRequestContext * ctx)
 
   /* Walk over known request scanners */
   int i=0;
+  fprintf(stderr, "SMS -- found %d scanners\n", scanner_count);
   while (i < scanner_count) {
     /* Sending both params is a bit redundant, but it
      saves having to rework all of the operations
      at once. This should be changed after all ops
      are handled in the parser. */
+    fprintf(stderr, "SMS -- scanner %d\n", i);
     hdr = scanners[i].scan(ctx, ctx->cimDoc,&parserc);
     if (parserc == 0) {
       /* The scanner recognizes the request so we don't
