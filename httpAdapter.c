@@ -1081,6 +1081,7 @@ doHttpRequest(CommHndl conn_fd)
   ctx.cimDocLength = len - hl;
   ctx.commHndl = &conn_fd;
   ctx.contentType = inBuf.content_type;
+  ctx.path = "/cimom";
 
   if (msgs[1].length > 0) {
     ctx.chunkFncs = &httpChunkFunctions;
