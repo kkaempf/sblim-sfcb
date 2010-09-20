@@ -1,3 +1,5 @@
+#include "cimRequest.h"
+
 /* CimRs resource types */
 #define RES_NS                    1
 #define RES_NS_Collection         2
@@ -43,6 +45,8 @@ typedef struct _cimrsreq {
   char* keyList;
   /* query stuff */
 } CimRsReq;
+
+static int parseInstanceFragment(CimRsReq* req, char* fragment);
 
 /* decode */
 static char* percentDecode(char* s) {
@@ -222,9 +226,14 @@ static int parseInstanceFragment(CimRsReq* req, char* fragment) {
   return -1;
 }
 
-RequestHdr scanCimRsRequest()
+RequestHdr
+scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
 {
-  fprintf(stderr, "path is '%s'\n", path);
+  fprintf(stderr, "path is '%s'\n", ctx->path);
+  RequestHdr reqHdr = { NULL, 0, 0, 0, 0, 0, 0, 0,
+                        NULL, 0, 0, 0, NULL, 0, 0,
+                      };
+/*
   ctx.path = path;
   ctx.httpOp = tmp;
 
@@ -239,6 +248,9 @@ RequestHdr scanCimRsRequest()
     if (req.meth) fprintf(stderr, " %s", req.meth);
     fprintf(stderr, "\n");
   }
+ */
+ *rc = PARSERC_ERR;
+ return reqHdr;
 }
 
 /* MODELINES */
