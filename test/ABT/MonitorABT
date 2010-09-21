@@ -17,7 +17,7 @@ machineID=""
 zipFile="report.zip"
 reportSummary="report.summary"
 testCount=0
-DATE=`date -u +%y%m%d`
+DATE=`date +%y%m%d_%R`
 STATUS="SUCCESS"
 
 selfUpdateDone="no"
@@ -69,12 +69,18 @@ if [ $sdStatus -eq 0 ]; then
     USAGE
 fi
 
+if [ $confFileStatus -eq 0 ] ; then
+    echo "No configuration file: It will take default conf file"
+    confFile=$scriptDir/sfcb.config
+fi
+source $confFile
+
 if [ $selfUpdateDone == "no" ]; then
     cd $scriptDir
+    rm -rf sfcb
     if $SFCBREPO_CMD 1>/dev/null 2>&1
     then
         RC=0
-        $SFCBREPO_CMD
         cd -
         cp $scriptDir/sfcb/test/ABT/* $scriptDir
         cp $scriptDir/MonitorABT $0
@@ -87,18 +93,11 @@ if [ $selfUpdateDone == "no" ]; then
     fi
 fi
 
-if [ $confFileStatus -eq 0 ] ; then
-    echo "No configuration file: It will take default conf file"
-    confFile=$scriptDir/sfcb.config
-fi
-
 if [ "$machineID" == "" ] ; then
     machineID=`hostname`
 fi
 RELEASE=`lsb_release -r -s`
 IDISTRO=`lsb_release -i -s`
-
-source $confFile
 
 export DISTRO="$IDISTRO $RELEASE"
 export MID=$machineID
@@ -106,6 +105,7 @@ export MID=$machineID
 #Check the config options
 
 export SFCB_ROOT=$scriptDir/sfcbBuild
+REPORT_DIR=$SFCB_ROOT/"report$DATE"
 
 index=${#TESTCONFIG[@]}
 
@@ -117,7 +117,7 @@ fi
 
 while [ $i -lt $index ]
 do
-     bash $scriptDir/ABTScript $SFCB_ROOT "${TESTNAME[$i]}"  "${TESTCONFIG[$i]}"
+     bash $scriptDir/ABTScript $SFCB_ROOT "${TESTNAME[$i]}" $REPORT_DIR  "${TESTCONFIG[$i]}"
      if [ $? -eq 0 ] ; then
          let testCount="$testCount + 1"
      fi
@@ -136,8 +136,8 @@ let  failureNo="$index - $testCount"
 if [  $REMOTE_USER_ID ]; then
    if [ $REMOTE_HOST ]; then
       if [ $SFCB_REMOTE_DESTINATION ]; then
-	    #ssh -t $REMOTE_USER_ID,SBLIM@$REMOTE_HOST create
-            scp -r $SFCB_ROOT/"report$DATE"  $REMOTE_USER_ID@$REMOTE_HOST:$SFCB_REMOTE_DESTINATION
+            ssh -nt $REMOTE_USER_ID,sblim@$REMOTE_HOST create
+            scp -r $REPORT_DIR  $REMOTE_USER_ID@$REMOTE_HOST:$SFCB_REMOTE_DESTINATION
             if [ $? -eq 0 ] ; then
               echo "SCP Success"  >> $SFCB_ROOT/$reportSummary
             else 
@@ -152,8 +152,9 @@ if [  $REMOTE_USER_ID ]; then
 else
    echo "Provide Remote Machine User ID"  >> $SFCB_ROOT/$reportSummary
 fi
+echo "Reports available: http://sblim.sourceforge.net/NBAT/"  >> $SFCB_ROOT/$reportSummary
 
 # Mail the report
 
-zip -r $SFCB_ROOT/$zipFile $SFCB_ROOT/"report$DATE"
-mutt -a $SFCB_ROOT/$zipFile -s "SFCB NBT: $STATUS: $TESTSUITE: $MID: $DISTRO: $DATE: ($testCount OK,$failureNo FAIL)" $MAIL_IDS < $SFCB_ROOT/$reportSummary
+zip -r $SFCB_ROOT/$zipFile $REPORT_DIR
+mutt -s "SFCB NBT: $STATUS: $TESTSUITE: $MID: $DISTRO: $DATE: ($testCount OK,$failureNo FAIL)" $MAIL_IDS < $SFCB_ROOT/$reportSummary

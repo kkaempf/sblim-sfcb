@@ -10,15 +10,17 @@
 #define CMPI_PLATFORM_LINUX_GENERIC_GNU
 
 #include <cimXmlParser.h>
-#include <cimXmlRequest.h>
+#include <cimRequest.h>
 
-extern RequestHdr scanCimXmlRequest(CimXmlRequestContext *ctx, char *xmlData);
+extern RequestHdr scanCimXmlRequest(CimRequestContext *ctx, char *xmlData, int *rc);
 
 int
 main(void)
 {
   int             rval = 0;
-  CimXmlRequestContext ctx;
+  int             rc = 0;
+  CimRequestContext    ctx;
+  XmlBuffer *xmb;
 
   // we'll wrap our test inside a VALUE tag, call scan, and check the
   // results
@@ -34,17 +36,19 @@ main(void)
   // char *expectedResults="<VALUE>&abc&&def<H>ello \"'2xspace:
   // 2xcrlf:\n\n
   // wORLD.&#invalidstring;&#no_semi_so_not_valid&#another_invalid_with_invalid_follow#20;<after_invalid>&#invalid_at_end</VALUE>";
+  ctx.contentType="application/xml";
 
-  RequestHdr      results = scanCimXmlRequest(&ctx, thestr);
+  RequestHdr      results = scanCimXmlRequest(&ctx, thestr, &rc);
+  xmb=(XmlBuffer*)results.buffer;
 
   printf("\"sfcXmlerror: syntax error\" above is expected.\n");
-  rval = strcmp(results.xmlBuffer->base, expectedResults);
+  rval = strcmp(xmb->base, expectedResults);
   if (rval) {
     printf
         ("xmlUnescape Failed...\n\nEXPECTED:    [%s]\n\nRECEIVED:    [%s]\n",
-         expectedResults, results.xmlBuffer->base);
-    printf("  buffer.last: %s\n", results.xmlBuffer->last);
-    printf("  buffer.cur: %s\n", results.xmlBuffer->cur);
+         expectedResults, xmb->base);
+    printf("  buffer.last: %s\n", xmb->last);
+    printf("  buffer.cur: %s\n", xmb->cur);
 
   }
   return rval;
