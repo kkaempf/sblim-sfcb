@@ -151,6 +151,7 @@ typedef struct _buffer {
                  *useragent;
   char           *principal;
   char           *protocol;
+  char           *path;
 #if defined USE_SSL
   X509           *certificate;
 #endif
@@ -894,7 +895,8 @@ doHttpRequest(CommHndl conn_fd)
     *path++ = 0; /* get rid of the leading space */
     _SFCB_TRACE(1, ("--- Header: %s", inBuf.httpHdr));
     path += strspn(path, " \t\r\n");
-    inBuf.protocol = strpbrk(path, " \t\r\n");
+    inBuf.path = path;
+    inBuf.protocol = strpbrk(inBuf.path, " \t\r\n");
 
     if (inBuf.protocol == NULL)
       break;
@@ -1081,7 +1083,8 @@ doHttpRequest(CommHndl conn_fd)
   ctx.cimDocLength = len - hl;
   ctx.commHndl = &conn_fd;
   ctx.contentType = inBuf.content_type;
-  ctx.path = "/cimom";
+  ctx.verb = inBuf.httpHdr;
+  ctx.path = inBuf.path;
 
   if (msgs[1].length > 0) {
     ctx.chunkFncs = &httpChunkFunctions;
