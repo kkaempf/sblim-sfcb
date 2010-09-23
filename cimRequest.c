@@ -1742,7 +1742,7 @@ handleCimRequest(CimRequestContext * ctx)
      at once. This should be changed after all ops
      are handled in the parser. */
     fprintf(stderr, "SMS -- scanner %d\n", i);
-    hdr = scanners[i].scan(ctx, ctx->cimDoc,&parserc);
+    hdr = scanners[i].scan(ctx, ctx->cimDoc, &parserc);
     if (parserc == 0) {
       /* The scanner recognizes the request so we don't
        * need to give it to anymore scanners. */
