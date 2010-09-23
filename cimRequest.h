@@ -61,6 +61,7 @@ typedef struct cimRequestContext {
   struct chunkFunctions *chunkFncs;
   char           *className;
   int             operation;
+  char           *verb;
   char           *path;
 } CimRequestContext;
 

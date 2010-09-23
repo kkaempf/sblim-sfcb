@@ -229,7 +229,7 @@ static int parseInstanceFragment(CimRsReq* req, char* fragment) {
 RequestHdr
 scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
 {
-  fprintf(stderr, "path is '%s'\n", ctx->path);
+  fprintf(stderr, "path is '%s'\nverb is '%s'\n", ctx->path, ctx->verb);
   RequestHdr reqHdr = { NULL, 0, 0, 0, 0, 0, 0, 0,
                         NULL, 0, 0, 0, NULL, 0, 0,
                       };
