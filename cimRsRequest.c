@@ -233,6 +233,30 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
   RequestHdr reqHdr = { NULL, 0, 0, 0, 0, 0, 0, 0,
                         NULL, 0, 0, 0, NULL, 0, 0,
                       };
+
+  if (strncmp(ctx->contentType,"application/json",16) !=0 ) {
+    // We're not the parser you are looking for.
+    *rc=1;
+    return reqHdr;
+  }
+  CimRsReq req = {0, NULL, NULL, NULL, NULL};
+  int prc = parseCimRsPath(ctx->path, &req);
+  fprintf(stderr, "parseCimPath returned %d\n", prc);
+  if (prc == 0) {
+    fprintf(stderr, "scope: %d\n", req.scope);
+    if (req.ns) fprintf(stderr, "%s", req.ns);
+    if (req.cn) fprintf(stderr, ":%s", req.cn);
+    if (req.keyList) fprintf(stderr, ".%s", req.keyList);
+    if (req.meth) fprintf(stderr, " %s", req.meth);
+    fprintf(stderr, "\n");
+  }
+
+  if (strcmp(ctx->verb,"GET")) {
+    if (strcmp(ctx->path,"instances")) {
+    }
+  }
+      
+
 /*
   ctx.path = path;
   ctx.httpOp = tmp;
