@@ -85,3 +85,5 @@ m4/
 *gcda
 core
 core.*
+*.gcov
+coverage/*
