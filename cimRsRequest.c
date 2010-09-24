@@ -95,8 +95,13 @@ int parseCimRsPath(char* p, CimRsReq* req) {
 
   req->path = strdup(p);
   path = req->path;
-  tmp = strpbrk(++path, "/");
 
+  if (strncasecmp(path, "/cimrs", 6) != 0) {
+    return -1;
+  }
+
+  //tmp = strpbrk(++path, "/");
+  tmp = path + 6; /* Skip '/cimrs' since we've already checked that */
   /* "/cimrs/namespaces" should be the start of every req path */
   if (strncasecmp(++tmp, "namespaces", 10) != 0) {
     return -1;
@@ -236,9 +241,9 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
 /*
   ctx.path = path;
   ctx.httpOp = tmp;
-
+ */
   CimRsReq req = {0, NULL, NULL, NULL, NULL};
-  int prc = parseCimRsPath(path, &req);
+  int prc = parseCimRsPath(ctx->path, &req);
   fprintf(stderr, "parseCimPath returned %d\n", prc);
   if (prc == 0) {
     fprintf(stderr, "scope: %d\n", req.scope);
@@ -248,7 +253,7 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
     if (req.meth) fprintf(stderr, " %s", req.meth);
     fprintf(stderr, "\n");
   }
- */
+
  *rc = PARSERC_ERR;
  return reqHdr;
 }
