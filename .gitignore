@@ -80,5 +80,8 @@ test/unittest/newDateTime
 test/unittest/xmlUnescape
 test/TestProviders/tests/RIModIS.XML
 test/xmltest/*.result
+test/cimrstest/*.result
 m4/
 *gcda
+core
+core.*
