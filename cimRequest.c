@@ -22,11 +22,21 @@
 
 #include "cmpi/cmpidt.h"
 #include "cimXmlGen.h"
-#include "cimRequest.h"
 #include "cimXmlParser.h"
 #include "msgqueue.h"
 #include "constClass.h"
 
+#ifdef HANDLER_CIMXML
+#include "cimRequest.h"
+#endif
+  
+#ifdef HANDLER_CIMRS
+#include "cimRsRequest.h"
+#endif
+  
+#ifdef HAVE_QUALREP
+#include "qualifier.h"
+#endif
 #ifdef HAVE_QUALREP
 #include "qualifier.h"
 #endif
@@ -56,6 +66,10 @@ int             noChunking = 0;
 typedef struct handler {
   RespSegments(*handler) (CimRequestContext *, RequestHdr * hdr);
 } Handler;
+
+typedef struct scanner {
+  RequestHdr (*scan) (CimRequestContext*, char*,int*);
+} Scanner;
 
 extern int      noChunking;
 
@@ -1685,6 +1699,17 @@ static Handler  handlers[] = {
   {invokeMethod},               // OPS_InvokeMethod 24
 };
 
+static Scanner scanners[] = {
+#ifdef HANDLER_CIMRS
+  {scanCimRsRequest},
+#endif
+#ifdef HANDLER_CIMXML
+  {scanCimXmlRequest},
+#endif
+};
+
+static int scanner_count = sizeof(scanners) / sizeof(Scanner);
+
 RespSegments
 handleCimRequest(CimRequestContext * ctx)
 {
@@ -1697,7 +1722,7 @@ handleCimRequest(CimRequestContext * ctx)
                   ue;
   struct timeval  sv,
                   ev;
-  int             parserc; /* scanner recognition code
+  int             parserc = 1; /* scanner recognition code
                            0 = format understood
                            1 = format not understood */
 
@@ -1708,19 +1733,19 @@ handleCimRequest(CimRequestContext * ctx)
 #endif
   _SFCB_ENTER(TRACE_CIMXMLPROC, "handleCimXmlRequest");
 
-  // Define the function array, be sure to adjust the size when
-  // adding entries
-  RequestHdr (*parseArray[1])(CimRequestContext*, char*,int*)={NULL};
-  parseArray[0]=&scanCimXmlRequest;
+  /* Walk over known request scanners */
   int i=0;
-  int asize=sizeof(parseArray)/sizeof(RequestHdr*);
-  while (i < asize) {
+  fprintf(stderr, "SMS -- found %d scanners\n", scanner_count);
+  while (i < scanner_count) {
     /* Sending both params is a bit redundant, but it
      saves having to rework all of the operations
      at once. This should be changed after all ops
      are handled in the parser. */
-    hdr = parseArray[i](ctx, ctx->cimDoc,&parserc);
+    fprintf(stderr, "SMS -- scanner %d\n", i);
+    hdr = scanners[i].scan(ctx, ctx->cimDoc, &parserc);
     if (parserc == 0) {
+      /* The scanner recognizes the request so we don't
+       * need to give it to anymore scanners. */
       break;
     }
     i++;
