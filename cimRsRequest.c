@@ -231,6 +231,69 @@ static int parseInstanceFragment(CimRsReq* req, char* fragment) {
   return -1;
 }
 
+
+static void
+buildRSGetInstanceRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr )
+{
+  CMPIObjectPath *path;
+  CMPIValue       val;
+  CMPIType        type;
+  GetInstanceReq *sreq;
+  int             sreqSize = sizeof(GetInstanceReq);
+  CMPIValue      *valp;
+  int             i,
+                  m;
+
+  //XtokGetInstance *req = (XtokGetInstance *)hdr->cimRequest;
+  //hdr->className = req->op.className.data;
+  reqHdr->className=rsReq->cn;
+  reqHdr->iMethod="GetInstance";
+  reqHdr->methodCall=0;
+  reqHdr->id="4700"; //Not sure where this comes from?
+  reqHdr->opType = OPS_GetInstance;
+  reqHdr->binCtx = calloc(1, sizeof(BinRequestContext));
+  reqHdr->principal = ctx->principal;
+  reqHdr->sessionId = ctx->sessionId;
+  BinRequestContext *binCtx = reqHdr->binCtx;
+  printf("props:%s\n",rsReq->keyList);
+/*
+  if (req->properties)
+    sreqSize += req->properties * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_GetInstance;
+  sreq->hdr.count = req->properties + 2;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+
+  for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
+    valp =
+        getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
+                           req->instanceName.bindings.keyBindings[i].value,
+                           &req->instanceName.bindings.keyBindings[i].ref,
+                           &val, &type, req->op.nameSpace.data);
+    CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp,
+             type);
+  }
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  for (i = 0; i < req->properties; i++) {
+    sreq->properties[i] =
+        setCharsMsgSegment(req->propertyList.values[i].value);
+  }
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+*/
+}
+
 RequestHdr
 scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
 {
@@ -244,6 +307,7 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
     *rc=1;
     return reqHdr;
   }
+  *rc=0;
       
 
 /*
@@ -264,10 +328,22 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
   if (strcmp(ctx->verb,"GET") == 0) {
     if (req.scope == SCOPE_INSTANCE) {
       fprintf(stderr,"MCS is a gi\n");
+      buildRSGetInstanceRequest(ctx,&req,&reqHdr);
+      fprintf(stderr,"MCS gotreq\n");
+      /*
+      reqHdr.className=req.cn;
+      reqHdr.iMethod="GetInstance";
+      reqHdr.methodCall=0;
+      reqHdr.id="4700";
+      reqHdr.opType = OPS_GetInstance;
+      reqHdr.binCtx = calloc(1, sizeof(BinRequestContext));
+      reqHdr.principal = ctx->principal;
+      reqHdr.sessionId = ctx->sessionId;
+ */ 
     }
   }
 
- *rc = PARSERC_ERR;
+ //*rc = PARSERC_OK;
  return reqHdr;
 }
 
