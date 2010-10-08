@@ -1,4 +1,8 @@
 #include "cimRequest.h"
+#include "native.h"
+#define _GNU_SOURCE
+#include <string.h>
+
 
 /* CimRs resource types */
 #define RES_NS                    1
@@ -50,6 +54,13 @@ static int parseInstanceFragment(CimRsReq* req, char* fragment);
 
 /* decode */
 static char* percentDecode(char* s) {
+// MCS This is a horrible horrible thing
+  if (strstr(s,"cimv2")) {
+    return "root/cimv2";
+  }
+  if (strstr(s,"interop")) {
+    return "root/interop";
+  }
   return s;
 }
 
@@ -235,17 +246,17 @@ static int parseInstanceFragment(CimRsReq* req, char* fragment) {
 static void
 buildRSGetInstanceRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr )
 {
-  CMPIObjectPath *path;
+  CMPIObjectPath *op;
   CMPIValue       val;
   CMPIType        type;
   GetInstanceReq *sreq;
   int             sreqSize = sizeof(GetInstanceReq);
   CMPIValue      *valp;
+  CMPIStatus rc;
   int             i,
                   m;
 
   //XtokGetInstance *req = (XtokGetInstance *)hdr->cimRequest;
-  //hdr->className = req->op.className.data;
   reqHdr->className=rsReq->cn;
   reqHdr->iMethod="GetInstance";
   reqHdr->methodCall=0;
@@ -255,18 +266,32 @@ buildRSGetInstanceRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *r
   reqHdr->principal = ctx->principal;
   reqHdr->sessionId = ctx->sessionId;
   BinRequestContext *binCtx = reqHdr->binCtx;
+  binCtx->rHdr=reqHdr;
+  //binCtx->oHdr = calloc(1, sizeof(OperationHdr));
+  //binCtx->bHdr = calloc(1, sizeof(BinRequestHdr));
+  binCtx->type=CMPI_instance;
+
+
+
   printf("props:%s\n",rsReq->keyList);
+  // get the op
+  op = NewCMPIObjectPath(rsReq->ns, rsReq->cn,&rc);
+  valp = getKeyValueTypePtr("string","Mike",NULL, &val, &type, rsReq->ns);
+  CMAddKey(op, "Name", valp, type);
+  //sreq->objectPath = setObjectPathMsgSegment(path);
+  binCtx->bHdr = &sreq->hdr;
 /*
   if (req->properties)
     sreqSize += req->properties * sizeof(MsgSegment);
   sreq = calloc(1, sreqSize);
   sreq->hdr.operation = OPS_GetInstance;
   sreq->hdr.count = req->properties + 2;
+  */
 
+/*
   path =
-      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+      TrackedCMPIObjectPath(rsReq->ns, rsReq->cn,
                             NULL);
-
   for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
     valp =
         getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
@@ -294,6 +319,37 @@ buildRSGetInstanceRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *r
 */
 }
 
+int getSortedKeys(CimRsReq *rsReq){
+  CMPIObjectPath *op;
+  CMPIStatus rc;
+  CMPIResult *rslt;
+  CMPIArray  *klist;
+  
+  CMPIContext *ctx = native_new_CMPIContext(MEM_NOT_TRACKED, NULL);
+  //rc=ClassProviderGetClass(NULL,ctx,rslt,op,NULL);
+  int keyCount=0;
+  printf("MCS cn %s ns %s\n",rsReq->cn,rsReq->ns);
+  op = NewCMPIObjectPath(rsReq->ns, rsReq->cn,&rc);
+  //rc=CMAddKey(op,
+  printf("MCS op rc:%d %s\n",rc.rc,rc.msg);
+  /*
+  keyCount=CMGetKeyCount(op,&rc);
+  printf("MCS keycount:%u rc:%d %s\n",keyCount,rc.rc,rc.msg);
+  rc=ClassProviderGetClass(NULL,ctx,rslt,op,NULL);
+  printf("MCS gc rc:%d %s\n",rc.rc,rc.msg);
+  */
+  CMPIConstClass *cc = getConstClass(rsReq->ns,rsReq->cn);
+  printf("MCS gcc\n");
+  printf("MCS gcc %d\n",cc->refCount);
+  klist = cc->ft->getKeyList(cc);
+  printf("MCS gkl\n");
+  CMPICount kcount = klist->ft->getSize(klist, NULL);
+  printf("MCS keycount:%u\n",kcount);
+
+}
+
+
+
 RequestHdr
 scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
 {
@@ -303,7 +359,7 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
                       };
 
   if (strncasecmp(ctx->path, "/cimrs", 6) != 0) {
-    // We're not the parser you are looking for.
+    // We are not the parser you are looking for.
     *rc=1;
     return reqHdr;
   }
@@ -328,6 +384,7 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
   if (strcmp(ctx->verb,"GET") == 0) {
     if (req.scope == SCOPE_INSTANCE) {
       fprintf(stderr,"MCS is a gi\n");
+    int rrc=getSortedKeys(&req);
       buildRSGetInstanceRequest(ctx,&req,&reqHdr);
       fprintf(stderr,"MCS gotreq\n");
       /*
