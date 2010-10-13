@@ -1,5 +1,6 @@
 #include "cimRequest.h"
 #include "native.h"
+#include "cimXmlParser.h"
 #define _GNU_SOURCE
 #include <string.h>
 
@@ -241,59 +242,46 @@ static int parseInstanceFragment(CimRsReq* req, char* fragment) {
 
   return -1;
 }
-
+//MCS Start horrible try 2
 
 static void
-buildRSGetInstanceRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr )
-{
-  CMPIObjectPath *op;
+buildRSGetInstanceRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr)
+{ 
+printf("MCS in BGIR\n");
+  CMPIObjectPath *path;
   CMPIValue       val;
   CMPIType        type;
   GetInstanceReq *sreq;
   int             sreqSize = sizeof(GetInstanceReq);
   CMPIValue      *valp;
-  CMPIStatus rc;
   int             i,
                   m;
-
-  //XtokGetInstance *req = (XtokGetInstance *)hdr->cimRequest;
-  reqHdr->className=rsReq->cn;
-  reqHdr->iMethod="GetInstance";
-  reqHdr->methodCall=0;
-  reqHdr->id="4700"; //Not sure where this comes from?
+  RequestHdr     *hdr = reqHdr;
+  BinRequestContext *binCtx = hdr->binCtx;
+  binCtx->oHdr = calloc(1, sizeof(OperationHdr));
+  binCtx->oHdr->nameSpace=setCharsMsgSegment(rsReq->ns);
+  binCtx->oHdr->className=setCharsMsgSegment(rsReq->cn);
+  binCtx->oHdr->type=OPS_GetInstance;
+  binCtx->oHdr->count=2;
   reqHdr->opType = OPS_GetInstance;
-  reqHdr->binCtx = calloc(1, sizeof(BinRequestContext));
-  reqHdr->principal = ctx->principal;
-  reqHdr->sessionId = ctx->sessionId;
-  BinRequestContext *binCtx = reqHdr->binCtx;
-  binCtx->rHdr=reqHdr;
-  //binCtx->oHdr = calloc(1, sizeof(OperationHdr));
-  //binCtx->bHdr = calloc(1, sizeof(BinRequestHdr));
-  binCtx->type=CMPI_instance;
+  
 
-
-
-  printf("props:%s\n",rsReq->keyList);
-  // get the op
-  op = NewCMPIObjectPath(rsReq->ns, rsReq->cn,&rc);
-  valp = getKeyValueTypePtr("string","Mike",NULL, &val, &type, rsReq->ns);
-  CMAddKey(op, "Name", valp, type);
-  //sreq->objectPath = setObjectPathMsgSegment(path);
-  binCtx->bHdr = &sreq->hdr;
 /*
   if (req->properties)
     sreqSize += req->properties * sizeof(MsgSegment);
+*/
+//sreqSize+=sizeof(MsgSegment);
   sreq = calloc(1, sreqSize);
   sreq->hdr.operation = OPS_GetInstance;
-  sreq->hdr.count = req->properties + 2;
-  */
+  //sreq->hdr.count = req->properties + 2;
+  sreq->hdr.count = 0 + 2;
 
+  path = TrackedCMPIObjectPath(rsReq->ns, rsReq->cn, NULL);
+  
 /*
-  path =
-      TrackedCMPIObjectPath(rsReq->ns, rsReq->cn,
-                            NULL);
   for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
-    valp =
+  //this call is in CimXmlOps and should be moved
+    valp =       
         getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
                            req->instanceName.bindings.keyBindings[i].value,
                            &req->instanceName.bindings.keyBindings[i].ref,
@@ -301,25 +289,36 @@ buildRSGetInstanceRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *r
     CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp,
              type);
   }
+*/
+  //valp = getKeyValueTypePtr("string","Mike",NULL, &val, &type, rsReq->ns);
+//val.chars="Mike";
+char * keyval=strdup("Mike");
+
+CMAddKey(path, "name", keyval, CMPI_chars);
+printf("MCS path: %s\n",CMGetCharPtr(CMObjectPathToString(path,NULL)));
+
   sreq->objectPath = setObjectPathMsgSegment(path);
   sreq->principal = setCharsMsgSegment(hdr->principal);
-  sreq->hdr.sessionId = hdr->sessionId;
 
+/*
   for (i = 0; i < req->properties; i++) {
     sreq->properties[i] =
         setCharsMsgSegment(req->propertyList.values[i].value);
   }
-  binCtx->oHdr = (OperationHdr *) req;
+*/
   binCtx->bHdr = &sreq->hdr;
-  binCtx->bHdr->flags = req->flags;
+  binCtx->bHdr->flags = FL_localOnly;
   binCtx->rHdr = hdr;
   binCtx->bHdrSize = sreqSize;
   binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
   binCtx->pAs = NULL;
-*/
-}
 
-int getSortedKeys(CimRsReq *rsReq){
+printf("MCS done\n");
+}
+// End horrible try 2
+
+int getSortedKeys(CimRsReq *rsReq)
+{
   CMPIObjectPath *op;
   CMPIStatus rc;
   CMPIResult *rslt;
@@ -348,12 +347,11 @@ int getSortedKeys(CimRsReq *rsReq){
 
 }
 
-
-
 RequestHdr
 scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
 {
   fprintf(stderr, "path is '%s'\nverb is '%s'\n", ctx->path, ctx->verb);
+  //RequestHdr *reqHdr = calloc(1,sizeof(*reqHdr);
   RequestHdr reqHdr = { NULL, 0, 0, 0, 0, 0, 0, 0,
                         NULL, 0, 0, 0, NULL, 0, 0,
                       };
@@ -381,22 +379,15 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
     if (req.meth) fprintf(stderr, " %s", req.meth);
     fprintf(stderr, "\n");
   }
+  reqHdr.binCtx = calloc(1, sizeof(BinRequestContext));
+  reqHdr.principal = ctx->principal;
+  reqHdr.sessionId = ctx->sessionId;
   if (strcmp(ctx->verb,"GET") == 0) {
     if (req.scope == SCOPE_INSTANCE) {
       fprintf(stderr,"MCS is a gi\n");
-    int rrc=getSortedKeys(&req);
+//    int rrc=getSortedKeys(&req);
       buildRSGetInstanceRequest(ctx,&req,&reqHdr);
-      fprintf(stderr,"MCS gotreq\n");
-      /*
-      reqHdr.className=req.cn;
-      reqHdr.iMethod="GetInstance";
-      reqHdr.methodCall=0;
-      reqHdr.id="4700";
-      reqHdr.opType = OPS_GetInstance;
-      reqHdr.binCtx = calloc(1, sizeof(BinRequestContext));
-      reqHdr.principal = ctx->principal;
-      reqHdr.sessionId = ctx->sessionId;
- */ 
+      fprintf(stderr,"MCS gotreq %s\n",reqHdr.className);
     }
   }
 
