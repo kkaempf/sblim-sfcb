@@ -48,6 +48,7 @@ typedef struct _cimrsreq {
   char* cn;
   char* meth; /* for class meth or inst meth */
   char* keyList;
+  CMPIArray *sortedKeyList;
   /* query stuff */
 } CimRsReq;
 
@@ -242,7 +243,6 @@ static int parseInstanceFragment(CimRsReq* req, char* fragment) {
 
   return -1;
 }
-//MCS Start horrible try 2
 
 static void
 buildRSGetInstanceRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr)
@@ -276,7 +276,6 @@ printf("MCS in BGIR\n");
   //sreq->hdr.count = req->properties + 2;
   sreq->hdr.count = 0 + 2;
 
-  path = TrackedCMPIObjectPath(rsReq->ns, rsReq->cn, NULL);
   
 /*
   for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
@@ -292,9 +291,24 @@ printf("MCS in BGIR\n");
 */
   //valp = getKeyValueTypePtr("string","Mike",NULL, &val, &type, rsReq->ns);
 //val.chars="Mike";
-char * keyval=strdup("Mike");
+  //char * keyval=strdup("Mike");
+  char * keyval,*keyname,*saveptr;
+  path = TrackedCMPIObjectPath(rsReq->ns, rsReq->cn, NULL);
+  keyval=strtok_r(rsReq->keyList," ",&saveptr);
+  for (i = 0; i < rsReq->sortedKeyList->ft->getSize(rsReq->sortedKeyList, NULL); i++)
+  {
+    keyname=CMGetCharPtr(rsReq->sortedKeyList->ft->getElementAt(rsReq->sortedKeyList, i, NULL).value.string);
+    printf("MCS key:%d %s\n", i,keyname);
+    if (keyval == NULL) {
+      printf("Missing key value for key %s\n",keyname);
+      // Need to abort or something, and should be an mlog call
+    } else {
+      CMAddKey(path, keyname, keyval, CMPI_chars);
+      keyval=strtok_r(NULL," ",&saveptr);
+    }
+  }
 
-CMAddKey(path, "name", keyval, CMPI_chars);
+
 printf("MCS path: %s\n",CMGetCharPtr(CMObjectPathToString(path,NULL)));
 
   sreq->objectPath = setObjectPathMsgSegment(path);
@@ -315,7 +329,6 @@ printf("MCS path: %s\n",CMGetCharPtr(CMObjectPathToString(path,NULL)));
 
 printf("MCS done\n");
 }
-// End horrible try 2
 
 int getSortedKeys(CimRsReq *rsReq)
 {
@@ -338,12 +351,21 @@ int getSortedKeys(CimRsReq *rsReq)
   printf("MCS gc rc:%d %s\n",rc.rc,rc.msg);
   */
   CMPIConstClass *cc = getConstClass(rsReq->ns,rsReq->cn);
-  printf("MCS gcc\n");
   printf("MCS gcc %d\n",cc->refCount);
+  CMPIString * CCCN = cc->ft->getClassName(cc,NULL);
+  printf("MCS gcc %s\n",CCCN->ft->getCharPtr(CCCN,NULL));
   klist = cc->ft->getKeyList(cc);
-  printf("MCS gkl\n");
+  rsReq->sortedKeyList=klist;
   CMPICount kcount = klist->ft->getSize(klist, NULL);
   printf("MCS keycount:%u\n",kcount);
+  //CMPIData keyname=klist->ft->getElementAt(klist,0,NULL);
+  int i;
+  for (i = 0; i < klist->ft->getSize(klist, NULL); i++)
+  {
+    printf("MCS key:%d %s\n", i,CMGetCharPtr(klist->ft->getElementAt(klist, i, NULL).value.string));
+  }
+//OK Now need to actually sort them before sticking the request
+  rsReq->sortedKeyList=klist;
 
 }
 
@@ -385,7 +407,7 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
   if (strcmp(ctx->verb,"GET") == 0) {
     if (req.scope == SCOPE_INSTANCE) {
       fprintf(stderr,"MCS is a gi\n");
-//    int rrc=getSortedKeys(&req);
+    int rrc=getSortedKeys(&req);
       buildRSGetInstanceRequest(ctx,&req,&reqHdr);
       fprintf(stderr,"MCS gotreq %s\n",reqHdr.className);
     }
