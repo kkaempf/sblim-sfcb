@@ -27,6 +27,16 @@ Bugs fixed:
 - 3058806 unused variable in getHdrs
 - 3062122 Bad merge reverted some data types
 
+Changes in 1.3.10
+=================
+
+New features:
+- NO NEW FEATURES
+
+Bugs fixed:
+
+- 3086143 set cmpi status in getPropQualifier
+
 Changes in 1.3.9
 ================
 
