@@ -1099,10 +1099,10 @@ makeHostedService(CMPIAssociationMI * mi,
   CMReturn(CMPI_RC_OK);
 }
 
-/** \brief makeElementConforms - Builds a CIM_ElementConformsToProfile instance
+/** \brief makeElementConforms - Builds a SFCB_ElementConformsToProfile instance
  *  
- *  Creates and returns the instance (or name) of a CIM_ElementConformsToProfile
- *  association between CIM_RegisteredProfile and CIM_IndicationService
+ *  Creates and returns the instance (or name) of a SFCB_ElementConformsToProfile
+ *  association between SFCB_RegisteredProfile and CIM_IndicationService
 */
 CMPIStatus
 makeElementConforms(CMPIAssociationMI * mi,
@@ -1204,7 +1204,7 @@ getAssociators(CMPIAssociationMI * mi,
       CMNewObjectPath(_broker, "root/interop", "CIM_HostedService", &rc);
   ecpop =
       CMNewObjectPath(_broker, "root/interop",
-                      "CIM_ElementConformsToProfile", &rc);
+                      "SFCB_ElementConformsToProfile", &rc);
   if ((saeop == NULL) || (hsop == NULL) || (ecpop == NULL)) {
     CMSetStatusWithChars(_broker, &rc, CMPI_RC_ERR_FAILED,
                          "Create CMPIObjectPath failed.");
@@ -1369,7 +1369,7 @@ getAssociators(CMPIAssociationMI * mi,
         && CMClassPathIsA(_broker, cop, "cim_indicationservice", &rc) == 1) {
       // An IndicationService was passed in, so we need to return either
       // the 
-      // CIM_RegisteredProfile instance or a CIM_ElementConformstoProfile
+      // CIM_RegisteredProfile instance or a SFCB_ElementConformstoProfile
       // association instance
       if (((strcasecmp(target, "Assocs") == 0)
            || (strcasecmp(target, "AssocNames") == 0))
@@ -1391,9 +1391,12 @@ getAssociators(CMPIAssociationMI * mi,
         }
       } else if (resultClass == NULL
                  ||
+                 (strcasecmp(resultClass, "SFCB_ElementConformsToProfile")
+                  == 0)
+                 ||
                  (strcasecmp(resultClass, "CIM_ElementConformsToProfile")
                   == 0)) {
-        // Return the CIM_ElementConformsToProfile association
+        // Return the SFCB_ElementConformsToProfile association
         makeElementConforms(mi, ctx, rslt, isop, ecpop, rpop, propertyList,
                             target);
       }
@@ -1404,7 +1407,7 @@ getAssociators(CMPIAssociationMI * mi,
             1)) {
       // A CIM_RegisteredProfile was passed in so wee need to return
       // either the
-      // CIM_IndicationService instance or a CIM_ElementConformsToProfile
+      // CIM_IndicationService instance or a SFCB_ElementConformsToProfile
       // association instance
       if (((strcasecmp(target, "Assocs") == 0)
            || (strcasecmp(target, "AssocNames") == 0))
@@ -1415,9 +1418,12 @@ getAssociators(CMPIAssociationMI * mi,
         buildAssoc(ctx, rslt, isop, propertyList, target);
       } else if (resultClass == NULL
                  ||
+                 (strcasecmp(resultClass, "SFCB_ElementConformsToProfile")
+                  == 0)
+                 ||
                  (strcasecmp(resultClass, "CIM_ElementConformsToProfile")
                   == 0)) {
-        // Return the CIM_ElementConformsToProfile association
+        // Return the SFCB_ElementConformsToProfile association
         makeElementConforms(mi, ctx, rslt, isop, ecpop, rpop, propertyList,
                             target);
       }

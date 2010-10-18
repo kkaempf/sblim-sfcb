@@ -1,3 +1,9 @@
+2010-10-18  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* default.reg.in, 10_interop.mof, interopServerProvider.c,
+	  test/xmltest/ECTP_RIN_RC_IS.lines:
+	[ 3086146 ] use SFCB_ElementConformsToProfile instead of CIM_ElementConf
+
 2010-10-14  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* constClass.c:

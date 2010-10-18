@@ -1,5 +1,5 @@
 <IMETHODRESPONSE NAME="ReferenceNames">
-<INSTANCENAME CLASSNAME="CIM_ElementConformsToProfile">
+<INSTANCENAME CLASSNAME="SFCB_ElementConformsToProfile">
 <KEYBINDING NAME="ConformantStandard">
 <KEYVALUE VALUETYPE="string">CIM:SFCB_IP</KEYVALUE>
 !<PROPERTY.REFERENCE NAME="ConformantStandard">
