@@ -1,8 +1,9 @@
 #include "cimRequest.h"
 #include "native.h"
-#include "cimXmlParser.h"
 #define _GNU_SOURCE
 #include <string.h>
+#include <dirent.h>
+
 
 
 /* CimRs resource types */
@@ -48,7 +49,6 @@ typedef struct _cimrsreq {
   char* cn;
   char* meth; /* for class meth or inst meth */
   char* keyList;
-  //CMPIArray *sortedKeyList;
   char** sortedKeys;
   int keyCount;
   /* query stuff */
@@ -256,8 +256,7 @@ printf("MCS in BGIR\n");
   GetInstanceReq *sreq;
   int             sreqSize = sizeof(GetInstanceReq);
   CMPIValue      *valp;
-  int             i,
-                  m;
+  int             i, m;
   RequestHdr     *hdr = reqHdr;
   BinRequestContext *binCtx = hdr->binCtx;
   binCtx->oHdr = calloc(1, sizeof(OperationHdr));
@@ -266,41 +265,19 @@ printf("MCS in BGIR\n");
   binCtx->oHdr->type=OPS_GetInstance;
   binCtx->oHdr->count=2;
   reqHdr->opType = OPS_GetInstance;
-  
 
-/*
-  if (req->properties)
-    sreqSize += req->properties * sizeof(MsgSegment);
-*/
-//sreqSize+=sizeof(MsgSegment);
   sreq = calloc(1, sreqSize);
   sreq->hdr.operation = OPS_GetInstance;
+  sreq->principal = setCharsMsgSegment(hdr->principal);
   //sreq->hdr.count = req->properties + 2;
   sreq->hdr.count = 0 + 2;
 
-  
-/*
-  for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
-  //this call is in CimXmlOps and should be moved
-    valp =       
-        getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
-                           req->instanceName.bindings.keyBindings[i].value,
-                           &req->instanceName.bindings.keyBindings[i].ref,
-                           &val, &type, req->op.nameSpace.data);
-    CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp,
-             type);
-  }
-*/
-  //valp = getKeyValueTypePtr("string","Mike",NULL, &val, &type, rsReq->ns);
-//val.chars="Mike";
-  //char * keyval=strdup("Mike");
+  // Get the keys and add to object path
   char * keyval,*keyname,*saveptr;
   path = TrackedCMPIObjectPath(rsReq->ns, rsReq->cn, NULL);
   keyval=strtok_r(rsReq->keyList,",",&saveptr);
-  //for (i = 0; i < rsReq->sortedKeyList->ft->getSize(rsReq->sortedKeyList, NULL); i++)
   for (i = 0; i < rsReq->keyCount; i++)
   {
-    //keyname=CMGetCharPtr(rsReq->sortedKeyList->ft->getElementAt(rsReq->sortedKeyList, i, NULL).value.string);
     keyname=rsReq->sortedKeys[i];
     printf("MCS key:%d %s\n", i,keyname);
     if (keyval == NULL) {
@@ -311,15 +288,12 @@ printf("MCS in BGIR\n");
       keyval=strtok_r(NULL,",",&saveptr);
     }
   }
-
-
 printf("MCS path: %s\n",CMGetCharPtr(CMObjectPathToString(path,NULL)));
-
   sreq->objectPath = setObjectPathMsgSegment(path);
-  sreq->principal = setCharsMsgSegment(hdr->principal);
 
   binCtx->bHdr = &sreq->hdr;
-  binCtx->bHdr->flags = FL_localOnly;
+  //binCtx->bHdr->flags = FL_localOnly;
+  binCtx->bHdr->flags = CMPI_FLAG_LocalOnly;
   binCtx->rHdr = hdr;
   binCtx->bHdrSize = sreqSize;
   binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
@@ -332,46 +306,35 @@ int getSortedKeys(CimRsReq *rsReq)
 {
   CMPIObjectPath *op;
   CMPIStatus rc;
-  CMPIResult *rslt;
   CMPIArray  *klist;
-  char ** keynames; 
-  keynames=malloc(sizeof(char*)*4); //but need this dynam
+  char ** keyNames; 
+  //int i,keyCount=0;
+  int i;
   
+  // Get a const class object
   CMPIContext *ctx = native_new_CMPIContext(MEM_NOT_TRACKED, NULL);
-  //rc=ClassProviderGetClass(NULL,ctx,rslt,op,NULL);
-  int keyCount=0;
-  printf("MCS cn %s ns %s\n",rsReq->cn,rsReq->ns);
   op = NewCMPIObjectPath(rsReq->ns, rsReq->cn,&rc);
-  printf("MCS op rc:%d %s\n",rc.rc,rc.msg);
-  /*
-  keyCount=CMGetKeyCount(op,&rc);
-  printf("MCS keycount:%u rc:%d %s\n",keyCount,rc.rc,rc.msg);
-  rc=ClassProviderGetClass(NULL,ctx,rslt,op,NULL);
-  printf("MCS gc rc:%d %s\n",rc.rc,rc.msg);
-  */
   CMPIConstClass *cc = getConstClass(rsReq->ns,rsReq->cn);
-  printf("MCS gcc %d\n",cc->refCount);
-  CMPIString * CCCN = cc->ft->getClassName(cc,NULL);
-  printf("MCS gcc %s\n",CCCN->ft->getCharPtr(CCCN,NULL));
+  // Get the key list and count
   klist = cc->ft->getKeyList(cc);
-  //rsReq->sortedKeyList=klist;
   CMPICount kcount = klist->ft->getSize(klist, NULL);
   printf("MCS keycount:%u\n",kcount);
-  //CMPIData keyname=klist->ft->getElementAt(klist,0,NULL);
-  int i;
+
+  // Now build an array 
+  keyNames=malloc(sizeof(char*)*kcount); //Need 1 entry for each key
   rsReq->keyCount=0;
-  for (i = 0; i < klist->ft->getSize(klist, NULL); i++)
+  //for (i = 0; i < klist->ft->getSize(klist, NULL); i++)
+  for (i = 0; i < kcount; i++)
   {
     printf("MCS key:%d %s\n", i,CMGetCharPtr(klist->ft->getElementAt(klist, i, NULL).value.string));
-    //keynames[i]=malloc(sizeof(char) * sizeof(CMGetCharPtr(klist->ft->getElementAt(klist, i, NULL).value.string)));
-    keynames[i]=malloc(sizeof(char) * strlen(CMGetCharPtr(klist->ft->getElementAt(klist, i, NULL).value.string))+2);
-    strcpy(keynames[i],CMGetCharPtr(klist->ft->getElementAt(klist, i, NULL).value.string));
-    printf("MCS akey %s\n",keynames[i]);
+    keyNames[i]=malloc(sizeof(char) * strlen(CMGetCharPtr(klist->ft->getElementAt(klist, i, NULL).value.string))+2);
+    strcpy(keyNames[i],CMGetCharPtr(klist->ft->getElementAt(klist, i, NULL).value.string));
     rsReq->keyCount++;
   }
-//OK Now need to actually sort them before sticking the request
-  rsReq->sortedKeys=keynames;
-  //rsReq->sortedKeyList=klist; // this should go away
+  // sort it 
+  qsort(keyNames, rsReq->keyCount, sizeof(char *),alphasort);
+  // and put it in the request
+  rsReq->sortedKeys=keyNames;
 }
 
 RequestHdr
