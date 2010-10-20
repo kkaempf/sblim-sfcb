@@ -247,14 +247,14 @@ static int parseInstanceFragment(CimRsReq* req, char* fragment) {
 }
 
 static void
-buildRSGetInstanceRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr)
+buildSimpleRSRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr)
 { 
-printf("MCS in BGIR\n");
+printf("MCS in SimpleReq\n");
   CMPIObjectPath *path;
   CMPIValue       val;
   CMPIType        type;
   GetInstanceReq *sreq;
-  int             sreqSize = sizeof(GetInstanceReq);
+  int             sreqSize;
   CMPIValue      *valp;
   int             i, m;
   RequestHdr     *hdr = reqHdr;
@@ -262,12 +262,24 @@ printf("MCS in BGIR\n");
   binCtx->oHdr = calloc(1, sizeof(OperationHdr));
   binCtx->oHdr->nameSpace=setCharsMsgSegment(rsReq->ns);
   binCtx->oHdr->className=setCharsMsgSegment(rsReq->cn);
-  binCtx->oHdr->type=OPS_GetInstance;
   binCtx->oHdr->count=2;
-  reqHdr->opType = OPS_GetInstance;
+  if (strcmp(ctx->verb,"GET") == 0) {
+printf("MCS get\n");
+    reqHdr->opType = OPS_GetInstance;
+    binCtx->oHdr->type=OPS_GetInstance;
+    sreqSize = sizeof(GetInstanceReq);
+    sreq = calloc(1, sreqSize);
+    sreq->hdr.operation = OPS_GetInstance;
+  } else if (strcmp(ctx->verb,"DELETE") == 0){
+printf("MCS del\n");
+    reqHdr->opType = OPS_DeleteInstance;
+    binCtx->oHdr->type=OPS_DeleteInstance;
+    sreqSize = sizeof(DeleteInstanceReq);
+    sreq = calloc(1, sreqSize);
+    sreq->hdr.operation = OPS_DeleteInstance;
+  }
 
-  sreq = calloc(1, sreqSize);
-  sreq->hdr.operation = OPS_GetInstance;
+
   sreq->principal = setCharsMsgSegment(hdr->principal);
   //sreq->hdr.count = req->properties + 2;
   sreq->hdr.count = 0 + 2;
@@ -302,6 +314,14 @@ printf("MCS path: %s\n",CMGetCharPtr(CMObjectPathToString(path,NULL)));
 printf("MCS done\n");
 }
 
+static int
+stringsort(const void *p1, const void *p2)
+{
+    // Have to make the pointers line up
+   return strcmp(* (char * const *) p1, * (char * const *) p2);
+}
+
+
 int getSortedKeys(CimRsReq *rsReq)
 {
   CMPIObjectPath *op;
@@ -326,13 +346,22 @@ int getSortedKeys(CimRsReq *rsReq)
   //for (i = 0; i < klist->ft->getSize(klist, NULL); i++)
   for (i = 0; i < kcount; i++)
   {
-    printf("MCS key:%d %s\n", i,CMGetCharPtr(klist->ft->getElementAt(klist, i, NULL).value.string));
+    //printf("MCS key:%d %s\n", i,CMGetCharPtr(klist->ft->getElementAt(klist, i, NULL).value.string));
     keyNames[i]=malloc(sizeof(char) * strlen(CMGetCharPtr(klist->ft->getElementAt(klist, i, NULL).value.string))+2);
     strcpy(keyNames[i],CMGetCharPtr(klist->ft->getElementAt(klist, i, NULL).value.string));
     rsReq->keyCount++;
   }
+  printf("MCS keys:");
+  for (i = 0; i < rsReq->keyCount; i++)
+    printf("%s %x,",keyNames[i],keyNames[i]);
+  printf("\n");
   // sort it 
-  qsort(keyNames, rsReq->keyCount, sizeof(char *),alphasort);
+  qsort(keyNames, rsReq->keyCount, sizeof(char *),stringsort);
+  printf("MCS sortedkeys:");
+  for (i = 0; i < rsReq->keyCount; i++)
+    //printf("%s,",keyNames[i]);
+    printf("%s %x,",keyNames[i],keyNames[i]);
+  printf("\n");
   // and put it in the request
   rsReq->sortedKeys=keyNames;
 }
@@ -372,11 +401,12 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
   reqHdr.binCtx = calloc(1, sizeof(BinRequestContext));
   reqHdr.principal = ctx->principal;
   reqHdr.sessionId = ctx->sessionId;
-  if (strcmp(ctx->verb,"GET") == 0) {
-    if (req.scope == SCOPE_INSTANCE) {
-      fprintf(stderr,"MCS is a gi\n");
+  if (req.scope == SCOPE_INSTANCE) {
+    if ( (strcmp(ctx->verb,"GET") == 0) ||
+        (strcmp(ctx->verb,"DELETE") == 0) ) {
+      fprintf(stderr,"MCS is simplereq\n");
       int rrc=getSortedKeys(&req);
-      buildRSGetInstanceRequest(ctx,&req,&reqHdr);
+      buildSimpleRSRequest(ctx,&req,&reqHdr);
       fprintf(stderr,"MCS gotreq %s\n",reqHdr.className);
     }
   }
