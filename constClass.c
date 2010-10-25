@@ -326,8 +326,12 @@ getPropQualifier(CMPIConstClass * cc, const char *cp, const char *cpq,
       rv.type = CMPI_boolean;
       rv.state = CMPI_goodValue;
       rv.value.boolean = 1;
+      if (rc)
+        CMSetStatus(rc, CMPI_RC_OK);
       return rv;
     } else {
+      if (rc) 
+        CMSetStatus(rc, CMPI_RC_ERR_NOT_FOUND);
       return rv_notFound;
     }
   }
@@ -338,8 +342,12 @@ getPropQualifier(CMPIConstClass * cc, const char *cp, const char *cpq,
       rv.type = CMPI_boolean;
       rv.state = CMPI_goodValue;
       rv.value.boolean = 1;
+      if (rc)
+        CMSetStatus(rc, CMPI_RC_OK);
       return rv;
     } else {
+      if (rc) 
+        CMSetStatus(rc, CMPI_RC_ERR_NOT_FOUND);
       return rv_notFound;
     }
   }

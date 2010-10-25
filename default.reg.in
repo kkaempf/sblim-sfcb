@@ -119,7 +119,7 @@
    type: instance association
    namespace: root/interop
 #
-[CIM_ElementConformsToProfile]
+[SFCB_ElementConformsToProfile]
    provider: ServerProvider
    location: sfcInteropServerProvider
    type: instance association

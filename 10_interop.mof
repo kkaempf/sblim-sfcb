@@ -70,7 +70,7 @@ class DMY_HostedService : CIM_HostedService
 {
 };
 
-class DMY_ElementConformsToProfile : CIM_ElementConformsToProfile
+class SFCB_ElementConformsToProfile : CIM_ElementConformsToProfile
 {
 };
 
