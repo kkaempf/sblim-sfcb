@@ -383,6 +383,14 @@ libTestIndicationProvider_la_LIBADD = -lsfcBrokerCore
 libTestIndicationProvider_la_DEPENDENCIES=libsfcBrokerCore.la
 endif
 
+# if we enable CIMrs requests, then compile in the CIMrs
+# request processor
+if CIMRS
+CIMRS_PROCESSOR = cimRsRequest.c
+else
+CIMRS_PROCESSOR = 
+endif
+
 #
 # if enable_local_connect_no_indication is not turned on then
 # we will build libsfcCimXmlCodec
@@ -391,7 +399,8 @@ if !LOCAL_CONNECT_NO_INDICATION
 libsfcCimXmlCodec_la_SOURCES = \
    cimXmlOps.y \
    cimXmlParserProcessed.c \
-   cimRequest.c 
+   cimRequest.c \
+   $(CIMRS_PROCESSOR)
 libsfcCimXmlCodec_la_LIBADD=-lsfcBrokerCore 
 libsfcCimXmlCodec_la_DEPENDENCIES=libsfcBrokerCore.la
 endif

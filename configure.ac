@@ -337,6 +337,7 @@ if test "$handler_CIMXML" == "yes"; then
    AC_DEFINE(HANDLER_CIMXML,,["CIMxml handler enabled"])
 fi
 if test "$handler_CIMRS" == "yes"; then
+   AM_CONDITIONAL(CIMRS,[test "$handler_CIMRS" == "yes"])
    AC_DEFINE(HANDLER_CIMRS,,["CIMrs handler enabled"])
 fi
 # End of parser config

@@ -26,6 +26,9 @@
 #include "msgqueue.h"
 #include "providerMgr.h"
 
+#define PARSERC_OK 0
+#define PARSERC_ERR 1
+ 
 struct commHndl;
 struct chunkFunctions;
 
@@ -58,7 +61,29 @@ typedef struct cimRequestContext {
   struct chunkFunctions *chunkFncs;
   char           *className;
   int             operation;
+  char           *verb;
+  char           *path;
 } CimRequestContext;
+
+typedef struct requestHdr {
+  void           *buffer;
+  int             rc;
+  int             opType;
+  int             simple;
+  char           *id;
+  char           *iMethod;
+  int             methodCall;
+  int             chunkedMode;
+  void           *cimRequest;
+  unsigned long   cimRequestLength;
+  char           *errMsg;
+  char           *className;
+  BinRequestContext  *binCtx;
+/* These don't really belong here, but it's *
+ * an easy way to get them to the parser.   */
+  char           *principal;
+  unsigned int    sessionId;
+} RequestHdr;
 
 extern RespSegments handleCimRequest(CimRequestContext * ctx);
 extern int      cleanupCimXmlRequest(RespSegments * rs);

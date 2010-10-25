@@ -77,26 +77,6 @@ typedef struct xmlAttr {
   char           *attr;
 } XmlAttr;
 
-typedef struct requestHdr {
-  void           *buffer;
-  int             rc;
-  int             opType;
-  int             simple;
-  char           *id;
-  char           *iMethod;
-  int             methodCall;
-  int             chunkedMode;
-  void           *cimRequest;
-  unsigned long   cimRequestLength;
-  char           *errMsg;
-  char           *className;
-  BinRequestContext  *binCtx;
-/* These don't really belong here, but it's *
- * an easy way to get them to the parser.   */
-  char           *principal;
-  unsigned int    sessionId;
-} RequestHdr;
-
 extern RequestHdr scanCimXmlRequest(CimRequestContext *ctx, char *xmlData, int *rc);
 extern void     freeCimXmlRequest(RequestHdr hdr);
 
