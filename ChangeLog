@@ -1,3 +1,8 @@
+2010-10-26 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	* cimRsRequest.c, cimRsRequest.h, cimRequest.c
+	[3095225] Implement Simple REST Requests
+		GetInstance and DeleteInstance functional
+
 2010-10-18  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* default.reg.in, 10_interop.mof, interopServerProvider.c,
