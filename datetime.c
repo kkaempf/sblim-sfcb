@@ -147,6 +147,10 @@ chars2bin(const char *string, CMPIStatus *rc)
     str[4] = 0;
     tmp.tm_year = atoi(str) - 1900;
 
+    if(mktime(&tmp) < 0) {
+       CMSetStatus(rc, CMPI_RC_ERR_INVALID_PARAMETER);
+    }
+
     msecs = msecs + (secs * 1000000ULL);
     msecs += (CMPIUint64) mktime(&tmp) * 1000000ULL;
     // Add in the offset
@@ -177,6 +181,8 @@ bin2chars(CMPIUint64 msecs, CMPIBoolean interval, CMPIStatus *rc,
                     mins,
                     hrs,
                     days;
+    /* ddddddddhhmmss.mmmmmm:000, at most 8 characters for day */
+    const unsigned long long day_limit = 99999999;
     seconds = msecs / 1000000ULL;
     useconds = msecs % 1000000ULL;
 
@@ -184,7 +190,8 @@ bin2chars(CMPIUint64 msecs, CMPIBoolean interval, CMPIStatus *rc,
     seconds %= 60ULL;
     hrs = mins / 60ULL;
     mins %= 60ULL;
-    days = hrs / 24ULL;
+    /* Modify to avoid datetime string overflow when the time duration overflow */
+    days = ((hrs / 24ULL) > day_limit) ? day_limit : (hrs / 24ULL);
     hrs %= 24ULL;
 
     sprintf(str_time, "%8.8llu%2.2llu%2.2llu%2.2llu.%6.6llu:000",

@@ -1,10 +1,27 @@
+/*
+ * cimRsRequest.c
+ *
+ * © Copyright IBM Corp. 2010
+ *
+ * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
+ * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
+ * CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
+ *
+ * You can obtain a current copy of the Eclipse Public License from
+ * http://www.opensource.org/licenses/eclipse-1.0.php
+ *
+ * Author:        Sean Swehla <smswehla@linux.vnet.ibm.com>
+ *
+ * Description:
+ *
+ * Functions for parsing RESTful CIM queries.
+ *
+ */
 #include "cimRequest.h"
 #include "native.h"
 #define _GNU_SOURCE
 #include <string.h>
 #include <dirent.h>
-
-
 
 /* CimRs resource types */
 #define RES_NS                    1
@@ -353,7 +370,6 @@ RequestHdr
 scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
 {
   fprintf(stderr, "path is '%s'\nverb is '%s'\n", ctx->path, ctx->verb);
-  //RequestHdr *reqHdr = calloc(1,sizeof(*reqHdr);
   RequestHdr reqHdr = { NULL, 0, 0, 0, 0, 0, 0, 0,
                         NULL, 0, 0, 0, NULL, 0, 0,
                       };
@@ -364,7 +380,6 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
     return reqHdr;
   }
   *rc=0;
-      
 
 /*
   ctx.path = path;
