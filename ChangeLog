@@ -1,3 +1,8 @@
+2010-10-28  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* interopProvider.c, indCIMXMLHandler.c:
+	[ 3095884 ] Indication classes missing SystemName
+
 2010-10-26 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* cimRsRequest.c, cimRsRequest.h, cimRequest.c
 	[3095225] Implement Simple REST Requests
