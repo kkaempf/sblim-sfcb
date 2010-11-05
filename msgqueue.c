@@ -29,8 +29,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <stddef.h>
-#include "control.h"
 #include <grp.h>
+#include "control.h"
 
 extern unsigned long exFlags;
 
