@@ -126,7 +126,7 @@ EOF
                 fi
               else
                 # Check for required lines
-                if ! grep --q '$line' $_TESTRESULT  ; then
+                if ! grep --q "$line" $_TESTRESULT  ; then
                     if [ $passed -eq 0 ] ; then
                         echo "FAILED required line not found"
                         passed=1
