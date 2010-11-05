@@ -438,6 +438,7 @@ void getSortedKeys(CimRsReq *rsReq)
   qsort(keyNames, rsReq->keyCount, sizeof(char *),stringsort);
   // and put it in the request
   rsReq->sortedKeys=keyNames;
+  return 0;
 }
 
 RequestHdr
