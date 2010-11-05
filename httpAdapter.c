@@ -1086,7 +1086,7 @@ doHttpRequest(CommHndl conn_fd)
   ctx.verb = inBuf.httpHdr;
   ctx.path = inBuf.path;
 
-  if (msgs[1].length > 0) {
+  if (msgs[1].length >= 0) {
     ctx.chunkFncs = &httpChunkFunctions;
     ctx.sessionId = sessionId;
 

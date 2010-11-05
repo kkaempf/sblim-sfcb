@@ -1,0 +1,5 @@
+<IRETURNVALUE>
+<INSTANCE CLASSNAME="TEST_Person">
+<PROPERTY NAME="name" TYPE="string">
+<VALUE>Mike</VALUE>
+Mike
