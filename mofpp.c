@@ -119,6 +119,7 @@ processFile(char *fn, FILE * in, FILE * out)
         }
       }
 
+      /* strip comments, but should first check if it's in the middle of a quoted string */
       while ((s = strstr(s, "/"))) {
         if (*(s + 1) == '/') {
           if ((e = strstr(s + 2, "\r\n"))) {
