@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.92 2010/07/14 19:09:37 buccella Exp $
+ * $Id: providerDrv.c,v 1.93 2010/11/08 19:54:45 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -94,6 +94,10 @@ char * opsName[];
 #define TIMING_START(req,pInfo)
 #define TIMING_STOP(req,pInfo)
 
+#endif
+
+#ifndef PROVIDERLOAD_DLFLAG
+#define PROVIDERLOAD_DLFLAG (RTLD_NOW | RTLD_GLOBAL)
 #endif
 
 extern CMPIBroker *Broker;
@@ -2562,9 +2566,9 @@ static int doLoadProvider(ProviderInfo *info, char *dlName, int dlName_length)
    while (dir) {
      libraryName(dir, (char *) info->location, fullname, fullname_max_length);
      if (stat(fullname,&stbuf) == 0) {
-       info->library = dlopen(fullname, RTLD_NOW | RTLD_GLOBAL);
+       info->library = dlopen(fullname, PROVIDERLOAD_DLFLAG);
        if (info->library == NULL) {
-	 mlogf(M_ERROR,M_SHOW,"*** dlopen error: %s\n",dlerror());
+         mlogf(M_ERROR,M_SHOW,"*** dlopen: %s error: %s\n", fullname, dlerror());
        } else {
 	 _SFCB_TRACE(1, ("--- Loaded provider library %s for %s-%d",
 			 fullname,
