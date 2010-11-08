@@ -1,3 +1,8 @@
+2010-11-08  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* providerDrv.c:
+	[ 3101155 ] Failed to load provider libraries due to symbol conflicts
+
 2010-11-04 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* cimrstest.sh
 	[3095225] Implement Simple REST Requests
