@@ -1,5 +1,8 @@
-2010-11-08  Chris Buccella  <buccella@linux.vnet.ibm.com>
+2010-11-08 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	* Makefile.am
+	[3104761] cimRsRequest.h missing from make-dist tarball
 
+2010-11-08  Chris Buccella  <buccella@linux.vnet.ibm.com>
 	* providerDrv.c:
 	[ 3101155 ] Failed to load provider libraries due to symbol conflicts
 

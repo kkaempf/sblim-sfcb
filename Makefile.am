@@ -444,7 +444,7 @@ classSchema2c_DEPENDENCIES=libsfcBrokerCore.la
 noinst_HEADERS=array.h $(SLP_INC) httpComm.h control.h    providerMgr.h \
 	constClass.h   msgqueue.h     providerRegister.h \
 	cimXmlParser.h    native.h       support.h cimXmlGen.h \
-	cimRequest.h genericlist.h  objectImpl.h   trace.h \
+	cimRequest.h cimRsRequest.h genericlist.h  objectImpl.h   trace.h \
 	sfcUtil/hashtable.h      sfcUtil/utilft.h mlog.h \
 	cmpiftx.h cmpimacsx.h \
 	fileRepository.h internalProvider.h \
