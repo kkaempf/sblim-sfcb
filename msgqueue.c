@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <stddef.h>
 #include "control.h"
+#include <grp.h>
 
 extern unsigned long exFlags;
 
@@ -755,7 +756,8 @@ localConnectServer()
   unsigned int    cl,
                   notDone = 1;
   char           *path;
-
+  char           *gperm;
+ 
   struct _msg {
     unsigned int    size;
     char            oper;
@@ -785,6 +787,30 @@ localConnectServer()
       0) {
     perror("bind error");
     return;
+  }
+
+  /* change perms for local socket if necessary */
+  getControlChars("socketPathGroupPerm", &gperm);
+  if (NULL != gperm) {
+    struct group *objgperm;
+    if (NULL == (objgperm = getgrnam(gperm))) {
+      mlogf(M_INFO,M_SHOW,"--- localConnectServer getgrnam failed: %s\n", strerror(errno));
+    } else {
+      /* change the socket group ownership as requested */
+      if (chown(path, getuid(), objgperm->gr_gid)) {
+	mlogf(M_INFO,M_SHOW,"--- localConnectServer chown failed: %s\n", strerror(errno));
+      } else {
+	struct stat sobj;
+	/* change the socket permission to allow group as requested */
+	if (stat(path, &sobj)) {
+	  mlogf(M_INFO,M_SHOW,"--- localConnectServer stat failed: %s\n", strerror(errno));
+	} else {
+	  if (chmod(path, (sobj.st_mode | S_IWGRP))) {
+	    mlogf(M_INFO,M_SHOW,"--- localConnectServer chmod failed: %s\n", strerror(errno));
+	  }
+	}
+      }
+    }
   }
 
   listen(ssocket, 1);
