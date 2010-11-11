@@ -1,3 +1,9 @@
+2010-11-11  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimcClientSfcbLocal.c, configure.ac, enumeration.c, providerMgr.c,
+	  providerMgr.h:
+	[ 3107553 ] Remove Large Volume Support
+
 2010-11-10  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* cimcClientSfcbLocal.c:

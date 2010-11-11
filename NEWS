@@ -29,6 +29,7 @@ Bugs fixed:
 - 3086146 use SFCB_ElementConformsToProfile instead of CIM_ElementConf
 - 3095225 Implement Simple REST Requests
 - 3104761 cimRsRequest.h missing from make-dist tarball
+- 3107553 Remove Large Volume Support
 
 Changes in 1.3.10
 =================

@@ -144,10 +144,6 @@ typedef struct binRequestContext {
   unsigned long   rCount;
   int             rc;
   MsgXctl        *ctlXdata;
-#ifdef LARGE_VOL_SUPPORT
-  int             largeVolLocal;
-  CMPIEnumeration *enm;
-#endif
 } BinRequestContext;
 
 #define XML_asObj 1
