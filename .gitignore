@@ -87,3 +87,5 @@ core
 core.*
 *.gcov
 coverage/*
+ps_mem.py
+MANIFEST
