@@ -89,3 +89,7 @@ core.*
 coverage/*
 ps_mem.py
 MANIFEST
+compile
+*.rej
+mofc/
+\#*\#
