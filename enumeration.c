@@ -21,7 +21,14 @@
  */
 
 #include "native.h"
-#include "sfcbenum.h"
+
+struct native_enum {
+	CMPIEnumeration enumeration;
+	int             refCount;
+	int             mem_state;
+	CMPICount       current;
+	CMPIArray      *data;
+};
 
 extern void     adjustArrayElementRefCount(CMPIArray *array, int n);
 static struct native_enum *__new_enumeration(int, CMPIArray *,

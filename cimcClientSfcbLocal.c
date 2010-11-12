@@ -103,39 +103,6 @@ set_debug()
 }
 #endif
 
-#ifdef LARGE_VOL_SUPPORT
-/*
- * 
- */
-
-extern int      getEnumState(CMPIEnumeration *);
-extern void     setEnumState(CMPIEnumeration *, int);
-#include "sfcbenum.h"
-
-typedef struct thrdInfo {
-  CMPIEnumeration *enm;
-  Client         *mb;
-  CMPIObjectPath *cop;
-  CMPIFlags       flags;
-  char          **properties;
-  CMPIStatus     *rc;
-} thrdInfo;
-
-static CMPIEnumeration *enumInstances(Client *, CMPIObjectPath *,
-                                      CMPIFlags, char **, CMPIStatus *);
-void           *enumInstancesThrd(thrdInfo *);
-static CMPIEnumeration *enumInstanceNames(Client *, CMPIObjectPath *,
-                                          CMPIStatus *);
-void           *enumInstanceNamesThrd(thrdInfo *);
-static CMPIEnumeration *enumClassNames(Client *, CMPIObjectPath *,
-                                       CMPIFlags, CMPIStatus *);
-void           *enumClassNamesThrd(thrdInfo *);
-static CMPIEnumeration *enumClasses(Client *, CMPIObjectPath *, CMPIFlags,
-                                    CMPIStatus *);
-void           *enumClassesThrd(thrdInfo *);
-
-#endif
-
 typedef const struct _ClientConnectionFT {
   CMPIStatus      (*release) (ClientConnection *);
 } ClientConnectionFT;
@@ -343,7 +310,6 @@ closeSockets(BinRequestContext * binCtx)
   }
 }
 
-#ifndef LARGE_VOL_SUPPORT
 static CMPIEnumeration *
 enumInstanceNames(Client * mb, CMPIObjectPath * cop, CMPIStatus *rc)
 {
@@ -498,7 +464,6 @@ enumInstances(Client * mb,
 
 }
 
-#endif
 /*
  * --------------------------------------------------------------------------
  */
@@ -1689,7 +1654,6 @@ getClass(Client * mb,
   _SFCB_RETURN(NULL);
 }
 
-#ifndef LARGE_VOL_SUPPORT
 static CMPIEnumeration *
 enumClassNames(Client * mb,
                CMPIObjectPath * cop, CMPIFlags flags, CMPIStatus *rc)
@@ -1829,8 +1793,6 @@ enumClasses(Client * mb,
   _SFCB_RETURN(NULL);
 
 }
-
-#endif
 
 static ClientFT clientFt = {
   1,                            // NATIVE_FT_VERSION,

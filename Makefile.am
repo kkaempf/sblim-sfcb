@@ -451,7 +451,7 @@ noinst_HEADERS=array.h $(SLP_INC) httpComm.h control.h    providerMgr.h \
 	selectexp.h queryOperation.h \
 	sfcVersion.h mrwlock.h sqlStatement.h avltree.h \
         cimcClientSfcbLocal.h $(QUALREP_HEADER) cmpidtx.h classSchemaMem.h \
-        objectpath.h instance.h $(SLP_HEADER) sfcbenum.h classProviderCommon.h
+        objectpath.h instance.h $(SLP_HEADER) classProviderCommon.h
 
 man_MANS=$(MANFILES)
 
