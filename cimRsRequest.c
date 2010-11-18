@@ -263,79 +263,43 @@ static int parseInstanceFragment(CimRsReq* req, char* fragment) {
 }
 
 static void
-buildGetClassRSRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr)
-{ 
-  GetClassReq *sreq;
-  CMPIObjectPath *path;
-  CMPIValue       val;
-  CMPIType        type;
-  int             sreqSize;
-  CMPIValue      *valp;
-  int             i, m;
-  RequestHdr     *hdr = reqHdr;
-
-  BinRequestContext *binCtx = hdr->binCtx;
-  binCtx->oHdr = calloc(1, sizeof(OperationHdr));
-  binCtx->oHdr->nameSpace=setCharsMsgSegment(rsReq->ns);
-  binCtx->oHdr->className=setCharsMsgSegment(rsReq->cn);
-  binCtx->oHdr->count=2;
-
-  if (strcmp(ctx->verb,"GET") == 0) {
-    sreqSize = sizeof(GetClassReq);
-    sreq = calloc(1, sreqSize);
-    sreq->hdr.operation = OPS_GetClass;
-    reqHdr->opType = OPS_GetClass;
-    binCtx->oHdr->type=OPS_GetClass;
-  } else if (strcmp(ctx->verb,"DELETE") == 0){
-    sreqSize = sizeof(DeleteInstanceReq);
-    sreq = calloc(1, sreqSize);
-    sreq->hdr.operation = OPS_DeleteInstance;
-    reqHdr->opType = OPS_DeleteInstance;
-    binCtx->oHdr->type=OPS_DeleteInstance;
-  }
-  sreq->principal = setCharsMsgSegment(hdr->principal);
-  //sreq->hdr.count = req->properties + 2;
-  sreq->hdr.count = 0 + 2;
-  path = TrackedCMPIObjectPath(rsReq->ns, rsReq->cn, NULL);
-  sreq->objectPath = setObjectPathMsgSegment(path);
-  sreq->properties[0] = setCharsMsgSegment(NULL);
-  binCtx->bHdr = &sreq->hdr;
-  //binCtx->bHdr->flags = FL_localOnly;
-  binCtx->bHdr->flags = CMPI_FLAG_LocalOnly;
-  binCtx->rHdr = hdr;
-  binCtx->bHdrSize = sreqSize;
-  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
-  binCtx->pAs = NULL;
-}
-
-static void
 buildSimpleRSRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr)
 { 
   CMPIObjectPath *path;
-  CMPIValue       val;
-  CMPIType        type;
   GetInstanceReq *sreq;
   int             sreqSize;
-  CMPIValue      *valp;
-  int             i, m;
+  int             i;
   RequestHdr     *hdr = reqHdr;
   BinRequestContext *binCtx = hdr->binCtx;
   binCtx->oHdr = calloc(1, sizeof(OperationHdr));
   binCtx->oHdr->nameSpace=setCharsMsgSegment(rsReq->ns);
   binCtx->oHdr->className=setCharsMsgSegment(rsReq->cn);
   binCtx->oHdr->count=2;
-  if (strcmp(ctx->verb,"GET") == 0) {
-    sreqSize = sizeof(GetInstanceReq);
-    sreq = calloc(1, sreqSize);
-    sreq->hdr.operation = OPS_GetInstance;
-    reqHdr->opType = OPS_GetInstance;
-    binCtx->oHdr->type=OPS_GetInstance;
-  } else if (strcmp(ctx->verb,"DELETE") == 0){
-    sreqSize = sizeof(DeleteInstanceReq);
-    sreq = calloc(1, sreqSize);
-    sreq->hdr.operation = OPS_DeleteInstance;
-    reqHdr->opType = OPS_DeleteInstance;
-    binCtx->oHdr->type=OPS_DeleteInstance;
+  if (rsReq->scope == SCOPE_INSTANCE )
+  {
+    if (strcmp(ctx->verb,"GET") == 0)
+    {
+      sreqSize = sizeof(GetInstanceReq);
+      sreq = calloc(1, sreqSize);
+      sreq->hdr.operation = OPS_GetInstance;
+      reqHdr->opType = OPS_GetInstance;
+      binCtx->oHdr->type=OPS_GetInstance;
+    } else if (strcmp(ctx->verb,"DELETE") == 0){
+      sreqSize = sizeof(DeleteInstanceReq);
+      sreq = calloc(1, sreqSize);
+      sreq->hdr.operation = OPS_DeleteInstance;
+      reqHdr->opType = OPS_DeleteInstance;
+      binCtx->oHdr->type=OPS_DeleteInstance;
+    }
+  } else if (rsReq->scope == SCOPE_CLASS ) {
+    if (strcmp(ctx->verb,"GET") == 0)
+    {
+      sreqSize = sizeof(GetClassReq);
+      sreq = calloc(1, sreqSize);
+      sreq->hdr.operation = OPS_GetClass;
+      reqHdr->opType = OPS_GetClass;
+      binCtx->oHdr->type=OPS_GetClass;
+    }
   }
 
 
@@ -344,18 +308,20 @@ buildSimpleRSRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr
   sreq->hdr.count = 0 + 2;
 
   // Get the keys and add to object path
-  char * keyval,*keyname,*saveptr;
   path = TrackedCMPIObjectPath(rsReq->ns, rsReq->cn, NULL);
-  keyval=strtok_r(rsReq->keyList,",",&saveptr);
-  for (i = 0; i < rsReq->keyCount; i++)
-  {
-    keyname=rsReq->sortedKeys[i];
-    if (keyval == NULL) {
-      printf("Missing key value for key %s\n",keyname);
-      // Need to abort or something, and should be an mlog call
-    } else {
-      CMAddKey(path, keyname, keyval, CMPI_chars);
-      keyval=strtok_r(NULL,",",&saveptr);
+  if ( rsReq->scope == SCOPE_INSTANCE) {
+    char * keyval,*keyname,*saveptr;
+    keyval=strtok_r(rsReq->keyList,",",&saveptr);
+    for (i = 0; i < rsReq->keyCount; i++)
+    {
+      keyname=rsReq->sortedKeys[i];
+      if (keyval == NULL) {
+        printf("Missing key value for key %s\n",keyname);
+        // Need to abort or something, and should be an mlog call
+      } else {
+        CMAddKey(path, keyname, keyval, CMPI_chars);
+        keyval=strtok_r(NULL,",",&saveptr);
+      }
     }
   }
   sreq->objectPath = setObjectPathMsgSegment(path);
@@ -386,9 +352,7 @@ int getSortedKeys(CimRsReq *rsReq)
   char ** keyNames; 
   //int i,keyCount=0;
   int i;
-  
   // Get a const class object
-  CMPIContext *ctx = native_new_CMPIContext(MEM_NOT_TRACKED, NULL);
   op = NewCMPIObjectPath(rsReq->ns, rsReq->cn,&rc);
   CMPIConstClass *cc = getConstClass(rsReq->ns,rsReq->cn);
   // Get the key list and count
@@ -444,16 +408,12 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
   reqHdr.binCtx = calloc(1, sizeof(BinRequestContext));
   reqHdr.principal = ctx->principal;
   reqHdr.sessionId = ctx->sessionId;
-  if (req.scope == SCOPE_INSTANCE) {
+  if ((req.scope == SCOPE_INSTANCE) ||
+    (req.scope == SCOPE_CLASS) ) {
     if ( (strcmp(ctx->verb,"GET") == 0) ||
         (strcmp(ctx->verb,"DELETE") == 0) ) {
-      int rrc=getSortedKeys(&req);
+      getSortedKeys(&req);
       buildSimpleRSRequest(ctx,&req,&reqHdr);
-    }
-  } else if (req.scope == SCOPE_CLASS ) {
-    if ( (strcmp(ctx->verb,"GET") == 0) ||
-        (strcmp(ctx->verb,"DELETE") == 0) ) {
-      buildGetClassRSRequest(ctx,&req,&reqHdr);
     }
   }
 
