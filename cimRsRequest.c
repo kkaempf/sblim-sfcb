@@ -182,6 +182,7 @@ int parseCimRsPath(char* p, CimRsReq* req) {
   }
   
   tmp = strpbrk(++cn, "/");
+  req->cn = cn;
 
   if (tmp == NULL) {
     /* /cimrs/namespaces/{ns}/classes/{cn} */
@@ -191,8 +192,6 @@ int parseCimRsPath(char* p, CimRsReq* req) {
 
   tmp = strpbrk(cn, "/");
   *tmp = 0;
-
-  req->cn = cn;
 
   tmp++;
 
@@ -261,6 +260,52 @@ static int parseInstanceFragment(CimRsReq* req, char* fragment) {
   }
 
   return -1;
+}
+
+static void
+buildGetClassRSRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr)
+{ 
+  GetClassReq *sreq;
+  CMPIObjectPath *path;
+  CMPIValue       val;
+  CMPIType        type;
+  int             sreqSize;
+  CMPIValue      *valp;
+  int             i, m;
+  RequestHdr     *hdr = reqHdr;
+
+  BinRequestContext *binCtx = hdr->binCtx;
+  binCtx->oHdr = calloc(1, sizeof(OperationHdr));
+  binCtx->oHdr->nameSpace=setCharsMsgSegment(rsReq->ns);
+  binCtx->oHdr->className=setCharsMsgSegment(rsReq->cn);
+  binCtx->oHdr->count=2;
+
+  if (strcmp(ctx->verb,"GET") == 0) {
+    sreqSize = sizeof(GetClassReq);
+    sreq = calloc(1, sreqSize);
+    sreq->hdr.operation = OPS_GetClass;
+    reqHdr->opType = OPS_GetClass;
+    binCtx->oHdr->type=OPS_GetClass;
+  } else if (strcmp(ctx->verb,"DELETE") == 0){
+    sreqSize = sizeof(DeleteInstanceReq);
+    sreq = calloc(1, sreqSize);
+    sreq->hdr.operation = OPS_DeleteInstance;
+    reqHdr->opType = OPS_DeleteInstance;
+    binCtx->oHdr->type=OPS_DeleteInstance;
+  }
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  //sreq->hdr.count = req->properties + 2;
+  sreq->hdr.count = 0 + 2;
+  path = TrackedCMPIObjectPath(rsReq->ns, rsReq->cn, NULL);
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->properties[0] = setCharsMsgSegment(NULL);
+  binCtx->bHdr = &sreq->hdr;
+  //binCtx->bHdr->flags = FL_localOnly;
+  binCtx->bHdr->flags = CMPI_FLAG_LocalOnly;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
 }
 
 static void
@@ -404,6 +449,11 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
         (strcmp(ctx->verb,"DELETE") == 0) ) {
       int rrc=getSortedKeys(&req);
       buildSimpleRSRequest(ctx,&req,&reqHdr);
+    }
+  } else if (req.scope == SCOPE_CLASS ) {
+    if ( (strcmp(ctx->verb,"GET") == 0) ||
+        (strcmp(ctx->verb,"DELETE") == 0) ) {
+      buildGetClassRSRequest(ctx,&req,&reqHdr);
     }
   }
 
