@@ -83,11 +83,13 @@ processFile(char *fn, FILE * in, FILE * out)
 {
   char           *s,
                  *e,
+                 *es, 
                   rec[10000],
                  *ifn = NULL;
   FILE           *incFile;
   int             comment = 0;
-  int             nl = 0;
+  int             nl = 0; /* line number */
+  int             qs = 0; /* flag for being withing a quoted string */
 
   while (fgets(rec, sizeof(rec), in)) {
     nl++;
@@ -102,7 +104,7 @@ processFile(char *fn, FILE * in, FILE * out)
     } else {
       s = rec;
 
-      if (comment == 1) {
+      if (comment == 1) { /* check for single-line comment */
         if ((e = strstr(s, "\r\n"))) {
           strcpy(s, e + 2);
           comment = 0;
@@ -110,7 +112,7 @@ processFile(char *fn, FILE * in, FILE * out)
           strcpy(s, e + 1);
           comment = 0;
         }
-      } else if (comment == 2) {
+      } else if (comment == 2) { /* check for block comment */
         if ((e = strstr(s, "*/"))) {
           strcpy(s, e + 2);
           comment = 0;
@@ -119,13 +121,28 @@ processFile(char *fn, FILE * in, FILE * out)
         }
       }
 
-      /* strip comments, but should first check if it's in the middle of a quoted string */
-      while ((s = strstr(s, "/"))) {
+      /* skip whitespace */
+      while ((*s == ' ') || (*s == '\t')) {
+	s++;
+      }
+      es = s;
+      qs = 0;
+      /* is this line a quoted string? */
+      if (*s == '"') {
+	qs = 1;
+	/* find end of the string */
+	es++;
+	while ((s = strstr(es, "\""))) {
+	  es = s+1; /* end of quoted string */
+	}
+      }
+
+      while ((s = strstr(es, "/"))) {
         if (*(s + 1) == '/') {
           if ((e = strstr(s + 2, "\r\n"))) {
             strcpy(s, e + 2);
           } else if ((e = strstr(s + 2, "\n"))) {
-            strcpy(s, e + 1);
+            strcpy(s, (e+qs));
           } else {
             *s = 0;
             comment = 1;
