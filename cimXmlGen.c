@@ -578,12 +578,15 @@ nsPath2xml(CMPIObjectPath * ci, UtilStringBuffer * sb)
   SFCB_APPENDCHARS_BLOCK(sb, "<NAMESPACEPATH>\n");
   SFCB_APPENDCHARS_BLOCK(sb, "<HOST>");
   if (hn && *hn) {
+    fprintf(stderr, "has hostname\n");
     sb->ft->appendChars(sb, hn);
   } else {
     hn = malloc(HOST_NAME_MAX);
     if (gethostname(hn, HOST_NAME_MAX) == 0) {
+      fprintf(stderr, "gethostname\n");
       sb->ft->appendChars(sb, hn);
     } else {
+      fprintf(stderr, "using localhost\n");
       SFCB_APPENDCHARS_BLOCK(sb, "localhost");
     }
     free(hn);

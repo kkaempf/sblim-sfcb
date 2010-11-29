@@ -3,6 +3,12 @@
 	* queryLexer.l, test/TestProviders/cmpiTestMethodProvider.c
 	[ 3122725 ] Cleanup warnings in queryLexer and test provider
 
+2010-11-18 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* cimRsRequest.c, cimRequest.c:
+	[3095225] Implement Simple REST Requests
+	GetClass support
+
 2010-11-18  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* mofpp.c:
