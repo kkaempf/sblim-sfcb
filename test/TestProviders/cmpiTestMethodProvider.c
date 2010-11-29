@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 #include "cmpi/cmpidt.h"
 #include "cmpi/cmpift.h"
 #include "cmpi/cmpimacs.h"
