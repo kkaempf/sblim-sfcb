@@ -1,3 +1,10 @@
+2010-12-06 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* cimRsRequest.c, ec_interop_class_collectionInterim.GET, 
+		ec_interop_class_collectionInterim.lines
+	[3095225] Implement Simple REST Requests
+	GetClassCollection (EnumClasses) support
+
 2010-11-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* queryLexer.l, test/TestProviders/cmpiTestMethodProvider.c
