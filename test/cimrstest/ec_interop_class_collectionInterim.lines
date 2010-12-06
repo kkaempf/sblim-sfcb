@@ -1,0 +1,12 @@
+<CIM CIMVERSION="2.0" DTDVERSION="2.0">
+<CLASS NAME="CIM_ElementConformsToProfile">
+<PROPERTY.REFERENCE NAME="ConformantStandard" REFERENCECLASS="CIM_RegisteredProfile">
+<CLASS NAME="__Namespace">
+<PROPERTY NAME="Name" TYPE="string">
+<CLASS NAME="CIM_AbstractIndicationSubscription">
+<CLASS NAME="CIM_ManagedElement">
+<CLASS NAME="CIM_ServiceAffectsElement">
+<CLASS NAME="CIM_Indication">
+<PROPERTY.ARRAY NAME="CorrelatedIndications" TYPE="string">
+<CLASS NAME="CIM_Dependency">
+<CLASS NAME="CIM_ElementCapabilities">

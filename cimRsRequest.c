@@ -263,6 +263,43 @@ static int parseInstanceFragment(CimRsReq* req, char* fragment) {
 }
 
 static void
+buildGetClassColl(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr)
+{ 
+  CMPIObjectPath *path;
+  GetInstanceReq *sreq;
+  int             sreqSize;
+
+  RequestHdr     *hdr = reqHdr;
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  binCtx->oHdr = calloc(1, sizeof(OperationHdr));
+  binCtx->oHdr->nameSpace=setCharsMsgSegment(rsReq->ns);
+  binCtx->oHdr->className=setCharsMsgSegment(rsReq->cn);
+  binCtx->oHdr->count=2;
+  binCtx->type = CMPI_class;
+  sreqSize = sizeof(EnumClassesReq);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = OPS_EnumerateClasses;
+  reqHdr->opType = OPS_EnumerateClasses;
+  binCtx->oHdr->type=OPS_EnumerateClasses;
+
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->hdr.count = 2;
+
+  path = TrackedCMPIObjectPath(rsReq->ns, rsReq->cn, NULL);
+  sreq->objectPath = setObjectPathMsgSegment(path);
+
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = CMPI_FLAG_LocalOnly;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+  binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+
+}
+
+
+static void
 buildSimpleRSRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr)
 { 
   CMPIObjectPath *path;
@@ -300,12 +337,11 @@ buildSimpleRSRequest(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr
       reqHdr->opType = OPS_GetClass;
       binCtx->oHdr->type=OPS_GetClass;
     }
-  }
-
+  } 
 
   sreq->principal = setCharsMsgSegment(hdr->principal);
   //sreq->hdr.count = req->properties + 2;
-  sreq->hdr.count = 0 + 2;
+  sreq->hdr.count = 2;
 
   // Get the keys and add to object path
   path = TrackedCMPIObjectPath(rsReq->ns, rsReq->cn, NULL);
@@ -344,7 +380,7 @@ stringsort(const void *p1, const void *p2)
 }
 
 
-int getSortedKeys(CimRsReq *rsReq)
+void getSortedKeys(CimRsReq *rsReq)
 {
   CMPIObjectPath *op;
   CMPIStatus rc;
@@ -415,7 +451,12 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
       getSortedKeys(&req);
       buildSimpleRSRequest(ctx,&req,&reqHdr);
     }
-  }
+  } 
+  if ((req.scope == SCOPE_CL_COLL ) 
+    && (strcmp(ctx->verb,"GET") == 0)) {
+    buildGetClassColl(ctx,&req,&reqHdr);
+    }
+
 
  //*rc = PARSERC_OK;
  return reqHdr;
