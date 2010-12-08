@@ -1,0 +1,179 @@
+<IRETURNVALUE>
+<VALUE.NAMEDINSTANCE>
+<INSTANCENAME CLASSNAME="CIM_Namespace">
+<KEYBINDING NAME="SystemCreationClassName">
+<KEYVALUE VALUETYPE="string">CIM_ComputerSystem</KEYVALUE>
+</KEYBINDING>
+<KEYBINDING NAME="SystemName">
+</KEYBINDING>
+<KEYBINDING NAME="ObjectManagerCreationClassName">
+<KEYVALUE VALUETYPE="string">CIM_ObjectManager</KEYVALUE>
+</KEYBINDING>
+<KEYBINDING NAME="ObjectManagerName">
+<KEYVALUE VALUETYPE="string">sfcb:NO-UUID-FILE-gubber</KEYVALUE>
+</KEYBINDING>
+<KEYBINDING NAME="CreationClassName">
+<KEYVALUE VALUETYPE="string">CIM_Namespace</KEYVALUE>
+</KEYBINDING>
+<KEYBINDING NAME="Name">
+<KEYVALUE VALUETYPE="string">root</KEYVALUE>
+</KEYBINDING>
+</INSTANCENAME>
+<INSTANCE CLASSNAME="CIM_Namespace">
+<PROPERTY NAME="DescriptionOfClassType" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="ClassTypeVersion" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="ClassType" TYPE="uint16">
+</PROPERTY>
+<PROPERTY NAME="DescriptionOfClassInfo" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="ClassInfo" TYPE="uint16">
+<VALUE>0</VALUE>
+</PROPERTY>
+<PROPERTY NAME="Name" TYPE="string">
+<VALUE>root</VALUE>
+</PROPERTY>
+<PROPERTY NAME="CreationClassName" TYPE="string">
+<VALUE>CIM_Namespace</VALUE>
+</PROPERTY>
+<PROPERTY NAME="ObjectManagerName" TYPE="string">
+<VALUE>sfcb:NO-UUID-FILE-gubber</VALUE>
+</PROPERTY>
+<PROPERTY NAME="ObjectManagerCreationClassName" TYPE="string">
+<VALUE>CIM_ObjectManager</VALUE>
+</PROPERTY>
+<PROPERTY NAME="SystemName" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="SystemCreationClassName" TYPE="string">
+<VALUE>CIM_ComputerSystem</VALUE>
+</PROPERTY>
+<PROPERTY NAME="InstanceID" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="Caption" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="Description" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="ElementName" TYPE="string">
+</PROPERTY>
+</INSTANCE>
+</VALUE.NAMEDINSTANCE>
+<VALUE.NAMEDINSTANCE>
+<INSTANCENAME CLASSNAME="CIM_Namespace">
+<KEYBINDING NAME="SystemCreationClassName">
+<KEYVALUE VALUETYPE="string">CIM_ComputerSystem</KEYVALUE>
+</KEYBINDING>
+<KEYBINDING NAME="SystemName">
+</KEYBINDING>
+<KEYBINDING NAME="ObjectManagerCreationClassName">
+<KEYVALUE VALUETYPE="string">CIM_ObjectManager</KEYVALUE>
+</KEYBINDING>
+<KEYBINDING NAME="ObjectManagerName">
+<KEYVALUE VALUETYPE="string">sfcb:NO-UUID-FILE-gubber</KEYVALUE>
+</KEYBINDING>
+<KEYBINDING NAME="CreationClassName">
+<KEYVALUE VALUETYPE="string">CIM_Namespace</KEYVALUE>
+</KEYBINDING>
+<KEYBINDING NAME="Name">
+<KEYVALUE VALUETYPE="string">root/cimv2</KEYVALUE>
+</KEYBINDING>
+</INSTANCENAME>
+<INSTANCE CLASSNAME="CIM_Namespace">
+<PROPERTY NAME="DescriptionOfClassType" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="ClassTypeVersion" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="ClassType" TYPE="uint16">
+</PROPERTY>
+<PROPERTY NAME="DescriptionOfClassInfo" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="ClassInfo" TYPE="uint16">
+<VALUE>0</VALUE>
+</PROPERTY>
+<PROPERTY NAME="Name" TYPE="string">
+<VALUE>root/cimv2</VALUE>
+</PROPERTY>
+<PROPERTY NAME="CreationClassName" TYPE="string">
+<VALUE>CIM_Namespace</VALUE>
+</PROPERTY>
+<PROPERTY NAME="ObjectManagerName" TYPE="string">
+<VALUE>sfcb:NO-UUID-FILE-gubber</VALUE>
+</PROPERTY>
+<PROPERTY NAME="ObjectManagerCreationClassName" TYPE="string">
+<VALUE>CIM_ObjectManager</VALUE>
+</PROPERTY>
+<PROPERTY NAME="SystemName" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="SystemCreationClassName" TYPE="string">
+<VALUE>CIM_ComputerSystem</VALUE>
+</PROPERTY>
+<PROPERTY NAME="InstanceID" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="Caption" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="Description" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="ElementName" TYPE="string">
+</PROPERTY>
+</INSTANCE>
+</VALUE.NAMEDINSTANCE>
+<VALUE.NAMEDINSTANCE>
+<INSTANCENAME CLASSNAME="CIM_Namespace">
+<KEYBINDING NAME="SystemCreationClassName">
+<KEYVALUE VALUETYPE="string">CIM_ComputerSystem</KEYVALUE>
+</KEYBINDING>
+<KEYBINDING NAME="SystemName">
+<KEYVALUE VALUETYPE="string">gubber</KEYVALUE>
+</KEYBINDING>
+<KEYBINDING NAME="ObjectManagerCreationClassName">
+<KEYVALUE VALUETYPE="string">CIM_ObjectManager</KEYVALUE>
+</KEYBINDING>
+<KEYBINDING NAME="ObjectManagerName">
+<KEYVALUE VALUETYPE="string">sfcb:NO-UUID-FILE-gubber</KEYVALUE>
+</KEYBINDING>
+<KEYBINDING NAME="CreationClassName">
+<KEYVALUE VALUETYPE="string">CIM_Namespace</KEYVALUE>
+</KEYBINDING>
+<KEYBINDING NAME="Name">
+<KEYVALUE VALUETYPE="string">root/interop</KEYVALUE>
+</KEYBINDING>
+</INSTANCENAME>
+<INSTANCE CLASSNAME="CIM_Namespace">
+<PROPERTY NAME="DescriptionOfClassType" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="ClassTypeVersion" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="ClassType" TYPE="uint16">
+</PROPERTY>
+<PROPERTY NAME="DescriptionOfClassInfo" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="ClassInfo" TYPE="uint16">
+<VALUE>0</VALUE>
+</PROPERTY>
+<PROPERTY NAME="Name" TYPE="string">
+<VALUE>root/interop</VALUE>
+</PROPERTY>
+<PROPERTY NAME="CreationClassName" TYPE="string">
+<VALUE>CIM_Namespace</VALUE>
+</PROPERTY>
+<PROPERTY NAME="ObjectManagerName" TYPE="string">
+<VALUE>sfcb:NO-UUID-FILE-gubber</VALUE>
+</PROPERTY>
+<PROPERTY NAME="ObjectManagerCreationClassName" TYPE="string">
+<VALUE>CIM_ObjectManager</VALUE>
+</PROPERTY>
+<PROPERTY NAME="SystemName" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="SystemCreationClassName" TYPE="string">
+<VALUE>CIM_ComputerSystem</VALUE>
+</PROPERTY>
+<PROPERTY NAME="InstanceID" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="Caption" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="Description" TYPE="string">
+</PROPERTY>
+<PROPERTY NAME="ElementName" TYPE="string">
+</PROPERTY>
+</INSTANCE>
+</VALUE.NAMEDINSTANCE>
