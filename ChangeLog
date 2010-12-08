@@ -1,13 +1,20 @@
+2010-12-08 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* cimRsRequest.c, Interim_enum_instcoll_CIM_Namespace.GET,
+		Interim_enum_instcoll_CIM_Namespace.lines:
+	[3095225] Implement Simple REST Requests
+	GetInstanceCollection (EnumInstances) support
+
 2010-12-06 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* cimRsRequest.c, ec_interop_class_collectionInterim.GET, 
-		ec_interop_class_collectionInterim.lines
+		ec_interop_class_collectionInterim.lines:
 	[3095225] Implement Simple REST Requests
 	GetClassCollection (EnumClasses) support
 
 2010-11-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
-	* queryLexer.l, test/TestProviders/cmpiTestMethodProvider.c
+	* queryLexer.l, test/TestProviders/cmpiTestMethodProvider.c:
 	[ 3122725 ] Cleanup warnings in queryLexer and test provider
 
 2010-11-18 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
