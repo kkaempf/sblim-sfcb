@@ -6,6 +6,7 @@ New features:
 - 3030289 Update wbemcat to make REST requests
 - 3031827 Parser does not create BinRequestContext
 - 3056234 Allow multiple parsers
+- 3095225 Implement Simple REST Requests
 
 Bugs fixed:
 
