@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.60 2010/08/20 19:25:38 mchasal Exp $
+ * $Id: cimXmlRequest.c,v 1.61 2010/12/21 23:01:49 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2234,10 +2234,10 @@ static RespSegments setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
    _SFCB_ENTER(TRACE_CIMXMLPROC, "setProperty");
    CMPIObjectPath *path;
    CMPIInstance *inst;
-   CMPIType t;
+   CMPIType t, type;
    CMPIStatus rc;
-   CMPIValue val;
-   int irc;
+   CMPIValue val, *valp;
+   int irc, i, m;
    BinRequestContext binCtx;
    BinResponseHdr *resp;
    SetPropertyReq sreq = BINREQ(OPS_SetProperty, 3);
@@ -2247,6 +2247,13 @@ static RespSegments setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
    hdr->className=req->op.className.data;
 
    path = TrackedCMPIObjectPath(req->op.nameSpace.data, req->instanceName.className, &rc);
+   for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
+      valp = getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
+                                req->instanceName.bindings.keyBindings[i].value,
+                                &req->instanceName.bindings.keyBindings[i].ref,
+                                &val, &type, req->op.nameSpace.data);
+      CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp, type);
+   }
 
    inst = internal_new_CMPIInstance(MEM_TRACKED, NULL, NULL, 1);
 
