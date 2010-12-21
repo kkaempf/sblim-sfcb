@@ -1,3 +1,8 @@
+2010-12-21  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimXmlOps.y:
+	[ 3130727 ] CMPIPropertyMIFT.setProperty() missing objectpath keys
+
 2010-12-08 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* cimRsRequest.c, Interim_enum_instcoll_CIM_Namespace.GET,

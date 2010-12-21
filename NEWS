@@ -31,6 +31,16 @@ Bugs fixed:
 - 3104761 cimRsRequest.h missing from make-dist tarball
 - 3107553 Remove Large Volume Support
 
+Changes in 1.3.11
+=================
+
+New features:
+- NO NEW FEATURES
+
+Bugs fixed: 
+
+- 3130727 CMPIPropertyMIFT.setProperty() missing objectpath keys
+
 Changes in 1.3.10
 =================
 

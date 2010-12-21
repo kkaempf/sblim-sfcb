@@ -1072,9 +1072,10 @@ buildSetPropertyRequest(void *parm)
 {
   CMPIObjectPath *path;
   CMPIInstance   *inst;
-  CMPIType        t;
+  CMPIType        t, type;
   CMPIStatus      rc;
-  CMPIValue       val;
+  CMPIValue       val, *valp;
+  int             i, m;
   SetPropertyReq *sreq;// = BINREQ(OPS_SetProperty, 3);
   RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
   BinRequestContext *binCtx = hdr->binCtx;
@@ -1086,6 +1087,13 @@ buildSetPropertyRequest(void *parm)
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data,
                             req->instanceName.className, &rc);
+  for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
+    valp = getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
+                              req->instanceName.bindings.keyBindings[i].value,
+                              &req->instanceName.bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
+    CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp, type);
+  }
 
   inst = internal_new_CMPIInstance(MEM_TRACKED, NULL, NULL, 1);
 
