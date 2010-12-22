@@ -93,7 +93,6 @@ static char* percentDecode(char* s) {
 static int checkEndingFragment(char* fragment, char* name, int nameLen) {
   /* /cimrs/namespaces/{ns}/classes/{cn}/associators */
   if (fragment[nameLen] == 0) {
-    fprintf(stderr, " request for %s\n", name);
     return 0;
   }
   /* something like /cimrs/namespaces/{ns}/classes/{cn}/associatorswithcrapattheend */
@@ -144,7 +143,6 @@ int parseCimRsPath(char* p, CimRsReq* req) {
   if (query != NULL) {
     *query = 0;
     parseCimRsQueryParams(++query);
-    fprintf(stderr, " has query\n");
   }
 
   ns = strpbrk(tmp, "/");
@@ -159,7 +157,6 @@ int parseCimRsPath(char* p, CimRsReq* req) {
 
   if (tmp == NULL) {
     /* we got "/cimrs/namespaces/{ns} */
-    fprintf(stderr, " request for namespace '%s'\n", ns);
     req->scope = SCOPE_NAMESPACE;
     return 0;
   }
@@ -450,7 +447,7 @@ void getSortedKeys(CimRsReq *rsReq)
 RequestHdr
 scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
 {
-  fprintf(stderr, "path is '%s'\nverb is '%s'\n", ctx->path, ctx->verb);
+  //fprintf(stderr, "path is '%s'\nverb is '%s'\n", ctx->path, ctx->verb);
   RequestHdr reqHdr = { NULL, 0, 0, 0, 0, 0, 0, 0,
                         NULL, 0, 0, 0, NULL, 0, 0,
                       };
@@ -468,7 +465,7 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
  */
   CimRsReq req = {0, NULL, NULL, NULL, NULL};
   int prc = parseCimRsPath(ctx->path, &req);
-  fprintf(stderr, "parseCimPath returned %d\n", prc);
+  /*
   if (prc == 0) {
     fprintf(stderr, "scope: %d\n", req.scope);
     if (req.ns) fprintf(stderr, "%s", req.ns);
@@ -477,6 +474,7 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
     if (req.meth) fprintf(stderr, " %s", req.meth);
     fprintf(stderr, "\n");
   }
+  */
   reqHdr.binCtx = calloc(1, sizeof(BinRequestContext));
   reqHdr.principal = ctx->principal;
   reqHdr.sessionId = ctx->sessionId;

@@ -195,7 +195,7 @@ tagEquals(XmlBuffer * xb, const char *t)
     if (getWord(xb, t, 1))
       return 1;
   } else {
-    printf("OOOPS\n");
+    printf("*** Error getting token\n");
   }
   xb->cur = start;
   return 0;
