@@ -464,8 +464,8 @@ scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
   ctx.httpOp = tmp;
  */
   CimRsReq req = {0, NULL, NULL, NULL, NULL};
-  int prc = parseCimRsPath(ctx->path, &req);
   /*
+  int prc = parseCimRsPath(ctx->path, &req);
   if (prc == 0) {
     fprintf(stderr, "scope: %d\n", req.scope);
     if (req.ns) fprintf(stderr, "%s", req.ns);
