@@ -78,6 +78,16 @@ incOK(char *str, char **s, char **e, char **ifn, FILE ** f)
   return 0;
 }
 
+char* getLineEnding(char* s) {
+  char* e = NULL;
+  if ((e = strstr(s, "\r\n"))) {
+    e+=2;
+  } else if ((e = strstr(s, "\n"))) {
+    e+=1;
+  }
+  return e;
+}
+
 void
 processFile(char *fn, FILE * in, FILE * out)
 {
@@ -89,7 +99,6 @@ processFile(char *fn, FILE * in, FILE * out)
   FILE           *incFile;
   int             comment = 0;
   int             nl = 0; /* line number */
-  int             qs = 0; /* flag for being withing a quoted string */
 
   while (fgets(rec, sizeof(rec), in)) {
     nl++;
@@ -105,16 +114,14 @@ processFile(char *fn, FILE * in, FILE * out)
       s = rec;
 
       if (comment == 1) { /* check for single-line comment */
-        if ((e = strstr(s, "\r\n"))) {
-          strcpy(s, e + 2);
+	e = getLineEnding(s);
+        if (e) {
+          strcpy(s, e);
           comment = 0;
-        } else if ((e = strstr(s, "\n"))) {
-          strcpy(s, e + 1);
-          comment = 0;
-        }
+	}
       } else if (comment == 2) { /* check for block comment */
         if ((e = strstr(s, "*/"))) {
-          strcpy(s, e + 2);
+          strcpy(s, getLineEnding(e));
           comment = 0;
         } else {
           continue;
@@ -123,26 +130,23 @@ processFile(char *fn, FILE * in, FILE * out)
 
       /* skip whitespace */
       while ((*s == ' ') || (*s == '\t')) {
-	s++;
+        s++;
       }
       es = s;
-      qs = 0;
       /* is this line a quoted string? */
       if (*s == '"') {
-	qs = 1;
-	/* find end of the string */
-	es++;
-	while ((s = strstr(es, "\""))) {
-	  es = s+1; /* end of quoted string */
-	}
+        /* find end of the string */
+        es++;
+        while ((s = strstr(es, "\""))) {
+          es = s+1; /* end of quoted string */
+        }
       }
 
       while ((s = strstr(es, "/"))) {
         if (*(s + 1) == '/') {
-          if ((e = strstr(s + 2, "\r\n"))) {
-            strcpy(s, e + 2);
-          } else if ((e = strstr(s + 2, "\n"))) {
-            strcpy(s, (e+qs));
+          e = getLineEnding(s);
+          if (e) {
+            strcpy(s, e);
           } else {
             *s = 0;
             comment = 1;
@@ -150,14 +154,14 @@ processFile(char *fn, FILE * in, FILE * out)
           }
         } else if (*(s + 1) == '*') {
           if ((e = strstr(s + 2, "*/"))) {
-            strcpy(s, e + 2);
+            strcpy(s, getLineEnding(e));
           } else {
             *s = 0;
             comment = 2;
             break;
           }
         } else {
-          s++;
+          es++;
         }
       }
 

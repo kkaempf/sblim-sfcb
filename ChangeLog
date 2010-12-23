@@ -1,3 +1,9 @@
+2010-12-23  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* mofpp.c:
+	[ 3054618 ] mofpp is overaggressive when detecting comments
+	Completed fix.  Previously had problems with some mofs
+	
 2010-12-21  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* cimXmlOps.y:
