@@ -10,6 +10,10 @@ New features:
 
 Bugs fixed:
 
+Everything in 1.3.10, plus:
+
+- 3130727 CMPIPropertyMIFT.setProperty() missing objectpath keys
+- 3054618 mofpp is overaggressive when detecting comments
 - 2955916 Pretty print
 - 3003508 slpTests.sh uses bash-isms
 - 3011256 Add macro to set inBuf value
