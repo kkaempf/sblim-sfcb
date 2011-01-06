@@ -572,6 +572,9 @@ if SSL
 	$(sfcbdatadir)/genSslCert.sh $(sfcbconfdir)
 endif
 
+footprint-mem:
+	./footprint.pl -m;
+
 footprint:
 	@flist='$(sbin_PROGRAMS) $(bin_PROGRAMS) $(sfcblib_LTLIBRARIES) $(dist_sfcbdata_SCRIPTS) $(init_SCRIPTS) $(man1_MANS) $(dist_man1_MANS) $(dist_pam_DATA) $(dist_sfcbdata_DATA) $(sfcbconf_DATA) $(sfcbdoc_DATA) $(sfcb_sharedobjects) '; \
 	rm -f "MANIFEST"; \
