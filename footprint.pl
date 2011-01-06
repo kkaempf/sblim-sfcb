@@ -29,9 +29,10 @@ my $totalsize=0;
 
 # -d = disk footprint
 # -m = memory footprint
+# -q = minimal output
 # if neither given, do both footprints
-our($opt_d, $opt_m);
-getopts('dm');
+our($opt_d, $opt_m, $opt_q);
+getopts('dmq');
 if ((! $opt_d ) && (! $opt_m)) {
     $opt_d=$opt_m=1;
 }
@@ -48,13 +49,13 @@ if ($opt_d) {
    }
 
     # Process MANIFEST contents
-    print "Disk footprint\n";
-    print "==============\n";
-    print "bytes\t\tfile\n";
+    print "Disk footprint\n" unless ($opt_q);
+    print "==============\n" unless ($opt_q);
+    print "bytes\t\tfile\n" unless ($opt_q);
     foreach (@man){
        chomp;
        my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) =stat($_);
-       print "$size\t\t$_\n";
+       print "$size\t\t$_\n" unless ($opt_q);
        $totalsize+=$size;
     }
     print "\n$totalsize\t\tTotal bytes\n\n";
@@ -63,8 +64,8 @@ if ($opt_d) {
 if ($opt_m) {
     # Check memory usage, sfcb needs to be running for this.
    # We also need the ps_mem.py python script.
-   print "Memory footprint\n";
-   print "=================\n";
+   print "Memory footprint\n" unless ($opt_q);
+   print "=================\n" unless ($opt_q);
    unless ($> == 0) {
        print "Must be run as root to do memory footprint.\n";
    } else {
@@ -80,10 +81,10 @@ if ($opt_m) {
        if ($PSMEM) {
            my $pid=`ps -aef | grep sfcbd`;
            unless (-z $pid) {
-               print " Private  +   Shared  =  RAM used       Program\n";
+               print " Private  +   Shared  =  RAM used       Program\n" unless ($opt_q);
                system("$PSMEM | grep sfcbd 2>&1");
            } else {
-               print "SFCB doesn't appear to be running, skipping RAM footprint.\n";
+               print "SFCB doesn't appear to be running, skipping RAM footprint.\n" unless ($opt_q);
            }
        }
    }
