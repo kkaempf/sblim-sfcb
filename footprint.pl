@@ -22,55 +22,71 @@
 # ============================================================================
 
 use strict;
+use Getopt::Std;
+
 my @man;
 my $totalsize=0;
 
-# Read MANIFEST file
-my $file="MANIFEST";
-if (-e $file) {
-  open(MANFILE,"<$file") || die "Cannot open $file: $!";
-  @man = (<MANFILE>);
-  close(MANFILE) || warn "Cannot close $file: $!";
-} else {
-    print "Can't read MANIFEST file, skipping disk usage check.\n";
+# -d = disk footprint
+# -m = memory footprint
+# -q = minimal output
+# if neither given, do both footprints
+our($opt_d, $opt_m, $opt_q);
+getopts('dmq');
+if ((! $opt_d ) && (! $opt_m)) {
+    $opt_d=$opt_m=1;
 }
 
-# Process MANIFEST contents
-print "Disk footprint\n";
-print "==============\n";
-print "bytes\t\tfile\n";
-foreach (@man){
-    chomp;
-    my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) =stat($_);
-    print "$size\t\t$_\n";
-    $totalsize+=$size;
-}
-print "\n$totalsize\t\tTotal bytes\n\n";
+if ($opt_d) {
+    # Read MANIFEST file
+   my $file="MANIFEST";
+   if (-e $file) {
+      open(MANFILE,"<$file") || die "Cannot open $file: $!";
+      @man = (<MANFILE>);
+      close(MANFILE) || warn "Cannot close $file: $!";
+   } else {
+      print "Can't read MANIFEST file, skipping disk usage check.\n";
+   }
 
-# Check memory usage, sfcb needs to be running for this.
-# We also need the ps_mem.py python script.
-print "Memory footprint\n";
-print "=================\n";
-unless ($> == 0) {
-    print "Must be run as root to do memory footprint.\n";
-} else {
-    my $PSMEM="";
-    if (-x "./ps_mem.py") {
-        $PSMEM="./ps_mem.py";
-    } elsif (`which ps_mem.py 2>/dev/null`) {
-        $PSMEM="ps_mem.py";
-    } else {
-        $PSMEM="";
-        print "ps_mem.py not found, go get it.\n";
+    # Process MANIFEST contents
+    print "Disk footprint\n" unless ($opt_q);
+    print "==============\n" unless ($opt_q);
+    print "bytes\t\tfile\n" unless ($opt_q);
+    foreach (@man){
+       chomp;
+       my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) =stat($_);
+       print "$size\t\t$_\n" unless ($opt_q);
+       $totalsize+=$size;
     }
-    if ($PSMEM) {
-        my $pid=`ps -aef | grep sfcbd`;
-        unless (-z $pid) {
-		    print " Private  +   Shared  =  RAM used       Program\n";
-            system("$PSMEM | grep sfcbd 2>&1");
-        } else {
-            print "SFCB doesn't appear to be running, skipping RAM footprint.\n";
-        }
-    }
+    print "\n$totalsize\t\tTotal bytes\n\n";
+}
+
+if ($opt_m) {
+    # Check memory usage, sfcb needs to be running for this.
+   # We also need the ps_mem.py python script.
+   print "Memory footprint\n" unless ($opt_q);
+   print "=================\n" unless ($opt_q);
+   unless ($> == 0) {
+       print "Must be run as root to do memory footprint.\n";
+   } else {
+       my $PSMEM="";
+       if (-x "./ps_mem.py") {
+           $PSMEM="./ps_mem.py";
+       } elsif (`which ps_mem.py 2>/dev/null`) {
+           $PSMEM="ps_mem.py";
+       } else {
+           $PSMEM="";
+           print "ps_mem.py not found, go get it.\n";
+       }
+       if ($PSMEM) {
+           my $pid=`ps -aef | grep sfcbd`;
+           unless (-z $pid) {
+               print " Private  +   Shared  =  RAM used       Program\n" unless ($opt_q);
+               system("$PSMEM | grep sfcbd 2>&1");
+           } else {
+               print "SFCB doesn't appear to be running, skipping RAM footprint.\n" unless ($opt_q);
+           }
+       }
+   }
 }
    

@@ -61,7 +61,7 @@ CVS_CHECK_OUT()
         RC=0
         DUALOUT "SFCB check-out : SUCCESS" "./$CVS_CO_OUT"
         cd sfcb
-        if $MOFCREPO_CMD 1>"$REPORTDIR"/$CVS_CO_OUT 2>&1
+        if $MOFCREPO_CMD 1>>"$REPORTDIR"/$CVS_CO_OUT 2>&1
         then
             RC=0
             DUALOUT "MOFC check-out : SUCCESS" "./$CVS_CO_OUT"
@@ -112,18 +112,22 @@ SFCB_TESTS()
 {
     echo "Starting Unit tests ........." >> $BASE_DIR/$TEST_OUT
 
-    SFCB_START
+    echo  -n "  Memory Footprint startup: " >> $BASE_DIR/$REPORT_SUMMARY
+    $BASE_DIR/sfcb/footprint.pl -qm >> $BASE_DIR/$REPORT_SUMMARY 2>$REPORTDIR/$TEST_OUT
     if make test 1>>"$REPORTDIR"/$TEST_OUT 2>&1
     then
         RC=0
         cp -r  $COVERAGE_DIR    "$REPORTDIR"
         DUALOUT "SFCB Tests : SUCCESS" "./$TEST_OUT"
+        echo -n "  Memory Footprint post test: " >> $BASE_DIR/$REPORT_SUMMARY
+        $BASE_DIR/sfcb/footprint.pl -qm >> $BASE_DIR/$REPORT_SUMMARY 2>$REPORTDIR/$TEST_OUT
+        sleep 600
+        echo -n "  Memory Footprint idle: " >> $BASE_DIR/$REPORT_SUMMARY
+        $BASE_DIR/sfcb/footprint.pl -qm >> $BASE_DIR/$REPORT_SUMMARY 2>$REPORTDIR/$TEST_OUT
     else
         RC=1
         DUALOUT "SFCB Tests : FAILURE" "./$TEST_OUT"
     fi
-    SFCB_STOP
-    SFCB_RESULTFILES
 }
 
 AUTO_CONF()
@@ -170,7 +174,12 @@ BUILD_SFCB()
             then
                 RC=0
                 DUALOUT "MAKE POSTINSTALL : SUCCESS" "./$MAKE_OUT"
+                SFCB_START
                 SFCB_TESTS
+                DUALOUT "SECOND TEST RUN:" 
+                SFCB_TESTS
+                SFCB_STOP
+                SFCB_RESULTFILES
             else
                 RC=1
                 DUALOUT "MAKE POSTINSTALL : FAILURE" "./$MAKE_OUT"
