@@ -179,24 +179,7 @@ myGetInstances(const CMPIBroker *_broker, const CMPIContext * ctx,
   objectpath = CMNewObjectPath(_broker, path, objectname, NULL);
 
   enumeration = CBEnumInstances(_broker, ctx, objectpath, NULL, &status);
-
-  // severe error
-  if (status.rc == CMPI_RC_ERR_FAILED) {
-    printf
-        ("--- Error enumerating %s. Deregistering service with slp\n",
-         objectname);
-    deregisterCIMService(urlsyntax);
-    if (status.msg)
-      CMRelease(status.msg);
-    if (objectpath)
-      CMRelease(objectpath);
-    if (enumeration)
-      CMRelease(enumeration);
-    exit(0);
-  }
-  // object not found ?
-  if (status.rc == CMPI_RC_ERR_INVALID_CLASS
-      || status.rc == CMPI_RC_ERR_NOT_FOUND) {
+  if (status.rc != CMPI_RC_OK) {
     retArr = NULL;
   }
 

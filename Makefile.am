@@ -161,18 +161,7 @@ sfcblib_LTLIBRARIES += \
    libTestIndicationProvider.la
 endif
 
-# if SLP_ALONE
-# SLP_PROGRAMFILES = cimslp
-# cimslp_SOURCES = \
-# 	cimslp.c \
-# 	cimslpCMPI.c \
-# 	cimslpSLP.c \
-# 	cimslpUtil.c 
-# 
-# cimslp_LDADD=-lslp -lcmpisfcc -lsfcBrokerCore
-# else
 SLP_PROGRAMFILES = 
-# endif
 
 sbin_PROGRAMS = \
    sfcbd 
@@ -406,12 +395,10 @@ libsfcCimXmlCodec_la_DEPENDENCIES=libsfcBrokerCore.la
 endif
 
 if SLP
-SLP_SRC = cimslp.c \
-          cimslpCMPI.c \
+SLP_SRC = cimslpCMPI.c \
           cimslpSLP.c \
           cimslpUtil.c
-SLP_INC = cimslp.h \
-          cimslpCMPI.h \
+SLP_INC = cimslpCMPI.h \
           cimslpSLP.h \
           cimslpUtil.h
 

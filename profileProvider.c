@@ -38,8 +38,9 @@
 #include <time.h>
 
 #ifdef HAVE_SLP
-#include "cimslp.h"
+#include <slp.h>
 #include "cimslpCMPI.h"
+#include "cimslpSLP.h"
 #include "control.h"
 pthread_t       slpUpdateThread;
 pthread_once_t  slpUpdateInitMtx = PTHREAD_ONCE_INIT;
@@ -51,6 +52,45 @@ char           *http_url = NULL;
 char           *http_attr = "NULL";
 char           *https_url = NULL;
 char           *https_attr = "NULL";
+
+
+void
+freeCFG(cimomConfig * cfg)
+{
+
+  free(cfg->cimhost);
+  free(cfg->cimpassword);
+  free(cfg->cimuser);
+  free(cfg->commScheme);
+  free(cfg->port);
+}
+
+void
+setUpDefaults(cimomConfig * cfg)
+{
+  cfg->commScheme = strdup("http");
+  cfg->cimhost = strdup("localhost");
+  cfg->port = strdup("5988");
+  cfg->cimuser = strdup("");
+  cfg->cimpassword = strdup("");
+  cfg->keyFile = NULL;
+  cfg->trustStore = NULL;
+  cfg->certFile = NULL;
+}
+
+void
+setUpTimes(int *slpLifeTime, int *sleepTime)
+{
+  if (*slpLifeTime < 16) {
+    *slpLifeTime = 16;
+  }
+  if (*slpLifeTime > SLP_LIFETIME_MAXIMUM) {
+    *slpLifeTime = SLP_LIFETIME_DEFAULT;
+  }
+
+  *sleepTime = *slpLifeTime - 15;
+}
+
 #endif
 
 #define LOCALCLASSNAME "ProfileProvider"
@@ -295,6 +335,8 @@ ProfileProviderInvokeMethod(CMPIMethodMI * mi,
 {
   _SFCB_ENTER(TRACE_INDPROVIDER, "ProfileProviderInvokeMethod");
   CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
+  /* this may /seem/ useless, but we use startupProvider() to load 
+     profileProvider via a method call; UPDATE_SLP_REG does the work on init */
   if (strcmp(methodName, "_startup"))
     st.rc = CMPI_RC_OK;
   _SFCB_RETURN(st);
@@ -467,8 +509,9 @@ spawnUpdateThread(const CMPIContext *ctx)
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
   rc = pthread_create(&newThread, &attr, slpUpdate, thread_args);
   if(rc) {
-    // deal with thread creation error
-    exit(1);
+    mlogf(M_ERROR, M_SHOW, "--- Could not create SLP update thread. SLP disabled.");
+    /* note: without SLP running, this provider is pretty useless.  But 
+       if it's marked "unload: never" there's not much we can do from here */
   }
 }
 
