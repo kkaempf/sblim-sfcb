@@ -1,3 +1,10 @@
+2011-01-07  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* Makefile.am, profileProvider.c, cimslpCMPI.c, 
+	  cimslp.h, cimslp.c:
+	[ 3022940 ] Remove dead SLP code dealing with proc management
+	(deleted cimslp.h and cimslp.c)
+
 2011-01-07 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* MonitorABT, ABTScript, sfcb.config, Makefile.am,
