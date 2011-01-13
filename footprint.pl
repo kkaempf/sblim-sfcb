@@ -29,12 +29,13 @@ my $totalsize=0;
 
 # -d = disk footprint
 # -m = memory footprint
+# -s = source line code count
 # -q = minimal output
-# if neither given, do both footprints
-our($opt_d, $opt_m, $opt_q);
-getopts('dmq');
-if ((! $opt_d ) && (! $opt_m)) {
-    $opt_d=$opt_m=1;
+# default is all footprints
+our($opt_d, $opt_m, $opt_q, $opt_s);
+getopts('dmqs');
+if ((! $opt_d ) && (! $opt_m) && (! $opt_s)) {
+    $opt_d=$opt_m=$opt_s=1;
 }
 
 if ($opt_d) {
@@ -58,8 +59,32 @@ if ($opt_d) {
        print "$size\t\t$_\n" unless ($opt_q);
        $totalsize+=$size;
     }
-    print "\n$totalsize\t\tTotal bytes\n\n";
+    print "\n" unless ($opt_q);
+    print "$totalsize\t\tTotal bytes\n";
+    print "\n" unless ($opt_q);
 }
+if ($opt_s) {
+   print "Source code line count\n" unless ($opt_q);
+   print "======================\n" unless ($opt_q);
+   my $SLOC="";
+   if (-x "./sloccount") {
+      $SLOC="./sloccount";
+  } elsif (`which sloccount 2>/dev/null`) {
+      $SLOC="sloccount";
+  } else {
+      $SLOC="";
+      print "sloccount not found, go get it.\n";
+  }
+  if ($SLOC) {
+    if ($opt_q) {
+        system("$SLOC . | grep ^ansic 2>&1");
+    } else {
+        system("$SLOC . 2>&1");
+    }
+  }
+}
+        
+
 
 if ($opt_m) {
     # Check memory usage, sfcb needs to be running for this.
@@ -89,4 +114,5 @@ if ($opt_m) {
        }
    }
 }
+
    

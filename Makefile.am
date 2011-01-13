@@ -559,6 +559,9 @@ if SSL
 	$(sfcbdatadir)/genSslCert.sh $(sfcbconfdir)
 endif
 
+footprint-sloc:
+	./footprint.pl -sq;
+
 footprint-mem:
 	./footprint.pl -mq;
 
