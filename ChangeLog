@@ -1,3 +1,8 @@
+2011-01-13 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* ABTScript, Makefile.am, footprint.pl:
+	[3152523] Changes for footprinting in ABT 
+
 2011-01-07  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* Makefile.am, profileProvider.c, cimslpCMPI.c, 
