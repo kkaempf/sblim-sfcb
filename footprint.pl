@@ -59,9 +59,11 @@ if ($opt_d) {
        print "$size\t\t$_\n" unless ($opt_q);
        $totalsize+=$size;
     }
-    print "\n" unless ($opt_q);
-    print "$totalsize\t\tTotal bytes\n";
-    print "\n" unless ($opt_q);
+    if ($opt_q) {
+        print "$totalsize\n";
+    } else {
+        print "\n$totalsize\t\tTotal bytes\n\n";
+    }
 }
 if ($opt_s) {
    print "Source code line count\n" unless ($opt_q);
@@ -77,7 +79,9 @@ if ($opt_s) {
   }
   if ($SLOC) {
     if ($opt_q) {
-        system("$SLOC . | grep ^ansic 2>&1");
+        my $slocout=`$SLOC . | grep ^ansic 2>&1`;
+        my ($lab,$sloc,$per)=split(/\s+/,$slocout);
+        print "$sloc\n";
     } else {
         system("$SLOC . 2>&1");
     }
@@ -87,9 +91,9 @@ if ($opt_s) {
 
 
 if ($opt_m) {
-    # Check memory usage, sfcb needs to be running for this.
+   # Check memory usage, sfcb needs to be running for this.
    # We also need the ps_mem.py python script.
-   print "Memory footprint\n" unless ($opt_q);
+   print "\nMemory footprint\n" unless ($opt_q);
    print "=================\n" unless ($opt_q);
    unless ($> == 0) {
        print "Must be run as root to do memory footprint.\n";
@@ -106,8 +110,17 @@ if ($opt_m) {
        if ($PSMEM) {
            my $pid=`ps -aef | grep sfcbd`;
            unless (-z $pid) {
-               print " Private  +   Shared  =  RAM used       Program\n" unless ($opt_q);
-               system("$PSMEM | grep sfcbd 2>&1");
+               my $psmemout=`$PSMEM | grep sfcbd 2>&1`;
+               if ($opt_q) {
+                    $psmemout =~ s/^\s+//;
+                    my ($first,$second)=split(/=/,$psmemout);
+                    $second =~ s/^\s+//;
+                    my ($mem,$units,$rest)=split(/\s+/,$second,3);
+                    print "$mem $units\n";
+               } else {
+                    print " Private  +   Shared  =  RAM used       Program\n";
+                    print "$psmemout\n";
+               }
            } else {
                print "SFCB doesn't appear to be running, skipping RAM footprint.\n" unless ($opt_q);
            }
