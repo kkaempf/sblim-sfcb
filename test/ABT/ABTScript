@@ -18,6 +18,9 @@ COVERAGE_DIR="$BASE_DIR/sfcb/coverage"
 REPORTDIR=$REPORT_DIR/"$TESTNAME"
 RESULTDIR=$REPORTDIR/xmlFailure_reportFiles
 HTMLFILE="$REPORTDIR/index.html"
+FPCUR=$BASE_DIR/FP_"$TESTNAME".cur
+FPPREV=/tmp/FP_"$TESTNAME".prev
+n=0;
 
 if [ ! -d $BASE_DIR ]; then
     mkdir -p $BASE_DIR
@@ -110,20 +113,31 @@ SFCB_RESULTFILES()
 
 SFCB_TESTS()
 {
+    n=$((n+1)) # Keep track of test iteration
     echo "Starting Unit tests ........." >> $BASE_DIR/$TEST_OUT
 
     echo  -n "  Memory Footprint startup: " >> $BASE_DIR/$REPORT_SUMMARY
-    $BASE_DIR/sfcb/footprint.pl -qm >> $BASE_DIR/$REPORT_SUMMARY 2>$REPORTDIR/$TEST_OUT
+    out=$($BASE_DIR/sfcb/footprint.pl -qm) 
+    FIND_DELTA "mem_startup$n" $out
+    echo "$out bytes $delta">> $BASE_DIR/$REPORT_SUMMARY 
+    echo "mem_startup$n:$out" >> $FPCUR
     if make test 1>>"$REPORTDIR"/$TEST_OUT 2>&1
     then
         RC=0
         cp -r  $COVERAGE_DIR    "$REPORTDIR"
         DUALOUT "SFCB Tests : SUCCESS" "./$TEST_OUT"
         echo -n "  Memory Footprint post test: " >> $BASE_DIR/$REPORT_SUMMARY
-        $BASE_DIR/sfcb/footprint.pl -qm >> $BASE_DIR/$REPORT_SUMMARY 2>$REPORTDIR/$TEST_OUT
-        sleep 600
+        out=$($BASE_DIR/sfcb/footprint.pl -qm) 
+        FIND_DELTA "mem_posttest$n" $out
+        echo "$out bytes $delta" >> $BASE_DIR/$REPORT_SUMMARY 
+        echo "mem_posttest$n:$out"  >> $FPCUR
+        # Sleep to allow provider unload
+        sleep 300
         echo -n "  Memory Footprint idle: " >> $BASE_DIR/$REPORT_SUMMARY
-        $BASE_DIR/sfcb/footprint.pl -qm >> $BASE_DIR/$REPORT_SUMMARY 2>$REPORTDIR/$TEST_OUT
+        out=$($BASE_DIR/sfcb/footprint.pl -qm) 
+        FIND_DELTA "mem_idle$n" $out
+        echo "$out bytes $delta" >> $BASE_DIR/$REPORT_SUMMARY 
+        echo "mem_idle$n:$out" >> $FPCUR
     else
         RC=1
         DUALOUT "SFCB Tests : FAILURE" "./$TEST_OUT"
@@ -156,6 +170,17 @@ CONFIGURE_SFCB()
     fi
 }
 
+FIND_DELTA()
+{
+    delta=""
+    if (($DELTA))
+    then
+        prev=$(grep $1 $FPPREV | cut -d":" -f2)
+        del=$(($2-$prev))
+        delta="(delta:$del)"
+    fi
+}
+
 # Starts SFCB Build
 
 BUILD_SFCB()
@@ -174,8 +199,17 @@ BUILD_SFCB()
             then
                 RC=0
                 DUALOUT "MAKE POSTINSTALL : SUCCESS" "./$MAKE_OUT"
+                make footprint 1>>${REPORTDIR}/${MAKE_OUT} 2>&1
                 echo  -n "  Source code line count: " >> $BASE_DIR/$REPORT_SUMMARY
-                $BASE_DIR/sfcb/footprint.pl -sq >> $BASE_DIR/$REPORT_SUMMARY 
+                out=$($BASE_DIR/sfcb/footprint.pl -sq) 
+                FIND_DELTA "sloc" $out
+                echo "$out $delta" >> $BASE_DIR/$REPORT_SUMMARY 
+                echo "sloc:$out" > $FPCUR
+                echo  -n "  Disk footprint: " >> $BASE_DIR/$REPORT_SUMMARY
+                out=$($BASE_DIR/sfcb/footprint.pl -dq) 
+                FIND_DELTA "disk" $out
+                echo "$out bytes $delta" >> $BASE_DIR/$REPORT_SUMMARY 
+                echo "disk:$out" >> $FPCUR
                 SFCB_START
                 SFCB_TESTS
                 DUALOUT "SECOND TEST RUN:" 
@@ -202,6 +236,13 @@ echo "<HTML><BODY>" >$HTMLFILE
 DUALOUT "TEST NAME :  $TESTNAME"
 DUALOUT "CONFIG OPTIONS: $CONFIGOPTIONS"
 
+# Check if there's previous footprint data
+DELTA=0
+if [ -r $FPPREV ]
+then
+    DELTA=1
+fi
+
 SFCB_CLEAN
 if [ ! -d $BASE_DIR/sfcb ]; then
     CVS_CHECK_OUT
@@ -214,5 +255,6 @@ echo "<a href=./coverage/index.html>Code Coverage Report</a><br>" >> $HTMLFILE
 DUALOUT " " 
 DUALOUT "============================================================== " 
 echo "</BODY></HTML>" >>$HTMLFILE
+cp $FPCUR $FPPREV
 
 exit  $RC

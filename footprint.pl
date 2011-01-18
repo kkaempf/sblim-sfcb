@@ -116,7 +116,18 @@ if ($opt_m) {
                     my ($first,$second)=split(/=/,$psmemout);
                     $second =~ s/^\s+//;
                     my ($mem,$units,$rest)=split(/\s+/,$second,3);
-                    print "$mem $units\n";
+                    # For the minimal output, "unhuman" the display
+                    my $bytes=$mem;
+                    if ($units == "Ki") {
+                        $bytes=int($mem*1024);
+                    } elsif ($units == "Mi") {
+                        $bytes=int($mem*1024*1024);
+                    } elsif ($units == "Gi") {
+                        $bytes=int($mem*1024*1024*1024);
+                    } elsif ($units == "Ti") {
+                        $bytes=int($mem*1024*1024*1024*1024);
+                    }
+                    print "$bytes\n";
                } else {
                     print " Private  +   Shared  =  RAM used       Program\n";
                     print "$psmemout\n";
