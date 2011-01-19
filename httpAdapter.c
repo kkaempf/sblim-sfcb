@@ -1593,6 +1593,7 @@ httpDaemon(int argc, char *argv[], int sslMode)
   int             enableHttp = 0;
   fd_set          httpfds;
   int             maxfdp1;      /* highest-numbered fd +1 */
+  char    	  *nicname = NULL; /* NIC Interface */
 
 #ifdef USE_SSL
 #ifdef USE_INET6
@@ -1622,6 +1623,8 @@ httpDaemon(int argc, char *argv[], int sslMode)
   sfcbSSLMode = sslMode;
   processName = "HTTP-Daemon";
 
+  getControlChars("networkInterface", &nicname); /* nicname - default NULL */
+  //if (nicname) _SFCB_TRACE(1, ("---  networkInterface = %s", nicname));
   if (getControlNum("httpPort", &httpPort))
     httpPort = 5988;            /* 5988 is default port */
 #ifdef USE_SSL

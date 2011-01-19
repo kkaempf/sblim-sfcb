@@ -16,6 +16,11 @@
 ## Default is true. If HTTPS is configured, default is false.
 enableHttp:     @SFCB_CONF_HTTP@
 
+## Network Interface Card (NIC) to use.
+## Default - not set.
+## If unset, SFCB will listen on all available network interfaces
+#networkInterface: eth0
+
 ## The HTTP port that SFCB should listen on. 
 ## Default is 5988
 httpPort:       5988

@@ -1,3 +1,8 @@
+2011-01-18 Narasimha Sharoff <nsharoff@us.ibm.com>
+
+	* control.c, httpAdapter.c, sfcb.cfg.pre.in
+	[1596336] Add config option for network interface binding
+
 2011-01-18 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* ABTScript, footprint.pl:

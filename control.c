@@ -119,6 +119,7 @@ Control         init[] = {
   {"httpMaxContentLength", 1, "100000000"},
   {"validateMethodParamTypes", 2, "false"},
   {"maxMsgLen", 1, "10000000"},
+  {"networkInterface", 3, NULL},
 };
 
 void
