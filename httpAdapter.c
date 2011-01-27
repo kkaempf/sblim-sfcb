@@ -52,6 +52,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
+#include <net/if.h>
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -133,6 +134,7 @@ extern int      inet_aton(const char *cp, struct in_addr *inp);
 
 static unsigned int sessionId;
 extern char    *opsName[];
+char	       *nicname = NULL; /* Network Interface */
 
 typedef int     (*Authenticate) (char *principal, char *pwd);
 
@@ -1369,6 +1371,31 @@ isDir(const char *path)
 #endif
 }
 
+/* 
+ * Bind the socket to the given network interface
+ * 
+ * The networkInterface, nicname ,is ignored when httpLocalOnly is true
+*/
+static int
+bindSocketToDevice(int sockfd)
+{
+	struct	  ifreq ifr;
+
+	if (nicname  && !httpLocalOnly) {
+		memset(&ifr, 0, sizeof(ifr));
+		snprintf(ifr.ifr_name, sizeof(ifr.ifr_name), "%s", nicname);
+  		if (setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE, 
+			(void *)&ifr, sizeof(ifr)) == -1) {
+    			mlogf(M_ERROR, M_SHOW, "--- setsockopt error %s\n", 
+			strerror(errno));
+			return -1;
+  		}
+		mlogf(M_INFO, M_SHOW, "--- Using Network Interface %s\n",
+			nicname);
+	}
+	return 0;
+}
+
 static int
 getSocket()
 {
@@ -1385,6 +1412,8 @@ getSocket()
   fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 #endif                          // USE_INET6
   setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *) &ru, sizeof(ru));
+  if (bindSocketToDevice(fd) == -1) return -1;
+
   return fd;
 }
 
@@ -1403,8 +1432,6 @@ bindToPort(int sock, int port, void *ssin, socklen_t * sin_len)
   memset(sin, 0, *sin_len);
 
   if (sock >= 0) {
-    if (getControlBool("httpLocalOnly", &httpLocalOnly))
-      httpLocalOnly = 0;
 
 #ifdef USE_INET6
     sin->sin6_family = AF_INET6;
@@ -1593,7 +1620,6 @@ httpDaemon(int argc, char *argv[], int sslMode)
   int             enableHttp = 0;
   fd_set          httpfds;
   int             maxfdp1;      /* highest-numbered fd +1 */
-  char    	  *nicname = NULL; /* NIC Interface */
 
 #ifdef USE_SSL
 #ifdef USE_INET6
@@ -1623,6 +1649,7 @@ httpDaemon(int argc, char *argv[], int sslMode)
   sfcbSSLMode = sslMode;
   processName = "HTTP-Daemon";
 
+  getControlBool("httpLocalOnly", &httpLocalOnly); /* default 0 */
   getControlChars("networkInterface", &nicname); /* nicname - default NULL */
   //if (nicname) _SFCB_TRACE(1, ("---  networkInterface = %s", nicname));
   if (getControlNum("httpPort", &httpPort))

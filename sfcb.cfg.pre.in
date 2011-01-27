@@ -19,6 +19,7 @@ enableHttp:     @SFCB_CONF_HTTP@
 ## Network Interface Card (NIC) to use.
 ## Default - not set.
 ## If unset, SFCB will listen on all available network interfaces
+## The value is ignored when httpLocalOnly is set to true
 #networkInterface: eth0
 
 ## The HTTP port that SFCB should listen on. 
