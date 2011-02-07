@@ -1125,7 +1125,8 @@ doHttpRequest(CommHndl conn_fd)
       writeResponse(conn_fd, response);
   }
 
-  cleanupCimXmlRequest(&response);
+  if (response.buffer != NULL)
+    cleanupCimXmlRequest(&response);
 
 #ifdef SFCB_DEBUG
   if (uset && (_sfcb_trace_mask & TRACE_RESPONSETIMING)) {

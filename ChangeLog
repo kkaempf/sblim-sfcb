@@ -1,3 +1,8 @@
+2011-02-07  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* httpAdapter.c: 
+	[ 3162016 ] sfcbd Segmentation fault in cleanupCimXmlRequest
+
 2011-01-18 Narasimha Sharoff <nsharoff@us.ibm.com>
 
 	* control.c, httpAdapter.c, sfcb.cfg.pre.in
