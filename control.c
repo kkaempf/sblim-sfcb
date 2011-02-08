@@ -66,14 +66,6 @@ Control         init[] = {
   {"httpLocalOnly", 2, "false"},
   {"httpUserSFCB", 2, "true"},
   {"httpUser", 0, ""},
-#ifdef HAVE_JDBC
-  {"dbpPort", 1, "5980"},
-  {"enableDbp", 2, "true"},
-  {"dbpProcs", 1, "8"},
-  {"dbpsPort", 1, "5981"},
-  {"enableDbps", 2, "true"},
-  {"dbpsProcs", 1, "8"},
-#endif
 #ifdef HAVE_SLP
   {"enableSlp", 2, "true"},
   {"slpRefreshInterval", 1, "600"},

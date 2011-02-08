@@ -28,7 +28,6 @@
 
 #define sfcBrokerVersion PACKAGE_VERSION
 #define sfcHttpDaemonVersion PACKAGE_VERSION
-#define sfcdbpDaemonVersion "0.1.0"
 
 #else
 /*
@@ -36,7 +35,6 @@
  */
 #define sfcBrokerVersion "0.8.1"
 #define sfcHttpDaemonVersion "0.8.1"
-#define sfcdbpDaemonVersion "0.1.0"
 
 #endif
 

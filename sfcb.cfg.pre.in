@@ -196,18 +196,6 @@ certificateAuthLib:   sfcCertificateAuthentication
 ## Default is true
 #doUdsAuth:      true
 
-
-##------------------------------------- JDBC ----------------------------------
-## These options only apply if configured with --enable-jdbc
-
-#dbpPort: 5980
-#enableDbp: true
-#dbpProcs: 8
-#dbpsPort: 5981
-#enableDbps: true
-#dbpsProcs: 8
-
-
 ##-------------------------------------- SLP -----------------------------------
 ## These options only apply if configured with --enable-slp
 
