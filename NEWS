@@ -10,6 +10,7 @@ Bugs fixed:
 - 3022940 Remove dead SLP code dealing with proc management
 - 3162016 sfcbd Segmentation fault in cleanupCimXmlRequest
 - 3175888 Remove JDBC support from SFCB 1.4.x
+- 3082573 Typo in interopProvider
 
 Changes in 1.4.0
 ================
