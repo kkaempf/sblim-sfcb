@@ -1,5 +1,8 @@
 2011-02-11  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* jdbc/
+	Removed (part of 3175888)
+
 	* brokerUpc.c:
 	[ 3172080 ] deliverIndication does not check for matching FROM classes
 
