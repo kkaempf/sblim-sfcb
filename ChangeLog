@@ -1,3 +1,8 @@
+2011-02-14 Narasimha Sharoff <nsharoff@us.ibm.com>
+
+	* cmpiTestExecQueryProvider.c
+	[ 3177707 ] ExecQuery 1 to 4 tests segfault on power LPAR
+
 2011-02-11  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* jdbc/

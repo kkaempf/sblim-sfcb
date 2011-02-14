@@ -162,10 +162,12 @@ evalute_selectcond(const CMPISelectCond *cond,
         rc = CMGetPredicateData(pred,
                                 &pred_type,
                                 &pred_op, &left_side, &right_side);
+	if (left_side != NULL) {
         // LS has the name. Get the predicate using another mechanism.
         pred2 =
             CMGetPredicate(subcnd, CMGetCharsPtr(left_side, &rc_String),
                            &rc);
+	}
       }
     }
   }
