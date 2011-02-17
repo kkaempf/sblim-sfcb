@@ -295,6 +295,7 @@ __rft_returnInstance(const CMPIResult *result,
   if (r->qs) {
     int             irc;
 
+    /* true for ExecQuery requests */
     if (r->qs->where) {
       r->qs->propSrc.data = (CMPIInstance *) instance;
       irc = r->qs->where->ft->evaluate(r->qs->where, &r->qs->propSrc);
@@ -302,7 +303,7 @@ __rft_returnInstance(const CMPIResult *result,
         if (r->qs->allProps == 0) {
           instance =
               r->qs->ft->cloneAndFilter(r->qs, (CMPIInstance *) instance,
-                                        r->qs->cop, r->qs->keys);
+                                        CMGetObjectPath(instance,NULL), r->qs->keys);
           releaseInstance = 1;
         }
       } else
@@ -311,7 +312,7 @@ __rft_returnInstance(const CMPIResult *result,
       if (r->qs->allProps == 0) {
         instance =
             r->qs->ft->cloneAndFilter(r->qs, (CMPIInstance *) instance,
-                                      r->qs->cop, r->qs->keys);
+                                      CMGetObjectPath(instance,NULL), r->qs->keys);
         releaseInstance = 1;
       }
     }
