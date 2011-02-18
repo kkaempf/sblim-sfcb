@@ -500,7 +500,8 @@ value2xml(CMPIData d, UtilStringBuffer * sb, int wv)
     else if (d.type == CMPI_boolean)
       splen = sprintf(str, "%s", d.value.boolean ? "TRUE" : "FALSE");
     else if (d.type == CMPI_char16)
-      splen = sprintf(str, "%c", d.value.char16);
+      /* To support wide charset/unicode charset, review this line */
+      splen = sprintf(str, "%c", (CMPIChar16)d.value.char16);
     else if (d.type == CMPI_chars) {
       sp = XMLEscape(d.value.chars, &splen);
       if (sp)

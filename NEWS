@@ -12,6 +12,7 @@ Bugs fixed:
 - 3175888 Remove JDBC support from SFCB 1.4.x
 - 3082573 Typo in interopProvider
 - 3177707 ExecQuery 1 to 4 tests segfault on power LPAR
+- 3185034 exec query test failures on power - char16 mismatch
 
 Changes in 1.4.0
 ================

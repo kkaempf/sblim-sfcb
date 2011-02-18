@@ -1,3 +1,8 @@
+2011-02-18 Narasimha Sharoff <nsharoff@us.ibm.com>
+
+	* cimXmlGen.c, cmpiTestExecQueryProvider.c
+	[ 3185034 ] exec query test failures on power - char16 mismatch
+
 2011-02-17  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* result.c, test/xmltest/execQuery.lines:
