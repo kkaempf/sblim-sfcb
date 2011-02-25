@@ -36,7 +36,12 @@
 #ifndef GENERIC_LIST_DEFINED
 #define GENERIC_LIST_DEFINED
 
+#include "config.h"
+#ifdef SFCCOMMON
 #include "utilft.h"
+#else
+#include <sfcCommon/utilft.h>
+#endif
 
 typedef struct GLE_struct {
   void           *pointer;

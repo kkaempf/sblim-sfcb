@@ -19,13 +19,19 @@
  *
  */
 
-#include "utilft.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
 #include <sys/types.h>
 #include <dirent.h>
+
+#include "config.h"
+#ifdef SFCCOMMON
+#include "utilft.h"
+#else
+#include <sfcCommon/utilft.h>
+#endif
 
 #include "constClass.h"
 #include "providerRegister.h"
