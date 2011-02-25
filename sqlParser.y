@@ -34,7 +34,13 @@
 #include <errno.h>
 #include "queryOperation.h"
 #include "sqlStatement.h"
+
+#include "config.h"
+#ifdef SFCCOMMON
 #include "utilft.h"
+#else
+#include <sfcCommon/utilft.h>
+#endif
 
 #define YYPARSE_PARAM parm 
 #define YYLEX_PARAM parm
