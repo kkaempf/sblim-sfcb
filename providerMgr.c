@@ -27,7 +27,6 @@
 #include "cmpi/cmpidt.h"
 #include "providerRegister.h"
 #include "providerMgr.h"
-#include "utilft.h"
 #include "msgqueue.h"
 #include "constClass.h"
 #include "cimXmlParser.h"
@@ -37,6 +36,12 @@
 #include "queryOperation.h"
 #include "selectexp.h"
 #include "config.h"
+
+#ifdef SFCCOMMON
+#include "utilft.h"
+#else
+#include <sfcCommon/utilft.h>
+#endif
 
 #ifdef HAVE_QUALREP
 #include "qualifier.h"

@@ -19,7 +19,6 @@
  *
  */
 
-#include "utilft.h"
 #include "support.h"
 #include "mlog.h"
 #include <stdio.h>
@@ -30,6 +29,12 @@
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
+#ifdef SFCCOMMON
+#include "utilft.h"
+#else
+#include <sfcCommon/utilft.h>
 #endif
 
 #ifndef SFCB_CONFDIR

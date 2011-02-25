@@ -29,13 +29,19 @@
 #include <string.h>
 #include <ctype.h>
 #include "fileRepository.h"
-#include "utilft.h"
 #include "trace.h"
 #include "providerMgr.h"
 #include "internalProvider.h"
 #include "native.h"
 #include "objectpath.h"
 #include <time.h>
+
+#include "config.h"
+#ifdef SFCCOMMON
+#include "utilft.h"
+#else
+#include <sfcCommon/utilft.h>
+#endif
 
 #ifdef HAVE_SLP
 #include <slp.h>

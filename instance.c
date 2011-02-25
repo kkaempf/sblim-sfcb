@@ -23,13 +23,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "utilft.h"
 #include "native.h"
 #include "instance.h"
 
 #include "objectImpl.h"
 #include "providerMgr.h"
 #include "config.h"
+
+#ifdef SFCCOMMON
+#include "utilft.h"
+#else
+#include <sfcCommon/utilft.h>
+#endif
 
 #ifdef SFCB_IX86
 #define SFCB_ASM(x) asm(x)

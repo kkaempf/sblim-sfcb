@@ -20,7 +20,6 @@
  *
  */
 
-#include "utilft.h"
 #include "mlog.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,6 +27,13 @@
 #include <string.h>
 #include <support.h>
 #include <pwd.h>
+
+#include "config.h"
+#ifdef SFCCOMMON
+#include "utilft.h"
+#else
+#include <sfcCommon/utilft.h>
+#endif
 
 #include "providerRegister.h"
 

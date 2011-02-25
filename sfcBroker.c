@@ -22,7 +22,14 @@
 
 #include <stdio.h>
 #include "native.h"
+
+#include "config.h"
+#ifdef SFCCOMMON
 #include "utilft.h"
+#else
+#include <sfcCommon/utilft.h>
+#endif
+
 #include "string.h"
 #include "cimXmlParser.h"
 // #include "brokerOs.c"

@@ -24,9 +24,15 @@
 #include "providerMgr.h"
 #include "constClass.h"
 #include "queryOperation.h"
-#include "utilft.h"
 #include "objectImpl.h"
 #include "mlog.h"
+
+#include "config.h"
+#ifdef SFCCOMMON
+#include "utilft.h"
+#else
+#include <sfcCommon/utilft.h>
+#endif
 
 extern void     native_array_reset_size(CMPIArray *array,
                                         CMPICount increment);

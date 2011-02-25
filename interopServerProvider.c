@@ -19,7 +19,6 @@
  *
  */
 
-#include "utilft.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -34,6 +33,12 @@
 #include "native.h"
 #include "control.h"
 #include "config.h"
+
+#ifdef SFCCOMMON
+#include "utilft.h"
+#else
+#include <sfcCommon/utilft.h>
+#endif
 
 #define NEW(x) ((x *) malloc(sizeof(x)))
 

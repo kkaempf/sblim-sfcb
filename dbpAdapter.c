@@ -37,11 +37,17 @@
 
 #include "cmpi/cmpidt.h"
 #include "msgqueue.h"
-#include "utilft.h"
 #include "trace.h"
 #include "cimXmlRequest.h"
 // #include "cimXmlParser.h"
 #include "queryOperation.h"
+
+#include "config.h"
+#ifdef SFCCOMMON
+#include "utilft.h"
+#else
+#include <sfcCommon/utilft.h>
+#endif
 
 #include <pthread.h>
 #include <semaphore.h>

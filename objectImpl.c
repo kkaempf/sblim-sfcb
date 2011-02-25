@@ -27,9 +27,14 @@
 
 #include "objectImpl.h"
 #include "array.h"
-#include "utilft.h"
 #include "trace.h"
 #include "config.h"
+
+#ifdef SFCCOMMON
+#include "utilft.h"
+#else
+#include <sfcCommon/utilft.h>
+#endif
 
 #ifdef SFCB_IX86
 #define SFCB_ASM(x) asm(x)
