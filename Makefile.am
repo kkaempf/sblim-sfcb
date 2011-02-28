@@ -27,7 +27,6 @@ sfcbconfdir=$(sysconfdir)/sfcb
 sfcbstatedir=$(localstatedir)/lib/sfcb
 initdir=$(sysconfdir)/init.d
 pamdir=$(sysconfdir)/pam.d
-sfcblibdir=$(libdir)/sfcb
 cmpilibdir=$(libdir)/cmpi
 
 MANFILES=man/genSslCert.1 man/getSchema.1 man/sfcbd.1 man/sfcbmof.1 \
@@ -36,6 +35,28 @@ MANFILES=man/genSslCert.1 man/getSchema.1 man/sfcbd.1 man/sfcbmof.1 \
 
 BUILT_SOURCES=queryParser.c queryLexer.c sqlParser.c sqlLexer.c cimXmlOps.c cimXmlParserProcessed.c $(MANFILES)
 
+if SFCCOMMON
+# Use the local sfcCommon libs
+    sfcblibdir=$(libdir)/sfcb
+    SFCCOMMON_LIBS = libsfcUtil.la 
+    SFCCOMMON_CPPFLAGS="-I$(srcdir)/sfcUtil"
+    SFCCOMMON_HEADER = sfcUtil/hashtable.h sfcUtil/utilft.h
+libsfcUtil_la_SOURCES = \
+        sfcUtil/hashtable.c \
+        sfcUtil/utilFactory.c \
+	    sfcUtil/utilHashtable.c \
+	    sfcUtil/utilStringBuffer.c \
+	    sfcUtil/libsfcUtil.Versions
+libsfcUtil_la_LDFLAGS = -Wl,--version-script,$(srcdir)/sfcUtil/libsfcUtil.Versions
+libsfcBrokerCore_la_LIBADD=-lsfcUtil
+libsfcBrokerCore_la_DEPENDENCIES=libsfcUtil.la
+else
+# Use shared library
+    sfccommondir=$(includedir)/sfcCommon
+    sfcblibdir=$(libdir)
+libsfcBrokerCore_la_LIBADD=
+endif
+
 AM_YFLAGS=-d
 AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sfcbconfdir)\" \
 	-DSFCB_STATEDIR=\"$(sfcbstatedir)\" \
@@ -43,7 +64,7 @@ AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sfcbconfdir)\" \
 	-DCMPI_LIBDIR=\"$(cmpilibdir)\" \
 	-DLIBDIR=\"$(libdir)\" \
 	-DSFCB_BINARY=\"$(sbindir)/sfcbd\" \
-	-I$(srcdir)/sfcUtil \
+    $(SFCCOMMON_CPPFLAGS) \
 	@SFCB_CPPFLAGS@ \
         @SFCB_CMPI_PLATFORM@ 
 AM_LDFLAGS=@SFCB_LDFLAGS@
@@ -127,8 +148,8 @@ endif
 sfcb_sharedobjects = \
    $(sfcblibdir)/*.so
 
+
 sfcblib_LTLIBRARIES = \
-   libsfcUtil.la \
    libsfcBrokerCore.la \
    libsfcFileRepository.la \
    libsfcInternalProvider.la \
@@ -149,6 +170,7 @@ sfcblib_LTLIBRARIES = \
    $(QUALREP_LIBS) \
    $(INDICATION_LIBS) \
    $(PAM_LIBS) \
+   $(SFCCOMMON_LIBS) \
    $(SLP_HOSTNAME_LIBS)
 
 if TEST_ENABLED 
@@ -172,13 +194,6 @@ bin_PROGRAMS = \
 noinst_PROGRAMS = \
    sfcbdumpP32onI32 classSchema2c
 
-libsfcUtil_la_SOURCES = \
-	sfcUtil/hashtable.c \
-	sfcUtil/utilFactory.c \
-	sfcUtil/utilHashtable.c \
-	sfcUtil/utilStringBuffer.c \
-	sfcUtil/libsfcUtil.Versions
-libsfcUtil_la_LDFLAGS = -Wl,--version-script,$(srcdir)/sfcUtil/libsfcUtil.Versions
 
 libsfcBrokerCore_la_SOURCES = \
     args.c \
@@ -219,8 +234,6 @@ libsfcBrokerCore_la_SOURCES = \
     $(QUALREP_FILES)
 
 libsfcBrokerCore_la_CFLAGS = $(AM_CFLAGS) @SFCB_CMPI_OS@ 
-libsfcBrokerCore_la_LIBADD=-lsfcUtil
-libsfcBrokerCore_la_DEPENDENCIES=libsfcUtil.la
 
 if JDBC
 sqlLexer.c: $(srcdir)/sqlLexer.l
@@ -336,7 +349,7 @@ libsfcClassProvider_la_DEPENDENCIES=libsfcBrokerCore.la
 
 libsfcClassProviderMem_la_SOURCES = \
    classProviderMem.c classSchemaMem.c interop_classSchema.c
-libsfcClassProviderMem_la_LIBADD=-lsfcBrokerCore
+libsfcClassProviderMem_la_LIBADD=-lsfcBrokerCore -lsfcUtil
 libsfcClassProviderMem_la_DEPENDENCIES=libsfcBrokerCore.la
 
 # Building providers in the test/TestProviders directory
@@ -425,14 +438,14 @@ sfcbinst2mof_SOURCES=sfcbinst2mof.c
 sfcbinst2mof_LDADD = -lsfcFileRepository
 
 classSchema2c_SOURCES=classSchema2c.c
-classSchema2c_LDADD=-lsfcBrokerCore
-classSchema2c_DEPENDENCIES=libsfcBrokerCore.la
+classSchema2c_LDADD=-lsfcBrokerCore -lsfcUtil
+classSchema2c_DEPENDENCIES=libsfcBrokerCore.la 
 
 noinst_HEADERS=array.h $(SLP_INC) httpComm.h control.h    providerMgr.h \
 	constClass.h   msgqueue.h     providerRegister.h \
 	cimXmlParser.h    native.h       support.h cimXmlGen.h \
-	cimRequest.h cimRsRequest.h genericlist.h  objectImpl.h   trace.h \
-	sfcUtil/hashtable.h      sfcUtil/utilft.h mlog.h \
+	cimRequest.h cimRsRequest.h objectImpl.h   trace.h \
+	mlog.h $(SFCCOMMON_HEADER) \
 	cmpiftx.h cmpimacsx.h \
 	fileRepository.h internalProvider.h \
 	selectexp.h queryOperation.h \

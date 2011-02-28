@@ -346,8 +346,8 @@ fi
 
 if test "$enable_sfcCommon" == "yes"; then
    AC_DEFINE(SFCCOMMON,,[Local sfcCommon enabled])
-   SFCCOMMONDIR="/usr/local/lib/"
-   sfcCommon_inc=
+else
+   AC_CHECK_LIB(sfcUtil,main,,[AC_MSG_ERROR([Could not find required sfcUtil])])
 fi
 
 if test "$enable_uds" == "yes"; then
@@ -442,7 +442,6 @@ fi
 # Checks for libraries.
 AC_CHECK_LIB(pthread,main)
 AC_CHECK_LIB(dl,main)
-AC_CHECK_LIB(sfcUtil,main,,[AC_MSG_ERROR([Could not find required sfcUtil])])
 
 AC_CHECK_LIB(z,main,[SFCB_LIBZ=-lz],[AC_MSG_ERROR([Could not find required libz])])
 if test "$enable_indications" = "yes" ; then
