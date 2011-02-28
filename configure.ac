@@ -111,6 +111,13 @@ AC_ARG_ENABLE(request-types,
 	[AC_HELP_STRING([--enable-request-types(=TYPES)],
 		[Enable support of listed request types. If none are listed, all are enabled.])])
 
+AC_ARG_ENABLE(sfcCommon,
+	[AC_HELP_STRING([--disable-sfcCommon],
+		[Disable local sfcCommon libraries and use shared version.])],
+	[enable_sfcCommon=$enableval],
+	[enable_sfcCommon="yes"]
+    )
+
 # Size checks
 AC_CHECK_SIZEOF(void*)
 AC_CHECK_SIZEOF(int)
@@ -234,6 +241,7 @@ AM_CONDITIONAL(CMDTEST,[test "$test_cmd" == "yes"])
 AM_CONDITIONAL(SLPTEST,[test "$test_slp" == "yes"])
 AM_CONDITIONAL(PROVTEST,[test "$test_providers" == "yes"])
 AM_CONDITIONAL(PROVTEST,[test "$test_local" == "yes"])
+
 if [test "$enable_tests"]; then
     # The order of TEST_SUBDIRS determines test
     # execution order.
@@ -336,6 +344,12 @@ if test "$handler_CIMRS" == "yes"; then
 fi
 # End of parser config
 
+if test "$enable_sfcCommon" == "yes"; then
+   AC_DEFINE(SFCCOMMON,,[Local sfcCommon enabled])
+   SFCCOMMONDIR="/usr/local/lib/"
+   sfcCommon_inc=
+fi
+
 if test "$enable_uds" == "yes"; then
    AC_DEFINE(HAVE_UDS,,[UDS authentication enabled])
 fi
@@ -428,6 +442,8 @@ fi
 # Checks for libraries.
 AC_CHECK_LIB(pthread,main)
 AC_CHECK_LIB(dl,main)
+AC_CHECK_LIB(sfcUtil,main,,[AC_MSG_ERROR([Could not find required sfcUtil])])
+
 AC_CHECK_LIB(z,main,[SFCB_LIBZ=-lz],[AC_MSG_ERROR([Could not find required libz])])
 if test "$enable_indications" = "yes" ; then
    LOAD_INDICATION_PROVIDER=
@@ -540,6 +556,7 @@ AM_CONDITIONAL(DOCS,[test "$enable_docs" == "yes"])
 AM_CONDITIONAL(IPV6,[test "$enable_ipv6" == "yes"])
 AM_CONDITIONAL(LOCAL_CONNECT_NO_INDICATION,[test "$enable_local_connect_only" == "yes" -a "$enable_indications" == "no"])
 AM_CONDITIONAL(LOCAL_CONNECT_ONLY,[test "$enable_local_connect_only" == "yes"])
+AM_CONDITIONAL(SFCCOMMON,[test "$enable_sfcCommon" == "yes"])
 
 AC_CONFIG_FILES([Makefile sfcb.spec sfcbrepos.sh sfcbstage.sh sfcbunstage.sh 
 	         sfcbuuid.sh sfcb.cfg.pre getSchema.sh.pre 
@@ -568,6 +585,7 @@ echo -e "uds"\\t\\t\\t\\t"${enable_uds:-no}"
 echo -e "tests"\\t\\t\\t\\t"${enable_tests:-no}"
 echo -e "debug"\\t\\t\\t\\t"${enable_debug:-no}"
 echo -e "Request types"\\t\\t\\t"${enable_request_types}"
+echo -e "Local sfcCommon"\\t\\t\\t"${enable_sfcCommon}"
 echo =================================================================
 echo
 echo "sfcb configuration complete.  you may now run 'make'"
