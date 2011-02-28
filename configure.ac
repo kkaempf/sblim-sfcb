@@ -42,10 +42,6 @@ AC_ARG_ENABLE(ssl,
 	[AC_HELP_STRING([--enable-ssl],
 		[include ssl support for SFCB.])])
 
-AC_ARG_ENABLE(jdbc,
-	[AC_HELP_STRING([--enable-jdbc],
-		[include server-side JDBC support for SFCB - EXPERIMENTAL.])])
-
 AC_ARG_ENABLE(slp,
 	[AC_HELP_STRING([--enable-slp],
 		[include slp agent for SFCB - EXPERIMENTAL.])])
@@ -161,10 +157,6 @@ fi
 
 if test "$enable_debug" == "yes"; then
    SFCB_CPPFLAGS="-D SFCB_DEBUG $SFCB_CPPFLAGS"
-fi
-
-if test "$enable_jdbc" == "yes"; then
-   AC_DEFINE(HAVE_JDBC,1,[JDBC support enabled.])
 fi
 
 if test "$enable_default_properties" == "yes"; then
@@ -544,7 +536,6 @@ if test -d $srcdir/cmpi-devel; then
 fi
 
 AM_CONDITIONAL(INDICATIONS,[test "$enable_indications" == "yes"]) 
-AM_CONDITIONAL(JDBC,[test "$enable_jdbc" == "yes"]) 
 AM_CONDITIONAL(SSL,[test "$enable_ssl" == "yes"]) 
 AM_CONDITIONAL(SLP,[test "$enable_slp" == "yes"]) 
 AM_CONDITIONAL(SLP_HOSTNAME_LIB,[test "$enable_slp_hostname_lib" == "yes"])
@@ -572,7 +563,6 @@ echo Configuration Features:
 echo -e "ssl"\\t\\t\\t\\t"${enable_ssl:-no}"
 echo -e "slp"\\t\\t\\t\\t"${enable_slp:-no}"
 echo -e "slp hostname lib"\\t\\t"${enable_slp_hostname_lib:-no}"
-echo -e "jdbc"\\t\\t\\t\\t"${enable_jdbc:-no}"
 echo -e "IPv6"\\t\\t\\t\\t"${enable_ipv6:-no}"
 echo -e "indications"\\t\\t\\t"${enable_indications}"
 echo -e "qualifierrep"\\t\\t\\t"${enable_qualifierrep:-no}"

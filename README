@@ -276,9 +276,6 @@ Options:
 	--enable-ssl=[yes|no]
 		Enable HTTPS (ie HTTP+SSL) support. Default=no
 
-	--enable-jdbc=[yes|no]
-		Enable server-side JDBC support (experimental). Default=no
-
 	--disable-indications=[yes|no]
 		Disable indication support. Default=no (ie enable indications)
 	
@@ -512,6 +509,11 @@ file /usr/local/etc/sfcb/sfcb.cfg. For example:
 
 Config Option Descriptions
 --------------------------
+networkInterface
+	The Interface sfcb http process will use to send and receive
+	packets. This value is ignored when httpLocalOnly is set to true.
+	By default this value is not set. Example: networkInterace=eth0
+
 httpPort
 	Local port that sfcbd should listen to receive HTTP (i.e. insecure)
 	requests from CIM clients. Default=5988

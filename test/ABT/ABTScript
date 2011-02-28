@@ -176,6 +176,10 @@ FIND_DELTA()
     if (($DELTA))
     then
         prev=$(grep $1 $FPPREV | cut -d":" -f2)
+        if [ -z $prev ]
+        then
+                prev=0
+        fi
         del=$(($2-$prev))
         delta="(delta:$del)"
     fi

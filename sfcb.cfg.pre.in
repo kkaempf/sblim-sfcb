@@ -16,6 +16,12 @@
 ## Default is true. If HTTPS is configured, default is false.
 enableHttp:     @SFCB_CONF_HTTP@
 
+## Network Interface Card (NIC) to use.
+## Default - not set.
+## If unset, SFCB will listen on all available network interfaces
+## The value is ignored when httpLocalOnly is set to true
+#networkInterface: eth0
+
 ## The HTTP port that SFCB should listen on. 
 ## Default is 5988
 httpPort:       5988
@@ -189,18 +195,6 @@ certificateAuthLib:   sfcCertificateAuthentication
 ## Enable authentication for Unix domain sockets connections
 ## Default is true
 #doUdsAuth:      true
-
-
-##------------------------------------- JDBC ----------------------------------
-## These options only apply if configured with --enable-jdbc
-
-#dbpPort: 5980
-#enableDbp: true
-#dbpProcs: 8
-#dbpsPort: 5981
-#enableDbps: true
-#dbpsProcs: 8
-
 
 ##-------------------------------------- SLP -----------------------------------
 ## These options only apply if configured with --enable-slp

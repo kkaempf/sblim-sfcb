@@ -1,12 +1,64 @@
+2011-02-23  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* providerDrv.c:
+	[ 3175770 ] execQuery returns multiple instances of same object
+
+2011-01-13 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+       * ABTScript:
+       [ 3152523 ] Changes for footprinting in ABT 
+
+2011-02-18 Narasimha Sharoff <nsharoff@us.ibm.com>
+
+	* cimXmlGen.c, cmpiTestExecQueryProvider.c
+	[ 3185034 ] exec query test failures on power - char16 mismatch
+
+2011-02-17  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* result.c, test/xmltest/execQuery.lines:
+	[ 3185178 ] Wrong classname for returned instances from execQuery
+
+2011-02-14 Narasimha Sharoff <nsharoff@us.ibm.com>
+
+	* cmpiTestExecQueryProvider.c
+	[ 3177707 ] ExecQuery 1 to 4 tests segfault on power LPAR
+
+2011-02-11  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* jdbc/
+	Removed (part of 3175888)
+
+	* brokerUpc.c:
+	[ 3172080 ] deliverIndication does not check for matching FROM classes
+
+2011-02-08  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* interopProvider.c: 
+	[ 3082573 ] Typo in interopProvider
+
+	* dbpAdapter.c, Makefile.am, configure.ac, control.c, 
+	sfcVersion.h, sfcb.cfg.pre.in, README: 
+	[ 3175888 ] Remove JDBC support from SFCB 1.4.x
+
+2011-02-07  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* httpAdapter.c: 
+	[ 3162016 ] sfcbd Segmentation fault in cleanupCimXmlRequest
+
+2011-01-18 Narasimha Sharoff <nsharoff@us.ibm.com>
+
+	* control.c, httpAdapter.c, sfcb.cfg.pre.in:
+	[ 1596336 ] Add config option for network interface binding
+
 2011-01-18 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* ABTScript, footprint.pl:
-	[3152523] Changes for footprinting in ABT 
+	[ 3152523 ] Changes for footprinting in ABT 
 
 2011-01-13 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* ABTScript, Makefile.am, footprint.pl:
-	[3152523] Changes for footprinting in ABT 
+	[ 3152523 ] Changes for footprinting in ABT 
 
 2011-01-07  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
@@ -19,7 +71,7 @@
 
 	* MonitorABT, ABTScript, sfcb.config, Makefile.am,
 		footprint.pl:
-	[3152523] Changes for footprinting in ABT 
+	[ 3152523 ] Changes for footprinting in ABT 
 
 2010-12-23  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
@@ -36,14 +88,14 @@
 
 	* cimRsRequest.c, Interim_enum_instcoll_CIM_Namespace.GET,
 		Interim_enum_instcoll_CIM_Namespace.lines:
-	[3095225] Implement Simple REST Requests
+	[ 3095225 ] Implement Simple REST Requests
 	GetInstanceCollection (EnumInstances) support
 
 2010-12-06 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* cimRsRequest.c, ec_interop_class_collectionInterim.GET, 
 		ec_interop_class_collectionInterim.lines:
-	[3095225] Implement Simple REST Requests
+	[ 3095225 ] Implement Simple REST Requests
 	GetClassCollection (EnumClasses) support
 
 2010-11-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
@@ -54,7 +106,7 @@
 2010-11-18 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* cimRsRequest.c, cimRequest.c:
-	[3095225] Implement Simple REST Requests
+	[ 3095225 ] Implement Simple REST Requests
 	GetClass support
 
 2010-11-18  Chris Buccella  <buccella@linux.vnet.ibm.com>
@@ -96,7 +148,7 @@
 
 2010-11-08 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* Makefile.am
-	[3104761] cimRsRequest.h missing from make-dist tarball
+	[ 3104761 ] cimRsRequest.h missing from make-dist tarball
 
 2010-11-08  Chris Buccella  <buccella@linux.vnet.ibm.com>
 	* providerDrv.c:
@@ -105,11 +157,11 @@
 	
 2010-11-04 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* cimrstest.sh
-	[3095225] Implement Simple REST Requests
+	[ 3095225 ] Implement Simple REST Requests
 
 2010-11-04 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* httpAdapter.c
-	[3095225] Implement Simple REST Requests
+	[ 3095225 ] Implement Simple REST Requests
 		Fix for 0 payload requests
 
 2010-10-28  Chris Buccella  <buccella@linux.vnet.ibm.com>
@@ -118,8 +170,8 @@
 
 2010-10-26 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 	* cimRsRequest.c, cimRsRequest.h, cimRequest.c
-	[3095225] Implement Simple REST Requests
-		GetInstance and DeleteInstance functional
+	[ 3095225 ] Implement Simple REST Requests
+	GetInstance and DeleteInstance functional
 
 2010-10-18  Chris Buccella  <buccella@linux.vnet.ibm.com>
 

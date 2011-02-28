@@ -1355,7 +1355,7 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
       } else
         removeHandler(ha, key);
     } else {
-      setStatus(&st, CMPI_RC_ERR_NOT_FOUND, "Handler objectnot found");
+      setStatus(&st, CMPI_RC_ERR_NOT_FOUND, "Handler object not found");
     }
     if (key)
       free(key);

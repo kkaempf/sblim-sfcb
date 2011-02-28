@@ -128,17 +128,6 @@ QUALREP_FILES =
 QUALREP_HEADER =
 endif
 
-if JDBC
-JDBC_FILES = \
-    dbpAdapter.c \
-    sqlLexer.l \
-    sqlParser.y \
-    sqlStatement.c \
-    avltree.c
-else
-JDBC_FILES =
-endif
-
 if PAM
     PAM_LIBS = libsfcBasicPAMAuthentication.la 
 else
@@ -230,18 +219,9 @@ libsfcBrokerCore_la_SOURCES = \
     cimXmlGen.c \
     mrwlock.c \
     mlog.c \
-    $(JDBC_FILES) \
     $(QUALREP_FILES)
 
 libsfcBrokerCore_la_CFLAGS = $(AM_CFLAGS) @SFCB_CMPI_OS@ 
-
-if JDBC
-sqlLexer.c: $(srcdir)/sqlLexer.l
-	$(LEX) -t $< | sed -e "s/yy/sfcSql/g" > $@
-
-sqlParser.c: $(srcdir)/sqlParser.y
-	$(YACC) $(AM_YFLAGS) -p sfcSql -o $@ $< 
-endif
 
 queryLexer.c: $(srcdir)/queryLexer.l
 	$(LEX) -t $< | sed -e "s/yy/sfcQuery/g" > $@

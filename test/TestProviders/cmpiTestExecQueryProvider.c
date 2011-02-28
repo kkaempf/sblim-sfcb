@@ -162,10 +162,12 @@ evalute_selectcond(const CMPISelectCond *cond,
         rc = CMGetPredicateData(pred,
                                 &pred_type,
                                 &pred_op, &left_side, &right_side);
+	if (left_side != NULL) {
         // LS has the name. Get the predicate using another mechanism.
         pred2 =
             CMGetPredicate(subcnd, CMGetCharsPtr(left_side, &rc_String),
                            &rc);
+	}
       }
     }
   }
@@ -230,6 +232,7 @@ _setProperty(CMPIInstance *ci, const char *p)
   CMPIValue       val;
   const char     *property;
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
+  CMPIChar16      c_val = 0x0063;
   if (strncmp(p, _ClassName, _ClassName_size) == 0) {
     property = p + _ClassName_size + 1;
   } else
@@ -244,7 +247,7 @@ _setProperty(CMPIInstance *ci, const char *p)
   else if ((strncmp(property, "s", 1) == 0) && (strlen(property) == 1)) {
     rc = CMSetProperty(ci, "s", (CMPIValue *) "Hello", CMPI_chars);
   } else if ((strncmp(property, "c", 1) == 0) && (strlen(property) == 1)) {
-    rc = CMSetProperty(ci, "c", (CMPIValue *) "c", CMPI_char16);
+    rc = CMSetProperty(ci, "c", (CMPIValue *) &c_val, CMPI_char16);
   }
 
   else if ((strncmp(property, "n32", 3) == 0) && (strlen(property) == 3)) {
