@@ -1,3 +1,8 @@
+2011-02-28 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* Makefile.am, configure.ac, README, most .c files:
+	[ 3177587 ] create sfcCommon library
+
 2011-02-23  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* providerDrv.c:
@@ -5,8 +10,8 @@
 
 2011-01-13 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
-       * ABTScript:
-       [ 3152523 ] Changes for footprinting in ABT 
+	* ABTScript:
+	[ 3152523 ] Changes for footprinting in ABT 
 
 2011-02-18 Narasimha Sharoff <nsharoff@us.ibm.com>
 

@@ -327,6 +327,11 @@ Options:
                 This option may require the GNU_SOURCE compiler flag if
                 building under glibc 2.8+. (CFLAGS=-D_GNU_SOURCE ./configure)
 
+        --disable-sfcCommon
+                Disables the sfcCommon libraries included in SFCB and uses
+                the installed shared library.
+                Default=enabled (local libraries used)
+
 
 9. Downloading the CIM Schema
 =============================
