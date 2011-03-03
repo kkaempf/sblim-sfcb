@@ -1,3 +1,9 @@
+2011-03-03 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* Makefile.am, configure.ac, README:
+	[ 3177587 ] create sfcCommon library
+	Rollback changes for a devel branch.
+
 2011-02-28 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* Makefile.am, configure.ac, README, most .c files:
