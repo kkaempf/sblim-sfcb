@@ -80,7 +80,11 @@ _sfcBasicAuthenticateRemote(char *user, char *pw, char *rhost)
 
   if (rc == PAM_SUCCESS) {
     retval = 1;
-  } else {
+  } 
+  else if (rc == PAM_NEW_AUTHTOK_REQD || rc == PAM_ACCT_EXPIRED) {
+    retval = -1;
+  }
+  else {
     retval = 0;
   }
 
