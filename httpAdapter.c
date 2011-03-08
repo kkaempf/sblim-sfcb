@@ -113,6 +113,11 @@ static int      get_cert(int, X509_STORE_CTX *);
 static int      ccValidate(X509 *, char **, int);
 #endif
 
+/* return codes used by baValidate */
+#define AUTH_PASS 1
+#define AUTH_FAIL 0
+#define AUTH_EXPIRED -1
+
 static key_t    httpProcSemKey;
 static key_t    httpWorkSemKey;
 static int      httpProcSem;
@@ -232,49 +237,47 @@ baValidate(char *cred, char **principal)
 {
   char           *auth,
                  *pw = NULL;
-  int             i,
-                  err = 0;
+  int             i;
   static void    *authLib = NULL;
   static Authenticate authenticate = NULL;
   char            dlName[512];
-  int             ret = 0;
+  int             ret = AUTH_FAIL;
 
   if (strncasecmp(cred, "basic ", 6))
-    return 0;
+    return AUTH_FAIL;
   auth = decode64(cred + 6);
-  for (i = 0; i < strlen(auth); i++)
+  for (i = 0; i < strlen(auth); i++) {
     if (auth[i] == ':') {
       auth[i] = 0;
       pw = &auth[i + 1];
       break;
     }
+  }
 
-  if (err == 0 && authLib == NULL) {
+  if (authLib == NULL) {
     char           *ln;
-    err = 1;
     if (getControlChars("basicAuthlib", &ln) == 0) {
       libraryName(NULL, ln, dlName, 512);
       if ((authLib = dlopen(dlName, RTLD_LAZY))) {
         authenticate = dlsym(authLib, "_sfcBasicAuthenticate");
-        if (authenticate)
-          err = 0;
       }
     }
-    if (err)
+    if (authenticate == NULL) {
       mlogf(M_ERROR, M_SHOW, "--- Authentication exit %s not found\n",
             dlName);
+      ret = AUTH_FAIL;
+    }
   }
 
-  if (err) {
-    ret = 1;
-  } else {
+  if (authenticate) {
     *principal = strdup(auth);
-    if (authenticate(auth, pw))
-      ret = 1;
+    ret = authenticate(auth, pw);
+    if (ret == AUTH_PASS)  ret = AUTH_PASS;
+    else if (ret == AUTH_EXPIRED)  ret = AUTH_EXPIRED;
+    else  ret = AUTH_FAIL;
   }
 
   free(auth);
-
   return ret;
 }
 
