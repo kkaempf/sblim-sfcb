@@ -203,7 +203,6 @@ releaseClient(Client * mb)
     CMRelease(cl->connection);
 
   free(cl);
-  closeLogging();
   return rc;
 }
 
@@ -1937,6 +1936,7 @@ static void    *
 release(ClientEnv *ce)
 {
   void           *lib = ce->hdl;
+  closeLogging();
   CONNECT_LOCK();
   if (localConnectCount > 0)
     localConnectCount -= 1;
