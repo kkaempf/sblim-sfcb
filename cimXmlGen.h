@@ -30,14 +30,8 @@
 
 #include "native.h"
 #include "trace.h"
-#include "string.h"
-
-#include "config.h"
-#ifdef SFCCOMMON
 #include "utilft.h"
-#else
-#include <sfcCommon/utilft.h>
-#endif
+#include "string.h"
 
 #include "queryOperation.h"
 

@@ -23,13 +23,7 @@
 #ifndef INTERNAL_PROVIDER_H
 #define INTERNAL_PROVIDER_H
 
-#include "config.h"
-#ifdef SFCCOMMON
 #include "utilft.h"
-#else
-#include <sfcCommon/utilft.h>
-#endif
-
 #include "cmpi/cmpidt.h"
 
 CMPIStatus      InternalProviderEnumInstanceNames(CMPIInstanceMI * mi,

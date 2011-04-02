@@ -19,15 +19,10 @@
  *
  */
 
+#include "utilft.h"
+
 #include "cmpi/cmpimacs.h"
 #include "avltree.h"
-
-#include "config.h"
-#ifdef SFCCOMMON
-#include "utilft.h"
-#else
-#include <sfcCommon/utilft.h>
-#endif
 
 #define DEFAULTDB "root/cimv2"
 /*

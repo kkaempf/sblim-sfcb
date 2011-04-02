@@ -28,16 +28,10 @@
 #include "cmpi/cmpift.h"
 #include "cmpiftx.h"
 #include "msgqueue.h"
+#include "utilft.h"
 #include "providerMgr.h"
 #include <time.h>
 #include <pwd.h>
-
-#include "config.h"
-#ifdef SFCCOMMON
-#include "utilft.h"
-#else
-#include <sfcCommon/utilft.h>
-#endif
 
 #ifdef __cplusplus
 extern          "C" {
