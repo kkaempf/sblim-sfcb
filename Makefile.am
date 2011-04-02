@@ -34,7 +34,7 @@ MANFILES=man/genSslCert.1 man/getSchema.1 man/sfcbd.1 man/sfcbmof.1 \
 	man/sfcbrepos.1 man/sfcbstage.1 man/sfcbunstage.1 man/sfcbuuid.1 \
 	man/wbemcat.1 man/xmltest.1
 
-BUILT_SOURCES=queryParser.c queryLexer.c sqlParser.c sqlLexer.c cimXmlOps.c cimXmlParserProcessed.c $(MANFILES)
+BUILT_SOURCES=queryParser.c queryLexer.c cimXmlOps.c cimXmlParserProcessed.c $(MANFILES)
 
 AM_YFLAGS=-d
 AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sfcbconfdir)\" \
@@ -416,7 +416,7 @@ noinst_HEADERS=array.h $(SLP_INC) httpComm.h control.h    providerMgr.h \
 	cmpiftx.h cmpimacsx.h \
 	fileRepository.h internalProvider.h \
 	selectexp.h queryOperation.h \
-	sfcVersion.h mrwlock.h sqlStatement.h avltree.h \
+	sfcVersion.h mrwlock.h avltree.h \
         cimcClientSfcbLocal.h $(QUALREP_HEADER) cmpidtx.h classSchemaMem.h \
         objectpath.h instance.h $(SLP_HEADER) classProviderCommon.h
 

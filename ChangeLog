@@ -1,3 +1,8 @@
+2011-04-02  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* sqlLexer.l, sqlParser.y, sqlStatement.c, sqlStatement.h, Makefile.am:
+	[ 3175888 ] Remove JDBC support from SFCB 1.4.x 
+
 2011-04-01  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* elementCapabilitiesProvider.c:
