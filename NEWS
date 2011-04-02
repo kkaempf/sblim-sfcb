@@ -7,8 +7,9 @@ New features:
 
 Bugs fixed: 
 
+Everything in 1.3.11, plus:
+
 - 3022940 Remove dead SLP code dealing with proc management
-- 3162016 sfcbd Segmentation fault in cleanupCimXmlRequest
 - 3175888 Remove JDBC support from SFCB 1.4.x
 - 3082573 Typo in interopProvider
 - 3177707 ExecQuery 1 to 4 tests segfault on power LPAR
@@ -68,6 +69,8 @@ Bugs fixed:
 - 3203290 Basic Auth Should Consider Expired Passwords
 - 3202420 CDATA value in a string property is improperly XML escaped
 - 3038078 Can create indication filters and destinations w/o key props
+- 3265502 CMPIContext not released in elementCapabilitiesProvider
+- 3162016 sfcbd Segmentation fault in cleanupCimXmlRequest
 
 Changes in 1.3.10
 =================

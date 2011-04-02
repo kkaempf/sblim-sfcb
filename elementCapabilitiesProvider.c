@@ -94,6 +94,7 @@ ElementCapabilitiesInitInstances(const CMPIContext *ctx)
   CMSetProperty(ci, "ManagedElement", &left, CMPI_ref);
   CMSetProperty(ci, "Capabilities", &right, CMPI_ref);
   CBCreateInstance(_broker, ctxLocal, op, ci, NULL);
+  CMRelease(ctxLocal);
   return;
 }
 
