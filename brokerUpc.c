@@ -29,7 +29,6 @@
 #include "providerRegister.h"
 #include "objectImpl.h"
 #include "msgqueue.h"
-#include "utilft.h"
 #include "config.h"
 
 #ifdef HAVE_INDICATIONS
