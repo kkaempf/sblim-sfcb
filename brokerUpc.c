@@ -24,17 +24,13 @@
 
 #include "support.h"
 #include "native.h"
+#include "utilft.h"
 #include "providerMgr.h"
 #include "providerRegister.h"
 #include "objectImpl.h"
 #include "msgqueue.h"
-#include "config.h"
-
-#ifdef SFCCOMMON
 #include "utilft.h"
-#else
-#include <sfcCommon/utilft.h>
-#endif
+#include "config.h"
 
 #ifdef HAVE_INDICATIONS
 #define SFCB_INCL_INDICATION_SUPPORT 1

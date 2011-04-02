@@ -23,13 +23,7 @@
 #include "native.h"
 #include "trace.h"
 #include "constClass.h"
-
-#include "config.h"
-#ifdef SFCCOMMON
 #include "utilft.h"
-#else
-#include <sfcCommon/utilft.h>
-#endif
 
 extern const char *opGetClassNameChars(const CMPIObjectPath * cop);
 extern const char *opGetNameSpaceChars(const CMPIObjectPath * cop);

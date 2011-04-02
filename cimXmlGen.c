@@ -29,16 +29,11 @@
 
 #include "native.h"
 #include "trace.h"
+#include "utilft.h"
 #include "string.h"
 
 #include "queryOperation.h"
 #include "config.h"
-
-#ifdef SFCCOMMON
-#include "utilft.h"
-#else
-#include <sfcCommon/utilft.h>
-#endif
 
 #ifdef SFCB_IX86
 #define SFCB_ASM(x) asm(x)

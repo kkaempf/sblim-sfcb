@@ -20,6 +20,7 @@
  */
 
 #include "sqlStatement.h"
+#include "utilft.h"
 
 #include "cimXmlParser.h"       // Provider operationen
 #include "cmpi/cmpidt.h"
@@ -27,12 +28,6 @@
 #include "objectImpl.h"
 #include "cmpi/cmpimacs.h"
 #include "config.h"
-
-#ifdef SFCCOMMON
-#include "utilft.h"
-#else
-#include <sfcCommon/utilft.h>
-#endif
 
 #include <stdio.h>
 #include <string.h>

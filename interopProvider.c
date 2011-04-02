@@ -27,6 +27,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "fileRepository.h"
+#include "utilft.h"
 #include "trace.h"
 #include "queryOperation.h"
 #include "providerMgr.h"
@@ -35,13 +36,6 @@
 #include "objectpath.h"
 #include <time.h>
 #include "instance.h"
-
-#include "config.h"
-#ifdef SFCCOMMON
-#include "utilft.h"
-#else
-#include <sfcCommon/utilft.h>
-#endif
 
 #define LOCALCLASSNAME "InteropProvider"
 

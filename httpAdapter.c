@@ -41,16 +41,10 @@
 
 #include "cmpi/cmpidt.h"
 #include "msgqueue.h"
+#include "utilft.h"
 #include "trace.h"
 #include "cimRequest.h"
 #include "support.h"
-
-#include "config.h"
-#ifdef SFCCOMMON
-#include "utilft.h"
-#else
-#include <sfcCommon/utilft.h>
-#endif
 
 #include <pthread.h>
 #include <semaphore.h>

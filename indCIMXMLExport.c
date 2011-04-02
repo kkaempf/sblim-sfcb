@@ -20,15 +20,9 @@
  */
 
 #include <curl/curl.h>
+#include "utilft.h"
 #include "trace.h"
 #include <string.h>
-
-#include "config.h"
-#ifdef SFCCOMMON
-#include "utilft.h"
-#else
-#include <sfcCommon/utilft.h>
-#endif
 
 extern UtilStringBuffer *newStringBuffer(int);
 extern int      getControlChars(char *id, char **val);

@@ -29,18 +29,12 @@
 #include <ctype.h>
 #include "providerRegister.h"
 #include "fileRepository.h"
+#include "utilft.h"
 #include "trace.h"
 #include "constClass.h"
 #include "internalProvider.h"
 #include "native.h"
 #include "objectpath.h"
-
-#include "config.h"
-#ifdef SFCCOMMON
-#include "utilft.h"
-#else
-#include <sfcCommon/utilft.h>
-#endif
 
 #define LOCALCLASSNAME "InternalProvider"
 

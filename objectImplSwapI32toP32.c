@@ -24,14 +24,8 @@
 #include <byteswap.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/utsname.h>
-
-#include "config.h"
-#ifdef SFCCOMMON
 #include "utilft.h"
-#else
-#include <sfcCommon/utilft.h>
-#endif
+#include <sys/utsname.h>
 
 #ifdef SETCLPFX
 #undef SETCLPFX

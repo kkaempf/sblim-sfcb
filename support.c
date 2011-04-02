@@ -720,13 +720,7 @@ releaseHeap(void *hc)
   _SFCB_EXIT();
 }
 
-#include "config.h"
-#ifdef SFCCOMMON
 #include "utilft.h"
-#else
-#include <sfcCommon/utilft.h>
-#endif
-
 #include "providerRegister.h"
 
 ProviderRegister *pReg = NULL;
