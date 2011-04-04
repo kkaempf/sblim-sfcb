@@ -5,6 +5,7 @@ New features:
 
 Bugs fixed: 
 - 3261868 Enum CQL filter on NULL cause incorrect rsp
+=======
 
 Changes in 1.4.1
 ================
