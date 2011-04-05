@@ -1,3 +1,9 @@
+2011-04-05  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* httpAdapter.c:
+	[ 3203290 ] Basic Auth Should Consider Expired Passwords
+	(one line of the change was missing from the previous commit)
+
 2011-04-05 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* cimcClientSfcbLocal.c:
