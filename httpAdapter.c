@@ -272,6 +272,7 @@ baValidate(char *cred, char **principal)
   }
 
   free(auth);
+  fprintf(stderr, "baValidate: returning %d\n", ret);
   return ret;
 }
 
@@ -1025,9 +1026,8 @@ doHttpRequest(CommHndl conn_fd)
   }
 #endif
   if (!authorized && !discardInput && doBa) {
-    if (!
-        (inBuf.authorization
-         && baValidate(inBuf.authorization, &inBuf.principal))) {
+    if (inBuf.authorization && 
+        (baValidate(inBuf.authorization,&inBuf.principal) != AUTH_PASS)) {
       char            more[] =
           "WWW-Authenticate: Basic realm=\"cimom\"\r\n";
       genError(conn_fd, &inBuf, 401, "Unauthorized", more);
