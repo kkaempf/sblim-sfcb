@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.38 2010/11/10 23:48:25 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.39 2011/04/05 21:02:53 mchasal Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -779,11 +779,20 @@ static CMPIEnumeration * execQuery(
    
    oHdr.nameSpace=setCharsMsgSegment((char*)ns->hdl);
    qs=parseQuery(MEM_TRACKED,query,lang,NULL,&irc);
+
+   if (irc) {
+      CIMCSetStatusWithChars(rc, CMPI_RC_ERR_INVALID_QUERY,
+         "syntax error in query.");
+      _SFCB_RETURN(NULL);
+   }
    
    fCls=qs->ft->getFromClassList(qs);
    if (fCls==NULL || *fCls==NULL) {
      mlogf(M_ERROR,M_SHOW,"--- from clause missing\n");
-     abort();
+     CIMCSetStatusWithChars(rc, CMPI_RC_ERR_INVALID_QUERY,
+        "required from clause is missing.");
+     _SFCB_RETURN(NULL);
+
    }
    oHdr.className = setCharsMsgSegment(*fCls);
 
