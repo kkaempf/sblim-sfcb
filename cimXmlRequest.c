@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.57 2010/01/15 20:58:33 buccella Exp $
+ * $Id: cimXmlRequest.c,v 1.61 2010/12/21 23:01:49 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -874,7 +874,7 @@ static RespSegments createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
    
    tmp = cl;
    cl = ClClassRebuildClass(cl,NULL); 
-   free(tmp);
+   ClClassFreeClass(tmp);
    cls=initConstClass(cl);
 
    sreq.principal = setCharsMsgSegment(ctx->principal);
@@ -898,6 +898,7 @@ static RespSegments createClass(CimXmlRequestContext * ctx, RequestHdr * hdr)
       resp = invokeProvider(&binCtx);
       closeProviderContext(&binCtx);
       resp->rc--;
+      ClClassFreeClass(cl);
       if (resp->rc == CMPI_RC_OK) {
 	if (resp) {
 	  free(resp);
@@ -2027,7 +2028,7 @@ int updateMethodParamTypes(RequestHdr *hdr) {
       if (isEI) continue;
     }
 
-    if ((ptok->type == 0) || (ptok->type == CMPI_ARRAY)) {
+    if ((ptok->type==0) || (ptok->type == CMPI_ARRAY)) {
       /* Type was unknown, fill it in */
       // printf("parameter %s missing type, using %s\n", sname, paramType(pdata.type));
       ptok->type = pdata.type;
@@ -2076,7 +2077,7 @@ static RespSegments invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
 
    for (p = req->paramValues.first; p; p = p->next) {
      /* Update untyped params (p->type==0) and verify those that were specified */
-     if (p->type == 0 || p->type == CMPI_ARRAY || vmpt) {
+     if (p->type==0 || p->type == CMPI_ARRAY || vmpt) {
        rc = updateMethodParamTypes(hdr);
 
        if (rc != CMPI_RC_OK) {
@@ -2106,6 +2107,17 @@ static RespSegments invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
    _SFCB_TRACE(1, ("--- Getting Provider context"));
    irc = getProviderContext(&binCtx, (OperationHdr *) req);
 
+   if (irc == MSG_X_SFCB_PROVIDER) {
+     if(*req->method == '_') {
+       RespSegments  rs;
+       rs = methodErrResponse(hdr, getErrSegment(CMPI_RC_ERR_ACCESS_DENIED, NULL));
+       closeProviderContext(&binCtx);
+       _SFCB_RETURN(rs);
+     } else {
+       irc = MSG_X_PROVIDER;
+     }
+   }
+                                                 
    _SFCB_TRACE(1, ("--- Provider context gotten"));
    if (irc == MSG_X_PROVIDER) {
       RespSegments rs;
@@ -2222,10 +2234,10 @@ static RespSegments setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
    _SFCB_ENTER(TRACE_CIMXMLPROC, "setProperty");
    CMPIObjectPath *path;
    CMPIInstance *inst;
-   CMPIType t;
+   CMPIType t, type;
    CMPIStatus rc;
-   CMPIValue val;
-   int irc;
+   CMPIValue val, *valp;
+   int irc, i, m;
    BinRequestContext binCtx;
    BinResponseHdr *resp;
    SetPropertyReq sreq = BINREQ(OPS_SetProperty, 3);
@@ -2235,6 +2247,13 @@ static RespSegments setProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
    hdr->className=req->op.className.data;
 
    path = TrackedCMPIObjectPath(req->op.nameSpace.data, req->instanceName.className, &rc);
+   for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
+      valp = getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
+                                req->instanceName.bindings.keyBindings[i].value,
+                                &req->instanceName.bindings.keyBindings[i].ref,
+                                &val, &type, req->op.nameSpace.data);
+      CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp, type);
+   }
 
    inst = internal_new_CMPIInstance(MEM_TRACKED, NULL, NULL, 1);
 

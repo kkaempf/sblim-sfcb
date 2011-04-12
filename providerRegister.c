@@ -116,11 +116,14 @@ static int addProviderToHT(ProviderInfo *info, UtilHashTable *ht)
 		++idx;
 	    }
 	    /* additional namespace for existing classname and provider name */
+            mlogf(M_INFO,M_SHOW,"--- Collating namespaces for registration of class %s, provider %s; consider single providerRegister entry\n", info->className, info->providerName);
 	    checkDummy->ns=(char**)realloc(checkDummy->ns,sizeof(char*)*(idx+2));
 	    checkDummy->ns[idx] = strdup(info->ns[0]);
 	    checkDummy->ns[++idx] = NULL;
 	    freeInfoPtr(info);
         } else {
+            /* add info to the nIR linked list */
+            info->nextInRegister = checkDummy->nextInRegister;
             checkDummy->nextInRegister = info;
         }
     } else {
@@ -175,7 +178,7 @@ ProviderRegister *newProviderRegister()
      dir = "/var/lib/sfcb/registration";
    }
 
-   strncpy(fin, dir, sizeof(fin)-18); /* 18 = strlen("/providerRegister")+1 */
+   strcpy(fin, dir);
    strcat(fin, "/providerRegister");
    in = fopen(fin, "r");
    if (in == NULL) 
@@ -189,7 +192,7 @@ ProviderRegister *newProviderRegister()
       bb->ht = UtilFactory->newHashTable(61,
                   UtilHashTable_charKey | UtilHashTable_ignoreKeyCase);
 
-      while (fgets(fin, sizeof(fin), in)) {
+      while (fgets(fin, 1024, in)) {
          n++;
          if (stmt) free(stmt);
          stmt = strdup(fin);

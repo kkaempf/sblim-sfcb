@@ -81,7 +81,6 @@ static int doFork = 0;
 int noChunking = 0;
 int sfcbSSLMode = 0;
 int httpLocalOnly = 0;  /* 1 = only listen on loopback interface */
-static int hBase;
 static int hMax;
 static int httpProcIdX;
 static int stopAccepting=0;
@@ -101,6 +100,11 @@ int ccVerifyMode = CC_VERIFY_IGNORE;
 static int get_cert(int,X509_STORE_CTX*);
 static int ccValidate(X509*, char**, int);
 #endif
+
+/* return codes used by baValidate */
+#define AUTH_PASS 1
+#define AUTH_FAIL 0
+#define AUTH_EXPIRED -1
 
 static key_t httpProcSemKey;
 static key_t httpWorkSemKey;
@@ -122,7 +126,6 @@ extern void dumpTiming(int pid);
 extern char * configfile;
 extern int inet_aton(const char *cp, struct in_addr *inp);
 
-int sfcBrokerPid=0;
 static unsigned int sessionId;
 extern char *opsName[];
 
@@ -145,25 +148,14 @@ typedef struct _buffer {
  #define USE_INET6
 #endif
 
-//#define USE_THREADS
-//for use by the process thread in handleHttpRequest()
-struct processThreadParams {
-   int breakloop;
-   CommHndl conn_fd;
-   int connFd;
-   fd_set httpfds;
-   struct timeval httpTimeout;
-   int isReady;
-};
-
-void initHttpProcCtl(int p, int sslmode)
+void initHttpProcCtl(int p)
 {
-   httpProcSemKey=ftok(SFCB_BINARY,'H' + sslmode);
-   httpWorkSemKey=ftok(SFCB_BINARY,'W' + sslmode);
+   httpProcSemKey=ftok(SFCB_BINARY,'H');
+   httpWorkSemKey=ftok(SFCB_BINARY,'W');
    union semun sun;
    int i;
 
-   mlogf(M_INFO,M_SHOW,"--- Max Http%s procs: %d\n",sslmode?"s":"",p);
+   mlogf(M_INFO,M_SHOW,"--- Max Http procs: %d\n", p);
    if ((httpProcSem=semget(httpProcSemKey,1,0600))!=-1) 
       semctl(httpProcSem,0,IPC_RMID,sun);
       
@@ -200,49 +192,52 @@ int remProcCtl()
    return 0;
 }
 
-
+/*
+ * Call the authentication library
+ * Return 1 on success, 0 on fail, -1 on expired
+ */
 int baValidate(char *cred, char **principal)
 {
    char *auth,*pw=NULL;
-   int i,err=0;
+   int i;
    static void *authLib=NULL;
    static Authenticate authenticate=NULL;
    char dlName[512];
-   int ret = 0;
+   int ret = AUTH_FAIL;
 
-   if (strncasecmp(cred,"basic ",6)) return 0;
+   if (strncasecmp(cred,"basic ",6)) return AUTH_FAIL;
    auth=decode64(cred+6);
-   for (i=0; i<strlen(auth); i++)
+   for (i=0; i<strlen(auth); i++) {
       if (auth[i]==':') {
           auth[i]=0;
           pw=&auth[i+1];
           break;
       }
+   }
 
-   if (err==0 && authLib==NULL) {
+   if (authLib==NULL) {
       char *ln;
-      err=1;
       if (getControlChars("basicAuthlib", &ln)==0) {
          libraryName(NULL,ln,dlName, 512);
         if ((authLib=dlopen(dlName, RTLD_LAZY))) {
             authenticate= dlsym(authLib, "_sfcBasicAuthenticate");
-            if (authenticate) err=0;
          }
       }
-      if (err) mlogf(M_ERROR,M_SHOW,"--- Authentication exit %s not found\n",dlName);
+      if (authenticate == NULL) {
+	mlogf(M_ERROR,M_SHOW,"--- Authentication exit %s not found or dlsym failed\n",dlName);
+	ret = AUTH_FAIL;
+      }
    }
 
-   if (err) {
-     ret = 1;
-   } 
-   else {
+   if (authenticate) {
      *principal=strdup(auth);
-     if (authenticate(auth,pw)) 
-       ret = 1;
+     ret = authenticate(auth,pw);
+     if (ret == AUTH_PASS)  ret = AUTH_PASS;
+     else if (ret == AUTH_EXPIRED)  ret = AUTH_EXPIRED;
+     else  ret = AUTH_FAIL;
    }
 
    free(auth);
-
    return ret;
 }
 
@@ -415,13 +410,15 @@ static int getPayload(CommHndl conn_fd, Buffer * b)
 {
    unsigned int c = b->length - b->ptr;
    int rc = 0;
-   b->content = (char *) malloc(b->content_length + 8);
-   if (c) memcpy(b->content, (b->data) + b->ptr, c);
 
    if (c > b->content_length) {
-     mlogf(M_INFO,M_SHOW,"--- HTTP Content-Length is lying; content truncated\n");
-     c = b->content_length;
+     mlogf(M_INFO, M_SHOW,
+	   "--- HTTP Content-Length is lying; rejecting %d %d\n", c, b->content_length);
+     return -1;
    }
+
+   b->content = (char *) malloc(b->content_length + 8);
+   if (c) memcpy(b->content, (b->data) + b->ptr, c);
 
    rc = readData(conn_fd, (b->content) + c, b->content_length - c);
    *((b->content) + b->content_length) = 0;
@@ -850,7 +847,7 @@ static int doHttpRequest(CommHndl conn_fd)
            exit(1);
          }
          unsigned int maxLen;
-         if (getControlUNum("httpMaxContentLength", &maxLen) != 0) {
+         if ((getControlUNum("httpMaxContentLength", &maxLen) != 0) || (maxLen == 0)) {
            genError(conn_fd, &inBuf, 501, "Server misconfigured (httpMaxContentLength)", NULL);
            _SFCB_TRACE(1, ("--- exiting: bad config httpMaxContentLength"));
            commClose(conn_fd);
@@ -933,7 +930,7 @@ static int doHttpRequest(CommHndl conn_fd)
    }
 #endif
    if (!authorized && !discardInput && doBa) {
-     if (!(inBuf.authorization && baValidate(inBuf.authorization,&inBuf.principal))) {
+     if (inBuf.authorization && (baValidate(inBuf.authorization,&inBuf.principal) != AUTH_PASS)) {
        char more[]="WWW-Authenticate: Basic realm=\"cimom\"\r\n";
        genError(conn_fd, &inBuf, 401, "Unauthorized", more);
        /* we continue to parse headers and empty the socket
@@ -1017,7 +1014,8 @@ static int doHttpRequest(CommHndl conn_fd)
 
    _SFCB_TRACE(1, ("--- Generate http response"));
    if (response.chunkedMode==0) writeResponse(conn_fd, response);
-   cleanupCimXmlRequest(&response);
+   if (response.buffer != NULL)
+     cleanupCimXmlRequest(&response);
 
 #ifdef SFCB_DEBUG
    if (uset && (_sfcb_trace_mask & TRACE_RESPONSETIMING) ) {
@@ -1037,112 +1035,12 @@ static int doHttpRequest(CommHndl conn_fd)
 }
 
 
-#ifdef USE_THREADS
-/**
- * from handleHttpRequest()
- *
- */
-void* processThreadFunc(void* params) {
-  //cast the param struct 
-  struct processThreadParams* p = (struct processThreadParams*)params;
-
-   _SFCB_ENTER(TRACE_HTTPDAEMON, "handleHttpRequest-processthread");
-
-  processName="CIMXML-Processor";
-  
-  localMode=0;
-  if (doFork) {
-    _SFCB_TRACE(1,("--- Forked xml handler %d", currentProc))
-  }
-
-  _SFCB_TRACE(1,("--- Started xml handler %d %d", currentProc,
-		 resultSockets.receive));
-
-  if (getenv("SFCB_PAUSE_HTTP")) for (p->breakloop=0;p->breakloop==0;) {
-    fprintf(stderr,"-#- Pausing - pid: %d\n",currentProc);
-    sleep(5);
-  }   
-
-  p->conn_fd.socket=p->connFd;
-  p->conn_fd.file=fdopen(p->connFd,"a");
-  p->conn_fd.buf = NULL;
-  if (p->conn_fd.file == NULL) {
-    mlogf(M_ERROR,M_SHOW,"--- failed to create socket stream - continue with raw socket: %s\n",strerror(errno));
-  } else {
-    p->conn_fd.buf = malloc(SOCKBUFSZ);
-    if (p->conn_fd.buf) {
-      setbuffer(p->conn_fd.file,p->conn_fd.buf,SOCKBUFSZ);
-    } else {
-      mlogf(M_ERROR,M_SHOW,"--- failed to create socket buffer - continue unbuffered: %s\n",strerror(errno));
-    }
-  }
-  if (sfcbSSLMode) {
-#if defined USE_SSL
-    BIO *sslb;
-    BIO *sb=BIO_new_socket(p->connFd,BIO_NOCLOSE);
-    if (!(->conn_fd.ssl = SSL_new(ctx)))
-      intSSLerror("Error creating SSL object");
-    SSL_set_bio(p->conn_fd.ssl, sb, sb);
-    if (SSL_accept(p->conn_fd.ssl) <= 0)
-      intSSLerror("Error accepting SSL connection");
-    sslb = BIO_new(BIO_f_ssl());
-    BIO_set_ssl(sslb,p->conn_fd.ssl,BIO_CLOSE);
-    p->conn_fd.bio=BIO_new(BIO_f_buffer());
-    BIO_push(p->conn_fd.bio,sslb);
-    if (BIO_set_write_buffer_size(p->conn_fd.bio,SOCKBUFSZ)) { 
-    } else {
-      p->conn_fd.bio=NULL;
-    }
-#endif
-  } else {
-#if defined USE_SSL
-    p->conn_fd.bio=NULL;
-    p->conn_fd.ssl=NULL;
-#endif
-  }
-      
-  numRequest = 0;
-  FD_ZERO(&p->httpfds);
-  FD_SET(p->conn_fd.socket,&p->httpfds);
-  do {
-    numRequest += 1;
-        
-    if (doHttpRequest(p->conn_fd)) {
-      /* eof reached - leave */
-      break;
-    }
-    if (keepaliveTimeout==0 || numRequest >= keepaliveMaxRequest ) {
-      /* no persistence wanted or exceeded - quit */
-      break;
-    }
-    /* wait for next request or timeout */
-    p->httpTimeout.tv_sec=keepaliveTimeout;
-    p->httpTimeout.tv_usec=keepaliveTimeout;
-    p->isReady = select(p->conn_fd.socket+1,&p->httpfds,NULL,NULL,&p->httpTimeout);
-    if (p->isReady == 0) {
-      _SFCB_TRACE(1,("--- HTTP connection timeout, quit %d ", currentProc));
-      break;
-    } else if (p->isReady < 0) {
-      _SFCB_TRACE(1,("--- HTTP connection error, quit %d ", currentProc));
-      break;
-    }
-  } while (1);
-
-  commClose(p->conn_fd);
-  if (!doFork) return;
-
-  _SFCB_TRACE(1, ("--- Xml handler exiting %d", currentProc));
-  dumpTiming(currentProc);
-
-return;
-}
-#endif
 
 /**
  * called by httpDaemon
  *
  */
-static void handleHttpRequest(int connFd)
+static void handleHttpRequest(int connFd, int sslMode)
 {
    int r;
    CommHndl conn_fd;
@@ -1155,173 +1053,6 @@ static void handleHttpRequest(int connFd)
    _SFCB_ENTER(TRACE_HTTPDAEMON, "handleHttpRequest");
 
    _SFCB_TRACE(1, ("--- Forking xml handler"));
-
-#ifdef USE_THREADS
-   if (doFork) {
-//       semAcquire(httpWorkSem,0);
-//       semAcquire(httpProcSem,0);
-//       for (httpProcIdX=0; httpProcIdX<hMax; httpProcIdX++)
-//          if (semGetValue(httpProcSem,httpProcIdX+1)==0) break;
-//       procReleaseUnDo.sem_num=httpProcIdX+1; 
-
-      sessionId++;
-      //r = fork();
-      struct processThreadParams ptparams = {breakloop, conn_fd, connFd, httpfds, httpTimeout, isReady};
-      _SFCB_TRACE(1, ("--- Spawning HTTP process thread"));
-      processThreadFunc(&ptparams);
-
-      //child's thread of execution
-//       if (r==0) {
-//          currentProc=getpid();
-//          processName="CIMXML-Processor";
-//          semRelease(httpProcSem,0);
-//          semAcquireUnDo(httpProcSem,0);
-//          semReleaseUnDo(httpProcSem,httpProcIdX+1);
-//          semRelease(httpWorkSem,0);
-//          atexit(uninitGarbageCollector);                      |
-//          atexit(sunsetControl);
-//       }
-      // parent's thread of execution
-      //else if (r>0) {
-         running++;
-         _SFCB_EXIT();
-      //}
-   }
-   //else r = 0;
-
-   // fork() failed
-//    if (r < 0) {
-//       char *emsg=strerror(errno);
-//       mlogf(M_ERROR,M_SHOW,"--- fork handler: %s\n",emsg);
-//       exit(1);
-//    }
-
-   // child's thread of execution || doFork=0
-   // moved this hunk to processThreadFunc for process thread to work on; this block remains for when doFork=0
-   //if (r == 0) {
-   if (doFork == 0) {
-
-      localMode=0;
-      if (doFork) {
-         _SFCB_TRACE(1,("--- Forked xml handler %d", currentProc))
-      }
-
-      _SFCB_TRACE(1,("--- Started xml handler %d %d", currentProc,
-                   resultSockets.receive));
-
-      if (getenv("SFCB_PAUSE_HTTP")) for (breakloop=0;breakloop==0;) {
-         fprintf(stderr,"-#- Pausing - pid: %d\n",currentProc);
-         sleep(5);
-      }   
-
-      conn_fd.socket=connFd;
-      conn_fd.file=fdopen(connFd,"a");
-
-     if (conn_fd.file == NULL) {
-	mlogf(M_ERROR,M_SHOW,"--- failed to create socket stream - continue with raw socket: %s\n",strerror(errno));
-      } else {
-	conn_fd.buf = malloc(SOCKBUFSZ);
-	if (conn_fd.buf) {
-	  setbuffer(conn_fd.file,conn_fd.buf,SOCKBUFSZ);
-	} else {
-	  mlogf(M_ERROR,M_SHOW,"--- failed to create socket buffer - continue unbuffered: %s\n",strerror(errno));
-	}
-      }
-      if (sfcbSSLMode) {
-#if defined USE_SSL
-	BIO *sslb;
-	BIO *sb;
-	long flags = fcntl(connFd,F_GETFL);
-	flags |= O_NONBLOCK;
-	fcntl(connFd,F_SETFL,flags);
-	sb=BIO_new_socket(connFd,BIO_NOCLOSE);
-	if (!(conn_fd.ssl = SSL_new(ctx)))
-	  intSSLerror("Error creating SSL object");
-	SSL_set_bio(conn_fd.ssl, sb, sb);
-	while(1) {
-	  int sslacc, sslerr;
-	  sslacc = SSL_accept(conn_fd.ssl);
-	  if (sslacc == 1) {
-	    /* accepted */
-	    break;
-	  }
-	  sslerr = SSL_get_error(conn_fd.ssl,sslacc);
-	  if (sslerr == SSL_ERROR_WANT_WRITE || 
-	      sslerr == SSL_ERROR_WANT_READ) {
-	    /* still in handshake */
-	    FD_ZERO(&httpfds);
-	    FD_SET(connFd,&httpfds);
-	    httpTimeout.tv_sec=5;
-	    httpTimeout.tv_usec=0;
-	    if (sslerr == SSL_ERROR_WANT_WRITE) {
-	      isReady = select(connFd+1,NULL,&httpfds,NULL,&httpTimeout);
-	    } else {
-	      isReady = select(connFd+1,&httpfds,NULL,NULL,&httpTimeout);
-	    }
-	    if (isReady == 0) {
-	      intSSLerror("Timeout error accepting SSL connection");
-	    } else if (isReady < 0) {
-	      intSSLerror("Error accepting SSL connection");
-	    }
-	  } else {
-	    /* unexpected error */
-	    intSSLerror("Error accepting SSL connection");
-	  } 
-	}
-	flags ^= O_NONBLOCK;
-	fcntl(connFd,F_SETFL,flags);
-	sslb = BIO_new(BIO_f_ssl());
-	BIO_set_ssl(sslb,conn_fd.ssl,BIO_CLOSE);
-	conn_fd.bio=BIO_new(BIO_f_buffer());
-	BIO_push(conn_fd.bio,sslb);
-	if (BIO_set_write_buffer_size(conn_fd.bio,SOCKBUFSZ)) { 
-	} else {
-	  conn_fd.bio=NULL;
-	}
-#endif
-      } else {
-#if defined USE_SSL
-	conn_fd.bio=NULL;
-	conn_fd.ssl=NULL;
-#endif
-      }
-      
-      numRequest = 0;
-      FD_ZERO(&httpfds);
-      FD_SET(conn_fd.socket,&httpfds);
-      do {
-	numRequest += 1;
-        
-        if (doHttpRequest(conn_fd)) {
-	  /* eof reached - leave */
-	  break;
-	}
-	if (keepaliveTimeout==0 || numRequest >= keepaliveMaxRequest ) {
-	  /* no persistence wanted or exceeded - quit */
-	  break;
-	}
-	/* wait for next request or timeout */
-	httpTimeout.tv_sec=keepaliveTimeout;
-	httpTimeout.tv_usec=keepaliveTimeout;
-	isReady = select(conn_fd.socket+1,&httpfds,NULL,NULL,&httpTimeout);
-	if (isReady == 0) {
-	  _SFCB_TRACE(1,("--- HTTP connection timeout, quit %d ", currentProc));
-	  break;
-	} else if (isReady < 0) {
-	  _SFCB_TRACE(1,("--- HTTP connection error, quit %d ", currentProc));
-	  break;
-	}
-      } while (1);
-
-      commClose(conn_fd);
-      if (!doFork) return;
-
-      _SFCB_TRACE(1, ("--- Xml handler exiting %d", currentProc));
-      dumpTiming(currentProc);
-      return;
-   }
-
-#else /* end threads section, start forked process section */
 
    if (doFork) {
       semAcquire(httpWorkSem,0);
@@ -1387,7 +1118,7 @@ static void handleHttpRequest(int connFd)
 	  mlogf(M_ERROR,M_SHOW,"--- failed to create socket buffer - continue unbuffered: %s\n",strerror(errno));
 	}
       }
-      if (sfcbSSLMode) {
+      if (sslMode) {
 #if defined USE_SSL
 	BIO *sslb;
 	BIO *sb;
@@ -1479,8 +1210,6 @@ static void handleHttpRequest(int connFd)
       exit(0);
    }
 
-#endif  //end forked section
-
 }
 
 int isDir(const char *path)
@@ -1497,388 +1226,515 @@ int isDir(const char *path)
 #endif
 }
 
+
+static int
+getSocket()
+{
+  int             fd;
+  int             ru = 1;
+
+#ifdef USE_INET6                // need to check
+  fd = socket(PF_INET6, SOCK_STREAM, IPPROTO_TCP);
+  if (fd < 0) {
+    mlogf(M_INFO, M_SHOW, "--- Using IPv4 address\n");
+    fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+  }
+#else
+  fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+#endif                          // USE_INET6
+  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *) &ru, sizeof(ru));
+  return fd;
+}
+
+static int
+bindToPort(int sock, int port, void *ssin, socklen_t * sin_len)
+{
+
+#ifdef USE_INET6
+  struct sockaddr_in6 *sin = ssin;
+#else
+  struct sockaddr_in *sin = ssin;
+#endif
+
+  *sin_len = sizeof(*sin);
+
+  memset(sin, 0, *sin_len);
+
+  if (sock >= 0) {
+    if (getControlBool("httpLocalOnly", &httpLocalOnly))
+      httpLocalOnly = 0;
+
+#ifdef USE_INET6
+    sin->sin6_family = AF_INET6;
+    if (httpLocalOnly)
+      sin->sin6_addr = in6addr_loopback;
+    else
+      sin->sin6_addr = in6addr_any;
+    sin->sin6_port = htons(port);
+#else
+    sin->sin_family = AF_INET;
+    if (httpLocalOnly) {
+      const char     *loopback_int = "127.0.0.1";
+      inet_aton(loopback_int, &(sin->sin_addr));
+    } else
+      sin->sin_addr.s_addr = INADDR_ANY;
+    sin->sin_port = htons(port);
+#endif
+
+    if (bind(sock, (struct sockaddr *) sin, *sin_len) || listen(sock, 10)) {
+      mlogf(M_ERROR, M_SHOW, "--- Cannot listen on port %ld (%s)\n", port,
+            strerror(errno));
+      sleep(1);
+      return 1;
+    }
+
+    return 0;
+
+  }
+
+  return 1;
+}
+
+#ifdef HAVE_UDS
+static int
+bindUDS(int fd, char *path, struct sockaddr_un *sun, socklen_t sun_len)
+{
+  if (fd >= 0) {
+    unlink(path);
+
+    size_t          gbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
+    char            gbuf[gbuflen];
+    struct group   *pgrp = NULL;
+    struct group    grp;
+    gid_t           oldfsgid = 0;
+
+    int             rc = getgrnam_r("sfcb", &grp, gbuf, gbuflen, &pgrp);
+    if (rc == 0 && pgrp) {
+#ifdef HAVE_SYS_FSUID_H
+      oldfsgid = setfsgid(pgrp->gr_gid);
+#else
+      oldfsgid = setegid(pgrp->gr_gid);
+#endif
+    }
+    mode_t          oldmask = umask(0007);
+    if (bind(fd, (struct sockaddr *) sun, sun_len) || listen(fd, 10)) {
+      mlogf(M_ERROR, M_SHOW,
+            "--- Cannot listen on unix socket %s (%s) %d\n", path,
+            strerror(errno));
+      sleep(1);
+      return 1;
+    }
+    umask(oldmask);
+    if (pgrp) {
+#ifdef HAVE_SYS_FSUID_H
+      setfsgid(oldfsgid);
+#else
+      setegid(oldfsgid);
+#endif
+    }
+
+    return 0;
+  }
+
+  return 1;
+}
+#endif                          // HAVE_UDS
+
+static void
+acceptRequest(int sock, void *ssin, socklen_t sin_len, int sslMode)
+{
+
+#ifdef USE_INET6
+  struct sockaddr_in6 *sin = ssin;
+#else
+  struct sockaddr_in *sin = ssin;
+#endif
+
+  int             connFd;
+  char           *emsg;
+
+  if ((connFd = accept(sock, (__SOCKADDR_ARG) & *sin, &sin_len)) < 0) {
+    if (errno == EINTR || errno == EAGAIN) {
+      return;
+    }
+    emsg = strerror(errno);
+    mlogf(M_ERROR, M_SHOW, "--- accept error %s\n", emsg);
+    abort();
+  }
+
+  handleHttpRequest(connFd, sslMode);
+  close(connFd);
+}
+
+#ifdef USE_SSL
+static void
+initSSL()
+{
+
+  _SFCB_ENTER(TRACE_HTTPDAEMON, "initSSL");
+
+  char           *fnc,
+                 *fnk,
+                 *fnt,
+                 *fnl;
+  int             rc;
+  ctx = SSL_CTX_new(SSLv23_method());
+  getControlChars("sslCertificateFilePath", &fnc);
+  _SFCB_TRACE(1, ("---  sslCertificateFilePath = %s", fnc));
+  if (SSL_CTX_use_certificate_chain_file(ctx, fnc) != 1)
+    intSSLerror("Error loading certificate from file");
+  getControlChars("sslKeyFilePath", &fnk);
+  _SFCB_TRACE(1, ("---  sslKeyFilePath = %s", fnk));
+  if (SSL_CTX_use_PrivateKey_file(ctx, fnk, SSL_FILETYPE_PEM) != 1)
+    intSSLerror("Error loading private key from file");
+  getControlChars("sslClientCertificate", &fnl);
+  _SFCB_TRACE(1, ("---  sslClientCertificate = %s", fnl));
+  if (strcasecmp(fnl, "ignore") == 0) {
+    ccVerifyMode = CC_VERIFY_IGNORE;
+    SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, 0);
+  } else if (strcasecmp(fnl, "accept") == 0) {
+    ccVerifyMode = CC_VERIFY_ACCEPT;
+    SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, get_cert);
+  } else if (strcasecmp(fnl, "require") == 0) {
+    ccVerifyMode = CC_VERIFY_REQUIRE;
+    SSL_CTX_set_verify(ctx,
+                       SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
+                       get_cert);
+  } else {
+    intSSLerror
+        ("sslClientCertificate must be one of: ignore, accept or require");
+  }
+  getControlChars("sslClientTrustStore", &fnt);
+  _SFCB_TRACE(1, ("---  sslClientTrustStore = %s", fnt));
+
+  if (ccVerifyMode != CC_VERIFY_IGNORE) {
+    if (isDir(fnt))
+      rc = SSL_CTX_load_verify_locations(ctx, NULL, fnt);
+    else
+      rc = SSL_CTX_load_verify_locations(ctx, fnt, NULL);
+    if (rc != 1)
+      intSSLerror("Error locating the client trust store");
+  }
+
+  /*
+   * SSLv2 is pretty old; no one should be needing it any more 
+   */
+  SSL_CTX_set_options(ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2 |
+                      SSL_OP_SINGLE_DH_USE);
+  /*
+   * disable weak ciphers 
+   */
+  if (SSL_CTX_set_cipher_list(ctx, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH")
+      != 1)
+    intSSLerror("Error setting cipher list (no valid ciphers)");
+
+}
+#endif                          // USE_SSL
+
+
 int httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
 {
 
 #ifdef USE_INET6
-   struct sockaddr_in6 sin;
+  struct sockaddr_in6 httpSin;
 #else
-   struct sockaddr_in sin;
-#endif
-   struct sockaddr_un sun; 
-
-   socklen_t sz,sin_len,sun_len;
-   int i,ru,rc;
-   char *cp;
-   long procs, port;
-   int listenFd=-1, connFd; 
-   int enableHttp=0;
-   fd_set httpfds;
-   int maxfdp1; 
-
-#ifdef HAVE_UDS
-   static char *udsPath=NULL;
-   int enableUds=0;
-   int  udsListenFd=-1;
+  struct sockaddr_in httpSin;
 #endif
 
-   name = argv[0];
-   debug = 1;
-   doFork = 1;
+  socklen_t       httpSin_len;
+  int             i,
+                  rc;
+  char           *cp;
+  long            procs,
+                  httpPort;
+  int             httpListenFd = -1;
+  int             enableHttp = 0;
+  fd_set          httpfds;
+  int             maxfdp1;      /* highest-numbered fd +1 */
 
-   _SFCB_ENTER(TRACE_HTTPDAEMON, "httpDaemon");
-
-   setupControl(configfile);
-   sfcbSSLMode=sslMode;
-   if (sslMode) processName="HTTPS-Daemon";
-   else processName="HTTP-Daemon";
-
-   if (sfcbSSLMode) {
-      if (getControlNum("httpsPort", &port))
-         port = 5989;
-      hBase=stBase;
-      hMax=stMax;
-   }
-   else {
-      if (getControlNum("httpPort", &port))
-         port = 5988;
-#ifdef HAVE_UDS
-      if (getControlChars("httpSocketPath", &udsPath)) 
-		 udsPath = "/tmp/sfcbHttpSocket"; 
-#endif
-      hBase=htBase;
-      hMax=htMax;
-   }
-
-   if (sslMode) {
-     if (getControlNum("httpsProcs", &procs))
-       procs = 10;
-   } else {
-     if (getControlNum("httpProcs", &procs))
-       procs = 10;
-     if (getControlBool("enableHttp", &enableHttp))
-       enableHttp=1;
-#ifdef HAVE_UDS
-	 if (getControlBool("enableUds", &enableUds))
-       enableUds=1;
-	 if (!enableUds)
-		 udsPath = NULL; 
-#endif
-	 if (!enableHttp)
-		 port = -1; 
-   }
-   initHttpProcCtl(procs,sslMode);
-
-   if (getControlBool("doBasicAuth", &doBa))
-      doBa=0;
-
-#ifdef HAVE_UDS
-   if (getControlBool("doUdsAuth", &doUdsAuth))
-      doUdsAuth=0;
-#endif
-
-   if (getControlNum("keepaliveTimeout", &keepaliveTimeout))
-     keepaliveTimeout = 15;
-
-   if (getControlNum("keepaliveMaxRequest", &keepaliveMaxRequest))
-     keepaliveMaxRequest = 10;
-
-   i = 1;
-   while (i < argc && argv[i][0] == '-') {
-      if (strcmp(argv[i], "-D") == 0)
-         debug = 1;
-      else if (strcmp(argv[i], "-nD") == 0)
-         debug = 0;
-      else if (strcmp(argv[i], "-p") == 0 && i + 1 < argc) {
-         ++i;
-         port = (unsigned short) atoi(argv[i]);
-      }
-      else if (strcmp(argv[i], "-tm") == 0) {
-         if (isdigit(*argv[i + 1])) {
-            ++i;
-         }
-      }
-      else if (strcmp(argv[i], "-F") == 0)
-         doFork = 1;
-      else if (strcmp(argv[i], "-nF") == 0)
-         doFork = 0;
-      else if (strcmp(argv[i], "-H") == 0);
-      ++i;
-   }
-
-   if (getControlBool("useChunking", &noChunking))
-      noChunking=0;
-   noChunking=noChunking==0;
-
-   cp = strrchr(name, '/');
-   if (cp != NULL)
-      ++cp;
-   else  cp = name;
-   name = cp;
-
-   if (sslMode) mlogf(M_INFO,M_SHOW,"--- %s HTTPS Daemon V" sfcHttpDaemonVersion " started - %d - port %ld\n", 
-         name, currentProc,port);
-#ifdef HAVE_UDS
-   else mlogf(M_INFO,M_SHOW,"--- %s HTTP  Daemon V" sfcHttpDaemonVersion " started - %d - port %ld, %s\n", 
-         name, currentProc,port,udsPath);
-#endif
-
-   if (doBa) mlogf(M_INFO,M_SHOW,"--- Using Basic Authentication\n");
-#ifdef HAVE_UDS
-   if (doUdsAuth) mlogf(M_INFO,M_SHOW,"--- Using Unix Socket Peer Cred Authentication\n");
-#endif
-
-   if (keepaliveTimeout == 0) {
-     mlogf(M_INFO,M_SHOW,"--- Keep-alive timeout disabled\n");
-   } else {
-     mlogf(M_INFO,M_SHOW,"--- Keep-alive timeout: %ld seconds\n",keepaliveTimeout);
-     mlogf(M_INFO,M_SHOW,"--- Maximum requests per connection: %ld\n",keepaliveMaxRequest);
-   }
-
-   ru = 1;
-#ifdef HAVE_UDS
-   if (enableUds) {
-      udsListenFd = socket(PF_UNIX, SOCK_STREAM, 0); 
-   }
-#endif
-   if (enableHttp || sslMode) {
+#ifdef USE_SSL
 #ifdef USE_INET6
-      listenFd = socket(PF_INET6, SOCK_STREAM, IPPROTO_TCP);
-      if (listenFd < 0) { 
-          mlogf(M_INFO,M_SHOW,"--- Using IPv4 address\n");
-          listenFd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-      }
+  struct sockaddr_in6 httpsSin;
 #else
-      listenFd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+  struct sockaddr_in httpsSin;
 #endif
-      setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, (char *) &ru, sizeof(ru));
-   }
-
-   sin_len = sizeof(sin);
-   sun_len = sizeof(sun); 
-
-   memset(&sin,0,sin_len);
-   memset(&sun,0,sun_len);
+  socklen_t       httpsSin_len;
+  long            httpsPort;
+  int             httpsListenFd = -1;
+#endif                          // USE_SSL
 
 #ifdef HAVE_UDS
-   if (udsListenFd >= 0) {
-     if (getControlChars("httpSocketPath", &udsPath)) {
-         mlogf(M_ERROR,M_SHOW,"--- No unix socket path defined for HTTP\n"); 
-         sleep(1);
-         kill(sfcbPid,3);
-     }
-     sun.sun_family=AF_UNIX;
-     strcpy(sun.sun_path,udsPath);
-   }
+  static char    *udsPath = NULL;
+  int             enableUds = 0;
+  int             udsListenFd = -1;
+  struct sockaddr_un sun;
+  socklen_t       sun_len;
 #endif
 
-   if (listenFd >= 0) {
-      if (getControlBool("httpLocalOnly", &httpLocalOnly))
-	    httpLocalOnly=0;
+  debug = 1;
+  doFork = 1;
 
-#ifdef USE_INET6
-     sin.sin6_family = AF_INET6;
-     if (httpLocalOnly)
-	   sin.sin6_addr = in6addr_loopback;
-     else
-	   sin.sin6_addr = in6addr_any;
-     sin.sin6_port = htons(port);
-#else
-     sin.sin_family = AF_INET;
-     if (httpLocalOnly) {
-	   char* loopback_int = "127.0.0.1";
-	   inet_aton(loopback_int, &sin.sin_addr); /* not INADDR_LOOPBACK ? */
-     }
-     else
-	   sin.sin_addr.s_addr = INADDR_ANY;
-     sin.sin_port = htons(port);
-#endif 
-   }
+  _SFCB_ENTER(TRACE_HTTPDAEMON, "httpDaemon");
 
-  if (listenFd >= 0) {
-     if (bind(listenFd, (struct sockaddr *) &sin, sin_len) ||
-             listen(listenFd, 10)) {
-            mlogf(M_ERROR,M_SHOW,"--- Cannot listen on port %ld (%s)\n", port, strerror(errno));
-            sleep(1);
-            kill(sfcbPid,3);
-     }
+  setupControl(configfile);
+  sfcbSSLMode = sslMode;
+  processName = "HTTP-Daemon";
+
+  if (getControlNum("httpPort", &httpPort))
+    httpPort = 5988;            /* 5988 is default port */
+#ifdef USE_SSL
+  if (sfcbSSLMode) {
+    if (getControlNum("httpsPort", &httpsPort))
+      httpsPort = 5989;
   }
+#endif                          // USE_SSL
+#ifdef HAVE_UDS
+  if (getControlChars("httpSocketPath", &udsPath))
+    udsPath = "/tmp/sfcbHttpSocket";
+#endif
+
+  hMax = htMax;                 /* max number of http procs */
+
+  if (getControlNum("httpProcs", &procs))
+    procs = 10;
+  if (getControlBool("enableHttp", &enableHttp))
+    enableHttp = 1;
+#ifdef HAVE_UDS
+  if (getControlBool("enableUds", &enableUds))
+    enableUds = 1;
+  if (!enableUds)
+    udsPath = NULL;
+#endif
+
+  if (!enableHttp)
+    httpPort = -1;
+  /*
+   * note: we check for enableHttps in sfcBroker 
+   */
+
+  initHttpProcCtl(procs);
+
+  if (getControlBool("doBasicAuth", &doBa))
+    doBa = 0;
+
+#ifdef HAVE_UDS
+  if (getControlBool("doUdsAuth", &doUdsAuth))
+    doUdsAuth = 0;
+#endif
+
+  if (getControlNum("keepaliveTimeout", &keepaliveTimeout))
+    keepaliveTimeout = 15;
+
+  if (getControlNum("keepaliveMaxRequest", &keepaliveMaxRequest))
+    keepaliveMaxRequest = 10;
+
+  if (getControlBool("useChunking", &noChunking))
+    noChunking = 0;
+  noChunking = noChunking == 0;
+
+  /*
+   * grab commandline options 
+   */
+  i = 1;
+  while (i < argc && argv[i][0] == '-') {
+    if (strcmp(argv[i], "-D") == 0)
+      debug = 1;
+    else if (strcmp(argv[i], "-nD") == 0)
+      debug = 0;
+    else if (strcmp(argv[i], "-p") == 0 && i + 1 < argc) {
+      ++i;
+      httpPort = (unsigned short) atoi(argv[i]);
+    } else if (strcmp(argv[i], "-tm") == 0) {
+      if (isdigit(*argv[i + 1])) {
+        ++i;
+      }
+    } else if (strcmp(argv[i], "-F") == 0)
+      doFork = 1;
+    else if (strcmp(argv[i], "-nF") == 0)
+      doFork = 0;
+    else if (strcmp(argv[i], "-H") == 0);
+    ++i;
+  }
+
+  name = argv[0];
+  cp = strrchr(name, '/');
+  if (cp != NULL)
+    ++cp;
+  else
+    cp = name;
+  name = cp;
+
+  if (enableHttp) {
+    mlogf(M_INFO, M_SHOW,
+          "--- %s HTTP Daemon V" sfcHttpDaemonVersion
+          " configured for port %ld - %d\n", name, httpPort, currentProc);
+  }
+#ifdef USE_SSL
+  if (sslMode)
+    mlogf(M_INFO, M_SHOW,
+          "--- %s HTTP Daemon V" sfcHttpDaemonVersion
+          " configured for port %ld - %d\n", name, httpsPort, currentProc);
+#endif                          // USE_SSL
+#ifdef HAVE_UDS
+  mlogf(M_INFO, M_SHOW,
+        "--- %s HTTP Daemon V" sfcHttpDaemonVersion
+        " configured for socket %s - %d\n", name, udsPath, currentProc);
+#endif                          // HAVE_UDS
+
+  if (doBa)
+    mlogf(M_INFO, M_SHOW, "--- Using Basic Authentication\n");
+#ifdef HAVE_UDS
+  if (doUdsAuth)
+    mlogf(M_INFO, M_SHOW,
+          "--- Using Unix Socket Peer Cred Authentication\n");
+#endif
+
+  if (keepaliveTimeout == 0) {
+    mlogf(M_INFO, M_SHOW, "--- Keep-alive timeout disabled\n");
+  } else {
+    mlogf(M_INFO, M_SHOW, "--- Keep-alive timeout: %ld seconds\n",
+          keepaliveTimeout);
+    mlogf(M_INFO, M_SHOW, "--- Maximum requests per connection: %ld\n",
+          keepaliveMaxRequest);
+  }
+
+  if (enableHttp) {
+    httpListenFd = getSocket();
+  }
+#ifdef USE_SSL
+  if (sslMode) {
+    httpsListenFd = getSocket();
+  }
+#endif                          // USE_SSL
+#ifdef HAVE_UDS
+  if (enableUds) {
+    udsListenFd = socket(PF_UNIX, SOCK_STREAM, 0);
+  }
+#endif                          // HAVE_UDS
+
 #ifdef HAVE_UDS
   if (udsListenFd >= 0) {
-     unlink(udsPath); 
-
-     size_t gbuflen = sysconf(_SC_GETGR_R_SIZE_MAX); 
-     char gbuf[gbuflen]; 
-     struct group* pgrp = NULL; 
-     struct group grp; 
-     gid_t oldfsgid = 0; 
-
-     int rc = getgrnam_r("sfcb", &grp, gbuf, gbuflen, &pgrp); 
-     if (rc == 0 && pgrp)
-     {
-#ifdef HAVE_SYS_FSUID_H
-         oldfsgid = setfsgid(pgrp->gr_gid); 
-#else
-         oldfsgid = setegid(pgrp->gr_gid); 
-#endif
-     }
-     mode_t oldmask = umask(0007); 
-     if (bind(udsListenFd, (struct sockaddr *) &sun, sun_len) ||
-             listen(udsListenFd, 10)) {
-            mlogf(M_ERROR,M_SHOW,"--- Cannot listen on unix socket %s (%s)\n", udsPath, strerror(errno));
-            sleep(1);
-            kill(sfcbPid,3);
-     }
-     umask(oldmask); 
-     if (pgrp)
-     {
-#ifdef HAVE_SYS_FSUID_H
-         setfsgid(oldfsgid); 
-#else
-         setegid(oldfsgid); 
-#endif
-     }
+    if (getControlChars("httpSocketPath", &udsPath)) {
+      mlogf(M_ERROR, M_SHOW, "--- No unix socket path defined for HTTP\n");
+      sleep(1);
+      return 1;
+    }
+    sun.sun_family = AF_UNIX;
+    strcpy(sun.sun_path, udsPath);
   }
 #endif
 
-  if (!debug) {
-      int rc = fork();
-      if (rc == -1) {
-         char *emsg=strerror(errno);
-         mlogf(M_ERROR,M_SHOW,"--- fork daemon: %s",emsg);
-         exit(1);
-      }
-      else if (rc)
-         exit(0);
-   }
-//   memInit();
-    currentProc=getpid();
-
-/* don't want these if we're using threads */
-#ifndef USE_THREADS
-    setSignal(SIGCHLD, handleSigChld,0);
-    setSignal(SIGUSR1, handleSigUsr1,0);
-    setSignal(SIGINT, SIG_IGN,0);
-    setSignal(SIGTERM, SIG_IGN,0);
-    setSignal(SIGHUP, SIG_IGN,0);
+  int             bindrc = 0;
+  if (enableHttp) {
+    bindrc = bindToPort(httpListenFd, httpPort, &httpSin, &httpSin_len);
+  }
+#ifdef USE_SSL
+  if (sslMode) {
+    bindrc |=
+        bindToPort(httpsListenFd, httpsPort, &httpsSin, &httpsSin_len);
+  }
+#endif
+#ifdef HAVE_UDS
+  if (enableUds) {
+    sun_len = sizeof(sun);
+    bindrc |= bindUDS(udsListenFd, udsPath, &sun, sun_len);
+  }
 #endif
 
-    commInit();
+  if (bindrc > 0)
+    return 1;                   /* if can't bind to port, return 1 to
+                                 * shutdown sfcb */
+
+  if (!debug) {
+    int             rc = fork();
+    if (rc == -1) {
+      char           *emsg = strerror(errno);
+      mlogf(M_ERROR, M_SHOW, "--- fork daemon: %s", emsg);
+      exit(1);
+    } else if (rc)
+      exit(0);
+  }
+
+  currentProc = getpid();
+
+  setSignal(SIGCHLD, handleSigChld, 0);
+  setSignal(SIGUSR1, handleSigUsr1, 0);
+  setSignal(SIGINT, SIG_IGN, 0);
+  setSignal(SIGTERM, SIG_IGN, 0);
+  setSignal(SIGHUP, SIG_IGN, 0);
 
 #if defined USE_SSL
-    if (sfcbSSLMode) {
-       char *fnc,*fnk, *fnt, *fnl;
-       int rc;
-       ctx = SSL_CTX_new(SSLv23_method());
-       getControlChars("sslCertificateFilePath", &fnc);
-       _SFCB_TRACE(1,("---  sslCertificateFilePath = %s",fnc));
-       if (SSL_CTX_use_certificate_chain_file(ctx, fnc) != 1)
-	 intSSLerror("Error loading certificate from file");
-       getControlChars("sslKeyFilePath", &fnk);
-       _SFCB_TRACE(1,("---  sslKeyFilePath = %s",fnk));
-       if (SSL_CTX_use_PrivateKey_file(ctx, fnk, SSL_FILETYPE_PEM) != 1)
-	 intSSLerror("Error loading private key from file");
-       getControlChars("sslClientCertificate", &fnl);
-       _SFCB_TRACE(1,("---  sslClientCertificate = %s",fnl));
-       if (strcasecmp(fnl,"ignore") == 0) {
-	 ccVerifyMode = CC_VERIFY_IGNORE;
-	 SSL_CTX_set_verify(ctx,SSL_VERIFY_NONE,0);
-       } else if (strcasecmp(fnl,"accept") == 0) {
-	 ccVerifyMode = CC_VERIFY_ACCEPT;
-	 SSL_CTX_set_verify(ctx,SSL_VERIFY_PEER,get_cert);
-       } else if (strcasecmp(fnl,"require") == 0) {
-	 ccVerifyMode = CC_VERIFY_REQUIRE;
-	 SSL_CTX_set_verify(ctx,
-			    SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT,
-			    get_cert);
-       } else {
-	 intSSLerror("sslClientCertificate must be one of: ignore, accept or require");	 
-       } 
-       getControlChars("sslClientTrustStore", &fnt);
-       _SFCB_TRACE(1,("---  sslClientTrustStore = %s",fnt));
+  if (sslMode) {
+    commInit();
+    initSSL();
+  }
+#endif                          // USE_SSL
 
-       if (ccVerifyMode != CC_VERIFY_IGNORE) {
-           if (isDir(fnt))
-              rc = SSL_CTX_load_verify_locations(ctx, NULL, fnt);
-           else
-              rc = SSL_CTX_load_verify_locations(ctx, fnt, NULL);
-           if (rc != 1)
-              intSSLerror("Error locating the client trust store");
-       }
+  maxfdp1 = httpListenFd + 1;
+#ifdef USE_SSL
+  maxfdp1 = (maxfdp1 > httpsListenFd) ? maxfdp1 : (httpsListenFd + 1);
+#endif
+#ifdef HAVE_UDS
+  maxfdp1 = (maxfdp1 > udsListenFd) ? maxfdp1 : (udsListenFd + 1);
+#endif
 
-       /* SSLv2 is pretty old; no one should be needing it any more */
-       SSL_CTX_set_options(ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2 | 
-                           SSL_OP_SINGLE_DH_USE); 
-       /* disable weak ciphers */
-       if (SSL_CTX_set_cipher_list(ctx, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH") != 1)
-           intSSLerror("Error setting cipher list (no valid ciphers)"); 
-	      
+  for (;;) {
+
+    /*
+     * select() modifies httpfds in-place, so reset after every select() 
+     */
+    FD_ZERO(&httpfds);
+    if (httpListenFd >= 0) {
+      FD_SET(httpListenFd, &httpfds);
+    }
+#ifdef USE_SSL
+    if (httpsListenFd >= 0) {
+      FD_SET(httpsListenFd, &httpfds);
+    }
+#endif                          // USE_SSL
+#ifdef HAVE_UDS
+    if (udsListenFd >= 0) {
+      FD_SET(udsListenFd, &httpfds);
+    }
+#endif                          // USE_UDS
+
+    rc = select(maxfdp1, &httpfds, NULL, NULL, NULL);
+
+    if (stopAccepting)
+      break;
+    if (rc < 0) {
+      if (errno == EINTR || errno == EAGAIN) {
+        continue;
+      }
+    }
+
+    if (httpListenFd >= 0 && FD_ISSET(httpListenFd, &httpfds)) {
+      _SFCB_TRACE(1, ("--- Processing http request"));
+      acceptRequest(httpListenFd, &httpSin, httpSin_len, 0);
+    }
+#ifdef USE_SSL
+    else if (httpsListenFd >= 0 && FD_ISSET(httpsListenFd, &httpfds)) {
+      _SFCB_TRACE(1, ("--- Processing https request"));
+      acceptRequest(httpsListenFd, &httpsSin, httpsSin_len, 1);
+    }
+#endif                          // USE_SSL
+#ifdef HAVE_UDS
+    else if (udsListenFd >= 0 && FD_ISSET(udsListenFd, &httpfds)) {
+      _SFCB_TRACE(1, ("--- Processing http UDS request"));
+      acceptRequest(udsListenFd, &sun, sun_len, 0);
     }
 #endif
+  }
 
-#ifdef HAVE_UDS
-   maxfdp1 = (listenFd > udsListenFd? listenFd : udsListenFd) + 1; 
-#else
-   maxfdp1 = listenFd + 1; 
-#endif
-   for (;;) {
-      char *emsg;
-      // listen(listenFd, 1);
-	  FD_ZERO(&httpfds); 
-	  if (listenFd >= 0) {
-         FD_SET(listenFd, &httpfds); 
-	  }
-#ifdef HAVE_UDS
-	  if (udsListenFd >= 0) {
-         FD_SET(udsListenFd, &httpfds); 
-      }
-#endif
-	  rc = select(maxfdp1, &httpfds, NULL, NULL, NULL); 
-	  if (stopAccepting) break;
-      if (rc < 0) {
-         if (errno == EINTR || errno == EAGAIN) {
-            continue;
-         }
-      }
-	  if (listenFd >= 0 && FD_ISSET(listenFd, &httpfds)) {
-		  sz = sin_len; 
-		  if ((connFd = accept(listenFd, (__SOCKADDR_ARG) &sin, &sz))<0) {
-			 if (errno == EINTR || errno == EAGAIN) {
-				continue;
-			 }   
-			 emsg=strerror(errno);
-			 mlogf(M_ERROR,M_SHOW,"--- accept error %s\n",emsg);
-			 _SFCB_ABORT();
-		  }
-		  _SFCB_TRACE(1, ("--- Processing http request"));
+  remProcCtl();
 
-		  handleHttpRequest(connFd);
-		  close(connFd);
-	  }
-#ifdef HAVE_UDS
-	  if (udsListenFd >= 0 && FD_ISSET(udsListenFd, &httpfds)) {
-		  sz = sun_len; 
-		  if ((connFd = accept(udsListenFd, (__SOCKADDR_ARG) &sun, &sz))<0) {
-			 if (errno == EINTR || errno == EAGAIN) {
-				continue;
-			 }   
-			 emsg=strerror(errno);
-			 mlogf(M_ERROR,M_SHOW,"--- accept error %s\n",emsg);
-			 _SFCB_ABORT();
-		  }
-		  _SFCB_TRACE(1, ("--- Processing http request"));
+  /*
+   * patiently wait for sfcBroker to kill us 
+   */
+  while (1) {
+    sleep(5);
+  }
 
-		  handleHttpRequest(connFd);
-		  close(connFd);
-	  }
-#endif
-   }
-   
-   remProcCtl();   
-   
-   while (1) {
-     sleep(5);
-   }
 }
 
 #if defined USE_SSL
@@ -1912,6 +1768,7 @@ static int ccValidate(X509 *certificate, char ** principal, int mode)
 	      "--- Certificate authentication exit %s not found\n",dlName);
 	result = 0;
       } 
+      dlclose(authLib);
     }
   } else {
     mlogf(M_ERROR,M_SHOW,

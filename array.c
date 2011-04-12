@@ -1,6 +1,6 @@
 
 /*
- * $Id: array.c,v 1.21 2008/04/14 18:42:34 gdread Exp $
+ * $Id: array.c,v 1.22 2010/03/01 15:40:06 smswehla Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -362,7 +362,7 @@ CMPIArray *internal_native_make_CMPIArray(CMPIData * av, CMPIStatus * rc,
 	  } else if (av[i + 1].type == CMPI_ref) {
 	      CMPIValue value;
 	      char *chars = (char *) ClObjectGetClString(hdr, (ClString *) & av[i + 1].value.chars);
-	      value.ref = getObjectPath(chars, NULL);
+	      value.ref = getObjectPath(chars,NULL);	      
 	      arraySetElementNotTrackedAt((CMPIArray *) array, i, &value, CMPI_ref);
 	  } else if (av[i + 1].type == CMPI_instance) {
               value.inst = (void *)ClObjectGetClObject(hdr, (ClString *) & av[i + 1].value.inst);

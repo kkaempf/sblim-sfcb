@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.70 2010/01/29 00:21:40 buccella Exp $
+ * $Id: providerMgr.c,v 1.74 2010/05/17 20:24:08 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -23,7 +23,6 @@
 
 #include <signal.h>
 #include <time.h>
-#include <pthread.h>
 
 #include "cmpidt.h"
 #include "providerRegister.h"
@@ -38,6 +37,8 @@
 #include "queryOperation.h"
 #include "selectexp.h"
 #include "config.h"
+
+#include <pthread.h>
 
 #ifdef HAVE_QUALREP
 #include "qualifier.h"
@@ -60,6 +61,7 @@ int enumUnLock(CMPIEnumeration * ) ;
 #else
 #define SFCB_ASM(x)
 #endif
+
 
 static pthread_mutex_t resultsocketMutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -785,6 +787,7 @@ static void methProvider(int *requestor, OperationHdr * req)
    char *className = (char *) req->className.data;
    char *nameSpace = (char *) req->nameSpace.data;
    ProviderInfo *info;
+   short          retcode;
    
    _SFCB_ENTER(TRACE_PROVIDERMGR, "methProvider");
    if (strcmp(className, "$ClassProvider$") == 0)
@@ -794,7 +797,15 @@ static void methProvider(int *requestor, OperationHdr * req)
       if (info->type!=FORCE_PROVIDER_NOTFOUND &&
           (rc = forkProvider(info, req, NULL)) == CMPI_RC_OK) {
          _SFCB_TRACE(1,("--- responding with  %s %p",info->providerName,info));
-         spSendCtlResult(requestor, &info->providerSockets.send, MSG_X_PROVIDER,
+       if(!(req->options & OH_Internal)
+          && info->location
+          && *info->location
+          && (strncmp(info->location, "sfc", 3) == 0)) {
+         retcode = MSG_X_SFCB_PROVIDER;
+       } else {
+         retcode = MSG_X_PROVIDER;
+       }
+         spSendCtlResult(requestor, &info->providerSockets.send, retcode,
             0, getProvIds(info).ids, req->options);
       }                   
       else {
@@ -926,10 +937,10 @@ void processProviderMgrRequests()
    if (interOpProvInfoPtr!=forceNoProvInfoPtr) {
      sleep(2);
      startUpProvider("root/interop","$InterOpProvider$");
-     sleep(2);
-     startUpProvider("root/interop","$ProfileProvider$");
    }   
 #endif
+
+   startUpProvider("root/interop","$ProfileProvider$");
       
    for (;;) {
       MgrHandler hdlr; 
@@ -1031,11 +1042,11 @@ int getProviderContext(BinRequestContext * ctx, OperationHdr * ohdr)
    ((OperationHdr *) buf)->className.data = (void *) l;
    l += ohdr->className.length;
    
-   if (localMode) {
-     pthread_mutex_lock(&resultsocketMutex);
-     sockets = resultSockets;
-   } else
-     sockets = getSocketPair("getProviderContext");   
+   if (localMode){
+	   pthread_mutex_lock(&resultsocketMutex);
+	   sockets=resultSockets;
+   }
+   else sockets=getSocketPair("getProviderContext");   
    
    _SFCB_TRACE(1,("--- Sending mgr request - to %d from %d", sfcbSockets.send,
                 sockets.send)); 
@@ -1045,12 +1056,12 @@ int getProviderContext(BinRequestContext * ctx, OperationHdr * ohdr)
    if (rc < 0) {
       mlogf(M_ERROR,M_SHOW,"--- spSendReq/spSendMsg failed to send on %d (%d)\n", sfcbSockets.send, rc);
       ctx->rc = rc;
-      if (!localMode) {
-	closeSocket(&sockets,COM_ALL,"getProviderContext");
+      if(!localMode){
+    	  closeSocket(&sockets,COM_ALL,"getProviderContext");
       } else {
-	pthread_mutex_unlock(&resultsocketMutex);
+    	  pthread_mutex_unlock(&resultsocketMutex);
       }
-     _SFCB_RETURN(rc);
+      _SFCB_RETURN(rc);
    }
 
    _SFCB_TRACE(1, ("--- Sending mgr request done"));
@@ -1085,9 +1096,9 @@ int getProviderContext(BinRequestContext * ctx, OperationHdr * ohdr)
    }
 
    if (!localMode) {
-     closeSocket(&sockets,COM_ALL,"getProviderContext");
+	  closeSocket(&sockets,COM_ALL,"getProviderContext");
    } else {
-     pthread_mutex_unlock(&resultsocketMutex);
+	   pthread_mutex_unlock(&resultsocketMutex);
    }
    _SFCB_RETURN(ctx->rc);
 }
@@ -1275,19 +1286,18 @@ BinResponseHdr *invokeProvider(BinRequestContext * ctx)
    ComSockets sockets;
    _SFCB_ENTER(TRACE_PROVIDERMGR | TRACE_CIMXMLPROC, "invokeProvider");
 
-   if (localMode) {
-      pthread_mutex_lock(&resultsocketMutex);
-      sockets = resultSockets;
+   if (localMode){
+	   pthread_mutex_lock(&resultsocketMutex);
+	   sockets=resultSockets;
    }
-   else
-      sockets = getSocketPair("invokeProvider");
+   else sockets=getSocketPair("invokeProvider");
    
    BinResponseHdr *resp=intInvokeProvider(ctx, sockets);
     
    if (!localMode) {
-      closeSocket(&sockets,COM_ALL,"invokeProvider");
+	  closeSocket(&sockets,COM_ALL,"invokeProvider");
    } else {
-      pthread_mutex_unlock(&resultsocketMutex);
+	   pthread_mutex_unlock(&resultsocketMutex);
    }
    
    _SFCB_RETURN(resp);
@@ -1301,12 +1311,11 @@ BinResponseHdr **invokeProviders(BinRequestContext * binCtx, int *err,
    ComSockets sockets;
    int i;
 
-   if (localMode) {
-     pthread_mutex_lock(&resultsocketMutex);
-     sockets = resultSockets;
+   if (localMode){
+	   pthread_mutex_lock(&resultsocketMutex);
+	   sockets=resultSockets;
    }
-   else 
-     sockets = getSocketPair("invokeProvider");
+   else sockets=getSocketPair("invokeProvider");
    
    resp = malloc(sizeof(BinResponseHdr *) * (binCtx->pCount));
    *err = 0;
@@ -1332,9 +1341,9 @@ BinResponseHdr **invokeProviders(BinRequestContext * binCtx, int *err,
    }
    
    if (!localMode) {
-      closeSocket(&sockets,COM_ALL,"invokeProvider");
+	  closeSocket(&sockets,COM_ALL,"invokeProvider");
    } else {
-      pthread_mutex_unlock(&resultsocketMutex);
+	   pthread_mutex_unlock(&resultsocketMutex);
    }
    
    _SFCB_RETURN(resp);

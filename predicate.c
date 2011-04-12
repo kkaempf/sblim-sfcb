@@ -1,6 +1,6 @@
 
 /*
- * $Id: predicate.c,v 1.7 2007/10/02 09:02:11 mihajlov Exp $
+ * $Id: predicate.c,v 1.9 2010/08/25 21:58:04 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *

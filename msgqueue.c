@@ -32,7 +32,7 @@
 #include <unistd.h>
 #include <stddef.h>
 #include "control.h"
-
+#include <grp.h>
 
 extern unsigned long exFlags;
 
@@ -173,9 +173,9 @@ static int spHandleError(int *s, char *m)
 {
    _SFCB_ENTER(TRACE_MSGQUEUE, "handleError");
    char *emsg=strerror(errno);
-   mlogf(M_ERROR,M_SHOW,"%s %d pid:%d-errno:%d : %s\n", m, *s, currentProc, errno,emsg);
-   _SFCB_ABORT();
-   //return -1;
+   mlogf(M_ERROR,M_SHOW,"%s %d %d-%d %s\n", m, *s, currentProc, errno,emsg);
+   //   _SFCB_ABORT();
+   return -1;
 }
 
 
@@ -307,8 +307,11 @@ static int spRcvMsg(int *s, int *from, void **data, unsigned long *length, MqgSt
       }
       partRecvd = totalRecvd = 0;
       do {
-         if ((partRecvd = spGetMsg(s, NULL, *data + totalRecvd, *length - totalRecvd, mqg)) == -1)
+	if ((partRecvd = spGetMsg(s, NULL, *data + totalRecvd, *length - totalRecvd, mqg)) == -1) {
+            free(*data);
+            *data = 0;
             return spHandleError(s, em);
+	}
          totalRecvd += partRecvd;
          if (mqg->teintr) mqg->eintr=1;    
       } while (mqg->teintr) ;       
@@ -325,8 +328,11 @@ static int spRcvMsg(int *s, int *from, void **data, unsigned long *length, MqgSt
       *length = 256;
       partRecvd = totalRecvd = 0;
       do {
-         if ((partRecvd = spGetMsg(s, NULL, *data + totalRecvd, *length - totalRecvd, mqg)) == -1)
+	if ((partRecvd = spGetMsg(s, NULL, *data + totalRecvd, *length - totalRecvd, mqg)) == -1) {
+            free(*data);
+            *data = 0;
             return spHandleError(s, em);
+	}
          totalRecvd += partRecvd;
          if (mqg->teintr) mqg->eintr=1;    
       } while (mqg->teintr) ;       
@@ -334,6 +340,7 @@ static int spRcvMsg(int *s, int *from, void **data, unsigned long *length, MqgSt
 
    switch (spMsg.xtra) {
    case MSG_X_PROVIDER:
+   case MSG_X_SFCB_PROVIDER:
       *length = spMsg.segments;
       *data = spMsg.provId;
    case MSG_X_INVALID_NAMESPACE:
@@ -674,6 +681,7 @@ void localConnectServer()
    int nsocket,ssocket;
    unsigned int cl, notDone=1;
    char *path;
+   char *gperm = NULL;
    
    struct _msg {
       unsigned int size;
@@ -703,6 +711,29 @@ void localConnectServer()
    if (bind(ssocket,(const struct sockaddr*)serverAddr, serverAddrLen)<0) {
       perror("bind error");
       return;
+   }
+
+   getControlChars("socketPathGroupPerm", &gperm);
+   if (NULL != gperm) {
+      struct group *objgperm;
+      if (NULL == (objgperm = getgrnam(gperm))) {
+         mlogf(M_INFO,M_SHOW,"--- localConnectServer getgrnam failed: %s\n", strerror(errno));
+      } else {
+         // change the socket group ownership as requested
+         if (chown(path, getuid(), objgperm->gr_gid)) {
+            mlogf(M_INFO,M_SHOW,"--- localConnectServer chown failed: %s\n", strerror(errno));
+         } else {
+            struct stat sobj;
+            // change the socket permission to allow group as requested
+            if (stat(path, &sobj)) {
+               mlogf(M_INFO,M_SHOW,"--- localConnectServer stat failed: %s\n", strerror(errno));
+            } else {
+               if (chmod(path, (sobj.st_mode | S_IWGRP))) {
+                  mlogf(M_INFO,M_SHOW,"--- localConnectServer chmod failed: %s\n", strerror(errno));
+               }
+            }
+         }
+      }
    }
    
    listen(ssocket,1);

@@ -36,6 +36,7 @@
 #include "native.h"
 #include "objectpath.h"
 #include <time.h>
+#include "instance.h"
 
 #define LOCALCLASSNAME "InteropProvider"
 
@@ -657,8 +658,8 @@ void initInterOp(
       }
       CMRelease(enm);
    } 
-   _SFCB_TRACE(1,("--- checking for sfcb_indicationsubscription"));
-   op=CMNewObjectPath(broker,"root/interop","sfcb_indicationsubscription",&st);
+   _SFCB_TRACE(1,("--- checking for cim_indicationsubscription"));
+   op=CMNewObjectPath(broker,"root/interop","cim_indicationsubscription",&st);
    ctxLocal = prepareUpcall((CMPIContext *)ctx);
    enm = _broker->bft->enumerateInstances(_broker, ctxLocal, op, NULL, &st);
    CMRelease(ctxLocal);
@@ -674,6 +675,26 @@ void initInterOp(
    }
       
    _SFCB_EXIT(); 
+}
+
+/*
+ for CIM_IndicationSubscription we use the DeliveryFailureTime property to track
+ when indication delivery first failed.  However, this property is not a part of
+ the mof supplied by the DMTF, so we need to filter it out of instances being
+ returned to the client
+*/
+void
+filterInternalProps(CMPIInstance* ci)
+{
+
+  CMPIStatus      pst = { CMPI_RC_OK, NULL };
+  CMGetProperty(ci, "DeliveryFailureTime", &pst);
+  /* prop is set, need to clear it out */
+  if (pst.rc != CMPI_RC_ERR_NOT_FOUND) {
+    filterFlagProperty(ci, "DeliveryFailureTime");
+  }
+
+  return;
 }
 
 /* --------------------------------------------------------------------------*/
@@ -733,9 +754,18 @@ CMPIStatus InteropProviderEnumInstances(
    enm = _broker->bft->enumerateInstances(_broker, ctxLocal, ref, properties, &st);
    CMRelease(ctxLocal);
                                       
-   while(enm && enm->ft->hasNext(enm, &st)) {
-       CMReturnInstance(rslt, (enm->ft->getNext(enm, &st)).value.inst);   
-   }   
+   while (enm && enm->ft->hasNext(enm, &st)) {
+
+     CMPIInstance* ci = (enm->ft->getNext(enm, &st)).value.inst;
+
+     /* need to check IndicationSubscription, since it may contain props used internally by sfcb */
+     CMPIObjectPath* cop = CMGetObjectPath(ci, &st);
+     if (strcasecmp(CMGetCharPtr(CMGetClassName(cop, NULL)), "cim_indicationsubscription") == 0) {
+       filterInternalProps(ci);
+     }
+
+     CMReturnInstance(rslt, ci);
+   }
    if(enm) CMRelease(enm);
    _SFCB_RETURN(st);
 }
@@ -759,6 +789,11 @@ CMPIStatus InteropProviderGetInstance(
 
    ci = _broker->bft->getInstance(_broker, ctxLocal, cop, properties, &st);
    if (st.rc==CMPI_RC_OK) {
+     /* need to check IndicationSubscription, since it may contain props used internally by sfcb */
+     if (strcasecmp(CMGetCharPtr(CMGetClassName(cop, NULL)), "cim_indicationsubscription") == 0) {
+       filterInternalProps(ci);
+     }
+
       CMReturnInstance(rslt, ci);
    }
    
@@ -796,17 +831,27 @@ CMPIStatus InteropProviderCreateInstance(
    memLinkObjectPath(copLocal);
    
    if(isa(nss, cns, "cim_indicationsubscription")) {
-      _SFCB_TRACE(1,("--- create sfcb_indicationsubscription"));
-
-      if (strcasecmp(cns,"CIM_IndicationSubscription")==0) {
-        // Set the class name to our defined extension class
-        CMSetClassName(copLocal,"SFCB_IndicationSubscription");
-        CMSetObjectPath(ciLocal, copLocal);
-      }
+      _SFCB_TRACE(1,("--- create cim_indicationsubscription"));
 
       st=processSubscription(_broker,ctx,ciLocal,copLocal);
    }
    else if (isa(nss, cns, "cim_indicationfilter")) {
+
+     CMPIString     *ccn = ciLocal->ft->getProperty(ciLocal, "creationclassname",
+						    &st).value.string;
+     if (CMIsNullObject(ccn)) {
+       setStatus(&st, CMPI_RC_ERR_FAILED,
+                 "CreationClassName property not found");
+       _SFCB_RETURN(st);
+     }
+     CMPIString     *sccn = ciLocal->ft->getProperty(ciLocal, "systemcreationclassname",
+                                                     &st).value.string;
+     if (CMIsNullObject(sccn)) {
+       setStatus(&st, CMPI_RC_ERR_FAILED,
+                 "SystemCreationClassName property not found");
+       _SFCB_RETURN(st);
+     }
+
       QLStatement *qs=NULL;
       int rc,i,n,m;
       char *key=NULL,*ql,lng[16];
@@ -860,6 +905,18 @@ CMPIStatus InteropProviderCreateInstance(
           CMSetStatus(&st, CMPI_RC_OK);
        }
         
+      /* SystemName is a key property.  According to DSP1054, the CIMOM must 
+         provide this if the client does not */
+      CMPIString *sysname=ciLocal->ft->getProperty(ciLocal,"SystemName",&st).value.string;
+      if (sysname == NULL || sysname->hdl == NULL) {
+ 	char hostName[512];
+ 	hostName[0]=0;
+	gethostname(hostName,511); /* should be the same as SystemName of IndicationService */
+	CMAddKey(copLocal, "SystemName", hostName, CMPI_chars);
+	CMSetProperty(ciLocal,"SystemName",hostName,CMPI_chars);
+      }
+
+
       for (ql=(char*)lang->hdl,i=0,n=0,m=strlen(ql); i<m; i++) {
          if (ql[i]>' ') lng[n++]=ql[i];
          if (n>=15) break;
@@ -872,7 +929,7 @@ CMPIStatus InteropProviderCreateInstance(
          _SFCB_RETURN(st);  
       }   
               
-      key=normalizeObjectPathCharsDup(cop);
+      key=normalizeObjectPathCharsDup(copLocal);
       if (getFilter(key)) {
          free(key);
          setStatus(&st,CMPI_RC_ERR_ALREADY_EXISTS,NULL);
@@ -1062,6 +1119,7 @@ CMPIStatus InteropProviderInvokeMethod(
 	CMPIArgs * out)
 { 
    CMPIStatus st = { CMPI_RC_OK, NULL };
+   CMPIStatus fn_st = { CMPI_RC_ERR_FAILED, NULL};
    
    _SFCB_ENTER(TRACE_INDPROVIDER, "InteropProviderInvokeMethod");
    
@@ -1073,8 +1131,10 @@ CMPIStatus InteropProviderInvokeMethod(
       HashTableIterator *i;
       Subscription *su;
       char *suName;
+      char *filtername = NULL;
       CMPIArgs *hin=CMNewArgs(_broker,NULL);
-      CMPIInstance *ind=CMGetArg(in,"indication",NULL).value.inst;
+      CMPIInstance *indo=CMGetArg(in,"indication",NULL).value.inst;
+      CMPIInstance *ind=CMClone(indo,NULL); /* we need this because we add IndicationFilterName */
       void *filterId=(void*)CMGetArg(in,"filterid",NULL).value.
 #if SIZEOF_INT == SIZEOF_VOIDP	
 	uint32;
@@ -1083,7 +1143,20 @@ CMPIStatus InteropProviderInvokeMethod(
 #endif
       char *ns=(char*)CMGetArg(in,"namespace",NULL).value.string->hdl;
       
+      // Add indicationFilterName to the indication
+      Filter *filter = filterId;
+      CMPIData cd_name = CMGetProperty(filter->fci, "name", &fn_st);
+      if (fn_st.rc == CMPI_RC_OK) {
+        filtername = cd_name.value.string->hdl;
+        _SFCB_TRACE(1,("--- %s: filter=%p, filter->sns=%s, filter->name=%s, filter namespace: %s", __FUNCTION__, filter, filter->sns, filtername, ns));
+        fn_st = CMSetProperty(ind, "IndicationFilterName", filtername, CMPI_chars);
+        if (fn_st.rc != CMPI_RC_OK) {
+            _SFCB_TRACE(1,("--- %s: failed to add IndicationFilterName = %s rc=%d", __FUNCTION__, filtername, fn_st.rc));
+        }
+      }
+
       CMAddArg(hin,"indication",&ind,CMPI_instance);
+      CMRelease(ind); /* this is ok since AddArg will make a copy */
       CMAddArg(hin,"nameSpace",ns,CMPI_chars);
       
       if (subscriptionHt) for (i = subscriptionHt->ft->getFirst(subscriptionHt, 

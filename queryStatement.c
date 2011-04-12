@@ -1,6 +1,6 @@
 
 /*
- * $Id: queryStatement.c,v 1.14 2007/06/22 10:34:43 sschuetz Exp $
+ * $Id: queryStatement.c,v 1.16 2010/04/14 20:06:24 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -28,6 +28,7 @@
 #include "mlog.h"
 
 extern int sfcQueryparse(QLControl*);
+extern void sfcQueryrestart(FILE *input_file); /*  Used on queryParse() error */
 extern CMPIBroker *Broker;
 extern void *qsAlloc(QLStatement *qs, unsigned int size);
 
@@ -263,6 +264,10 @@ QLStatement *parseQuery(int mode, const char *query, const char *lang, const cha
    } else ctl.statement->lang=0;
    
    *rc=sfcQueryparse(&ctl);
+
+   /* Always call restart after parsing. This resets the lexer FSM. */
+   sfcQueryrestart(0);
+
    if (sns) qs->sns=strdup(sns);
    else sns=NULL;
    

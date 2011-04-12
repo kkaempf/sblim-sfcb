@@ -573,7 +573,7 @@ int existingNameSpace(const char *ns)
 #endif
     
    if ((d=opendir(fn))==NULL) {
-      fprintf(stderr, "opendir: %s: %s\n", fn, strerror(errno));
+      perror("opendir");
       return 0;
    }   
    closedir(d);

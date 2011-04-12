@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.83 2010/02/04 19:20:38 smswehla Exp $
+ * $Id: providerDrv.c,v 1.95 2011/02/23 23:02:42 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -95,6 +95,26 @@ char * opsName[];
 #define TIMING_STOP(req,pInfo)
 
 #endif
+
+#ifndef PROVIDERLOAD_DLFLAG
+#define PROVIDERLOAD_DLFLAG (RTLD_NOW | RTLD_GLOBAL)
+#endif
+
+#ifndef HAVE_OPTIMIZED_ENUMERATION
+     /* not a special provider, perform class name substitution if call is for a
+        parent class of the class the provider is registered for */
+#define REPLACE_CN(info,path)  \
+   if (info->className && info->className[0] != '$') {  \
+     char * classname = CMGetCharPtr(CMGetClassName(path,NULL));  \
+     char * namespace = CMGetCharPtr(CMGetNameSpace(path,NULL));  \
+     if (classname && namespace && strcasecmp(info->className,classname)) {  \
+       CMPIObjectPath * provPath = CMNewObjectPath(Broker,namespace,info->className,NULL);  \
+       if (provPath && CMClassPathIsA(Broker,provPath,classname,NULL)) {   \
+	 _SFCB_TRACE(1, ("--- Replacing class name %s",info->className));  \
+	 path = provPath;  \
+       }  }  }
+#endif
+
 
 extern CMPIBroker *Broker;
 
@@ -318,7 +338,7 @@ static void stopProc(void *p)
 
    ctx = native_new_CMPIContext(MEM_NOT_TRACKED,NULL);
    for (pInfo=activProvs; pInfo; pInfo=pInfo->next,cpli++) {
- 
+
      if (pInfo->classMI) pInfo->classMI->ft->cleanup(pInfo->classMI, ctx);
      if (pInfo->instanceMI && (hasBeenCleaned(cleanedProvs, INST, pInfo->library, &cpli) == 0)) {
        pInfo->instanceMI->ft->cleanup(pInfo->instanceMI, ctx, 1);
@@ -342,6 +362,7 @@ static void stopProc(void *p)
        cleanedProvs[cpli].types |= IND;
      }
    }
+    
    mlogf(M_INFO,M_SHOW,"---  stopped %s %d\n",processName,getpid());
    ctx->ft->release(ctx);
    
@@ -450,47 +471,47 @@ void* providerIdleThread()
                      ctx = native_new_CMPIContext(MEM_TRACKED,NULL);
                      noBreak=0;
 
-                     int apc = getActivProvCount();
-                     ProvLibAndTypes cleanedProvs[apc]; 
-                     int i;
-                     for (i=0; i < apc; i++) { cleanedProvs[i].lib = 0; cleanedProvs[i].types = 0; }
-                     int cpli = 0; /* the index into cleanedProvs for a given prov lib */
+		     int apc = getActivProvCount();
+		     ProvLibAndTypes cleanedProvs[apc]; 
+		     int i;
+		     for (i=0; i < apc; i++) { cleanedProvs[i].lib = 0; cleanedProvs[i].types = 0; }
+		     int cpli = 0; /* the index into cleanedProvs for a given prov lib */
 
                      for (crc.rc=0,pInfo = activProvs; pInfo; pInfo = pInfo->next,cpli++) {
-                        if (pInfo->library==NULL) continue;
-                       
-                        if (crc.rc==CMPI_RC_OK && pInfo->instanceMI && (hasBeenCleaned(cleanedProvs, INST, pInfo->library, &cpli) == 0)) {
-                           crc = pInfo->instanceMI->ft->cleanup(pInfo->instanceMI, ctx,0);
-                           if (crc.rc==CMPI_RC_OK) {
-                              cleanedProvs[cpli].lib = pInfo->library;
-                              cleanedProvs[cpli].types |= INST;
-                           }
-                        }
-                        if (crc.rc==CMPI_RC_OK && pInfo->associationMI  && (hasBeenCleaned(cleanedProvs, ASSOC, pInfo->library, &cpli) == 0)) {
-                           crc = pInfo->associationMI->ft->cleanup(pInfo->associationMI, ctx,0);
-                           if (crc.rc==CMPI_RC_OK) {
-                              cleanedProvs[cpli].lib = pInfo->library;
-                              cleanedProvs[cpli].types |= ASSOC;
-                           }
-                        }
-                        if (crc.rc==CMPI_RC_OK && pInfo->methodMI && (hasBeenCleaned(cleanedProvs, METH, pInfo->library, &cpli) == 0)) {
-                           crc = pInfo->methodMI->ft->cleanup(pInfo->methodMI, ctx,0);
-                           if (crc.rc==CMPI_RC_OK) {
-                              cleanedProvs[cpli].lib = pInfo->library;
-                              cleanedProvs[cpli].types |= METH;
-                           }
-                        }
-                        if (crc.rc==CMPI_RC_OK && pInfo->indicationMI && (hasBeenCleaned(cleanedProvs, IND, pInfo->library, &cpli) == 0)) {
-                           crc = pInfo->indicationMI->ft->cleanup(pInfo->indicationMI, ctx,0);
-                           if (crc.rc==CMPI_RC_OK) {
-                              cleanedProvs[cpli].lib = pInfo->library;
-                              cleanedProvs[cpli].types |= IND;
-                           }
-                        }
+		       if (pInfo->library==NULL) continue;
+		       
+		       if (crc.rc==0 && pInfo->instanceMI && (hasBeenCleaned(cleanedProvs, INST, pInfo->library, &cpli) == 0)) {
+			 crc = pInfo->instanceMI->ft->cleanup(pInfo->instanceMI, ctx,0);
+			 if (crc.rc==CMPI_RC_OK) {
+			   cleanedProvs[cpli].lib = pInfo->library;
+			   cleanedProvs[cpli].types |= INST;
+			 }
+		       }
+		       if (crc.rc==0 && pInfo->associationMI  && (hasBeenCleaned(cleanedProvs, ASSOC, pInfo->library, &cpli) == 0)) {
+			 crc = pInfo->associationMI->ft->cleanup(pInfo->associationMI, ctx,0);
+			 if (crc.rc==CMPI_RC_OK) {
+			   cleanedProvs[cpli].lib = pInfo->library;
+			   cleanedProvs[cpli].types |= ASSOC;
+			 }
+		       }
+		       if (crc.rc==0 && pInfo->methodMI && (hasBeenCleaned(cleanedProvs, METH, pInfo->library, &cpli) == 0)) {
+			 crc = pInfo->methodMI->ft->cleanup(pInfo->methodMI, ctx,0);
+			 if (crc.rc==CMPI_RC_OK) {
+			   cleanedProvs[cpli].lib = pInfo->library;
+			   cleanedProvs[cpli].types |= METH;
+			 }
+		       }
+		       if (crc.rc==0 && pInfo->indicationMI && (hasBeenCleaned(cleanedProvs, IND, pInfo->library, &cpli) == 0)) {
+			 crc = pInfo->indicationMI->ft->cleanup(pInfo->indicationMI, ctx,0);
+			 if (crc.rc==CMPI_RC_OK) {
+			   cleanedProvs[cpli].lib = pInfo->library;
+			   cleanedProvs[cpli].types |= IND;
+			 }
+		       }
 		       
                         _SFCB_TRACE(1, ("--- Cleanup rc: %d %s-%d",crc.rc,processName,currentProc));
 
-			if (crc.rc==CMPI_RC_NEVER_UNLOAD) doNotExit=1;
+                        if (crc.rc==CMPI_RC_NEVER_UNLOAD) doNotExit=1;
                         if (crc.rc==CMPI_RC_DO_NOT_UNLOAD) doNotExit=noBreak=1;
                         if (crc.rc==CMPI_RC_OK) {
                            _SFCB_TRACE(1, ("--- Unloading provider %s-%d",pInfo->providerName,currentProc));
@@ -504,7 +525,7 @@ void* providerIdleThread()
 			   pthread_mutex_destroy(&pInfo->initMtx);
                         }   
                         else doNotExit=1;
-		     }
+		     }  
                      if (doNotExit==0) {
                         dumpTiming(currentProc);
                         _SFCB_TRACE(1, ("--- Exiting %s-%d",processName,currentProc));
@@ -1735,19 +1756,7 @@ static BinResponseHdr *enumInstances(BinRequestHdr * hdr, ProviderInfo * info,
    char **props=NULL;
 
 #ifndef HAVE_OPTIMIZED_ENUMERATION
-   if (info->className && info->className[0] != '$') {
-     /* not a special provider, perform class name substitution if call is for a
-        parent class of the class the provider is registered for */
-     char * classname = CMGetCharPtr(CMGetClassName(path,NULL));
-     char * namespace = CMGetCharPtr(CMGetNameSpace(path,NULL));
-     if (classname && namespace && strcasecmp(info->className,classname)) {
-       CMPIObjectPath * provPath = CMNewObjectPath(Broker,namespace,info->className,NULL);
-       if (provPath && CMClassPathIsA(Broker,provPath,classname,NULL)) {
-	 _SFCB_TRACE(1, ("--- Replacing class name %s",info->className));
-	 path = provPath;
-       }
-     }
-   }
+   REPLACE_CN(info,path);
 #endif
 
    if (req->hdr.flags & FL_localOnly) flgs|=CMPI_FLAG_LocalOnly;
@@ -1790,19 +1799,7 @@ static BinResponseHdr *enumInstanceNames(BinRequestHdr * hdr,
    CMPIFlags flgs=0;
 
 #ifndef HAVE_OPTIMIZED_ENUMERATION
-   if (info->className && info->className[0] != '$') {
-     /* not a special provider, perform class name substitution if call is for a
-        parent class of the class the provider is registered for */
-     char * classname = CMGetCharPtr(CMGetClassName(path,NULL));
-     char * namespace = CMGetCharPtr(CMGetNameSpace(path,NULL));
-     if (classname && namespace && strcasecmp(info->className,classname)) {
-       CMPIObjectPath * provPath = CMNewObjectPath(Broker,namespace,info->className,NULL);
-       if (provPath && CMClassPathIsA(Broker,provPath,classname,NULL)) {
-	 _SFCB_TRACE(1, ("--- Replacing class name %s",info->className));
-	 path = provPath;
-       }
-     }
-   }
+   REPLACE_CN(info,path);
 #endif
 
    ctx->ft->addEntry(ctx,CMPIInvocationFlags,(CMPIValue*)&flgs,CMPI_uint32);
@@ -1917,6 +1914,10 @@ static BinResponseHdr *execQuery(BinRequestHdr * hdr, ProviderInfo * info, int r
          resp = errorResp(&rci);
          _SFCB_RETURN(resp);
       }
+
+#ifndef HAVE_OPTIMIZED_ENUMERATION
+      REPLACE_CN(info,path);
+#endif
 
       qs->propSrc.getValue=queryGetValue;
       qs->propSrc.sns=qs->sns;
@@ -2157,7 +2158,25 @@ static BinResponseHdr *activateFilter(BinRequestHdr *hdr, ProviderInfo* info,
       char *lang=(char*)req->language.data;
       type=(char*)req->type.data;
       char *sns=(char*)req->sns.data;
+
       se=(NativeSelectExp*)NewCMPISelectExp(query,lang,sns,NULL,&rci);
+      if (rci.rc != CMPI_RC_OK) {
+	mlogf(M_DEBUG, M_SHOW, "Failed to parse query (%s). Error code(%d).\n", query, rci.rc);
+	resp = errorResp(&rci);
+	_SFCB_RETURN(resp);
+      }
+      else if (se == NULL) {
+	/*
+	 * If se is NULL, rci.rc should have an error code set, but check for
+	 * the NULL case just in case something went wrong.
+	 */
+	mlogf(M_ERROR, M_SHOW, "Unknown error parsing query (%s).\n", query);
+	rci.rc = CMPI_RC_ERR_FAILED;
+	resp = errorResp(&rci);
+	_SFCB_RETURN(resp);
+      }
+
+
       makeActive=1;
       se->filterId=req->filterId;
       prev=se->next=activFilters;
@@ -2216,13 +2235,6 @@ static BinResponseHdr *activateFilter(BinRequestHdr *hdr, ProviderInfo* info,
       }
       TIMING_STOP(hdr,info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
-
-      /*if (info->indicationEnabled==0 && rci.rc==CMPI_RC_OK) {
-      info->indicationEnabled=1;
-	TIMING_START(hdr,info)
-      info->indicationMI->ft->enableIndications(info->indicationMI,ctx);
-	TIMING_STOP(hdr,info)
-      }*/
 
       if (rci.rc==CMPI_RC_OK) {
          resp = (BinResponseHdr *) calloc(1,sizeof(BinResponseHdr));
@@ -2433,7 +2445,6 @@ int initProvider(ProviderInfo *info, unsigned int sessionId, char** errorStr)
 
    pthread_mutex_lock(&info->initMtx);
    if (info->initialized==0) {  
-     info -> initialized = 1;
    
      ctx->ft->addEntry(ctx,CMPIInvocationFlags,(CMPIValue*)&flgs,CMPI_uint32);
      ctx->ft->addEntry(ctx,CMPIPrincipal,(CMPIValue*)"$$",CMPI_chars);
@@ -2504,7 +2515,6 @@ int initProvider(ProviderInfo *info, unsigned int sessionId, char** errorStr)
      
      if (rc) {
        rc = -2;
-       info -> initialized = 0;
        if (errstr != NULL) {
           *errorStr = sfcb_snprintf("Error initializing provider %s from %s for class %s.  %s", 
                            info->providerName, info->location, 
@@ -2515,6 +2525,7 @@ int initProvider(ProviderInfo *info, unsigned int sessionId, char** errorStr)
                            info->providerName, info->location, info->className);
        }
      } else {
+       info -> initialized = 1;
        *errorStr = NULL;
      }
    }
@@ -2550,9 +2561,9 @@ static int doLoadProvider(ProviderInfo *info, char *dlName, int dlName_length)
    while (dir) {
      libraryName(dir, (char *) info->location, fullname, fullname_max_length);
      if (stat(fullname,&stbuf) == 0) {
-       info->library = dlopen(fullname, RTLD_NOW | RTLD_GLOBAL);
+       info->library = dlopen(fullname, PROVIDERLOAD_DLFLAG);
        if (info->library == NULL) {
-	 mlogf(M_ERROR,M_SHOW,"*** dlopen error: %s\n",dlerror());
+         mlogf(M_ERROR,M_SHOW,"*** dlopen: %s error: %s\n", fullname, dlerror());
        } else {
 	 _SFCB_TRACE(1, ("--- Loaded provider library %s for %s-%d",
 			 fullname,
@@ -2677,8 +2688,8 @@ static ProvHandler pHandlers[] = {
 #else
    {NULL},                      //OPS_ActivateFilter     28
    {NULL},                      //OPS_DeactivateFilter   29
-   {NULL},                      //OPS_EnableIndications  30
-   {NULL}                       //OPS_DisableIndications 31
+   {NULL},                      //OPS_DisableIndications  30
+   {NULL}                       //OPS_EnableIndications 31
 #endif   
 };
 
@@ -2713,8 +2724,8 @@ char *opsName[] = {
    "IndicationLookup",
    "ActivateFilter",
    "DeactivateFilter",
-   "EnableIndications",
    "DisableIndications",
+   "EnableIndications",
 };
 
 static void *processProviderInvocationRequestsThread(void *prms)
@@ -2888,7 +2899,11 @@ void processProviderInvocationRequests(char *name)
                      (void **) &parms->req, &rl, &mqg);
       if (mqg.rdone) {
 	int debug_break = 0;
-         if (rc!=0)mlogf(M_ERROR,M_SHOW,"oops\n");               
+	if (rc!=0) {
+	  mlogf(M_ERROR,M_SHOW, "spRecvReq returned error %d. Skipping message.\n", rc);
+	  free(parms);
+	  continue;
+	}               
 
          _SFCB_TRACE(1, ("--- Got something op:%d-prov:%p on R%d-%lu", 
             parms->req->operation,parms->req->provId,

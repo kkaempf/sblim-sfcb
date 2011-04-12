@@ -23,7 +23,6 @@
 #include "utilft.h"
 #include "support.h"
 #include "mlog.h"
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -78,6 +77,7 @@ Control init[] = {
    {"dbpsProcs",        1, "8"},
 #endif
 #ifdef HAVE_SLP
+   {"enableSlp",         2, "true"},
    {"slpRefreshInterval",         1, "600"},
    {"slpHostnameLib",   0, "sfcSlpHostname"},
 #endif
@@ -110,6 +110,7 @@ Control init[] = {
    {"certificateAuthLib",   0, "sfcCertificateAuthentication"},
    {"localSocketPath",   0, "/tmp/sfcbLocalSocket"},
    {"httpSocketPath",   0, "/tmp/sfcbHttpSocket"},
+   {"socketPathGroupPerm",   0, NULL},
    
    {"traceFile",   0, "stderr"},
    {"traceLevel",   1, "0"},
