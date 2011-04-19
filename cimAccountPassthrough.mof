@@ -1,0 +1,24 @@
+[Description ("SFCB_Account is a dummy class used for the sole purpose of " 
+              "allowing an InvokeMethod request from an expired user to "
+              "pass through to the CIM_Account provider in order to update "
+              "the expired password."
+)]
+class SFCB_Account
+{
+        [Description ("Provide the new password to be used in the "
+                      "ModifyInstance operation on CIM_Account. "
+                      "The return type of uint8 is the CMPI return code from "
+                      "the ModifyInstance call, and Message is the CMPI "
+                      "status message. "  
+                      )]
+        uint8 UpdateExpiredPassword( [IN] string UserPassword, [OUT] string Message);
+};
+
+instance of CIM_Account
+{
+SystemCreationClassName="CIM_ComputerSystem";
+SystemName="thefoot";
+CreationClassName="CIM_IndicationService";
+Name="expired";
+UserPassword="bad";
+};
