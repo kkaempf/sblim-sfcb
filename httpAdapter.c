@@ -840,6 +840,8 @@ doHttpRequest(CommHndl conn_fd)
                   ev;
   CimRequestContext ctx;
   int             breakloop;
+  int             hcrFlags = 0;  /* flags to pass to handleCimRequest() */
+
   _SFCB_ENTER(TRACE_HTTPDAEMON, "doHttpRequest");
 
   if (pauseCodec("http"))
@@ -983,6 +985,12 @@ doHttpRequest(CommHndl conn_fd)
         discardInput = 2;
       }
     }
+#ifdef ALLOW_UPDATE_EXPIRED_PW
+    else if (strncasecmp(hdr, "Pragma: UpdateExpiredPassword", 29) == 0) {
+      fprintf(stderr, "setting HCR_UPDATE_PW\n");
+      hcrFlags |= HCR_UPDATE_PW;
+    }
+#endif
   }
 
 #if defined USE_SSL
@@ -1010,6 +1018,7 @@ doHttpRequest(CommHndl conn_fd)
 #endif
 
   int             authorized = 0;
+  int             barc = 0;
 #ifdef HAVE_UDS
   if (!discardInput && doUdsAuth) {
     struct sockaddr_un sun;
@@ -1026,17 +1035,27 @@ doHttpRequest(CommHndl conn_fd)
   }
 #endif
   if (!authorized && !discardInput && doBa) {
-    if (inBuf.authorization && 
-        (baValidate(inBuf.authorization,&inBuf.principal) != AUTH_PASS)) {
-      char            more[] =
+    if (inBuf.authorization) {
+      barc = baValidate(inBuf.authorization,&inBuf.principal);
+#ifdef ALLOW_UPDATE_EXPIRED_PW
+      if (barc == AUTH_EXPIRED) {
+	fprintf(stderr, "setting HCR_EXPIRED_PW\n");
+	hcrFlags |= HCR_EXPIRED_PW;
+      }
+      else if (barc == AUTH_FAIL) {
+#else
+      if (barc != AUTH_PASS) {
+#endif
+	char            more[] =
           "WWW-Authenticate: Basic realm=\"cimom\"\r\n";
-      genError(conn_fd, &inBuf, 401, "Unauthorized", more);
-      /*
-       * we continue to parse headers and empty the socket to be graceful
-       * with the client 
-       */
-      discardInput = 1;
-    }
+	genError(conn_fd, &inBuf, 401, "Unauthorized", more);
+	/*
+	 * we continue to parse headers and empty the socket to be graceful
+	 * with the client 
+	 */
+	discardInput = 1;
+      }
+  }
 #if defined USE_SSL
     else if (sfcbSSLMode && ccVerifyMode != CC_VERIFY_IGNORE) {
       /*
@@ -1081,6 +1100,7 @@ doHttpRequest(CommHndl conn_fd)
   msgs[1].data = inBuf.content;
   msgs[1].length = len - hl;
 
+  fprintf(stderr, "httpAd: principal=%s\n", inBuf.principal);
   ctx.cimDoc = inBuf.content;
   ctx.principal = inBuf.principal;
   ctx.host = inBuf.host;
@@ -1113,7 +1133,7 @@ doHttpRequest(CommHndl conn_fd)
     }
 #endif
 
-    response = handleCimRequest(&ctx);
+    response = handleCimRequest(&ctx, hcrFlags);
   } else {
     response = nullResponse;
   }

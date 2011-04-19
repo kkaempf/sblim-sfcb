@@ -364,6 +364,27 @@ ctxErrResponse(RequestHdr * hdr, BinRequestContext * ctx, int meth)
   return iMethodErrResponse(hdr, getErrSegment(err, hdr->errMsg));
 };
 
+// Todo: ax this
+// static RespSegments
+// expiredPWErrResponse(RequestHdr * hdr)
+// {
+//   char *error;
+
+//   RespSegments    rs = {
+//     NULL, 0, 0, NULL,
+//     {{0, responseIntro1},
+//      {0, hdr->id},
+//      {0, responseIntro2},
+//      {0, hdr->iMethod},
+//      {0, responseIntro3Error},
+//      {1, error},
+//      {0, responseTrailer1Error},
+//      }
+//   };
+
+//   return rs;
+// }
+
 static          RespSegments
 iMethodGetTrailer(UtilStringBuffer * sb)
 {
@@ -1699,6 +1720,23 @@ static Handler  handlers[] = {
   {invokeMethod},               // OPS_InvokeMethod 24
 };
 
+RespSegments sendHdrToHandler(RequestHdr* hdr, CimRequestContext* ctx) {
+
+  RespSegments    rs;
+  Handler         hdlr;
+  HeapControl    *hc;
+
+  hc = markHeap();
+  hdlr = handlers[hdr->opType];
+  rs = hdlr.handler(ctx, hdr);
+  releaseHeap(hc);
+
+  ctx->className = hdr->className;
+  ctx->operation = hdr->opType;
+
+  return rs;
+}
+
 static Scanner scanners[] = {
 #ifdef HANDLER_CIMRS
   {scanCimRsRequest},
@@ -1711,12 +1749,10 @@ static Scanner scanners[] = {
 static int scanner_count = sizeof(scanners) / sizeof(Scanner);
 
 RespSegments
-handleCimRequest(CimRequestContext * ctx)
+handleCimRequest(CimRequestContext * ctx, int flags)
 {
   RespSegments    rs;
   RequestHdr      hdr;
-  Handler         hdlr;
-  HeapControl    *hc;
 #ifdef SFCB_DEBUG
   struct rusage   us,
                   ue;
@@ -1771,7 +1807,7 @@ handleCimRequest(CimRequestContext * ctx)
                  timevalDiff(&us.ru_stime, &ue.ru_stime)));
     }
 #endif
-
+    fprintf(stderr, "flags=%d\n", flags);
     if (hdr.rc) {
       if (hdr.methodCall) {
         rs = methodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
@@ -1782,15 +1818,43 @@ handleCimRequest(CimRequestContext * ctx)
                                                   hdr.errMsg));
 //      rs = iMethodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
 //                                                  "invalid imethodcall XML"));
+      }
+    } 
+#ifdef ALLOW_UPDATE_EXPIRED_PW
+    else if (flags) {
+      fprintf(stderr, "in hcr, flags set\n");
+      /* request from user with an expired password AND requesting password update */
+      if (flags == (HCR_UPDATE_PW + HCR_EXPIRED_PW)) {
+	fprintf(stderr, " in hcr, got update_pw flag and expired flag\n");
+	if (strcasecmp(hdr.className, "SFCB_Account") == 0) {
+	  fprintf(stderr, "call to SFCB_Account\n");
+	  rs = sendHdrToHandler(&hdr, ctx);
+	}
+	/* TODO: other reqs for SFCB_Account? reqs not for SFCB_Account? */
+      }
+      else {
+	if (hdr.methodCall) { /* non-expired user tried to invoke UpdatePassword */
+	  rs = methodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
+						     "bad UpdatePassword request"));
+	} else { /* expired user tried to invoke non-UpdatePassword request */
+	  if(!hdr.errMsg) hdr.errMsg = strdup("user password expired");
+	  rs = iMethodErrResponse(&hdr, getErrSegment(2,
+						      hdr.errMsg));
+	}
+      }
+      /* make SURE that other requests get rejected by this point! */
     }
-    } else {
-      hc = markHeap();
-      hdlr = handlers[hdr.opType];
-      rs = hdlr.handler(ctx, &hdr);
-      releaseHeap(hc);
+#endif
+    else {
+      fprintf(stderr, "sendHdrToHandler (normal)\n");
+      rs = sendHdrToHandler(&hdr, ctx);
+//       hc = markHeap();
+//       hdlr = handlers[hdr.opType];
+//       rs = hdlr.handler(ctx, &hdr);
+//       releaseHeap(hc);
 
-      ctx->className = hdr.className;
-      ctx->operation = hdr.opType;
+//       ctx->className = hdr.className;
+//       ctx->operation = hdr.opType;
     }
     rs.buffer = hdr.buffer;
     rs.rc=0;

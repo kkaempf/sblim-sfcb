@@ -85,8 +85,14 @@ typedef struct requestHdr {
   unsigned int    sessionId;
 } RequestHdr;
 
-extern RespSegments handleCimRequest(CimRequestContext * ctx);
+extern RespSegments handleCimRequest(CimRequestContext * ctx, int flags);
 extern int      cleanupCimXmlRequest(RespSegments * rs);
+
+#define ALLOW_UPDATE_EXPIRED_PW
+#ifdef ALLOW_UPDATE_EXPIRED_PW
+  #define HCR_EXPIRED_PW 1  /* flag: expired user tries to auth */
+  #define HCR_UPDATE_PW 2  /* flag: UpdateExpiredPassword HTTP header */
+#endif
 
 #endif
 /* MODELINES */
