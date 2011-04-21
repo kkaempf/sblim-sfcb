@@ -1825,22 +1825,21 @@ handleCimRequest(CimRequestContext * ctx, int flags)
       fprintf(stderr, "in hcr, flags set\n");
       /* request from user with an expired password AND requesting password update */
       if (flags == (HCR_UPDATE_PW + HCR_EXPIRED_PW)) {
-	fprintf(stderr, " in hcr, got update_pw flag and expired flag\n");
-	if (strcasecmp(hdr.className, "SFCB_Account") == 0) {
-	  fprintf(stderr, "call to SFCB_Account\n");
-	  rs = sendHdrToHandler(&hdr, ctx);
-	}
-	/* TODO: other reqs for SFCB_Account? reqs not for SFCB_Account? */
+        fprintf(stderr, " in hcr, got update_pw flag and expired flag\n");
+        if (strcasecmp(hdr.className, "SFCB_Account") == 0) {
+          fprintf(stderr, "call to SFCB_Account\n");
+          rs = sendHdrToHandler(&hdr, ctx);
+        }
       }
       else {
-	if (hdr.methodCall) { /* non-expired user tried to invoke UpdatePassword */
-	  rs = methodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
-						     "bad UpdatePassword request"));
-	} else { /* expired user tried to invoke non-UpdatePassword request */
-	  if(!hdr.errMsg) hdr.errMsg = strdup("user password expired");
-	  rs = iMethodErrResponse(&hdr, getErrSegment(2,
-						      hdr.errMsg));
-	}
+        if (hdr.methodCall) { /* non-expired user tried to invoke UpdatePassword */
+          rs = methodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
+                           "bad UpdateExpiredPassword request (wrong user?)"));
+        } else { /* expired user tried to invoke non-UpdatePassword request */
+          if(!hdr.errMsg) hdr.errMsg = strdup("user password expired");
+          rs = iMethodErrResponse(&hdr, getErrSegment(2,
+                                                      hdr.errMsg));
+        }
       }
       /* make SURE that other requests get rejected by this point! */
     }

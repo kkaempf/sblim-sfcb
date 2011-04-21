@@ -15,7 +15,8 @@
  *
  * Description:
  *
- * 
+ * This provider's only function is to handle an InvokeMethod request
+ * for UpdateExpiredPassword and pass it on to the CIM_Account provider
  *
  */
 
@@ -25,17 +26,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-#include "fileRepository.h"
-#include "utilft.h"
 #include "trace.h"
-#include "queryOperation.h"
-#include "providerMgr.h"
-#include "internalProvider.h"
 #include "native.h"
-#include "objectpath.h"
-#include <time.h>
-#include "instance.h"
 
 /*
  * ------------------------------------------------------------------------- 
@@ -53,61 +45,15 @@ setStatus(CMPIStatus *st, CMPIrc rc, char *msg)
     st->msg = NULL;
 }
 
-static int
-interOpNameSpace(const CMPIObjectPath * cop, CMPIStatus *st)
-{
-  char           *ns = (char *) CMGetNameSpace(cop, NULL)->hdl;
-  fprintf(stderr, "  ns is: %s\n", ns);
-  if (strcasecmp(ns, "root/interop") && strcasecmp(ns, "root/pg_interop")) {
-    if (st)
-      setStatus(st, CMPI_RC_ERR_FAILED,
-                "Object must reside in root/interop");
-    return 0;
-  }
-  return 1;
-}
-
-/*
- * ------------------------------------------------------------------------- 
- */
-
-// static CMPIContext *
-// prepareUpcall(const CMPIContext *ctx)
-// {
-//   /*
-//    * used to invoke the internal provider in upcalls, otherwise we will be 
-//    * routed to this provider again
-//    */
-//   CMPIContext    *ctxLocal;
-//   ctxLocal = native_clone_CMPIContext(ctx);
-//   CMPIValue       val;
-//   val.string = sfcb_native_new_CMPIString("$DefaultProvider$", NULL, 0);
-//   ctxLocal->ft->addEntry(ctxLocal, "rerouteToProvider", &val, CMPI_string);
-//   return ctxLocal;
-// }
-
-/*
- * --------------------------------------------------------------------------
- */
-/*
- * Method Provider Interface 
- */
-/*
- * --------------------------------------------------------------------------
- */
 
 CMPIStatus
 CimAccountPassthroughProviderMethodCleanup(CMPIMethodMI * mi,
                              const CMPIContext *ctx, CMPIBoolean terminate)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
-  _SFCB_ENTER(TRACE_INDPROVIDER, "CimAccountPassthroughProviderMethodCleanup");
+  _SFCB_ENTER(TRACE_PROVIDERS, "CimAccountPassthroughProviderMethodCleanup");
   _SFCB_RETURN(st);
 }
-
-/*
- * ------------------------------------------------------------------------- 
- */
 
 CMPIStatus
 CimAccountPassthroughProviderInvokeMethod(CMPIMethodMI * mi,
@@ -119,13 +65,18 @@ CimAccountPassthroughProviderInvokeMethod(CMPIMethodMI * mi,
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
 
-  _SFCB_ENTER(TRACE_INDPROVIDER, "CimAccountPassthroughProviderInvokeMethod");
-
-  /* TODO: get rid of this? */
-  if (interOpNameSpace(ref, &st) != 1)
-    _SFCB_RETURN(st);
+  _SFCB_ENTER(TRACE_PROVIDERS, "CimAccountPassthroughProviderInvokeMethod");
 
   _SFCB_TRACE(1, ("--- Method: %s", methodName));
+
+  CMPIData arg = CMGetArg(in, "UserPassword", &st);
+  if (st.rc != CMPI_RC_OK) {
+    setStatus(&st, CMPI_RC_ERR_NOT_FOUND, 
+              "Required argument UserPassword missing");
+    _SFCB_RETURN(st);
+  }
+  const char* newPW = CMGetCharPtr(arg.value.string);
+  fprintf(stderr, "  newPW is \"%s\"\n", newPW);
 
   if (strcasecmp(methodName, "UpdateExpiredPassword") == 0) {
     fprintf(stderr, "  IM UpdateExpiredPassword\n");
@@ -154,9 +105,8 @@ CimAccountPassthroughProviderInvokeMethod(CMPIMethodMI * mi,
 	}
       }
     }
-    if (caInst) {
-      /* ok to send ModifyInstance request to CIM_Account provider */
-      char* newPW = "bob";
+    if (caInst) {  /* ok to send ModifyInstance request to CIM_Account prov */
+
       CMPIString* npwv;
       npwv = CMNewString(_broker, newPW, NULL);
       fprintf(stderr, " npwv is %s\n", CMGetCharsPtr(npwv, NULL));
@@ -172,7 +122,10 @@ CimAccountPassthroughProviderInvokeMethod(CMPIMethodMI * mi,
        
       CMSetProperty(caInst, "UserPassword", (CMPIValue*)&(pwArray), CMPI_stringA);
       st = CBModifyInstance(_broker, ctx, caOp, caInst, NULL);
-      fprintf(stderr, "st from modify is %d\n", st.rc);
+
+      CMPIValue av; 
+      av.string = st.msg;
+      CMAddArg(out, "Message", &av, CMPI_string);
     }
     else {      /* no caInst; probably wrong principal (UserName didn't match) */
       fprintf(stderr, "  Name didn't match\n"); 
