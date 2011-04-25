@@ -130,7 +130,7 @@ CimAccountPassthroughProviderInvokeMethod(CMPIMethodMI * mi,
     else {      /* no caInst; probably wrong principal (UserName didn't match) */
       fprintf(stderr, "  Name didn't match\n"); 
       _SFCB_TRACE(1, ("--- Invalid request method: %s", methodName));
-      setStatus(&st, CMPI_RC_ERR_METHOD_NOT_FOUND, "Invalid request method");
+      setStatus(&st, CMPI_RC_ERR_NOT_FOUND, "No matching CIM_Account for user");
     }
   }
   else {

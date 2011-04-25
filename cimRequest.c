@@ -331,57 +331,16 @@ methodErrResponse(RequestHdr * hdr, char *error)
 static char    *
 getErrExpiredSegment()
 {
-  char* msg = sfcb_snprintf("<INSTANCE CLASSNAME=\"CIM_Error\">\n\
+  char* msg = sfcb_snprintf("<ERROR CODE=\"2\">\n\
+<INSTANCE CLASSNAME=\"CIM_Error\">\n\
 <PROPERTY NAME=\"ErrorType\" TYPE=\"uint16\">1</PROPERTY>\n\
 <PROPERTY NAME=\"OtherErrorType\" TYPE=\"string\">\
 Password Expired</PROPERTY>\n\
 <PROPERTY NAME=\"ProbableCause\" TYPE=\"uint16\">117</PROPERTY>\n\
-</INSTANCE>\n");
+</INSTANCE>\n</ERROR>\n");
 
   return msg;
 }
-
-char           *
-getErrExpiredTrailer()
-{
-  return sfcb_snprintf("CIMStatusCodeDescription: %s\r\n", cimMsg[1]);
-}
-
-static          RespSegments
-iMethodErrExpiredResponse(RequestHdr * hdr, char *error)
-{
-  RespSegments    rs = {
-    NULL, 0, 0, NULL,
-    {{0, iResponseIntro1},
-     {0, hdr->id},
-     {0, iResponseIntro2},
-     {0, hdr->iMethod},
-     {0, iResponseIntro3Error},
-     {1, error},
-     {0, iResponseTrailer1Error},
-     }
-  };
-
-  return rs;
-};
-
-static          RespSegments
-methodErrExpiredResponse(RequestHdr * hdr, char *error)
-{
-  RespSegments    rs = {
-    NULL, 0, 0, NULL,
-    {{0, responseIntro1},
-     {0, hdr->id},
-     {0, responseIntro2},
-     {0, hdr->iMethod},
-     {0, responseIntro3Error},
-     {1, error},
-     {0, responseTrailer1Error},
-     }
-  };
-
-  return rs;
-};
 
 #endif /* ALLOW_UPDATE_EXPIRED_PW */
 
@@ -422,27 +381,6 @@ ctxErrResponse(RequestHdr * hdr, BinRequestContext * ctx, int meth)
     return methodErrResponse(hdr, getErrSegment(err, hdr->errMsg));
   return iMethodErrResponse(hdr, getErrSegment(err, hdr->errMsg));
 };
-
-// Todo: ax this
-// static RespSegments
-// expiredPWErrResponse(RequestHdr * hdr)
-// {
-//   char *error;
-
-//   RespSegments    rs = {
-//     NULL, 0, 0, NULL,
-//     {{0, responseIntro1},
-//      {0, hdr->id},
-//      {0, responseIntro2},
-//      {0, hdr->iMethod},
-//      {0, responseIntro3Error},
-//      {1, error},
-//      {0, responseTrailer1Error},
-//      }
-//   };
-
-//   return rs;
-// }
 
 static          RespSegments
 iMethodGetTrailer(UtilStringBuffer * sb)
@@ -1883,41 +1821,20 @@ handleCimRequest(CimRequestContext * ctx, int flags)
     else if (flags) {
       fprintf(stderr, "in hcr, flags set\n");
       /* request from user with an expired password AND requesting password update */
-      if (flags == (HCR_UPDATE_PW + HCR_EXPIRED_PW)) {
+      if (flags == (HCR_UPDATE_PW + HCR_EXPIRED_PW) &&
+          (strcasecmp(hdr.className, "SFCB_Account") == 0) && hdr.methodCall) {
         fprintf(stderr, " in hcr, got update_pw flag and expired flag\n");
-        if ((strcasecmp(hdr.className, "SFCB_Account") == 0) && hdr.methodCall) {
-          fprintf(stderr, "call to SFCB_Account\n");
-          rs = sendHdrToHandler(&hdr, ctx);
-        }
-	else {  /* wrong class */
-	  if (hdr.methodCall) { 
-	    rs = methodErrExpiredResponse(&hdr, getErrExpiredSegment());
-	  } else {
-	    rs = iMethodErrExpiredResponse(&hdr, getErrExpiredSegment());
-	  }
-	}
+	fprintf(stderr, "call to SFCB_Account\n");
+	rs = sendHdrToHandler(&hdr, ctx);
       }
-      else { 
-	if (flags == HCR_UPDATE_PW) {  /* non-expired user trying UpdatePassword */
-	  if (hdr.methodCall) { 
-	    rs = methodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
-						       "bad UpdateExpiredPassword request (wrong user?)"));
-	  } else {
-	    if(!hdr.errMsg) hdr.errMsg = strdup("user password expired");
-	    rs = iMethodErrResponse(&hdr, getErrSegment(2,
-							hdr.errMsg));
-	  }
-	}
-	else {  /* expired user tried to invoke non-UpdatePassword request */
-	  if (hdr.methodCall) { 
-	    rs = methodErrExpiredResponse(&hdr, getErrExpiredSegment());
-	  } else {
-	    rs = iMethodErrExpiredResponse(&hdr, getErrExpiredSegment());
-	  }
+      else {    /* expired user tried to invoke non-UpdatePassword request */
+	if (hdr.methodCall) { 
+	  rs = methodErrResponse(&hdr, getErrExpiredSegment());
+	} else {
+	  rs = iMethodErrResponse(&hdr, getErrExpiredSegment());
 	}
       }
     }
-  
 #endif  /* ALLOW_UPDATE_EXPIRED_PW */
 
     else {
