@@ -272,7 +272,6 @@ baValidate(char *cred, char **principal)
   }
 
   free(auth);
-  fprintf(stderr, "baValidate: returning %d\n", ret);
   return ret;
 }
 
@@ -987,7 +986,6 @@ doHttpRequest(CommHndl conn_fd)
     }
 #ifdef ALLOW_UPDATE_EXPIRED_PW
     else if (strncasecmp(hdr, "Pragma: UpdateExpiredPassword", 29) == 0) {
-      fprintf(stderr, "setting HCR_UPDATE_PW\n");
       hcrFlags |= HCR_UPDATE_PW;
     }
 #endif
@@ -1039,8 +1037,10 @@ doHttpRequest(CommHndl conn_fd)
       barc = baValidate(inBuf.authorization,&inBuf.principal);
 #ifdef ALLOW_UPDATE_EXPIRED_PW
       if (barc == AUTH_EXPIRED) {
-	fprintf(stderr, "setting HCR_EXPIRED_PW\n");
 	hcrFlags |= HCR_EXPIRED_PW;
+      }
+      else if (barc == AUTH_PASS) {
+	hcrFlags = 0; /* clear flags so non-expired user doesn't update pw */
       }
       else if (barc == AUTH_FAIL) {
 #else
@@ -1100,7 +1100,6 @@ doHttpRequest(CommHndl conn_fd)
   msgs[1].data = inBuf.content;
   msgs[1].length = len - hl;
 
-  fprintf(stderr, "httpAd: principal=%s\n", inBuf.principal);
   ctx.cimDoc = inBuf.content;
   ctx.principal = inBuf.principal;
   ctx.host = inBuf.host;
