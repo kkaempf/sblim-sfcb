@@ -331,12 +331,15 @@ methodErrResponse(RequestHdr * hdr, char *error)
 static char    *
 getErrExpiredSegment()
 {
-  char* msg = sfcb_snprintf("<ERROR CODE=\"2\">\n\
+  char* msg = sfcb_snprintf("<ERROR CODE=\"2\" \
+DESCRIPTION=\"User Account Expired\">\n\
 <INSTANCE CLASSNAME=\"CIM_Error\">\n\
-<PROPERTY NAME=\"ErrorType\" TYPE=\"uint16\">1</PROPERTY>\n\
+<PROPERTY NAME=\"ErrorType\" TYPE=\"uint16\">\
+<VALUE>1</VALUE></PROPERTY>\n\
 <PROPERTY NAME=\"OtherErrorType\" TYPE=\"string\">\
-Password Expired</PROPERTY>\n\
-<PROPERTY NAME=\"ProbableCause\" TYPE=\"uint16\">117</PROPERTY>\n\
+<VALUE>Password Expired</VALUE></PROPERTY>\n\
+<PROPERTY NAME=\"ProbableCause\" TYPE=\"uint16\">\
+<VALUE>117</VALUE></PROPERTY>\n\
 </INSTANCE>\n</ERROR>\n");
 
   return msg;
