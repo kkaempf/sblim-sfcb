@@ -178,7 +178,7 @@ if test "$enable_slp_hostname_lib" == "yes"; then
 fi
 
 if test "$enable_expired_pw_update" == "yes"; then
-   AC_DEFINE(ACCOUNT_PASSTHRU,1,[Expired Account Password Update enabled])
+   AC_DEFINE(ALLOW_UPDATE_EXPIRED_PW,1,[Expired Account Password Update enabled])
 fi
 
 # Check and configure requested tests.
