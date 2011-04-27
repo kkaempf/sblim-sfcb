@@ -178,8 +178,12 @@ if test "$enable_slp_hostname_lib" == "yes"; then
 fi
 
 if test "$enable_expired_pw_update" == "yes"; then
+   LOAD_SFCBACCOUNT_PROVIDER=
    AC_DEFINE(ALLOW_UPDATE_EXPIRED_PW,1,[Expired Account Password Update enabled])
+else
+   LOAD_SFCBACCOUNT_PROVIDER='#'
 fi
+AC_SUBST(LOAD_SFCBACCOUNT_PROVIDER)
 
 # Check and configure requested tests.
 if test "$enable_tests" == "yes"; then

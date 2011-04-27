@@ -69,12 +69,12 @@
 @LOAD_INDICATION_PROVIDER@   location: sfcElementCapabilitiesProvider
 @LOAD_INDICATION_PROVIDER@   type: association
 @LOAD_INDICATION_PROVIDER@   namespace: root/interop
-# TODO: if this
-[SFCB_Account]
-   provider: CimAccountPassthroughProvider
-   location: sfccimAccountPassthroughProvider
-   type: method
-   namespace: root/interop
+
+@LOAD_SFCBACCOUNT_PROVIDER@[SFCB_Account]
+@LOAD_SFCBACCOUNT_PROVIDER@   provider: CimAccountPassthroughProvider
+@LOAD_SFCBACCOUNT_PROVIDER@   location: sfccimAccountPassthroughProvider
+@LOAD_SFCBACCOUNT_PROVIDER@   type: method
+@LOAD_SFCBACCOUNT_PROVIDER@   namespace: root/interop
 #
 [SFCB_RegisteredProfile]
    provider: ProfileProvider
