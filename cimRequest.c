@@ -1824,7 +1824,7 @@ handleCimRequest(CimRequestContext * ctx, int flags)
     else if (flags) {
       fprintf(stderr, "in hcr, flags set\n");
       /* request from user with an expired password AND requesting password update */
-      if (flags == (HCR_UPDATE_PW + HCR_EXPIRED_PW) &&
+      if (flags == (HCR_UPDATE_PW | HCR_EXPIRED_PW) &&
           (strcasecmp(hdr.className, "SFCB_Account") == 0) && hdr.methodCall) {
         fprintf(stderr, " in hcr, got update_pw flag and expired flag\n");
 	fprintf(stderr, "call to SFCB_Account\n");
