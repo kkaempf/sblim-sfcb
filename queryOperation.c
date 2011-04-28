@@ -1,6 +1,6 @@
 
 /*
- * $Id: queryOperation.c,v 1.17 2011/04/04 22:37:18 mchasal Exp $
+ * $Id: queryOperation.c,v 1.18 2011/04/28 19:54:15 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -759,7 +759,7 @@ int _isNullEvaluate(QLOperation *op, QLPropertySource* source)
 static int __NullEvaluate(QLOperation *op, QLPropertySource* source, int invert)
 {
    QLOpd type;
-   CMPIValue v = getPropValue(op->lhod, source, &type);
+   getPropValue(op->lhod, source, &type);
 
    if (invert)
       return ((type != QL_Null));
