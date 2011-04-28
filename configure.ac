@@ -48,7 +48,7 @@ AC_ARG_ENABLE(ssl,
 
 AC_ARG_ENABLE(slp,
 	[AC_HELP_STRING([--enable-slp],
-		[include slp agent for SFCB - EXPERIMENTAL.])])
+		[include slp agent for SFCB.])])
 		
 AC_ARG_ENABLE(slp-hostname-lib,
    [AC_HELP_STRING([--enable-slp-hostname-lib],
