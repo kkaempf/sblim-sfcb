@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.39 2011/04/05 21:02:53 mchasal Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.40 2011/04/28 21:48:28 buccella Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -1186,7 +1186,7 @@ static CMPIValue convertFromStringValue(
 
    // expected incoming type is either string or string array
    // incoming array type must match expected array type 
-   if ((xtype & CMPI_ARRAY) ^ (strctype & CMPI_ARRAY)) {
+   if (!(xtype & CMPI_ARRAY) && (strctype & CMPI_ARRAY)) {
       if (prc) CMSetStatus(prc, CMPI_RC_ERR_INVALID_PARAMETER);
       return newcval; 	
    }
