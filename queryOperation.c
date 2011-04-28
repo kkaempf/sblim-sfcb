@@ -860,7 +860,7 @@ _isNullEvaluate(QLOperation * op, QLPropertySource * source)
 static int __NullEvaluate(QLOperation *op, QLPropertySource* source, int invert)
 {
    QLOpd type;
-   CMPIValue v = getPropValue(op->lhod, source, &type);
+   getPropValue(op->lhod, source, &type);
 
    if (invert) 
       return ((type != QL_Null));

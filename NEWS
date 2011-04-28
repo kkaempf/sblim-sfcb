@@ -6,6 +6,7 @@ New features:
 Bugs fixed: 
 - 3261868 Enum CQL filter on NULL cause incorrect rsp
 - 3213591 Local intf client abort abnormally on enum filter syntax err
+- 3291646 Unused var in __NullEvaluate
 
 Changes in 1.4.1
 ================
