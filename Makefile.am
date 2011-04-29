@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.109 2010/08/20 20:00:17 buccella Exp $  
+# $Id: Makefile.am,v 1.110 2011/04/29 21:40:50 mchasal Exp $  
 #
 #  Makefile.am
 # 
@@ -504,6 +504,15 @@ sfcb.cfg: sfcb.cfg.pre
 getSchema.sh: getSchema.sh.pre
 	sed -e s?$$\{prefix\}?$(prefix)?g \
 	-e s?$$\{exec_prefix\}?$(prefix)?g $< > $@
+
+if SETTABLERETRY
+20_indication.mof: 20_indication.mof.pre
+	sed -e s?SETTABLE?TRUE?g $< > $@
+else
+20_indication.mof: 20_indication.mof.pre
+	sed -e s?SETTABLE?FALSE?g $< > $@
+endif
+
 
 sfcb: sfcb.$(INIT_STYLE)
 	sed -e s?$$\{prefix\}?$(prefix)?g \
