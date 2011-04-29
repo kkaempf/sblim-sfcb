@@ -103,6 +103,10 @@ AC_ARG_ENABLE(tests,
 	[AC_HELP_STRING([--enable-tests(=TESTS)],
 		[Enable listed tests. If none are listed, all are enabled.])])
 
+AC_ARG_ENABLE(settableretry,
+	[AC_HELP_STRING([--enable-settableretry],
+		[Allow reliable indication params to be settable.])])
+
 AC_ARG_ENABLE(uds,
 	[AC_HELP_STRING([--enable-uds],
 		[Enable UDS authentication.])])
@@ -176,6 +180,7 @@ fi
 
 # Check and configure requested tests.
 if test "$enable_tests" == "yes"; then
+    enable_settableretry="yes"
 if test "$enable_local_connect_only" == "yes"; then
     enable_tests="localtests,gcov"
 else
@@ -334,6 +339,10 @@ fi
 
 if test "$enable_uds" == "yes"; then
    AC_DEFINE(HAVE_UDS,,[UDS authentication enabled])
+fi
+
+if test "$enable_settableretry" == "yes"; then
+   AC_DEFINE(SETTABLERETRY,,[Settable indication parameters enabled])
 fi
 
 
@@ -525,6 +534,7 @@ if test -d $srcdir/cmpi-devel; then
 fi
 
 AM_CONDITIONAL(INDICATIONS,[test "$enable_indications" == "yes"]) 
+AM_CONDITIONAL(SETTABLERETRY,[test "$enable_settableretry" == "yes"]) 
 AM_CONDITIONAL(SSL,[test "$enable_ssl" == "yes"]) 
 AM_CONDITIONAL(SLP,[test "$enable_slp" == "yes"]) 
 AM_CONDITIONAL(SLP_HOSTNAME_LIB,[test "$enable_slp_hostname_lib" == "yes"])
@@ -537,7 +547,7 @@ AM_CONDITIONAL(LOCAL_CONNECT_NO_INDICATION,[test "$enable_local_connect_only" ==
 AM_CONDITIONAL(LOCAL_CONNECT_ONLY,[test "$enable_local_connect_only" == "yes"])
 
 AC_CONFIG_FILES([Makefile sfcb.spec sfcbrepos.sh sfcbstage.sh sfcbunstage.sh 
-	         sfcbuuid.sh sfcb.cfg.pre getSchema.sh.pre 
+	         sfcbuuid.sh sfcb.cfg.pre getSchema.sh.pre 20_indication.mof.pre
 		 sfcb.init-redhat sfcb.init-suse sfcb.init-none default.reg
 		 man/genSslCert.1.pre  man/sfcbmof.1.pre 
                  man/sfcbunstage.1.pre man/sfcbuuid.1.pre man/getSchema.1.pre
@@ -562,6 +572,7 @@ echo -e "uds"\\t\\t\\t\\t"${enable_uds:-no}"
 echo -e "tests"\\t\\t\\t\\t"${enable_tests:-no}"
 echo -e "debug"\\t\\t\\t\\t"${enable_debug:-no}"
 echo -e "Request types"\\t\\t\\t"${enable_request_types}"
+echo -e "Settable retry parameters"\\t"${enable_settableretry:-no}"
 echo =================================================================
 echo
 echo "sfcb configuration complete.  you may now run 'make'"

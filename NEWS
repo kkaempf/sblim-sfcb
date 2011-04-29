@@ -2,11 +2,11 @@ Changes in 1.4.2
 ================
 
 New features:
+- 3190623 Set *IsSettable propperties to false for IndicationService
 
 Bugs fixed: 
 
 Everything in 1.3.12, plus: 
-
 
 Changes in 1.4.1
 ================
