@@ -180,7 +180,6 @@ fi
 
 # Check and configure requested tests.
 if test "$enable_tests" == "yes"; then
-    enable_settableretry="yes"
 if test "$enable_local_connect_only" == "yes"; then
     enable_tests="localtests,gcov"
 else
@@ -188,6 +187,10 @@ else
     enable_tests="unit,gcov,wbemcli,xml,commands,slp,providers,cimrs"
 fi
 fi
+if test "$enable_tests" != ""; then
+    enable_settableretry="yes"
+fi
+
 
 OLDIFS="$IFS"
 IFS=","
