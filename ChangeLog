@@ -1,3 +1,14 @@
+2011-05-03 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* configure.ac, Makefile.am, sblim-sfcb.service.pre.in
+	[ 3280992 ] Add systemd file to SFCB sources
+
+2011-05-02 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* configure.ac
+	[ 3190623 ] Set *IsSettable propperties to false for IndicationService
+	Problem with auto-enable when tests are enabled. 
+
 2011-04-29 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* 20_indication.mof.pre.in, Makefile.am, configure.ac
