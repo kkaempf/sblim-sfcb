@@ -29,6 +29,7 @@ initdir=$(sysconfdir)/init.d
 pamdir=$(sysconfdir)/pam.d
 sfcblibdir=$(libdir)/sfcb
 cmpilibdir=$(libdir)/cmpi
+systemddir=$(prefix)/share/systemd
 
 MANFILES=man/genSslCert.1 man/getSchema.1 man/sfcbd.1 man/sfcbmof.1 \
 	man/sfcbrepos.1 man/sfcbstage.1 man/sfcbunstage.1 man/sfcbuuid.1 \
@@ -424,7 +425,8 @@ man_MANS=$(MANFILES)
 
 EXTRA_DIST=sfcb.cfg.pre.in sfcb.spec sfcbrepos.sh.in sfcbstage.sh.in \
 	sfcbunstage.sh.in sfcbuuid.sh.in sfcb.init-redhat.in sfcb.init-suse.in \
-	sfcb.init-none.in cimXmlParser.c footprint.pl test cmpi-devel
+	sfcb.init-none.in cimXmlParser.c footprint.pl test cmpi-devel \
+    sblim-sfcb.service.pre.in
 
 dist_sfcbdata_SCRIPTS=genSslCert.sh getSchema.sh test/stageschema.sh
 
@@ -489,10 +491,12 @@ else
 	sed -e s?SETTABLE?FALSE?g $< > $@
 endif
 
-
-sfcb: sfcb.$(INIT_STYLE)
+sfcb: sfcb.$(INIT_STYLE) sblim-sfcb.service
 	sed -e s?$$\{prefix\}?$(prefix)?g \
 	-e s?$$\{exec_prefix\}?$(prefix)?g $< > $@
+
+sblim-sfcb.service: sblim-sfcb.service.pre
+	sed -e s?$$\{exec_prefix\}?$(prefix)?g $< > $@
 
 providerRegister: providerRegister.c
 	touch $@
@@ -501,6 +505,7 @@ unittest:
 	cd test && sh check_all.sh
 
 install-data-local:
+	if test -d $(systemddir); then cp $(srcdir)/sblim-sfcb.service $(systemddir); fi; 
 	test -d $(DESTDIR)$(sfcbstatedir)/registration/repository || $(mkdir_p) $(DESTDIR)$(sfcbstatedir)/registration/repository
 	test -d $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop || $(mkdir_p) $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop
 	test -d $(DESTDIR)$(sfcbstatedir)/stage/regs || $(mkdir_p) $(DESTDIR)$(sfcbstatedir)/stage/regs
@@ -521,6 +526,7 @@ endif
 uninstall-local:
 	rm -f $(DESTDIR)$(sfcbstatedir)/stage/default.reg
 	rm -f $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop/10_interop.mof
+	rm -f $(systemddir)/sblim-sfcb.service
 if INDICATIONS
 	rm -f $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop/20_indication.mof
 	rm -f $(DESTDIR)$(sfcbstatedir)/stage/mofs/indication.mof
@@ -532,7 +538,7 @@ endif
 clean-local:
 	rm -f sfcbrepos sfcbstage sfcbunstage sfcbuuid sfcb.cfg getSchema.sh sfcb \
 		sfcb.init-redhat sfcb.init-suse sfcb.init-none sfcb-dox.conf \
-                cimXmlParserProcessed.c \
+                cimXmlParserProcessed.c sblim-sfcb.service \
 		*.gcno *.gcda *.gcov $(MANFILES) test/TestProviders/tests/RIModIS.XML
 	rm -rf doc/* coverage/ 
 

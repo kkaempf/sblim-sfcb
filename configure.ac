@@ -551,7 +551,7 @@ AM_CONDITIONAL(LOCAL_CONNECT_ONLY,[test "$enable_local_connect_only" == "yes"])
 
 AC_CONFIG_FILES([Makefile sfcb.spec sfcbrepos.sh sfcbstage.sh sfcbunstage.sh 
 	         sfcbuuid.sh sfcb.cfg.pre getSchema.sh.pre 20_indication.mof.pre
-		 sfcb.init-redhat sfcb.init-suse sfcb.init-none default.reg
+		 sfcb.init-redhat sfcb.init-suse sfcb.init-none default.reg sblim-sfcb.service.pre
 		 man/genSslCert.1.pre  man/sfcbmof.1.pre 
                  man/sfcbunstage.1.pre man/sfcbuuid.1.pre man/getSchema.1.pre
 		 man/sfcbrepos.1.pre  man/wbemcat.1.pre

@@ -3,6 +3,7 @@ Changes in 1.4.2
 
 New features:
 - 3190623 Set *IsSettable propperties to false for IndicationService
+- 3280992 Add systemd file to SFCB sources
 
 Bugs fixed: 
 
