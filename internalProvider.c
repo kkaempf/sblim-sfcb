@@ -48,7 +48,7 @@ extern CMPIInstance *relocateSerializedInstance(void *area);
 extern char    *sfcb_value2Chars(CMPIType type, CMPIValue * value);
 extern CMPIObjectPath *getObjectPath(char *path, char **msg);
 extern CMPIBroker *Broker;
-extern UtilStringBuffer *newStringBuffer(int s);
+//extern UtilStringBuffer *newStringBuffer(int s);
 extern void     setStatus(CMPIStatus *st, CMPIrc rc, const char *msg);
 
 static const CMPIBroker *_broker;

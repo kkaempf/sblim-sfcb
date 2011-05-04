@@ -117,7 +117,7 @@ sfcb_sharedobjects = \
    $(sfcblibdir)/*.so
 
 sfcblib_LTLIBRARIES = \
-   libsfcUtil.la \
+   libsfcHt.la \
    libsfcBrokerCore.la \
    libsfcFileRepository.la \
    libsfcInternalProvider.la \
@@ -161,13 +161,11 @@ bin_PROGRAMS = \
 noinst_PROGRAMS = \
    sfcbdumpP32onI32 classSchema2c
 
-libsfcUtil_la_SOURCES = \
+libsfcHt_la_SOURCES = \
 	sfcUtil/hashtable.c \
-	sfcUtil/utilFactory.c \
 	sfcUtil/utilHashtable.c \
-	sfcUtil/utilStringBuffer.c \
 	sfcUtil/libsfcUtil.Versions
-libsfcUtil_la_LDFLAGS = -Wl,--version-script,$(srcdir)/sfcUtil/libsfcUtil.Versions
+libsfcHt_la_LDFLAGS = -Wl,--version-script,$(srcdir)/sfcUtil/libsfcUtil.Versions
 
 libsfcBrokerCore_la_SOURCES = \
     args.c \
@@ -207,8 +205,8 @@ libsfcBrokerCore_la_SOURCES = \
     $(QUALREP_FILES)
 
 libsfcBrokerCore_la_CFLAGS = $(AM_CFLAGS) @SFCB_CMPI_OS@ 
-libsfcBrokerCore_la_LIBADD=-lsfcUtil
-libsfcBrokerCore_la_DEPENDENCIES=libsfcUtil.la
+libsfcBrokerCore_la_LIBADD=-lsfcHt -lsfcUtil 
+libsfcBrokerCore_la_DEPENDENCIES=libsfcHt.la
 
 queryLexer.c: $(srcdir)/queryLexer.l
 	$(LEX) -t $< | sed -e "s/yy/sfcQuery/g" > $@
@@ -412,7 +410,7 @@ noinst_HEADERS=array.h $(SLP_INC) httpComm.h control.h    providerMgr.h \
 	constClass.h   msgqueue.h     providerRegister.h \
 	cimXmlParser.h    native.h       support.h cimXmlGen.h \
 	cimRequest.h cimRsRequest.h genericlist.h  objectImpl.h   trace.h \
-	sfcUtil/hashtable.h      sfcUtil/utilft.h mlog.h \
+	sfcUtil/hashtable.h      mlog.h \
 	cmpiftx.h cmpimacsx.h \
 	fileRepository.h internalProvider.h \
 	selectexp.h queryOperation.h \
