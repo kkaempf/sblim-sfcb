@@ -360,7 +360,7 @@ lookupProviders(long type, char *className, char *nameSpace,
   lst = (*ht)->ft->get(*ht, id);
 
   if (lst == NULL) {
-    lst = UtilFactory->newList();
+    lst = UtilFactory->newList(memAddUtilList, memUnlinkEncObj);
     if ((rc = addProviders(type, className, nameSpace, lst))) {
       lst->ft->release(lst);
       free(id);
@@ -646,7 +646,7 @@ getAssocProviders(char *className, char *nameSpace)
     lst = assocProvidersHt->ft->get(assocProvidersHt, key);
   }
   if (lst == NULL) {
-    lst = UtilFactory->newList();
+    lst = UtilFactory->newList(memAddUtilList, memUnlinkEncObj);
     if (addAssocProviders(className, nameSpace, lst)) {
       lst->ft->release(lst);
       _SFCB_RETURN(NULL);
@@ -1756,7 +1756,7 @@ _getConstClassChildren(const char *ns, const char *cn)
         localInvokeMethod(&binCtx, path, "getchildren", in, &out, &rc, 0);
     if (out) {
       ar = CMGetArg(out, "children", &rc).value.array;
-      ul = UtilFactory->newList();
+      ul = UtilFactory->newList(memAddUtilList, memUnlinkEncObj);
       for (i = 0, m = CMGetArrayCount(ar, NULL); i < m; i++) {
         str = CMGetArrayElementAt(ar, i, NULL).value.string;
         if (str && str->hdl)
@@ -1804,7 +1804,7 @@ _getAssocClassNames(const char *ns)
     data = localInvokeMethod(&binCtx, path, "getassocs", in, &out, &rc, 0);
     if (out) {
       ar = CMGetArg(out, "assocs", &rc).value.array;
-      ul = UtilFactory->newList();
+      ul = UtilFactory->newList(memAddUtilList, memUnlinkEncObj);
       for (i = 0, m = CMGetArrayCount(ar, NULL); i < m; i++) {
         char           *name =
             CMGetArrayElementAt(ar, i, NULL).value.string->hdl;

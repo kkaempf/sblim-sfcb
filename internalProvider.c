@@ -655,7 +655,7 @@ getRefs(const CMPIContext *ctx, const CMPIResult *rslt,
         const char *resultRole,
         const char **propertyList, int associatorFunction)
 {
-  UtilList       *refs = UtilFactory->newList();
+  UtilList       *refs = UtilFactory->newList(memAddUtilList, memUnlinkEncObj);
   char           *ns = (char *) CMGetNameSpace(cop, NULL)->hdl;
   CMPIStatus      st = { CMPI_RC_OK, NULL };
 

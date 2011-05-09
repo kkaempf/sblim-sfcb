@@ -260,11 +260,16 @@ addChild(ClassRegister * cr, const char *p, const char *child)
       ((ClassBase *) (cr + 1))->it->ft->get(((ClassBase *) (cr + 1))->it,
                                             p);
   if (ul == NULL) {
-    ul = UtilFactory->newList();
+    fprintf(stderr, "classProvider: addChild()\n");
+    ul = UtilFactory->newList(memAddUtilList, memUnlinkEncObj);
+    fprintf(stderr, "classProvider: newList() return\n");
     ((ClassBase *) (cr + 1))->it->ft->put(((ClassBase *) (cr + 1))->it, p,
                                           ul);
   }
+  fprintf(stderr, "classProvider: calling prepend() %p\n", ul->ft->prepend);
   ul->ft->prepend(ul, child);
+  fprintf(stderr, "classProvider: return from prepend()\n");
+
 }
 
 static void

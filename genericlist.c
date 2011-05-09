@@ -36,10 +36,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "genericlist.h"
-#include "mlog.h"
-#include "support.h"
 
-#ifdef THINK_C
+#ifdef THINK_C /* what is this? */
 #define malloc NewPtr
 #endif
 
@@ -138,7 +136,7 @@ add_to_beginning(Generic_list list, void *pointer)
   Generic_list_element *element;
 
   if (!pointer) {
-    mlogf(M_ERROR, M_SHOW, "%s: NULL pointer passed 1\n", module);
+    //    mlogf(M_ERROR, M_SHOW, "%s: NULL pointer passed 1\n", module);
     return;
     exit(EXIT_FAILURE);
   }
@@ -162,7 +160,7 @@ add_to_end(Generic_list list, void *pointer)
   Generic_list_element *element;
 
   if (!pointer) {
-    mlogf(M_ERROR, M_SHOW, "%s: NULL pointer passed 2\n", module);
+    //    mlogf(M_ERROR, M_SHOW, "%s: NULL pointer passed 2\n", module);
     // abort();
     return;
     exit(EXIT_FAILURE);
@@ -546,7 +544,7 @@ emalloc(unsigned int n)
 
   ptr = (void *) malloc(n);
   if (ptr == NULL) {
-    mlogf(M_ERROR, M_SHOW, "%s: error allocating memory\n", module);
+    //    mlogf(M_ERROR, M_SHOW, "%s: error allocating memory\n", module);
     exit(EXIT_FAILURE);
   }
   return ptr;
@@ -555,9 +553,10 @@ emalloc(unsigned int n)
 static void
 listRelease(UtilList * ul)
 {
+  fprintf(stderr, "list released\n");
   Generic_list    l = *(Generic_list *) & ul->hdl;
   destroy_list(&l);
-  memUnlinkEncObj(ul->mem_state);
+  if (ul->ft->memUnlink)  ul->ft->memUnlink(ul->mem_state);
   free(ul);
 }
 
@@ -685,8 +684,10 @@ listRemoveThis(UtilList * ul, void *elm)
 }
 
 Util_List_FT    UtilList_ft = {
-  1,
+  2,
   listRelease,
+  //  listMemUnlink, /* should be set by SFCB */
+  NULL, /* memUnlink (used in SFCB) */
   listClone,
   listClear,
   listSize,
@@ -709,18 +710,23 @@ Util_List_FT    UtilList_ft = {
 Util_List_FT   *UtilListFT = &UtilList_ft;
 
 UtilList       *
-newList()
+newList(void* memAddFunc, void* memReleaseFunc)
 {
-  UtilList        ul,
-                 *tUl;
-  int             state;
+  fprintf(stderr, "newList()\n");
+  UtilList        ul;
 
   ul.ft = UtilListFT;
   initialize_list((Generic_list *) & ul.hdl);
-  tUl = memAddEncObj(MEM_NOT_TRACKED, &ul, sizeof(ul), &state);
-  tUl->mem_state = state;
+  ul.ft->memUnlink = memReleaseFunc;
 
-  return tUl;
+  if (memAddFunc) {  /* SFCB does this */
+    UtilList* (*memLink)(UtilList*);
+    memLink = memAddFunc;
+    return (*memLink)(&ul);
+  }
+  else {  /* SFCC does this */
+    return memcpy(malloc(sizeof(ul)),&ul,sizeof(ul));
+  }
 }
 /* MODELINES */
 /* DO NOT EDIT BELOW THIS COMMENT */
