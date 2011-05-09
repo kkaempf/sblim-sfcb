@@ -20,7 +20,7 @@
  *
  */
 
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>

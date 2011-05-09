@@ -27,7 +27,7 @@
 #include "cmpi/cmpidt.h"
 #include "providerRegister.h"
 #include "providerMgr.h"
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "msgqueue.h"
 #include "constClass.h"
 #include "cimXmlParser.h"

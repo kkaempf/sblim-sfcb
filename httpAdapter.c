@@ -41,7 +41,7 @@
 
 #include "cmpi/cmpidt.h"
 #include "msgqueue.h"
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "trace.h"
 #include "cimRequest.h"
 #include "support.h"

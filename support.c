@@ -596,7 +596,6 @@ memAddEncObj(int mode, void *ptr, size_t size, int *memId)
 UtilList *
 memAddUtilList(UtilList* ul)
 {
-  fprintf(stderr, "memAddUtilList()\n");
   UtilList* tUl;
   int state;
   tUl = memAddEncObj(MEM_NOT_TRACKED, ul, sizeof(*ul), &state);
@@ -731,7 +730,7 @@ releaseHeap(void *hc)
   _SFCB_EXIT();
 }
 
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "providerRegister.h"
 
 ProviderRegister *pReg = NULL;

@@ -24,7 +24,7 @@
 
 #include "support.h"
 #include "native.h"
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "providerMgr.h"
 #include "providerRegister.h"
 #include "objectImpl.h"

@@ -29,7 +29,7 @@
 #include <ctype.h>
 #include "providerRegister.h"
 #include "fileRepository.h"
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "trace.h"
 #include "constClass.h"
 #include "internalProvider.h"

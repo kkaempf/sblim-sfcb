@@ -39,7 +39,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <dlfcn.h>
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 
 #define ENQ_BOT_LIST(i,f,l,n,p) { if (l) l->n=i; else f=i; \
                                   i->p=l; i->n=NULL; l=i;}

@@ -19,7 +19,7 @@
  *
  */
 
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "support.h"
 #include "mlog.h"
 #include <stdio.h>

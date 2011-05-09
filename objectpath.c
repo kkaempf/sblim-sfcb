@@ -29,7 +29,7 @@
 
 #include "native.h"
 #include "msgqueue.h"
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 
 extern UtilStringBuffer *newStringBuffer(int s);
 
