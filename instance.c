@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "native.h"
 #include "instance.h"
 

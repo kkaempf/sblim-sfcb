@@ -24,7 +24,7 @@
 #include "providerMgr.h"
 #include "constClass.h"
 #include "queryOperation.h"
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "objectImpl.h"
 #include "mlog.h"
 

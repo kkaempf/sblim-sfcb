@@ -45,7 +45,7 @@
 
 #include "native.h"
 #include "trace.h"
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "string.h"
 
 #include "queryOperation.h"
@@ -74,7 +74,7 @@ typedef struct scanner {
 extern int      noChunking;
 
 extern CMPIBroker *Broker;
-extern UtilStringBuffer *newStringBuffer(int s);
+//extern UtilStringBuffer *newStringBuffer(int s);
 extern UtilStringBuffer *instanceToString(CMPIInstance *ci, char **props);
 extern const char *getErrorId(int c);
 extern const char *instGetClassName(CMPIInstance *ci);
@@ -236,7 +236,8 @@ UtilStringBuffer *
 segments2stringBuffer(RespSegment * rs)
 {
   int             i;
-  UtilStringBuffer *sb = newStringBuffer(4096);
+  //  UtilStringBuffer *sb = newStringBuffer(4096);
+  UtilStringBuffer *sb = UtilFactory->newStrinBuffer(4096);
 
   if (rs) {
     for (i = 0; i < 7; i++) {

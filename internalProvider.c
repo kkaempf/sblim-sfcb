@@ -29,7 +29,7 @@
 #include <ctype.h>
 #include "providerRegister.h"
 #include "fileRepository.h"
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "trace.h"
 #include "constClass.h"
 #include "internalProvider.h"
@@ -48,7 +48,7 @@ extern CMPIInstance *relocateSerializedInstance(void *area);
 extern char    *sfcb_value2Chars(CMPIType type, CMPIValue * value);
 extern CMPIObjectPath *getObjectPath(char *path, char **msg);
 extern CMPIBroker *Broker;
-extern UtilStringBuffer *newStringBuffer(int s);
+//extern UtilStringBuffer *newStringBuffer(int s);
 extern void     setStatus(CMPIStatus *st, CMPIrc rc, const char *msg);
 
 static const CMPIBroker *_broker;
@@ -655,7 +655,7 @@ getRefs(const CMPIContext *ctx, const CMPIResult *rslt,
         const char *resultRole,
         const char **propertyList, int associatorFunction)
 {
-  UtilList       *refs = UtilFactory->newList();
+  UtilList       *refs = UtilFactory->newList(memAddUtilList, memUnlinkEncObj);
   char           *ns = (char *) CMGetNameSpace(cop, NULL)->hdl;
   CMPIStatus      st = { CMPI_RC_OK, NULL };
 
