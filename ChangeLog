@@ -1,3 +1,23 @@
+2011-05-09  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* Makefile.am, brokerEnc.c, brokerUpc.c, cimRequest.c, cimXmlGen.c,
+	  cimXmlGen.h, classProvider.c, classProviderCommon.h, 
+	  classProviderGz.c, classProviderMem.c, classProviderSf.c, 
+	  classSchema2c.c, configure.ac, control.c, 
+	  elementCapabilitiesProvider.c, fileRepository.h, genericlist.c, 
+	  genericlist.h, httpAdapter.c, indCIMXMLExport.c, instance.c,
+          internalProvider.c, internalProvider.h, interopProvider.c, 
+	  interopServerProvider.c, objectImpl.c, objectImplSwapI32toP32.c, 
+	  objectpath.c, objectpath.h, profileProvider.c, providerDrv.c, 
+	  providerMgr.c, providerRegister.c, providerRegister.h, result.c, 
+	  sfcBroker.c, sfcUtil/hashtable.c, sfcUtil/hashtable.h, 
+	  sfcUtil/libsfcUtil.Versions, sfcUtil/utilFactory.c, 
+	  sfcUtil/utilHashtable.c, sfcUtil/utilStringBuffer.c, 
+	  sfcUtil/utilft.h, support.c, support.h:
+	[ 3177587 ] create sfcCommon 
+	(continued)
+	Moved in genericlist.*, removed sfcUtil/*, updated includes and build
+
 2011-05-03 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* configure.ac, Makefile.am, sblim-sfcb.service.pre.in
