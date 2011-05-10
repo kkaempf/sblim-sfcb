@@ -19,7 +19,7 @@
  *
  */
 #include <stdio.h>
-#include "sfcUtil/utilft.h"
+#include <sfcCommon/utilft.h>
 
 #ifndef _FILEREPOSITORY_
 #define _FILEREPOSITORY_

@@ -28,7 +28,7 @@
 #include "cmpi/cmpift.h"
 #include "cmpiftx.h"
 #include "msgqueue.h"
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "providerMgr.h"
 #include <time.h>
 #include <pwd.h>

@@ -86,7 +86,7 @@ buildInheritanceTable(ClassRegister * cr)
       continue;
     ul = it->ft->get(it, p);
     if (ul == NULL) {
-      ul = UtilFactory->newList();
+      ul = UtilFactory->newList(NULL, memUnlinkEncObj);
       it->ft->put(it, p, ul);
     }
     ul->ft->prepend(ul, cc->ft->getCharClassName(cc));
@@ -389,7 +389,7 @@ addClass(ClassRegister * cr, CMPIConstClass * ccp, char *cn, char *p)
   if (p) {
     ul = it->ft->get(it, p);
     if (ul == NULL) {
-      ul = UtilFactory->newList();
+      ul = UtilFactory->newList(NULL, memUnlinkEncObj);
       it->ft->put(it, p, ul);
     }
     ul->ft->prepend(ul, cn);

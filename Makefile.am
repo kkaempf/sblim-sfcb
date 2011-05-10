@@ -44,7 +44,6 @@ AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sfcbconfdir)\" \
 	-DCMPI_LIBDIR=\"$(cmpilibdir)\" \
 	-DLIBDIR=\"$(libdir)\" \
 	-DSFCB_BINARY=\"$(sbindir)/sfcbd\" \
-	-I$(srcdir)/sfcUtil \
 	@SFCB_CPPFLAGS@ \
         @SFCB_CMPI_PLATFORM@ 
 AM_LDFLAGS=@SFCB_LDFLAGS@
@@ -118,7 +117,6 @@ sfcb_sharedobjects = \
    $(sfcblibdir)/*.so
 
 sfcblib_LTLIBRARIES = \
-   libsfcUtil.la \
    libsfcBrokerCore.la \
    libsfcFileRepository.la \
    libsfcInternalProvider.la \
@@ -162,14 +160,6 @@ bin_PROGRAMS = \
 noinst_PROGRAMS = \
    sfcbdumpP32onI32 classSchema2c
 
-libsfcUtil_la_SOURCES = \
-	sfcUtil/hashtable.c \
-	sfcUtil/utilFactory.c \
-	sfcUtil/utilHashtable.c \
-	sfcUtil/utilStringBuffer.c \
-	sfcUtil/libsfcUtil.Versions
-libsfcUtil_la_LDFLAGS = -Wl,--version-script,$(srcdir)/sfcUtil/libsfcUtil.Versions
-
 libsfcBrokerCore_la_SOURCES = \
     args.c \
     array.c \
@@ -192,7 +182,6 @@ libsfcBrokerCore_la_SOURCES = \
     providerRegister.c \
     objectImpl.c \
     constClass.c \
-    genericlist.c \
     msgqueue.c \
     providerMgr.c \
     providerDrv.c \
@@ -208,8 +197,6 @@ libsfcBrokerCore_la_SOURCES = \
     $(QUALREP_FILES)
 
 libsfcBrokerCore_la_CFLAGS = $(AM_CFLAGS) @SFCB_CMPI_OS@ 
-libsfcBrokerCore_la_LIBADD=-lsfcUtil
-libsfcBrokerCore_la_DEPENDENCIES=libsfcUtil.la
 
 queryLexer.c: $(srcdir)/queryLexer.l
 	$(LEX) -t $< | sed -e "s/yy/sfcQuery/g" > $@
@@ -412,8 +399,8 @@ classSchema2c_DEPENDENCIES=libsfcBrokerCore.la
 noinst_HEADERS=array.h $(SLP_INC) httpComm.h control.h    providerMgr.h \
 	constClass.h   msgqueue.h     providerRegister.h \
 	cimXmlParser.h    native.h       support.h cimXmlGen.h \
-	cimRequest.h cimRsRequest.h genericlist.h  objectImpl.h   trace.h \
-	sfcUtil/hashtable.h      sfcUtil/utilft.h mlog.h \
+	cimRequest.h cimRsRequest.h objectImpl.h   trace.h \
+	mlog.h \
 	cmpiftx.h cmpimacsx.h \
 	fileRepository.h internalProvider.h \
 	selectexp.h queryOperation.h \

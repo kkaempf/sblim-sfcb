@@ -27,7 +27,7 @@
 
 #include "objectImpl.h"
 #include "array.h"
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "trace.h"
 #include "config.h"
 

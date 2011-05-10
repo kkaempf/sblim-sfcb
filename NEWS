@@ -4,6 +4,7 @@ Changes in 1.4.2
 New features:
 - 3190623 Set *IsSettable propperties to false for IndicationService
 - 3280992 Add systemd file to SFCB sources
+- 3177587 create sfcCommon (SFCB 1.4 now requires sfcCommon lib to be installed)
 
 Bugs fixed: 
 

@@ -31,7 +31,7 @@
 #include "cmpi/cmpidt.h"
 #include "providerMgr.h"
 #include "providerRegister.h"
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "cimXmlParser.h"
 #include "support.h"
 #include "msgqueue.h"

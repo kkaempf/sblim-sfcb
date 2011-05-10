@@ -21,7 +21,7 @@
 #ifndef _OBJECTPATH_H
 #define _OBJECTPATH_H
 
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 
 UtilStringBuffer *normalizeObjectPathStrBuf(const CMPIObjectPath * cop);
 char           *normalizeObjectPathChars(const CMPIObjectPath * cop);

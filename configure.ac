@@ -437,6 +437,9 @@ fi
 AC_CHECK_LIB(pthread,main)
 AC_CHECK_LIB(dl,main)
 AC_CHECK_LIB(z,main,[SFCB_LIBZ=-lz],[AC_MSG_ERROR([Could not find required libz])])
+#AC_CHECK_LIB(sfcUtil,newStringBuffer,[SFC_COMM=-lsfcUtil],[AC_MSG_ERROR([Could not find required sfcUtil])])
+AC_CHECK_LIB(sfcUtil,newStringBuffer)
+#AC_SEARCH_LIBS(newStringBuffer,sfcUtil,[SFC_COMM=-lsfcUtil],[AC_MSG_ERROR([Could not find required sfcUtil])])
 if test "$enable_indications" = "yes" ; then
    LOAD_INDICATION_PROVIDER=
    AC_DEFINE(HAVE_INDICATIONS,1,[Indication support enabled.])
