@@ -1,3 +1,8 @@
+2011-05-11  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimRequest.c:
+	[ 3300167 ] Memory leaks caused by cimRequest changes
+
 2011-05-10 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* interopServerProvider.c
