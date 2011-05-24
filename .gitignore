@@ -15,6 +15,7 @@ man/*.pre
 man/*.1
 .deps/
 .libs/
+m4/
 INSTALL
 Makefile
 Makefile.in
@@ -22,6 +23,7 @@ TAGS
 aclocal.m4
 autom4te.cache/
 classSchema2c
+confdefs.h
 config.guess
 config.h
 config.h.in
