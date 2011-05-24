@@ -12,8 +12,8 @@ Version: @PACKAGE_VERSION@
 Release: 0
 Group: Systems Management/Base
 License: EPL
-URL: http://www.sblim.org
-Source0: ftp://dl.sourceforge.net/pub/s/sb/sblim/%{name}-%{version}.tar.bz2
+URL: https://sourceforge.net/projects/sblim/
+Source0: https://downloads.sourceforge.net/project/sblim/sblim-sfcb/1.4%20branch%20%28unstable%29/%{name}-%{version}.tar.bz2
 Provides: cimserver
 BuildRequires: curl-devel
 BuildRequires: zlib-devel
@@ -23,6 +23,7 @@ Requires: curl
 Requires: zlib
 Requires: openssl
 Requires: pam
+Requires: libsblim-sfccommon
 
 %Description
 Small Footprint CIM Broker (sfcb) is a CIM server conforming to the
