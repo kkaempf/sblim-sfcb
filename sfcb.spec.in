@@ -19,6 +19,7 @@ BuildRequires: curl-devel
 BuildRequires: zlib-devel
 BuildRequires: openssl-devel
 BuildRequires: pam-devel
+BuildRequires: sblim-cmpi-devel
 Requires: curl
 Requires: zlib
 Requires: openssl
