@@ -19,6 +19,7 @@ man/*.pre
 man/*.1
 .deps/
 .libs/
+m4/
 INSTALL
 Makefile
 Makefile.in
@@ -26,6 +27,7 @@ TAGS
 aclocal.m4
 autom4te.cache/
 classSchema2c
+confdefs.h
 config.guess
 config.h
 config.h.in
@@ -41,6 +43,7 @@ install-sh
 libtool
 ltmain.sh
 missing
+sblim-sfcb.service.pre
 sfcb
 sfcb-dox.conf
 sfcb.cfg
@@ -96,3 +99,17 @@ mofc/
 20_indication.mof
 20_indication.mof.pre
 sfcbsem
+sfcbd.log
+sfcbproc
+sfcbtrace
+test/localtests/test_an
+test/localtests/test_as
+test/localtests/test_ci
+test/localtests/test_ec
+test/localtests/test_ecn
+test/localtests/test_ei
+test/localtests/test_ein
+test/localtests/test_enumNS
+test/localtests/test_gc
+test/localtests/test_gi
+test-driver
