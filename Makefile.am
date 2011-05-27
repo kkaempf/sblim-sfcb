@@ -521,6 +521,9 @@ endif
 if DOCS
 	rm -rf $(DESTDIR)$(sfcbdocdir)/html
 endif
+if TEST_ENABLED
+	./test/stageschema.sh -d test/schema -p $(prefix) -u
+endif
 
 clean-local:
 	rm -f sfcbrepos sfcbstage sfcbunstage sfcbuuid sfcb.cfg getSchema.sh sfcb \
