@@ -132,4 +132,9 @@
    unload: never
    namespace: root/interop
 #
-
+[CIM_NamespaceInManager]
+   provider: ServerProvider
+   location: sfcInteropServerProvider
+   type: association
+   namespace: root/interop
+#

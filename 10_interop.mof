@@ -70,6 +70,11 @@ class DMY_HostedService : CIM_HostedService
 {
 };
 
+class DMY_NamespaceInManager : CIM_NamespaceInManager
+{
+};
+
+
 class SFCB_ElementConformsToProfile : CIM_ElementConformsToProfile
 {
 };

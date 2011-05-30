@@ -8,6 +8,7 @@ New features:
 - 3309374 Implement CIM_CIMXMLCommunicationMechanism
 
 Bugs fixed: 
+- 3199899 sfcb uninstall process should remove test mof's 
 
 Everything in 1.3.12, plus: 
 

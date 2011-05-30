@@ -4,6 +4,11 @@
 	test/xmltest/enumerateinstancenames.ComMech.lines:
 	[ 3309374 ] Implement CIM_CIMXMLCommunicationMechanism
 
+2011-05-27 Narasimha Sharoff <nsharoff@us.ibm.com>
+
+	* Makefile.am
+	[ 3199899 ] sfcb uninstall process should remove test mof's
+
 2011-05-16 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* indCIMXMLHandler.c
