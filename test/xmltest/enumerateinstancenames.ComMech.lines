@@ -1,8 +1,8 @@
-<INSTANCENAME CLASSNAME="CIM_ObjectManagerCommunicationMechanism">
+<INSTANCENAME CLASSNAME="SFCB_CIMXMLCommunicationMechanism">
 <KEYBINDING NAME="SystemCreationClassName">
 <KEYVALUE VALUETYPE="string">CIM_ObjectManager</KEYVALUE>
 </KEYBINDING>
 <KEYBINDING NAME="CreationClassName">
-<KEYVALUE VALUETYPE="string">CIM_ObjectManagerCommunicationMechanism</KEYVALUE>
+<KEYVALUE VALUETYPE="string">SFCB_CIMXMLCommunicationMechanism</KEYVALUE>
 </KEYBINDING>
 </INSTANCENAME>

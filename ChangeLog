@@ -1,6 +1,7 @@
 2011-05-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
-	* 10_interop.mof, default.reg.in, interopServerProvider.c:
+	* 10_interop.mof, default.reg.in, interopServerProvider.c, 
+	test/xmltest/enumerateinstancenames.ComMech.lines:
 	[ 3309374 ] Implement CIM_CIMXMLCommunicationMechanism
 
 2011-05-16 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>

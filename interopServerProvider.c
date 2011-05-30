@@ -568,7 +568,7 @@ ComMechProviderEnumInstanceNames(CMPIInstanceMI * mi,
 
   CMAddKey(op, "SystemCreationClassName", "CIM_ObjectManager", CMPI_chars);
   CMAddKey(op, "CreationClassName",
-           "CIM_CIMXMLCommunicationMechanism", CMPI_chars);
+           "SFCB_CIMXMLCommunicationMechanism", CMPI_chars);
   hostName[0] = 0;
   gethostname(hostName, 511);
   CMAddKey(op, "SystemName", hostName, CMPI_chars);
