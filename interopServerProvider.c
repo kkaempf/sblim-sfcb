@@ -1,8 +1,8 @@
 
 /*
- * classProvider.c
+ * interopServerProvider.c
  *
- * (C) Copyright IBM Corp. 2005
+ * (C) Copyright IBM Corp. 2005, 2010, 2011
  *
  * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
  * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
@@ -15,7 +15,18 @@
  *
  * Description:
  *
- * InteropServer provider for sfcb .
+ * InteropServer provider for sfcb
+ *
+ * Has implementation for the following classes:
+ * 
+ *   Namespace
+ *   ObjectManager
+ *   CIMXMLCommunicationMechanism
+ *   IndicationService
+ *   IndicationServiceCapabilities
+ *   ServiceAffectsElement
+ *   HostedService
+ *   ElementConformsToProfile
  *
  */
 
@@ -553,11 +564,11 @@ ComMechProviderEnumInstanceNames(CMPIInstanceMI * mi,
   _SFCB_ENTER(TRACE_PROVIDERS, "ComMechProviderEnumInstanceNames");
 
   op = CMNewObjectPath(_broker, "root/interop",
-                       "CIM_ObjectManagerCommunicationMechanism", NULL);
+                       "SFCB_CIMXMLCommunicationMechanism", NULL);
 
   CMAddKey(op, "SystemCreationClassName", "CIM_ObjectManager", CMPI_chars);
   CMAddKey(op, "CreationClassName",
-           "CIM_ObjectManagerCommunicationMechanism", CMPI_chars);
+           "CIM_CIMXMLCommunicationMechanism", CMPI_chars);
   hostName[0] = 0;
   gethostname(hostName, 511);
   CMAddKey(op, "SystemName", hostName, CMPI_chars);
@@ -591,13 +602,13 @@ ComMechProviderEnumInstances(CMPIInstanceMI * mi,
   _SFCB_ENTER(TRACE_PROVIDERS, "ComMechProviderEnumInstanceNames");
 
   op = CMNewObjectPath(_broker, "root/interop",
-                       "CIM_ObjectManagerCommunicationMechanism", NULL);
+                       "SFCB_CIMXMLCommunicationMechanism", NULL);
   ci = CMNewInstance(_broker, op, NULL);
 
   CMSetProperty(ci, "SystemCreationClassName", "CIM_ObjectManager",
                 CMPI_chars);
   CMSetProperty(ci, "CreationClassName",
-                "CIM_ObjectManagerCommunicationMechanism", CMPI_chars);
+                "SFCB_CIMXMLCommunicationMechanism", CMPI_chars);
   hostName[0] = 0;
   gethostname(hostName, 511);
   CMSetProperty(ci, "SystemName", hostName, CMPI_chars);
@@ -626,6 +637,8 @@ ComMechProviderEnumInstances(CMPIInstanceMI * mi,
 
   CMSetProperty(ci, "MultipleOperationsSupported", &bul, CMPI_boolean);
 
+  CMSetProperty(ci, "CIMValidated", &bul, CMPI_boolean);
+
   CMReturnInstance(rslt, ci);
 
   _SFCB_RETURN(st);
@@ -648,7 +661,7 @@ ServiceProviderGetInstance(CMPIInstanceMI * mi,
       if (strcasecmp(className, "cim_objectmanager") == 0)
         return ObjectManagerProviderEnumInstances(mi, ctx, rslt, ref,
                                                   properties);
-      if (strcasecmp(className, "cim_objectmanagercommunicationMechanism")
+      if (strcasecmp(className, "sfcb_cimxmlcommunicationMechanism")
           == 0)
         return ComMechProviderEnumInstances(mi, ctx, rslt, ref,
                                             properties);
@@ -693,9 +706,9 @@ ServerProviderGetInstance(CMPIInstanceMI * mi,
     return ServiceProviderGetInstance(mi, ctx, rslt, ref, properties,
                                       "cim_objectmanager");
   if (strcasecmp
-      ((char *) cls->hdl, "cim_objectmanagercommunicationMechanism") == 0)
+      ((char *) cls->hdl, "sfcb_cimxmlcommunicationMechanism") == 0)
     return ServiceProviderGetInstance(mi, ctx, rslt, ref, properties,
-                                      "cim_objectmanagercommunicationMechanism");
+                                      "sfcb_cimxmlcommunicationMechanism");
   if (strcasecmp((char *) cls->hdl, "cim_indicationservice") == 0)
     return ServiceProviderGetInstance(mi, ctx, rslt, ref, properties,
                                       "cim_indicationservice");
@@ -724,7 +737,7 @@ ServerProviderEnumInstanceNames(CMPIInstanceMI * mi,
                                             "CIM_ObjectManager",
                                             "CIM_ComputerSystem");
   if (strcasecmp
-      ((char *) cls->hdl, "cim_objectmanagercommunicationMechanism") == 0)
+      ((char *) cls->hdl, "sfcb_cimxmlcommunicationMechanism") == 0)
     return ComMechProviderEnumInstanceNames(mi, ctx, rslt, ref);
   if (strcasecmp((char *) cls->hdl, "cim_indicationservice") == 0)
     return ServiceProviderEnumInstanceNames(mi, ctx, rslt, ref,
@@ -757,7 +770,7 @@ ServerProviderEnumInstances(CMPIInstanceMI * mi,
     return ObjectManagerProviderEnumInstances(mi, ctx, rslt, ref,
                                               properties);
   if (strcasecmp
-      ((char *) cls->hdl, "cim_objectmanagercommunicationMechanism") == 0)
+      ((char *) cls->hdl, "sfcb_cimxmlcommunicationMechanism") == 0)
     return ComMechProviderEnumInstances(mi, ctx, rslt, ref, properties);
   if (strcasecmp((char *) cls->hdl, "cim_interopservice") == 0) /* do we * 
                                                                  * still * 

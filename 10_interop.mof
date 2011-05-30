@@ -15,7 +15,7 @@ class DMY_IndicationService : CIM_IndicationService
 {
 };
 
-class DMY_ObjectManagerCommunicationMechanism : CIM_ObjectManagerCommunicationMechanism
+class SFCB_CIMXMLCommunicationMechanism : CIM_CIMXMLCommunicationMechanism
 {
 };
 
