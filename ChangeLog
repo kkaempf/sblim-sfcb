@@ -1,3 +1,8 @@
+2011-06-01  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+	* control.c, genSslCert.sh, httpAdapter.c, sfcb.cfg.pre.in
+	[ 3259627 ] provide a list acceptable CAs to client
+
 2011-05-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* 10_interop.mof, default.reg.in, interopServerProvider.c, 

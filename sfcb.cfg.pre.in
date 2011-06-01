@@ -166,6 +166,10 @@ sslKeyFilePath: @sysconfdir@/sfcb/file.pem
 ## Default is @sysconfdir@/sfcb/server.pem
 sslCertificateFilePath: @sysconfdir@/sfcb/server.pem
 
+## Filename containing list of certificates server accepts
+## Default is @sysconfdir@/sfcb/clist.pem
+sslCertList: @sysconfdir@/sfcb/clist.pem
+
 ## How SFCB handles client certificate based authentication. 
 ## ignore - do not request a certificate from the client
 ## accept - request a certificate from the client; do not fail if not presented
