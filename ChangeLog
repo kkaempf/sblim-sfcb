@@ -1,3 +1,8 @@
+2011-06-01  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* interopServerProvider.c:
+	[ 3310364 ] Implement CIM_NamespaceInManager
+
 2011-06-01  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
 	* control.c, genSslCert.sh, httpAdapter.c, sfcb.cfg.pre.in

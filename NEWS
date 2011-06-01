@@ -7,6 +7,7 @@ New features:
 - 3177587 create sfcCommon (SFCB 1.4 now requires sfcCommon lib to be installed)
 - 3309374 Implement CIM_CIMXMLCommunicationMechanism
 - 3259627 provide a list acceptable CAs to client
+- 3310364 Implement CIM_NamespaceInManager
 
 Bugs fixed: 
 - 3199899 sfcb uninstall process should remove test mof's 

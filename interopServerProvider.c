@@ -391,24 +391,15 @@ ServiceProviderEnumInstanceNames(CMPIInstanceMI * mi,
   _SFCB_RETURN(st);
 }
 
-static CMPIStatus
-ObjectManagerProviderEnumInstances(CMPIInstanceMI * mi,
-                                   const CMPIContext *ctx,
-                                   const CMPIResult *rslt,
-                                   const CMPIObjectPath * ref,
-                                   const char **properties)
+static CMPIInstance*
+makeObjectManager()
 {
-  CMPIStatus      st = { CMPI_RC_OK, NULL };
   char            str[512];
-  CMPIObjectPath *op;
-  CMPIInstance   *ci;
   CMPIUint16      state;
   CMPIBoolean     bul = 0;
-
-  _SFCB_ENTER(TRACE_PROVIDERS, "ObjectManagerProviderEnumInstances");
-
-  op = CMNewObjectPath(_broker, "root/interop", "CIM_ObjectManager", NULL);
-  ci = CMNewInstance(_broker, op, NULL);
+  CMPIObjectPath* op = CMNewObjectPath(_broker, "root/interop", 
+                                       "CIM_ObjectManager", NULL);
+  CMPIInstance* ci = CMNewInstance(_broker, op, NULL);
 
   CMSetProperty(ci, "CreationClassName", "CIM_ObjectManager", CMPI_chars);
   CMSetProperty(ci, "SystemCreationClassName", "CIM_ComputerSystem",
@@ -425,8 +416,21 @@ ObjectManagerProviderEnumInstances(CMPIInstanceMI * mi,
   CMSetProperty(ci, "RequestedState", &state, CMPI_uint16);
   state = 2;
   CMSetProperty(ci, "EnabledDefault", &state, CMPI_uint16);
+  return ci;
+}
 
-  CMReturnInstance(rslt, ci);
+static CMPIStatus
+ObjectManagerProviderEnumInstances(CMPIInstanceMI * mi,
+                                   const CMPIContext *ctx,
+                                   const CMPIResult *rslt,
+                                   const CMPIObjectPath * ref,
+                                   const char **properties)
+{
+  CMPIStatus      st = { CMPI_RC_OK, NULL };
+
+  _SFCB_ENTER(TRACE_PROVIDERS, "ObjectManagerProviderEnumInstances");
+
+  CMReturnInstance(rslt, makeObjectManager());
 
   _SFCB_RETURN(st);
 }
@@ -1107,8 +1111,11 @@ makeCIM_System(CMPIInstance *csi)
   CMReturn(CMPI_RC_OK);
 }
 
-/** \brief makeHostedService - Builds a CIM_HostedService instance
+/** \brief makeHostedService - Builds a CIM_HostedDependency instance:
  *  
+ *  CIM_HostedService 
+ *  CIM_NamespaceInManager
+ *
  *  Creates and returns the instance (or name) of a CIM_HostedService
  *  association between CIM_System and CIM_IndicationService
 */
@@ -1116,45 +1123,69 @@ CMPIStatus
 makeHostedService(CMPIAssociationMI * mi,
                   const CMPIContext *ctx,
                   const CMPIResult *rslt,
-                  const CMPIObjectPath * isop,
-                  const CMPIObjectPath * hsop,
-                  const CMPIObjectPath * csop,
+                  const CMPIObjectPath * dop, /* op of dependent */
+                  const CMPIObjectPath * hdop, /* op of assoc class */
+                  const CMPIObjectPath * aop, /* op of antecedent */
                   const char **propertyList, const char *target)
 {
-  CMPIEnumeration *isenm = NULL;
+  CMPIEnumeration *denm = NULL;
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
-  CMPIInstance   *hsi,
-                 *cci;
+  CMPIInstance   *hdi,
+                 *anti;
 
-  /* make an instance for the dependent */
-  cci = CMNewInstance(_broker, csop, &rc);
-  makeCIM_System(cci);
+  /* make an instance for the antecedent 
+     (System or ObjectManager) */
+  CMPIString* acn = CMGetClassName(aop, NULL);
+  if (strcasecmp(CMGetCharPtr(acn), "CIM_System") == 0) {
+    anti = CMNewInstance(_broker, aop, &rc);
+    makeCIM_System(anti);
+  }
+  else if (strcasecmp(CMGetCharPtr(acn), "CIM_ObjectManager") == 0) {
+    anti = makeObjectManager();
+  }
+  else {  /* should never happen */
+    rc.rc = CMPI_RC_ERR_FAILED;
+    return rc;
+  }
 
-  /* Get the SINGLE instance of isop HostedService 
-     (IndicationService or ObjectManager) */
-  isenm = _broker->bft->enumerateInstanceNames(_broker, ctx, isop, &rc);
-  CMPIData        isinst = CMGetNext(isenm, &rc);
-  // Create an instance 
-  hsi = CMNewInstance(_broker, hsop, &rc);
-  CMPIValue       cciop;
-  cciop.ref = CMGetObjectPath(cci, NULL);
+  /* Get the SINGLE instance of the dependent 
+     (IndicationService or Namespace) */
+  CMPIString* dcn = CMGetClassName(dop, NULL);
+  CMPIValue depop;
+  if (strcasecmp(CMGetCharPtr(dcn), "CIM_IndicationService") == 0) {
+    denm = _broker->bft->enumerateInstanceNames(_broker, ctx, dop, &rc);
+    CMPIData        dinst = CMGetNext(denm, &rc);
+    depop = dinst.value;
+  }
+  else if (strcasecmp(CMGetCharPtr(dcn), "CIM_Namespace") == 0) {
+    depop.ref = (CMPIObjectPath*)dop;
+  }
+  else {  /* should never happen */
+    rc.rc = CMPI_RC_ERR_FAILED;
+    return rc;
+  }
 
-  CMSetProperty(hsi, "Dependent", &(isinst.value), CMPI_ref);
-  CMSetProperty(hsi, "Antecedent", &(cciop), CMPI_ref);
+  /* Create an instance of the assoc class */
+  hdi = CMNewInstance(_broker, hdop, &rc);
+  CMPIValue       antiop;
+  antiop.ref = CMGetObjectPath(anti, NULL);
+
+  CMSetProperty(hdi, "Dependent", &(depop), CMPI_ref);
+  CMSetProperty(hdi, "Antecedent", &(antiop), CMPI_ref);
   if (strcasecmp(target, "Refs") == 0) {
     if (propertyList) {
-      CMSetPropertyFilter(hsi, propertyList, NULL);
+      CMSetPropertyFilter(hdi, propertyList, NULL);
     }
-    CMReturnInstance(rslt, hsi);
+    CMReturnInstance(rslt, hdi);
   } else {
-    CMReturnObjectPath(rslt, CMGetObjectPath(hsi, NULL));
+    CMReturnObjectPath(rslt, CMGetObjectPath(hdi, NULL));
   }
-  if (cci)
-    CMRelease(cci);
-  if (hsi)
-    CMRelease(hsi);
-  if (isenm)
-    CMRelease(isenm);
+  if (anti)
+    CMRelease(anti);
+  if (hdi)
+    CMRelease(hdi);
+  if (denm)
+    CMRelease(denm);
   CMReturnDone(rslt);
   CMReturn(CMPI_RC_OK);
 }
@@ -1361,6 +1392,111 @@ static CMPIStatus handleAssocHostedService(CMPIAssociationMI* mi,
     return rc;
 }
 
+static CMPIStatus handleAssocNIM(CMPIAssociationMI* mi, 
+                                           const CMPIContext* ctx, 
+                                           const CMPIResult* rslt, 
+                                           const CMPIObjectPath* cop, 
+                                           const char* resultClass, 
+                                           const char* role, 
+                                           const char* resultRole, 
+                                           const char** propertyList, 
+                                           const char* target, 
+                                           CMPIObjectPath* nimop) 
+{
+    CMPIStatus      rc = { CMPI_RC_OK, NULL };
+
+    CMPIObjectPath* nsop =
+        CMNewObjectPath(_broker, CMGetCharPtr(CMGetNameSpace(cop, &rc)),
+                        "CIM_Namespace", &rc);
+    CMPIObjectPath* omop = CMNewObjectPath(_broker, "root/interop", "CIM_ObjectManager", &rc);
+    if ((nsop == NULL) || (omop == NULL)) {
+      CMSetStatusWithChars(_broker, &rc, CMPI_RC_ERR_FAILED,
+                           "Create CMPIObjectPath failed.");
+      return rc;
+    }
+    
+    /* A Namespace was passed in, so we need to return either
+       the ObjectManager instance or an association instance */
+    if ((role == NULL || (strcasecmp(role, "dependent") == 0))
+        && (resultRole == NULL
+            || (strcasecmp(resultRole, "antecedent") == 0))
+        && CMClassPathIsA(_broker, cop, "cim_namespace", &rc) == 1) {
+      if (((strcasecmp(target, "Assocs") == 0)
+           || (strcasecmp(target, "AssocNames") == 0))
+          && (resultClass == NULL
+              || (strcasecmp(resultClass, "CIM_ObjectManager") == 0))) {
+
+        /* check it if the ObjectManager cop exists */
+        CBGetInstance(_broker, ctx, cop, NULL, &rc);
+        if (rc.rc != CMPI_RC_OK)
+          return rc;
+
+        /* Return the CIM_ObjectManager instance */
+        CMPIInstance* cci = makeObjectManager();
+        if (strcasecmp(target, "Assocs") == 0) {
+          if (propertyList) {
+            CMSetPropertyFilter(cci, propertyList, NULL);
+          }
+          CMReturnInstance(rslt, cci);
+        } else {
+          CMReturnObjectPath(rslt, CMGetObjectPath(cci, NULL));
+        }
+        if (cci)
+          CMRelease(cci);
+
+      } else if (resultClass == NULL
+                 || (strcasecmp(resultClass, "CIM_NamespaceInManager") == 0)) {
+        /* Return the NIM instance */
+        makeHostedService(mi, ctx, rslt, nsop, nimop, omop, propertyList,
+                          target);
+      } 
+
+    }
+
+    /* An ObjectManager was passed in so wee need to return either the
+     * Namespace instances or a CIM_NamespaceInManager association 
+     * instance */
+    if ((role == NULL || strcasecmp(role, "antecedent") == 0)
+        && (resultRole == NULL || strcasecmp(resultRole, "dependent") == 0)
+        && (CMClassPathIsA(_broker, cop, "cim_objectmanager", &rc) == 1)) {
+
+      /* check it if the ObjectManager cop exists */
+      CBGetInstance(_broker, ctx, cop, NULL, &rc);
+      if (rc.rc != CMPI_RC_OK)
+        return rc;
+
+      if (((strcasecmp(target, "Assocs") == 0)
+           || (strcasecmp(target, "AssocNames") == 0))
+          && (resultClass == NULL
+              || (strcasecmp(resultClass, "CIM_Namespace") ==
+                  0))) {
+        /* Return the CIM_Namespace instances */
+        CMPIEnumeration* nsenm =
+            CBEnumInstances(_broker, ctx, nsop, NULL, &rc);
+        CMPIData        inst = CMGetNext(nsenm, &rc);
+        for (; inst.state == CMPI_goodValue; inst = CMGetNext(nsenm, &rc)) {
+          
+          if (strcasecmp(target, "Assocs") == 0) {
+            if (propertyList) {
+              CMSetPropertyFilter(inst.value.inst, propertyList, NULL);
+            }
+            CMReturnInstance(rslt, (inst.value.inst));
+          } else {
+            CMReturnObjectPath(rslt, CMGetObjectPath(inst.value.inst, NULL));
+          }
+        }
+        if (nsenm)
+          CMRelease(nsenm);
+      } else if (resultClass == NULL
+                 || (strcasecmp(resultClass, "CIM_NamespaceInManager") == 0)) {
+        /* Return the NIM instance */
+        makeHostedService(mi, ctx, rslt, nsop, nimop, omop, propertyList,
+                          target);
+      }
+    }
+    return rc;
+}
+
 static CMPIStatus handleAssocElementConforms(CMPIAssociationMI* mi, 
 					   const CMPIContext* ctx, 
 					   const CMPIResult* rslt, 
@@ -1474,7 +1610,8 @@ getAssociators(CMPIAssociationMI * mi,
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   CMPIObjectPath *saeop = NULL;
   CMPIObjectPath *hsop = NULL,
-    *ecpop = NULL;
+    *ecpop = NULL,
+    *nimop = NULL;
 
   // Make sure role & resultRole are valid
   if (role && resultRole && (strcasecmp(role, resultRole) == 0)) {
@@ -1508,6 +1645,8 @@ getAssociators(CMPIAssociationMI * mi,
                       "SFCB_ServiceAffectsElement", &rc);
   hsop =
       CMNewObjectPath(_broker, "root/interop", "CIM_HostedService", &rc);
+  nimop =
+      CMNewObjectPath(_broker, "root/interop", "CIM_NamespaceInManager", &rc);
   ecpop =
       CMNewObjectPath(_broker, "root/interop",
                       "SFCB_ElementConformsToProfile", &rc);
@@ -1530,7 +1669,13 @@ getAssociators(CMPIAssociationMI * mi,
     rc = handleAssocHostedService(mi, ctx, rslt, cop, resultClass, role, resultRole, propertyList, target, hsop);
     if (rc.rc) return rc;
   }
-  // Handle ElementConformstoProfile
+  /* Handle CIM_NamespaceInManager */
+  if ((assocClass == NULL)
+      || (CMClassPathIsA(_broker, nimop, assocClass, &rc) == 1)) {
+    rc = handleAssocNIM(mi, ctx, rslt, cop, resultClass, role, resultRole, propertyList, target, nimop);
+    if (rc.rc) return rc;
+  }
+  /* Handle ElementConformstoProfile */
   if (((assocClass == NULL)
       || (CMClassPathIsA(_broker, ecpop, assocClass, &rc) == 1)) 
       && (CMClassPathIsA(_broker, cop, "cim_indicationservice", &rc) == 1)) {
