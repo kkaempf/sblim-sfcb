@@ -47,8 +47,9 @@ chmod 700 $DIR/*.pem
 if [ $DO_SERVER = yes ]
 then
     cp $DIR/cert.pem $TARGETDIR/server.pem
+    cp $DIR/cert.pem $TARGETDIR/clist.pem
     cp $DIR/key.pem $TARGETDIR/file.pem
-    chmod 400 $TARGETDIR/server.pem $TARGETDIR/file.pem
+    chmod 400 $TARGETDIR/server.pem $TARGETDIR/file.pem $TARGETDIR/clist.pem
 fi
 
 if [ $DO_CLIENT = yes ]

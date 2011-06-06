@@ -39,6 +39,7 @@
 #include <time.h>
 #include <sys/time.h>
 #include <dlfcn.h>
+#include <sfcCommon/utilft.h>
 
 #define ENQ_BOT_LIST(i,f,l,n,p) { if (l) l->n=i; else f=i; \
                                   i->p=l; i->n=NULL; l=i;}
@@ -195,6 +196,7 @@ void           *memAddEncObj(int mode, void *ptr, size_t size, int *memId);
 void            memUnlinkEncObj(int memId);
 void            memLinkEncObj(void *ptr, int *memId);
 void            memLinkInstance(CMPIInstance *ci);
+UtilList       *memAddUtilList(UtilList* ul);
 
 void           *markHeap();
 void            releaseHeap(void *heap);

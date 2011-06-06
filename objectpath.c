@@ -29,7 +29,7 @@
 
 #include "native.h"
 #include "msgqueue.h"
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 
 extern UtilStringBuffer *newStringBuffer(int s);
 
@@ -733,7 +733,8 @@ normalizeObjectPathStrBuf(const CMPIObjectPath * cop)
   int             i;
   char            pc = 0,
       *cp;
-  UtilStringBuffer *sb = newStringBuffer(512);
+  //  UtilStringBuffer *sb = newStringBuffer(512);
+  UtilStringBuffer *sb = UtilFactory->newStrinBuffer(512);
 
   KeyIds         *ids = (KeyIds *) malloc(sizeof(KeyIds) * c);
 

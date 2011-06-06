@@ -45,7 +45,7 @@
 
 #include "native.h"
 #include "trace.h"
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "string.h"
 
 #include "queryOperation.h"
@@ -74,7 +74,7 @@ typedef struct scanner {
 extern int      noChunking;
 
 extern CMPIBroker *Broker;
-extern UtilStringBuffer *newStringBuffer(int s);
+//extern UtilStringBuffer *newStringBuffer(int s);
 extern UtilStringBuffer *instanceToString(CMPIInstance *ci, char **props);
 extern const char *getErrorId(int c);
 extern const char *instGetClassName(CMPIInstance *ci);
@@ -236,7 +236,8 @@ UtilStringBuffer *
 segments2stringBuffer(RespSegment * rs)
 {
   int             i;
-  UtilStringBuffer *sb = newStringBuffer(4096);
+  //  UtilStringBuffer *sb = newStringBuffer(4096);
+  UtilStringBuffer *sb = UtilFactory->newStrinBuffer(4096);
 
   if (rs) {
     for (i = 0; i < 7; i++) {
@@ -839,9 +840,11 @@ enumClasses(CimRequestContext * ctx, RequestHdr * hdr)
                                                    [0].data));
       }
       freeResponseHeaders(resp, hdr->binCtx);
+      free(hdr->binCtx->bHdr);
       _SFCB_RETURN(rs);
     }
     freeResponseHeaders(resp, hdr->binCtx);
+    free(hdr->binCtx->bHdr);
 
     rs.chunkedMode = 1;
     rs.rc = err;
@@ -1144,9 +1147,11 @@ execQuery(CimRequestContext * ctx, RequestHdr * hdr)
                                                                  1]->object
                                                    [0].data));
       }
+      free(hdr->binCtx->bHdr);
       freeResponseHeaders(resp, hdr->binCtx);
       _SFCB_RETURN(rs);
     }
+    free(hdr->binCtx->bHdr);
     freeResponseHeaders(resp, hdr->binCtx);
     rs.chunkedMode = 1;
     rs.rc = err;
@@ -1662,6 +1667,9 @@ setQualifier(CimRequestContext * ctx, RequestHdr * hdr)
       if (resp) {
         free(resp);
       }
+      SetQualifierReq* sreq = (SetQualifierReq*)hdr->binCtx->bHdr;
+      free(sreq->qualifier.data);
+      free(hdr->binCtx->bHdr);
       _SFCB_RETURN(iMethodResponse(hdr, NULL));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
@@ -1859,6 +1867,9 @@ handleCimRequest(CimRequestContext * ctx, int flags)
     rs = iMethodErrResponse(&hdr, getErrSegment(hdr.rc, hdr.errMsg));
     rs.rc=1;
   }
+
+  if (hdr.binCtx)
+    free(hdr.binCtx);
 
   // This will be dependent on the type of request being processed.
   freeCimXmlRequest(hdr);

@@ -48,7 +48,7 @@ AC_ARG_ENABLE(ssl,
 
 AC_ARG_ENABLE(slp,
 	[AC_HELP_STRING([--enable-slp],
-		[include slp agent for SFCB - EXPERIMENTAL.])])
+		[include slp agent for SFCB.])])
 		
 AC_ARG_ENABLE(slp-hostname-lib,
    [AC_HELP_STRING([--enable-slp-hostname-lib],
@@ -102,6 +102,10 @@ AC_ARG_ENABLE(ipv6,
 AC_ARG_ENABLE(tests,
 	[AC_HELP_STRING([--enable-tests(=TESTS)],
 		[Enable listed tests. If none are listed, all are enabled.])])
+
+AC_ARG_ENABLE(settableretry,
+	[AC_HELP_STRING([--enable-settableretry],
+		[Allow reliable indication params to be settable.])])
 
 AC_ARG_ENABLE(uds,
 	[AC_HELP_STRING([--enable-uds],
@@ -194,6 +198,10 @@ else
     enable_tests="unit,gcov,wbemcli,xml,commands,slp,providers,cimrs"
 fi
 fi
+if test "$enable_tests" != ""; then
+    enable_settableretry="yes"
+fi
+
 
 OLDIFS="$IFS"
 IFS=","
@@ -347,6 +355,10 @@ if test "$enable_uds" == "yes"; then
    AC_DEFINE(HAVE_UDS,,[UDS authentication enabled])
 fi
 
+if test "$enable_settableretry" == "yes"; then
+   AC_DEFINE(SETTABLERETRY,,[Settable indication parameters enabled])
+fi
+
 if test "$enable_qualifierrep" == "yes"; then
    LOAD_QUALIFIER_PROVIDER=
    AC_DEFINE(HAVE_QUALREP,,[Qualifier repository support enabled.])
@@ -435,6 +447,9 @@ fi
 AC_CHECK_LIB(pthread,main)
 AC_CHECK_LIB(dl,main)
 AC_CHECK_LIB(z,main,[SFCB_LIBZ=-lz],[AC_MSG_ERROR([Could not find required libz])])
+#AC_CHECK_LIB(sfcUtil,newStringBuffer,[SFC_COMM=-lsfcUtil],[AC_MSG_ERROR([Could not find required sfcUtil])])
+AC_CHECK_LIB(sfcUtil,newStringBuffer)
+#AC_SEARCH_LIBS(newStringBuffer,sfcUtil,[SFC_COMM=-lsfcUtil],[AC_MSG_ERROR([Could not find required sfcUtil])])
 if test "$enable_indications" = "yes" ; then
    LOAD_INDICATION_PROVIDER=
    AC_DEFINE(HAVE_INDICATIONS,1,[Indication support enabled.])
@@ -535,6 +550,7 @@ if test -d $srcdir/cmpi-devel; then
 fi
 
 AM_CONDITIONAL(INDICATIONS,[test "$enable_indications" == "yes"]) 
+AM_CONDITIONAL(SETTABLERETRY,[test "$enable_settableretry" == "yes"]) 
 AM_CONDITIONAL(SSL,[test "$enable_ssl" == "yes"]) 
 AM_CONDITIONAL(SLP,[test "$enable_slp" == "yes"]) 
 AM_CONDITIONAL(SLP_HOSTNAME_LIB,[test "$enable_slp_hostname_lib" == "yes"])
@@ -548,8 +564,8 @@ AM_CONDITIONAL(LOCAL_CONNECT_ONLY,[test "$enable_local_connect_only" == "yes"])
 AM_CONDITIONAL(ACCOUNT_PASSTHRU,[test "$enable_expired_pw_update" == "yes"])
 
 AC_CONFIG_FILES([Makefile sfcb.spec sfcbrepos.sh sfcbstage.sh sfcbunstage.sh 
-	         sfcbuuid.sh sfcb.cfg.pre getSchema.sh.pre 
-		 sfcb.init-redhat sfcb.init-suse sfcb.init-none default.reg
+	         sfcbuuid.sh sfcb.cfg.pre getSchema.sh.pre 20_indication.mof.pre
+		 sfcb.init-redhat sfcb.init-suse sfcb.init-none default.reg sblim-sfcb.service.pre
 		 man/genSslCert.1.pre  man/sfcbmof.1.pre 
                  man/sfcbunstage.1.pre man/sfcbuuid.1.pre man/getSchema.1.pre
 		 man/sfcbrepos.1.pre  man/wbemcat.1.pre
@@ -574,6 +590,7 @@ echo -e "tests"\\t\\t\\t\\t"${enable_tests:-no}"
 echo -e "debug"\\t\\t\\t\\t"${enable_debug:-no}"
 echo -e "Request types"\\t\\t\\t"${enable_request_types}"
 echo -e "Allow expired account pw update"\\t"${enable_expired_pw_update:-no}"
+echo -e "Settable retry parameters"\\t"${enable_settableretry:-no}"
 echo =================================================================
 echo
 echo "sfcb configuration complete.  you may now run 'make'"

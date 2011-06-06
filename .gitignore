@@ -93,3 +93,5 @@ compile
 *.rej
 mofc/
 \#*\#
+20_indication.mof
+20_indication.mof.pre

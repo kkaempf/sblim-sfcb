@@ -263,7 +263,7 @@ fi
 ###
 cleanup
 init
-lim=1000
+lim=500
 echo -n  "  Indication flood: "
 ./GenMI.pl 10 3 300 1
 if [ $? -ne 0 ] 

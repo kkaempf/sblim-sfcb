@@ -217,7 +217,7 @@ addChild(ClassRegister * cr, const char *p, const char *child)
       ((ClassBase *) (cr + 1))->it->ft->get(((ClassBase *) (cr + 1))->it,
                                             p);
   if (ul == NULL) {
-    ul = UtilFactory->newList();
+    ul = UtilFactory->newList(memAddUtilList, memUnlinkEncObj);
     ((ClassBase *) (cr + 1))->it->ft->put(((ClassBase *) (cr + 1))->it, p,
                                           ul);
   }

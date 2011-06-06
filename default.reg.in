@@ -101,7 +101,7 @@
    type: instance
    namespace: root/interop
 #
-[CIM_ObjectManagerCommunicationMechanism]
+[SFCB_CIMXMLCommunicationMechanism]
    provider: ServerProvider
    location: sfcInteropServerProvider
    type: instance
@@ -138,4 +138,9 @@
    unload: never
    namespace: root/interop
 #
-
+[CIM_NamespaceInManager]
+   provider: ServerProvider
+   location: sfcInteropServerProvider
+   type: association
+   namespace: root/interop
+#

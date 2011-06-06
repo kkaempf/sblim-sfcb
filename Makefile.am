@@ -29,6 +29,7 @@ initdir=$(sysconfdir)/init.d
 pamdir=$(sysconfdir)/pam.d
 sfcblibdir=$(libdir)/sfcb
 cmpilibdir=$(libdir)/cmpi
+systemddir=$(prefix)/share/systemd
 
 MANFILES=man/genSslCert.1 man/getSchema.1 man/sfcbd.1 man/sfcbmof.1 \
 	man/sfcbrepos.1 man/sfcbstage.1 man/sfcbunstage.1 man/sfcbuuid.1 \
@@ -43,7 +44,6 @@ AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sfcbconfdir)\" \
 	-DCMPI_LIBDIR=\"$(cmpilibdir)\" \
 	-DLIBDIR=\"$(libdir)\" \
 	-DSFCB_BINARY=\"$(sbindir)/sfcbd\" \
-	-I$(srcdir)/sfcUtil \
 	@SFCB_CPPFLAGS@ \
         @SFCB_CMPI_PLATFORM@ 
 AM_LDFLAGS=@SFCB_LDFLAGS@
@@ -123,7 +123,6 @@ sfcb_sharedobjects = \
    $(sfcblibdir)/*.so
 
 sfcblib_LTLIBRARIES = \
-   libsfcUtil.la \
    libsfcBrokerCore.la \
    libsfcFileRepository.la \
    libsfcInternalProvider.la \
@@ -168,14 +167,6 @@ bin_PROGRAMS = \
 noinst_PROGRAMS = \
    sfcbdumpP32onI32 classSchema2c
 
-libsfcUtil_la_SOURCES = \
-	sfcUtil/hashtable.c \
-	sfcUtil/utilFactory.c \
-	sfcUtil/utilHashtable.c \
-	sfcUtil/utilStringBuffer.c \
-	sfcUtil/libsfcUtil.Versions
-libsfcUtil_la_LDFLAGS = -Wl,--version-script,$(srcdir)/sfcUtil/libsfcUtil.Versions
-
 libsfcBrokerCore_la_SOURCES = \
     args.c \
     array.c \
@@ -198,7 +189,6 @@ libsfcBrokerCore_la_SOURCES = \
     providerRegister.c \
     objectImpl.c \
     constClass.c \
-    genericlist.c \
     msgqueue.c \
     providerMgr.c \
     providerDrv.c \
@@ -214,8 +204,6 @@ libsfcBrokerCore_la_SOURCES = \
     $(QUALREP_FILES)
 
 libsfcBrokerCore_la_CFLAGS = $(AM_CFLAGS) @SFCB_CMPI_OS@ 
-libsfcBrokerCore_la_LIBADD=-lsfcUtil
-libsfcBrokerCore_la_DEPENDENCIES=libsfcUtil.la
 
 queryLexer.c: $(srcdir)/queryLexer.l
 	$(LEX) -t $< | sed -e "s/yy/sfcQuery/g" > $@
@@ -424,8 +412,8 @@ classSchema2c_DEPENDENCIES=libsfcBrokerCore.la
 noinst_HEADERS=array.h $(SLP_INC) httpComm.h control.h    providerMgr.h \
 	constClass.h   msgqueue.h     providerRegister.h \
 	cimXmlParser.h    native.h       support.h cimXmlGen.h \
-	cimRequest.h cimRsRequest.h genericlist.h  objectImpl.h   trace.h \
-	sfcUtil/hashtable.h      sfcUtil/utilft.h mlog.h \
+	cimRequest.h cimRsRequest.h objectImpl.h   trace.h \
+	mlog.h \
 	cmpiftx.h cmpimacsx.h \
 	fileRepository.h internalProvider.h \
 	selectexp.h queryOperation.h \
@@ -437,7 +425,8 @@ man_MANS=$(MANFILES)
 
 EXTRA_DIST=sfcb.cfg.pre.in sfcb.spec sfcbrepos.sh.in sfcbstage.sh.in \
 	sfcbunstage.sh.in sfcbuuid.sh.in sfcb.init-redhat.in sfcb.init-suse.in \
-	sfcb.init-none.in cimXmlParser.c footprint.pl test cmpi-devel
+	sfcb.init-none.in cimXmlParser.c footprint.pl test cmpi-devel \
+    sblim-sfcb.service.pre.in
 
 dist_sfcbdata_SCRIPTS=genSslCert.sh getSchema.sh test/stageschema.sh
 
@@ -500,9 +489,20 @@ getSchema.sh: getSchema.sh.pre
 	sed -e s?$$\{prefix\}?$(prefix)?g \
 	-e s?$$\{exec_prefix\}?$(prefix)?g $< > $@
 
-sfcb: sfcb.$(INIT_STYLE)
+if SETTABLERETRY
+20_indication.mof: 20_indication.mof.pre
+	sed -e s?SETTABLE?TRUE?g $< > $@
+else
+20_indication.mof: 20_indication.mof.pre
+	sed -e s?SETTABLE?FALSE?g $< > $@
+endif
+
+sfcb: sfcb.$(INIT_STYLE) sblim-sfcb.service
 	sed -e s?$$\{prefix\}?$(prefix)?g \
 	-e s?$$\{exec_prefix\}?$(prefix)?g $< > $@
+
+sblim-sfcb.service: sblim-sfcb.service.pre
+	sed -e s?$$\{exec_prefix\}?$(prefix)?g $< > $@
 
 providerRegister: providerRegister.c
 	touch $@
@@ -511,6 +511,7 @@ unittest:
 	cd test && sh check_all.sh
 
 install-data-local:
+	if test -d $(systemddir); then cp $(srcdir)/sblim-sfcb.service $(systemddir); fi; 
 	test -d $(DESTDIR)$(sfcbstatedir)/registration/repository || $(mkdir_p) $(DESTDIR)$(sfcbstatedir)/registration/repository
 	test -d $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop || $(mkdir_p) $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop
 	test -d $(DESTDIR)$(sfcbstatedir)/stage/regs || $(mkdir_p) $(DESTDIR)$(sfcbstatedir)/stage/regs
@@ -534,6 +535,7 @@ endif
 uninstall-local:
 	rm -f $(DESTDIR)$(sfcbstatedir)/stage/default.reg
 	rm -f $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop/10_interop.mof
+	rm -f $(systemddir)/sblim-sfcb.service
 if INDICATIONS
 	rm -f $(DESTDIR)$(sfcbstatedir)/stage/mofs/root/interop/20_indication.mof
 	rm -f $(DESTDIR)$(sfcbstatedir)/stage/mofs/indication.mof
@@ -541,11 +543,14 @@ endif
 if DOCS
 	rm -rf $(DESTDIR)$(sfcbdocdir)/html
 endif
+if TEST_ENABLED
+	./test/stageschema.sh -d test/schema -p $(prefix) -u
+endif
 
 clean-local:
 	rm -f sfcbrepos sfcbstage sfcbunstage sfcbuuid sfcb.cfg getSchema.sh sfcb \
 		sfcb.init-redhat sfcb.init-suse sfcb.init-none sfcb-dox.conf \
-                cimXmlParserProcessed.c \
+                cimXmlParserProcessed.c sblim-sfcb.service \
 		*.gcno *.gcda *.gcov $(MANFILES) test/TestProviders/tests/RIModIS.XML
 	rm -rf doc/* coverage/ 
 

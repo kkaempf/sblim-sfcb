@@ -41,7 +41,7 @@
 
 #include "cmpi/cmpidt.h"
 #include "msgqueue.h"
-#include "utilft.h"
+#include <sfcCommon/utilft.h>
 #include "trace.h"
 #include "cimRequest.h"
 #include "support.h"
@@ -105,6 +105,8 @@ static X509    *x509 = NULL;
 int             ccVerifyMode = CC_VERIFY_IGNORE;
 static int      get_cert(int, X509_STORE_CTX *);
 static int      ccValidate(X509 *, char **, int);
+static int	load_cert(const char *);
+static void	print_cert(const char *cert_file, const STACK_OF(X509_NAME) *);
 #endif
 
 /* return codes used by baValidate */
@@ -272,6 +274,7 @@ baValidate(char *cred, char **principal)
   }
 
   free(auth);
+  fprintf(stderr, "baValidate: returning %d\n", ret);
   return ret;
 }
 
@@ -1568,7 +1571,8 @@ initSSL()
   char           *fnc,
                  *fnk,
                  *fnt,
-                 *fnl;
+                 *fnl,
+                 *fcert;
   int             rc;
   ctx = SSL_CTX_new(SSLv23_method());
   getControlChars("sslCertificateFilePath", &fnc);
@@ -1581,6 +1585,8 @@ initSSL()
     intSSLerror("Error loading private key from file");
   getControlChars("sslClientCertificate", &fnl);
   _SFCB_TRACE(1, ("---  sslClientCertificate = %s", fnl));
+  getControlChars("sslCertList", &fcert);
+  load_cert(fcert);
   if (strcasecmp(fnl, "ignore") == 0) {
     ccVerifyMode = CC_VERIFY_IGNORE;
     SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, 0);
@@ -1973,6 +1979,54 @@ ccValidate(X509 * certificate, char **principal, int mode)
           "--- Certificate authentication exit not configured\n");
   }
   _SFCB_RETURN(result);
+}
+
+/* 
+ * Load the list of certificates accepted by the server into ctx object
+ * This information will be sent to the client during SSL handshake
+*/
+static int
+load_cert(const char *cert_file)
+{
+  STACK_OF(x509_NAME) *cert_names;
+
+  if (cert_file == NULL) {
+        mlogf(M_ERROR, M_SHOW,
+              "--- SSL CA list: file %s not found\n", cert_file);
+	return -1;
+  }
+  cert_names = SSL_load_client_CA_file(cert_file);
+  if (cert_names == NULL) {
+        mlogf(M_ERROR, M_SHOW,
+              "--- SSL CA list: cannot read file %s\n", cert_file);
+        return -1;
+  } else {
+#ifdef SFCB_DEBUG
+	print_cert(cert_file, cert_names);
+#endif
+	SSL_CTX_set_client_CA_list(ctx, cert_names);
+  }
+
+ return 0;
+}
+
+/* Print the list of certificates in CTX */
+static void
+print_cert(const char *cert_file, const STACK_OF(X509_NAME) *cert_names)
+{
+  char *str = NULL;
+  int i = 0;
+
+  _SFCB_ENTER(TRACE_HTTPDAEMON, "print_cert");
+  mlogf(M_INFO, M_SHOW, "--- SSL CA list loaded from %s\n", cert_file);
+  if (sk_X509_NAME_num(cert_names) > 0) {
+    for (i=0; i < sk_X509_NAME_num(cert_names); i++) {
+      str = X509_NAME_oneline(sk_X509_NAME_value(cert_names, i),0,0);
+      _SFCB_TRACE(4, ("\t Name #%d:%s\n", (i+1), str));
+      free(str);
+    }
+  }
+  return;
 }
 #endif
 /* MODELINES */

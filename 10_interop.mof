@@ -15,7 +15,7 @@ class DMY_IndicationService : CIM_IndicationService
 {
 };
 
-class DMY_ObjectManagerCommunicationMechanism : CIM_ObjectManagerCommunicationMechanism
+class SFCB_CIMXMLCommunicationMechanism : CIM_CIMXMLCommunicationMechanism
 {
 };
 
@@ -69,6 +69,11 @@ class DMY_IndicationSubscription : CIM_IndicationSubscription
 class DMY_HostedService : CIM_HostedService
 {
 };
+
+class DMY_NamespaceInManager : CIM_NamespaceInManager
+{
+};
+
 
 class SFCB_ElementConformsToProfile : CIM_ElementConformsToProfile
 {
