@@ -74,6 +74,7 @@
 @LOAD_SFCBACCOUNT_PROVIDER@   provider: CimAccountPassthroughProvider
 @LOAD_SFCBACCOUNT_PROVIDER@   location: sfccimAccountPassthroughProvider
 @LOAD_SFCBACCOUNT_PROVIDER@   type: method
+@LOAD_SFCBACCOUNT_PROVIDER@   parameters: AccountClass=root/cimv2:cim_account
 @LOAD_SFCBACCOUNT_PROVIDER@   namespace: root/interop
 #
 [SFCB_RegisteredProfile]

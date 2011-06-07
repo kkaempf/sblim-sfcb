@@ -228,6 +228,10 @@ remProcCtl()
   return 0;
 }
 
+/*                                                                                                                                                                                                                
+ * Call the authentication library
+ * Return 1 on success, 0 on fail, -1 on expired
+ */
 int
 baValidate(char *cred, char **principal)
 {
@@ -274,7 +278,6 @@ baValidate(char *cred, char **principal)
   }
 
   free(auth);
-  fprintf(stderr, "baValidate: returning %d\n", ret);
   return ret;
 }
 

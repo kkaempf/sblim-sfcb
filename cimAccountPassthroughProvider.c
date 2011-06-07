@@ -76,11 +76,40 @@ CimAccountPassthroughProviderInvokeMethod(CMPIMethodMI * mi,
     _SFCB_RETURN(st);
   }
   const char* newPW = CMGetCharPtr(arg.value.string);
-  fprintf(stderr, "  newPW is \"%s\"\n", newPW);
 
   if (strcasecmp(methodName, "UpdateExpiredPassword") == 0) {
-    fprintf(stderr, "  IM UpdateExpiredPassword\n");
-    CMPIObjectPath *caOp = CMNewObjectPath(_broker, "root/cimv2", "cim_account", &st);
+
+    /* check to see if parameters were specified in providerRegister */
+    CMPIStatus parm_st = { CMPI_RC_OK, NULL };
+    CMPIData parmdata = CMGetContextEntry(ctx, "sfcbProviderParameters", &parm_st);
+    char* acct_cn = "CIM_Account";
+    char* acct_ns = "root/cimv2";
+
+    if (parm_st.rc == CMPI_RC_OK ) {
+      const char* parms = CMGetCharPtr(parmdata.value.string);
+
+      /* there is only one param, so just take whatever is after the '=' */
+      char* val = strchr(parms,'=');
+      if (val) {
+        char* colon = strchr(val,':');
+        if (colon) {
+          acct_cn = colon+1;
+          colon[0] = '\0';
+          acct_ns = val+1;
+        }
+      }
+    }
+
+    CMPIObjectPath *caOp = CMNewObjectPath(_broker, acct_ns, acct_cn, &st);
+
+    /* if a simple strcmp works, don't bother with the isa */
+    if (strcasecmp(acct_cn, "cim_account")) { 
+      if (!CMClassPathIsA(_broker, caOp, "cim_account", &st)) {
+       setStatus(&st, CMPI_RC_ERR_NOT_FOUND, 
+                       "Class specified for password update not a CIM_Account");
+       _SFCB_RETURN(st);
+      }
+    }
 
     CMPIData principal = CMGetContextEntry(ctx, "CMPIPrincipal", &st);
     char* httpUser = CMGetCharPtr(principal.value.string);
@@ -92,33 +121,28 @@ CimAccountPassthroughProviderInvokeMethod(CMPIMethodMI * mi,
     CMPIInstance *caInst = NULL;
 
     while (enm && CMHasNext(enm, &st)) {
-      fprintf(stderr, "  got an instance of CIM_Account\n");
       item = CMGetNext(enm, &st);
       caOp = item.value.ref;
       nameKey = CMGetKey(caOp, "Name", &st);
       if (st.rc == CMPI_RC_OK) {
-	nameKeyStr = nameKey.value.string;
-	if (strcmp(CMGetCharsPtr(nameKeyStr, &st), httpUser) == 0) {
-	  fprintf(stderr, "  name matches\n");
-	  caInst = CBGetInstance(_broker, ctx, caOp, NULL, &st);
-	  break;
-	}
+        nameKeyStr = nameKey.value.string;
+        if (strcmp(CMGetCharsPtr(nameKeyStr, &st), httpUser) == 0) {
+          caInst = CBGetInstance(_broker, ctx, caOp, NULL, &st);
+          break;
+        }
       }
     }
     if (caInst) {  /* ok to send ModifyInstance request to CIM_Account prov */
 
       CMPIString* npwv;
       npwv = CMNewString(_broker, newPW, NULL);
-      fprintf(stderr, " npwv is %s\n", CMGetCharsPtr(npwv, NULL));
       
       CMPIArray *pwArray = CMNewArray(_broker, 1, CMPI_string, &st);
 
       st = CMSetArrayElementAt(pwArray, 0, (CMPIValue*)&(npwv), CMPI_string);
-      fprintf(stderr, "  after set st = %d\n", st.rc);
       
       CMPIData d = CMGetArrayElementAt(pwArray, 0, NULL);
       CMPIString* s = d.value.string;
-      fprintf(stderr, "in the array is %s\n", CMGetCharsPtr(s, NULL));
        
       CMSetProperty(caInst, "UserPassword", (CMPIValue*)&(pwArray), CMPI_stringA);
       st = CBModifyInstance(_broker, ctx, caOp, caInst, NULL);
@@ -128,7 +152,6 @@ CimAccountPassthroughProviderInvokeMethod(CMPIMethodMI * mi,
       CMAddArg(out, "Message", &av, CMPI_string);
     }
     else {      /* no caInst; probably wrong principal (UserName didn't match) */
-      fprintf(stderr, "  Name didn't match\n"); 
       _SFCB_TRACE(1, ("--- Invalid request method: %s", methodName));
       setStatus(&st, CMPI_RC_ERR_NOT_FOUND, "No matching CIM_Account for user");
     }

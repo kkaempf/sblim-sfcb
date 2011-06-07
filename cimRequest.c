@@ -1815,7 +1815,6 @@ handleCimRequest(CimRequestContext * ctx, int flags)
                  timevalDiff(&us.ru_stime, &ue.ru_stime)));
     }
 #endif
-    fprintf(stderr, "flags=%d\n", flags);
     if (hdr.rc) {
       if (hdr.methodCall) {
         rs = methodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
@@ -1830,12 +1829,9 @@ handleCimRequest(CimRequestContext * ctx, int flags)
     } 
 #ifdef ALLOW_UPDATE_EXPIRED_PW
     else if (flags) {
-      fprintf(stderr, "in hcr, flags set\n");
       /* request from user with an expired password AND requesting password update */
       if (flags == (HCR_UPDATE_PW | HCR_EXPIRED_PW) &&
           (strcasecmp(hdr.className, "SFCB_Account") == 0) && hdr.methodCall) {
-        fprintf(stderr, " in hcr, got update_pw flag and expired flag\n");
-	fprintf(stderr, "call to SFCB_Account\n");
 	rs = sendHdrToHandler(&hdr, ctx);
       }
       else {    /* expired user tried to invoke non-UpdatePassword request */
@@ -1849,15 +1845,7 @@ handleCimRequest(CimRequestContext * ctx, int flags)
 #endif  /* ALLOW_UPDATE_EXPIRED_PW */
 
     else {
-      fprintf(stderr, "sendHdrToHandler (normal)\n");
       rs = sendHdrToHandler(&hdr, ctx);
-//       hc = markHeap();
-//       hdlr = handlers[hdr.opType];
-//       rs = hdlr.handler(ctx, &hdr);
-//       releaseHeap(hc);
-
-//       ctx->className = hdr.className;
-//       ctx->operation = hdr.opType;
     }
     rs.buffer = hdr.buffer;
     rs.rc=0;
