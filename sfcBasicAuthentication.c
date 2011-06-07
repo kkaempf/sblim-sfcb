@@ -26,12 +26,7 @@ extern int
 _sfcBasicAuthenticate(char *user, char *pw)
 {
   printf("-#- Authentication request for %s\n", user);
-  if (strcmp(user, "expired") == 0)
-    return -1;
-  if (strcmp(user, "bad") == 0)
-    return 0;
-
-  return 1; /* change to "PASS" for feature testing */
+  return 0;
   /*
    * - for security reasons always return false - if
    * (strcmp(user,"REJECT")==0) return 0; return 1; 
