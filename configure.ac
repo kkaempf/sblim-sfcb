@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.117 2011/04/29 21:40:50 mchasal Exp $
+# $Id: configure.ac,v 1.118 2011/06/08 20:29:13 mchasal Exp $
 # 
 # configure.ac
 #
@@ -194,6 +194,10 @@ else
     enable_tests="unit,gcov,wbemcli,xml,commands,slp,providers"
 fi
 fi
+if test "$enable_tests" != ""; then
+    enable_settableretry="yes"
+fi
+
 
 OLDIFS="$IFS"
 IFS=","
