@@ -58,7 +58,7 @@ useChunking:    true
 
 ## Enable basic authentication for HTTP and HTTPS connections
 ## Default is false
-doBasicAuth:    true #temp change to test feature
+doBasicAuth:    false
 
 ## Name of of the authenticaion library. Leave off the ".so"
 ## Default is: sfcBasicAuthentication
