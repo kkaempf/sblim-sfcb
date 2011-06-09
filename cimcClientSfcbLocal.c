@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.40 2011/04/28 21:48:28 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.41 2011/06/09 22:39:02 buccella Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -1910,6 +1910,7 @@ static void* release(ClientEnv* ce)
    }
    CONNECT_UNLOCK();
    free(ce);
+   sunsetControl();
    uninitGarbageCollector();
    return lib;
 }
