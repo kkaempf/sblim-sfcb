@@ -130,10 +130,15 @@ sunsetControl()
                   m;
   for (i = 0, m = sizeof(init) / sizeof(Control); i < m; i++) {
     if (init[i].dupped)
-      free(init[i].strValue);
+      if(init[i].dupped) {
+        free(init[i].strValue);
+        init[i].dupped = 0;
+      }
   }
-  ct->ft->release(ct);
-  ct = NULL;
+  if (ct) {
+    ct->ft->release(ct);
+    ct=NULL;
+  }
 }
 
 int

@@ -1,8 +1,10 @@
 Changes in 1.4.2
 ================
 
+Everything in 1.3.12, plus: 
+
+
 New features:
-- 3190623 Set *IsSettable propperties to false for IndicationService
 - 3280992 Add systemd file to SFCB sources
 - 3177587 create sfcCommon (SFCB 1.4 now requires sfcCommon lib to be installed)
 - 3309374 Implement CIM_CIMXMLCommunicationMechanism
@@ -11,9 +13,6 @@ New features:
 
 Bugs fixed: 
 - 3199899 sfcb uninstall process should remove test mof's 
-
-Everything in 1.3.12, plus: 
-
 - 3300167 Memory leaks caused by cimRequest changes
 
 Changes in 1.4.1
@@ -75,12 +74,18 @@ Everything in 1.3.10, plus:
 Changes in 1.3.12
 =================
 
+New features: 
+
+- 3190623 Set *IsSettable propperties to false for IndicationService
+- 3313833 Allow for passthrough for expired user to update password
+
 Bugs Fixed: 
 
 - 3261868 Enum CQL filter on NULL cause incorrect rsp
 - 3213591 Local intf client abort abnormally on enum filter syntax err
 - 3291646 Unused var in __NullEvaluate
 - 3202466 Single item on method param of array type rejected via Local
+- 3314383 Memory leak in CimResource_Enumerate_EP
 
 Changes in 1.3.11
 =================
