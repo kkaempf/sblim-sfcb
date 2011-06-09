@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.110 2011/04/29 21:40:50 mchasal Exp $  
+# $Id: Makefile.am,v 1.111 2011/06/09 23:10:10 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -20,6 +20,8 @@
 #  Makefile process input for sfcb.
 # 
 # 
+
+AUTOMAKE_OPTIONS = no-dist-gzip dist-bzip2
 
 sfcbdocdir=$(datadir)/doc/sfcb-$(VERSION)
 sfcbdatadir=$(datadir)/sfcb
