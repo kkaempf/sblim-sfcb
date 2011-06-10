@@ -87,6 +87,7 @@ Bugs Fixed:
 - 3202466 Single item on method param of array type rejected via Local
 - 3314383 Memory leak in CimResource_Enumerate_EP
 - 3047562 [patch] Create bzip2 tarballs on "make dist"
+- 3314762 Memory leak in method invoke using SFCB local interface
 
 Changes in 1.3.11
 =================

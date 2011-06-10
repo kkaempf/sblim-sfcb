@@ -1480,8 +1480,10 @@ invokeMethod(Client * mb,
 
   memset(&binCtx, 0, sizeof(BinRequestContext));
 
-  argsin = convertFromStringArguments(getClass(mb, cop, 0, NULL, rc), 
-				      method, in, rc);
+  CMPIConstClass *tcls = getClass(mb, cop, 0, NULL, rc);
+  argsin = convertFromStringArguments(tcls, method, in, rc);
+  CMRelease(tcls);
+  tcls = NULL;
 
   if(rc && rc->rc == CMPI_RC_OK) {
     sreq.objectPath = setObjectPathMsgSegment(cop);
