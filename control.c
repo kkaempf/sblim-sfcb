@@ -152,6 +152,7 @@ setupControl(char *fn)
                   n = 0,
       err = 0;
   CntlVals        rv;
+  char *configFile;
 
   if (ct)
     return 0;
@@ -164,11 +165,18 @@ setupControl(char *fn)
   }
 
   if (fn) {
-    strcpy(fin, fn);
+    if (strlen(fn) >= sizeof(fin))
+      mlogf(M_ERROR,M_SHOW, "--- \"%s\" too long\n", fn);
+    strncpy(fin,fn,sizeof(fin));
+  } 
+  else if ((configFile = getenv("SFCB_CONFIG_FILE")) != NULL && configFile[0] != '\0') {
+    if (strlen(configFile) >= sizeof(fin))
+      mlogf(M_ERROR,M_SHOW, "--- \"%s\" too long\n", configFile);
+    strncpy(fin,configFile,sizeof(fin));
   } else {
-    strcpy(fin, SFCB_CONFDIR);
-    strcat(fin, "/sfcb.cfg");
+    strncpy(fin, SFCB_CONFDIR "/sfcb.cfg", sizeof(fin));
   }
+  fin[sizeof(fin)-1] = '\0';
 
   if (fin[0] == '/')
     mlogf(M_INFO, M_SHOW, "--- Using %s\n", fin);

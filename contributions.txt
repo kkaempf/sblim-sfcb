@@ -190,3 +190,4 @@ Chris Poblete, Dell
 Josef Moellers
 --------------
 11/17/2010 [ 3109469 ] Potential Buffer Overflow in msgqueue.c:localConnectServer()
+06/10/2011 [ 3165732 ] Add ability for client library to specify configuration file
