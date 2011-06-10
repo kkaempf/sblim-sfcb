@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.41 2011/06/09 22:39:02 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.42 2011/06/10 17:57:45 buccella Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -1453,8 +1453,13 @@ static CMPIData invokeMethod(
 
    memset(&binCtx,0,sizeof(BinRequestContext));
 
-   argsin = convertFromStringArguments(getClass(mb, cop, 0, NULL, rc), 
+   CMPIConstClass *tcls = getClass(mb, cop, 0, NULL, rc);
+
+   argsin = convertFromStringArguments(tcls, 
       method, in, rc);
+
+   CMRelease(tcls);
+   tcls = NULL;
 
    if(rc && rc->rc == CMPI_RC_OK) {
    sreq.objectPath = setObjectPathMsgSegment(cop);
