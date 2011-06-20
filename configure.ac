@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.119 2011/06/08 22:00:12 buccella Exp $
+# $Id: configure.ac,v 1.120 2011/06/20 21:35:55 buccella Exp $
 # 
 # configure.ac
 #
@@ -206,7 +206,7 @@ else
 fi
 fi
 if test "$enable_tests" != ""; then
-+    enable_settableretry="yes"
+    enable_settableretry="yes"
 fi
 
 
