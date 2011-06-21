@@ -134,7 +134,7 @@ gatherNameSpacesData(const char *dn, int dbl,
   int             l;
 
   dir = opendir(dn);
-  if (dir)
+  if (dir) {
     while ((de = readdir(dir)) != NULL) {
       if (strcmp(de->d_name, ".") == 0)
         continue;
@@ -159,7 +159,8 @@ gatherNameSpacesData(const char *dn, int dbl,
       }
       free(n);
     }
-  closedir(dir);
+    closedir(dir);
+  }
 }
 
 static void

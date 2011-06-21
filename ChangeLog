@@ -1,5 +1,8 @@
 2011-06-21  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* interopServerProvider.c:
+	[ 3324168 ] gatherNameSpacesData() may closedir() a NULL pointer
+
 	* indCIMXMLHandler.c:
 	[ 3324131 ] indCIMXMLHandler may return uninitialized CMPIStatus
 
