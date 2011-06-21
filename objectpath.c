@@ -642,7 +642,7 @@ getObjectPath(char *path, char **msg)
         free(nname);
       return op;
     }
-    *msg = "No className found";
+    if (msg) *msg = "No className found";
     free(origu);
     if (nname)
       free(nname);
