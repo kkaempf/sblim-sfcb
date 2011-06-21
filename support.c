@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.36 2009/12/22 00:18:29 buccella Exp $
+ * $Id: support.c,v 1.37 2011/06/21 22:50:59 buccella Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -412,7 +412,7 @@ static void __cleanup_mt(void *ptr)
      
      if (mt->hc.memObjs) free(mt->hc.memObjs);
      if (mt->hc.memEncObjs) free(mt->hc.memEncObjs);
-     if (mt) free(mt);
+     free(mt);
    }
    _SFCB_EXIT();
 }
