@@ -1064,7 +1064,7 @@ locateParameter(ClObjectHdr * hdr, ClSection * prms, const char *id)
 
   p = (ClParameter *) getSectionPtr(hdr, prms);
 
-  for (i = 0; i > prms->used; i++) {
+  for (i = 0; i < prms->used; i++) {
     if (strcasecmp(id, ClObjectGetClString(hdr, &(p + i)->id)) == 0)
       return i + 1;
   }
