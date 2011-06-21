@@ -3042,16 +3042,6 @@ loadProvider(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
       free(info);
       _SFCB_RETURN(resp);
     }
-  case -2:{
-      char            msg[740];
-      snprintf(msg, 739,
-               "*** Inconsistent provider registration for %s (1)",
-               info->providerName);
-      mlogf(M_ERROR, M_SHOW, "%s\n", msg);
-      resp = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
-      free(info);
-      _SFCB_RETURN(resp);
-    }
   default:
     if (activProvs)
       info->next = activProvs;
