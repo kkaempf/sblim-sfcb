@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.97 2011/06/21 20:49:44 buccella Exp $
+ * $Id: providerDrv.c,v 1.98 2011/06/21 22:48:03 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2760,16 +2760,14 @@ static void *processProviderInvocationRequestsThread(void *prms)
          exit(-1);
       }
       
-      if (pInfo && pInfo->library==NULL) { 
+      if (pInfo->library==NULL) { 
          char dlName[512];
          mlogf(M_INFO,M_SHOW,"--- Reloading provider\n");
          doLoadProvider(pInfo,dlName, 512);
       }  
       
-      if (pInfo) {
-	initRc=initProvider(pInfo,req->sessionId, &errstr);
-	_SFCB_TRACE(1, ("--- Provider initialization rc %d",initRc));
-      }
+      initRc=initProvider(pInfo,req->sessionId, &errstr);
+      _SFCB_TRACE(1, ("--- Provider initialization rc %d",initRc));
 
    }
    else pInfo = NULL;
