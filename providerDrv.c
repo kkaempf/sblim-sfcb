@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.96 2011/04/04 22:37:18 mchasal Exp $
+ * $Id: providerDrv.c,v 1.97 2011/06/21 20:49:44 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -876,6 +876,7 @@ static int sendResponse(int requestor, BinResponseHdr * hdr)
             else hdr->rv.value.string=NULL;
          }
          hdr->rv.type=CMPI_chars;
+	 /* note: a break statement is NOT missing here... */
       case CMPI_chars:
          hdr->rvEnc=setCharsMsgSegment((char*)hdr->rv.value.string);
          rvl=hdr->rvEnc.length;
@@ -2618,15 +2619,6 @@ static BinResponseHdr *loadProvider(BinRequestHdr * hdr, ProviderInfo * info, in
    case -1: {
       char msg[740];
       snprintf(msg,739,"*** Failed to load %s for %s", dlName,
-              info->providerName);
-      mlogf(M_ERROR,M_SHOW,"%s\n",msg);
-      resp = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
-      free(info);
-      _SFCB_RETURN(resp);
-   }
-   case -2:  {
-      char msg[740];
-      snprintf(msg,739,"*** Inconsistent provider registration for %s (1)",
               info->providerName);
       mlogf(M_ERROR,M_SHOW,"%s\n",msg);
       resp = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
