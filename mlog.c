@@ -1,5 +1,5 @@
 /*
- * $Id: mlog.c,v 1.11 2010/04/07 20:54:11 buccella Exp $
+ * $Id: mlog.c,v 1.12 2011/06/22 20:50:33 buccella Exp $
  *
  * (C) Copyright IBM Corp. 2003, 2004
  *
@@ -18,7 +18,7 @@
  *
  */
 
-const char *_mlog_id = "$Id: mlog.c,v 1.11 2010/04/07 20:54:11 buccella Exp $";
+const char *_mlog_id = "$Id: mlog.c,v 1.12 2011/06/22 20:50:33 buccella Exp $";
 
 
 #include "mlog.h"
@@ -29,6 +29,7 @@ const char *_mlog_id = "$Id: mlog.c,v 1.11 2010/04/07 20:54:11 buccella Exp $";
 #include <errno.h>
 #include <signal.h>
 #include "trace.h"              /* for setSignal() */
+#include <sys/wait.h>
  
 FILE           *log_w_stream;
 int             logfds[2] = { 0, 0 };
@@ -108,8 +109,10 @@ void startLogging(int level) {
   * the syslog services that are created in startLogging.
   */
 void closeLogging() {
+   int wstat;
    closelog();
    close(logfds[1]);
+   wait(&wstat); // wait to prevent zombie
 }
 
 
