@@ -894,6 +894,7 @@ InteropProviderGetInstance(CMPIInstanceMI * mi,
   if (st.rc == CMPI_RC_OK) {
 
     /* need to check IndicationSubscription, since it may contain props used internally by sfcb */
+    /* To get the filtered properties, use internalprovider GetInstance */
     if (strcasecmp(CMGetCharPtr(CMGetClassName(cop, NULL)), "cim_indicationsubscription") == 0) {
       filterInternalProps(ci);
     }

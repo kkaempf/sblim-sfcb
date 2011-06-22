@@ -10,6 +10,7 @@ New features:
 - 3309374 Implement CIM_CIMXMLCommunicationMechanism
 - 3259627 provide a list acceptable CAs to client
 - 3310364 Implement CIM_NamespaceInManager
+- 3274893 For SFCB 1.4, set SequenceIdentifier as described in DSP1054 1.2.
 
 Bugs fixed: 
 - 3199899 sfcb uninstall process should remove test mof's 

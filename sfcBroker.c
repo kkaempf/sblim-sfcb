@@ -214,6 +214,7 @@ stopBroker(void *p)
   sunsetControl();
   // uninitGarbageCollector();
   closeLogging();
+  free((void *)sfcBrokerStart);
 
   if (restartBroker) {
     char           *emsg = strerror(errno);
@@ -644,6 +645,17 @@ main(int argc, char *argv[])
 
   mlogf(M_INFO, M_SHOW, "--- %s V" sfcHttpDaemonVersion " started - %d\n",
         name, currentProc);
+
+  //get the creation timestamp for the sequence context
+  struct timeval  tv;
+  struct timezone tz;
+  gettimeofday(&tv, &tz);
+  struct tm cttm;
+  sfcBrokerStart = (char *) malloc(15 * sizeof(char));
+  memset((void *)sfcBrokerStart, 0, 15 * sizeof(char));
+  if (gmtime_r(&tv.tv_sec, &cttm) != NULL) {
+    strftime((char *)sfcBrokerStart, 15, "%Y%m%d%H%M%S", &cttm);
+  }
 
   if (collectStat) {
     mlogf(M_INFO, M_SHOW, "--- Statistics collection enabled\n");
