@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.98 2011/06/21 22:48:03 buccella Exp $
+ * $Id: providerDrv.c,v 1.99 2011/06/24 23:52:33 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2307,6 +2307,7 @@ static BinResponseHdr *deactivateFilter(BinRequestHdr *hdr, ProviderInfo* info,
 	   rci = info->indicationMI->ft->deActivateFilter(info->indicationMI, ctx,
 							  (CMPISelectExp*)se, "", path, 1);
 	 }
+	 CMRelease((CMPISelectExp*)se);
 	 TIMING_STOP(hdr,info)
          if (rci.rc==CMPI_RC_OK) {
             resp->rc=1;
