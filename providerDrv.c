@@ -2717,6 +2717,7 @@ deactivateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
       _SFCB_RETURN(resp);
     }
     sef = &se->next;
+    CMRelease((CMPISelectExp*)se);
   }
 
   _SFCB_RETURN(resp);
