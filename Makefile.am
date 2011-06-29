@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.111 2011/06/09 23:10:10 buccella Exp $  
+# $Id: Makefile.am,v 1.112 2011/06/29 17:33:01 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -558,7 +558,7 @@ endif
 clean-local:
 	rm -f sfcbrepos sfcbstage sfcbunstage sfcbuuid sfcb.cfg getSchema.sh sfcb \
 		sfcb.init-redhat sfcb.init-suse sfcb.init-none sfcb-dox.conf \
-                cimXmlParserProcessed.c \
+                cimXmlParserProcessed.c 20_indication.mof \
 		*.gcno *.gcda *.gcov $(MANFILES)
 	rm -rf doc/* coverage/
 
