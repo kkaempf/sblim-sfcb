@@ -426,7 +426,7 @@ man_MANS=$(MANFILES)
 
 EXTRA_DIST=sfcb.cfg.pre.in sfcb.spec sfcbrepos.sh.in sfcbstage.sh.in \
 	sfcbunstage.sh.in sfcbuuid.sh.in sfcb.init-redhat.in sfcb.init-suse.in \
-	sfcb.init-none.in cimXmlParser.c footprint.pl test cmpi-devel \
+	sfcb.init-none.in cimXmlParser.c footprint.pl test \
     sblim-sfcb.service.pre.in
 
 dist_sfcbdata_SCRIPTS=genSslCert.sh getSchema.sh test/stageschema.sh
@@ -551,7 +551,7 @@ endif
 clean-local:
 	rm -f sfcbrepos sfcbstage sfcbunstage sfcbuuid sfcb.cfg getSchema.sh sfcb \
 		sfcb.init-redhat sfcb.init-suse sfcb.init-none sfcb-dox.conf \
-                cimXmlParserProcessed.c sblim-sfcb.service \
+                cimXmlParserProcessed.c sblim-sfcb.service 20_indication.mof \
 		*.gcno *.gcda *.gcov $(MANFILES) test/TestProviders/tests/RIModIS.XML
 	rm -rf doc/* coverage/ 
 
