@@ -63,7 +63,7 @@ char           *opsName[];
    struct timeval sv,ev;
 
 #define TIMING_START(req,pInfo)						\
-      if (pInfo && req->sessionId && (_sfcb_trace_mask & TRACE_RESPONSETIMING) ) {\
+      if (pInfo && req && (_sfcb_trace_mask & TRACE_RESPONSETIMING) ) {\
          gettimeofday(&sv,NULL);\
          getrusage(RUSAGE_SELF,&us);\
          getrusage(RUSAGE_CHILDREN,&cs);\
@@ -71,7 +71,7 @@ char           *opsName[];
       }
 
 #define TIMING_STOP(req,pInfo)					\
-      if (uset && (_sfcb_trace_mask & TRACE_RESPONSETIMING) ) { \
+      if (uset) { \
 	gettimeofday(&ev,NULL); \
 	getrusage(RUSAGE_SELF,&ue); \
 	getrusage(RUSAGE_CHILDREN,&ce); \
@@ -86,6 +86,7 @@ char           *opsName[];
 				       timevalDiff(&cs.ru_utime,&ce.ru_utime), \
 				       timevalDiff(&cs.ru_stime,&ce.ru_stime) \
 				       )); \
+	uset=0;\
       }
 #else
 

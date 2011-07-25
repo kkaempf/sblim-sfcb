@@ -1,3 +1,9 @@
+2011-07-25 Narasimha Sharoff <nsharoff@us.ibm.com>
+	* providerDrv.c:
+	[ 3101157 ] Failed to enable provider timing analysis with SfcbLocal
+	( Patch by Chris Poblete ) 
+	Added uset reset in TIMING_STOP
+
 2011-06-27 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* indCIMXMLHandler.c:

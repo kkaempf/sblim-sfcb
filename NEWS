@@ -15,6 +15,7 @@ New features:
 Bugs fixed: 
 - 3199899 sfcb uninstall process should remove test mof's 
 - 3300167 Memory leaks caused by cimRequest changes
+- 3101157 Failed to enable provider timing analysis with SfcbLocal
 
 Changes in 1.4.1
 ================
