@@ -73,6 +73,13 @@ Everything in 1.3.10, plus:
 - 3104761 cimRsRequest.h missing from make-dist tarball
 - 3107553 Remove Large Volume Support
 
+Changes in 1.3.13
+=================
+
+Bugs Fixed: 
+
+- [ 3386391 ] HOST_NAME_MAX undefined
+
 Changes in 1.3.12
 =================
 
