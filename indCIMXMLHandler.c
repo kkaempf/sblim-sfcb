@@ -983,7 +983,7 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
     // Get the stub from the handler
     CMPIString *context = CMGetProperty(hdlr, "SequenceContext", &st).value.string;
     // and add the sfcb start time
-    char *cstr=malloc( (strlen(context->ft->getCharPtr(context,NULL)) + strlen(sfcBrokerStart)) * sizeof(char));
+    char *cstr=malloc( (strlen(context->ft->getCharPtr(context,NULL)) + strlen(sfcBrokerStart) + 1) * sizeof(char));
     sprintf(cstr,"%s%s",context->ft->getCharPtr(context,NULL),sfcBrokerStart);
     context = sfcb_native_new_CMPIString(cstr, NULL, 0); 
     // and put it in the indication
