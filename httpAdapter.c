@@ -145,6 +145,10 @@ typedef struct _buffer {
  #define USE_INET6
 #endif
 
+#ifdef USE_INET6
+static int fallback_ipv4;
+#endif
+
 //#define USE_THREADS
 //for use by the process thread in handleHttpRequest()
 struct processThreadParams {
@@ -1501,10 +1505,12 @@ int httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
 {
 
 #ifdef USE_INET6
-   struct sockaddr_in6 sin;
-#else
-   struct sockaddr_in sin;
+   struct sockaddr_in6 sin6;
+   socklen_t sin6_len;
 #endif
+   struct sockaddr *sain;
+   socklen_t sain_len;
+   struct sockaddr_in sin;
    struct sockaddr_un sun; 
 
    socklen_t sz,sin_len,sun_len;
@@ -1647,6 +1653,7 @@ int httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
       if (listenFd < 0) { 
           mlogf(M_INFO,M_SHOW,"--- Using IPv4 address\n");
           listenFd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	  fallback_ipv4 = 1;
       }
 #else
       listenFd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -1654,9 +1661,15 @@ int httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
       setsockopt(listenFd, SOL_SOCKET, SO_REUSEADDR, (char *) &ru, sizeof(ru));
    }
 
+#ifdef USE_INET6
+   sin6_len = sizeof(sin6);
+#endif
    sin_len = sizeof(sin);
    sun_len = sizeof(sun); 
 
+#ifdef USE_INET6
+   memset(&sin6,0,sin6_len);
+#endif
    memset(&sin,0,sin_len);
    memset(&sun,0,sun_len);
 
@@ -1677,13 +1690,17 @@ int httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
 	    httpLocalOnly=0;
 
 #ifdef USE_INET6
-     sin.sin6_family = AF_INET6;
+     if (!fallback_ipv4) {
+     sin6.sin6_family = AF_INET6;
      if (httpLocalOnly)
-	   sin.sin6_addr = in6addr_loopback;
+	   sin6.sin6_addr = in6addr_loopback;
      else
-	   sin.sin6_addr = in6addr_any;
-     sin.sin6_port = htons(port);
-#else
+	   sin6.sin6_addr = in6addr_any;
+     sin6.sin6_port = htons(port);
+     sain = (struct sockaddr *) &sin6;
+     sain_len = sin6_len;
+     } else {
+#endif 
      sin.sin_family = AF_INET;
      if (httpLocalOnly) {
 	   char* loopback_int = "127.0.0.1";
@@ -1692,11 +1709,15 @@ int httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
      else
 	   sin.sin_addr.s_addr = INADDR_ANY;
      sin.sin_port = htons(port);
+     sain = (struct sockaddr *) &sin;
+     sain_len = sin_len;
+#ifdef USE_INET6
+     }
 #endif 
    }
 
   if (listenFd >= 0) {
-     if (bind(listenFd, (struct sockaddr *) &sin, sin_len) ||
+     if (bind(listenFd, sain, sain_len) ||
              listen(listenFd, 10)) {
             mlogf(M_ERROR,M_SHOW,"--- Cannot listen on port %ld (%s)\n", port, strerror(errno));
             sleep(1);
