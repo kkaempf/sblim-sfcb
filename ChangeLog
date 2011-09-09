@@ -1,3 +1,9 @@
+2011-09-09 Narasimha Sharoff <nsharoff@us.ibm.com>
+
+	* mofc/backend_sfcb.c objectImplSwapI32toP32.c
+	[ 3310192 ] 32bit sfcbmof fails to run under x86_64
+	Initial patch from Chris Poblete, reworked by Narasimha Sharoff
+
 2011-09-06 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* httpAdapter.c, sfcb.cfg.pre.in, control.c:
