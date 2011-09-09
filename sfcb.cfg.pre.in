@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.26 2011/09/09 21:32:43 mchasal Exp $
+# $Id: sfcb.cfg.pre.in,v 1.27 2011/09/09 22:54:18 mchasal Exp $
 ##
 ## Sample Configuration for Small Footprint CIM Broker
 ## 
@@ -182,6 +182,11 @@ sslClientTrustStore: @sysconfdir@/sfcb/client.pem
 ## Applicable only if sslClientCertificate is not set to "accept" or "require".
 ## Default is sfcCertificateAuthentication
 certificateAuthLib:   sfcCertificateAuthentication
+
+## List of SSL ciphers to enable.
+## Default is "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH" which disables
+##      weak ciphers.
+sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 
 ##---------------------------------- UDS --------------------------------------
 ## These options only apply if configured with --enable-uds
