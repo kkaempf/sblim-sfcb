@@ -95,6 +95,7 @@ Control         init[] = {
   {"sslKeyFilePath", 0, SFCB_CONFDIR "/file.pem"},
   {"sslCertificateFilePath", 0, SFCB_CONFDIR "/server.pem"},
   {"sslCertList", 0, SFCB_CONFDIR "/clist.pem"},
+  {"sslCiphers", 0, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"},
 
   {"registrationDir", 0, SFCB_STATEDIR "/registration"},
   {"providerDirs", 3, SFCB_LIBDIR " " CMPI_LIBDIR " " LIBDIR},  /* 3:
