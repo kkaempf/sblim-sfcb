@@ -17,6 +17,7 @@ Bugs fixed:
 - 3300167 Memory leaks caused by cimRequest changes
 - 3101157 Failed to enable provider timing analysis with SfcbLocal
 - 3400114 sfcb fails to start with ipv6 disabled
+- 3310192 32bit sfcbmof fails to run x86_64
 
 Changes in 1.4.1
 ================

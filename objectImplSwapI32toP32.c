@@ -506,20 +506,14 @@ swapI32toP32Class(ClClass * cls, int *size)
   ClObjectHdr    *hdr = &cls->hdr;
   int             ofs = sizeof(CLP32_ClClass);
   int             sz = p32SizeClassH(hdr, cls) + CLEXTRA;
-  struct utsname  uName;
-  static int      first = 1;
   // char *cn;
 
-  if (first) {
-    uname(&uName);
-
-    if (uName.machine[0] != 'i' || strcmp(uName.machine + 2, "86") != 0) {
+#if (__WORDSIZE !=32) || !defined (__i386__) || (__x86_64__ )
       fprintf(stderr,
-              "--- swapI32toP32Class can only execute on ix86 machines\n");
+              "--- swapI32toP32Class can only execute on ix86 built 32bit binary\n");
       exit(16);
-    }
-    first = 0;
-  }
+#endif // __i386__ 
+
   // cn=(char*)ClObjectGetClString(&cls->hdr, &cls->name);
 
   CLP32_ClClass  *nc = (CLP32_ClClass *) calloc(1, sz);
@@ -557,19 +551,11 @@ swapI32toP32Instance(ClInstance * inst, int *size)
   ClObjectHdr    *hdr = &inst->hdr;
   int             ofs = sizeof(CLP32_ClInstance);
   int             sz = p32SizeInstanceH(hdr, inst) + CLEXTRA;
-  struct utsname  uName;
-  static int      first = 1;
 
-  if (first) {
-    uname(&uName);
-
-    if (uName.machine[0] != 'i' || strcmp(uName.machine + 2, "86") != 0) {
+#if (__WORDSIZE != 32) && !defined (__i386__) || (__x86_64__)
       fprintf(stderr,
-              "--- swapI32toP32Instance can only execute on ix86 machines\n");
-      exit(16);
-    }
-    first = 0;
-  }
+              "--- swapI32toP32Instance can only execute on ix86 built 32bit binary\n");
+#endif // __i386__
 
   CLP32_ClInstance *ni = (CLP32_ClInstance *) calloc(1, sz);
 
@@ -603,19 +589,13 @@ swapI32toP32QualifierDeclaration(ClQualifierDeclaration * qual, int *size)
   ClObjectHdr    *hdr = &qual->hdr;
   int             ofs = sizeof(CLP32_ClQualifierDeclaration);
   int             sz = p32SizeQualifierH(hdr, qual) + CLEXTRA;
-  struct utsname  uName;
-  static int      first = 1;
 
-  if (first) {
-    uname(&uName);
 
-    if (uName.machine[0] != 'i' || strcmp(uName.machine + 2, "86") != 0) {
+#if (__WORDSIZE !=32) || !defined (__i386__) || (__x86_64__ )
       fprintf(stderr,
               "--- swapI32toP32QualifierDeclaration can only execute on ix86 machines\n");
       exit(16);
-    }
-    first = 0;
-  }
+#endif // __i386 __
 
   CLP32_ClQualifierDeclaration *nq =
       (CLP32_ClQualifierDeclaration *) calloc(1, sz);
