@@ -388,7 +388,12 @@ static int readData(CommHndl conn_fd, char *into, int length)
    FD_SET(conn_fd.socket,&httpfds);
 
    while (c < length) {
-      isReady = select(conn_fd.socket+1,&httpfds,NULL,NULL,&httpSelectTimeout);
+      if (conn_fd.ssl && SSL_pending(conn_fd.ssl)) {
+	isReady = 1;
+      }
+      else {
+	isReady = select(conn_fd.socket+1,&httpfds,NULL,NULL,&httpSelectTimeout);
+      }
       if (isReady == 0) {
          c = -1;
          break;
