@@ -1,3 +1,8 @@
+2011-09-22 Narasimha Sharoff <nsharoff@us.ibm.com>
+
+	* providerDrv.c, result.c, support.c
+	[ 3413031 ] fixes to perform check before calling free
+
 2011-09-09 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* httpAdapter.c, sfcb.cfg.pre.in, control.c:

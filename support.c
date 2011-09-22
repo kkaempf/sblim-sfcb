@@ -413,11 +413,11 @@ __cleanup_mt(void *ptr)
     __flush_mt(mt);
 
     if (mt->hc.memObjs)
-      free(mt->hc.memObjs);
+      { free(mt->hc.memObjs); mt->hc.memObjs = NULL; }
     if (mt->hc.memEncObjs)
-      free(mt->hc.memEncObjs);
+      { free(mt->hc.memEncObjs); mt->hc.memEncObjs = NULL; }
 
-    free(mt);
+    if (mt) { free(mt); mt = NULL; }
   }
   _SFCB_EXIT();
 }
@@ -720,13 +720,16 @@ releaseHeap(void *hc)
   __flush_mt(mt);
 
   if (mt->hc.memObjs)
-    free(mt->hc.memObjs);
+    { free(mt->hc.memObjs); mt->hc.memObjs = NULL; }
   if (mt->hc.memEncObjs)
-    free(mt->hc.memEncObjs);
+    { free(mt->hc.memEncObjs); mt->hc.memEncObjs = NULL; }
 
+  if (hc) {
   memcpy(&mt->hc, hc, sizeof(HeapControl));
 
   free(hc);
+  hc = NULL; 
+  }
   _SFCB_EXIT();
 }
 

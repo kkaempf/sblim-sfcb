@@ -3338,6 +3338,7 @@ processProviderInvocationRequests(char *name)
                     providerSockets.receive,
                     getInode(providerSockets.receive)));
     parms = (Parms *) malloc(sizeof(*parms));
+    memset(parms, 0, sizeof(*parms));
 
     rc = spRecvReq(&providerSockets.receive, &parms->requestor,
                    (void **) &parms->req, &rl, &mqg);
