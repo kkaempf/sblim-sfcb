@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.37 2011/06/21 22:50:59 buccella Exp $
+ * $Id: support.c,v 1.38 2011/09/23 20:19:31 nsharoff Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -410,9 +410,11 @@ static void __cleanup_mt(void *ptr)
      mt->cleanupDone = 1;
      __flush_mt(mt);
      
-     if (mt->hc.memObjs) free(mt->hc.memObjs);
-     if (mt->hc.memEncObjs) free(mt->hc.memEncObjs);
-     free(mt);
+     if (mt->hc.memObjs) 
+       { free(mt->hc.memObjs); mt->hc.memObjs = NULL; }
+     if (mt->hc.memEncObjs)
+       { free(mt->hc.memEncObjs); mt->hc.memEncObjs = NULL; }
+     if (mt) { free(mt); mt = NULL; }
    }
    _SFCB_EXIT();
 }
@@ -684,12 +686,15 @@ void releaseHeap(void *hc)
    
    __flush_mt(mt);
    
-   if (mt->hc.memObjs) free(mt->hc.memObjs);
-   if (mt->hc.memEncObjs) free(mt->hc.memEncObjs);
+   if (mt->hc.memObjs) { free(mt->hc.memObjs); mt->hc.memObjs = NULL; }
+   if (mt->hc.memEncObjs) { free(mt->hc.memEncObjs); mt->hc.memEncObjs = NULL; }
    
+   if (hc) {
    memcpy(&mt->hc,hc,sizeof(HeapControl));
    
    free(hc);
+   hc = NULL;
+   }
    _SFCB_EXIT();
 }
 

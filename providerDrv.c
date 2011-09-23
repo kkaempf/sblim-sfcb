@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.100 2011/06/24 23:54:15 buccella Exp $
+ * $Id: providerDrv.c,v 1.101 2011/09/23 20:20:07 nsharoff Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2889,6 +2889,7 @@ void processProviderInvocationRequests(char *name)
       _SFCB_TRACE(1, ("--- Waiting for provider request to R%d-%lu",
                    providerSockets.receive,getInode(providerSockets.receive)));
       parms = (Parms *) malloc(sizeof(*parms));
+      memset(parms, 0, sizeof(*parms));
       
       rc = spRecvReq(&providerSockets.receive, &parms->requestor,
                      (void **) &parms->req, &rl, &mqg);
