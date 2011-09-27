@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.62 2011/06/08 22:00:12 buccella Exp $
+ * $Id: cimXmlRequest.c,v 1.63 2011/09/27 15:00:17 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2036,10 +2036,11 @@ int updateMethodParamTypes(RequestHdr *hdr) {
        would have type as string. Check here to not fail the else-if below. */
     if (param && (ptok->type & CMPI_instance)) {
       int isEI = 0;
-      int qcount = ClClassGetMethParmQualifierCount(cl, meth, i);
+      int qcount = ClClassGetMethParmQualifierCount(cl, meth, p);
+      fprintf(stderr, "qcount is %d\n", qcount);
       for (; qcount > 0; qcount--) {
         char* qname;
-        ClClassGetMethParamQualifierAt(cl, param, qcount, NULL, &qname);
+        ClClassGetMethParamQualifierAt(cl, param, (qcount-1), NULL, &qname);
         if (strcmp(qname, "EmbeddedInstance") == 0) {
 	  // fprintf(stderr, "  is EmbeddedInstance\n");
           isEI = 1;
