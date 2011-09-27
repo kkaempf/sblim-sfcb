@@ -1478,10 +1478,10 @@ updateMethodParamTypes(RequestHdr * hdr)
     if (param && (ptok->type & CMPI_instance)) {
       int             isEI = 0;
       int             qcount =
-          ClClassGetMethParmQualifierCount(cl, meth, i);
+          ClClassGetMethParmQualifierCount(cl, meth, p);
       for (; qcount > 0; qcount--) {
         char           *qname;
-        ClClassGetMethParamQualifierAt(cl, param, qcount, NULL, &qname);
+        ClClassGetMethParamQualifierAt(cl, param, (qcount - 1), NULL, &qname);
         if (strcmp(qname, "EmbeddedInstance") == 0) {
           // fprintf(stderr, " is EmbeddedInstance\n");
           isEI = 1;
