@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.63 2011/09/27 15:00:17 buccella Exp $
+ * $Id: cimXmlRequest.c,v 1.64 2011/09/27 15:06:48 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2037,7 +2037,6 @@ int updateMethodParamTypes(RequestHdr *hdr) {
     if (param && (ptok->type & CMPI_instance)) {
       int isEI = 0;
       int qcount = ClClassGetMethParmQualifierCount(cl, meth, p);
-      fprintf(stderr, "qcount is %d\n", qcount);
       for (; qcount > 0; qcount--) {
         char* qname;
         ClClassGetMethParamQualifierAt(cl, param, (qcount-1), NULL, &qname);
