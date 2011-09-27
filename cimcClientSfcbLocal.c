@@ -1208,7 +1208,7 @@ static CMPIValue convertFromStringValue(CMPIValue strcval,
 {
   char *sval = NULL;
   char *scheck  = NULL;
-  CMPIValue newcval;
+  CMPIValue newcval = {CMPI_null};
   
   _SFCB_ENTER(TRACE_CIMXMLPROC, "convertFromStringValue");
   
@@ -1216,7 +1216,7 @@ static CMPIValue convertFromStringValue(CMPIValue strcval,
   // incoming array type must match expected array type 
   if (!(xtype & CMPI_ARRAY) && (strctype & CMPI_ARRAY)) {
     if (prc) CMSetStatus(prc, CMPI_RC_ERR_INVALID_PARAMETER);
-    return newcval;     
+    return newcval;
   }
   
   if (CMPI_chars == strctype) {
