@@ -19,6 +19,7 @@ Bugs fixed:
 - 3400114 sfcb fails to start with ipv6 disabled
 - 3310192 32bit sfcbmof fails to run x86_64
 - 3413031 fixes to perform check before calling free
+- 2727918 blob has leak in EnumQualifiers
 
 Changes in 1.4.1
 ================

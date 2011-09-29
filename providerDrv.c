@@ -3246,7 +3246,23 @@ processProviderInvocationRequestsThread(void *prms)
       if (req->operation == OPS_LoadProvider && resp->rc == 2)
         exit(-1);
     }
+
+    /* SF:2727918, Bugzilla:51733 - memory leak fix */
+#ifdef HAVE_QUALREP
+    if ((req->operation == OPS_GetQualifier) 
+         || (req->operation == OPS_EnumerateQualifiers)) {
+      for (i = 0; i < resp->count; i++) {
+        if (resp->object[i].data) {
+          free(resp->object[i].data);
+          resp->object[i].data = NULL;
+        }
+     }
+    }
     free(resp);
+    resp = NULL;
+#else
+    free(resp);
+#endif
   }
 
   tool_mm_flush();
