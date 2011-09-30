@@ -52,12 +52,6 @@
 @LOAD_INDICATION_PROVIDER@   type: instance method
 @LOAD_INDICATION_PROVIDER@   namespace: root/interop
 #
-@LOAD_INDICATION_PROVIDER@[SFCB_IndicationSubscription]
-@LOAD_INDICATION_PROVIDER@   provider: InteropProvider
-@LOAD_INDICATION_PROVIDER@   location: sfcInteropProvider
-@LOAD_INDICATION_PROVIDER@   type: instance method
-@LOAD_INDICATION_PROVIDER@   namespace: root/interop
-#
 @LOAD_INDICATION_PROVIDER@[CIM_IndicationFilter]
 @LOAD_INDICATION_PROVIDER@   provider: InteropProvider
 @LOAD_INDICATION_PROVIDER@   location: sfcInteropProvider
@@ -79,7 +73,7 @@
 [SFCB_RegisteredProfile]
    provider: ProfileProvider
    location: sfcProfileProvider
-   type: instance method
+   type: instance
    unload: never
    namespace: root/interop
 #
@@ -131,3 +125,11 @@
    type: instance association
    namespace: root/interop
 #
+[SFCB_IndicationElement]
+   provider: InternalProvider
+   location: sfcInternalProvider
+   type: instance method association
+   unload: never
+   namespace: root/interop
+#
+

@@ -1,3 +1,11 @@
+20_indication.mof.pre
+m4/
+mofc/
+test/pywbem/
+test/xmltest/execQuerySeg01.lines
+test/xmltest/execQuerySeg01.xml
+test/xmltest/execQuerySeg02.lines
+test/xmltest/execQuerySeg02.xml
 *.orig
 *.la
 *.lo

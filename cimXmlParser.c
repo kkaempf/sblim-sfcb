@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlParser.c,v 1.33 2009/06/05 20:09:34 buccella Exp $
+ * $Id: cimXmlParser.c,v 1.35 2010/05/21 22:26:50 buccella Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -1599,6 +1599,7 @@ RequestHdr scanCimXmlRequest(char *xmlData)
    control.reqHdr.xmlBuffer = xmb;
    control.reqHdr.cimRequest = NULL;
    control.reqHdr.iMethod = NULL;
+   control.reqHdr.errMsg = NULL;
    control.paramValues.last = control.paramValues.first = NULL;
    control.properties.last = control.properties.first = NULL;
    control.qualifiers.last = control.qualifiers.first = NULL;
@@ -1994,4 +1995,6 @@ void freeCimXmlRequest(RequestHdr hdr)
     }
     free (hdr.cimRequest);
   }
+  if (hdr.errMsg)
+    free(hdr.errMsg);
 }

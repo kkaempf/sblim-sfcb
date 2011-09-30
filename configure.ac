@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.105 2010/02/17 19:19:11 buccella Exp $
+# $Id: configure.ac,v 1.116 2011/04/01 01:57:59 buccella Exp $
 # 
 # configure.ac
 #
@@ -22,9 +22,8 @@
 
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(Small Footprint CIM Broker, 1.3.7, sblim-devel@lists.sourceforge.net, sblim-sfcb)
+AC_INIT(Small Footprint CIM Broker, 1.3.11, sblim-devel@lists.sourceforge.net, sblim-sfcb)
 AC_CONFIG_SRCDIR([providerDrv.c])
-AC_CONFIG_MACRO_DIR([m4])
 
 #disable "seems to ignore the --datarootdir setting" warnings
 #AC_DEFUN([AC_DATAROOTDIR_CHECKED])
@@ -168,7 +167,8 @@ if test "$enable_default_properties" == "yes"; then
 fi
 
 if test "$enable_slp" == "standalone"; then
-   AC_DEFINE(HAVE_SLP_ALONE,,[SLP standalone support enabled.])
+   # AC_DEFINE(HAVE_SLP_ALONE,,[SLP standalone support enabled.])
+   AC_MSG_ERROR([standalone slp agent is no longer supported.])
 fi
 
 if test "$enable_slp" == "yes"; then
@@ -199,6 +199,8 @@ do
             test_gcov=yes;;
         wbemcli)
             test_wbemcli=yes;;
+        pywbem)
+            test_pywbem=yes;;
         unit|unittest)
             test_unit=yes;;
         xml|xmltest)
@@ -225,6 +227,8 @@ AM_CONDITIONAL(UNITTEST,[test "$test_unit" == "yes"])
 AM_CONDITIONAL(GCOV,[test "$test_gcov" == "yes"])
 AM_CONDITIONAL(WCTEST,[test "$test_wbemcli" == "yes"])
 AM_CONDITIONAL(XMLTEST,[test "$test_xml" == "yes"])
+AM_CONDITIONAL(PYWBEMTEST,[test "$test_pywbem" == "yes"])
+AM_CONDITIONAL(UDSTEST,[test "$enable_uds" == "yes"])
 AM_CONDITIONAL(CMDTEST,[test "$test_cmd" == "yes"])
 AM_CONDITIONAL(SLPTEST,[test "$test_slp" == "yes"])
 AM_CONDITIONAL(PROVTEST,[test "$test_providers" == "yes"])
@@ -248,6 +252,11 @@ if [test "$enable_tests"]; then
     if [test "$test_wbemcli" == "yes"]; then
         TEST_SUBDIRS="$TEST_SUBDIRS wbemcli"
         AC_CONFIG_FILES([test/wbemcli/Makefile])
+    fi
+
+    if [test "$test_pywbem" == "yes"]; then
+        TEST_SUBDIRS="$TEST_SUBDIRS pywbem"
+        AC_CONFIG_FILES([test/pywbem/Makefile])
     fi
 
     if [test "$test_xml" == "yes"]; then
@@ -418,9 +427,6 @@ AC_SUBST(SFCB_CONF_HTTP)
 
 if test "$enable_slp"; then
 	#defined in acinclude.m4
-	CHECK_SFCC  
-	AC_CHECK_LIB(cmpisfcc,cmciConnect,[],[AC_MSG_ERROR(no. Sorry cannot find libcmpisfcc.)])
-	
 	AC_CHECK_HEADERS([slp.h],[],[AC_MSG_ERROR(no. Sorry cannot find slp.h.)])
 	AC_CHECK_LIB(slp,SLPReg,[],[AC_MSG_ERROR(no. Sorry cannot find libslp.)])
 fi

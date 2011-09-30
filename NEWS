@@ -1,3 +1,119 @@
+Changes in 1.3.11
+=================
+
+Bugs fixed:
+
+- 3130727 CMPIPropertyMIFT.setProperty() missing objectpath keys
+- 3054618 mofpp is overaggressive when detecting comments
+- 3162016 sfcbd Segmentation fault in cleanupCimXmlRequest
+- 3172080 deliverIndication does not check for matching FROM classes
+- 3185178 Wrong classname for returned instances from execQuery
+- 3175770 execQuery returns multiple instances of same object
+- 3203290 Basic Auth Should Consider Expired Passwords
+- 3202420 CDATA value in a string property is improperly XML escaped
+- 3038078 Can create indication filters and destinations w/o key props
+- 3206663 Enum CQL filter on NULL cause segfault and incorrect rsp
+- 3265502 CMPIContext not released in elementCapabilitiesProvider
+
+Changes in 1.3.10
+=================
+
+Bugs fixed:
+- 3086143 set cmpi status in getPropQualifier
+- 3086145 check datetime format in chars2bin
+- 3095884 Indication classes missing SystemName
+- 3101155 Failed to load provider libraries due to symbol conflicts
+- 3101148 SfcbLocal method parameter type conversion and validation
+- 3101154 Daemon clients failed SfcbLocal connect due to permission
+- 3097310 localConnect in cimcClientSfcbLocal.c accesses free'd memory
+- 3087577 Provider MI accessed before finished initializing
+- 3109469 Potential Buffer Overflow in msgqueue.c:localConnectServer()
+- 3122725 Cleanup warnings in queryLexer and test provider
+
+Changes in 1.3.9
+================
+
+Bugs fixed:
+- 2994737 cimslp fails to get sslCertificateFilePath config value
+- 2984485 Possible access to freed memory in cimslpSLP.c
+- 3016295 Initialise refcount in CMPIInstance clone
+- 2950521 Provider operations are wrongly traced
+- 3016863 Data corruption when replacing array properties
+- 3022941 Remove HAVE_SLP_ALONE sections
+- 3022934 SLP code calls setupControl more than once
+- 3023079 slpUpdate does not release ctx on exit
+- 2920363 make test fails if sfcb is running under valgrind
+- 2950545 indCIMXMLHandler destination schema correction wrong
+- 2968599 Wrong trace msg for invokeMethod (local interface)
+- 3023502 Memory leak on CreateClass
+- 3022919 profileProvider (SLP) has increasing memory usage over time
+- 2952628 Handler is not removed from interop-Hashtable when CI fails
+- 3017845 disableIndications not called on provider shutdown
+- 3010272 Indication providers always unloaded when idle
+- 3003509 sfcb must configure IndicationFilterName
+- 3012365 enableIndications() only called once per provider group
+- 3026606 Prov idle unload may not call all cleanup functions
+- 3048944 Bump downloaded CIM schema to 2.26
+- 3048960 method array types not filled in
+- 3049645 SLP hostname lib won't build
+- 3035165 objectSize in objectImpl.c is not used thread safe
+- 3053240 Leak on indication delivery
+
+Changes in 1.3.8
+================
+
+New features:
+
+- 2963601 pywbem tests
+- 2961422 Single HTTP Adapter
+- 2980820 Indication Profile 1.1: New attr values.
+- 2990091 Implement getPropertyQualifier in CMPIObjectPath
+- 2990169 Bump downloaded CIM schema to 2.25
+- 2980524 providerRegister should collate namespaces
+- 2994969 Persist failing indications
+- 2964568 Indication stress test
+- 2987170 Handle SLP in a provider
+
+Bugs fixed:
+- 2952616 internalProvider is not Threadsafe
+- 2952912 resultSockets variable is not used threadsafe
+- 2950773 Leak in indCIMXMLHandler.c
+- 2949454 Memory leak in ServerProviderInitInstances()
+- 2958167 Remove USE_THREADS sections of httpAdapter
+- 2948647 getObjectPath may dereference NULL pointer
+- 2963746 Incorrect license in test makefiles
+- 2966804 setObjectPath returns uninitialized pointer
+- 2968246 connect2 builds unnecessary struct
+- 2968198 CMPI_chars in sfcb - see #2967257
+- 2968658 cimcClientSfcbLocal.c does not clone return value
+- 2969129 Missing dlclose() in httpAdapter.c
+- 2974807 Can't have > 2 providers registered for the same classname
+- 2961560 Disallow InvokeMethod calls to internal provider methods
+- 2982924 Use a logging process to write to syslog"
+- 2979028 Modify SFCB to not abort for socket errors
+- 2979030 Restart the lexer when filter creation ends in a parsing err
+- 2984214 double free error cimXmlGen.c: triggered by AssocatorNames
+- 2978514 Compilation with --enable-jdbc fails
+- 2979043 Fix leak in msgqueue.c during an error condition
+- 2979036 Always reset lexer and add error handing to activateFilter()
+- 2993137 CMSetProperty fails for CMPIInstance for EmbeddedObject
+- 2997928 Namespace incorrect in test_providers
+- 2997961 IndRetryTest.sh leaves IndicationSubscription modded
+- 3001879 Remove SLP sections from internalProvider
+- 3001896 httpAdapter can crash on bad content length
+- 3001915 Possible heap corruption in httpAdapter
+- 3002851 SLP needs to register at startup
+- 3004257 slp information in README is not current
+- 3004232 configure.ac allows slp-standalone and checks for sfcc
+- 3003508 slpTests.sh uses bash-isms
+- 3004996 Typo in instance.c
+- 3004992 Sporadic deadlock on multiple failing indications
+- 3005424 Memory leak on error responses
+- 3005508 Warning in indCIMXMLHandler.c 
+- 3005574 make clean does not remove cimXmlParserProcessed.c
+- 3006687 ProfileProvider depends on sfcc
+- 3006690 Remove startSLPAgent sections from sfcBroker
+
 Changes in 1.3.7
 ================
 

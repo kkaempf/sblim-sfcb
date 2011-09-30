@@ -50,25 +50,7 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_SLP
-#include "cimslp.h"
-static int startSLP = 1;
-#endif
-
-#ifdef LOCAL_CONNECT_ONLY_ENABLE
-// from httpAdapter.c
 int sfcBrokerPid=0;
-#endif // LOCAL_CONNECT_ONLY_ENABLE
-
-//#define USE_THREADS
-
-// for use by thread in startHttpd, startDbpd
-struct adapterThreadParams {
-  int argc;
-  char* argv;
-  int sslMode;
-  int sfcPid;
-};
 
 extern void setExFlag(unsigned long f);
 extern char *parseTarget(const char *target);
@@ -77,7 +59,7 @@ extern int init_sfcBroker();
 extern CMPIBroker *Broker;
 extern void initProvProcCtl(int);
 extern void processTerminated(int pid);
-extern int httpDaemon(int argc, char *argv[], int sslMode, int pid);
+extern int httpDaemon(int argc, char *argv[], int sslMode);
 extern void processProviderMgrRequests();
 
 extern int stopNextProc();
@@ -89,7 +71,6 @@ extern void sunsetControl();
 extern void uninitGarbageCollector();
 
 extern TraceId traceIds[];
-extern int sfcBrokerPid;
 
 extern unsigned long exFlags;
 static int startHttp = 0;
@@ -167,51 +148,6 @@ static int stopNextAdapter()
    }
    return 0;
 }
-
-
-#ifdef USE_THREADS
-// thread-based adapter functions
-
-static void addStartedThreadAdapter(pthread_t tid)
-{
- 
-   StartedThreadAdapter *sa=(StartedThreadAdapter*)malloc(sizeof(StartedThreadAdapter));
-
-   sa->stopped=0;
-   sa->tid=tid;
-   sa->next=lastStartedThreadAdapter;
-   lastStartedThreadAdapter=sa;
-}
-
-static int testStartedThreadAdapter(pthread_t tid, int *left) 
-{
-   StartedThreadAdapter *sa=lastStartedThreadAdapter;
-   int stopped=0;
-   
-   *left=0;
-   while (sa) {
-     if (pthread_equal(sa->tid, tid)) stopped=sa->stopped=1;
-      if (sa->stopped==0) (*left)++;
-      sa=sa->next;
-   }
-   return stopped;
-}         
-
-static int stopNextThreadAdapter()
-{
-   StartedThreadAdapter *sa=lastStartedThreadAdapter;
-   
-   while (sa) {
-      if (sa->stopped==0) {
-         sa->stopped=1;
-         pthread_exit(sa->tid);
-         return sa->tid;
-      }   
-      sa=sa->next;
-   }
-   return 0;
-}
-#endif
 
 static pthread_mutex_t sdMtx=PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t  sdCnd=PTHREAD_COND_INITIALIZER;
@@ -408,34 +344,9 @@ static void handleSigAbort(int sig)
 
 
 #ifndef LOCAL_CONNECT_ONLY_ENABLE
-#ifdef USE_THREADS
-void* startHttpThread(void* params) {
-  struct adapterThreadParams* p = (struct adapterThreadParams*)params;
-  currentProc=getpid();
-
-  httpDaemon(p->argc, p->argv, p->sslMode, p->sfcPid);
-  closeSocket(&sfcbSockets,cRcv,"startHttpd");
-  closeSocket(&resultSockets,cAll,"startHttpd");
-
-}
-#endif
 
 static int startHttpd(int argc, char *argv[], int sslMode)
 {
-#ifdef USE_THREADS
-
-   int pid,sfcPid=currentProc;
-   struct adapterThreadParams htparams = {argc, argv, sslMode, sfcPid};
-   pthread_t httpThread;
-   pthread_create(&httpThread, NULL, &startHttpThread, &htparams);
-   //newThread(&startHttpThread, &htparams, 0);
-
-   pthread_yield();
-
-   addStartedThreadAdapter(httpThread);
-
-#else
-
    int pid,sfcPid=currentProc;
    int httpSFCB,rc;
    char *httpUser;
@@ -483,7 +394,10 @@ static int startHttpd(int argc, char *argv[], int sslMode)
               exit(2);
           }
       }
-      httpDaemon(argc, argv, sslMode, sfcPid);
+   
+      if (httpDaemon(argc, argv, sslMode)) {
+	kill(sfcPid, 3);          /* if port in use, shutdown */
+      }
       closeSocket(&sfcbSockets,cRcv,"startHttpd");
       closeSocket(&resultSockets,cAll,"startHttpd");
    }
@@ -491,7 +405,6 @@ static int startHttpd(int argc, char *argv[], int sslMode)
       addStartedAdapter(pid);
       return 0;
    }
-#endif
    return 0;
 }
 
@@ -519,16 +432,6 @@ static int startDbpd(int argc, char *argv[], int sslMode)
     	addStartedAdapter(pid);
        	return 0;
     }
-    return 0;
-}
-
-#endif
-
-#ifdef HAVE_SLP
-
-static int startSLPAgent()
-{
-    slpAgent();
     return 0;
 }
 
@@ -655,13 +558,8 @@ int main(int argc, char *argv[])
 	       if (*optarg == '?') {
 		   fprintf(stdout, "---   Traceable Components:     Int       Hex\n");
 		   for (i = 0; traceIds[i].id; i++)
-		       fprintf(stdout, "--- \t%18s:    %d\t0x%07X\n", traceIds[i].id, traceIds[i].code, traceIds[i].code);
+		       fprintf(stdout, "--- \t%18s:    %d\t0x%05X\n", traceIds[i].id, traceIds[i].code, traceIds[i].code);
 		   exit(0);
-	       } else if (*optarg == 0 && *(optarg+1) == 'x') {
-		   if (sscanf(optarg,"0x%lx",&tmask) != 1) {
-		     fprintf(stderr,"-t argument not proper hex value\n");
-		     exit(1);
-		   }
 	       } else if (isdigit(*optarg)) {
 		   char *ep;
 		   tmask = strtol(optarg, &ep, 0);
@@ -702,7 +600,7 @@ int main(int argc, char *argv[])
       usage(1);
    }
 
-   startLogging("sfcb",syslogLevel);
+   startLogging(syslogLevel);
 
    mlogf(M_INFO,M_SHOW,"--- %s V" sfcHttpDaemonVersion " started - %d\n", name, currentProc);
 
@@ -819,7 +717,7 @@ int main(int argc, char *argv[])
 	   "--- Max provider process number adjusted to %d\n", pSockets);
    }
 
-   if ((enableHttp && dSockets > 0) || (enableHttps && sSockets > 0) ) {
+   if ((enableHttp || enableHttps) && dSockets > 0) {
      startHttp = 1;
    }
    
@@ -840,10 +738,7 @@ int main(int argc, char *argv[])
    
 #ifndef LOCAL_CONNECT_ONLY_ENABLE
    if (startHttp) {
-      if (sslMode)
-         startHttpd(argc, argv,1);
-      if (!sslOMode)
-         startHttpd(argc, argv,0);
+     startHttpd(argc, argv, sslMode);
    }
 #endif // LOCAL_CONNECT_ONLY_ENABLE
    
@@ -858,13 +753,6 @@ int main(int argc, char *argv[])
 #endif	
 
 
-#ifdef HAVE_SLP
-   //Start SLP Agent
-   if (startSLP) {
-		startSLPAgent();
-   }
-#endif
-   
    setSignal(SIGSEGV, handleSigSegv,SA_ONESHOT);
    setSignal(SIGCHLD, handleSigChld,0);
    

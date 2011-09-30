@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 #include "cmpidt.h"
 #include "cmpift.h"
 #include "cmpimacs.h"
@@ -47,6 +48,9 @@ static char *paramType(CMPIType type)
    return "*??*";
 }
 
+
+
+
 CMPIStatus TestMethodProviderMethodCleanup (
     CMPIMethodMI * mi,
     const CMPIContext * ctx,
@@ -74,7 +78,6 @@ CMPIStatus TestMethodProviderInvokeMethod (
     CMPIString * str1;
     CMPIString * str2;
     CMPIValue val1, val2;
-
     /* get the class name from object-path */
     className = CMGetClassName(ref, &rc);
     /* get a pointer to a C char* representation of this String. */
@@ -113,11 +116,12 @@ CMPIStatus TestMethodProviderInvokeMethod (
             rc = CMAddArg(out, argName, &val2, CMPI_string);
         } else if (!strcmp("CheckArrayNoType", methodName)) {
             data = CMGetArg(in, "IntArray", &rc);
-            CMPIType atype=data.value.array->ft->getSimpleType(data.value.array,&rc);
+            CMPIType atype=data.value.array->ft->getSimpleType(data.value.array,&rc); 
             sprintf(result,"Datatype is %s",paramType(atype));
             str1 = CMNewString(_broker, result, &rc);
             val1.string = str1;
         }
+
     }
     CMReturnData (rslt, (CMPIValue *) &val1, CMPI_string);
     CMReturnDone (rslt);

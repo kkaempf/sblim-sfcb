@@ -1,3 +1,466 @@
+2011-03-31  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* elementCapabiltiesProvider.c:
+	[ 3265502 ] CMPIContext not released in elementCapabilitiesProvider
+
+2011-03-30 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* queryOperation.c
+	[ 3206663 ] Enum CQL filter on NULL cause segfault and incorrect rsp
+	(based on patch by  cpoblete)
+
+2011-03-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* interopProvider.c, indCIMXMLHandler.c:
+	[ 3038078 ] Can create indication filters and destinations w/o key props
+
+2011-03-08  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimXmlGen.c:
+	[ 3202420 ] CDATA value in a string property is improperly XML escaped
+	(patch by Chris Poblete)
+
+	* httpAdapter.c, sfcBasicPAMAuthentication.c:
+	[ 3203290 ] Basic Auth Should Consider Expired Passwords
+
+2011-02-23  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* providerDrv.c: 
+	[ 3175770 ] execQuery returns multiple instances of same object
+
+2011-02-17  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* result.c: 
+	[ 3185178 ] Wrong classname for returned instances from execQuery
+
+2011-02-11  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* brokerUpc.c:
+	[ 3172080 ] deliverIndication does not check for matching FROM classes
+
+2011-02-10  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* httpAdapter.c:
+	[ 3162016 ] sfcbd Segmentation fault in cleanupCimXmlRequest
+
+2010-12-23  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* mofpp.c:
+	[ 3054618 ] mofpp is overaggressive when detecting comments
+
+2010-12-21  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimXmlRequest.c:
+	[ 3130727 ] CMPIPropertyMIFT.setProperty() missing objectpath keys
+
+2010-11-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* queryLexer.l, test/TestProviders/cmpiTestMethodProvider.c,
+	[ 3122725 ] Cleanup warnings in queryLexer and test provider
+
+2010-11-17  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* msgqueue.c:
+	[ 3109469 ] Potential Buffer Overflow in msgqueue.c:localConnectServer()
+	(patch by Josef Moellers)
+
+2010-11-15  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* providerDrv.c:
+	[ 3087577 ] Provider MI accessed before finished initializing
+
+2010-11-10  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimcClientSfcbLocal.c:
+	[ 3097310 ] localConnect in cimcClientSfcbLocal.c accesses free'd memory
+
+	* control.c, msgqueue.c, sfcb.cfg.pre.in:
+	[ 3101154 ] Daemon clients failed SfcbLocal connect due to permission
+	(patch by Chris Poblete)	
+
+2010-11-08  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimcClientSfcbLocal.c:
+	[ 3101148 ] SfcbLocal method parameter type conversion and validation
+	(patch by Chris Poblete)
+
+	* providerDrv.c:
+	[ 3101155 ] Failed to load provider libraries due to symbol conflicts
+	(patch by Chris Poblete)
+
+2010-10-27  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* interopProvider.c, indCIMXMLHandler.c:
+	[ 3095884 ] Indication classes missing SystemName
+
+2010-10-14  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* constClass.c:
+	[ 3086143 ] set cmpi status in getPropQualifier
+	(patch by Janny Au)
+	
+	* datetime.c:
+	[ 3086145 ] check datetime format in chars2bin
+	(patch by Janny Au)
+
+2010-08-25  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* predicate.c:
+	Pulled out 3051707 patch for the time being
+
+	* interopProvider.c:
+	[ 3053240 ] Leak on indication delivery
+
+2010-08-23  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* predicate.c:
+	[ 3051707 ] Leak in predicate.c
+
+2010-08-20  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* Makefile.am:
+	[ 3049645 ] SLP hostname lib won't build
+
+	* objectImpl.c:
+	[ 3035165 ] objectSize in objectImpl.c is not used thread safe
+	(patch by Till Steinbach)
+
+2010-08-20 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	*  cimXmlRequest.c test/TestProviders/cmpiTestMethodProvider.c,
+		test/schema/root/cimv2/Test_Method.mof 
+	[ 3048960 ] method array types not filled in
+
+2010-08-19  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* getSchema.sh.pre.in:
+	[ 3048944 ] Bump downloaded CIM schema to 2.26
+
+2010-07-14  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* providerDrv.c:
+	[ 3026606 ] Prov idle unload may not call all cleanup functions
+
+2010-07-12  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* brokerUpc.c, providerDrv.c, providerRegister.h
+	[ 3012365 ] enableIndications() only called once per provider group
+	(patch by Tim Potter)
+
+2010-07-08 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	* interopProvider.c
+	[ 3003509 ] sfcb must configure IndicationFilterName 
+	(based on patch by sto)
+
+2010-07-06  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* providerDrv.c:
+	[ 3010272 ] Indication providers always unloaded when idle
+
+2010-07-01  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* providerDrv.c:
+	[ 3017845 ] disableIndications not called on provider shutdown
+
+	* indCIMXMLHandler.c:
+	[ 2952628 ] Handler is not removed from interop-Hashtable when CI fails
+	(based on patch by Till Steinbach)
+
+	* profileProvider.c:
+	[ 3022919 ] profileProvider (SLP) has increasing memory usage over time
+
+2010-06-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimXmlRequest.c:
+	[ 3023502 ] Memory leak on CreateClass
+
+	* indCIMXMLHandler.c:
+	[ 2950545 ] indCIMXMLHandler destination schema correction wrong
+	(proposed by Till Steinbach)
+
+	* cimcClientSfcbLocal.c:
+	[ 2968599 ] Wrong trace msg for invokeMethod (local interface)
+	(patch by Klaus Kaempf)
+
+2010-06-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* objectImpl.c:
+	[ 3016863 ] Data corruption when replacing array properties
+
+	* cimslp.c, cimslpSLP.c:
+	[ 3022941 ] Remove HAVE_SLP_ALONE sections
+
+	* profileProvider.c, cimslpCMPI.c:
+	[ 3022934 ] SLP code calls setupControl more than once
+
+	* profileProvider.c: 
+	[ 3023079 ] slpUpdate does not release ctx on exit
+
+	* test/running.sh, test/finaltest/finalcheck.sh:
+	[ 2920363 ] make test fails if sfcb is running under valgrind
+
+2010-06-17  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* providerDrv.c:
+	[ 2950521 ] Provider operations are wrongly traced
+	(patch by Till Steinbach)
+
+2010-06-16  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* instance.c:
+	[ 3016295 ] Initialise refcount in CMPIInstance clone
+	(patch by Tim Potter)
+	
+2010-05-27 Sean Swehla <smswehla@linux.vnet.ibm.com>
+
+	* cimslpSLP.c:
+	[ 2984485 ] Possible access to freed memory in cimslpSLP.c
+        (based on patch by Klaus Kämpf)
+
+2010-05-27 Sean Swehla <smswehla@linux.vnet.ibm.com>
+
+	* profileProvider.c:
+	[ 2994737 ] cimslp fails to get sslCertificateFilePath config value
+        (patch by Klaus Kämpf)
+
+2010-05-25  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* sfcBroker.c:
+	[ 3006690 ] Remove startSLPAgent sections from sfcBroker
+
+2010-05-24  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* configure.ac
+	[ 3004232 ] configure.ac allows slp-standalone and checks for sfcc
+	(second hunk was not applied)
+
+	* cimslpCMPI.h, cimslpCMPI.c:
+	[ 3006687 ] ProfileProvider depends on sfcc
+
+2010-05-21 Sean Swehla <smswehla@linux.vnet.ibm.com>
+
+	* tests/slptest/slpTests.sh, Makefile.am, README,
+          cimslp.c, cimslp.h, cimslpCMPI.c, cimslpCMPI.h 
+	  cimslpSLP.c, cimslpSLP.h, cimslpUtil.c, cimslpUtil.h,
+          configure.ac, control.c, profileProvider.c,
+          sfcBroker.c, sfcb.cfg.pre.in
+        [ 3004257 ] slp information in README is not current
+        [ 3004232 ] configure.ac allows slp-standalone and checks for sfcc
+        [ 3003508 ] slpTests.sh uses bash-isms
+        [ 2987170 ] Handle SLP in a provider
+
+2010-05-21 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+	* indCIMXMLHandler.c:
+	[ 3005508 ] Warning in indCIMXMLHandler.c 
+
+2010-05-21  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimXmlParser.c:
+	[ 3005424 ] Memory leak on error responses
+
+	* Makefile.am:
+	[ 3005574 ] make clean does not remove cimXmlParserProcessed.c
+
+	* Makefile.am:
+	[ 2987170 ] Handle SLP in a provider
+        (missing cimslp headers in no_inst_HEADERS)
+	
+2010-05-20 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* test/TestProviders/tests/IndRetryTest.sh:
+	[ 2964568 ] Indication stress test
+
+2010-05-20 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* indCIMXMLHandler.c:
+	[ 3004992 ] Sporadic deadlock on multiple failing indications
+
+2010-05-20  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* instance.c:
+	[ 3004996 ] Typo in instance.c
+
+2010-05-19  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* indCIMXMLHandler.c:
+	[ 3004358 ] indCIMXMLHanlder ci can leak on error condition
+
+2010-05-17  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* profileProvider.c, providerMgr.c, default.reg.in:
+	[ 3002851 ] SLP needs to register at startup
+
+2010-05-14  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* internalProvider.c:
+	[ 3001879 ] Remove SLP sections from internalProvider
+
+	* httpAdapter.c:
+	[ 3001896 ] httpAdapter can crash on bad content length
+
+	[ 3001915 ] Possible heap corruption in httpAdapter
+	
+2010-05-14 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* 10_interop.mof, default.reg.in, indCIMXMLHandler.c, 
+		interopServerProvider.c, test/TestProviders/tests/IndRetryTest.sh:
+	[ 2994969 ] Persist failing indications
+
+2010-05-06 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* test/TestProviders/tests/IndRetryTest.sh:
+	[ 2997961 ] IndRetryTest.sh leaves IndicationSubscription modded
+
+2010-05-06 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* test/TestProviders/cmpiTestIndicationProvider.c:
+	[ 2997928 ] Namespace incorrect in test_providers
+
+2010-04-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* providerRegister.c:
+	[ 2980524 ] providerRegister should collate namespaces
+	(patch by Klaus Kaempf)
+
+2010-04-27  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* constClass.c, instance.c:
+	[ 2993137 ] CMSetProperty fails for CMPIInstance for EmbeddedObject
+
+2010-04-20 Sean Swehla <smswehla@linux.vnet.ibm.com>
+
+        * objectpath.c:
+        [ 2990091 ] Implement getPropertyQualifier in CMPIObjectPath
+
+2010-04-20  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* getSchema.sh.pre.in:
+	[ 2990169 ] Bump downloaded CIM schema to 2.25
+
+2010-04-14  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* msgqueue.c:
+	[ 2979043 ] Fix leak in msgqueue.c during an error condition
+	(patch by John Powell)
+
+	* queryStatement.c, providerDrv.c:
+	[ 2979036 ] Always reset lexer and add error handing to activateFilter()
+	(patch by John Powell)
+
+2010-04-13  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* dbpAdapter.c, sqlLexer.l, sqlParser.y, sqlStatement.c, sqlStatement.h:
+	[ 2978514 ] Compilation with --enable-jdbc fails
+	(patch by Klaus Kampf)
+
+2010-04-09  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimXmlGen.c:
+	[ 2984214 ] double free error cimXmlGen.c: triggered by AssocatorNames 
+	(patch by Chad Smith)
+
+2010-04-07  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimcClientSfcbLocal.c, sfcBroker.c, mlog.h, mlog.c:
+	[ 2982924 ] Use a logging process to write to syslog
+
+	* providerDrv.c:
+	[ 2979028 ] Modify SFCB to not abort for socket errors 
+	(patch by John Powell)
+
+	* queryStatement.c:
+	[ 2979030 ] Restart the lexer when filter creation ends in a parsing err
+	
+2010-04-01 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* 20_indication.mof, profileProvider.c, interopServerProvider.c:
+	[ 2980820 ] Indication Profile 1.1 New attr values.
+
+2010-03-29 Sean Swehla <smswehla@linux.vnet.ibm.com>
+
+	* cimXmlRequest.c, msgqueue.c, msgqueue.h, providerMgr.c:
+	[ 2961560 ] Disallow InvokeMethod calls to internal provider methods
+
+2010-03-22  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* providerRegister.c:
+	[ 2974807 ] Can't have > 2 providers registered for the same classname
+
+2010-03-12  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* httpAdapter.c:
+	[ 2969129 ] Missing dlclose() in httpAdapter.c
+	(patch by Tim Potter)
+
+2010-03-12 Sean Swehla <smswehla@linux.vnet.ibm.com>
+
+	* value.c:
+	[ 2968656 ] cimcClientSfcbLocal.c does not clone return value
+	(patch by Klaus Kaempf)
+
+2010-03-12 Sean Swehla <smswehla@linux.vnet.ibm.com>
+
+	* value.c:
+	[ 2968198 ] CMPI_chars in sfcb - see #2967257
+	(patch by Klaus Kaempf)
+
+2010-03-10 Sean Swehla <smswehla@linux.vnet.ibm.com>
+
+	* cimcClientSfcbLocal.c:
+	[ 2968246 ] connect2 builds unnecessary struct
+
+2010-03-09 Sean Swehla <smswehla@linux.vnet.ibm.com>
+
+	* instance.c:
+	[ 2966804 ] setObjectPath returns uninitialized pointer
+
+2010-03-08  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* httpAdapter.c, sfcBroker.c:
+	[ 2961422 ] Single HTTP Adapter
+
+2010-03-04 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* Makefile.am in test subdirs
+	[ 2963746 ] Incorrect license in test makefiles
+
+2010-03-04  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* configure.ac, test/pywbem/Makefile.am, test/pywbem/check_pywbem.py,
+	  test/pywbem/ecn_interop.py:
+	[ 2963601 ] pywbem tests
+
+2010-03-01 Sean Swehla <smswehla@linux.vnet.ibm.com>
+
+	* args.c, array.c, constClass.c, instance.c, internalProvider.c, objectpath.c:
+	[ 2948647 ] getObjectPath may dereference NULL pointer
+
+2010-02-24  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* httpAdapter.c, sfcBroker.c:
+	[ 2958167 ] Remove USE_THREADS sections of httpAdapter
+
+2010-02-19  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* interopServerProvider.c:
+	[ 2949454 ] Memory leak in ServerProviderInitInstances()
+
+2009-02-19 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* indCIMXMLHandler.c:
+	[ 2950773 ] Leak in indCIMXMLHandler.c
+
+2010-02-19 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* providerMgr.c:
+	[ 2952912 ] resultSockets variable is not used threadsafe 
+	(patch by Till Steinbach )
+
+2010-02-19 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* internalProvider.c:
+	[ 2952616 ] internalProvider is not Threadsafe
+	(patch by Till Steinbach )
+
 2010-02-10  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* Makefile.am:

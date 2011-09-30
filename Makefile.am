@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.105 2010/02/10 20:51:15 buccella Exp $  
+# $Id: Makefile.am,v 1.109 2010/08/20 20:00:17 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -37,7 +37,6 @@ MANFILES=man/genSslCert.1 man/getSchema.1 man/sfcbd.1 man/sfcbmof.1 \
 BUILT_SOURCES=queryParser.c queryLexer.c sqlParser.c sqlLexer.c cimXmlOps.c cimXmlParserProcessed.c $(MANFILES)
 
 AM_YFLAGS=-d
-ACLOCAL_AMFLAGS=-I m4
 AM_CPPFLAGS=-DSFCB_CONFDIR=\"$(sfcbconfdir)\" \
 	-DSFCB_STATEDIR=\"$(sfcbstatedir)\" \
 	-DSFCB_LIBDIR=\"$(sfcblibdir)\" \
@@ -90,16 +89,6 @@ CIMXMLCODEC_LIBS_LINK = -lsfcCimXmlCodec
 
 HTTP_ADAPTER_LIBS = libsfcHttpAdapter.la
 HTTP_ADAPTER_LIBS_LINK = -lsfcHttpAdapter
-endif
-
-if SLP
-SLP_LIBS = libslpAgent.la
-SLP_LIB = -lslpAgent
-SLP_HEADER = cimslpCMPI.h cimslp.h cimslpSLP.h cimslpUtil.h
-else
-SLP_LIBS =
-SLP_LIB =
-SLP_HEADER =
 endif
 
 if SLP_HOSTNAME_LIB
@@ -158,10 +147,9 @@ sfcblib_LTLIBRARIES = \
    libsfcObjectImplSwapI32toP32.la \
    libcimcClientSfcbLocal.la \
    $(QUALREP_LIBS) \
-   $(SLP_LIBS) \
-   $(SLP_HOSTNAME_LIBS) \
    $(INDICATION_LIBS) \
-   $(PAM_LIBS) 
+   $(PAM_LIBS) \
+   $(SLP_HOSTNAME_LIBS)
 
 if TEST_ENABLED 
 sfcblib_LTLIBRARIES += \
@@ -173,18 +161,18 @@ sfcblib_LTLIBRARIES += \
    libTestIndicationProvider.la
 endif
 
-if SLP_ALONE
-SLP_PROGRAMFILES = cimslp
-cimslp_SOURCES = \
-	cimslp.c \
-	cimslpCMPI.c \
-	cimslpSLP.c \
-	cimslpUtil.c 
-
-cimslp_LDADD=-lslp -lcmpisfcc -lsfcBrokerCore
-else
+# if SLP_ALONE
+# SLP_PROGRAMFILES = cimslp
+# cimslp_SOURCES = \
+# 	cimslp.c \
+# 	cimslpCMPI.c \
+# 	cimslpSLP.c \
+# 	cimslpUtil.c 
+# 
+# cimslp_LDADD=-lslp -lcmpisfcc -lsfcBrokerCore
+# else
 SLP_PROGRAMFILES = 
-endif
+# endif
 
 sbin_PROGRAMS = \
    sfcbd 
@@ -287,8 +275,10 @@ libsfcHttpAdapter_la_LIBADD=-lsfcBrokerCore $(CIMXMLCODEC_LIBS_LINK)
 libsfcHttpAdapter_la_DEPENDENCIES=libsfcBrokerCore.la $(CIMXMLCODEC_LIBS)
 endif
 
+if SLP_HOSTNAME_LIB
 libsfcSlpHostname_la_SOURCES = \
    sfcSlpHostname.c
+endif
 
 libsfcBasicAuthentication_la_SOURCES = \
    sfcBasicAuthentication.c
@@ -330,9 +320,10 @@ libsfcIndCIMXMLHandler_la_DEPENDENCIES=libsfcBrokerCore.la libsfcInternalProvide
 	$(CIMXMLCODEC_LIBS) $(HTTP_ADAPTER_LIBS)
 
 libsfcProfileProvider_la_SOURCES = \
-   profileProvider.c 
-libsfcProfileProvider_la_LIBADD=-lsfcBrokerCore
-libsfcProfileProvider_la_DEPENDENCIES=libsfcBrokerCore.la
+   profileProvider.c \
+   $(SLP_SRC)
+libsfcProfileProvider_la_LIBADD=-lsfcBrokerCore 
+libsfcProfileProvider_la_DEPENDENCIES=libsfcBrokerCore.la 
 
 libsfcElementCapabilitiesProvider_la_SOURCES = \
    elementCapabilitiesProvider.c 
@@ -406,13 +397,17 @@ libsfcCimXmlCodec_la_DEPENDENCIES=libsfcBrokerCore.la
 endif
 
 if SLP
-libslpAgent_la_CFLAGS = $(AM_CFLAGS)
-libslpAgent_la_SOURCES = \
-    cimslp.c \
-    cimslpCMPI.c \
-    cimslpSLP.c \
-    cimslpUtil.c
-libslpAgent_la_LIBADD=-lslp -lcmpisfcc
+SLP_SRC = cimslp.c \
+          cimslpCMPI.c \
+          cimslpSLP.c \
+          cimslpUtil.c
+SLP_INC = cimslp.h \
+          cimslpCMPI.h \
+          cimslpSLP.h \
+          cimslpUtil.h
+
+else
+SLP_INC =
 endif
 
 if QUALREP
@@ -423,7 +418,7 @@ libsfcQualifierProvider_la_DEPENDENCIES=libsfcBrokerCore.la libsfcFileRepository
 endif
 
 sfcbd_SOURCES=sfcBroker.c
-sfcbd_LDADD=-lsfcBrokerCore $(CIMXMLCODEC_LIBS_LINK) $(HTTP_ADAPTER_LIBS_LINK) $(SLP_LIB)
+sfcbd_LDADD=-lsfcBrokerCore $(CIMXMLCODEC_LIBS_LINK) $(HTTP_ADAPTER_LIBS_LINK)
 sfcbd_DEPENDENCIES=libsfcBrokerCore.la $(CIMXMLCODEC_LIBS) $(HTTP_ADAPTER_LIBS)
 
 sfcbmofpp_SOURCES=mofpp.c
@@ -437,7 +432,7 @@ classSchema2c_SOURCES=classSchema2c.c
 classSchema2c_LDADD=-lsfcBrokerCore
 classSchema2c_DEPENDENCIES=libsfcBrokerCore.la
 
-noinst_HEADERS=array.h   httpComm.h control.h    providerMgr.h \
+noinst_HEADERS=array.h $(SLP_INC) httpComm.h control.h    providerMgr.h \
 	constClass.h   msgqueue.h     providerRegister.h \
 	cimXmlParser.h    native.h       support.h cimXmlGen.h \
 	cimXmlRequest.h  genericlist.h  objectImpl.h   trace.h \
@@ -552,6 +547,7 @@ endif
 clean-local:
 	rm -f sfcbrepos sfcbstage sfcbunstage sfcbuuid sfcb.cfg getSchema.sh sfcb \
 		sfcb.init-redhat sfcb.init-suse sfcb.init-none sfcb-dox.conf \
+                cimXmlParserProcessed.c \
 		*.gcno *.gcda *.gcov $(MANFILES)
 	rm -rf doc/* coverage/
 
@@ -594,7 +590,7 @@ endif
 test: testprep check testreport
 endif
 
-postinstall: #install-cimschema create-sslkeys
+postinstall: install-cimschema create-sslkeys
 	test -f $(DESTDIR)$(sfcbstatedir)/registration/providerRegister || $(INSTALL_DATA) $(DESTDIR)$(sfcbstatedir)/stage/default.reg $(DESTDIR)$(sfcbstatedir)/registration/providerRegister 
 if TEST_ENABLED
 	./test/stageschema.sh -d test/schema -p $(prefix)

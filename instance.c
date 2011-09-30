@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.45 2008/11/21 20:23:51 mchasal Exp $
+ * $Id: instance.c,v 1.52 2010/06/16 22:48:21 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -150,6 +150,7 @@ static CMPIInstance *__ift_clone(const CMPIInstance * instance, CMPIStatus * rc)
    struct native_instance *new = (struct native_instance*)
        malloc(sizeof(struct native_instance));
 
+   new->refCount = 0;
    new->mem_state=MEM_NOT_TRACKED;
    new->property_list = __duplicate_list((const char**)i->property_list);
    new->key_list = __duplicate_list((const char**)i->key_list);
@@ -278,6 +279,22 @@ static CMPIStatus __ift_setProperty(const CMPIInstance * instance,
    CMReturn(CMPI_RC_OK);
 }
 
+CMPIStatus filterFlagProperty(CMPIInstance* ci, const char* id) {
+
+   CMPIStatus     st = { CMPI_RC_OK, 0 };
+   ClInstance     *inst = (ClInstance *) ci->hdl;
+   ClSection      *prps = &inst->properties;
+   int             i;
+
+   if ((i = ClObjectLocateProperty(&inst->hdr, prps, id)) != 0) {
+      ClInstanceFilterFlagProperty(inst, i-1);
+   }
+   else
+      st.rc = CMPI_RC_ERR_NOT_FOUND;
+
+   return st;
+}
+
 static CMPIStatus __ift_setObjectPath(CMPIInstance * inst,
                                       const CMPIObjectPath * cop)
 {
@@ -303,6 +320,7 @@ static CMPIStatus __ift_setObjectPath(CMPIInstance * inst,
       ns = "*NoNameSpace*";
       cn = "*NoClassName*";
       tmp1.rc=tmp2.rc=tmp3.rc=CMPI_RC_OK;
+      tmp1.msg=tmp2.msg=tmp3.msg=NULL;
    }
 
    if (tmp1.rc != CMPI_RC_OK || tmp2.rc != CMPI_RC_OK || tmp3.rc != CMPI_RC_OK) {
@@ -914,8 +932,8 @@ static void instFillDefaultProperties(struct native_instance *inst,
 	 pd = cc->ft->getPropertyAt(cc,pc,&pn,&ps);
 
 	 /* if this prop is an EmbeddedObject, force type to CMPI_instance to allow CMSetProperty with a CMPI_Instance */
-         CMPIData pqd = cc->ft->getPropQualifier(cc, CMGetCharsPtr(pn, NULL), "EmbeddedObject", NULL);
-	 if ((pqd.state == CMPI_goodValue) && (pqd.value.boolean = 1)) {
+	 CMPIData pqd = cc->ft->getPropQualifier(cc, CMGetCharsPtr(pn, NULL), "EmbeddedObject", NULL);
+	 if ((pqd.state == CMPI_goodValue) && (pqd.value.boolean == 1)) {
 	    pd.type = CMPI_instance;
 	 }
 

@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.20 2009/12/04 21:41:00 buccella Exp $
+# $Id: sfcb.cfg.pre.in,v 1.24 2010/11/10 20:30:32 buccella Exp $
 ##
 ## Sample Configuration for Small Footprint CIM Broker
 ## 
@@ -47,8 +47,8 @@ useChunking:    true
 #chunkSize: 50000
 
 ## Maximum ContentLength of an HTTP request allowed.
-## Default is 0 (no limit)
-#httpMaxContentLength: 0
+## Default is 100000000
+#httpMaxContentLength: 100000000
 
 ## Enable basic authentication for HTTP and HTTPS connections
 ## Default is false
@@ -78,6 +78,12 @@ basicAuthLib:   @SFCB_CONF_BASICAUTHLIB@
 ## Default is /tmp/sfcbLocalSocket
 #localSocketPath: /tmp/sfcbLocalSocket
 
+## The group name to use to set permission for the named socket. This is
+## useful for daemon clients where worker threads are running with permission
+## different than the permission for the named socket. For example, sfcb may
+## be running as root while a web server using sfcb may be running as daemon.
+## Default is NULL which means no change to the default permission.
+#socketPathGroupPerm: daemon
 
 ##---------------------------- Provider-Related -------------------------------
 
@@ -145,10 +151,6 @@ enableHttps:    @SFCB_CONF_HTTPS@
 ## Default is 5989
 httpsPort:      5989
 
-## Max number of HTTP processes for HTTPS.  
-## Default is 8
-httpsProcs:     8
-
 ## Filename containing the private key for the server's certificate. The file 
 ## must be in PEM format and may not be passphrase-protected. 
 ## Default is @sysconfdir@/sfcb/file.pem
@@ -182,11 +184,11 @@ certificateAuthLib:   sfcCertificateAuthentication
 
 ## Enable connections via Unix domain sockets. 
 ## Default is false
-enableUds:      true
+#enableUds:      false
 
 ## Enable authentication for Unix domain sockets connections
-## Default is false
-doUdsAuth:      true
+## Default is true
+#doUdsAuth:      true
 
 
 ##------------------------------------- JDBC ----------------------------------
@@ -202,6 +204,9 @@ doUdsAuth:      true
 
 ##-------------------------------------- SLP -----------------------------------
 ## These options only apply if configured with --enable-slp
+
+## Enable registration of service:wbem with slp
+#enableSlp: true
 
 ## Time interval in seconds in which the slp process refreshes information.
 ## Default is 600
