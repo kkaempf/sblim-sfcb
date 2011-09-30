@@ -81,6 +81,13 @@ Everything in 1.3.10, plus:
 - 3104761 cimRsRequest.h missing from make-dist tarball
 - 3107553 Remove Large Volume Support
 
+Changes in 1.3.14
+=================
+
+Bugs Fixed: 
+
+- 3414700 assocClass ignored for assoc upcalls
+
 Changes in 1.3.13
 =================
 
