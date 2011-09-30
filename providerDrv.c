@@ -887,7 +887,7 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
                         info->providerName, currentProc,
                         providerSockets.receive,
                         getInode(providerSockets.receive)));
-        processName = info->providerName;
+        processName = strdup(info->providerName);
         providerProcess = 1;
         info->proc = *proc;
         info->pid = currentProc;

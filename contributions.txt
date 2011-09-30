@@ -114,6 +114,7 @@ Klaus Kampf, Novell
 06/30/2010 [ 2968599 ] Wrong trace msg for invokeMethod (local interface)
 06/09/2011 [ 3047562 ] [patch] Create bzip2 tarballs on "make dist"
 09/06/2011 [ 3400114 ] sfcb fails to start with ipv6 disabled
+09/30/2011 [ 3416055 ] SIGSEGV sometimes does not print provider name
 
 Mike Brasher, Inova
 -------------------
