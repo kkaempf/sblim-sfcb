@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.102 2011/09/29 07:29:12 nsharoff Exp $
+ * $Id: providerDrv.c,v 1.103 2011/09/30 17:14:05 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -746,7 +746,7 @@ static int getProcess(ProviderInfo * info, ProviderProcess ** proc)
             _SFCB_TRACE(1,("--- Forked started for %s %d %d-%lu",
                          info->providerName, currentProc,providerSockets.receive,
                          getInode(providerSockets.receive)));
-            processName=info->providerName;
+            processName=strdup(info->providerName);
             providerProcess=1;
             info->proc=*proc;
             info->pid=currentProc; 
