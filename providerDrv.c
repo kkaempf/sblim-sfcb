@@ -391,7 +391,7 @@ static void handleSigSegv(int sig)
       sendResponse(threads->requestor, resp);
       threads=threads->next;
    }        
-           
+   abort(); /* force a core */
 }
 
 static void handleSigUsr1(int sig)
