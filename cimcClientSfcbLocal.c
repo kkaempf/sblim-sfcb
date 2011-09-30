@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.42 2011/06/10 17:57:45 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.43 2011/09/27 15:31:48 buccella Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -1180,7 +1180,7 @@ static CMPIValue convertFromStringValue(
 {
    char *sval = NULL;
    char *scheck  = NULL;
-   CMPIValue newcval;
+   CMPIValue newcval = {CMPI_null};
 
    _SFCB_ENTER(TRACE_CIMXMLPROC, "convertFromStringValue");
 

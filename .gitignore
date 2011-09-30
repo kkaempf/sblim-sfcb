@@ -10,6 +10,9 @@ test/xmltest/execQuerySeg02.xml
 *.la
 *.lo
 *.o
+\#*
+.#*
+tmpfail
 queryLexer.c
 queryParser.c
 queryParser.h

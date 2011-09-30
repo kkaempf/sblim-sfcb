@@ -94,6 +94,7 @@ Control init[] = {
    
    {"keepaliveTimeout",        1, "15"},
    {"keepaliveMaxRequest",     1, "10"},
+   {"selectTimeout",           1, "5"},
 
    {"providerSampleInterval",  1, "30"},
    {"providerTimeoutInterval", 1, "60"},
@@ -103,6 +104,7 @@ Control init[] = {
 
    {"sslKeyFilePath",   0, SFCB_CONFDIR "/file.pem"},
    {"sslCertificateFilePath", 0, SFCB_CONFDIR "/server.pem"},
+   {"sslCiphers", 0, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"},
 
    {"registrationDir", 0, SFCB_STATEDIR "/registration"},
    {"providerDirs", 3, SFCB_LIBDIR " " CMPI_LIBDIR " " LIBDIR}, /* 3: unstripped */

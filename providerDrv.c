@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.100 2011/06/24 23:54:15 buccella Exp $
+ * $Id: providerDrv.c,v 1.102 2011/09/29 07:29:12 nsharoff Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2813,7 +2813,23 @@ static void *processProviderInvocationRequestsThread(void *prms)
 	if (req->operation == OPS_LoadProvider && resp->rc == 2)
 	  exit(-1);
       }
-      free(resp);
+
+    /* SF:2727918, Bugzilla:51733 - memory leak fix */
+#ifdef HAVE_QUALREP
+    if ((req->operation == OPS_GetQualifier) 
+         || (req->operation == OPS_EnumerateQualifiers)) {
+      for (i = 0; i < resp->count; i++) {
+        if (resp->object[i].data) {
+          free(resp->object[i].data);
+          resp->object[i].data = NULL;
+        }
+     }
+    }
+    free(resp);
+    resp = NULL;
+#else
+    free(resp);
+#endif
    }  
     
    tool_mm_flush();
@@ -2889,6 +2905,7 @@ void processProviderInvocationRequests(char *name)
       _SFCB_TRACE(1, ("--- Waiting for provider request to R%d-%lu",
                    providerSockets.receive,getInode(providerSockets.receive)));
       parms = (Parms *) malloc(sizeof(*parms));
+      memset(parms, 0, sizeof(*parms));
       
       rc = spRecvReq(&providerSockets.receive, &parms->requestor,
                      (void **) &parms->req, &rl, &mqg);

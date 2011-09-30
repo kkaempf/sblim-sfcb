@@ -22,121 +22,55 @@
 # ============================================================================
 
 use strict;
-use Getopt::Std;
-
 my @man;
 my $totalsize=0;
 
-# -d = disk footprint
-# -m = memory footprint
-# -s = source line code count
-# -q = minimal output
-# default is all footprints
-our($opt_d, $opt_m, $opt_q, $opt_s);
-getopts('dmqs');
-if ((! $opt_d ) && (! $opt_m) && (! $opt_s)) {
-    $opt_d=$opt_m=$opt_s=1;
+# Read MANIFEST file
+my $file="MANIFEST";
+if (-e $file) {
+  open(MANFILE,"<$file") || die "Cannot open $file: $!";
+  @man = (<MANFILE>);
+  close(MANFILE) || warn "Cannot close $file: $!";
+} else {
+    print "Can't read MANIFEST file, skipping disk usage check.\n";
 }
 
-if ($opt_d) {
-    # Read MANIFEST file
-   my $file="MANIFEST";
-   if (-e $file) {
-      open(MANFILE,"<$file") || die "Cannot open $file: $!";
-      @man = (<MANFILE>);
-      close(MANFILE) || warn "Cannot close $file: $!";
-   } else {
-      print "Can't read MANIFEST file, skipping disk usage check.\n";
-   }
+# Process MANIFEST contents
+print "Disk footprint\n";
+print "==============\n";
+print "bytes\t\tfile\n";
+foreach (@man){
+    chomp;
+    my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) =stat($_);
+    print "$size\t\t$_\n";
+    $totalsize+=$size;
+}
+print "\n$totalsize\t\tTotal bytes\n\n";
 
-    # Process MANIFEST contents
-    print "Disk footprint\n" unless ($opt_q);
-    print "==============\n" unless ($opt_q);
-    print "bytes\t\tfile\n" unless ($opt_q);
-    foreach (@man){
-       chomp;
-       my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) =stat($_);
-       print "$size\t\t$_\n" unless ($opt_q);
-       $totalsize+=$size;
-    }
-    if ($opt_q) {
-        print "$totalsize\n";
+# Check memory usage, sfcb needs to be running for this.
+# We also need the ps_mem.py python script.
+print "Memory footprint\n";
+print "=================\n";
+unless ($> == 0) {
+    print "Must be run as root to do memory footprint.\n";
+} else {
+    my $PSMEM="";
+    if (-x "./ps_mem.py") {
+        $PSMEM="./ps_mem.py";
+    } elsif (`which ps_mem.py 2>/dev/null`) {
+        $PSMEM="ps_mem.py";
     } else {
-        print "\n$totalsize\t\tTotal bytes\n\n";
+        $PSMEM="";
+        print "ps_mem.py not found, go get it.\n";
+    }
+    if ($PSMEM) {
+        my $pid=`ps -aef | grep sfcbd`;
+        unless (-z $pid) {
+		    print " Private  +   Shared  =  RAM used       Program\n";
+            system("$PSMEM | grep sfcbd 2>&1");
+        } else {
+            print "SFCB doesn't appear to be running, skipping RAM footprint.\n";
+        }
     }
 }
-if ($opt_s) {
-   print "Source code line count\n" unless ($opt_q);
-   print "======================\n" unless ($opt_q);
-   my $SLOC="";
-   if (-x "./sloccount") {
-      $SLOC="./sloccount";
-  } elsif (`which sloccount 2>/dev/null`) {
-      $SLOC="sloccount";
-  } else {
-      $SLOC="";
-      print "sloccount not found, go get it.\n";
-  }
-  if ($SLOC) {
-    if ($opt_q) {
-        my $slocout=`$SLOC . | grep ^ansic 2>&1`;
-        my ($lab,$sloc,$per)=split(/\s+/,$slocout);
-        print "$sloc\n";
-    } else {
-        system("$SLOC . 2>&1");
-    }
-  }
-}
-        
-
-
-if ($opt_m) {
-   # Check memory usage, sfcb needs to be running for this.
-   # We also need the ps_mem.py python script.
-   print "\nMemory footprint\n" unless ($opt_q);
-   print "=================\n" unless ($opt_q);
-   unless ($> == 0) {
-       print "Must be run as root to do memory footprint.\n";
-   } else {
-       my $PSMEM="";
-       if (-x "./ps_mem.py") {
-           $PSMEM="./ps_mem.py";
-       } elsif (`which ps_mem.py 2>/dev/null`) {
-           $PSMEM="ps_mem.py";
-       } else {
-           $PSMEM="";
-           print "ps_mem.py not found, go get it.\n";
-       }
-       if ($PSMEM) {
-           my $pid=`ps -aef | grep sfcbd`;
-           unless (-z $pid) {
-               my $psmemout=`$PSMEM | grep sfcbd 2>&1`;
-               if ($opt_q) {
-                    $psmemout =~ s/^\s+//;
-                    my ($first,$second)=split(/=/,$psmemout);
-                    $second =~ s/^\s+//;
-                    my ($mem,$units,$rest)=split(/\s+/,$second,3);
-                    # For the minimal output, "unhuman" the display
-                    my $bytes=$mem;
-                    if ($units == "Ki") {
-                        $bytes=int($mem*1024);
-                    } elsif ($units == "Mi") {
-                        $bytes=int($mem*1024*1024);
-                    } elsif ($units == "Gi") {
-                        $bytes=int($mem*1024*1024*1024);
-                    } elsif ($units == "Ti") {
-                        $bytes=int($mem*1024*1024*1024*1024);
-                    }
-                    print "$bytes\n";
-               } else {
-                    print " Private  +   Shared  =  RAM used       Program\n";
-                    print "$psmemout\n";
-               }
-           } else {
-               print "SFCB doesn't appear to be running, skipping RAM footprint.\n" unless ($opt_q);
-           }
-       }
-   }
-}
-
    

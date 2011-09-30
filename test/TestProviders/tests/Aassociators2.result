@@ -1,0 +1,41 @@
+\n\n**** Test Failed ****\n\n
+FAILED: required line not found
+\t<INSTANCENAME CLASSNAME="CMPI_TEST_Person">
+FAILED: required line not found
+\t<KEYBINDING NAME="name">
+FAILED: required line not found
+\t<KEYVALUE VALUETYPE="string">Harry</KEYVALUE>
+FAILED: required line not found
+\t</KEYBINDING>
+FAILED: required line not found
+\t</INSTANCENAME>
+FAILED: required line not found
+\t<INSTANCE CLASSNAME="CMPI_TEST_Person">
+FAILED: required line not found
+\t<PROPERTY NAME="name" TYPE="string">
+FAILED: required line not found
+\t<VALUE>Harry</VALUE>
+FAILED: required line not found
+\t</PROPERTY>
+FAILED: required line not found
+\t</INSTANCE>
+FAILED: required line not found
+\t<INSTANCENAME CLASSNAME="CMPI_TEST_Person">
+FAILED: required line not found
+\t<KEYBINDING NAME="name">
+FAILED: required line not found
+\t<KEYVALUE VALUETYPE="string">Larry</KEYVALUE>
+FAILED: required line not found
+\t</KEYBINDING>
+FAILED: required line not found
+\t</INSTANCENAME>
+FAILED: required line not found
+\t<INSTANCE CLASSNAME="CMPI_TEST_Person">
+FAILED: required line not found
+\t<PROPERTY NAME="name" TYPE="string">
+FAILED: required line not found
+\t<VALUE>Larry</VALUE>
+FAILED: required line not found
+\t</PROPERTY>
+FAILED: required line not found
+\t</INSTANCE>

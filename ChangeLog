@@ -1,7 +1,61 @@
-2011-06-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
+2011-09-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* test/TestProviders/cmpiTestInstanceProvider.c
+	Fixed memory leak
+
+2011-09-28  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+	* providerDrv.c:
+	[ 2727918 ] blob has leak in Enumqualifiers
+
+2011-09-27  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimcClientSfcbLocal.c:
+	[ 3414482 ] Compiler warning in cimcClientSfcbLocal
+
+	* cimXmlRequest.c:
+	[ 3414236 ] updateMethodParamTypes uses incorrect qualifier count
+
+2011-09-23  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+	* providerDrv.c, support.c, result.c
+	[ 3413031 ] fixes to perform check before calling free
+
+2011-09-21  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* Makefile.am:
-	Added 20_indication.mof to the clean-local target 
+	[ 3412033 ] New files from 3313833 missed release tarball
+
+2011-09-09 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* httpAdapter.c, sfcb.cfg.pre.in, control.c:
+	[ 3406825 ] Make ssl cipher list configurable
+
+2011-09-09 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* httpAdapter.c, sfcb.cfg.pre.in, control.c:
+	[ 3406823 ] Make select timeout a config option.
+
+2011-09-06 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* httpAdapter.c:
+	[ 3400114 ] sfcb fails to start with ipv6 disabled
+	Patch from kkaempf
+
+2011-08-25  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* interopProvider.c:
+	[ 3398337 ] Namespaces of filter and handler for IndSub not checked
+
+2011-08-22  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* indCIMXMLHandler.c: 
+	[ 3393324 ] sfcb process abort in IndCIMXMLHandlerInvokeMethod
+
+2011-08-04  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimXmlGen.c:
+	[ 3386391 ] HOST_NAME_MAX undefined
 
 2011-06-27 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 

@@ -1,0 +1,149 @@
+\n\n**** Test Failed ****\n\n
+FAILED: required line not found
+\t<INSTANCENAME CLASSNAME="CMPI_TEST_Racing">
+FAILED: required line not found
+\t<KEYBINDING NAME="driver">
+FAILED: required line not found
+\t<VALUE.REFERENCE>
+FAILED: required line not found
+\t<LOCALINSTANCEPATH>
+FAILED: required line not found
+\t<LOCALNAMESPACEPATH>
+FAILED: required line not found
+\t<NAMESPACE NAME="root"/>
+FAILED: required line not found
+\t<NAMESPACE NAME="cimv2"/>
+FAILED: required line not found
+\t</LOCALNAMESPACEPATH>
+FAILED: required line not found
+\t<INSTANCENAME CLASSNAME="CMPI_TEST_Vehicle">
+FAILED: required line not found
+\t<KEYBINDING NAME="name">
+FAILED: required line not found
+\t<KEYVALUE VALUETYPE="string">BMW</KEYVALUE>
+FAILED: required line not found
+\t</KEYBINDING>
+FAILED: required line not found
+\t</INSTANCENAME>
+FAILED: required line not found
+\t</LOCALINSTANCEPATH>
+FAILED: required line not found
+\t</VALUE.REFERENCE>
+FAILED: required line not found
+\t</KEYBINDING>
+FAILED: required line not found
+\t<KEYBINDING NAME="model">
+FAILED: required line not found
+\t<VALUE.REFERENCE>
+FAILED: required line not found
+\t<LOCALINSTANCEPATH>
+FAILED: required line not found
+\t<LOCALNAMESPACEPATH>
+FAILED: required line not found
+\t<NAMESPACE NAME="root"/>
+FAILED: required line not found
+\t<NAMESPACE NAME="cimv2"/>
+FAILED: required line not found
+\t</LOCALNAMESPACEPATH>
+FAILED: required line not found
+\t<INSTANCENAME CLASSNAME="CMPI_TEST_Person">
+FAILED: required line not found
+\t<KEYBINDING NAME="name">
+FAILED: required line not found
+\t<KEYVALUE VALUETYPE="string">Harry</KEYVALUE>
+FAILED: required line not found
+\t</KEYBINDING>
+FAILED: required line not found
+\t</INSTANCENAME>
+FAILED: required line not found
+\t</LOCALINSTANCEPATH>
+FAILED: required line not found
+\t</VALUE.REFERENCE>
+FAILED: required line not found
+\t</KEYBINDING>
+FAILED: required line not found
+\t</INSTANCENAME>
+FAILED: required line not found
+\t</INSTANCEPATH>
+FAILED: required line not found
+\t</OBJECTPATH>
+FAILED: required line not found
+\t<OBJECTPATH>
+FAILED: required line not found
+\t<INSTANCEPATH>
+FAILED: required line not found
+\t<NAMESPACEPATH>
+FAILED: required line not found
+\t<LOCALNAMESPACEPATH>
+FAILED: required line not found
+\t<NAMESPACE NAME="root"/>
+FAILED: required line not found
+\t<NAMESPACE NAME="cimv2"/>
+FAILED: required line not found
+\t</LOCALNAMESPACEPATH>
+FAILED: required line not found
+\t</NAMESPACEPATH>
+FAILED: required line not found
+\t<INSTANCENAME CLASSNAME="CMPI_TEST_Racing">
+FAILED: required line not found
+\t<KEYBINDING NAME="driver">
+FAILED: required line not found
+\t<VALUE.REFERENCE>
+FAILED: required line not found
+\t<LOCALINSTANCEPATH>
+FAILED: required line not found
+\t<LOCALNAMESPACEPATH>
+FAILED: required line not found
+\t<NAMESPACE NAME="root"/>
+FAILED: required line not found
+\t<NAMESPACE NAME="cimv2"/>
+FAILED: required line not found
+\t</LOCALNAMESPACEPATH>
+FAILED: required line not found
+\t<INSTANCENAME CLASSNAME="CMPI_TEST_Vehicle">
+FAILED: required line not found
+\t<KEYBINDING NAME="name">
+FAILED: required line not found
+\t<KEYVALUE VALUETYPE="string">BMW</KEYVALUE>
+FAILED: required line not found
+\t</KEYBINDING>
+FAILED: required line not found
+\t</INSTANCENAME>
+FAILED: required line not found
+\t</LOCALINSTANCEPATH>
+FAILED: required line not found
+\t</VALUE.REFERENCE>
+FAILED: required line not found
+\t</KEYBINDING>
+FAILED: required line not found
+\t<KEYBINDING NAME="model">
+FAILED: required line not found
+\t<VALUE.REFERENCE>
+FAILED: required line not found
+\t<LOCALINSTANCEPATH>
+FAILED: required line not found
+\t<LOCALNAMESPACEPATH>
+FAILED: required line not found
+\t<NAMESPACE NAME="root"/>
+FAILED: required line not found
+\t<NAMESPACE NAME="cimv2"/>
+FAILED: required line not found
+\t</LOCALNAMESPACEPATH>
+FAILED: required line not found
+\t<INSTANCENAME CLASSNAME="CMPI_TEST_Person">
+FAILED: required line not found
+\t<KEYBINDING NAME="name">
+FAILED: required line not found
+\t<KEYVALUE VALUETYPE="string">Larry</KEYVALUE>
+FAILED: required line not found
+\t</KEYBINDING>
+FAILED: required line not found
+\t</INSTANCENAME>
+FAILED: required line not found
+\t</LOCALINSTANCEPATH>
+FAILED: required line not found
+\t</VALUE.REFERENCE>
+FAILED: required line not found
+\t</KEYBINDING>
+FAILED: required line not found
+\t</INSTANCENAME>

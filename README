@@ -490,10 +490,12 @@ file /usr/local/etc/sfcb/sfcb.cfg. For example:
 	doBasicAuth:    false
 	basicAuthLib:   sfcBasicAuthentication
 	useChunking:    true
+    selectTimeout:  5
 	keepaliveTimeout: 0
 	keepaliveMaxRequest: 10
 	sslKeyFilePath: /usr/local/etc/sfcb/file.pem
 	sslCertificateFilePath: /usr/local/etc/sfcb/server.pem
+    sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 	registrationDir: /usr/local/var/lib/sfcb/registration
 	providerDirs: /usr/local/lib/sfcb /usr/local/lib /usr/local/lib/cmpi
 
@@ -554,6 +556,10 @@ enableSlp
         sfcb should/not advertise wbem services with the DA
         Default=true
 
+selectTimeout
+	Specify the maximum time in seconds for the HTTP select to complete.
+	Default is 5 seconds.
+
 slpRefreshInterval
 	timeinterval in seconds in which the slp process refreshes information
 
@@ -576,6 +582,11 @@ sslCertificateFilePath
 	Specify the name of the file containing the server's certificate. 
 	The file must be in PEM format. This file is only required if 
 	enableHttps is set to true. Default=/usr/local/etc/sfcb/server.pem
+
+sslCiphers
+	Specify the list of SSL ciphers to enable. 
+	Default is "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH" which disables 
+		weak ciphers.
 
 registrationDir
 	Specify the registration directory, which contains the provider

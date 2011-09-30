@@ -88,7 +88,8 @@ static int running=0;
 static long keepaliveTimeout=15;
 static long keepaliveMaxRequest=10;
 static long numRequest;
-struct timeval httpSelectTimeout = {5, 0};  /* 5 sec. timeout for select() before read() */
+static long     selectTimeout = 5; /* default 5 sec. timeout for select() before read() */
+struct timeval httpSelectTimeout = {0, 0};
 
 #if defined USE_SSL
 static SSL_CTX *ctx;
@@ -146,6 +147,10 @@ typedef struct _buffer {
 
 #ifdef HAVE_IPV6
  #define USE_INET6
+#endif
+
+#ifdef USE_INET6
+static int fallback_ipv4;
 #endif
 
 void initHttpProcCtl(int p)
@@ -1256,6 +1261,7 @@ getSocket()
   if (fd < 0) {
     mlogf(M_INFO, M_SHOW, "--- Using IPv4 address\n");
     fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+    fallback_ipv4 = 1;
   }
 #else
   fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -1264,53 +1270,74 @@ getSocket()
   return fd;
 }
 
+
+#ifdef USE_INET6
+static struct sockaddr *
+prepSockAddr6(int port, void *ssin, socklen_t * sin_len)
+{
+  struct sockaddr_in6 *sin = ssin;
+
+  *sin_len = sizeof(*sin);
+  memset(sin, 0, *sin_len);
+
+  sin->sin6_family = AF_INET6;
+  if (httpLocalOnly)
+    sin->sin6_addr = in6addr_loopback;
+  else
+    sin->sin6_addr = in6addr_any;
+  sin->sin6_port = htons(port);
+
+  return (struct sockaddr *) sin;
+}
+#endif
+
+
+static struct sockaddr *
+prepSockAddr4(int port, void *ssin, socklen_t * sin_len)
+{
+  struct sockaddr_in *sin = ssin;
+
+  *sin_len = sizeof(*sin);
+  memset(sin, 0, *sin_len);
+	
+  sin->sin_family = AF_INET;
+  if (httpLocalOnly) {
+    const char *loopback_int = "127.0.0.1";
+    inet_aton(loopback_int, &(sin->sin_addr));
+  } else
+    sin->sin_addr.s_addr = INADDR_ANY;
+  sin->sin_port = htons(port);
+
+  return (struct sockaddr *) sin;
+}
+
+
 static int
 bindToPort(int sock, int port, void *ssin, socklen_t * sin_len)
 {
+  struct sockaddr *sin;
+
+  if (sock < 0)
+    return 1;
+
+  if (getControlBool("httpLocalOnly", &httpLocalOnly))
+    httpLocalOnly = 0;
 
 #ifdef USE_INET6
-  struct sockaddr_in6 *sin = ssin;
-#else
-  struct sockaddr_in *sin = ssin;
+  if (!fallback_ipv4)
+    sin = prepSockAddr6(port, ssin, sin_len);
+  else
 #endif
+    sin = prepSockAddr4(port, ssin, sin_len);
 
-  *sin_len = sizeof(*sin);
-
-  memset(sin, 0, *sin_len);
-
-  if (sock >= 0) {
-    if (getControlBool("httpLocalOnly", &httpLocalOnly))
-      httpLocalOnly = 0;
-
-#ifdef USE_INET6
-    sin->sin6_family = AF_INET6;
-    if (httpLocalOnly)
-      sin->sin6_addr = in6addr_loopback;
-    else
-      sin->sin6_addr = in6addr_any;
-    sin->sin6_port = htons(port);
-#else
-    sin->sin_family = AF_INET;
-    if (httpLocalOnly) {
-      const char     *loopback_int = "127.0.0.1";
-      inet_aton(loopback_int, &(sin->sin_addr));
-    } else
-      sin->sin_addr.s_addr = INADDR_ANY;
-    sin->sin_port = htons(port);
-#endif
-
-    if (bind(sock, (struct sockaddr *) sin, *sin_len) || listen(sock, 10)) {
-      mlogf(M_ERROR, M_SHOW, "--- Cannot listen on port %ld (%s)\n", port,
-            strerror(errno));
-      sleep(1);
-      return 1;
-    }
-
-    return 0;
-
+  if (bind(sock, sin, *sin_len) || listen(sock, 10)) {
+    mlogf(M_ERROR, M_SHOW, "--- Cannot listen on port %ld (%s)\n", port,
+          strerror(errno));
+    sleep(1);
+    return 1;
   }
 
-  return 1;
+  return 0;
 }
 
 #ifdef HAVE_UDS
@@ -1394,7 +1421,8 @@ initSSL()
   char           *fnc,
                  *fnk,
                  *fnt,
-                 *fnl;
+                 *fnl,
+                 *sslCiphers;
   int             rc;
   ctx = SSL_CTX_new(SSLv23_method());
   getControlChars("sslCertificateFilePath", &fnc);
@@ -1440,10 +1468,11 @@ initSSL()
   SSL_CTX_set_options(ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2 |
                       SSL_OP_SINGLE_DH_USE);
   /*
-   * disable weak ciphers 
+   * Set valid ciphers
    */
-  if (SSL_CTX_set_cipher_list(ctx, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH")
-      != 1)
+  getControlChars("sslCiphers", &sslCiphers);
+  _SFCB_TRACE(1, ("---  sslCiphers = %s", sslCiphers));
+  if (SSL_CTX_set_cipher_list(ctx, sslCiphers) != 1)
     intSSLerror("Error setting cipher list (no valid ciphers)");
 
 }
@@ -1540,6 +1569,11 @@ int httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
     doUdsAuth = 0;
 #endif
 
+  // Get selectTimeout from the config file, or use 5 if not set
+  if (getControlNum("selectTimeout", &selectTimeout))
+    selectTimeout = 5;
+  httpSelectTimeout.tv_sec=selectTimeout;
+
   if (getControlNum("keepaliveTimeout", &keepaliveTimeout))
     keepaliveTimeout = 15;
 
@@ -1606,6 +1640,8 @@ int httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
     mlogf(M_INFO, M_SHOW,
           "--- Using Unix Socket Peer Cred Authentication\n");
 #endif
+
+  mlogf(M_INFO, M_SHOW, "--- Select timeout: %ld seconds\n",selectTimeout);
 
   if (keepaliveTimeout == 0) {
     mlogf(M_INFO, M_SHOW, "--- Keep-alive timeout disabled\n");

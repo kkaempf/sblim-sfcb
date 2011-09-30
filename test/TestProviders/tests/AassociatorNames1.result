@@ -1,0 +1,19 @@
+\n\n**** Test Failed ****\n\n
+FAILED: required line not found
+\t<INSTANCENAME CLASSNAME="CMPI_TEST_Vehicle">
+FAILED: required line not found
+\t<KEYBINDING NAME="vehiclename">
+FAILED: required line not found
+\t<KEYVALUE VALUETYPE="string">BMW</KEYVALUE>
+FAILED: required line not found
+\t</KEYBINDING>
+FAILED: required line not found
+\t<INSTANCENAME CLASSNAME="CMPI_TEST_Vehicle">
+FAILED: required line not found
+\t<KEYBINDING NAME="vehiclename">
+FAILED: required line not found
+\t<KEYVALUE VALUETYPE="string">Ferrari</KEYVALUE>
+FAILED: required line not found
+\t</KEYBINDING>
+FAILED: required line not found
+\t</INSTANCENAME>
