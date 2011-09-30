@@ -486,10 +486,8 @@ static void writeResponse(CommHndl conn_fd, RespSegments rs)
       if (rs.segments[i].txt) {
          if (rs.segments[i].mode == 2) {
             UtilStringBuffer *sb = (UtilStringBuffer *) rs.segments[i].txt;
-            if (sb) {
-               commWrite(conn_fd, (void*)sb->ft->getCharPtr(sb), ls[i]);
-               sb->ft->release(sb);
-            }
+            commWrite(conn_fd, (void*)sb->ft->getCharPtr(sb), ls[i]);
+            sb->ft->release(sb);
          }
          else {
             commWrite(conn_fd, rs.segments[i].txt, ls[i]);
@@ -596,10 +594,8 @@ static void writeChunkResponse(BinRequestContext *ctx, BinResponseHdr *rh)
          if (rs.segments[i].txt) {
             if (rs.segments[i].mode == 2) {
                UtilStringBuffer *sb = (UtilStringBuffer *) rs.segments[i].txt;
-               if (sb) {
-                  commWrite(*(ctx->commHndl), (void*)sb->ft->getCharPtr(sb), ls[i]);
-                  sb->ft->release(sb);
-               }         
+               commWrite(*(ctx->commHndl), (void*)sb->ft->getCharPtr(sb), ls[i]);
+               sb->ft->release(sb);
             }
             else {
                commWrite(*(ctx->commHndl), rs.segments[i].txt, ls[i]);
@@ -749,6 +745,7 @@ static int doHttpRequest(CommHndl conn_fd)
    struct timeval sv, ev;
    CimXmlRequestContext ctx;
    int breakloop;
+   int hcrFlags = 0;  /* flags to pass to handleCimRequest() */
 
    _SFCB_ENTER(TRACE_HTTPDAEMON, "doHttpRequest");
 
@@ -894,6 +891,11 @@ static int doHttpRequest(CommHndl conn_fd)
 	         discardInput=2;
          }
       }
+#ifdef ALLOW_UPDATE_EXPIRED_PW
+      else if (strncasecmp(hdr, "Pragma: UpdateExpiredPassword", 29) == 0) {
+	hcrFlags |= HCR_UPDATE_PW;
+      }
+#endif
    }
 
 #if defined USE_SSL
@@ -917,6 +919,7 @@ static int doHttpRequest(CommHndl conn_fd)
 #endif
 
    int authorized = 0; 
+   int barc = 0;
 #ifdef HAVE_UDS
    if (!discardInput && doUdsAuth) {
        struct sockaddr_un sun; 
@@ -930,13 +933,28 @@ static int doHttpRequest(CommHndl conn_fd)
    }
 #endif
    if (!authorized && !discardInput && doBa) {
-     if (inBuf.authorization && (baValidate(inBuf.authorization,&inBuf.principal) != AUTH_PASS)) {
-       char more[]="WWW-Authenticate: Basic realm=\"cimom\"\r\n";
-       genError(conn_fd, &inBuf, 401, "Unauthorized", more);
-       /* we continue to parse headers and empty the socket
-	  to be graceful with the client */
-       discardInput=1;
-     }
+
+     if (inBuf.authorization) {
+       barc = baValidate(inBuf.authorization,&inBuf.principal);
+#ifdef ALLOW_UPDATE_EXPIRED_PW
+       if (barc == AUTH_EXPIRED) {
+ 	 hcrFlags |= HCR_EXPIRED_PW;
+       }
+       else if (barc == AUTH_PASS) {
+ 	 hcrFlags = 0; /* clear flags so non-expired user doesn't update pw */
+       }
+       else if (barc == AUTH_FAIL) {
+#else
+	 if (barc != AUTH_PASS) {
+#endif
+	   char more[]="WWW-Authenticate: Basic realm=\"cimom\"\r\n";
+	   genError(conn_fd, &inBuf, 401, "Unauthorized", more);
+	   /* we continue to parse headers and empty the socket
+	      to be graceful with the client */
+	   discardInput=1;
+	 }
+       }
+
 #if defined USE_SSL
      else if (sfcbSSLMode && ccVerifyMode != CC_VERIFY_IGNORE) {
        /* associate certificate with principal for next request */
@@ -1005,7 +1023,7 @@ static int doHttpRequest(CommHndl conn_fd)
       }  
 #endif 
       
-      response = handleCimXmlRequest(&ctx);
+      response = handleCimXmlRequest(&ctx, hcrFlags);
    } 
    else {
      response = nullResponse;

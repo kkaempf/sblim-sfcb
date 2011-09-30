@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.95 2011/02/23 23:02:42 buccella Exp $
+ * $Id: providerDrv.c,v 1.100 2011/06/24 23:54:15 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -876,6 +876,7 @@ static int sendResponse(int requestor, BinResponseHdr * hdr)
             else hdr->rv.value.string=NULL;
          }
          hdr->rv.type=CMPI_chars;
+	 /* note: a break statement is NOT missing here... */
       case CMPI_chars:
          hdr->rvEnc=setCharsMsgSegment((char*)hdr->rv.value.string);
          rvl=hdr->rvEnc.length;
@@ -1830,6 +1831,9 @@ CMPIValue queryGetValue(QLPropertySource* src, char* name, QLOpd *type)
    CMPIValue v={(long long)0};
    
    if (rc.rc==CMPI_RC_OK) {
+      if (d.state == CMPI_nullValue) {
+         *type=QL_Null;
+      } else {
       if ((d.type & CMPI_SINT) == CMPI_SINT) { 
          if (d.type==CMPI_sint32) v.sint64=d.value.sint32;
          else if (d.type==CMPI_sint16) v.sint64=d.value.sint16;
@@ -1873,6 +1877,7 @@ CMPIValue queryGetValue(QLPropertySource* src, char* name, QLOpd *type)
       default:
          *type=QL_Invalid;
       }
+     }
    }
    else *type=QL_NotFound;
    return v;
@@ -2313,6 +2318,7 @@ static BinResponseHdr *deactivateFilter(BinRequestHdr *hdr, ProviderInfo* info,
          _SFCB_RETURN(resp);
       }
       sef=&se->next;
+      CMRelease((CMPISelectExp*)se);
    }
 
    _SFCB_RETURN(resp);
@@ -2620,15 +2626,6 @@ static BinResponseHdr *loadProvider(BinRequestHdr * hdr, ProviderInfo * info, in
       free(info);
       _SFCB_RETURN(resp);
    }
-   case -2:  {
-      char msg[740];
-      snprintf(msg,739,"*** Inconsistent provider registration for %s (1)",
-              info->providerName);
-      mlogf(M_ERROR,M_SHOW,"%s\n",msg);
-      resp = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
-      free(info);
-      _SFCB_RETURN(resp);
-   }
    default:
       if (activProvs)
          info->next = activProvs;
@@ -2764,16 +2761,14 @@ static void *processProviderInvocationRequestsThread(void *prms)
          exit(-1);
       }
       
-      if (pInfo && pInfo->library==NULL) { 
+      if (pInfo->library==NULL) { 
          char dlName[512];
          mlogf(M_INFO,M_SHOW,"--- Reloading provider\n");
          doLoadProvider(pInfo,dlName, 512);
       }  
       
-      if (pInfo) {
-	initRc=initProvider(pInfo,req->sessionId, &errstr);
-	_SFCB_TRACE(1, ("--- Provider initialization rc %d",initRc));
-      }
+      initRc=initProvider(pInfo,req->sessionId, &errstr);
+      _SFCB_TRACE(1, ("--- Provider initialization rc %d",initRc));
 
    }
    else pInfo = NULL;

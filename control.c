@@ -57,6 +57,9 @@ static UtilHashTable *ct = NULL;
 
 char * configfile = NULL;
 
+// Control initial values
+// { property, type, value}
+// Type: 0=string, 1=num, 2=bool, 3=unstripped string
 Control init[] = {
    {"httpPort",         1, "5988"},
    {"enableHttp",       2, "true"},
@@ -119,16 +122,26 @@ Control init[] = {
    {"httpMaxContentLength", 1, "100000000"},
    {"validateMethodParamTypes",	2,	"false"},
    {"maxMsgLen",	1,	"10000000"},
+   {"DeliveryRetryInterval",1,"20"},
+   {"DeliveryRetryAttempts",1,"3"},
+   {"SubscriptionRemovalTimeInterval",1,"2592000"},
+   {"SubscriptionRemovalAction",1,"2"},
+
 };
 
 void sunsetControl()
 {
    int i,m;
    for (i = 0, m = sizeof(init) / sizeof(Control); i < m; i++) {
-      if(init[i].dupped) free(init[i].strValue);
+      if(init[i].dupped) {
+	 free(init[i].strValue);
+	 init[i].dupped = 0;
+      }
    }
-   ct->ft->release(ct);
-   ct=NULL;
+   if (ct) {
+      ct->ft->release(ct);
+      ct=NULL;
+   }
 }
 
 int setupControl(char *fn)
@@ -137,6 +150,7 @@ int setupControl(char *fn)
    char fin[1024], *stmt = NULL;
    int i, m, n=0, err=0;
    CntlVals rv;
+   char *configFile;
 
    if (ct)
       return 0;
@@ -149,12 +163,19 @@ int setupControl(char *fn)
    }
 
    if (fn) {
-     strcpy(fin,fn);
+     if (strlen(fn) >= sizeof(fin))
+         mlogf(M_ERROR,M_SHOW, "--- \"%s\" too long\n", fn);
+     strncpy(fin,fn,sizeof(fin));
    } 
-   else {
-      strcpy(fin, SFCB_CONFDIR);  
-      strcat(fin, "/sfcb.cfg");
+   else if ((configFile = getenv("SFCB_CONFIG_FILE")) != NULL && configFile[0] != '\0') {
+     if (strlen(configFile) >= sizeof(fin))
+         mlogf(M_ERROR,M_SHOW, "--- \"%s\" too long\n", configFile);
+     strncpy(fin,configFile,sizeof(fin));
    }
+   else {
+      strncpy(fin, SFCB_CONFDIR "/sfcb.cfg", sizeof(fin));
+   }
+   fin[sizeof(fin)-1] = '\0';
    
    if (fin[0]=='/') mlogf(M_INFO,M_SHOW,"--- Using %s\n",fin);
    else mlogf(M_INFO,M_SHOW,"--- Using ./%s\n",fin);
@@ -201,10 +222,7 @@ int setupControl(char *fn)
    }
    if (stmt) free(stmt);
 
-
-   if (in) {
-     fclose(in);
-   }
+   fclose(in);
 
    if (err) {
       mlogf(M_INFO,M_SHOW,"--- Broker terminated because of previous error(s)\n");

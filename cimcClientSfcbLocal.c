@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.38 2010/11/10 23:48:25 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.42 2011/06/10 17:57:45 buccella Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -779,11 +779,20 @@ static CMPIEnumeration * execQuery(
    
    oHdr.nameSpace=setCharsMsgSegment((char*)ns->hdl);
    qs=parseQuery(MEM_TRACKED,query,lang,NULL,&irc);
+
+   if (irc) {
+      CIMCSetStatusWithChars(rc, CMPI_RC_ERR_INVALID_QUERY,
+         "syntax error in query.");
+      _SFCB_RETURN(NULL);
+   }
    
    fCls=qs->ft->getFromClassList(qs);
    if (fCls==NULL || *fCls==NULL) {
      mlogf(M_ERROR,M_SHOW,"--- from clause missing\n");
-     abort();
+     CIMCSetStatusWithChars(rc, CMPI_RC_ERR_INVALID_QUERY,
+        "required from clause is missing.");
+     _SFCB_RETURN(NULL);
+
    }
    oHdr.className = setCharsMsgSegment(*fCls);
 
@@ -1177,7 +1186,7 @@ static CMPIValue convertFromStringValue(
 
    // expected incoming type is either string or string array
    // incoming array type must match expected array type 
-   if ((xtype & CMPI_ARRAY) ^ (strctype & CMPI_ARRAY)) {
+   if (!(xtype & CMPI_ARRAY) && (strctype & CMPI_ARRAY)) {
       if (prc) CMSetStatus(prc, CMPI_RC_ERR_INVALID_PARAMETER);
       return newcval; 	
    }
@@ -1444,8 +1453,13 @@ static CMPIData invokeMethod(
 
    memset(&binCtx,0,sizeof(BinRequestContext));
 
-   argsin = convertFromStringArguments(getClass(mb, cop, 0, NULL, rc), 
+   CMPIConstClass *tcls = getClass(mb, cop, 0, NULL, rc);
+
+   argsin = convertFromStringArguments(tcls, 
       method, in, rc);
+
+   CMRelease(tcls);
+   tcls = NULL;
 
    if(rc && rc->rc == CMPI_RC_OK) {
    sreq.objectPath = setObjectPathMsgSegment(cop);
@@ -1901,6 +1915,7 @@ static void* release(ClientEnv* ce)
    }
    CONNECT_UNLOCK();
    free(ce);
+   sunsetControl();
    uninitGarbageCollector();
    return lib;
 }

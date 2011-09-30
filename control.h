@@ -1,5 +1,5 @@
 /*
- * $Id: control.h,v 1.4 2009/03/24 19:02:19 smswehla Exp $
+ * $Id: control.h,v 1.5 2011/06/24 20:13:20 mchasal Exp $
  *
  * (C) Copyright IBM Corp. 2005
  *
@@ -27,5 +27,6 @@ int getControlChars(char *id, char **val);
 int getControlUNum(char *id, unsigned int *val);
 int getControlNum(char *id, long *val);
 int getControlBool(char *id, int *val);
+const char      * sfcBrokerStart;
 
 #endif

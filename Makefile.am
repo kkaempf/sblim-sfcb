@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.109 2010/08/20 20:00:17 buccella Exp $  
+# $Id: Makefile.am,v 1.112 2011/06/29 17:33:01 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -20,6 +20,8 @@
 #  Makefile process input for sfcb.
 # 
 # 
+
+AUTOMAKE_OPTIONS = no-dist-gzip dist-bzip2
 
 sfcbdocdir=$(datadir)/doc/sfcb-$(VERSION)
 sfcbdatadir=$(datadir)/sfcb
@@ -505,6 +507,15 @@ getSchema.sh: getSchema.sh.pre
 	sed -e s?$$\{prefix\}?$(prefix)?g \
 	-e s?$$\{exec_prefix\}?$(prefix)?g $< > $@
 
+if SETTABLERETRY
+20_indication.mof: 20_indication.mof.pre
+	sed -e s?SETTABLE?TRUE?g $< > $@
+else
+20_indication.mof: 20_indication.mof.pre
+	sed -e s?SETTABLE?FALSE?g $< > $@
+endif
+
+
 sfcb: sfcb.$(INIT_STYLE)
 	sed -e s?$$\{prefix\}?$(prefix)?g \
 	-e s?$$\{exec_prefix\}?$(prefix)?g $< > $@
@@ -547,7 +558,7 @@ endif
 clean-local:
 	rm -f sfcbrepos sfcbstage sfcbunstage sfcbuuid sfcb.cfg getSchema.sh sfcb \
 		sfcb.init-redhat sfcb.init-suse sfcb.init-none sfcb-dox.conf \
-                cimXmlParserProcessed.c \
+                cimXmlParserProcessed.c 20_indication.mof \
 		*.gcno *.gcda *.gcov $(MANFILES)
 	rm -rf doc/* coverage/
 

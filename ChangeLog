@@ -1,3 +1,137 @@
+2011-06-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* Makefile.am:
+	Added 20_indication.mof to the clean-local target 
+
+2011-06-27 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* indCIMXMLHandler.c:
+	[ 3274893 ] For SFCB 1.4, set SequenceIdentifier as described in DSP1054 1.2.
+	Fixed some warnings and a extra free.
+
+2011-06-24  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* providerDrv.c:
+	[ 3328763 ] deactivateFilter() doesn't release CMPI object
+
+2011-06-24 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* indCIMXMLHandler.c, interopProvider.c, sfcBroker.c, control.h,
+	test/TestProviders/tests/IndRetryTest.sh:
+	[ 3274893 ] For SFCB 1.4, set SequenceIdentifier as described in DSP1054 1.2.
+
+2011-06-22  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* mlog.c:
+	[ 3323419 ] sfcb local interface causes zombie/defunct client processes
+	(patch by Chris Poblete)
+
+	* brokerUpc.c:
+	[ 3324578 ] getInstance() up call does not close provider context
+	(patch by Santosh Bidaralli)
+
+2011-06-21  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* trace.c:
+	[ 3324265 ] _sfcb_trace may deref NULL pointers
+
+	* support.c:
+	[ 3324255 ] Unnecessary NULL check in __cleanup_mt()
+
+	* providerDrv.c:
+	[ 3324247 ] Unnecessary NULL check in providerDrv
+
+	* objectpath.c:
+	[ 3324198 ] getObjectPath() may deref a NULL pointer
+
+	* objectImpl.c:
+	[ 3324192 ] Erroneous condition in loop in objectImpl:locateParameter()
+
+	* interopServerProvider.c:
+	[ 3324168 ] gatherNameSpacesData() may closedir() a NULL pointer
+
+	* indCIMXMLHandler.c:
+	[ 3324131 ] indCIMXMLHandler may return uninitialized CMPIStatus
+
+	* providerDrv.c:
+	[ 3324214 ] Remove dead code from providerDrv:loadProvider()
+
+	* httpAdapter.c:
+	[ 3323427 ] Unnecessary NULL check in httpAdapter
+
+	* control.c:
+	[ 3323422 ] Unnecessary NULL check in control.c
+
+2011-06-10  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimcClientSfcbLocal.c:
+	[ 3314762 ] Memory leak in method invoke using SFCB local interface
+	(patch by Chris Poblete)
+
+	* control.c:
+	[ 3165732 ] Add ability for client library to specify configuration file
+	(patch by Josef Moellers)
+
+2011-06-09  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* control.c, cimcClientSfcbLocal.c:
+	[ 3314383 ] Memory leak in CimResource_Enumerate_EP
+	(patch by Chris Poblete)
+
+	* Makefile.am
+	[ 3047562 ] [patch] Create bzip2 tarballs on "make dist"
+	(patch by Klaus Kaempf)
+
+2011-06-08  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimAccountPassthroughProvider.c, cimAccountPassthrough.mof, 
+	cimXmlRequest.c, cimXmlRequest.h, httpAdapter.c, Makefile.am,
+	configure.ac, default.reg.in:
+	[ 3313833 ] Allow for passthrough for expired user to update password
+
+2011-05-02 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* configure.ac
+	[ 3190623 ] Set *IsSettable propperties to false for IndicationService
+	Problem with auto-enable when tests are enabled.
+
+2011-05-16 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* indCIMXMLHandler.c
+	[ 3296541 ] CIM_IndicationSubscription corrupts after delilvery fails 
+
+2011-05-10 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* interopServerProvider.c
+	[ 3287789 ] interopServerProvider not conservative when answering reqs
+
+2011-04-29 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* 20_indication.mof.pre.in, Makefile.am, configure.ac
+	control.c, interopServerProvider.c, sfcb.cfg.pre.in:
+	[ 3190623 ] Set *IsSettable propperties to false for IndicationService
+
+2011-04-28  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimcClientSfcbLocal.c:
+	[ 3202466 ] Single item on method param of array type rejected via Local
+	(patch by Chris Poblete)
+
+	* queryOperation.c: 
+	[ 3291646 ] Unused var in __NullEvaluate
+
+2011-04-05 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* cimcClientSfcbLocal.c:
+	[ 3213591 ] Local intf client abort abnormally on enum filter syntax err
+	(patch by cpoblete)
+
+2011-04-04 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* queryOperation.c, providerDrv.c
+	[ 3261868 ] Enum CQL filter on NULL cause incorrect rsp
+	(based on patch by  cpoblete)
+
 2011-03-31  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* elementCapabiltiesProvider.c:

@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.116 2011/04/01 01:57:59 buccella Exp $
+# $Id: configure.ac,v 1.121 2011/06/29 17:33:01 buccella Exp $
 # 
 # configure.ac
 #
@@ -22,7 +22,7 @@
 
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT(Small Footprint CIM Broker, 1.3.11, sblim-devel@lists.sourceforge.net, sblim-sfcb)
+AC_INIT(Small Footprint CIM Broker, 1.3.12, sblim-devel@lists.sourceforge.net, sblim-sfcb)
 AC_CONFIG_SRCDIR([providerDrv.c])
 
 #disable "seems to ignore the --datarootdir setting" warnings
@@ -109,9 +109,17 @@ AC_ARG_ENABLE(tests,
 	[AC_HELP_STRING([--enable-tests(=TESTS)],
 		[Enable listed tests. If none are listed, all are enabled.])])
 
+AC_ARG_ENABLE(settableretry,
+	[AC_HELP_STRING([--enable-settableretry],
+		[Allow reliable indication params to be settable.])])
+
 AC_ARG_ENABLE(uds,
 	[AC_HELP_STRING([--enable-uds],
 		[Enable UDS authentication.])])
+
+AC_ARG_ENABLE(expired-pw-update,
+	[AC_HELP_STRING([--enable-expired-pw-update],
+		[allow a user with an expired account to invoke a password update for CIM_Account (see docs).])])
 
 # Size checks
 AC_CHECK_SIZEOF(void*)
@@ -179,9 +187,17 @@ if test "$enable_slp_hostname_lib" == "yes"; then
    AC_DEFINE(SLP_HOSTNAME_LIB,,[SLP Hostname lib enabled])
 fi
 
+if test "$enable_expired_pw_update" == "yes"; then
+   LOAD_SFCBACCOUNT_PROVIDER=
+   AC_DEFINE(ALLOW_UPDATE_EXPIRED_PW,1,[Expired Account Password Update enabled])
+else
+   LOAD_SFCBACCOUNT_PROVIDER='#'
+fi
+AC_SUBST(LOAD_SFCBACCOUNT_PROVIDER)
 
 # Check and configure requested tests.
 if test "$enable_tests" == "yes"; then
+    enable_settableretry="yes"
 if test "$enable_local_connect_only" == "yes"; then
     enable_tests="localtests,gcov"
 else
@@ -189,6 +205,10 @@ else
     enable_tests="unit,gcov,wbemcli,xml,commands,slp,providers"
 fi
 fi
+if test "$enable_tests" != ""; then
+    enable_settableretry="yes"
+fi
+
 
 OLDIFS="$IFS"
 IFS=","
@@ -298,6 +318,10 @@ fi
 
 if test "$enable_uds" == "yes"; then
    AC_DEFINE(HAVE_UDS,,[UDS authentication enabled])
+fi
+
+if test "$enable_settableretry" == "yes"; then
+   AC_DEFINE(SETTABLERETRY,,[Settable indication parameters enabled])
 fi
 
 
@@ -486,6 +510,7 @@ if test -d $srcdir/mofc; then
 fi
 
 AM_CONDITIONAL(INDICATIONS,[test "$enable_indications" == "yes"]) 
+AM_CONDITIONAL(SETTABLERETRY,[test "$enable_settableretry" == "yes"])
 AM_CONDITIONAL(JDBC,[test "$enable_jdbc" == "yes"]) 
 AM_CONDITIONAL(SSL,[test "$enable_ssl" == "yes"]) 
 AM_CONDITIONAL(SLP,[test "$enable_slp" == "yes"]) 
@@ -497,9 +522,10 @@ AM_CONDITIONAL(DOCS,[test "$enable_docs" == "yes"])
 AM_CONDITIONAL(IPV6,[test "$enable_ipv6" == "yes"])
 AM_CONDITIONAL(LOCAL_CONNECT_NO_INDICATION,[test "$enable_local_connect_only" == "yes" -a "$enable_indications" == "no"])
 AM_CONDITIONAL(LOCAL_CONNECT_ONLY,[test "$enable_local_connect_only" == "yes"])
+AM_CONDITIONAL(ACCOUNT_PASSTHRU,[test "$enable_expired_pw_update" == "yes"])
 
 AC_CONFIG_FILES([Makefile sfcb.spec sfcbrepos.sh sfcbstage.sh sfcbunstage.sh 
-	         sfcbuuid.sh sfcb.cfg.pre getSchema.sh.pre 
+	         sfcbuuid.sh sfcb.cfg.pre getSchema.sh.pre 20_indication.mof.pre
 		 sfcb.init-redhat sfcb.init-suse sfcb.init-none default.reg
 		 man/genSslCert.1.pre  man/sfcbmof.1.pre 
                  man/sfcbunstage.1.pre man/sfcbuuid.1.pre man/getSchema.1.pre
@@ -524,6 +550,8 @@ echo -e "default instance properties"\\t"${enable_default_properties}"
 echo -e "uds"\\t\\t\\t\\t"${enable_uds:-no}"
 echo -e "tests"\\t\\t\\t\\t"${enable_tests:-no}"
 echo -e "debug"\\t\\t\\t\\t"${enable_debug:-no}"
+echo -e "Allow expired account pw update"\\t"${enable_expired_pw_update:-no}"
+echo -e "Settable retry parameters"\\t"${enable_settableretry:-no}"
 echo =================================================================
 echo
 echo "sfcb configuration complete.  you may now run 'make'"
