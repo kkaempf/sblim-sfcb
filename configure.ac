@@ -24,12 +24,14 @@
 
 AC_INIT(Small Footprint CIM Broker, 1.3.13, sblim-devel@lists.sourceforge.net, sblim-sfcb)
 AC_CONFIG_SRCDIR([providerDrv.c])
+AC_CONFIG_MACRO_DIR([m4])
 
 #disable "seems to ignore the --datarootdir setting" warnings
 #AC_DEFUN([AC_DATAROOTDIR_CHECKED])
 
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER([config.h])
+ACLOCAL_AMFLAGS=-I m4
 
 AC_ARG_ENABLE(debug,
 	[AC_HELP_STRING([--disable-debug],

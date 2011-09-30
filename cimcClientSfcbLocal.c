@@ -214,7 +214,6 @@ static CMPIStatus releaseClient(Client * mb)
   if (cl->connection) CMRelease(cl->connection);
 
   free(cl);
-  closeLogging();
   return rc;
 }
 
@@ -1907,6 +1906,7 @@ int localConnect(ClientEnv* ce, CMPIStatus *st)
 static void* release(ClientEnv* ce)
 {
    void *lib=ce->hdl;
+   closeLogging();
    CONNECT_LOCK();
    if (localConnectCount > 0) localConnectCount -= 1;
    if (localConnectCount == 0) {
