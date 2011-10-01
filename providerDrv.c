@@ -2831,8 +2831,9 @@ static void *processProviderInvocationRequestsThread(void *prms)
     free(resp);
 #endif
    }  
-    
-   tool_mm_flush();
+   
+   if (pInfo)
+      tool_mm_flush();
    
    if (pInfo && idleThreadStartHandled==0) {
       if (idleThreadStartHandled==0 && req->operation != OPS_PingProvider) {
