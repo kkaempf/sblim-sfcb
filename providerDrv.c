@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.103 2011/09/30 17:14:05 buccella Exp $
+ * $Id: providerDrv.c,v 1.104 2011/10/26 17:15:11 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2146,7 +2146,7 @@ static BinResponseHdr *activateFilter(BinRequestHdr *hdr, ProviderInfo* info,
    CMPIResult *result = native_new_CMPIResult(0,1,NULL);
    CMPIFlags flgs=0;
    int makeActive=0;
-   char *type = NULL;
+   char *type=(char*)req->type.data;
 
    ctx->ft->addEntry(ctx,CMPIInvocationFlags,(CMPIValue*)&flgs,CMPI_uint32);
    ctx->ft->addEntry(ctx,CMPIPrincipal,(CMPIValue*)req->principal.data,CMPI_chars);
@@ -2161,7 +2161,6 @@ static BinResponseHdr *activateFilter(BinRequestHdr *hdr, ProviderInfo* info,
    if (se==NULL) {
       char *query=(char*)req->query.data;
       char *lang=(char*)req->language.data;
-      type=(char*)req->type.data;
       char *sns=(char*)req->sns.data;
 
       se=(NativeSelectExp*)NewCMPISelectExp(query,lang,sns,NULL,&rci);
