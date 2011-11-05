@@ -1,3 +1,8 @@
+2011-11-04  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* objectImpl.c:
+	Reverting part of 3023072
+
 2011-10-26 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* providerDrv.c:

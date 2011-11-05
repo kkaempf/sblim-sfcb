@@ -537,6 +537,7 @@ replaceClStringN(ClObjectHdr * hdr, int id, const char *str, unsigned int length
   free(ts);
 
   i = addClStringN(hdr, str, length);
+  fb = getStrBufPtr(hdr);  /* addClString may change the strbufptr */
   fb->iUsed--;
   fb->indexPtr[id - 1] = fb->indexPtr[i - 1];
 
