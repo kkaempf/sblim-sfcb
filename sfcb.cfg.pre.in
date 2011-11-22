@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.27 2011/09/09 22:54:18 mchasal Exp $
+# $Id: sfcb.cfg.pre.in,v 1.28 2011/11/22 20:41:20 buccella Exp $
 ##
 ## Sample Configuration for Small Footprint CIM Broker
 ## 
@@ -61,6 +61,11 @@ basicAuthLib:   @SFCB_CONF_BASICAUTHLIB@
 ## Maximum time in seconds an sfcb HTTP process will wait for select.
 ## Default is 5
 #selectTimeout: 5
+
+## Name of the entry point into the authentication library
+## The return code of this function will determine if auth passes or fails
+## Default is: _sfcBasicAuthenticate
+basicAuthEntry: _sfcBasicAuthenticate
 
 ## Maximum time in seconds an sfcb HTTP process will wait between two requests
 ## on one connection before terminating. 0 will disable HTTP keep-alive.
