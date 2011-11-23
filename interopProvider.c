@@ -950,22 +950,7 @@ InteropProviderCreateInstance(CMPIInstanceMI * mi,
     st = processSubscription(_broker, ctx, ciLocal, copLocal);
   } else if (isa(nss, cns, "cim_indicationfilter")) {
 
-    CMPIString     *ccn = ciLocal->ft->getProperty(ciLocal, "creationclassname",
-                           &st).value.string;
-    if (CMIsNullObject(ccn)) {
-      setStatus(&st, CMPI_RC_ERR_FAILED,
-                "CreationClassName property not found");
-      _SFCB_RETURN(st);
-    }
-    CMPIString     *sccn = ciLocal->ft->getProperty(ciLocal, "systemcreationclassname",
-                           &st).value.string;
-    if (CMIsNullObject(sccn)) {
-      setStatus(&st, CMPI_RC_ERR_FAILED,
-                "SystemCreationClassName property not found");
-      _SFCB_RETURN(st);
-    }
-
-
+    setCCN(copLocal,ciLocal,"CIM_ComputerSystem");
     QLStatement    *qs = NULL;
     int             rc,
                     i,
