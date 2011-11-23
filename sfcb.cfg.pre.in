@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.28 2011/11/22 20:41:20 buccella Exp $
+# $Id: sfcb.cfg.pre.in,v 1.29 2011/11/23 03:24:00 mchasal Exp $
 ##
 ## Sample Configuration for Small Footprint CIM Broker
 ## 
@@ -93,6 +93,11 @@ basicAuthEntry: _sfcBasicAuthenticate
 ## be running as root while a web server using sfcb may be running as daemon.
 ## Default is NULL which means no change to the default permission.
 #socketPathGroupPerm: daemon
+
+## Trim leading and trailing whitespace from XML property values. 
+## Whitespace is space, tab, crlf. Any ascii value <= 32.
+## Default is true
+#trimWhitespace:      true
 
 ##---------------------------- Provider-Related -------------------------------
 
