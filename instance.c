@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.52 2010/06/16 22:48:21 buccella Exp $
+ * $Id: instance.c,v 1.53 2011/11/23 18:22:16 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -955,6 +955,23 @@ static void instFillDefaultProperties(struct native_instance *inst,
    }
 }
 #endif
+
+/*
+  Set the CreationClassName and SystemCreationClassName
+  According to DSP1001, these need not be specified by the client
+  and should be ignored if provided.
+*/
+void
+setCCN(CMPIObjectPath * cop,
+        CMPIInstance *ci,
+        const char * sccn)
+{
+  CMPIString* ccn = CMGetClassName(cop, NULL);
+  CMAddKey(cop, "creationclassname", CMGetCharPtr(ccn), CMPI_chars);
+  CMSetProperty(ci,"creationclassname", CMGetCharPtr(ccn), CMPI_chars);
+  CMAddKey(cop, "systemcreationclassname", sccn, CMPI_chars);
+  CMSetProperty(ci,"systemcreationclassname", sccn, CMPI_chars);
+}
 
 /****************************************************************************/
 
