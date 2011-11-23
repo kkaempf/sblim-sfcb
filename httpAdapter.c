@@ -95,6 +95,7 @@ static long     keepaliveMaxRequest = 10;
 static long     numRequest;
 static long     selectTimeout = 5; /* default 5 sec. timeout for select() before read() */
 struct timeval  httpSelectTimeout = { 0, 0 };   
+int             trimws;
 
 #if defined USE_SSL
 static SSL_CTX *ctx;
@@ -1766,6 +1767,9 @@ httpDaemon(int argc, char *argv[], int sslMode)
   if (getControlBool("useChunking", &noChunking))
     noChunking = 0;
   noChunking = noChunking == 0;
+
+  if (getControlBool("trimWhitespace", &trimws))
+    trimws = 0;
 
   /*
    * grab commandline options 
