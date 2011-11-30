@@ -324,6 +324,7 @@ makeFromEmbeddedObject(XtokValue value, char *ns)
   CMPIValue       val;
   memset(&val, 0, sizeof(CMPIValue));
   CMPIObjectPath *path;
+  CMPIStatus rc = {CMPI_RC_OK, NULL};
 
   if (value.type == typeValue_Instance) {
     CMPIInstance   *inst;
@@ -333,7 +334,7 @@ makeFromEmbeddedObject(XtokValue value, char *ns)
 
     for (p = xtokInstance->properties.first; p; p = p->next) {
       if (p->val.val.value) {
-        val = str2CMPIValue(p->valueType, p->val.val, &p->val.ref, NULL);
+        val = str2CMPIValue(p->valueType, p->val.val, &p->val.ref, NULL, &rc);
         CMSetProperty(inst, p->name, &val, p->valueType);
       }
     }
@@ -346,10 +347,11 @@ makeFromEmbeddedObject(XtokValue value, char *ns)
 
 CMPIValue
 str2CMPIValue(CMPIType type, XtokValue val, XtokValueReference * ref,
-              char *ns)
+              char *ns, CMPIStatus *status)
 {
   CMPIValue       value;
   CMPIType        t = 0;
+  CMPIStatus rc = {CMPI_RC_OK, NULL};
 
   if (type == 0) {
     type = guessType(val.value);
@@ -383,13 +385,14 @@ str2CMPIValue(CMPIType type, XtokValue val, XtokValueReference * ref,
     value.array = TrackedCMPIArray(max, t, NULL);
     if (value.array != NULL) {
       for (i = 0; i < max; i++) {
-        v = str2CMPIValue(t, arr->values[i], refarr->values + i, ns);
+        v = str2CMPIValue(t, arr->values[i], refarr->values + i, ns, &rc);
         CMSetArrayElementAt(value.array, i, &v, t);
       }
       return value;
     }
   }
 
+  /* Feature 75543 - set and return status->rc on failures */
   switch (type) {
   case CMPI_char16:
     value.char16 = *val.value;
@@ -398,41 +401,69 @@ str2CMPIValue(CMPIType type, XtokValue val, XtokValueReference * ref,
     value.string = sfcb_native_new_CMPIString(val.value, NULL, 0);
     break;
   case CMPI_sint64:
-    sscanf(val.value, "%lld", &value.sint64);
+    if (invalid_int(val.value, type))
+       status->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    else sscanf(val.value, "%lld", &value.sint64);
     break;
   case CMPI_uint64:
-    sscanf(val.value, "%llu", &value.uint64);
+    if (invalid_uint(val.value, type))
+       status->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    else sscanf(val.value, "%llu", &value.uint64);
     break;
   case CMPI_sint32:
-    sscanf(val.value, "%d", &value.sint32);
+    if (invalid_int(val.value, type))
+       status->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    else sscanf(val.value, "%d", &value.sint32);
     break;
   case CMPI_uint32:
-    sscanf(val.value, "%u", &value.uint32);
+    if (invalid_uint(val.value, type))
+       status->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    else sscanf(val.value, "%u", &value.uint32);
     break;
   case CMPI_sint16:
-    sscanf(val.value, "%hd", &value.sint16);
+    if (invalid_int(val.value, type))
+       status->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    else sscanf(val.value, "%hd", &value.sint16);
     break;
   case CMPI_uint16:
-    sscanf(val.value, "%hu", &value.uint16);
+    if (invalid_uint(val.value, type))
+       status->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    else sscanf(val.value, "%hu", &value.uint16);
     break;
   case CMPI_uint8:
-    sscanf(val.value, "%u", &value.uint32);
-    value.uint8 = value.uint32;
+    if (invalid_uint(val.value, type))
+       status->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    else {
+       sscanf(val.value, "%u", &value.uint32);
+       value.uint8 = value.uint32;
+    }
     break;
   case CMPI_sint8:
-    sscanf(val.value, "%d", &value.sint32);
-    value.sint8 = value.sint32;
+    if (invalid_int(val.value, type))
+       status->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    else {
+       sscanf(val.value, "%d", &value.sint32);
+       value.sint8 = value.sint32;
+    }
     break;
   case CMPI_boolean:
-    value.boolean = strcasecmp(val.value, "false");
-    if (value.boolean)
-      value.boolean = 1;
+    if (invalid_boolean(val.value, type))
+       status->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    else {
+       value.boolean = strcasecmp(val.value, "false");
+       if (value.boolean)
+         value.boolean = 1;
+    }
     break;
   case CMPI_real32:
-    sscanf(val.value, "%f", &value.real32);
+    if (invalid_real(val.value, type))
+       status->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    else sscanf(val.value, "%f", &value.real32);
     break;
   case CMPI_real64:
-    sscanf(val.value, "%lf", &value.real64);
+    if (invalid_real(val.value, type))
+       status->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+    else sscanf(val.value, "%lf", &value.real64);
     break;
   case CMPI_dateTime:
     value.dateTime =

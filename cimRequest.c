@@ -348,6 +348,26 @@ DESCRIPTION=\"User Account Expired\">\n\
 
 #endif /* ALLOW_UPDATE_EXPIRED_PW */
 
+/* feature-75543 : report type validation errors for str2CMPIValue */
+static RespSegments valErrResponse(RequestHdr * hdr,
+                   BinRequestContext * ctx, int meth)
+{
+    char msg[256];
+    CMPIrc err;
+    switch (ctx->rc) {
+     case CMPI_RC_ERR_INVALID_PARAMETER:
+       hdr->errMsg = strdup("Invalid parameter provided");
+       err = CMPI_RC_ERR_INVALID_PARAMETER;
+       break;
+    default:
+       sprintf(msg, "Internal error - %d\n", ctx->rc);
+       hdr->errMsg = strdup(msg);
+       err = CMPI_RC_ERR_FAILED;
+    }
+    if (meth) return(methodErrResponse(hdr,getErrSegment(err,hdr->errMsg)));
+    else return(iMethodErrResponse(hdr,getErrSegment(err,hdr->errMsg)));
+}
+
 static          RespSegments
 ctxErrResponse(RequestHdr * hdr, BinRequestContext * ctx, int meth)
 {
@@ -983,9 +1003,17 @@ modifyInstance(CimRequestContext * ctx, RequestHdr * hdr)
   _SFCB_ENTER(TRACE_CIMXMLPROC, "modifyInstance");
   int             irc;
   BinResponseHdr *resp;
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  /* If CMPIType for a value is incorrect, return error #75543 */
+  if (binCtx->rc != CMPI_RC_OK) {
+        _SFCB_TRACE(1, ("--- binCtx->rc returned: %d",hdr->binCtx->rc));
+         if (hdr->binCtx->bHdr) free(hdr->binCtx->bHdr);
+	_SFCB_RETURN(valErrResponse(hdr, hdr->binCtx, 0));
+  }
+
   _SFCB_TRACE(1, ("--- Getting Provider context"));
   irc = getProviderContext(hdr->binCtx);
-
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
     RespSegments    rs;

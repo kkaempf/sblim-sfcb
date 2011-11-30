@@ -40,7 +40,7 @@ extern CMPIValue *getKeyValueTypePtr(char *type, char *value,
                                      CMPIValue * val, CMPIType *typ,
                                      char *scopingNS);
 extern CMPIValue str2CMPIValue(CMPIType type, XtokValue val,
-                               XtokValueReference * ref, char *ns);
+                 XtokValueReference * ref, char *ns, CMPIStatus *status);
 extern int      value2xml(CMPIData d, UtilStringBuffer * sb, int wv);
 extern int      instanceName2xml(CMPIObjectPath * cop,
                                  UtilStringBuffer * sb);
@@ -62,6 +62,11 @@ extern void     data2xml(CMPIData *data, void *obj, CMPIString *name,
                          char *eTag, int eTagLen, UtilStringBuffer * sb,
                          UtilStringBuffer * qsb, int inst, int param);
 CMPIType        guessType(char *val);
+
+extern int invalid_int(const char *v, const CMPIType type);
+extern int invalid_uint(const char *v, const CMPIType type);
+extern int invalid_real(const char *v, const CMPIType type);
+extern int invalid_boolean(const char *v, const CMPIType type);
 
 #endif
 /* MODELINES */

@@ -35,6 +35,7 @@
 #include "cmpidtx.h"
 #include "cimXmlGen.h"
 #include "cimXmlParser.h"
+#include "cimXmlOps.h"
 #include "objectImpl.h"
 #include "constClass.h"
 #include "native.h"
@@ -288,6 +289,7 @@ buildCreateInstanceRequest(void *parm)
 
   RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
   BinRequestContext *binCtx = hdr->binCtx;
+  CMPIStatus rc = {CMPI_RC_OK, NULL};
 
   memset(binCtx, 0, sizeof(BinRequestContext));
   XtokCreateInstance *req = (XtokCreateInstance *) hdr->cimRequest;
@@ -307,7 +309,7 @@ buildCreateInstanceRequest(void *parm)
     if (p->val.val.value) {
       val =
           str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
-                        req->op.nameSpace.data);
+                        req->op.nameSpace.data, &rc);
       CMSetProperty(inst, p->name, &val, p->valueType);
     }
   }
@@ -527,6 +529,7 @@ buildCreateClassRequest(void *parm)
   XtokClass      *c;
   CMPIData        d;
   CMPIParameter   pa;
+  CMPIStatus      rc = {CMPI_RC_OK, NULL};
 
   memset(binCtx, 0, sizeof(BinRequestContext));
   XtokCreateClass *req = (XtokCreateClass *) hdr->cimRequest;
@@ -547,7 +550,7 @@ buildCreateClassRequest(void *parm)
       d.value.uint64 = 0;
     } else {
       d.state = CMPI_goodValue;
-      d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+      d.value = str2CMPIValue(q->type, q->value, NULL, NULL, &rc);
     }
     d.type = q->type;
     ClClassAddQualifier(&cl->hdr, &cl->qualifiers, q->name, d);
@@ -564,7 +567,7 @@ buildCreateClassRequest(void *parm)
       d.state = CMPI_goodValue;
       d.value =
           str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
-                        req->op.nameSpace.data);
+                        req->op.nameSpace.data, &rc);
     }
     d.type = p->valueType;
     propId = ClClassAddProperty(cl, p->name, d, p->referenceClass);
@@ -579,7 +582,7 @@ buildCreateClassRequest(void *parm)
         d.value.uint64 = 0;
       } else {
         d.state = CMPI_goodValue;
-        d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+        d.value = str2CMPIValue(q->type, q->value, NULL, NULL, &rc);
       }
       d.type = q->type;
       ClClassAddPropertyQualifier(&cl->hdr, prop, q->name, d);
@@ -605,7 +608,7 @@ buildCreateClassRequest(void *parm)
         d.value.uint64 = 0;
       } else {
         d.state = CMPI_goodValue;
-        d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+        d.value = str2CMPIValue(q->type, q->value, NULL, NULL, &rc);
       }
       d.type = q->type;
       ClClassAddMethodQualifier(&cl->hdr, meth, q->name, d);
@@ -628,7 +631,7 @@ buildCreateClassRequest(void *parm)
           d.value.uint64 = 0;
         } else {
           d.state = CMPI_goodValue;
-          d.value = str2CMPIValue(q->type, q->value, NULL, NULL);
+          d.value = str2CMPIValue(q->type, q->value, NULL, NULL, &rc);
         }
         d.type = q->type;
         ClClassAddMethParamQualifier(&cl->hdr, cl_parm, q->name, d);
@@ -659,7 +662,7 @@ buildCreateClassRequest(void *parm)
   binCtx->pAs = NULL;
 }
 
-static void
+static int
 buildModifyInstanceRequest(void *parm)
 {
   CMPIObjectPath *path;
@@ -676,6 +679,8 @@ buildModifyInstanceRequest(void *parm)
   XtokProperty   *p = NULL;
   RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
   BinRequestContext *binCtx = hdr->binCtx;
+  CMPIStatus rc = {CMPI_RC_OK, NULL};
+  int err = 0;
 
   memset(binCtx, 0, sizeof(BinRequestContext));
   XtokModifyInstance *req = (XtokModifyInstance *) hdr->cimRequest;
@@ -712,7 +717,12 @@ buildModifyInstanceRequest(void *parm)
     if (p->val.val.value) {
       val =
           str2CMPIValue(p->valueType, p->val.val, &p->val.ref,
-                        req->op.nameSpace.data);
+                        req->op.nameSpace.data, &rc);
+      if (rc.rc != CMPI_RC_OK) { /* bugzilla 75543 */
+         binCtx->rc = rc.rc;
+	 err = 1;
+         break;
+      }
       CMSetProperty(inst, p->name, &val, p->valueType);
     }
   }
@@ -727,6 +737,7 @@ buildModifyInstanceRequest(void *parm)
   binCtx->bHdrSize = sreqSize;
   binCtx->chunkedMode = binCtx->xmlAs = binCtx->noResp = 0;
   binCtx->pAs = NULL;
+  return err;
 }
 
 static void
@@ -1079,6 +1090,7 @@ buildSetPropertyRequest(void *parm)
   SetPropertyReq *sreq;// = BINREQ(OPS_SetProperty, 3);
   RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
   BinRequestContext *binCtx = hdr->binCtx;
+  CMPIStatus      st = {CMPI_RC_OK, NULL};
 
   memset(binCtx, 0, sizeof(BinRequestContext));
   XtokSetProperty *req = (XtokSetProperty *) hdr->cimRequest;
@@ -1107,7 +1119,7 @@ buildSetPropertyRequest(void *parm)
   if (t != CMPI_null) {
     val =
         str2CMPIValue(t, req->newVal.val, &req->newVal.ref,
-                      req->op.nameSpace.data);
+                      req->op.nameSpace.data, &st);
     CMSetProperty(inst, req->propertyName, &val, t);
   } else {
     val.string = 0;
@@ -1201,6 +1213,7 @@ buildSetQualifierRequest(void *parm)
   SetQualifierReq *sreq;// = BINREQ(OPS_SetQualifier, 3);
   RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
   BinRequestContext *binCtx = hdr->binCtx;
+  CMPIStatus rc = {CMPI_RC_OK, NULL};
 
   memset(binCtx, 0, sizeof(BinRequestContext));
   XtokSetQualifier *req = (XtokSetQualifier *) hdr->cimRequest;
@@ -1256,7 +1269,7 @@ buildSetQualifierRequest(void *parm)
     d.value = str2CMPIValue(d.type, req->qualifierdeclaration.data.value,
                             (XtokValueReference *) &
                             req->qualifierdeclaration.data.valueArray,
-                            NULL);
+                            NULL, &rc);
     ClQualifierAddQualifier(&q->hdr, &q->qualifierData,
                             req->qualifierdeclaration.name, d);
   } else {                      // no default value - rely on ISARRAY
@@ -1338,6 +1351,7 @@ buildInvokeMethodRequest(void *parm)
   XtokParamValue *p;
   RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
   BinRequestContext *binCtx = hdr->binCtx;
+  CMPIStatus     st = {CMPI_RC_OK, NULL};
 
   memset(binCtx, 0, sizeof(BinRequestContext));
   XtokMethodCall *req = (XtokMethodCall *) hdr->cimRequest;
@@ -1385,7 +1399,7 @@ buildInvokeMethodRequest(void *parm)
 
     if (p->value.value) {
       CMPIValue       val = str2CMPIValue(p->type, p->value, &p->valueRef,
-                                          req->op.nameSpace.data);
+                                          req->op.nameSpace.data, &st);
       CMAddArg(in, p->name, &val, p->type);
     }
   }
@@ -2905,7 +2919,7 @@ modifyInstance
        $$.properties=0;
 
        setRequest(parm,&$$,sizeof(XtokModifyInstance),OPS_ModifyInstance);
-       buildModifyInstanceRequest(parm);
+       if (buildModifyInstanceRequest(parm)) yyerror("Invalid Parameter");
     }
     | localNameSpacePath modifyInstanceParmsList
     {
@@ -2919,7 +2933,7 @@ modifyInstance
        $$.properties=$2.properties;
 
        setRequest(parm,&$$,sizeof(XtokModifyInstance),OPS_ModifyInstance);
-       buildModifyInstanceRequest(parm);
+       if (buildModifyInstanceRequest(parm)) yyerror("Invalid Parameter");
     }
 ;
 
