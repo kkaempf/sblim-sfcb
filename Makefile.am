@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.113 2011/09/21 14:50:20 buccella Exp $  
+# $Id: Makefile.am,v 1.114 2011/11/30 23:23:44 nsharoff Exp $  
 #
 #  Makefile.am
 # 
@@ -235,6 +235,7 @@ libsfcBrokerCore_la_SOURCES = \
     cimXmlGen.c \
     mrwlock.c \
     mlog.c \
+    utilTypeCk.c \
     $(JDBC_FILES) \
     $(QUALREP_FILES)
 
