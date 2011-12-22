@@ -1,0 +1,216 @@
+#!/bin/sh
+
+##############################################################################
+#
+# (C) Copyright IBM Corp. 2011
+#
+# THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
+# ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
+# CONSTITUTES RECIPIENTS ACCEPTANCE OF THE AGREEMENT.
+#
+# You can obtain a current copy of the Eclipse Public License from
+# http://www.opensource.org/licenses/eclipse-1.0.php
+#
+# Author: Mark Lanzo <marklan@us.ibm.com>
+#
+# Description: Scan running SFCB processes, 
+#   and figure out which ones are which, as best we can.
+#
+# This script is designed to run in embedded environments
+# This means that a very limited subset of Unix commands and shell features
+# are used, because we stick to things known to be available in a reduced 
+# shell environment.  This does limit the capability somewhat.
+#
+##############################################################################
+
+N=${0##*/}
+
+warn ()
+  {
+    echo 1>&2 "$N: $@"
+  }
+
+die ()
+  {
+    warn "$@"
+    exit 1
+  }
+
+help ()
+  {
+cat <<HELP
+$N - Attempt to identify SFCB co-processes.
+
+  This scans for all the SFCB server processes (ones whose name matches
+  "sbin/sfcbd"), and attempts to determine the specific role of each of
+  those processes.
+
+  Caution: Determination is not always 100% accurate.  In particular,
+  the Main process is determined by seeing if the process is also the 
+  process group leader (its PID equals its PGID) - a condition which
+  is true if SFCB was started as a daemon (normal mode) but which may
+  not apply if SFCB was started in the foreground (developer mode).
+
+Usage:
+  $N [options]
+
+Options:
+  -raw      Scan for sfcbd processes and print process ID info, but don't
+            otherwise attempt to classify the processes.
+
+  -main     Specify the main sfcb process ID when not running in daemon 
+            mode. Experimental.
+
+
+HELP
+    exit 0
+  }
+
+check_arg ()
+  {
+    if [ $# -lt 2 -o -z "$2" ] ; then
+	die "The '$1' option requires a value."
+    fi
+  }
+
+MAIN_PID=unknown
+RAW_PS=
+
+while [ $# -gt 0 ] ; do
+    case "$1" in
+	-h | -help | --help | -usage | --usage)
+	    help ;;
+
+	# Experimental and currently undocumented option.  May remove later.
+	-main)
+	    check_arg "$@" ; shift
+	    MAIN_PID="$1"
+	    ;;
+
+	-raw)
+	    RAW_PS=true ;;
+
+        -*)
+            die "Invalid option '$1'"
+            ;;
+        *)
+            die "Invalid parameter '$1'"
+            ;;
+    esac
+
+    shift
+done
+
+if [ -n "$RAW_PS" ] ; then
+    printf "%5s %5s %5s %-4s %s\n" PID PPID PGID STAT CMD
+    ps -e -o pid,ppid,pgid,stat,cmd | grep 'sbin[/]sfcb'
+    exit 0
+fi
+
+PS_INFO=$(ps -e -o pid,ppid,pgid,stat,cmd | grep 'sbin[/]sfcb')
+
+if [ -z "$PS_INFO" ] ; then
+    echo "No SFCB Processes found."
+    exit 0
+fi
+
+printf "%5s %5s %5s %-6s %s\n" PID PPID PGID STATE ROLE
+
+echo "$PS_INFO" | while read pid ppid pgid stat cmd ; do
+    # If we launched as a daemon, then the top level process is the process 
+    # group leader, so it is easy to identify.
+    #
+    # If not launched as a daemon, we have to be told how to recognize
+    # the right one (with the -main option).
+
+    if [ "$pid" = "$pgid" -o "$pid" = "$MAIN_PID" ] ; then
+	role="SFCB Main"
+
+    # The HTTP Daemon process will be listening on either or both of
+    # ports 5988 (http) or 5989 (https).  It spawns child processes
+    # to handle incoming requests.  Its children will also have the
+    # ports open but we can distinguish them because they will not be
+    # direct children of the master process.
+    #
+    # Again, this requires that we be told who the master process is,
+    # if we weren't launched as a daemon.
+
+    elif [ -n "`lsof -n -w -a -i :5988 -i :5989 -p $pid`" ] ; then
+	if [ "$ppid" = "$pgid"  -o \
+	     "$ppid" = "$MAIN_PID" ] ; then
+	    role="Http Daemon"
+	else
+	    role="Http Request Handler"
+	fi
+
+    # SFCB opens up a huge number of sockets (like 100+!) before launching any
+    # of its child processes, -except- that it launches it logger process 
+    # prior to opening the sockets.  So the logger has a more normal count
+    # of processes.  Here, we make the guess that if it has less than 8
+    # files open, it is the logger process (in fact it probably has about 4). 
+    # Heuristics like this are bad, but I don't know any other way to reliably
+    # identify the logger process.
+
+    else
+	open_fd=$(ls /proc/$pid/fd 2> /dev/null | wc -w)
+
+	# If we get 0 from above, the process must have gone away, so 
+	# don't bother reporting it.  It was probably an HTTP request
+	# handler.
+
+	if [ "$open_fd" -eq 0 ] ; then
+	    continue
+	fi
+
+	if [ "$open_fd" -lt 8 ] ; then
+	    role="SFCB Logger"
+	else
+	    role=""    # Sentinel: try other classsifiers
+	fi
+    fi
+
+    # Beyond this point, we can identify provider processes, but only by
+    # scanning the shared libraries they have loaded and looking for 
+    # specific shared libraries which carry that provider's code.  Which
+    # means knowing a priori the names of those specific libraries.
+    #
+    # In theory, we could parse the providerRegister file inside the
+    # registration directory and learn all the provider shared objects,
+    # and identify all provider processes based on this, but that is not
+    # an easy thing to do from a shell script.  It also wouldn't give us
+    # unique names as multiple providers can be in a single library.
+
+    if [ -z "$role" ] ; then
+
+	# Cache contents of /proc/$pid/maps for efficiency, and also 
+        # in case the process vanishes while we are poking around.
+	MAP=`cat /proc/$pid/maps 2>/dev/null`
+
+	if [ -z "$MAP" ] ; then
+	    role="" # Process vanished, probably was HTTP Request Handler
+	elif echo "$MAP" | grep -q 'libdctmi\.so'                ; then
+	    role="Instrumentation Provider (DCTMI)"
+	elif echo "$MAP" | grep -q 'IndCIMXMLHandler'            ; then
+	    role="IndCIMXMLHandler"
+	elif echo "$MAP" | grep -q 'InteropProvider'             ; then
+	    role="Interop Provider"
+	elif echo "$MAP" | grep -q 'sfcClassProvider'            ; then
+	    role="Class Provider"
+	elif echo "$MAP" | grep -q 'sfcProfileProvider'          ; then
+	    role="Profile Provider"
+	elif echo "$MAP" | grep -q 'sfcInternalProvider'         ; then
+	    role="SFCB Internal Provider"
+	elif echo "$MAP" | grep -q 'sfcInteropServerProvider'    ; then
+	    role="SFCB Interop Server Provider"
+	else
+	    # Most likely it is another provider, but it could also
+	    # be Main if we couldn't figure that out on our own.
+	    role="Unknown"
+	fi
+    fi
+
+    if [ -n "$role" ] ; then
+        printf "%5d %5d %5d %-6s %s\n" "$pid" "$ppid" "$pgid" "$stat" "$role"
+    fi
+done
+
