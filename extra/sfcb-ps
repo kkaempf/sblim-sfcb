@@ -42,7 +42,7 @@ cat <<HELP
 $N - Attempt to identify SFCB co-processes.
 
   This scans for all the SFCB server processes (ones whose name matches
-  "sbin/sfcbd"), and attempts to determine the specific role of each of
+  "sfcbd"), and attempts to determine the specific role of each of
   those processes.
 
   Caution: Determination is not always 100% accurate.  In particular,
@@ -103,11 +103,11 @@ done
 
 if [ -n "$RAW_PS" ] ; then
     printf "%5s %5s %5s %-4s %s\n" PID PPID PGID STAT CMD
-    ps -e -o pid,ppid,pgid,stat,cmd | grep 'sbin[/]sfcb'
+    ps -e -o pid,ppid,pgid,stat,cmd | grep 'sfcbd'
     exit 0
 fi
 
-PS_INFO=$(ps -e -o pid,ppid,pgid,stat,cmd | grep 'sbin[/]sfcb')
+PS_INFO=$(ps -e -o pid,ppid,pgid,stat,cmd | grep 'sfcbd')
 
 if [ -z "$PS_INFO" ] ; then
     echo "No SFCB Processes found."
@@ -122,7 +122,6 @@ echo "$PS_INFO" | while read pid ppid pgid stat cmd ; do
     #
     # If not launched as a daemon, we have to be told how to recognize
     # the right one (with the -main option).
-
     if [ "$pid" = "$pgid" -o "$pid" = "$MAIN_PID" ] ; then
 	role="SFCB Main"
 
