@@ -458,6 +458,15 @@ stopProc(void *p)
   exit(0);
 }
 
+static void handleSigPipe(int sig) 
+{
+  // Got a sigpipe, but we don't want to do anything about it because it could
+  // cause the provider to unload improperly.
+  mlogf(M_ERROR,M_SHOW, "-#- %s - %d provider received a SIGPIPE signal, ignoring\n",
+    processName, currentProc);
+}
+
+
 static void
 handleSigSegv(int sig)
 {
@@ -862,6 +871,7 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
         setSignal(SIGCHLD, SIG_DFL, 0);
         setSignal(SIGTERM, SIG_IGN, 0);
         setSignal(SIGHUP, SIG_IGN, 0);
+        setSignal(SIGPIPE, handleSigPipe,0);
         setSignal(SIGUSR1, handleSigUsr1, 0);
 
         setSignal(SIGSEGV, handleSigSegv, SA_ONESHOT);
