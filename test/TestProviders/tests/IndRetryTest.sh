@@ -314,9 +314,9 @@ fi
 
 # Check sequence numbers
 echo -n  "  Indication flood sequence numbers: "
-i=1
+i=0
 f=0
-while [ $i -lt $((lim+1)) ]
+while [ $i -lt $((lim)) ]
 do
     grep -A1 SequenceNumber $ODIR/SFCB_Listener.txt | grep '<VALUE>'$i'</VALUE>' > /dev/null 2>&1
     if [ $? -eq 0 ]
@@ -333,12 +333,13 @@ then
     echo "PASSED"
 else
     echo "$f missing: FAILED"
+    RC=1
 fi
 
 ###
 # Cleanup and exit
 ###
-cleanup
+#cleanup
 # Set Indication_Service back to the defaults
 ./GenMI.pl 20 3 2592000 2
 if [ $? -ne 0 ] 

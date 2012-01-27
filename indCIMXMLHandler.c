@@ -434,7 +434,7 @@ IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
 
     // set the properties
     CMSetProperty(ciLocal, "SequenceContext", &scontext, CMPI_string);
-    CMPIValue zarro = {.sint64 = 0 };
+    CMPIValue zarro = {.sint64 = -1 };
     CMSetProperty(ciLocal, "LastSequenceNumber", &zarro, CMPI_sint64);
   }
 
@@ -982,7 +982,7 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
     CMPIValue lastseq = CMGetProperty(hdlr, "LastSequenceNumber", &st).value;
     lastseq.sint64++;
     // Handle wrapping of the signed int
-    if (lastseq.sint64 < 0) lastseq.sint64=1;
+    if (lastseq.sint64 < 0) lastseq.sint64=0;
     // Update the last used number in the handler
     CMSetProperty(hdlr, "LastSequenceNumber", &lastseq.sint64, CMPI_sint64);
     CBModifyInstance(_broker, ctxLocal, hop, hdlr, NULL);

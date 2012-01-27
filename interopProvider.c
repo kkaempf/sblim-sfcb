@@ -712,7 +712,6 @@ initInterOp(const CMPIBroker * broker, const CMPIContext *ctx)
                        &st);
   ctxLocal = prepareUpcall((CMPIContext *) ctx);
   enm = _broker->bft->enumerateInstances(_broker, ctxLocal, op, NULL, &st);
-  CMRelease(ctxLocal);
 
   if (enm) {
     while (enm->ft->hasNext(enm, &st)
@@ -741,6 +740,11 @@ initInterOp(const CMPIBroker * broker, const CMPIContext *ctx)
     while (enm->ft->hasNext(enm, &st)
            && (ci = (enm->ft->getNext(enm, &st)).value.inst)) {
       cop = CMGetObjectPath(ci, &st);
+      // Reset the sequence numbers on sfcb restart
+      CMPIInstance *ldi = _broker->bft->getInstance(_broker, ctxLocal, cop, NULL, NULL);
+      CMPIValue zarro = {.sint64 = -1 };
+      CMSetProperty(ldi, "LastSequenceNumber", &zarro, CMPI_sint64);
+      CBModifyInstance(_broker, ctxLocal, cop, ldi, NULL);
       addHandler(ci, cop);
     }
     CMRelease(enm);
@@ -748,9 +752,7 @@ initInterOp(const CMPIBroker * broker, const CMPIContext *ctx)
   _SFCB_TRACE(1, ("--- checking for cim_indicationsubscription"));
   op = CMNewObjectPath(broker, "root/interop",
                        "cim_indicationsubscription", &st);
-  ctxLocal = prepareUpcall((CMPIContext *) ctx);
   enm = _broker->bft->enumerateInstances(_broker, ctxLocal, op, NULL, &st);
-  CMRelease(ctxLocal);
 
   if (enm) {
     while (enm->ft->hasNext(enm, &st)
@@ -762,6 +764,7 @@ initInterOp(const CMPIBroker * broker, const CMPIContext *ctx)
     }
     CMRelease(enm);
   }
+  CMRelease(ctxLocal);
 
   _SFCB_EXIT();
 }
