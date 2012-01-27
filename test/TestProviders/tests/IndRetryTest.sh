@@ -339,7 +339,7 @@ fi
 ###
 # Cleanup and exit
 ###
-#cleanup
+cleanup
 # Set Indication_Service back to the defaults
 ./GenMI.pl 20 3 2592000 2
 if [ $? -ne 0 ] 
