@@ -1,4 +1,4 @@
-# $Id: configure.ac,v 1.124 2011/09/29 22:11:55 buccella Exp $
+# $Id: configure.ac,v 1.125 2012/02/03 16:45:57 buccella Exp $
 # 
 # configure.ac
 #
@@ -181,7 +181,11 @@ fi
 
 if test "$enable_slp" == "yes"; then
    AC_DEFINE(HAVE_SLP,,[SLP support enabled.])
+   LOAD_PROFILE_PROVIDER=
+else
+   LOAD_PROFILE_PROVIDER='#'
 fi
+AC_SUBST(LOAD_PROFILE_PROVIDER)
 
 if test "$enable_slp_hostname_lib" == "yes"; then
    AC_DEFINE(SLP_HOSTNAME_LIB,,[SLP Hostname lib enabled])
