@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlParser.c,v 1.36 2011/11/23 03:24:00 mchasal Exp $
+ * $Id: cimXmlParser.c,v 1.37 2012/02/11 19:43:32 nsharoff Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -1741,7 +1741,9 @@ static void freeParamValues(XtokParamValues *op)
 {
   XtokParamValue * pv = op->first , *dv;
   while (pv) {
-    freeParamValue(pv);
+    /* 3486814 : type is invalid, value is null */
+    if (pv->type != USHRT_MAX)
+       freeParamValue(pv);
     dv = pv;
     pv = pv->next;
     free(dv);
