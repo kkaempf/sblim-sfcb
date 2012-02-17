@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.43 2011/09/27 15:31:48 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.44 2012/02/17 22:54:59 mchasal Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -2035,7 +2035,7 @@ ClientEnv* _Create_SfcbLocal_Env(char *id)
     env->hdl=NULL;
     env->ft=&localFT;
     // enable logging when called from sfcc
-    startLogging(LOG_ERR);
+    startLogging(LOG_ERR,0);
 
     // enable trace logging
     _SFCB_TRACE_INIT();

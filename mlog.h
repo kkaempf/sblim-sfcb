@@ -1,5 +1,5 @@
 /*
- * $Id: mlog.h,v 1.6 2010/04/07 20:54:11 buccella Exp $
+ * $Id: mlog.h,v 1.7 2012/02/17 22:54:59 mchasal Exp $
  *
  * (C) Copyright IBM Corp. 2003, 2004
  *
@@ -29,7 +29,7 @@
 
 #define LOG_MSG_MAX 4096
 
-void startLogging(int level);
+void startLogging(int level, int thread);
 void closeLogging();
 void mlogf(int priority, int errout, const char* fmt, ...);
 
