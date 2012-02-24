@@ -2091,7 +2091,7 @@ _Create_SfcbLocal_Env(char *id)
   env->hdl = NULL;
   env->ft = &localFT;
   // enable logging when called from sfcc
-  startLogging(LOG_ERR);
+  startLogging(LOG_ERR,0);
 
   // enable trace logging
   _SFCB_TRACE_INIT();

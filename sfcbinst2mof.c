@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <syslog.h>
 
 #include "cmpi/cmpidt.h"
 #include "cmpi/cmpimacs.h"
@@ -9,6 +10,7 @@
 #include "objectImpl.h"
 #include "control.h"
 #include "array.h"
+#include "mlog.h"
 
 #define VERSION "0.8.0"
 
@@ -425,6 +427,8 @@ main(int argc, char *argv[])
     help(argv[0]);
     return 0;
   }
+
+  startLogging(LOG_INFO,0);
   // now let's get to work
   char           *ns = namespace;
   char           *clsname = classname;
