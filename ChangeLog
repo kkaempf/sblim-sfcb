@@ -3,6 +3,9 @@
 	* interopProvider.c, indCIMXMLHandler.c, sfcb.cfg.pre.in
 	[ 3484025 ] Disable indication sequencing
 
+	* mlog.c: 
+	[ 3487675 ] Log message troubles with \n
+
 2012-01-26 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* interopProvider.c, indCIMXMLHandler.c, indRetryTest.sh
