@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.115 2012/02/03 16:45:57 buccella Exp $  
+# $Id: Makefile.am,v 1.116 2012/02/24 22:49:40 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -183,7 +183,7 @@ bin_PROGRAMS = \
    sfcbmofpp sfcbdump sfcbinst2mof
 
 noinst_PROGRAMS = \
-   sfcbdumpP32onI32 classSchema2c
+   sfcbdumpP32onI32 classSchema2c sfcbsem
 
 libsfcUtil_la_SOURCES = \
 	sfcUtil/hashtable.c \
@@ -440,6 +440,8 @@ sfcbinst2mof_LDADD = -lsfcFileRepository
 classSchema2c_SOURCES=classSchema2c.c
 classSchema2c_LDADD=-lsfcBrokerCore
 classSchema2c_DEPENDENCIES=libsfcBrokerCore.la
+
+sfcbsem_SOURCES=sfcbsem.c
 
 noinst_HEADERS=array.h $(SLP_INC) httpComm.h control.h    providerMgr.h \
 	constClass.h   msgqueue.h     providerRegister.h \
