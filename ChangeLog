@@ -1,3 +1,8 @@
+2012-02-24 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* interopProvider.c, indCIMXMLHandler.c, sfcb.cfg.pre.in
+	[ 3484025 ] Disable indication sequencing
+
 2012-01-26 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* interopProvider.c, indCIMXMLHandler.c, indRetryTest.sh
