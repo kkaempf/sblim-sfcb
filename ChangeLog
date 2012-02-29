@@ -1,5 +1,10 @@
 2012-02-29 Dave Heller <hellerda@us.ibm.com>
 
+	* cimslpSLP.c:
+	[ 3495801 ] Correction to 3495343
+
+2012-02-29 Dave Heller <hellerda@us.ibm.com>
+
 	* cimslpSLP.c, indCIMXMLExport.c:
 	[ 3495343 ] Bad pointer references in trace statements
 

@@ -8,6 +8,7 @@ New features:
 
 Bugs fixed:
 - 3495343 Bad pointer references in trace statements
+- 3495801 Correction to 3495343
 
 Changes in 1.4.2
 ================
