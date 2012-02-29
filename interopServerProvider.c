@@ -45,6 +45,7 @@
 #include "native.h"
 #include "control.h"
 #include "config.h"
+#include "objectpath.h"
 
 #define NEW(x) ((x *) malloc(sizeof(x)))
 
@@ -436,6 +437,64 @@ ObjectManagerProviderEnumInstances(CMPIInstanceMI * mi,
   _SFCB_RETURN(st);
 }
 
+static CMPIObjectPath* makeIndServiceOP() {
+
+  CMPIStatus st = { CMPI_RC_OK, 0 };
+  char str[512];
+  CMPIObjectPath* op=CMNewObjectPath(_broker,"root/interop","CIM_IndicationService",&st);
+  CMAddKey(op,"CreationClassName","CIM_IndicationService",CMPI_chars);
+  CMAddKey(op,"SystemCreationClassName","CIM_ComputerSystem",CMPI_chars);
+  str[0]=str[511]=0;
+  gethostname(str,511);
+  CMAddKey(op,"SystemName",str,CMPI_chars);
+  CMAddKey(op,"Name",getSfcbUuid(),CMPI_chars);
+
+  return op;
+}
+
+static CMPIStatus makeIndService(CMPIInstance *ci) 
+{
+  CMPIStatus st = { CMPI_RC_OK, 0 };
+
+  CMPIBoolean filterCreation=1;
+  CMPIUint16      retryAttempts,subRemoval;
+  CMPIUint32      tmp,retryInterval,subRemovalInterval; 
+
+
+  // Get the retry parameters from the config file
+  getControlUNum("DeliveryRetryInterval", &retryInterval);
+  getControlUNum("DeliveryRetryAttempts", &tmp);
+  if (tmp > UINT16_MAX) {
+    // Exceeded max range, set to default
+    mlogf(M_ERROR, M_SHOW, "--- Value for DeliveryRetryAttempts exceeds range, using default.\n");
+    retryAttempts=3;
+  } else {
+    retryAttempts=(CMPIUint16) tmp;
+  }
+  getControlUNum("SubscriptionRemovalTimeInterval", &subRemovalInterval);
+  getControlUNum("SubscriptionRemovalAction", &tmp);
+  if (tmp > UINT16_MAX) {
+    // Exceeded max range, set to default
+    mlogf(M_ERROR, M_SHOW, "--- Value for SubscriptionRemovalAction exceeds range, using default.\n");
+    subRemoval=2;
+  } else {
+    subRemoval= (CMPIUint16) tmp;
+  }
+
+  CMSetProperty(ci,"CreationClassName","CIM_IndicationService",CMPI_chars);
+  CMSetProperty(ci,"SystemCreationClassName","CIM_ComputerSystem",CMPI_chars);
+  CMSetProperty(ci,"Name",getSfcbUuid(),CMPI_chars);
+  CMSetProperty(ci,"FilterCreationEnabled",&filterCreation,CMPI_boolean);
+  CMSetProperty(ci,"ElementName","sfcb",CMPI_chars);
+  CMSetProperty(ci,"Description",PACKAGE_STRING,CMPI_chars);
+  CMSetProperty(ci,"DeliveryRetryAttempts",&retryAttempts,CMPI_uint16);
+  CMSetProperty(ci,"DeliveryRetryInterval",&retryInterval,CMPI_uint32);
+  CMSetProperty(ci,"SubscriptionRemovalAction",&subRemoval,CMPI_uint16);
+  CMSetProperty(ci,"SubscriptionRemovalTimeInterval",&subRemovalInterval,CMPI_uint32);
+
+  return st;
+}
+
 static CMPIStatus
 IndServiceProviderGetInstance(CMPIInstanceMI * mi,
                               const CMPIContext *ctx,
@@ -444,27 +503,42 @@ IndServiceProviderGetInstance(CMPIInstanceMI * mi,
                               const char **properties)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
-  CMPIObjectPath *op;
-  CMPIInstance   *indService = NULL;
+  CMPIInstance* ci = NULL;
 
   _SFCB_ENTER(TRACE_PROVIDERS, "IndServiceProviderGetInstance");
 
-  CMPIContext    *ctxLocal;
-  ctxLocal = native_clone_CMPIContext(ctx);
-  CMPIValue       val;
-  val.string = sfcb_native_new_CMPIString("$DefaultProvider$", NULL, 0);
-  ctxLocal->ft->addEntry(ctxLocal, "rerouteToProvider", &val, CMPI_string);
+  CMPIObjectPath* op = makeIndServiceOP();
+  /* compare object paths to see if we're being asked for the one we have 
+     if ref is NULL, then skip it, because we're haning an ei call */   
+  if ((ref !=NULL) && objectpathCompare(op, ref)) {
+    st.rc=CMPI_RC_ERR_NOT_FOUND;
+    _SFCB_RETURN(st);
+  }
 
-  op = CMNewObjectPath(_broker, "root/interop", "CIM_IndicationService",
-                       NULL);
-  indService = CBGetInstance(_broker, ctxLocal, ref, properties, &st);
+#ifdef SETTABLERETRY
 
-  CMReturnInstance(rslt, indService);
+  /* check if it exists first */
+   CMPIContext *ctxLocal;
+   ctxLocal = native_clone_CMPIContext(ctx);
+   CMPIValue val;
+   val.string = sfcb_native_new_CMPIString("$DefaultProvider$", NULL,0);
+   ctxLocal->ft->addEntry(ctxLocal, "rerouteToProvider", &val, CMPI_string);
+
+   ci = CBGetInstance(_broker, ctxLocal, ref, properties, &st);
+
+#else
+
+   ci = CMNewInstance(_broker, op, &st);
+  
+  makeIndService(ci);
+
+#endif
+
+  CMReturnInstance(rslt,ci);
   CMReturnDone(rslt);
 
-  if (ctxLocal)
-    CMRelease(ctxLocal);
   _SFCB_RETURN(st);
+
 }
 
 static CMPIStatus
@@ -475,15 +549,17 @@ IndServiceProviderEnumInstances(CMPIInstanceMI * mi,
                                 const char **properties)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
-  CMPIObjectPath *op;
-  CMPIEnumeration *indServices = NULL;
 
   _SFCB_ENTER(TRACE_PROVIDERS, "IndServiceProviderEnumInstances");
 
-  CMPIContext    *ctxLocal;
+#ifdef SETTABLERETRY
+   
+  CMPIObjectPath *op;
+  CMPIEnumeration *indServices = NULL;
+  CMPIContext *ctxLocal;
   ctxLocal = native_clone_CMPIContext(ctx);
-  CMPIValue       val;
-  val.string = sfcb_native_new_CMPIString("$DefaultProvider$", NULL, 0);
+  CMPIValue val;
+  val.string = sfcb_native_new_CMPIString("$DefaultProvider$", NULL,0);
   ctxLocal->ft->addEntry(ctxLocal, "rerouteToProvider", &val, CMPI_string);
 
   op = CMNewObjectPath(_broker, "root/interop", "CIM_IndicationService",
@@ -497,6 +573,11 @@ IndServiceProviderEnumInstances(CMPIInstanceMI * mi,
 
   if (ctxLocal)
     CMRelease(ctxLocal);
+
+#else
+  st = IndServiceProviderGetInstance(mi, ctx, rslt, NULL, properties);
+#endif
+
   _SFCB_RETURN(st);
 }
 
@@ -871,71 +952,35 @@ ServerProviderExecQuery(CMPIInstanceMI * mi,
 void
 ServerProviderInitInstances(const CMPIContext *ctx)
 {
-  CMPIStatus      st = { CMPI_RC_OK, 0 };
-  char            str[512];
-  CMPIObjectPath *op = NULL;
-  CMPIValue       val;
-  CMPIInstance   *ci = NULL;
-  CMPIContext    *ctxLocal;
-  CMPIBoolean     filterCreation = 1;
 
-  CMPIUint16      retryAttempts,subRemoval; 
-  CMPIUint32      tmp,retryInterval,subRemovalInterval; 
-  
-  // Get the retry parameters from the config file
-  getControlUNum("DeliveryRetryInterval", &retryInterval);
-  getControlUNum("DeliveryRetryAttempts", &tmp);
-  if (tmp > UINT16_MAX) {
-    // Exceeded max range, set to default
-    mlogf(M_ERROR, M_SHOW, "--- Value for DeliveryRetryAttempts exceeds range, using default.\n");
-    retryAttempts=3;
-  } else {
-    retryAttempts=(CMPIUint16) tmp;
-  }
-  getControlUNum("SubscriptionRemovalTimeInterval", &subRemovalInterval);
-  getControlUNum("SubscriptionRemovalAction",  &tmp);
-  if (tmp > UINT16_MAX) {
-    // Exceeded max range, set to default
-    mlogf(M_ERROR, M_SHOW, "--- Value for SubscriptionRemovalAction exceeds range, using default.\n");
-    subRemoval=2;
-  } else {
-    subRemoval= (CMPIUint16) tmp;
-  }
+  /* only applicable if we're relying on InternalProvider */
+#ifdef SETTABLERETRY
+
+  CMPIStatus st;
+  CMPIInstance *ci;
+  CMPIObjectPath *op;
+
+  CMPIValue       val;
+  CMPIContext *ctxLocal;
 
   ctxLocal = native_clone_CMPIContext(ctx);
   val.string = sfcb_native_new_CMPIString("$DefaultProvider$", NULL, 0);
   ctxLocal->ft->addEntry(ctxLocal, "rerouteToProvider", &val, CMPI_string);
 
-  op = CMNewObjectPath(_broker, "root/interop", "CIM_IndicationService",
-                       &st);
-  CMAddKey(op, "CreationClassName", "CIM_IndicationService", CMPI_chars);
-  CMAddKey(op, "SystemCreationClassName", "CIM_ComputerSystem",
-           CMPI_chars);
-  str[0] = str[511] = 0;
-  gethostname(str, 511);
-  CMAddKey(op, "SystemName", str, CMPI_chars);
-  CMAddKey(op, "Name", getSfcbUuid(), CMPI_chars);
-  // Delete the instance so we can replace with proper values
+  op = makeIndServiceOP();
+
+  /* a brutal way to update values; because of this, changes don't persist */
   CBDeleteInstance(_broker,ctxLocal,op);
   ci = CMNewInstance(_broker, op, &st);
 
-  CMSetProperty(ci, "CreationClassName", "CIM_IndicationService",
-                CMPI_chars);
-  CMSetProperty(ci, "SystemCreationClassName", "CIM_ComputerSystem",
-                CMPI_chars);
-  CMSetProperty(ci, "SystemName", str, CMPI_chars);
-  CMSetProperty(ci, "Name", getSfcbUuid(), CMPI_chars);
-  CMSetProperty(ci, "FilterCreationEnabled", &filterCreation,
-                CMPI_boolean);
-  CMSetProperty(ci, "ElementName", "sfcb", CMPI_chars);
-  CMSetProperty(ci, "Description", PACKAGE_STRING, CMPI_chars);
-  CMSetProperty(ci, "DeliveryRetryAttempts", &retryAttempts, CMPI_uint16);
-  CMSetProperty(ci, "DeliveryRetryInterval", &retryInterval, CMPI_uint32);
-  CMSetProperty(ci, "SubscriptionRemovalAction", &subRemoval, CMPI_uint16);
-  CMSetProperty(ci, "SubscriptionRemovalTimeInterval", &subRemovalInterval,
-                CMPI_uint32);
+  makeIndService(ci);
+
+  op = CMGetObjectPath(ci, &st);
+
   CBCreateInstance(_broker, ctxLocal, op, ci, &st);
   CMRelease(ctxLocal);
+#endif
+
   return;
 }
 
