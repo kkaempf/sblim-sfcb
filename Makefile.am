@@ -166,7 +166,7 @@ bin_PROGRAMS = \
    sfcbmofpp sfcbdump sfcbinst2mof $(SLP_PROGRAMFILES)
 
 noinst_PROGRAMS = \
-   sfcbdumpP32onI32 classSchema2c
+   sfcbdumpP32onI32 classSchema2c sfcbsem
 
 libsfcBrokerCore_la_SOURCES = \
     args.c \
@@ -409,6 +409,8 @@ sfcbinst2mof_LDADD = -lsfcFileRepository
 classSchema2c_SOURCES=classSchema2c.c
 classSchema2c_LDADD=-lsfcBrokerCore
 classSchema2c_DEPENDENCIES=libsfcBrokerCore.la
+
+sfcbsem_SOURCES=sfcbsem.c
 
 noinst_HEADERS=array.h $(SLP_INC) httpComm.h control.h    providerMgr.h \
 	constClass.h   msgqueue.h     providerRegister.h \
