@@ -1,3 +1,15 @@
+2012-02-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* Makefile.am, test/Makefile.am,
+	  test/TestProviders/tests/IndRetryTest.sh,
+	  test/TestProviders/tests/Makefile.am,
+	  test/TestProviders/tests/xmltest.sh,
+	  test/commands/Makefile.am, test/commands/sfcbdump.sh,
+	  test/unittest/Makefile.am, test/xmltest/Makefile.am,
+	  test/xmltest/xmltest.sh:
+	[ 3495789 ] Makefile improvements for test suite
+	(code by Viktor Mihajlovski)
+
 2012-02-28  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* sfcbsem.c, Makefile.am:
