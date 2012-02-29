@@ -46,7 +46,6 @@ int             ptBase,
                 stBase,
                 htMax,
                 stMax;
-int             httpProcId;
 int             currentProc = 0;
 int             noProvPause = 0;
 char           *provPauseStr = NULL;

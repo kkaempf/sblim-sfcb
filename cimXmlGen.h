@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef array_h
-#define array_h
+#ifndef cimXmlGen_h
+#define cimXmlGen_h
 
 #include "cimRequest.h"
 #include "cimXmlParser.h"

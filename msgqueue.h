@@ -201,7 +201,6 @@ extern int      ptBase,
                 stBase,
                 htMax,
                 stMax;
-extern int      httpProcId;
 
 extern void     stopLocalConnectServer();
 extern void     localConnectServer();
