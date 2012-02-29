@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.3 2010/03/04 22:19:56 mchasal Exp $  
+# $Id: Makefile.am,v 1.4 2012/02/29 23:12:45 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -31,4 +31,5 @@ else
 endif
 
 #Some wbemcat tests
-TESTS = xmltest.sh IndRetryTest.sh
+export SRCDIR=$(srcdir)
+TESTS = $(srcdir)/xmltest.sh $(srcdir)/IndRetryTest.sh

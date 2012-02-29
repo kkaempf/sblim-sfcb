@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.10 2010/03/04 22:19:56 mchasal Exp $  
+# $Id: Makefile.am,v 1.11 2012/02/29 23:12:45 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -22,6 +22,7 @@
 
 MAINTAINERCLEANFILES = Makefile.in
 
+AM_CPPFLAGS=-I$(top_srcdir)
 AM_LDFLAGS=-L"$(top_builddir)/.libs"
 
 TESTS_ENVIRONMENT = SFCB_TRACE_FILE="/tmp/sfcbtracetest"

@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.2 2010/03/04 22:19:56 mchasal Exp $  
+# $Id: Makefile.am,v 1.3 2012/02/29 23:12:45 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -23,4 +23,5 @@
 MAINTAINERCLEANFILES = Makefile.in
 
 #Some wbemcat tests
+export SRCDIR=$(srcdir)
 TESTS = cmdusage.sh sfcbdump.sh
