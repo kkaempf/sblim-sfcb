@@ -1,5 +1,9 @@
 2012-02-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* providerMgr.c:
+	[ 3495806 ] isChild() can cause a provider mismatch
+	(patch by Viktor Mihajlovski)
+
 	* msgqueue.h, msgqueue.c, cimXmlGen.h:
 	[ 3495804 ] Cleanup: httpProcId still defined, wrong define in cimXmlGen
 
