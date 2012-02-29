@@ -1,5 +1,9 @@
 2012-02-28  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* sfcbsem.c, Makefile.am:
+	[ 3493493 ] Add sfcbsem
+	(code by Viktor Mihajlovski)
+
 	* interopServerProvider.c
 	[ 3416164 ] Don't write CIM_IndicationService to disk
 
