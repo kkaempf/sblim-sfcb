@@ -377,7 +377,7 @@ exportIndication(char *url, char *payload, char **resp, char **msg)
     }
   }
 
-  _SFCB_TRACE(1, ("--- url: %s rc: %d %s", url, rc, msg));
+  _SFCB_TRACE(1, ("--- url: %s rc: %d %s", url, rc, *msg));
   if (rc) {
     mlogf(M_ERROR, M_SHOW,
           "Problem processing indication to %s. sfcb rc: %d %s\n", url, rc,

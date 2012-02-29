@@ -6,6 +6,8 @@ Everything in 1.3.13 and 1.3.14, plus:
 New features:
 - 3441679 Add a feature to validate CMPI types
 
+Bugs fixed:
+- 3495343 Bad pointer references in trace statements
 
 Changes in 1.4.2
 ================
