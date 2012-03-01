@@ -314,7 +314,7 @@ fi
 count=$(grep SFCB_IndicationID $ODIR/SFCB_Listener.txt  | wc -l)
 if [ $count -ne 0 ] 
 then
-    echo " SFCB_IndicationID property found: FAILED"
+    echo "  SFCB_IndicationID property found: FAILED"
     RC=1
 fi
 
