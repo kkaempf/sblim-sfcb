@@ -1,5 +1,5 @@
 /*
- * $Id: brokerUpc.c,v 1.35 2011/09/30 16:11:36 buccella Exp $
+ * $Id: brokerUpc.c,v 1.36 2012/03/01 17:46:40 nsharoff Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -146,6 +146,7 @@ static CMPIStatus deliverIndication(const CMPIBroker* mb, const CMPIContext* ctx
 		 );
          CBInvokeMethod(mb,ctx,op,"_deliver",in,NULL,&st);
       }
+      classMatch = 0; /* 3483200 */
       se=se->next;
    }   
    
