@@ -1376,13 +1376,13 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
                        (char *) str->hdl));
           CMAddArg(hin, "subscription", &su->sci, CMPI_instance);
 
-	  pthread_attr_init(&it_attr);
-	  pthread_attr_setdetachstate(&it_attr, PTHREAD_CREATE_DETACHED);
-	  
-	  DeliveryInfo* di = malloc(sizeof(DeliveryInfo));
-	  di->ctx = native_clone_CMPIContext(ctx);
-	  di->hop = CMClone(su->ha->hop, NULL);
-	  di->hin = CMClone(hin, NULL);
+          pthread_attr_init(&it_attr);
+          pthread_attr_setdetachstate(&it_attr, PTHREAD_CREATE_DETACHED);
+          
+          DeliveryInfo* di = malloc(sizeof(DeliveryInfo));
+          di->ctx = native_clone_CMPIContext(ctx);
+          di->hop = CMClone(su->ha->hop, NULL);
+          di->hin = CMClone(hin, NULL);
 
 	  pthread_create(&ind_thread, &it_attr,&sendIndForDelivery,(void *) di);
 
