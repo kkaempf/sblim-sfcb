@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.77 2012/03/05 18:13:43 nsharoff Exp $
+ * $Id: providerMgr.c,v 1.78 2012/03/05 19:11:54 nsharoff Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -123,6 +123,9 @@ static void notSupported(int *requestor, OperationHdr * req)
       NULL, req->options);
    free(req);
 }
+
+int prov_rdy_state = -1;   /* 3497096 :77022 - stopBroker() reads this value */
+pthread_mutex_t syncMtx=PTHREAD_MUTEX_INITIALIZER; /* shared with stopBroker */
 
 /* -------------
  * ---
@@ -966,10 +969,18 @@ void processProviderMgrRequests()
            _SFCB_TRACE(1,("--- Mgr request for %s-%s (%d) from %d", req->nameSpace.data,
                 req->className.data,req->type,requestor));
 
+   	   pthread_mutex_lock(&syncMtx); /* 77022 */
+   	   prov_rdy_state = -1;
+	   pthread_mutex_unlock(&syncMtx);
+
            sigprocmask(SIG_SETMASK, &mask, &old_mask);
            hdlr = mHandlers[req->type];
            hdlr.handler(&requestor, req);
            sigprocmask(SIG_SETMASK, &old_mask, NULL);
+
+   	   pthread_mutex_lock(&syncMtx); /* 77022 */
+   	   prov_rdy_state = 1;
+   	   pthread_mutex_unlock(&syncMtx);
            
            _SFCB_TRACE(1,("--- Mgr request for %s-%s DONE", req->nameSpace.data,
               req->className.data));

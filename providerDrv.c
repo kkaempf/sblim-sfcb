@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.106 2012/03/05 18:13:27 nsharoff Exp $
+ * $Id: providerDrv.c,v 1.107 2012/03/05 19:11:36 nsharoff Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -367,11 +367,11 @@ static void stopProc(void *p)
    mlogf(M_INFO,M_SHOW,"---  stopped %s %d\n",processName,getpid());
    ctx->ft->release(ctx);
    
-   uninit_sfcBroker();
-   uninitProvProcCtl();
-   uninitSocketPairs();
-   sunsetControl();
-   uninitGarbageCollector();
+   //uninit_sfcBroker(); /* 3497096 */
+   //uninitProvProcCtl();
+   //uninitSocketPairs();
+   //sunsetControl();
+   //uninitGarbageCollector();
    
    exit(0);
 } 
