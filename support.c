@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.38 2011/09/23 20:19:31 nsharoff Exp $
+ * $Id: support.c,v 1.39 2012/03/05 18:14:26 nsharoff Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -714,7 +714,10 @@ int init_sfcBroker()
 
 int uninit_sfcBroker()
 {
-   if (pReg) pReg->ft->release(pReg);
+   if (pReg) {
+     pReg->ft->release(pReg);
+     pReg = NULL;
+   }
    return 0;
 }
 
