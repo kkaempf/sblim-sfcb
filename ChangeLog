@@ -1,3 +1,8 @@
+2012-03-01 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* indCIMXMLHandler.c:
+	[ 3498044 ] RIEnabled conflicts with settable retries
+
 2012-03-06  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* providerDrv.c, providerMgr.c:
@@ -20,7 +25,7 @@
 
 2012-03-01 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
-	* indCIMXMLHandler.c, indRetryTest.sh
+	* indCIMXMLHandler.c, indRetryTest.sh:
 	[ 3484083] Exclude SFCBIndicationID 
 
 2012-03-01  Chris Buccella  <buccella@linux.vnet.ibm.com>
