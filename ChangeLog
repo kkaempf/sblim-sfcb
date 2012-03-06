@@ -4,6 +4,11 @@
 	[ 3497765 ] Better Error Handling in sfcb Provider Manager and Driver
 	(patch by Viktor Mihajlovski)
 
+2012-03-06 Dave Heller <hellerda@us.ibm.com>
+
+	* extra/sfcb-ps:
+	[ 3497831 ] Updates to sfcb-ps test script
+
 2012-03-02  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* interopProvider.c:
