@@ -1,5 +1,8 @@
 2012-03-07  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* indCIMXMLHandler.c, interopProvider.c, test/xmltest/LD_modify*:
+	[ 3498932 ] Implement ModifyInstance for CIM_ListenerDestination
+
 	* 10_interop.mof, default.reg.in, interopServerProvider.c:
 	[ 3498275 ] Remove __Namespace
 

@@ -92,6 +92,7 @@ Changes in 1.3.14
 New Features:
 
 - 3493493 Add sfcbsem
+- 3498932 Implement ModifyInstance for CIM_ListenerDestination
 
 Bugs Fixed: 
 
