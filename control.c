@@ -61,6 +61,7 @@ char * configfile = NULL;
 // { property, type, value}
 // Type: 0=string, 1=num, 2=bool, 3=unstripped string
 Control init[] = {
+   {"argvDebug",        2, "false"},
    {"httpPort",         1, "5988"},
    {"enableHttp",       2, "true"},
    {"enableUds",        2, "true"},

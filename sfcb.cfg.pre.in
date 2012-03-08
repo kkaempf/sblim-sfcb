@@ -11,6 +11,11 @@
 ## Use '#' at the start of a line to comment
 ## 
 
+##--- Debug ---
+## Show provider information via argv, viewable in 'ps' output
+## Default: false
+argvDebug: true
+
 ##------------------------------------- HTTP ----------------------------------
 ## Enable HTTP. 
 ## Default is true. If HTTPS is configured, default is false.
