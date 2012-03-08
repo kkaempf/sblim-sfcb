@@ -1,5 +1,8 @@
 2012-03-08  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* fileRepository.c:
+	[ 3499930 ] Check file repository writes
+
 	* httpAdapter.c, cimRequest.c, sfcBroker.c:
 	[ 3440300 ] Allow forced chunked responses
 	[ 3492362 ] Problem with whitespace trimming if local connect only
