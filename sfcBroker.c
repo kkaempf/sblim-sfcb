@@ -484,6 +484,8 @@ static void version()
     exit(0);
 }
 
+extern void passOrigArgPtrs(int *argc, char ***argv);
+
 int main(int argc, char *argv[])
 {
    int c, i;
@@ -493,6 +495,7 @@ int main(int argc, char *argv[])
    int enableUds=0;
 #endif
    int enableHttp=0,enableHttps=0,useChunking=0,doBa=0,enableInterOp=0,httpLocalOnly=0;
+   int argvDebug = 0;
    int syslogLevel=LOG_ERR;
    long dSockets,sSockets,pSockets;
    char *pauseStr;
@@ -641,6 +644,9 @@ int main(int argc, char *argv[])
      printf("--- Provider pausing for: %s\n",pauseStr);
    }
       
+   if (getControlBool("argvDebug", &argvDebug) == 0)
+       passOrigArgPtrs(&argc, &argv);
+
    if (getControlBool("enableHttp", &enableHttp))
       enableHttp=1;
 

@@ -58,6 +58,7 @@ static UtilHashTable *ct = NULL;
 char * configfile = NULL;
 
 Control init[] = {
+   {"argvDebug",        2, "false"},
    {"httpPort",         1, "5988"},
    {"enableHttp",       2, "true"},
    {"enableUds",        2, "true"},
