@@ -93,6 +93,8 @@ static int      adaptersStopped = 0,
 
 extern char    *configfile;
 
+int trimws = 1;
+
 typedef struct startedAdapter {
   struct startedAdapter *next;
   int             stopped;
@@ -779,6 +781,11 @@ main(int argc, char *argv[])
     }
     mlogf(M_INFO, M_SHOW,
           "--- Max provider process number adjusted to %d\n", pSockets);
+  }
+
+  /* Check for whitespace trimming option */
+  if (getControlBool("trimWhitespace", &trimws)) {
+    trimws = 0;
   }
 
   if ((enableHttp || enableHttps) && dSockets > 0) {

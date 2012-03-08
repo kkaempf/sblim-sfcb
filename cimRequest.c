@@ -58,11 +58,6 @@
 #define SFCB_ASM(x)
 #endif
 
-#ifdef LOCAL_CONNECT_ONLY_ENABLE
-// from httpAdapter.c
-int             noChunking = 0;
-#endif                          // LOCAL_CONNECT_ONLY_ENABLE
-
 typedef struct handler {
   RespSegments(*handler) (CimRequestContext *, RequestHdr * hdr);
 } Handler;
@@ -71,7 +66,6 @@ typedef struct scanner {
   RequestHdr (*scan) (CimRequestContext*, char*,int*);
 } Scanner;
 
-extern int      noChunking;
 
 extern CMPIBroker *Broker;
 //extern UtilStringBuffer *newStringBuffer(int s);
@@ -828,7 +822,7 @@ enumClasses(CimRequestContext * ctx, RequestHdr * hdr)
   BinResponseHdr **resp;
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "enumClasses");
-  if (noChunking || ctx->teTrailers == 0)
+  if (ctx->teTrailers == 0)
     hdr->chunkedMode = hdr->binCtx->chunkedMode = 0;
   else {
     hdr->binCtx->bHdr->flags |= FL_chunked;
@@ -850,7 +844,7 @@ enumClasses(CimRequestContext * ctx, RequestHdr * hdr)
 
     closeProviderContext(hdr->binCtx);
 
-    if (noChunking || ctx->teTrailers == 0) {
+    if (ctx->teTrailers == 0) {
       if (err == 0) {
         rs = genResponses(hdr->binCtx, resp, l);
       } else {
@@ -1088,8 +1082,9 @@ enumInstances(CimRequestContext * ctx, RequestHdr * hdr)
                   err = 0;
   BinResponseHdr **resp;
 
-  if (noChunking || ctx->teTrailers == 0)
+  if (ctx->teTrailers == 0) {
     hdr->chunkedMode = hdr->binCtx->chunkedMode = 0;
+  }
   else {
     hdr->binCtx->bHdr->flags |= FL_chunked;
     hdr->chunkedMode = hdr->binCtx->chunkedMode = 1;
@@ -1109,7 +1104,7 @@ enumInstances(CimRequestContext * ctx, RequestHdr * hdr)
     _SFCB_TRACE(1, ("--- Back from Providers"));
     closeProviderContext(hdr->binCtx);
 
-    if (noChunking || ctx->teTrailers == 0) {
+    if (ctx->teTrailers == 0) {
       if (err == 0) {
         rs = genResponses(hdr->binCtx, resp, l);
       } else {
@@ -1147,7 +1142,7 @@ execQuery(CimRequestContext * ctx, RequestHdr * hdr)
   hdr->binCtx->commHndl = ctx->commHndl;
   hdr->binCtx->chunkFncs = ctx->chunkFncs;
 
-  if (noChunking || ctx->teTrailers == 0)
+  if (ctx->teTrailers == 0)
     hdr->chunkedMode = hdr->binCtx->chunkedMode = 0;
   else {
     hdr->binCtx->bHdr->flags |= FL_chunked;
@@ -1166,7 +1161,7 @@ execQuery(CimRequestContext * ctx, RequestHdr * hdr)
     _SFCB_TRACE(1, ("--- Back from Provider"));
     closeProviderContext(hdr->binCtx);
 
-    if (noChunking || ctx->teTrailers == 0) {
+    if (ctx->teTrailers == 0) {
       if (err == 0) {
         rs = genResponses(hdr->binCtx, resp, l);
       } else {
@@ -1244,7 +1239,7 @@ associators(CimRequestContext * ctx, RequestHdr * hdr)
   hdr->binCtx->commHndl = ctx->commHndl;
   hdr->binCtx->chunkFncs = ctx->chunkFncs;
 
-  if (noChunking || ctx->teTrailers == 0)
+  if (ctx->teTrailers == 0)
     hdr->chunkedMode = hdr->binCtx->chunkedMode = 0;
   else {
     hdr->binCtx->bHdr->flags |= FL_chunked;
@@ -1263,7 +1258,7 @@ associators(CimRequestContext * ctx, RequestHdr * hdr)
 
     closeProviderContext(hdr->binCtx);
 
-    if (noChunking || ctx->teTrailers == 0) {
+    if (ctx->teTrailers == 0) {
       if (err == 0) {
         rs = genResponses(hdr->binCtx, resp, l);
       } else {
@@ -1342,7 +1337,7 @@ references(CimRequestContext * ctx, RequestHdr * hdr)
   hdr->binCtx->commHndl = ctx->commHndl;
   hdr->binCtx->chunkFncs = ctx->chunkFncs;
 
-  if (noChunking || ctx->teTrailers == 0)
+  if (ctx->teTrailers == 0)
     hdr->chunkedMode = hdr->binCtx->chunkedMode = 0;
   else {
     hdr->binCtx->bHdr->flags |= FL_chunked;
@@ -1360,7 +1355,7 @@ references(CimRequestContext * ctx, RequestHdr * hdr)
     _SFCB_TRACE(1, ("--- Back from Provider"));
     closeProviderContext(hdr->binCtx);
 
-    if (noChunking || ctx->teTrailers == 0) {
+    if (ctx->teTrailers == 0) {
       if (err == 0) {
         rs = genResponses(hdr->binCtx, resp, l);
       } else {

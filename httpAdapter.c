@@ -82,7 +82,12 @@ static int      doBa;
 static int      doUdsAuth;
 #endif
 static int      doFork = 0;
-int             noChunking = 0;
+
+#define CHUNK_NEVER 0
+#define CHUNK_ALLOW 1
+#define CHUNK_FORCE 2
+int chunkMode = CHUNK_ALLOW;
+
 int             sfcbSSLMode = 0;        /* used as a global sslMode */
 int             httpLocalOnly = 0;      /* 1 = only listen on loopback
                                          * interface */
@@ -95,7 +100,6 @@ static long     keepaliveMaxRequest = 10;
 static long     numRequest;
 static long     selectTimeout = 5; /* default 5 sec. timeout for select() before read() */
 struct timeval  httpSelectTimeout = { 0, 0 };   
-int             trimws;
 
 #if defined USE_SSL
 static SSL_CTX *ctx;
@@ -1110,7 +1114,9 @@ doHttpRequest(CommHndl conn_fd)
   ctx.cimDoc = inBuf.content;
   ctx.principal = inBuf.principal;
   ctx.host = inBuf.host;
-  ctx.teTrailers = inBuf.trailers;
+  /* override based on sfcb.cfg value */
+  ctx.teTrailers = (chunkMode == CHUNK_FORCE) ? 1 : inBuf.trailers;
+  if (chunkMode == CHUNK_NEVER)  ctx.teTrailers = 0;
   ctx.cimDocLength = len - hl;
   ctx.commHndl = &conn_fd;
   ctx.contentType = inBuf.content_type;
@@ -1764,12 +1770,11 @@ httpDaemon(int argc, char *argv[], int sslMode)
   if (getControlNum("keepaliveMaxRequest", &keepaliveMaxRequest))
     keepaliveMaxRequest = 10;
 
-  if (getControlBool("useChunking", &noChunking))
-    noChunking = 0;
-  noChunking = noChunking == 0;
-
-  if (getControlBool("trimWhitespace", &trimws))
-    trimws = 0;
+  char* chunkStr;
+  if (getControlChars("useChunking", &chunkStr) == 0) {
+    if (strcmp(chunkStr, "false") == 0)  chunkMode = CHUNK_NEVER;
+    else if (strcmp(chunkStr, "always") == 0)  chunkMode = CHUNK_FORCE;
+  }
 
   /*
    * grab commandline options 
