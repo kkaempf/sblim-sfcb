@@ -932,35 +932,11 @@ process is spawned and enter an pause loop to allow you to attach to the
 process from the debugger. One attached, do the following to exit this pause
 loop and so be able to debug the normal execution of this process:
 
-	1. set a breakpoint at the sleep(5) statement 2006 in providerDrv.c
-	2. set the next instruction to the first statement after the
-	   sleep loop (2009).
-	3. set any other breakpoint that you desire for debugging and continue
+	1. set a breakpoint at the sleep(5) statement in httpAdapter.c
+	2. set a breakpoint farther down the execution path
+	3. breakout of the pause loop: set breakloop=1
 
-The following is the relevant code from providerDrv.c
-
-2932          if (once && debugMode && parms->req->operation != OPS_LoadProvider) for (;;) {
-2933             fprintf(stdout,"-#- Pausing for provider: %s -pid: %d\n",name,currentProc);
-2934             once=0;
-2935             sleep(5);
-2936          }
-2937
-2938          if (parms->req->operation == OPS_LoadProvider || debugMode) {
-2939             processProviderInvocationRequestsThread(parms);
-2940          }
-2941          else {
-2942             pthread_create(&t, &tattr, (void *(*)(void *))
-2943                 processProviderInvocationRequestsThread, (void *) parms);
-2944          }
-  
-[How pause class provider to attach debugger?]
-
-
-If the error(s) are determined to be in the SBLIM provider library, not the
-sfcb itself, then you should enabled provider debug messages using the
-SBLIM_TRACE environment variable and/or try attaching a runtime debugger to
-the provider's process and set appropriate breakpoints. See Section 23 below
-for more information about debugging providers.   
+Attaching to a provider process to degbug works similarly; see Sec. 23.
 
 
 17. Class Repository
@@ -1422,33 +1398,14 @@ process is spawned and enter a pause loop to allow you to attach to the
 process from the debugger. Once attached, do the following to exit the pause
 loop and so be able to debug the normal execution of the provider process:
 
-	1. set a breakpoint at the sleep(5) statement at line 2459 in
-	   providerDrv.c.and continue.
-	2. set the value of the variable debug_break to 1 so that the pause
-	   loop will be broken out of when line 2456 is executed.
-	3. set any breakpoints you desire in the provider code and continue.
+	1. set a breakpoint at the sleep(5) in providerDrv.c.and continue.
+	2. set any breakpoints you desire in the provider code and continue.
+	3. breakout of the pause loop: set debug_break=1
 
 	NOTE: Due to optimization, setting debug_break might not work. In
 	      this case sfcb will need to be built without optimizations by
 	      adding "CFLAGS=-g" when configuring sfcb.
                                                                                 
-The following is the relevant code from providerDrv.c
-
-2455          if (once && debugMode && parms->req->operation != OPS_LoadProvider) for (;;) {
-2456            if (debug_break) break;
-2457             fprintf(stdout,"-#- Pausing for provider: %s -pid: %d\n",name,currentProc);
-2458             once=0;      
-2459             sleep(5);
-2460          }
-2461 
-2462          if (parms->req->operation == OPS_LoadProvider || debugMode) {
-2463             processProviderInvocationRequestsThread(parms);
-2464          }
-2465          else {
-2466             pthread_create(&t, &tattr, (void *(*)(void *))
-2467                 processProviderInvocationRequestsThread, (void *) parms);
-2468          }
-
 
 24. wbemcli, sfcc and other CIM Clients
 =======================================
