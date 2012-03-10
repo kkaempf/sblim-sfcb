@@ -1,5 +1,8 @@
 2012-03-10  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* httpAdapter.c:
+	[ 3457460 ] PAM_RHOST set wrong
+
 	* httpAdapter.c, sfcBasicPAMAuthentication.c:
 	[ 3367332 ] RHOST Support for PAM
 
