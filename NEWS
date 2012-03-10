@@ -95,6 +95,7 @@ New Features:
 - 3493493 Add sfcbsem
 - 3498932 Implement ModifyInstance for CIM_ListenerDestination
 - 3440300 Allow forced chunked responses
+- 3367333 New entry point for authentication library
 
 Bugs Fixed: 
 
