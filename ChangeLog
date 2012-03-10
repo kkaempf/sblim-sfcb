@@ -1,3 +1,8 @@
+2012-03-10  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* httpAdapter.c, sfcBasicPAMAuthentication.c:
+	[ 3367332 ] RHOST Support for PAM
+
 2012-03-09  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* httpAdapter.c, control.c, sfcb.cfg.pre.in:
