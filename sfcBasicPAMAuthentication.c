@@ -1,6 +1,6 @@
 
 /*
- * $Id: sfcBasicPAMAuthentication.c,v 1.4 2012/03/12 19:20:18 buccella Exp $
+ * $Id: sfcBasicPAMAuthentication.c,v 1.5 2012/03/12 22:30:52 buccella Exp $
  *
  * © Copyright IBM Corp. 2007
  *
@@ -93,11 +93,14 @@ static int _sfcBasicAuthenticateRemote(char *user, char *pw, AuthExtras *extras)
   else {
     retval = 0;
   }
-  
+   /* for testing */
+   // pam_putenv(pamh, "CMPIRole=54321");
+
    /* if we keep the handle around, it means we'll call pam_end() later */
   if (extras) {
     extras->authHandle = pamh;
     extras->release = closePam;
+    extras->role = pam_getenv(pamh, "CMPIRole");
   }
   else
     pam_end(pamh, rc);
