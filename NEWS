@@ -97,6 +97,7 @@ New Features:
 - 3440300 Allow forced chunked responses
 - 3367333 New entry point for authentication library
 - 3367332 RHOST Support for PAM
+- 3367361 Allow for releasing auth handle after CIM request completes
 
 Bugs Fixed: 
 

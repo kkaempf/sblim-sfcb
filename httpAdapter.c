@@ -1199,6 +1199,10 @@ doHttpRequest(CommHndl conn_fd)
   if (response.buffer != NULL)
     cleanupCimXmlRequest(&response);
 
+  if (extras.release) {
+    extras.release(extras.authHandle);
+  }
+
 #ifdef SFCB_DEBUG
   if (uset && (_sfcb_trace_mask & TRACE_RESPONSETIMING)) {
     gettimeofday(&ev, NULL);
