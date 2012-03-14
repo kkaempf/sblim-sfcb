@@ -1149,6 +1149,7 @@ doHttpRequest(CommHndl conn_fd)
 
   ctx.cimDoc = inBuf.content;
   ctx.principal = inBuf.principal;
+  ctx.role = extras.role;
   ctx.host = inBuf.host;
   /* override based on sfcb.cfg value */
   ctx.teTrailers = (chunkMode == CHUNK_FORCE) ? 1 : inBuf.trailers;

@@ -127,7 +127,7 @@ buildAssociatorNamesRequest(void *parm)
   }
   sreq = calloc(1, sizeof(*sreq)); 
   sreq->hdr.operation = OPS_AssociatorNames;
-  sreq->hdr.count = 6; 
+  sreq->hdr.count = AIN_REQ_REG_SEGMENTS;
 
   sreq->objectPath = setObjectPathMsgSegment(path);
 
@@ -136,6 +136,7 @@ buildAssociatorNamesRequest(void *parm)
   sreq->assocClass = req->op.assocClass;
   sreq->resultRole = req->op.resultRole;
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->hdr.sessionId = hdr->sessionId;
 
   req->op.className = req->op.assocClass;
@@ -193,7 +194,7 @@ buildAssociatorsRequest(void *parm)
     sreqSize += req->properties * sizeof(MsgSegment);
   sreq = calloc(1, sreqSize);
   sreq->hdr.operation = OPS_Associators;
-  sreq->hdr.count = req->properties + 6;
+  sreq->hdr.count = req->properties + AI_REQ_REG_SEGMENTS;
 
   for (i = 0, m = req->objectName.bindings.next; i < m; i++) {
     valp = getKeyValueTypePtr(req->objectName.bindings.keyBindings[i].type,
@@ -213,6 +214,7 @@ buildAssociatorsRequest(void *parm)
   sreq->resultRole = req->op.resultRole;
   sreq->hdr.flags = req->flags;
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->hdr.sessionId = hdr->sessionId;
 
   for (i = 0; i < req->properties; i++)
@@ -255,9 +257,10 @@ buildEnumInstanceRequest(void *parm)
     sreqSize += req->properties * sizeof(MsgSegment);
   sreq = calloc(1, sreqSize);
   sreq->hdr.operation = OPS_EnumerateInstances;
-  sreq->hdr.count = req->properties + 2;
+  sreq->hdr.count = req->properties + EI_REQ_REG_SEGMENTS;
 
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->objectPath = setObjectPathMsgSegment(path);
   sreq->hdr.sessionId = hdr->sessionId;
 
@@ -302,7 +305,7 @@ buildCreateInstanceRequest(void *parm)
 
   sreq = calloc(1, sizeof(CreateInstanceReq));
   sreq->hdr.operation = OPS_CreateInstance;
-  sreq->hdr.count = 3;
+  sreq->hdr.count = CI_REQ_REG_SEGMENTS;
 
 
   for (p = req->instance.properties.first; p; p = p->next) {
@@ -316,6 +319,7 @@ buildCreateInstanceRequest(void *parm)
 
   sreq->instance = setInstanceMsgSegment(inst);
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->hdr.sessionId = hdr->sessionId;
 
   path = inst->ft->getObjectPath(inst, &st);
@@ -408,13 +412,14 @@ buildGetClassRequest(void *parm)
     sreqSize += req->properties * sizeof(MsgSegment);
   sreq = calloc(1, sreqSize);
   sreq->hdr.operation = OPS_GetClass;
-  sreq->hdr.count = req->properties + 2;
+  sreq->hdr.count=req->properties+GC_REQ_REG_SEGMENTS;
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
                             NULL);
   sreq->objectPath = setObjectPathMsgSegment(path);
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->hdr.sessionId = hdr->sessionId;
 
   for (i = 0; i < req->properties; i++)
@@ -444,13 +449,14 @@ buildDeleteClassRequest(void *parm)
 
   sreq = calloc(1, sizeof(DeleteClassReq));
   sreq->hdr.operation = OPS_DeleteClass;
-  sreq->hdr.count = 2;
+  sreq->hdr.count = DC_REQ_REG_SEGMENTS;
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
                             NULL);
   sreq->objectPath = setObjectPathMsgSegment(path);
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->hdr.sessionId = hdr->sessionId;
 
   binCtx->oHdr = (OperationHdr *) req;
@@ -481,7 +487,7 @@ buildDeleteInstanceRequest(void *parm)
 
   sreq = calloc(1, sreqSize);
   sreq->hdr.operation = OPS_DeleteInstance;
-  sreq->hdr.count = 2;
+  sreq->hdr.count = DI_REQ_REG_SEGMENTS;
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
@@ -497,6 +503,7 @@ buildDeleteInstanceRequest(void *parm)
   }
   sreq->objectPath = setObjectPathMsgSegment(path);
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->hdr.sessionId = hdr->sessionId;
 
   binCtx->oHdr = (OperationHdr *) req;
@@ -648,8 +655,9 @@ buildCreateClassRequest(void *parm)
   int sreqSize = sizeof(*sreq) + (3 * sizeof(MsgSegment));
   sreq = calloc(1, sreqSize);
   sreq->hdr.operation = OPS_CreateClass;
-  sreq->hdr.count = 3;
+  sreq->hdr.count = CC_REQ_REG_SEGMENTS;
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->path = setObjectPathMsgSegment(path);
   sreq->cls = setConstClassMsgSegment(cls);
   sreq->hdr.sessionId = hdr->sessionId;
@@ -690,7 +698,7 @@ buildModifyInstanceRequest(void *parm)
     sreqSize += req->properties * sizeof(MsgSegment);
   sreq = calloc(1, sreqSize);
   sreq->hdr.operation = OPS_ModifyInstance;
-  sreq->hdr.count = req->properties + 3;
+  sreq->hdr.count = req->properties + MI_REQ_REG_SEGMENTS;
 
   for (i = 0; i < req->properties; i++) {
     sreq->properties[i] =
@@ -729,6 +737,7 @@ buildModifyInstanceRequest(void *parm)
   sreq->instance = setInstanceMsgSegment(inst);
   sreq->path = setObjectPathMsgSegment(path);
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->hdr.sessionId = hdr->sessionId;
 
   binCtx->oHdr = (OperationHdr *) req;
@@ -761,9 +770,10 @@ buildEnumClassesRequest(void *parm)
   sreqSize = sizeof(*sreq);// + 2 * sizeof(MsgSegment);
   sreq = calloc(1, sreqSize);
   sreq->hdr.operation = OPS_EnumerateClasses;
-  sreq->hdr.count = 2;
+  sreq->hdr.count = EC_REQ_REG_SEGMENTS;
   sreq->objectPath = setObjectPathMsgSegment(path);
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->hdr.flags = req->flags;
   sreq->hdr.sessionId = hdr->sessionId;
 
@@ -797,8 +807,9 @@ buildEnumClassNamesRequest(void *parm)
   sreq = calloc(1, sizeof(*sreq));
   sreq->objectPath = setObjectPathMsgSegment(path);
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->hdr.operation = OPS_EnumerateClassNames;
-  sreq->hdr.count = 2;
+  sreq->hdr.count = ECN_REQ_REG_SEGMENTS;
   sreq->hdr.flags = req->flags;
   sreq->hdr.sessionId = hdr->sessionId;
 
@@ -833,8 +844,9 @@ buildEnumInstanceNamesRequest(void *parm)
   sreq = calloc(1, sizeof(*sreq));
   sreq->objectPath = setObjectPathMsgSegment(path);
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->hdr.operation = OPS_EnumerateInstanceNames;
-  sreq->hdr.count = 2;
+  sreq->hdr.count = EIN_REQ_REG_SEGMENTS;
   sreq->hdr.sessionId = hdr->sessionId;
 
   binCtx->oHdr = (OperationHdr *) req;
@@ -883,9 +895,10 @@ buildExecQueryRequest(void *parm)
 
   sreq = calloc(1, sizeof(*sreq));
   sreq->hdr.operation = OPS_ExecQuery;
-  sreq->hdr.count = 4;
+  sreq->hdr.count = EQ_REQ_REG_SEGMENTS;
   sreq->objectPath = setObjectPathMsgSegment(path);
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->query = setCharsMsgSegment((char *) req->op.query.data);
   sreq->queryLang = setCharsMsgSegment((char *) req->op.queryLang.data);
   sreq->hdr.sessionId = hdr->sessionId;
@@ -923,7 +936,7 @@ buildReferencesRequest(void *parm)
     sreqSize += req->properties * sizeof(MsgSegment);
   sreq = calloc(1, sreqSize);
   sreq->hdr.operation = OPS_References;
-  sreq->hdr.count = req->properties + 4;
+  sreq->hdr.count = req->properties + RI_REQ_REG_SEGMENTS;
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
@@ -957,6 +970,7 @@ buildReferencesRequest(void *parm)
   sreq->role = req->op.role;
   sreq->hdr.flags = req->flags;
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->hdr.sessionId = hdr->sessionId;
 
   for (i = 0; i < req->properties; i++)
@@ -1019,12 +1033,13 @@ buildReferenceNamesRequest(void *parm)
 
   sreq = calloc(1, sizeof(*sreq));
   sreq->hdr.operation = OPS_ReferenceNames;
-  sreq->hdr.count = 4;
+  sreq->hdr.count = RIN_REQ_REG_SEGMENTS;
   sreq->objectPath = setObjectPathMsgSegment(path);
 
   sreq->resultClass = req->op.resultClass;
   sreq->role = req->op.role;
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->hdr.sessionId = hdr->sessionId;
 
   req->op.className = req->op.resultClass;
@@ -1374,9 +1389,10 @@ buildInvokeMethodRequest(void *parm)
     }
   sreq = calloc(1, sizeof(*sreq));
   sreq->hdr.operation = OPS_InvokeMethod;
-  sreq->hdr.count = 5;
+  sreq->hdr.count = IM_REQ_REG_SEGMENTS;
   sreq->objectPath = setObjectPathMsgSegment(path);
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->hdr.sessionId = hdr->sessionId;
 
   if (getControlBool("validateMethodParamTypes", &vmpt))
@@ -2108,7 +2124,7 @@ iMethodCall
 methodCall
     : localClassPath 
     {
-       $$.op.count = 2;
+       $$.op.count = IM_REQ_REG_SEGMENTS;
        $$.op.type = OPS_InvokeMethod;
        $$.op.nameSpace=setCharsMsgSegment($1.path);
        $$.op.className=setCharsMsgSegment($1.className);
@@ -2121,7 +2137,7 @@ methodCall
     }   
     | localClassPath paramValues
     {
-       $$.op.count = 2;
+       $$.op.count = IM_REQ_REG_SEGMENTS;
        $$.op.type = OPS_InvokeMethod;
        $$.op.nameSpace=setCharsMsgSegment($1.path);
        $$.op.className=setCharsMsgSegment($1.className);
@@ -2133,7 +2149,7 @@ methodCall
     }   
     | localInstancePath 
     {
-       $$.op.count = 2;
+       $$.op.count = IM_REQ_REG_SEGMENTS;
        $$.op.type = OPS_InvokeMethod;
        $$.op.nameSpace=setCharsMsgSegment($1.path);
        $$.op.className=setCharsMsgSegment($1.instanceName.className);
@@ -2147,7 +2163,7 @@ methodCall
     }   
     | localInstancePath paramValues
     {
-       $$.op.count = 2;
+       $$.op.count = IM_REQ_REG_SEGMENTS;
        $$.op.type = OPS_InvokeMethod;
        $$.op.nameSpace=setCharsMsgSegment($1.path);
        $$.op.className=setCharsMsgSegment($1.instanceName.className);
@@ -2438,7 +2454,7 @@ setQualifierParm
 getClass
     : localNameSpacePath
     {
-       $$.op.count = 2;
+       $$.op.count = GC_REQ_REG_SEGMENTS;
        $$.op.type = OPS_GetClass;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
@@ -2452,7 +2468,7 @@ getClass
     }
     | localNameSpacePath getClassParmsList
     {
-       $$.op.count = 2;
+       $$.op.count = GC_REQ_REG_SEGMENTS;
        $$.op.type = OPS_GetClass;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.className);
@@ -2554,7 +2570,7 @@ getClassParms
 enumClassNames
     : localNameSpacePath
     {
-       $$.op.count = 2;
+       $$.op.count = ECN_REQ_REG_SEGMENTS;
        $$.op.type = OPS_EnumerateClassNames;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
@@ -2565,7 +2581,7 @@ enumClassNames
     }
     | localNameSpacePath enumClassNamesParmsList
     {
-       $$.op.count = 2;
+       $$.op.count = ECN_REQ_REG_SEGMENTS;
        $$.op.type = OPS_EnumerateClassNames;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.className);
@@ -2620,7 +2636,7 @@ enumClassNamesParms
 enumClasses
     : localNameSpacePath
     {
-       $$.op.count = 2;
+       $$.op.count = EC_REQ_REG_SEGMENTS;
        $$.op.type = OPS_EnumerateClasses;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
@@ -2631,7 +2647,7 @@ enumClasses
     }
     | localNameSpacePath enumClassesParmsList
     {
-       $$.op.count = 2;
+       $$.op.count = EC_REQ_REG_SEGMENTS;
        $$.op.type = OPS_EnumerateClasses;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.className);
@@ -2716,7 +2732,7 @@ enumClassesParms
 getInstance
     : localNameSpacePath
     {
-       $$.op.count = 2;
+       $$.op.count = GI_REQ_REG_SEGMENTS;
        $$.op.type = OPS_GetInstance;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
@@ -2724,13 +2740,14 @@ getInstance
        $$.propertyList.values = NULL;
        $$.properties=0;
        $$.instNameSet = 0;
+       //$$.userRole=setCharsMsgSegment($$.op.role);
 
        setRequest(parm,&$$,sizeof(XtokGetInstance),OPS_GetInstance);
        buildGetInstanceRequest(parm);
     }
     | localNameSpacePath getInstanceParmsList
     {
-       $$.op.count = 2;
+       $$.op.count = GI_REQ_REG_SEGMENTS;
        $$.op.type = OPS_GetInstance;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.instanceName.className);
@@ -2834,7 +2851,7 @@ getInstanceParms
 createClass
     : localNameSpacePath
     {
-       $$.op.count = 3;
+       $$.op.count = CC_REQ_REG_SEGMENTS;
        $$.op.type = OPS_CreateClass;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
@@ -2845,7 +2862,7 @@ createClass
     }
     | localNameSpacePath createClassParm
     {
-       $$.op.count = 3;
+       $$.op.count = CC_REQ_REG_SEGMENTS;
        $$.op.type = OPS_CreateClass;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.cls.className);
@@ -2873,7 +2890,7 @@ createClassParm
 createInstance
     : localNameSpacePath
     {
-       $$.op.count = 2;
+       $$.op.count = CI_REQ_REG_SEGMENTS;
        $$.op.type = OPS_CreateInstance;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
@@ -2883,7 +2900,7 @@ createInstance
     }
     | localNameSpacePath createInstanceParm
     {
-       $$.op.count = 2;
+       $$.op.count = CI_REQ_REG_SEGMENTS;
        $$.op.type = OPS_CreateInstance;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.instance.className);
@@ -2910,7 +2927,7 @@ createInstanceParm
 modifyInstance
     : localNameSpacePath
     {
-       $$.op.count = 2;
+       $$.op.count = MI_REQ_REG_SEGMENTS;
        $$.op.type = OPS_ModifyInstance;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
@@ -2923,7 +2940,7 @@ modifyInstance
     }
     | localNameSpacePath modifyInstanceParmsList
     {
-       $$.op.count = 2;
+       $$.op.count = MI_REQ_REG_SEGMENTS;
        $$.op.type = OPS_ModifyInstance;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.namedInstance.path.className);
@@ -3004,7 +3021,7 @@ modifyInstanceParms
 deleteClass
     : localNameSpacePath
     {
-       $$.op.count = 2;
+       $$.op.count = DC_REQ_REG_SEGMENTS;
        $$.op.type = OPS_DeleteClass;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
@@ -3014,7 +3031,7 @@ deleteClass
     }
     | localNameSpacePath deleteClassParm
     {
-       $$.op.count = 2;
+       $$.op.count = DC_REQ_REG_SEGMENTS;
        $$.op.type = OPS_DeleteClass;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.className);
@@ -3041,7 +3058,7 @@ deleteClassParm
 deleteInstance
     : localNameSpacePath
     {
-       $$.op.count = 2;
+       $$.op.count = DI_REQ_REG_SEGMENTS;
        $$.op.type = OPS_DeleteInstance;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
@@ -3051,7 +3068,7 @@ deleteInstance
     }
     | localNameSpacePath deleteInstanceParm
     {
-       $$.op.count = 2;
+       $$.op.count = DI_REQ_REG_SEGMENTS;
        $$.op.type = OPS_DeleteInstance;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.instanceName.className);
@@ -3079,7 +3096,7 @@ deleteInstanceParm
 enumInstanceNames
     : localNameSpacePath XTOK_IP_CLASSNAME className ZTOK_IPARAMVALUE
     {
-       $$.op.count = 2;
+       $$.op.count = EIN_REQ_REG_SEGMENTS;
        $$.op.type = OPS_EnumerateInstanceNames;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($3);
@@ -3098,7 +3115,7 @@ enumInstanceNames
 enumInstances
     : localNameSpacePath
     {
-       $$.op.count = 2;
+       $$.op.count = EI_REQ_REG_SEGMENTS;
        $$.op.type = OPS_EnumerateInstances;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
@@ -3111,7 +3128,7 @@ enumInstances
     }
     | localNameSpacePath enumInstancesParmsList
     {
-       $$.op.count = 2;
+       $$.op.count = EI_REQ_REG_SEGMENTS;
        $$.op.type = OPS_EnumerateInstances;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.className);
@@ -3228,7 +3245,7 @@ execQuery
           XTOK_IP_QUERY value ZTOK_IPARAMVALUE
           XTOK_IP_QUERYLANG value ZTOK_IPARAMVALUE
     {
-       $$.op.count = 3;
+       $$.op.count = EQ_REQ_REG_SEGMENTS;
        $$.op.type = OPS_ExecQuery;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.query=setCharsMsgSegment($3.value);
@@ -3241,7 +3258,7 @@ execQuery
           XTOK_IP_QUERYLANG value ZTOK_IPARAMVALUE
           XTOK_IP_QUERY value ZTOK_IPARAMVALUE
     {
-       $$.op.count = 3;
+       $$.op.count = EQ_REQ_REG_SEGMENTS;
        $$.op.type = OPS_ExecQuery;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.query=setCharsMsgSegment($6.value);
@@ -3261,7 +3278,7 @@ execQuery
 associators
     : localNameSpacePath
     {
-       $$.op.count = 6;
+       $$.op.count = AI_REQ_REG_SEGMENTS;
        $$.op.type = OPS_Associators;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
@@ -3279,7 +3296,7 @@ associators
     }
     | localNameSpacePath associatorsParmsList
     {
-       $$.op.count = 6;
+       $$.op.count = AI_REQ_REG_SEGMENTS;
        $$.op.type = OPS_Associators;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.objectName.className);
@@ -3443,7 +3460,7 @@ associatorsParms
 references
     : localNameSpacePath
     {
-       $$.op.count = 4;
+       $$.op.count = RI_REQ_REG_SEGMENTS;
        $$.op.type = OPS_References;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
@@ -3459,7 +3476,7 @@ references
     }
     | localNameSpacePath referencesParmsList
     {
-       $$.op.count = 4;
+       $$.op.count = RI_REQ_REG_SEGMENTS;
        $$.op.type = OPS_References;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.objectName.className);
@@ -3591,7 +3608,7 @@ referencesParms
 associatorNames
     : localNameSpacePath
     {
-       $$.op.count = 6;
+       $$.op.count = AIN_REQ_REG_SEGMENTS;
        $$.op.type = OPS_AssociatorNames;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
@@ -3606,7 +3623,7 @@ associatorNames
     }
     | localNameSpacePath associatorNamesParmsList
     {
-       $$.op.count = 6;
+       $$.op.count = AIN_REQ_REG_SEGMENTS;
        $$.op.type = OPS_AssociatorNames;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.objectName.className);
@@ -3705,7 +3722,7 @@ associatorNamesParms
 referenceNames
     : localNameSpacePath
     {
-       $$.op.count = 4;
+       $$.op.count = RIN_REQ_REG_SEGMENTS;
        $$.op.type = OPS_ReferenceNames;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
@@ -3718,7 +3735,7 @@ referenceNames
     }
     | localNameSpacePath referenceNamesParmsList
     {
-       $$.op.count = 4;
+       $$.op.count = RIN_REQ_REG_SEGMENTS;
        $$.op.type = OPS_ReferenceNames;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.objectName.className);

@@ -1336,6 +1336,8 @@ deleteClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
@@ -1390,9 +1392,11 @@ getClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
-  if (req->hdr.count > 2)
-    props = makePropertyList(req->hdr.count - 2, req->properties);
+  if (req->hdr.count>GC_REQ_REG_SEGMENTS) 
+       props=makePropertyList(req->hdr.count - GC_REQ_REG_SEGMENTS,req->properties);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
@@ -1441,6 +1445,8 @@ createClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
@@ -1485,6 +1491,8 @@ enumClassNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
 
@@ -1541,6 +1549,8 @@ enumClasses(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
 
@@ -1887,18 +1897,21 @@ invokeMethod(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
+
   if (info->parms)
     ctx->ft->addEntry(ctx, "sfcbProviderParameters",
                       (CMPIValue *) info->parms, CMPI_chars);
 
-  if (req->hdr.count > 5) {
+  if (req->hdr.count > IM_REQ_REG_SEGMENTS) {
     int             i,
                     s,
                     n;
     CMPIString     *name;
     in = CMNewArgs(Broker, NULL);
     BinRequestHdr  *r = (BinRequestHdr *) req;
-    for (n = 5, i = 0, s = CMGetArgCount(tIn, NULL); i < s; i++) {
+    for (n = IM_REQ_REG_SEGMENTS, i = 0, s = CMGetArgCount(tIn, NULL); i < s; i++) {
       CMPIData        d = CMGetArgAt(tIn, i, &name, NULL);
       if (d.type == CMPI_instance) {
         d.value.inst = relocateSerializedInstance(r->object[n++].data);
@@ -1967,9 +1980,11 @@ getInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
-  if (req->hdr.count > 2)
-    props = makePropertyList(req->hdr.count - 2, req->properties);
+  if (req->hdr.count > GI_REQ_REG_SEGMENTS)
+    props = makePropertyList(req->hdr.count - GI_REQ_REG_SEGMENTS, req->properties);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
@@ -2027,6 +2042,8 @@ deleteInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
@@ -2070,6 +2087,8 @@ createInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
@@ -2121,9 +2140,11 @@ modifyInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
-  if (req->hdr.count > 3)
-    props = makePropertyList(req->hdr.count - 3, req->properties);
+  if (req->hdr.count > MI_REQ_REG_SEGMENTS)
+    props = makePropertyList(req->hdr.count - MI_REQ_REG_SEGMENTS, req->properties);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
@@ -2185,9 +2206,11 @@ enumInstances(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
-  if (req->hdr.count > 2)
-    props = makePropertyList(req->hdr.count - 2, req->properties);
+  if (req->hdr.count > EI_REQ_REG_SEGMENTS)
+    props = makePropertyList(req->hdr.count - EI_REQ_REG_SEGMENTS, req->properties);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
@@ -2234,6 +2257,8 @@ enumInstanceNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
@@ -2344,6 +2369,8 @@ execQuery(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
@@ -2450,9 +2477,11 @@ associators(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
-  if (req->hdr.count > 6)
-    props = makePropertyList(req->hdr.count - 6, req->properties);
+  if (req->hdr.count > AI_REQ_REG_SEGMENTS)
+    props = makePropertyList(req->hdr.count - AI_REQ_REG_SEGMENTS, req->properties);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
@@ -2505,9 +2534,11 @@ references(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
-  if (req->hdr.count > 4)
-    props = makePropertyList(req->hdr.count - 4, req->properties);
+  if (req->hdr.count > RI_REQ_REG_SEGMENTS)
+    props = makePropertyList(req->hdr.count - RI_REQ_REG_SEGMENTS, req->properties);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
@@ -2552,6 +2583,8 @@ associatorNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)
@@ -2598,6 +2631,8 @@ referenceNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                     CMPI_chars);
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
+  ctx->ft->addEntry(ctx, CMPIRole, (CMPIValue *) req->userRole.data, 
+                    CMPI_chars);
 
   _SFCB_TRACE(1, ("--- Calling provider %s", info->providerName));
   TIMING_START(hdr, info)

@@ -1808,6 +1808,7 @@ handleCimRequest(CimRequestContext * ctx, int flags)
      at once. This should be changed after all ops
      are handled in the parser. */
     hdr = scanners[i].scan(ctx, ctx->cimDoc, &parserc);
+    hdr.role=ctx->role;
     if (parserc == 0) {
       /* The scanner recognizes the request so we don't
        * need to give it to anymore scanners. */

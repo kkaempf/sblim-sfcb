@@ -1,3 +1,10 @@
+2012-03-14  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* brokerUpc.c, cimRequest.c, cimRequest.h, cimXmlOps.y,
+	  cimcClientSfcbLocal.c, httpAdapter.c, providerDrv.c,
+	  providerMgr.c, providerMgr.h, sfcBasicPAMAuthentication.c
+	[ 3367363 ] Add CMPIRole Support
+
 2012-03-12  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* httpAdapter.c, sfcBasicPAMAuthentication.c:

@@ -99,10 +99,14 @@ _sfcBasicAuthenticateRemote(char *user, char *pw, AuthExtras *extras)
     retval = 0;
   }
 
+   /* for testing */
+   // pam_putenv(pamh, "CMPIRole=54321");
+
    /* if we keep the handle around, it means we'll call pam_end() later */
   if (extras) {
     extras->authHandle = pamh;
     extras->release = closePam;
+    extras->role = pam_getenv(pamh, "CMPIRole");
   }
   else
     pam_end(pamh, rc);

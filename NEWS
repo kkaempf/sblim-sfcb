@@ -98,6 +98,7 @@ New Features:
 - 3367333 New entry point for authentication library
 - 3367332 RHOST Support for PAM
 - 3367361 Allow for releasing auth handle after CIM request completes
+- 3367363 Add CMPIRole Support
 
 Bugs Fixed: 
 

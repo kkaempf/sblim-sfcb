@@ -56,6 +56,7 @@ typedef struct cimRequestContext {
   char           *contentType;
   int             teTrailers;
   unsigned int    sessionId;
+  const char     *role;
   unsigned long   cimDocLength;
   struct commHndl *commHndl;
   struct chunkFunctions *chunkFncs;
@@ -78,6 +79,7 @@ typedef struct requestHdr {
   unsigned long   cimRequestLength;
   char           *errMsg;
   char           *className;
+  const char     *role;
   BinRequestContext  *binCtx;
 /* These don't really belong here, but it's *
  * an easy way to get them to the parser.   */
