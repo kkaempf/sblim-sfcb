@@ -267,6 +267,16 @@ setContext(BinRequestContext * binCtx, OperationHdr * oHdr,
   binCtx->chunkedMode = 0;
 }
 
+static char* getRole(const CMPIContext * context) 
+{
+  CMPIStatus st = {0, NULL};
+  CMPIData roledata = CMGetContextEntry(context, "CMPIRole", &st);
+  if (st.rc == CMPI_RC_OK) 
+    return CMGetCharPtr(roledata.value.string);
+  else
+    return NULL;
+}
+
 static void
 cpyResult(CMPIResult *result, CMPIArray *ar, int *c)
 {
@@ -580,10 +590,12 @@ getInstance(const CMPIBroker * broker,
       sreqSize += sizeof(MsgSegment);
     }
     sreq = (GetInstanceReq *) calloc(1, sreqSize);
-    sreq->hdr.count = ps + 2;
+    sreq->hdr.count=ps+GI_REQ_REG_SEGMENTS;
     sreq->hdr.operation = OPS_GetInstance;
 
     setContext(&binCtx, &oHdr, &sreq->hdr, sreqSize, context, cop, NULL, NULL);
+    sreq->userRole = setCharsMsgSegment(getRole(context));
+
     _SFCB_TRACE(1,
                 ("--- for %s %s", (char *) oHdr.nameSpace.data,
                  (char *) oHdr.className.data));
@@ -688,7 +700,7 @@ createInstance(const CMPIBroker * broker,
                  (char *) oHdr.className.data));
 
     sreq.instance = setInstanceMsgSegment(inst);
-    sreq.userRole = setCharsMsgSegment(NULL);
+    sreq.userRole = setCharsMsgSegment(getRole(context));
 
     checkReroute(broker, context, &oHdr);
 
@@ -777,15 +789,16 @@ modifyInstance(const CMPIBroker * broker,
     for (ps = 0, p = props; p && *p; p++, ps++)
       sreqSize += sizeof(MsgSegment);
     sreq = (ModifyInstanceReq *) calloc(1, sreqSize);
-    sreq->hdr.count = ps + 3;
+    sreq->hdr.count=ps+MI_REQ_REG_SEGMENTS;
     sreq->hdr.operation = OPS_ModifyInstance;
-    sreq->userRole = setCharsMsgSegment(NULL);
 
     setContext(&binCtx, &oHdr, &sreq->hdr, sreqSize, context, cop, NULL, NULL);
     _SFCB_TRACE(1,
                 ("--- for %s %s", (char *) oHdr.nameSpace.data,
                  (char *) oHdr.className.data));
 
+    sreq->userRole = setCharsMsgSegment(getRole(context));
+    //      fprintf(stderr, "brokerUpc MI: CMPIRole is \"%s\"\n", CMGetCharPtr(roledata.value.string));
     checkReroute(broker, context, &oHdr);
 
     sreq->instance = setInstanceMsgSegment(inst);
@@ -862,7 +875,7 @@ deleteInstance(const CMPIBroker * broker,
     _SFCB_TRACE(1,
                 ("--- for %s %s", (char *) oHdr.nameSpace.data,
                  (char *) oHdr.className.data));
-    sreq.userRole = setCharsMsgSegment(NULL);
+    sreq.userRole = setCharsMsgSegment(getRole(context));
 
     checkReroute(broker, context, &oHdr);
 
@@ -938,7 +951,7 @@ execQuery(const CMPIBroker * broker,
 
     sreq.query = setCharsMsgSegment(query);
     sreq.queryLang = setCharsMsgSegment(lang);
-    sreq.userRole = setCharsMsgSegment(NULL);
+    sreq.userRole = setCharsMsgSegment(getRole(context));
 
     irc = getProviderContext(&binCtx);
 
@@ -1017,7 +1030,7 @@ enumInstances(const CMPIBroker * broker,
 {
   EnumInstancesReq sreq = BINREQ(OPS_EnumerateInstances, EI_REQ_REG_SEGMENTS);
   OperationHdr    oHdr = { OPS_EnumerateInstances, 2 };
-  sreq.userRole = setCharsMsgSegment(NULL);
+  sreq.userRole = setCharsMsgSegment(getRole(context));
 
   return genericEnumRequest(broker, context, cop, props, NULL, NULL, NULL,
                             NULL, OPS_EnumerateInstances, &sreq.hdr, &oHdr,
@@ -1031,7 +1044,7 @@ enumInstanceNames(const CMPIBroker * broker,
 {
   EnumInstanceNamesReq sreq = BINREQ(OPS_EnumerateInstanceNames, EIN_REQ_REG_SEGMENTS);
   OperationHdr    oHdr = { OPS_EnumerateInstanceNames, 2 };
-  sreq.userRole = setCharsMsgSegment(NULL);
+  sreq.userRole = setCharsMsgSegment(getRole(context));
 
   return genericEnumRequest(broker, context, cop, NULL, NULL, NULL, NULL,
                             NULL, OPS_EnumerateInstanceNames, &sreq.hdr,
@@ -1060,7 +1073,7 @@ associators(const CMPIBroker * broker,
   sreq.role = setCharsMsgSegment(role);
   sreq.assocClass = setCharsMsgSegment(assocclass);
   sreq.resultRole = setCharsMsgSegment(resultrole);
-  sreq.userRole = setCharsMsgSegment(NULL);
+  sreq.userRole = setCharsMsgSegment(getRole(context));
 
   return genericEnumRequest(broker, context, cop, props, assocclass,
                             resultclass, role, resultrole, OPS_Associators,
@@ -1084,7 +1097,7 @@ associatorNames(const CMPIBroker * broker,
   sreq.role = setCharsMsgSegment(role);
   sreq.assocClass = setCharsMsgSegment(assocclass);
   sreq.resultRole = setCharsMsgSegment(resultrole);
-  sreq.userRole = setCharsMsgSegment(NULL);
+  sreq.userRole = setCharsMsgSegment(getRole(context));
 
   return genericEnumRequest(broker, context, cop, NULL, assocclass,
                             resultclass, role, resultrole,
@@ -1104,7 +1117,7 @@ references(const CMPIBroker * broker,
 
   sreq.role = setCharsMsgSegment(role);
   sreq.resultClass = setCharsMsgSegment(resultclass);
-  sreq.userRole = setCharsMsgSegment(NULL);
+  sreq.userRole = setCharsMsgSegment(getRole(context));
 
   return genericEnumRequest(broker, context, cop, props, NULL,
                             resultclass, role, NULL, OPS_References,
@@ -1123,7 +1136,7 @@ referenceNames(const CMPIBroker * broker,
 
   sreq.role = setCharsMsgSegment(role);
   sreq.resultClass = setCharsMsgSegment(resultclass);
-  sreq.userRole = setCharsMsgSegment(NULL);
+  sreq.userRole = setCharsMsgSegment(getRole(context));
 
   return genericEnumRequest(broker, context, cop, NULL, NULL, resultclass,
                             role, NULL, OPS_ReferenceNames, &sreq.hdr,
@@ -1185,7 +1198,7 @@ invokeMethod(const CMPIBroker * broker, const CMPIContext *context,
     sreq->in = setArgsMsgSegment(in);
     sreq->out = setArgsMsgSegment(NULL);
     sreq->method = setCharsMsgSegment(method);
-    sreq->userRole = setCharsMsgSegment(NULL);
+    sreq->userRole = setCharsMsgSegment(getRole(context));
 
     if (x) 
       for (n=IM_REQ_REG_SEGMENTS,i=0,s=CMGetArgCount(in,NULL); i<s; i++) {
