@@ -172,15 +172,24 @@ enableHttps:    @SFCB_CONF_HTTPS@
 httpsPort:      5989
 
 ## Filename containing the private key for the server's certificate. The file 
-## must be in PEM format and may not be passphrase-protected. 
+## must be in PEM format and may not be passphrase-protected. The file is
+## relevant for both client connect and indications sent via https.
+## For client connect: the file must be present if enableHttps is true.
+## For indications: the file is required only if the indication receiver
+## will attempt to verify the sender (sfcb) certificate.
 ## Default is @sysconfdir@/sfcb/file.pem
 sslKeyFilePath: @sysconfdir@/sfcb/file.pem
 
 ## Filename containing the server's certificate. Must be in PEM format.
+## The file is relevant for both client connect and indications sent via https.
+## For client connect: the file must be present if enableHttps is true.
+## For indications: the file is required only if the indication receiver
+## will attempt to verify the sender (sfcb) certificate.
 ## Default is @sysconfdir@/sfcb/server.pem
 sslCertificateFilePath: @sysconfdir@/sfcb/server.pem
 
-## Filename containing list of certificates server accepts
+## Filename containing list of certificates server accepts.
+## The file is relevant client connect only.
 ## Default is @sysconfdir@/sfcb/clist.pem
 sslCertList: @sysconfdir@/sfcb/clist.pem
 
@@ -192,8 +201,23 @@ sslCertList: @sysconfdir@/sfcb/clist.pem
 ## Default is ignore
 sslClientCertificate: ignore
 
-## Location of the trust store. If sslClientCertificate is set to "require", 
+## How SFCB handles verification of the endpoint certificate when sending
+## an indication via https.
+## ignore - do not attempt to validate the endpoint certificate
+## verify - validate the certificate against known CA certs in the trust store;
+##          do not send the indication if verification fails.
+## verifyhostname - additionally validate the certificate CN (common name)
+##          against the indication handler Destination address; 
+##          do not send the indication if verification fails.
+## Default is ignore (always send the indication)
+sslIndicationReceiverCert: ignore
+
+## Location of the trust store. Contains one or more CA certificates.
+## The file is relevant for both client connect and indications sent via https.
+## For client connect: if sslClientCertificate is set to "require", 
 ## certificate presented must present valid according to the trust store.
+## For indications: if sslIndicationReceiverCert is set to "verify" or
+## "verifyhostname", the endpoint's certificate is checked against this file.
 ## Default: @sysconfdir@/sfcb/client.pem
 sslClientTrustStore: @sysconfdir@/sfcb/client.pem
 

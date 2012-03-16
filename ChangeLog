@@ -1,3 +1,8 @@
+2012-03-16 Dave Heller <hellerda@us.ibm.com>
+
+	* control.c, indCIMXMLExport.c, sfcb.cfg.pre.in:
+	[ 3506453 ] Support peer cert verification for SSL indications
+
 2012-03-15  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* brokerUpc.c:

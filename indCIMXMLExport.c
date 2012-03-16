@@ -150,7 +150,9 @@ genRequest(CurlData * cd, char *url, char **msg)
 {
   CURLcode        rv;
   char           *fnc,
-                 *fnk;
+                 *fnk,
+                 *fnt,
+                 *fnl;
 
   *msg = NULL;
 
@@ -180,10 +182,38 @@ genRequest(CurlData * cd, char *url, char **msg)
   rv = curl_easy_setopt(cd->mHandle, CURLOPT_POST, 1);
 
   /*
-   * Disable SSL verification 
+   * Enable endpoint cert verification as required
    */
-  rv = curl_easy_setopt(cd->mHandle, CURLOPT_SSL_VERIFYHOST, 0);
-  rv = curl_easy_setopt(cd->mHandle, CURLOPT_SSL_VERIFYPEER, 0);
+  getControlChars("sslIndicationReceiverCert", &fnl);
+  for(;;) {
+    if (strcasecmp(fnl, "ignore") == 0) {
+      rv = curl_easy_setopt(cd->mHandle, CURLOPT_SSL_VERIFYPEER, 0);
+      rv = curl_easy_setopt(cd->mHandle, CURLOPT_SSL_VERIFYHOST, 0);
+      break;
+    } else if ((strcasecmp(fnl, "verify") == 0) ||
+               (strcasecmp(fnl, "verifyhostname") == 0)) {
+      if (getControlChars("sslClientTrustStore", &fnt) == 0) {
+        rv = curl_easy_setopt(cd->mHandle, CURLOPT_CAINFO, fnt);
+      } else {
+        /* possible? */
+        *msg=strdup("Cannot determine value of sslClientTrustStore parameter.");
+        return 3;
+      }
+      rv = curl_easy_setopt(cd->mHandle, CURLOPT_SSL_VERIFYPEER, 1);
+      if (strcasecmp(fnl, "verify") == 0) {
+        rv = curl_easy_setopt(cd->mHandle, CURLOPT_SSL_VERIFYHOST, 0);
+        break;
+      } else {  /* verifyhostname */
+        rv = curl_easy_setopt(cd->mHandle, CURLOPT_SSL_VERIFYHOST, 2);
+        break;
+      }
+    } else {
+      // Since we don't know user intent in this case, assume the strictest.
+      mlogf(M_ERROR,M_SHOW,
+          "--- ERROR: Invalid value for sslIndicationReceiverCert, setting to: verifyhostname.\n");
+      fnl = "verifyhostname";
+    }
+  }
 
   /*
    * set up client side cert usage 
@@ -228,7 +258,7 @@ genRequest(CurlData * cd, char *url, char **msg)
   rv = curl_easy_setopt(cd->mHandle, CURLOPT_FAILONERROR, 1);
 
   // Turn this on to enable debugging
-  // rv = curl_easy_setopt(mHandle, CURLOPT_VERBOSE, 1);
+  // rv = curl_easy_setopt(cd->mHandle, CURLOPT_VERBOSE, 1);
 
   return 0;
 }

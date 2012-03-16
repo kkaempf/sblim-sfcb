@@ -108,6 +108,7 @@ Control         init[] = {
   {"enableInterOp", 2, "true"},
   {"sslClientTrustStore", 0, SFCB_CONFDIR "/client.pem"},
   {"sslClientCertificate", 0, "ignore"},
+  {"sslIndicationReceiverCert", 0, "ignore" },
   {"certificateAuthLib", 0, "sfcCertificateAuthentication"},
   {"localSocketPath", 0, "/tmp/sfcbLocalSocket"},
   {"httpSocketPath", 0, "/tmp/sfcbHttpSocket"},

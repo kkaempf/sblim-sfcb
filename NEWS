@@ -6,6 +6,7 @@ Everything in 1.3.13 and 1.3.14, plus:
 New features:
 - 3441679 Add a feature to validate CMPI types
 - 3497831 Updates to sfcb-ps test script
+- 3506453 Support peer cert verification for SSL indications
 
 Bugs fixed: 
 - 3495804 Cleanup: httpProcId still defined, wrong define in cimXmlGen
