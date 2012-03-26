@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.67 2012/03/16 19:07:53 buccella Exp $
+ * $Id: cimXmlRequest.c,v 1.68 2012/03/26 19:39:36 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2189,8 +2189,6 @@ static RespSegments invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
                                                  
    _SFCB_TRACE(1, ("--- Provider context gotten"));
    if (irc == MSG_X_PROVIDER) {
-     fprintf(stderr, "cimXmlRequest: before invokeProvider, ctx.role is \"%s\"\n", ctx->role);
-
       RespSegments rs;
       resp = invokeProvider(&binCtx);
       closeProviderContext(&binCtx);
