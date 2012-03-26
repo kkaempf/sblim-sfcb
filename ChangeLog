@@ -1,3 +1,8 @@
+2012-03-26  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+	* providerDrv.c:
+	[ 3498496 ] sfcb hangs and fails to respond to CIM requests
+
 2012-03-16  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* cimXmlRequest.c:

@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.110 2012/03/12 22:30:52 buccella Exp $
+ * $Id: providerDrv.c,v 1.111 2012/03/26 18:32:25 nsharoff Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2416,7 +2416,7 @@ static BinResponseHdr *deactivateFilter(BinRequestHdr *hdr, ProviderInfo* info,
    IndicationReq *req = (IndicationReq*)hdr;
    BinResponseHdr *resp=NULL;
    CMPIStatus rci = { CMPI_RC_OK, NULL };
-   NativeSelectExp *se=NULL,**sef=&activFilters;
+   NativeSelectExp *se=NULL, *prev = NULL;
    CMPIObjectPath *path = relocateSerializedObjectPath(req->objectPath.data);
    CMPIContext *ctx = native_new_CMPIContext(MEM_TRACKED,info);
    CMPIResult *result = native_new_CMPIResult(0,1,NULL);
@@ -2432,9 +2432,9 @@ static BinResponseHdr *deactivateFilter(BinRequestHdr *hdr, ProviderInfo* info,
    _SFCB_TRACE(1, ("---  pid: %d activFilters %p",currentProc,activFilters));
    if (info->indicationMI==NULL || activFilters==NULL) _SFCB_RETURN(resp); 
 
-   for (se = activFilters; se; se = se->next) {
+   for (se = activFilters; se; prev = se, se = se->next) {
+        //_SFCB_TRACE(1, ("---- se->filterid:%p, req=>filterid:%p, se:%p, activFilters:%p, prev:%p", se->filterId, req->filterId, se, activFilters, prev));
       if (se->filterId == req->filterId) {
-         *sef=se->next;
          if (activFilters==NULL) {
             _SFCB_TRACE(1, ("--- Calling disableIndications %s",info->providerName));
             info->indicationEnabled=0;
@@ -2458,6 +2458,16 @@ static BinResponseHdr *deactivateFilter(BinRequestHdr *hdr, ProviderInfo* info,
          if (rci.rc==CMPI_RC_OK) {
 	   decreaseInUseSem(info->provIds.procId);
 	   resp->rc=1;
+           /*79580-3498496*/
+            if (prev == NULL) {
+                 activFilters = activFilters->next;
+            }
+            else {
+                 prev->next = se->next;
+            }
+            _SFCB_TRACE(1, ("---- pid:%d, freeing: %p", currentProc, se));
+            CMRelease((CMPISelectExp *)se);
+
 	   _SFCB_RETURN(resp);
          }
 
@@ -2465,8 +2475,6 @@ static BinResponseHdr *deactivateFilter(BinRequestHdr *hdr, ProviderInfo* info,
          resp = errorResp(&rci);
          _SFCB_RETURN(resp);
       }
-      sef=&se->next;
-      CMRelease((CMPISelectExp*)se);
    }
 
    _SFCB_RETURN(resp);
