@@ -1,3 +1,9 @@
+2012-03-28  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimRequest.c:
+	[ 3510458 ] Malformed XML response to GetProperty
+	(patch by Zane Bitter)
+
 2012-03-16 Dave Heller <hellerda@us.ibm.com>
 
 	* control.c, indCIMXMLExport.c, sfcb.cfg.pre.in:

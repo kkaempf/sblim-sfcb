@@ -198,3 +198,7 @@ Josef Moellers
 Santosh Bidaralli, Dell
 -----------------------
 06/22/2011 [ 3324578 ] getInstance() up call does not close provider context
+
+Zane Bitter, Red Hat
+--------------------
+03/28/2012 [ 3510458 ] Malformed XML response to GetProperty

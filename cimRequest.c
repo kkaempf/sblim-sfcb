@@ -1460,7 +1460,6 @@ getProperty(CimRequestContext * ctx, RequestHdr * hdr)
   CMPIInstance   *inst;
   CMPIData        data;
   UtilStringBuffer *sb;
-  CMPIString     *tmpString = NewCMPIString(NULL, NULL);
   int             irc;
   BinResponseHdr *resp;
   RespSegments    rsegs;
@@ -1479,9 +1478,7 @@ getProperty(CimRequestContext * ctx, RequestHdr * hdr)
       inst = relocateSerializedInstance(resp->object[0].data);
       sb = UtilFactory->newStrinBuffer(1024);
       data = inst->ft->getProperty(inst, req->name, NULL);
-      data2xml(&data, NULL, tmpString, NULL, NULL, 0, NULL, 0, sb, NULL, 0,
-               0);
-      CMRelease(tmpString);
+      value2xml(data, sb, 1);
       rsegs = iMethodResponse(hdr, sb);
       if (resp) {
         free(resp);
@@ -1495,11 +1492,9 @@ getProperty(CimRequestContext * ctx, RequestHdr * hdr)
     if (resp) {
       free(resp);
     }
-    CMRelease(tmpString);
     free(hdr->binCtx->bHdr);
     _SFCB_RETURN(rs);
   }
-  CMRelease(tmpString);
   free(hdr->binCtx->bHdr);
   closeProviderContext(hdr->binCtx);
 
