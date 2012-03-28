@@ -1,3 +1,9 @@
+2012-03-28  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimXmlRequest.c:
+	[ 3510458 ] Malformed XML response to GetProperty
+	(patch by Zane Bitter)
+
 2012-03-28 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* interopProvider.c:
