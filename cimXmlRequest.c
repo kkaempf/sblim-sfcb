@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.69 2012/03/28 15:44:30 buccella Exp $
+ * $Id: cimXmlRequest.c,v 1.70 2012/03/28 15:48:12 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2238,7 +2238,7 @@ static RespSegments getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
    CMPIData data;
    CMPIStatus rc;
    UtilStringBuffer *sb;
-   int irc;
+   int irc, i, m;
    BinRequestContext binCtx;
    BinResponseHdr *resp;
    RespSegments rsegs;
@@ -2249,6 +2249,16 @@ static RespSegments getProperty(CimXmlRequestContext * ctx, RequestHdr * hdr)
    hdr->className=req->op.className.data;
 
    path = TrackedCMPIObjectPath(req->op.nameSpace.data, req->instanceName.className, &rc);
+   for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
+      CMPIType type;
+      CMPIValue val, *valp;
+
+      valp = getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
+                                req->instanceName.bindings.keyBindings[i].value,
+                                &req->instanceName.bindings.keyBindings[i].ref,
+                                &val, &type, req->op.nameSpace.data);
+      CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp, type);
+   }
 
    sreq.principal = setCharsMsgSegment(ctx->principal);
    sreq.path = setObjectPathMsgSegment(path);
