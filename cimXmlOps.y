@@ -1065,6 +1065,7 @@ buildGetPropertyRequest(void *parm)
   GetPropertyReq  *sreq;//BINREQ(OPS_GetProperty, 3);
   RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
   BinRequestContext *binCtx = hdr->binCtx;
+  int i, m;
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "buildGetPropertyRequest");
 
@@ -1075,6 +1076,16 @@ buildGetPropertyRequest(void *parm)
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data,
                             req->instanceName.className, &rc);
+  for (i = 0, m = req->instanceName.bindings.next; i < m; i++) {
+    CMPIType type;
+    CMPIValue val, *valp;
+
+    valp = getKeyValueTypePtr(req->instanceName.bindings.keyBindings[i].type,
+                              req->instanceName.bindings.keyBindings[i].value,
+                              &req->instanceName.bindings.keyBindings[i].ref,
+                              &val, &type, req->op.nameSpace.data);
+    CMAddKey(path, req->instanceName.bindings.keyBindings[i].name, valp, type);
+  }
 
   sreq = calloc(1, sizeof(*sreq));
   sreq->hdr.operation = OPS_GetProperty;

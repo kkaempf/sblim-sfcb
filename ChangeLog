@@ -1,5 +1,9 @@
 2012-03-28  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* cimXmlOps.y:
+	[ 3510456 ] GetProperty calls not passing keys to providers
+	(patch by Zane Bitter)
+
 	* cimRequest.c:
 	[ 3510458 ] Malformed XML response to GetProperty
 	(patch by Zane Bitter)
