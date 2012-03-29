@@ -1,3 +1,8 @@
+2012-03-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* providerDrv.c:
+	[ 3408288 ] Safer Signal Handlers
+
 2012-03-29 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* cimcClientSfcbLocal.c:
