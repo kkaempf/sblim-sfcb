@@ -3561,9 +3561,12 @@ processProviderInvocationRequests(char *name)
       if (parms->req->operation == OPS_LoadProvider || debugMode) {
         processProviderInvocationRequestsThread(parms);
       } else {
-        pthread_create(&t, &tattr, (void *(*)(void *))
-                       processProviderInvocationRequestsThread,
-                       (void *) parms);
+	int pcrc = pthread_create(&t, &tattr, (void *(*)(void *))
+				  processProviderInvocationRequestsThread,
+				  (void *) parms);
+	if (pcrc) 
+	  mlogf(M_ERROR,M_SHOW,"pthread_create() failed for handling provider request\n");
+
       }
     } else {
       free(parms);

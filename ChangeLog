@@ -1,3 +1,8 @@
+2012-03-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* interopProvider.c, providerDrv.c, control.c, sfcb.cfg.pre.in:
+	[ 3512575 ] Add indication delivery thread limit and timeout
+
 2012-03-28  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* cimXmlOps.y:

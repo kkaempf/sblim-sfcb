@@ -37,6 +37,7 @@
 #include "objectpath.h"
 #include <time.h>
 #include "instance.h"
+#include "control.h"
 
 #define LOCALCLASSNAME "InteropProvider"
 
@@ -86,6 +87,19 @@ typedef struct subscription {
 static UtilHashTable *filterHt = NULL;
 static UtilHashTable *handlerHt = NULL;
 static UtilHashTable *subscriptionHt = NULL;
+
+/* for indication delivery */
+static long MAX_IND_THREADS;
+static long IND_THREAD_TO;
+static sem_t availThreadsSem;
+struct timespec availThreadWait;
+
+typedef struct delivery_info {
+  const CMPIContext* ctx;
+  CMPIObjectPath *hop;  
+  CMPIArgs* hin;
+} DeliveryInfo;
+
 
 /*
  * ------------------------------------------------------------------------- 
@@ -817,6 +831,10 @@ initInterOp(const CMPIBroker * broker, const CMPIContext *ctx)
   }
   CMRelease(ctxLocal);
 
+  getControlNum("indicationDeliveryThreadLimit",&MAX_IND_THREADS);
+  getControlNum("indicationDeliveryThreadTimeout",&IND_THREAD_TO);
+  sem_init(&availThreadsSem, 0, MAX_IND_THREADS);
+
   _SFCB_EXIT();
 }
 
@@ -1340,24 +1358,22 @@ InteropProviderMethodCleanup(CMPIMethodMI * mi,
  * ------------------------------------------------------------------------- 
  */
 
-typedef struct delivery_info {
-  const CMPIContext* ctx;
-  CMPIObjectPath *hop;  
-  CMPIArgs* hin;
-} DeliveryInfo;
 
 void * sendIndForDelivery(void *di) {
 
   _SFCB_ENTER(TRACE_INDPROVIDER, "sendIndForDelivery");
+  fprintf(stderr, "thread started %p\n", (void*)pthread_self());
 
   DeliveryInfo* delInfo;
   delInfo = (DeliveryInfo*)di;
   CBInvokeMethod(_broker,delInfo->ctx,delInfo->hop,"_deliver",delInfo->hin,NULL,NULL);
-
+  sleep(5);
   CMRelease((CMPIContext*)delInfo->ctx);
   CMRelease(delInfo->hop);
   CMRelease(delInfo->hin);
   free(di);
+  sem_post(&availThreadsSem);
+  fprintf(stderr, "thread exiting %p\n", (void*)pthread_self());
   pthread_exit(NULL);
 }
 
@@ -1438,10 +1454,25 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
           di->ctx = native_clone_CMPIContext(ctx);
           di->hop = CMClone(su->ha->hop, NULL);
           di->hin = CMClone(hin, NULL);
-
-	  pthread_create(&ind_thread, &it_attr,&sendIndForDelivery,(void *) di);
-
-          _SFCB_TRACE(1, ("--- invoke handler status: %d", st.rc));
+	  if (IND_THREAD_TO > 0) {
+	    availThreadWait.tv_sec = time(NULL) + IND_THREAD_TO;
+	    while ((sem_timedwait(&availThreadsSem, &availThreadWait)) == -1) {
+	      if (errno == ETIMEDOUT) {
+		mlogf(M_ERROR,M_SHOW,"Timedout waiting to create indication delivery thread; dropping indication\n");
+		break;
+	      }
+	      else   /* probably EINTR */
+		continue;
+	    }
+	  }
+	  else {
+	    sem_wait(&availThreadsSem);
+	  }
+	  int pcrc = pthread_create(&ind_thread, &it_attr,&sendIndForDelivery,(void *) di);
+	  
+	  _SFCB_TRACE(1,("--- indication delivery thread status: %d", pcrc));
+	  if (pcrc) 
+	    mlogf(M_ERROR,M_SHOW,"pthread_create() failed for indication delivery thread\n");
         }
       }
   }

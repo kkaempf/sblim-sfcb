@@ -100,6 +100,7 @@ New Features:
 - 3367332 RHOST Support for PAM
 - 3367361 Allow for releasing auth handle after CIM request completes
 - 3367363 Add CMPIRole Support
+- 3512575 Add indication delivery thread limit and timeout
 
 Bugs Fixed: 
 
