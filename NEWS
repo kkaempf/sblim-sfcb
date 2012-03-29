@@ -61,6 +61,7 @@ Bugs fixed:
 - 3512425 SequenceContext needs to be set at startup
 - 3510458 Malformed XML response to GetProperty
 - 3510456 GetProperty calls not passing keys to providers
+- 3505407 Client openlog changes settings
 
 Changes in 1.3.13
 =================
