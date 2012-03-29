@@ -1,3 +1,9 @@
+2012-03-29 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* interopProvider.c:
+	[ 3512425 ] SequenceContext needs to be set at startup
+	(fixed compiler warning)
+
 2012-03-28  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* cimXmlRequest.c:

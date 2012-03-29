@@ -738,7 +738,6 @@ void initInterOp(
          addHandler(ci,cop);
       }
       CMRelease(enm);
-      free(context);
    } 
    _SFCB_TRACE(1,("--- checking for cim_indicationsubscription"));
    op=CMNewObjectPath(broker,"root/interop","cim_indicationsubscription",&st);
