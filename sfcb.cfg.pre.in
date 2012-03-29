@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.30 2012/02/04 01:03:31 mchasal Exp $
+# $Id: sfcb.cfg.pre.in,v 1.31 2012/03/29 15:39:33 buccella Exp $
 ##
 ## Sample Configuration for Small Footprint CIM Broker
 ## 
@@ -255,6 +255,25 @@ sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 ## Can be overriden by setting environment variable SFCB_TRACE_LEVEL. 
 ## Default is 0. If trace mask is set (by any method) the default is 1.
 #traceLevel: 0
+
+##---------------------------- Indications ----------------------------
+
+## Indication provider calls to CBDeliverIndication() cause a thread to spawn
+## which will handle the delivery. This allows CBDeliverIndication() to return
+## without waiting for the delivery to complete. However, spawning an unlimited
+## number of threads will cause increased resource usage. This limit will 
+## prevent unlimited thread creation. If the limit is reached, calls to 
+## CBDeliverIndication will block.
+## Default is 30
+#indicationDeliveryThreadLimit: 30
+
+## When the indicationDeliveryThreadLimit is reached, delivery requests will 
+## block, waiting to create a thread. This timeout allows for the indication
+## to be dropped if a new thread cannot be created within a given time.
+## Note that this dropped indication will not be retried, even if reliable
+## indications support is enabled. 
+## Default is 0 (no timeout)
+#indicationDeliveryThreadTimeout: 0
 
 ##----------------------------Reliable Indications ----------------------------
 ## Interval between indication retry attempts

@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.111 2012/03/26 18:32:25 nsharoff Exp $
+ * $Id: providerDrv.c,v 1.112 2012/03/29 15:39:33 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -3113,8 +3113,11 @@ void processProviderInvocationRequests(char *name)
             processProviderInvocationRequestsThread(parms);
          }
          else {
-            pthread_create(&t, &tattr, (void *(*)(void *))
+	   int pcrc = pthread_create(&t, &tattr, (void *(*)(void *))
                 processProviderInvocationRequestsThread, (void *) parms);
+           if (pcrc) 
+	     mlogf(M_ERROR,M_SHOW,"pthread_create() failed for handling provider request\n");
+
          }
       }
       else {

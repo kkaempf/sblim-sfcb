@@ -86,6 +86,18 @@ static UtilHashTable *filterHt = NULL;
 static UtilHashTable *handlerHt = NULL;
 static UtilHashTable *subscriptionHt = NULL;
 
+/* for indication delivery */
+static long MAX_IND_THREADS;
+static long IND_THREAD_TO;
+static sem_t availThreadsSem;
+struct timespec availThreadWait;
+
+typedef struct delivery_info {
+  const CMPIContext* ctx;
+  CMPIObjectPath *hop;  
+  CMPIArgs* hin;
+} DeliveryInfo;
+
 /* ------------------------------------------------------------------------- */
 
 static int interOpNameSpace(
@@ -760,7 +772,11 @@ void initInterOp(
       CMRelease(enm);   
    }
    CMRelease(ctxLocal);
-      
+
+   getControlNum("indicationDeliveryThreadLimit",&MAX_IND_THREADS);
+   getControlNum("indicationDeliveryThreadTimeout",&IND_THREAD_TO);
+   sem_init(&availThreadsSem, 0, MAX_IND_THREADS);
+
    _SFCB_EXIT(); 
 }
 
@@ -1241,12 +1257,6 @@ CMPIStatus InteropProviderMethodCleanup(
    _SFCB_RETURN(st);
 }
 
-typedef struct delivery_info {
-  const CMPIContext* ctx;
-  CMPIObjectPath *hop;  
-  CMPIArgs* hin;
-} DeliveryInfo;
-
 void * sendIndForDelivery(void *di) {
 
   _SFCB_ENTER(TRACE_INDPROVIDER, "sendIndForDelivery");
@@ -1259,6 +1269,7 @@ void * sendIndForDelivery(void *di) {
   CMRelease(delInfo->hop);
   CMRelease(delInfo->hin);
   free(di);
+  sem_post(&availThreadsSem);
   pthread_exit(NULL);
 }
 
@@ -1334,9 +1345,25 @@ CMPIStatus InteropProviderInvokeMethod(
             di->hop = CMClone(su->ha->hop, NULL);
             di->hin = CMClone(hin, NULL);
 
-            pthread_create(&ind_thread, &it_attr,&sendIndForDelivery,(void *) di);
+            if (IND_THREAD_TO > 0) {
+              availThreadWait.tv_sec = time(NULL) + IND_THREAD_TO;
+              while ((sem_timedwait(&availThreadsSem, &availThreadWait)) == -1) {
+                if (errno == ETIMEDOUT) {
+                  mlogf(M_ERROR,M_SHOW,"Timedout waiting to create indication delivery thread; dropping indication\n");
+                  break;
+                }
+                else   /* probably EINTR */
+                  continue;
+              }
+            }
+            else {
+              sem_wait(&availThreadsSem);
+            }
+            int pcrc = pthread_create(&ind_thread, &it_attr,&sendIndForDelivery,(void *) di);
+            _SFCB_TRACE(1,("--- indication delivery thread status: %d", pcrc));
+            if (pcrc) 
+              mlogf(M_ERROR,M_SHOW,"pthread_create() failed for indication delivery thread\n");
 
-            _SFCB_TRACE(1,("--- invoke handler status: %d",st.rc));
          }     
       }   
    }
@@ -1383,7 +1410,7 @@ CMPIStatus InteropProviderInvokeMethod(
       _SFCB_TRACE(1,("--- Invalid request method: %s",methodName));
       setStatus(&st, CMPI_RC_ERR_METHOD_NOT_FOUND, "Invalid request method");
    }
-   
+
    _SFCB_RETURN(st);
 }
 
