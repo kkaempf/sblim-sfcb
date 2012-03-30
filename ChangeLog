@@ -1,5 +1,8 @@
 2012-03-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* test/TestProviders/cmpiTestIndicationProvider.c:
+	[ 3487419 ] TestIndication Provider Does Not Enable Correctly
+
 	* providerDrv.c:
 	[ 3408288 ] Safer Signal Handlers
 

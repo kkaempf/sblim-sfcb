@@ -116,8 +116,6 @@ CMPIStatus      indProvActivateFilter
      const CMPISelectExp *exp, const char *clsName,
      const CMPIObjectPath * classPath, CMPIBoolean firstActivation) {
   fprintf(stderr, "+++ indProvActivateFilter()\n");
-  enabled = 1;
-  fprintf(stderr, "--- enabled: %d\n", enabled);
   CMReturn(CMPI_RC_OK);
 }
 
@@ -126,8 +124,6 @@ CMPIStatus      indProvDeActivateFilter
      const CMPISelectExp *filter, const char *clsName,
      const CMPIObjectPath * classPath, CMPIBoolean lastActivation) {
   fprintf(stderr, "+++ indProvDeActivateFilter\n");
-  enabled = 0;
-  fprintf(stderr, "--- disabled: %d\n", enabled);
   CMReturn(CMPI_RC_OK);
 }
 
@@ -135,6 +131,8 @@ CMPIStatus
 indProvEnableIndications(CMPIIndicationMI * cThis, const CMPIContext *ctx)
 {
   fprintf(stderr, "+++ indProvEnableIndications\n");
+  enabled = 1;
+  fprintf(stderr, "--- enabled: %d\n", enabled);
   CMReturn(CMPI_RC_OK);
 }
 
@@ -142,6 +140,8 @@ CMPIStatus
 indProvDisableIndications(CMPIIndicationMI * cThis, const CMPIContext *ctx)
 {
   fprintf(stderr, "+++ indProvDisableIndications\n");
+  enabled = 0;
+  fprintf(stderr, "--- disabled: %d\n", enabled);
   CMReturn(CMPI_RC_OK);
 }
 
