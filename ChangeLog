@@ -11,6 +11,10 @@
 	* providerDrv.c:
 	[ 3408288 ] Safer Signal Handlers
 
+	* interopProvider.c, providerDrv.c, sfcb.cfg.pre.in, 
+	  control.c:
+	[ 3512575 ] Add indication delivery thread limit and timeout
+	
 2012-03-29 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* cimcClientSfcbLocal.c:

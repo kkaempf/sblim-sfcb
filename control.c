@@ -131,6 +131,8 @@ Control init[] = {
    {"DeliveryRetryAttempts",1,"3"},
    {"SubscriptionRemovalTimeInterval",1,"2592000"},
    {"SubscriptionRemovalAction",1,"2"},
+   {"indicationDeliveryThreadLimit",1,"30"},
+   {"indicationDeliveryThreadTimeout",1,"0"},
 
 };
 
