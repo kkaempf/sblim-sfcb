@@ -1,5 +1,9 @@
 2012-03-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* httpAdapter.c:
+	[ 3441028 ] sblim-sfcb fails on large https requests
+	(patch by Klaus Kaempf)
+
 	* providerDrv.c:
 	[ 3408288 ] Safer Signal Handlers
 
