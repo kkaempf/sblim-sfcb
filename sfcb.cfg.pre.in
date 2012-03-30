@@ -278,6 +278,25 @@ sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 ## Default is 0. If trace mask is set (by any method) the default is 1.
 #traceLevel: 0
 
+##---------------------------- Indications ----------------------------
+
+## Indication provider calls to CBDeliverIndication() cause a thread to spawn
+## which will handle the delivery. This allows CBDeliverIndication() to return
+## without waiting for the delivery to complete. However, spawning an unlimited
+## number of threads will cause increased resource usage. This limit will 
+## prevent unlimited thread creation. If the limit is reached, calls to 
+## CBDeliverIndication will block.
+## Default is 30
+#indicationDeliveryThreadLimit: 30
+
+## When the indicationDeliveryThreadLimit is reached, delivery requests will 
+## block, waiting to create a thread. This timeout allows for the indication
+## to be dropped if a new thread cannot be created within a given time.
+## Note that this dropped indication will not be retried, even if reliable
+## indications support is enabled. 
+## Default is 0 (no timeout)
+#indicationDeliveryThreadTimeout: 0
+
 ##----------------------------Reliable Indications ----------------------------
 ## Interval between indication retry attempts
 ## Default is 20 seconds
