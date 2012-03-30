@@ -1,5 +1,8 @@
 2012-03-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* providerDrv.c:
+	[ 3408288 ] Safer Signal Handlers
+
 	* interopProvider.c, providerDrv.c, control.c, sfcb.cfg.pre.in:
 	[ 3512575 ] Add indication delivery thread limit and timeout
 

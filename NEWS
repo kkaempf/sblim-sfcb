@@ -125,6 +125,7 @@ Bugs Fixed:
 - 3504607 CMPIRole Support in brokerUpc
 - 3510458 Malformed XML response to GetProperty
 - 3510456 GetProperty calls not passing keys to providers
+- 3408288 Safer Signal Handlers
 
 Changes in 1.3.13
 =================

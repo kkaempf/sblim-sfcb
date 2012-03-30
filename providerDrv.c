@@ -174,6 +174,10 @@ extern void     uninitSocketPairs();
 extern void     sunsetControl();
 extern void     uninitGarbageCollector();
 
+static BinResponseHdr *err_crash_resp; /* holds generic "we crashed" response */
+static long ecr_len;
+static long makeSafeResponse(BinResponseHdr *hdr, BinResponseHdr **out);
+
 typedef struct parms {
   int             requestor;
   BinRequestHdr  *req;
@@ -520,19 +524,14 @@ static void
 handleSigSegv(int sig)
 {
   Parms          *threads = activeThreadsFirst;
-  char            msg[1024];
-  BinResponseHdr *resp;
+  int dmy = -1;
 
   mlogf(M_ERROR, M_SHOW,
         "-#- %s - %d provider exiting due to a SIGSEGV signal\n",
         processName, currentProc);
   while (threads) {
-    snprintf(msg, 1023,
-             "*** Provider %s(%d) exiting due to a SIGSEGV signal",
-             threads->pInfo->providerName, currentProc);
-    resp = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
-    sendResponse(threads->requestor, resp);
-    threads = threads->next;
+    spSendResult(&threads->requestor, &dmy, err_crash_resp, ecr_len);
+    threads=threads->next;
   }
 
 }
@@ -1005,6 +1004,13 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
           _SFCB_ABORT();
         }
 
+        char msg[1024];
+        snprintf(msg,1023, "*** Provider %s(%d) exiting due to a SIGSEGV signal",
+                 processName, currentProc);
+        BinResponseHdr* buf = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
+
+        ecr_len = makeSafeResponse(buf, &err_crash_resp);
+
         processProviderInvocationRequests(info->providerName);
         _SFCB_RETURN(0);
       }
@@ -1116,123 +1122,127 @@ typedef struct provHandler {
                               int requestor);
 } ProvHandler;
 
-static int
-sendResponse(int requestor, BinResponseHdr * hdr)
+static long 
+makeSafeResponse(BinResponseHdr* hdr, BinResponseHdr** out) 
 {
-  _SFCB_ENTER(TRACE_PROVIDERDRV, "sendResponse");
-  int             i,
-                  rvl = 0,
-      ol,
-      size,
-      dmy = -1;
-  long            l;
-  char            str_time[26];
-  BinResponseHdr *buf;
+  int i, rvl=0, ol, size;
+  long len;
+  char str_time[26];
+  BinResponseHdr *outHdr = NULL;
 
   size = sizeof(BinResponseHdr) + ((hdr->count - 1) * sizeof(MsgSegment));
 
   if (hdr->rvValue) {
-    switch (hdr->rv.type) {
+    switch(hdr->rv.type) {
     case CMPI_string:
       if (hdr->rv.value.string) {
-        if (hdr->rv.value.string->hdl) {
-          hdr->rv.value.string = hdr->rv.value.string->hdl;
-        } else
-          hdr->rv.value.string = NULL;
+	if (hdr->rv.value.string->hdl) {
+	  hdr->rv.value.string= hdr->rv.value.string->hdl; 
+	}
+	else hdr->rv.value.string=NULL;
       }
-      hdr->rv.type = CMPI_chars;
+
+      hdr->rv.type=CMPI_chars;
+      /* note: a break statement is NOT missing here... */
     case CMPI_chars:
-      hdr->rvEnc = setCharsMsgSegment((char *) hdr->rv.value.string);
-      rvl = hdr->rvEnc.length;
+      hdr->rvEnc=setCharsMsgSegment((char*)hdr->rv.value.string);
+      rvl=hdr->rvEnc.length;
       break;
     case CMPI_dateTime:
       dateTime2chars(hdr->rv.value.dateTime, NULL, str_time);
-      hdr->rvEnc.type = MSG_SEG_CHARS;
-      hdr->rvEnc.length = rvl = 26;
-      hdr->rvEnc.data = &str_time;
+      hdr->rvEnc.type=MSG_SEG_CHARS;
+      hdr->rvEnc.length=rvl=26;
+      hdr->rvEnc.data=&str_time;
       break;
     case CMPI_ref:
-      mlogf(M_ERROR, M_SHOW, "-#- not supporting refs\n");
+      mlogf(M_ERROR,M_SHOW,"-#- not supporting refs\n");
       abort();
-    default:;
+    default: ;
     }
   }
 
-  for (l = size, i = 0; i < hdr->count; i++) {
-    /*
-     * add padding length to calculation 
-     */
-    l += (hdr->object[i].type ==
-          MSG_SEG_CHARS ? PADDED_LEN(hdr->object[i].length) : hdr->
-          object[i].length);
+  for (len = size, i = 0; i < hdr->count; i++) {
+    /* add padding length to calculation */
+    len += (hdr->object[i].type == MSG_SEG_CHARS ? PADDED_LEN(hdr->object[i].length) : hdr->object[i].length);
   }
 
-  buf = (BinResponseHdr *) malloc(l + rvl + 8);
-  memcpy(buf, hdr, size);
+  outHdr = malloc(len +rvl + 8);
+  memcpy(outHdr, hdr, size);
 
   if (rvl) {
     ol = hdr->rvEnc.length;
-    l = size;
+    len=size;
     switch (hdr->rvEnc.type) {
     case MSG_SEG_CHARS:
-      memcpy(((char *) buf) + l, hdr->rvEnc.data, ol);
-      buf->rvEnc.data = (void *) l;
-      l += ol;
+      memcpy(((char *) outHdr) + len, hdr->rvEnc.data, ol);
+      outHdr->rvEnc.data = (void *) len;
+      len += ol;
       break;
-    }
-    size = l;
+    } 
+    size=len;
   }
 
-  for (l = size, i = 0; i < hdr->count; i++) {
+  for (len = size, i = 0; i < hdr->count; i++) {
     ol = hdr->object[i].length;
     switch (hdr->object[i].type) {
     case MSG_SEG_OBJECTPATH:
       getSerializedObjectPath((CMPIObjectPath *) hdr->object[i].data,
-                              ((char *) buf) + l);
-      buf->object[i].data = (void *) l;
-      l += ol;
+			      ((char *) outHdr) + len);
+      outHdr->object[i].data = (void *) len;
+      len += ol;
       break;
     case MSG_SEG_INSTANCE:
       getSerializedInstance((CMPIInstance *) hdr->object[i].data,
-                            ((char *) buf) + l);
-      buf->object[i].data = (void *) l;
-      l += ol;
+			    ((char *) outHdr) + len);
+      outHdr->object[i].data = (void *) len;
+      len += ol;
       break;
     case MSG_SEG_CHARS:
-      memcpy(((char *) buf) + l, hdr->object[i].data, ol);
-      buf->object[i].data = (void *) l;
-      buf->object[i].length = PADDED_LEN(ol);
-      l += buf->object[i].length;
+      memcpy(((char *) outHdr) + len, hdr->object[i].data, ol);
+      outHdr->object[i].data = (void *) len;
+      outHdr->object[i].length = PADDED_LEN(ol);
+      len += outHdr->object[i].length;
       break;
     case MSG_SEG_CONSTCLASS:
       getSerializedConstClass((CMPIConstClass *) hdr->object[i].data,
-                              ((char *) buf) + l);
-      buf->object[i].data = (void *) l;
-      l += ol;
+			      ((char *) outHdr) + len);
+      outHdr->object[i].data = (void *) len;
+      len += ol;
       break;
     case MSG_SEG_ARGS:
       getSerializedArgs((CMPIArgs *) hdr->object[i].data,
-                        ((char *) buf) + l);
-      buf->object[i].data = (void *) l;
-      l += ol;
+			((char *) outHdr) + len);
+      outHdr->object[i].data = (void *) len;
+      len += ol;
       break;
+
 #ifdef HAVE_QUALREP
     case MSG_SEG_QUALIFIER:
       getSerializedQualifier((CMPIQualifierDecl *) hdr->object[i].data,
-                             ((char *) buf) + l);
-      buf->object[i].data = (void *) l;
-      l += ol;
+			     ((char *) outHdr) + len);
+      outHdr->object[i].data = (void *) len;
+      len += ol;
       break;
 #endif
     default:
-      mlogf(M_ERROR, M_SHOW, "--- bad sendResponse request %d\n",
-            hdr->object[i].type);
-      _SFCB_ABORT();
+      mlogf(M_ERROR,M_SHOW,"--- bad sendResponse request %d\n", hdr->object[i].type);
+      abort();
     }
   }
 
-  _SFCB_TRACE(1, ("--- Sending result to %d-%lu",
-                  requestor, getInode(requestor)));
+  *out = outHdr;
+  return len;
+}
+
+static int sendResponse(int requestor, BinResponseHdr * hdr)
+{
+  _SFCB_ENTER(TRACE_PROVIDERDRV, "sendResponse");
+  int dmy=-1;
+  BinResponseHdr* buf = (void*)&dmy;
+  long l = makeSafeResponse(hdr, &buf);
+
+  _SFCB_TRACE(1, ("--- Sending result %p to %d-%lu size %lu",
+		  buf, requestor,getInode(requestor), l));
 
   spSendResult(&requestor, &dmy, buf, l);
   free(buf);
