@@ -440,7 +440,6 @@ CMPIStatus IndCIMXMLHandlerModifyInstance(CMPIInstanceMI * mi,
     _SFCB_TRACE(1,("--- modify %s", cns));
 		
     CMPIData newDest = CMGetProperty(ci, "Destination", &st);
-    fprintf(stderr, "new dest is %s\n", CMGetCharPtr(newDest.value.string));
 
     if(newDest.state != CMPI_goodValue) {
       st.rc = CMPI_RC_ERR_FAILED;
