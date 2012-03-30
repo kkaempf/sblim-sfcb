@@ -1,3 +1,8 @@
+2012-03-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* httpAdapter.c:
+	[ 3512094 ] SFCB can leak PAM handles under error conditions
+
 2012-03-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* providerDrv.c:
