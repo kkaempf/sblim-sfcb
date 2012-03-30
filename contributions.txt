@@ -116,6 +116,7 @@ Klaus Kampf, Novell
 09/06/2011 [ 3400114 ] sfcb fails to start with ipv6 disabled
 09/30/2011 [ 3416055 ] SIGSEGV sometimes does not print provider name
 03/29/2012 [ 3441028 ] sblim-sfcb fails on large https requests
+03/29/2012 [ 3416054 ] Provider continues despite SIGSEGV
 
 Mike Brasher, Inova
 -------------------

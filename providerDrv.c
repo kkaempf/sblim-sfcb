@@ -533,7 +533,7 @@ handleSigSegv(int sig)
     spSendResult(&threads->requestor, &dmy, err_crash_resp, ecr_len);
     threads=threads->next;
   }
-
+  abort(); /* force cord dump */
 }
 
 static void
