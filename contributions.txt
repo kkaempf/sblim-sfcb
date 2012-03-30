@@ -115,6 +115,7 @@ Klaus Kampf, Novell
 06/09/2011 [ 3047562 ] [patch] Create bzip2 tarballs on "make dist"
 09/30/2011 [ 3416055 ] SIGSEGV sometimes does not print provider name
 03/29/2012 [ 3441028 ] sblim-sfcb fails on large https requests
+03/29/2012 [ 3416054 ] Provider continues despite SIGSEGV
 
 Mike Brasher, Inova
 -------------------

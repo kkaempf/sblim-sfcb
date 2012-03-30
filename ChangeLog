@@ -1,5 +1,9 @@
 2012-03-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* providerDrv.c:
+	[ 3416054 ] Provider continues despite SIGSEGV
+	(patch by Klaus Kaempf)
+
 	* httpAdapter.c:
 	[ 3441028 ] sblim-sfcb fails on large https requests
 	(patch by Klaus Kaempf)

@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.113 2012/03/29 21:19:43 buccella Exp $
+ * $Id: providerDrv.c,v 1.114 2012/03/30 02:47:11 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -448,7 +448,7 @@ static void handleSigSegv(int sig)
      spSendResult(&threads->requestor, &dmy, err_crash_resp, ecr_len);
      threads=threads->next;
    }        
-           
+   abort(); /* force a core */
 }
 
 static void handleSigUsr1(int sig)
