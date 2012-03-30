@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.114 2012/03/30 02:47:11 buccella Exp $
+ * $Id: providerDrv.c,v 1.115 2012/03/30 23:43:05 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -875,6 +875,7 @@ static int getProcess(ProviderInfo * info, ProviderProcess ** proc)
 	    BinResponseHdr* buf = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
 	    
             ecr_len = makeSafeResponse(buf, &err_crash_resp);
+	    free(buf);
 
             processProviderInvocationRequests(info->providerName);
             _SFCB_RETURN(0);
