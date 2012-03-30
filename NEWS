@@ -127,6 +127,7 @@ Bugs Fixed:
 - 3510456 GetProperty calls not passing keys to providers
 - 3408288 Safer Signal Handlers
 - 3487419 TestIndication Provider Does Not Enable Correctly
+- 3441028 sblim-sfcb fails on large https requests
 
 Changes in 1.3.13
 =================
