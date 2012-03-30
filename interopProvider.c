@@ -1362,7 +1362,6 @@ InteropProviderMethodCleanup(CMPIMethodMI * mi,
 void * sendIndForDelivery(void *di) {
 
   _SFCB_ENTER(TRACE_INDPROVIDER, "sendIndForDelivery");
-  fprintf(stderr, "thread started %p\n", (void*)pthread_self());
 
   DeliveryInfo* delInfo;
   delInfo = (DeliveryInfo*)di;
@@ -1373,7 +1372,6 @@ void * sendIndForDelivery(void *di) {
   CMRelease(delInfo->hin);
   free(di);
   sem_post(&availThreadsSem);
-  fprintf(stderr, "thread exiting %p\n", (void*)pthread_self());
   pthread_exit(NULL);
 }
 
