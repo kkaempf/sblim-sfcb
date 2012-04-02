@@ -3,6 +3,11 @@
 	* cimcClientSfcbLocal.c:
 	[ 3505407 ] Client openlog changes settings
 
+2012-04-02  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* interopProvider.c:
+	[ 3485830 ] SFCB Makes Redundant ActivateFilter Calls
+
 2012-03-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* providerDrv.c:
