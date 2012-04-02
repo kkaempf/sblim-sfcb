@@ -1010,6 +1010,7 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
         BinResponseHdr* buf = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
 
         ecr_len = makeSafeResponse(buf, &err_crash_resp);
+	free(buf);
 
         processProviderInvocationRequests(info->providerName);
         _SFCB_RETURN(0);
