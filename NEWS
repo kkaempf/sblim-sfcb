@@ -129,6 +129,8 @@ Bugs Fixed:
 - 3487419 TestIndication Provider Does Not Enable Correctly
 - 3441028 sblim-sfcb fails on large https requests
 - 3416054 Provider continues despite SIGSEGV
+- 3505407 Client openlog changes settings
+
 
 Changes in 1.3.13
 =================

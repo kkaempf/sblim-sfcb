@@ -1,3 +1,8 @@
+2012-04-02 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* cimcClientSfcbLocal.c:
+	[ 3505407 ] Client openlog changes settings
+
 2012-03-29  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* providerDrv.c:
