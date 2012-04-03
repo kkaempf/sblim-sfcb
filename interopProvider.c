@@ -795,12 +795,33 @@ initInterOp(const CMPIBroker * broker, const CMPIContext *ctx)
   enm = _broker->bft->enumerateInstances(_broker, ctx, op, NULL, &st);
 
   if (enm) {
+    // Get the IndicationService name for SequenceContext migration
+    CMPIObjectPath * isop = CMNewObjectPath(_broker, "root/interop", "CIM_IndicationService", NULL);
+    CMPIEnumeration * isenm = _broker->bft->enumerateInstances(_broker, ctx, isop, NULL, NULL);
+    CMPIData isinst = CMGetNext(isenm, NULL);
+    CMPIData mc = CMGetProperty(isinst.value.inst, "Name", NULL);
+    CMPIData ld;
+    // Loop through all the listeners
+    int ldcount=0;
+    char context[100];
     while (enm->ft->hasNext(enm, &st)
            && (ci = (enm->ft->getNext(enm, &st)).value.inst)) {
       cop = CMGetObjectPath(ci, &st);
       if (RIEnabled) {
-         // Reset the sequence numbers on sfcb restart
+         // check and set context for migrated listeners.
          CMPIInstance *ldi = _broker->bft->getInstance(_broker, ctxLocal, cop, NULL, NULL);
+         ld = CMGetProperty(ldi, "SequenceContext", NULL);
+         if (ld.state != CMPI_goodValue) {
+             _SFCB_TRACE(1,("---  adding SequenceContext to migrated cim_listenerdestination"));
+             // build and set the context string, we can't know the actual creation
+             // time, so just use SFCB start time + index.
+             ldcount++;
+             sprintf (context,"%s#%sM%d#",mc.value.string->ft->getCharPtr(mc.value.string,NULL),sfcBrokerStart,ldcount);
+             CMPIValue scontext;
+             scontext.string = sfcb_native_new_CMPIString(context, NULL, 0);
+             CMSetProperty(ldi, "SequenceContext", &scontext, CMPI_string);
+         }
+         // Reset the sequence numbers on sfcb restart
          CMPIValue zarro = {.sint64 = -1 };
          CMSetProperty(ldi, "LastSequenceNumber", &zarro, CMPI_sint64);
          CBModifyInstance(_broker, ctxLocal, cop, ldi, NULL);
