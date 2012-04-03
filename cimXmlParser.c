@@ -1847,7 +1847,9 @@ freeParamValues(XtokParamValues * op)
   XtokParamValue *pv = op->first,
       *dv;
   while (pv) {
-    freeParamValue(pv);
+    /* 3486814 : type is invalid, value is null */
+    if (pv->type != USHRT_MAX)
+       freeParamValue(pv);
     dv = pv;
     pv = pv->next;
     free(dv);

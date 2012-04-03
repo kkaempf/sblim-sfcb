@@ -1,3 +1,14 @@
+2012-04-02  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+        * indCIMXMLHandler.c:
+        [ 3485438 ] Segfault while retrying to deliver an indication
+
+        * sfcBroker.c:
+        [ 3462309 ] Do not allow multiple instances of sfcb
+
+        * cimXmlParser.c:
+        [ 3486814 ] sfcb crashes while freeing the cimxml response
+
 2012-04-02 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* cimcClientSfcbLocal.c:
