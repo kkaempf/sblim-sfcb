@@ -1,3 +1,8 @@
+2012-04-03 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* interopProvider.c:
+	[ 3512425 ] SequenceContext needs to be set at startup
+
 2012-04-03  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* Makefile.am, configure.ac, default.reg.in, profileProvider.c,
@@ -6,14 +11,14 @@
 
 2012-04-02  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
-        * indCIMXMLHandler.c:
-        [ 3485438 ] Segfault while retrying to deliver an indication
+	* indCIMXMLHandler.c:
+	[ 3485438 ] Segfault while retrying to deliver an indication
 
-        * sfcBroker.c:
-        [ 3462309 ] Do not allow multiple instances of sfcb
+	* sfcBroker.c:
+	[ 3462309 ] Do not allow multiple instances of sfcb
 
-        * cimXmlParser.c:
-        [ 3486814 ] sfcb crashes while freeing the cimxml response
+	* cimXmlParser.c:
+	[ 3486814 ] sfcb crashes while freeing the cimxml response
 
 2012-04-02 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 

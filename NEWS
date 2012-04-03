@@ -132,6 +132,7 @@ Bugs Fixed:
 - 3505407 Client openlog changes settings
 - 3485830 SFCB Makes Redundant ActivateFilter Calls
 - 3483294 InternalProvider Should Handle SFCB_RegisteredProfile
+- 3512425 SequenceContext needs to be set at startup
 
 Changes in 1.3.13
 =================
