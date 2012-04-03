@@ -998,7 +998,9 @@ processProviderMgrRequests()
     startUpProvider("root/interop", "$InterOpProvider$");
   }
 #endif
+#ifdef HAVE_SLP
   startUpProvider("root/interop", "$ProfileProvider$");
+#endif
 
   for (;;) {
     MgrHandler      hdlr;

@@ -1,3 +1,9 @@
+2012-04-03  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* Makefile.am, configure.ac, default.reg.in, profileProvider.c,
+	providerMgr.c, test/xmltest/modifyInstance_regprofile.lines:
+	[ 3483294 ] InternalProvider Should Handle SFCB_RegisteredProfile
+
 2012-04-02  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
         * indCIMXMLHandler.c:
