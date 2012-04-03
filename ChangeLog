@@ -1,3 +1,12 @@
+2012-04-03  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+	* indCIMXMLHandler.c, interopProvider.c:
+	[ 3495060 ] verify filter and handler information during subscription
+
+	* objectImpl.c:
+	[ 3471814 ] segfault in objectImpl.c:131,ClObjectGetClString
+        (Patch by Chris Buccella and Narasimha Sharoff)
+
 2012-04-03 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* interopProvider.c:
