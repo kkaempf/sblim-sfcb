@@ -1,3 +1,8 @@
+2012-04-03  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* utilTypeCk.c:
+	[ 3514443 ] sfcb 1.3.14 compilation error
+
 2012-03-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* httpAdapter.c:

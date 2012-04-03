@@ -25,7 +25,7 @@
 #include <strings.h>
 #include <limits.h>
 #include <errno.h>
-#include "cmpi/cmpidt.h"
+#include "cmpidt.h"
 
 /* checks for unsigned integers uint8 - uint64 */
 int 
