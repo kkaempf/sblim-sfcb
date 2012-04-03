@@ -198,7 +198,7 @@
 	[ 3484025 ] Disable indication sequencing
 
 	* mlog.c: 
-	[ 3487675 ] Log message troubles with \n
+	[ 3487675 ] Log messages can be concatenated
 
 	* mlog.c, mlog.h, cimcClientSfcbLocal.c, sfcBroker.c, sfcbinst2mof.c: 
 	[ 3488688 ] Don't spawn logger for clients 
