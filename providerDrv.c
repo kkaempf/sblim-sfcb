@@ -503,11 +503,11 @@ stopProc(void *p)
   mlogf(M_INFO, M_SHOW, "---  stopped %s %d\n", processName, getpid());
   ctx->ft->release(ctx);
 
-  uninit_sfcBroker();
-  uninitProvProcCtl();
-  uninitSocketPairs();
-  sunsetControl();
-  uninitGarbageCollector();
+  //uninit_sfcBroker(); /* 3497096 */
+  //uninitProvProcCtl();
+  //uninitSocketPairs();
+  //sunsetControl();
+  //uninitGarbageCollector();
 
   exit(0);
 }
