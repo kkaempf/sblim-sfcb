@@ -990,6 +990,10 @@ processProviderMgrRequests()
 
   _SFCB_ENTER(TRACE_PROVIDERMGR, "processProviderMgrRequests");
 
+  /* SF:3416060 disable signals during startup */
+  sigfillset(&mask);
+  sigprocmask(SIG_SETMASK, &mask, &old_mask);
+
   startUpProvider("root/interop", "$ClassProvider$");
 
 #ifdef SFCB_INCL_INDICATION_SUPPORT
@@ -1001,6 +1005,7 @@ processProviderMgrRequests()
 #ifdef HAVE_SLP
   startUpProvider("root/interop", "$ProfileProvider$");
 #endif
+   sigprocmask(SIG_SETMASK, &old_mask, NULL);
 
   for (;;) {
     MgrHandler      hdlr;
@@ -1029,8 +1034,10 @@ processProviderMgrRequests()
                      req->nameSpace.data, req->className.data, req->type,
                      requestor));
 
+        sigprocmask(SIG_SETMASK, &mask, &old_mask);
         hdlr = mHandlers[req->type];
         hdlr.handler(&requestor, req);
+        sigprocmask(SIG_SETMASK, &old_mask, NULL);
 
         _SFCB_TRACE(1,
                     ("--- Mgr request for %s-%s DONE", req->nameSpace.data,

@@ -1,3 +1,8 @@
+2012-04-04  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+	* providerDrv.c, providerMgr.c, providerMgr.h, support.c:
+	[ 3416060 ] SIGSEGV in tool_mm_flush()
+
 2012-04-03  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
 	* providerDrv.c:

@@ -748,8 +748,10 @@ init_sfcBroker()
 int
 uninit_sfcBroker()
 {
-  if (pReg)
+  if (pReg) {
     pReg->ft->release(pReg);
+    pReg = NULL;
+  }
   return 0;
 }
 
