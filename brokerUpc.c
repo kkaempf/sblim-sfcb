@@ -124,6 +124,7 @@ deliverIndication(const CMPIBroker * mb, const CMPIContext *ctx,
   NativeSelectExp *se = activFilters;
 
   while (se) {
+    void *hc = markHeap(); /* 3497209:78376 */
     /* Check for matching FROM class */
     for (x=0; x<se->qs->fcNext; x++) {
       if (CMClassPathIsA(mb, indop, se->qs->fClasses[x], &st)) {
@@ -131,6 +132,7 @@ deliverIndication(const CMPIBroker * mb, const CMPIContext *ctx,
         break;
       }
     }
+    releaseHeap(hc); /* 3497209:78376 - relase objs that are no longer reqd */
     if (classMatch && se->exp.ft->evaluate(&se->exp, ind, &st)) {
       /*
        * apply a propertyfilter in case the query is not "SELECT * FROM
@@ -153,7 +155,10 @@ deliverIndication(const CMPIBroker * mb, const CMPIContext *ctx,
 #endif
           );
       CBInvokeMethod(mb, ctx, op, "_deliver", in, NULL, &st);
+      CMRelease(op);
+      CMRelease(in);
     }
+    classMatch = 0; /* 3483200 */
     se = se->next;
   }
 

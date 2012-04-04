@@ -1,5 +1,16 @@
 2012-04-03  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
+	* providerDrv.c:
+	[ 3498496 ] sfcb hangs and fails to respond to CIM requests
+
+	* brokerUpc.c:
+	[ 3497209 ] oom panic: out of memory using fsp indprovider
+
+	* brokerUpc.c:
+	[ 3483200 ] duplicate indication deliveries
+
+2012-04-03  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
 	* indCIMXMLHandler.c, interopProvider.c:
 	[ 3495060 ] verify filter and handler information during subscription
 
