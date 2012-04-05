@@ -1,3 +1,8 @@
+2012-04-05  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+	* control.c:
+	[ 3514627 ] unsupported sfcb.cfg param - use exit call
+
 2012-04-04  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
 	* providerDrv.c, providerMgr.c, sfcBroker.c:

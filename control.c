@@ -243,7 +243,7 @@ setupControl(char *fn)
   if (err) {
     mlogf(M_INFO, M_SHOW,
           "--- Broker terminated because of previous error(s)\n");
-    abort();
+    exit(1);
   }
 
   return 0;
