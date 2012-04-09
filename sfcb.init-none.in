@@ -20,10 +20,26 @@ start() {
 }	
 
 stop() {
-	echo -n "Shutting down sfcb: "
-	killall sfcbd && echo "done." && return 0 ||
-	echo "failed."
-	return 1
+    echo -n "Shutting down sfcb: "
+    if killall sfcbd
+    then
+        sleep 3
+        # If it hasn't died gracefully, kill it
+        if killall -KILL sfcbd 2>/dev/null
+        then
+                # In this case, it needed to be killed
+                echo "failed(killed)." 
+                exit 1
+        else
+                # In this case, it was already dead
+                echo "done."
+                exit 0
+        fi
+    else
+        # In this case, it probably wasn't running
+        echo "failed." 
+        exit 1
+    fi
 }
 
 reload() {
