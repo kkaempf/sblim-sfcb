@@ -11,6 +11,7 @@ New features:
 Bugs fixed: 
 - 3495804 Cleanup: httpProcId still defined, wrong define in cimXmlGen
 - 3498719 Better SSL error reporting for sfcb
+- 3516167 Force kill sfcbd on stop if needed
 
 Changes in 1.4.2
 ================

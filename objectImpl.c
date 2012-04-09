@@ -555,7 +555,7 @@ removeClObject(ClObjectHdr * hdr, int id)
 {
    _SFCB_ENTER(TRACE_OBJECTIMPL, "removeClObject");
    //   fprintf(stderr, "replaceClString: %p replacing entry for we're skipping %d\n", hdr, (id-1));
-   char *ts, *fs, *tmpstr = NULL;
+   char *ts, *fs;
    long i, l, u;
    ClStrBuf *fb;
 
