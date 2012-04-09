@@ -115,6 +115,9 @@ notSupported(int *requestor, OperationHdr * req)
   free(req);
 }
 
+int prov_rdy_state = -1;   /* 3497096 :77022 - stopBroker() reads this value */
+pthread_mutex_t syncMtx=PTHREAD_MUTEX_INITIALIZER; /* shared with stopBroker */
+
 /*
  * ------------- --- Instance Provider support ---className ------------- 
  */
@@ -990,6 +993,10 @@ processProviderMgrRequests()
 
   _SFCB_ENTER(TRACE_PROVIDERMGR, "processProviderMgrRequests");
 
+  /* SF:3416060 disable signals during startup */
+  sigfillset(&mask);
+  sigprocmask(SIG_SETMASK, &mask, &old_mask);
+
   startUpProvider("root/interop", "$ClassProvider$");
 
 #ifdef SFCB_INCL_INDICATION_SUPPORT
@@ -1001,6 +1008,7 @@ processProviderMgrRequests()
 #ifdef HAVE_SLP
   startUpProvider("root/interop", "$ProfileProvider$");
 #endif
+   sigprocmask(SIG_SETMASK, &old_mask, NULL);
 
   for (;;) {
     MgrHandler      hdlr;
@@ -1029,8 +1037,18 @@ processProviderMgrRequests()
                      req->nameSpace.data, req->className.data, req->type,
                      requestor));
 
+        pthread_mutex_lock(&syncMtx); /* 77022 */
+        prov_rdy_state = -1;
+        pthread_mutex_unlock(&syncMtx);
+
+        sigprocmask(SIG_SETMASK, &mask, &old_mask);
         hdlr = mHandlers[req->type];
         hdlr.handler(&requestor, req);
+        sigprocmask(SIG_SETMASK, &old_mask, NULL);
+
+        pthread_mutex_lock(&syncMtx); /* 77022 */
+        prov_rdy_state = 1;
+        pthread_mutex_unlock(&syncMtx);
 
         _SFCB_TRACE(1,
                     ("--- Mgr request for %s-%s DONE", req->nameSpace.data,

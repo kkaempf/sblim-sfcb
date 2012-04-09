@@ -795,12 +795,33 @@ initInterOp(const CMPIBroker * broker, const CMPIContext *ctx)
   enm = _broker->bft->enumerateInstances(_broker, ctx, op, NULL, &st);
 
   if (enm) {
+    // Get the IndicationService name for SequenceContext migration
+    CMPIObjectPath * isop = CMNewObjectPath(_broker, "root/interop", "CIM_IndicationService", NULL);
+    CMPIEnumeration * isenm = _broker->bft->enumerateInstances(_broker, ctx, isop, NULL, NULL);
+    CMPIData isinst = CMGetNext(isenm, NULL);
+    CMPIData mc = CMGetProperty(isinst.value.inst, "Name", NULL);
+    CMPIData ld;
+    // Loop through all the listeners
+    int ldcount=0;
+    char context[100];
     while (enm->ft->hasNext(enm, &st)
            && (ci = (enm->ft->getNext(enm, &st)).value.inst)) {
       cop = CMGetObjectPath(ci, &st);
       if (RIEnabled) {
-         // Reset the sequence numbers on sfcb restart
+         // check and set context for migrated listeners.
          CMPIInstance *ldi = _broker->bft->getInstance(_broker, ctxLocal, cop, NULL, NULL);
+         ld = CMGetProperty(ldi, "SequenceContext", NULL);
+         if (ld.state != CMPI_goodValue) {
+             _SFCB_TRACE(1,("---  adding SequenceContext to migrated cim_listenerdestination"));
+             // build and set the context string, we can't know the actual creation
+             // time, so just use SFCB start time + index.
+             ldcount++;
+             sprintf (context,"%s#%sM%d#",mc.value.string->ft->getCharPtr(mc.value.string,NULL),sfcBrokerStart,ldcount);
+             CMPIValue scontext;
+             scontext.string = sfcb_native_new_CMPIString(context, NULL, 0);
+             CMSetProperty(ldi, "SequenceContext", &scontext, CMPI_string);
+         }
+         // Reset the sequence numbers on sfcb restart
          CMPIValue zarro = {.sint64 = -1 };
          CMSetProperty(ldi, "LastSequenceNumber", &zarro, CMPI_sint64);
          CBModifyInstance(_broker, ctxLocal, cop, ldi, NULL);
@@ -861,6 +882,39 @@ filterInternalProps(CMPIInstance* ci)
   return;
 }
 
+/* feature #3495060 :76814 : Verify the filter and handler information */
+CMPIStatus
+verify_subscription(const CMPIContext * ctx,
+        const CMPIObjectPath *cop, 
+        const CMPIInstance *ci)
+{ 
+      CMPIContext *ctxlocal = NULL;
+      CMPIStatus st = { CMPI_RC_OK, NULL };
+
+      CMPIData sub_filter = CMGetProperty(ci, "Filter", &st);
+      CMPIObjectPath *sub_filter_op = sub_filter.value.ref;
+      ctxlocal = prepareUpcall((CMPIContext *)ctx);
+      CMPIInstance *sub_filter_inst = CBGetInstance(_broker, ctxlocal,
+                    sub_filter_op, NULL, &st);
+      if (sub_filter_inst == NULL) {
+         setStatus(&st,st.rc,"Invalid Subscription Filter");
+         CMRelease(ctxlocal);
+         return st;
+      }
+
+      CMPIData sub_handler = CMGetProperty(ci, "Handler", &st);
+      CMPIObjectPath *sub_handler_op = sub_handler.value.ref;
+      CMPIInstance *sub_handler_inst = CBGetInstance(_broker, ctxlocal,
+                    sub_handler_op, NULL, &st);
+      if (sub_handler_inst == NULL) {
+         setStatus(&st,st.rc,"Invalid Subscription Handler");
+         CMRelease(ctxlocal);
+         return st;
+      }
+
+      CMRelease(ctxlocal);
+      return st;
+}
 
 /*
  * --------------------------------------------------------------------------
@@ -1020,6 +1074,9 @@ InteropProviderCreateInstance(CMPIInstanceMI * mi,
 
   if (isa(nss, cns, "cim_indicationsubscription")) {
     _SFCB_TRACE(1, ("--- create cim_indicationsubscription"));
+
+    st = verify_subscription(ctx, cop, ci); /* 3495060 */
+    if (st.rc != CMPI_RC_OK) _SFCB_RETURN(st);
 
     st = processSubscription(_broker, ctx, ciLocal, copLocal);
   } else if (isa(nss, cns, "cim_indicationfilter")) {

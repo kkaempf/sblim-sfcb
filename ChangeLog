@@ -1,3 +1,43 @@
+2012-04-05  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+	* control.c:
+	[ 3514627 ] unsupported sfcb.cfg param - use exit call
+
+2012-04-04  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+	* providerDrv.c, providerMgr.c, sfcBroker.c:
+	[ 3497096 ] double free during stopProc()
+
+2012-04-04  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+	* providerDrv.c, providerMgr.c, providerMgr.h, support.c:
+	[ 3416060 ] SIGSEGV in tool_mm_flush()
+
+2012-04-03  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+	* providerDrv.c:
+	[ 3498496 ] sfcb hangs and fails to respond to CIM requests
+
+	* brokerUpc.c:
+	[ 3497209 ] oom panic: out of memory using fsp indprovider
+
+	* brokerUpc.c:
+	[ 3483200 ] duplicate indication deliveries
+
+2012-04-03  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+	* indCIMXMLHandler.c, interopProvider.c:
+	[ 3495060 ] verify filter and handler information during subscription
+
+	* objectImpl.c:
+	[ 3471814 ] segfault in objectImpl.c:131,ClObjectGetClString
+        (Patch by Chris Buccella and Narasimha Sharoff)
+
+2012-04-03 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* interopProvider.c:
+	[ 3512425 ] SequenceContext needs to be set at startup
+
 2012-04-03  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* Makefile.am, configure.ac, default.reg.in, profileProvider.c,
@@ -6,14 +46,14 @@
 
 2012-04-02  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
-        * indCIMXMLHandler.c:
-        [ 3485438 ] Segfault while retrying to deliver an indication
+	* indCIMXMLHandler.c:
+	[ 3485438 ] Segfault while retrying to deliver an indication
 
-        * sfcBroker.c:
-        [ 3462309 ] Do not allow multiple instances of sfcb
+	* sfcBroker.c:
+	[ 3462309 ] Do not allow multiple instances of sfcb
 
-        * cimXmlParser.c:
-        [ 3486814 ] sfcb crashes while freeing the cimxml response
+	* cimXmlParser.c:
+	[ 3486814 ] sfcb crashes while freeing the cimxml response
 
 2012-04-02 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
@@ -193,7 +233,7 @@
 	[ 3484025 ] Disable indication sequencing
 
 	* mlog.c: 
-	[ 3487675 ] Log message troubles with \n
+	[ 3487675 ] Log messages can be concatenated
 
 	* mlog.c, mlog.h, cimcClientSfcbLocal.c, sfcBroker.c, sfcbinst2mof.c: 
 	[ 3488688 ] Don't spawn logger for clients 
