@@ -101,6 +101,13 @@ New Features:
 - 3367361 Allow for releasing auth handle after CIM request completes
 - 3367363 Add CMPIRole Support
 - 3512575 Add indication delivery thread limit and timeout
+- 3435778 Preserve leading/trailing whitespace in values
+- 3433733 CreationClassNames should be supplied
+- 3446179 Add a feature to validate CMPI types
+- 3484025 Disable indication sequencing
+- 3462309 Do not allow multiple instances of sfcb
+- 3488688 Don't spawn logger for clients
+
 
 Bugs Fixed: 
 
@@ -108,30 +115,47 @@ Bugs Fixed:
 - 3416055 SIGSEGV sometimes does not print provider name
 - 3416167 CIM_InstDeletion not in class repo by default
 - 3422650 Associators calls to IndicationService depends on cmpi-base
+- 3428806 type=null in authorizeFilter call
+
+reset
+- 3478930 Handle SIGPIPE in providerMgr
+- 3478933 Sequence Number reset issues
+- 3483294 InternalProvider Should Handle SFCB_RegisteredProfile
+- 3485438 segfault while retrying to deliver an indication
+- 3486814 sfcb crashes while freeing the cimxml response
+- 3485830 SFCB Makes Redundant ActivateFilter Calls
+- 3487419 TestIndication Provider Does Not Enable Correctly
+- 3487675 Log messages can be concatenated
+- 3492362 Problem with whitespace trimming if local connect only
+- 3457460 PAM_RHOST set wrong
+- 3495343 Bad pointer references in trace statements
 - 3416164 Don't write CIM_IndicationService to disk
+- 3495801 Correction to 3495343
 - 3495789 Makefile improvements for test suite
 - 3495806 isChild() can cause a provider mismatch
-- 3495343 Bad pointer references in trace statements
-- 3495801 Correction to 3495343
+- 3483200 duplicate indication deliveries
 - 3496061 IndicationSubscription May Be Undeletable
+- 3484083 Exclude SFCBIndicationID
 - 3496383 Faster Return from CBDeliverIndication
+- 3416060 sigsegv in tool_mm_flush()
+- 3497096 double free during stopProc
 - 3497765 Better Error Handling in sfcb Provider Manager and Driver
 - 3497950 SFCB Semaphore Handling Improvements
 - 3498275 Remove __Namespace
+- 3498044 RIEnabled conflicts with settable retries
 - 3426027 cimAccountPassThrough does not set return code
-- 3492362 Problem with whitespace trimming if local connect only
+- 3498719 Better SSL error reporting for sfcb
+- 3471814 sfcb SEGV fault in objectImpl.c:131 (ClObjectGetClString)
 - 3499930 Check file repository writes
-- 3457460 PAM_RHOST set wrong
+- 3497209 oom panic: out of memory using fsp indprovider
 - 3504607 CMPIRole Support in brokerUpc
+- 3498496 sfcb hangs and fails to respond to CIM requests
 - 3510458 Malformed XML response to GetProperty
 - 3510456 GetProperty calls not passing keys to providers
+- 3505407 Client openlog changes settings
 - 3408288 Safer Signal Handlers
-- 3487419 TestIndication Provider Does Not Enable Correctly
 - 3441028 sblim-sfcb fails on large https requests
 - 3416054 Provider continues despite SIGSEGV
-- 3505407 Client openlog changes settings
-- 3485830 SFCB Makes Redundant ActivateFilter Calls
-- 3483294 InternalProvider Should Handle SFCB_RegisteredProfile
 
 Changes in 1.3.13
 =================
