@@ -156,6 +156,17 @@ struct auth_extras {
 };
 typedef struct auth_extras AuthExtras;
 
+AuthExtras      extras = {NULL, NULL, NULL, NULL};
+
+void releaseAuthHandle() {
+  _SFCB_ENTER(TRACE_HTTPDAEMON, "releaseAuthHandle");
+  if (extras.release) {
+     _SFCB_TRACE(1,("--- extras.authHandle = %p",  extras.authHandle));
+     extras.release(extras.authHandle);
+     extras.release = NULL;
+  }
+}
+
 typedef int     (*Authenticate) (char *principal, char *pwd);
 typedef int     (*Authenticate2) (char *principal, char *pwd, AuthExtras *extras);
 
@@ -251,7 +262,7 @@ remProcCtl()
  * Return 1 on success, 0 on fail, -1 on expired
  */
 int
-baValidate(char *cred, char **principal, AuthExtras* extras)
+baValidate(char *cred, char **principal)
 {
   char           *auth,
                  *pw = NULL;
@@ -295,7 +306,7 @@ baValidate(char *cred, char **principal, AuthExtras* extras)
   else {
     *principal = strdup(auth);
     if (authenticate2)
-      ret = authenticate2(auth, pw, extras);
+      ret = authenticate2(auth, pw, &extras);
     else 
       ret = authenticate(auth, pw);
 
@@ -362,6 +373,11 @@ handleSigUsr1(int sig)
     pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
     pthread_create(&t, &tattr, (void *(*)(void *)) stopProc, NULL);
   }
+}
+
+static void handleSigPipe(int sig)
+{
+  exit(1);
 }
 
 static void
@@ -1067,8 +1083,6 @@ doHttpRequest(CommHndl conn_fd)
   }
 #endif
 
-  AuthExtras      extras = {NULL, NULL, NULL, NULL};
-
   if (!authorized && !discardInput && doBa) {
     if (inBuf.authorization) {
 
@@ -1085,7 +1099,7 @@ doHttpRequest(CommHndl conn_fd)
         extras.clientIp = ipstr;
       //        fprintf(stderr, "client is: %s\n", ipstr);
 
-      barc = baValidate(inBuf.authorization,&inBuf.principal,&extras);
+      barc = baValidate(inBuf.authorization,&inBuf.principal);
 
 #ifdef ALLOW_UPDATE_EXPIRED_PW
       if (barc == AUTH_EXPIRED) {
@@ -1142,6 +1156,7 @@ doHttpRequest(CommHndl conn_fd)
     exit(1);
   }
   if (discardInput) {
+    releaseAuthHandle();
     free(hdr);
     freeBuffer(&inBuf);
     _SFCB_RETURN(discardInput - 1);
@@ -1205,9 +1220,7 @@ doHttpRequest(CommHndl conn_fd)
   if (response.buffer != NULL)
     cleanupCimXmlRequest(&response);
 
-  if (extras.release) {
-    extras.release(extras.authHandle);
-  }
+  releaseAuthHandle();
 
 #ifdef SFCB_DEBUG
   if (uset && (_sfcb_trace_mask & TRACE_RESPONSETIMING)) {
@@ -1267,6 +1280,7 @@ handleHttpRequest(int connFd, int sslMode)
       semAcquireUnDo(httpProcSem, 0);
       semReleaseUnDo(httpProcSem, httpProcIdX + 1);
       semRelease(httpWorkSem, 0);
+      atexit(releaseAuthHandle);
       atexit(uninitGarbageCollector);
       atexit(sunsetControl);
     }
@@ -2069,6 +2083,7 @@ httpDaemon(int argc, char *argv[], int sslMode)
   setSignal(SIGINT, SIG_IGN, 0);
   setSignal(SIGTERM, SIG_IGN, 0);
   setSignal(SIGHUP, SIG_IGN, 0);
+  setSignal(SIGPIPE, handleSigPipe,0);
 
 #if defined USE_SSL
   if (sslMode) {

@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <security/pam_appl.h>
+#include "trace.h"
 
 #define SFCB_PAM_APP "sfcb"
 
@@ -60,8 +61,11 @@ sfcBasicConv(int num_msg, const struct pam_message **msg,
 }
 
 void closePam(pam_handle_t* handle) {
+  _SFCB_ENTER(TRACE_HTTPDAEMON, "closePam");
   int rc = PAM_SUCCESS;
+  _SFCB_TRACE(1,("--- pam_end for handle %p",  handle));
   pam_end(handle, rc);
+  _SFCB_TRACE(1,("--- pam_end rc = %d", rc));
 }
 
 static int
@@ -75,7 +79,10 @@ _sfcBasicAuthenticateRemote(char *user, char *pw, AuthExtras *extras)
   int             rc,
                   retval;
 
+  _SFCB_ENTER(TRACE_HTTPDAEMON, "_sfcBasicAuthenticateRemote");
+
   rc = pam_start(SFCB_PAM_APP, user, &sfcConvStruct, &pamh);
+  _SFCB_TRACE(1,("--- pam_start, pamh = %p", pamh));
 
   if (extras && extras->clientIp) {
     pam_set_item(pamh, PAM_RHOST, extras->clientIp);
