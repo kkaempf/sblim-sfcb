@@ -1,5 +1,8 @@
 2012-04-09  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* cimXmlGen.c:
+	[ 3419721 ] reset CMPIValue buffer in str2CMPIValue
+
 	* httpAdapter.c, sfcBasicPAMAuthentication.c:
 	[ 3512094 ] SFCB can leak PAM handles under error conditions
 

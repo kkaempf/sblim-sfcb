@@ -156,6 +156,7 @@ Bugs Fixed:
 - 3416054 Provider continues despite SIGSEGV
 - 3512425 SequenceContext needs to be set at startup
 - 3512094 SFCB can leak PAM handles under error conditions
+- 3419721 reset CMPIValue buffer in str2CMPIValue
 
 Changes in 1.3.13
 =================

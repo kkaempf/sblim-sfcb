@@ -353,6 +353,7 @@ str2CMPIValue(CMPIType type, XtokValue val, XtokValueReference * ref,
   CMPIType        t = 0;
   CMPIStatus rc = {CMPI_RC_OK, NULL};
 
+  memset(&value, 0, sizeof(CMPIValue));
   if (type == 0) {
     type = guessType(val.value);
   }
