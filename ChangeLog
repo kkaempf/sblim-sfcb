@@ -1,3 +1,8 @@
+2012-04-09 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* sfcb.init-none.in
+	[ 3516167 ] Force kill sfcbd on stop if needed
+
 2012-04-05  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
 	* control.c:
