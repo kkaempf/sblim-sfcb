@@ -1,3 +1,8 @@
+2012-04-10  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimXmlRequest.c, control.c, httpAdapter.c, sfcb.cfg.pre.in:
+	[ 3440300 ] Allow forced chunked responses
+
 2012-04-05  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
         * control.c:

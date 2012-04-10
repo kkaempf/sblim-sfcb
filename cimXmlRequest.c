@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.70 2012/03/28 15:48:12 buccella Exp $
+ * $Id: cimXmlRequest.c,v 1.71 2012/04/10 15:49:56 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -54,14 +54,14 @@
 
 #ifdef LOCAL_CONNECT_ONLY_ENABLE
 // from httpAdapter.c
-int noChunking = 0;
+int chunkMode = CHUNK_NEVER;
 #endif // LOCAL_CONNECT_ONLY_ENABLE
 
 typedef struct handler {
    RespSegments(*handler) (CimXmlRequestContext *, RequestHdr * hdr);
 } Handler;
 
-extern int noChunking;
+extern int chunkMode;
 
 extern CMPIBroker *Broker;
 extern UtilStringBuffer *newStringBuffer(int s);
@@ -1052,7 +1052,7 @@ static RespSegments enumClasses(CimXmlRequestContext * ctx,
    binCtx.xmlAs=binCtx.noResp=0;
    binCtx.chunkFncs=ctx->chunkFncs;
    
-   if (noChunking || ctx->teTrailers==0)
+   if (ctx->teTrailers==0)
       hdr->chunkedMode=binCtx.chunkedMode=0;
    else {
       sreq.hdr.flags|=FL_chunked;
@@ -1072,7 +1072,7 @@ static RespSegments enumClasses(CimXmlRequestContext * ctx,
 
       closeProviderContext(&binCtx);
       
-      if (noChunking || ctx->teTrailers==0) {
+      if (ctx->teTrailers==0) {
 	if (err == 0) {
 	  rs = genResponses(&binCtx, resp, l);
 	} else {
@@ -1505,14 +1505,14 @@ static RespSegments enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
    binCtx.xmlAs=binCtx.noResp=0;
    binCtx.chunkFncs=ctx->chunkFncs;
    
-   if (noChunking || ctx->teTrailers==0)
+   if (ctx->teTrailers==0) {
       hdr->chunkedMode=binCtx.chunkedMode=0;
+   }
    else {
       sreq->hdr.flags|=FL_chunked;
       hdr->chunkedMode=binCtx.chunkedMode=1;
    }
    binCtx.pAs=NULL;
-
    _SFCB_TRACE(1, ("--- Getting Provider context"));
    irc = getProviderContext(&binCtx, (OperationHdr *) req);
    _SFCB_TRACE(1, ("--- Provider context gotten irc: %d",irc));
@@ -1524,7 +1524,7 @@ static RespSegments enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
       _SFCB_TRACE(1, ("--- Back from Providers"));
       closeProviderContext(&binCtx);
       
-      if (noChunking || ctx->teTrailers==0) {
+      if (ctx->teTrailers==0) {
 	if (err == 0) {
 	  rs = genResponses(&binCtx, resp, l);
 	} else {
@@ -1597,7 +1597,7 @@ static RespSegments execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
    binCtx.xmlAs=XML_asObj; binCtx.noResp=0;
    binCtx.chunkFncs=ctx->chunkFncs;
    
-   if (noChunking || ctx->teTrailers==0)
+   if (ctx->teTrailers==0)
       hdr->chunkedMode=binCtx.chunkedMode=0;
    else {
       sreq.hdr.flags|=FL_chunked;
@@ -1617,7 +1617,7 @@ static RespSegments execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
       _SFCB_TRACE(1, ("--- Back from Provider"));
       closeProviderContext(&binCtx);
       
-      if (noChunking || ctx->teTrailers==0) {
+      if (ctx->teTrailers==0) {
 	if (err == 0) {
 	  rs = genResponses(&binCtx, resp, l);
 	} else {
@@ -1791,7 +1791,7 @@ static RespSegments associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
    binCtx.pAs=NULL;
    binCtx.chunkFncs=ctx->chunkFncs;
    
-   if (noChunking || ctx->teTrailers==0)
+   if (ctx->teTrailers==0)
       hdr->chunkedMode=binCtx.chunkedMode=0;
    else {
       sreq->hdr.flags|=FL_chunked;
@@ -1810,7 +1810,7 @@ static RespSegments associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
       
       closeProviderContext(&binCtx);
       
-      if (noChunking || ctx->teTrailers==0) {
+      if (ctx->teTrailers==0) {
          if (err == 0) {
 	   rs = genResponses(&binCtx, resp, l);
 	 } else {
@@ -1982,7 +1982,7 @@ static RespSegments references(CimXmlRequestContext * ctx, RequestHdr * hdr)
    binCtx.pAs=NULL;
    binCtx.chunkFncs=ctx->chunkFncs;
    
-   if (noChunking || ctx->teTrailers==0)
+   if (ctx->teTrailers==0)
       hdr->chunkedMode=binCtx.chunkedMode=0;
    else {
       sreq->hdr.flags|=FL_chunked;
@@ -2000,7 +2000,7 @@ static RespSegments references(CimXmlRequestContext * ctx, RequestHdr * hdr)
       _SFCB_TRACE(1, ("--- Back from Provider"));
       closeProviderContext(&binCtx);
       
-      if (noChunking || ctx->teTrailers==0) {
+      if (ctx->teTrailers==0) {
 	if (err == 0) { 
 	   rs = genResponses(&binCtx, resp, l);
 	} else {

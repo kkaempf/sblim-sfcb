@@ -90,7 +90,7 @@ Control init[] = {
    {"doBasicAuth",      2, "false"},
    {"doUdsAuth",        2, "false"},
    
-   {"useChunking",      2, "false"},
+   {"useChunking",      0, "true"},
    {"chunkSize",        1, "50000"},
 
    {"trimWhitespace",      2, "true"},

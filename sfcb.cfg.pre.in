@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.31 2012/03/29 15:39:33 buccella Exp $
+# $Id: sfcb.cfg.pre.in,v 1.32 2012/04/10 15:49:56 buccella Exp $
 ##
 ## Sample Configuration for Small Footprint CIM Broker
 ## 
@@ -38,6 +38,8 @@ httpProcs:      8
 #httpLocalOnly: false
 
 ## Enable HTTP chunking. This will reduce memory usage of HTTP process.
+## Possible values are: true, false, always
+## "always" will chunk responses regardless of the client's HTTP headers
 ## Default is true
 useChunking:    true
 

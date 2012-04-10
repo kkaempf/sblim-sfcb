@@ -78,7 +78,12 @@ static int doBa;
 static int doUdsAuth;
 #endif
 static int doFork = 0;
-int noChunking = 0;
+
+#define CHUNK_NEVER 0
+#define CHUNK_ALLOW 1
+#define CHUNK_FORCE 2
+int chunkMode = CHUNK_ALLOW;
+
 int sfcbSSLMode = 0;
 int httpLocalOnly = 0;  /* 1 = only listen on loopback interface */
 static int hMax;
@@ -1055,7 +1060,9 @@ static int doHttpRequest(CommHndl conn_fd)
    ctx.principal = inBuf.principal;
    ctx.role = extras.role;
    ctx.host = inBuf.host;
-   ctx.teTrailers = inBuf.trailers;
+   /* override based on sfcb.cfg value */
+   ctx.teTrailers = (chunkMode == CHUNK_FORCE) ? 1 : inBuf.trailers;
+   if (chunkMode == CHUNK_NEVER)  ctx.teTrailers = 0;
    ctx.cimXmlDocLength = len - hl;
    ctx.commHndl = &conn_fd;
    
@@ -1748,9 +1755,11 @@ int httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
   if (getControlNum("keepaliveMaxRequest", &keepaliveMaxRequest))
     keepaliveMaxRequest = 10;
 
-  if (getControlBool("useChunking", &noChunking))
-    noChunking = 0;
-  noChunking = noChunking == 0;
+  char* chunkStr;
+  if (getControlChars("useChunking", &chunkStr) == 0) {
+    if (strcmp(chunkStr, "false") == 0)  chunkMode = CHUNK_NEVER;
+    else if (strcmp(chunkStr, "always") == 0)  chunkMode = CHUNK_FORCE;
+  }
 
   /*
    * grab commandline options 
