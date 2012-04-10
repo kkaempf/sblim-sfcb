@@ -214,6 +214,7 @@ BUILD_SFCB()
                 FIND_DELTA "disk" $out
                 echo "$out bytes $delta" >> $BASE_DIR/$REPORT_SUMMARY 
                 echo "disk:$out" >> $FPCUR
+                sfcbrepos -fi # Ensure we have a clean repo
                 SFCB_START
                 SFCB_TESTS
                 DUALOUT "SECOND TEST RUN:" 
