@@ -28,7 +28,7 @@
 #ifdef SFCB_DEBUG
 
 #define _SFCB_TRACE(LEVEL,STR) \
-  if ((_sfcb_trace_mask & __traceMask) && (LEVEL<=_sfcb_debug) && (LEVEL>0) ) \
+  if ((*_ptr_sfcb_trace_mask & __traceMask) && (LEVEL<=_sfcb_debug) && (LEVEL>0) ) \
   _sfcb_trace(LEVEL,__FILE__,__LINE__,_sfcb_format_trace STR);
 
 #define _SFCB_ENTER(n,f) \
@@ -59,7 +59,7 @@
 
 #define _SFCB_TRACE_FUNCTION(LEVEL,f) \
    _SFCB_TRACE(LEVEL,("Invoking trace function %s",#f)); \
-    if ((_sfcb_trace_mask & __traceMask) &&  (LEVEL<=_sfcb_debug) && (LEVEL>0) ) { \
+    if ((*_ptr_sfcb_trace_mask & __traceMask) &&  (LEVEL<=_sfcb_debug) && (LEVEL>0) ) { \
     f;}
 
 #define _SFCB_ABORT() {\
@@ -70,14 +70,15 @@
       _sfcb_trap(n);
 
 extern int _sfcb_debug;
-extern unsigned long _sfcb_trace_mask;
+//MGL use pointer indirect _sfcb_trace_mask to allow shared memory flag
+extern unsigned long *_ptr_sfcb_trace_mask;
 
 extern char *_sfcb_format_trace(char *fmt, ...);
 extern void _sfcb_trace(int, char *, int, char *);
 extern void _sfcb_trace_start(int l);
 extern void _sfcb_trace_init();
 extern void _sfcb_trace_stop();
-extern void _sfcb_set_trace_mask(int n);
+extern void _sfcb_set_trace_mask(unsigned long n);
 extern void _sfcb_set_trace_file(char * file);
 extern void _sfcb_trap(int n);
 
@@ -98,7 +99,7 @@ extern void _sfcb_trap(int n);
 #define TRAP(n)
 #endif
 
-extern void _sfcb_set_trace_mask(int n);
+extern void _sfcb_set_trace_mask(unsigned long n);
 
 typedef struct traceId {
    char *id;
@@ -140,8 +141,8 @@ int colorTrace;
 #define TRACE_SOCKETS           16384
 #define TRACE_MEMORYMGR         32768
 #define TRACE_MSGQUEUE          65536
-#define TRACE_XMLPARSING        131072  
-#define TRACE_RESPONSETIMING    262144       
+#define TRACE_XMLPARSING        131072
+#define TRACE_RESPONSETIMING    262144
 #define TRACE_DBPDAEMON         524288
 #define TRACE_SLP               1048576
 

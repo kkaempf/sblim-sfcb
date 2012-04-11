@@ -1,3 +1,11 @@
+2012-04-11  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* Makefile.am, cimXmlRequest.c, httpAdapter.c, httpComm.c,
+	  providerDrv.c, providerMgr.c, sfcBroker.c, sfcb.cfg.pre.in,
+	  trace.c, trace.h:
+	[ 3501314 ] Add dynamic logging and syslog output to sfcb trace
+	(based on patch from Mike Lisanke)
+
 2012-04-10  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* cimXmlRequest.c, control.c, httpAdapter.c, sfcb.cfg.pre.in:

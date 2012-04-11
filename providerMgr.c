@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.81 2012/03/12 22:30:52 buccella Exp $
+ * $Id: providerMgr.c,v 1.82 2012/04/11 22:55:17 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1167,7 +1167,7 @@ static BinResponseHdr *intInvokeProvider(BinRequestContext * ctx,ComSockets sock
    struct rusage us,ue;
    struct timeval sv, ev;
 
-      if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
+      if (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING) {
 	gettimeofday(&sv,NULL);
 	getrusage(RUSAGE_SELF,&us);
       }
@@ -1317,7 +1317,7 @@ static BinResponseHdr *intInvokeProvider(BinRequestContext * ctx,ComSockets sock
    releaseHeap(heapCtl);
 
 #ifdef SFCB_DEBUG
-   if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
+   if (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING) {
       gettimeofday(&ev,NULL);
       getrusage(RUSAGE_SELF,&ue);
       _sfcb_trace(1,__FILE__,__LINE__,

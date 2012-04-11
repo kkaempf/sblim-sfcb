@@ -34,6 +34,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <stdlib.h>
 #include "config.h"
 
 /* ---------------------------------------------------------------------------*/
@@ -47,7 +50,12 @@ int terminating=0;
 
 int _sfcb_debug = 0;
 unsigned long _sfcb_trace_mask = 0;
+/* use pointer indirect _sfcb_trace_mask to allow shared memory flag */
+unsigned long *_ptr_sfcb_trace_mask = &_sfcb_trace_mask;
+void *vpDP = NULL;
+int shmid;
 char *_SFCB_TRACE_FILE = NULL;
+int _SFCB_TRACE_TO_SYSLOG = 0;
 
 TraceId traceIds[]={ 
   {"providerMgr",       TRACE_PROVIDERMGR},
@@ -101,7 +109,8 @@ void _sfcb_trace_start(int n)
 
 void _sfcb_trace_stop()
 {
-   _sfcb_debug = 0;
+  shmctl(shmid, IPC_RMID, 0);
+  _sfcb_debug = 0;
 }
 
 void _sfcb_trace_init()
@@ -110,6 +119,25 @@ void _sfcb_trace_init()
    char *var = NULL;
    char *err = NULL;
    FILE *ferr = NULL;
+   int tryid = 0xDEB001;
+
+   while ((shmid = shmget(tryid, sizeof(unsigned long), (IPC_CREAT | 0660))) < 0 && (errno == EEXIST)) tryid++;
+   mlogf(M_INFO,M_SHOW,"--- Shared memory ID for tracing: %x\n", tryid);
+   if (shmid < 0) {
+     mlogf(M_ERROR,M_SHOW, "shmget(%x) failed in %s at line %d.\n", tryid, __FILE__, __LINE__ );
+     abort();
+   }
+   else {
+     vpDP = shmat( shmid, NULL, 0 );
+	
+     if (vpDP == (void*)-1) {// shmat returns an error
+       mlogf(M_ERROR,M_SHOW, "shmat(%u,) failed with errno = %s(%u) in %s at line %d.\n", shmid, strerror(errno), errno, __FILE__, __LINE__ );
+       abort();
+     }
+     else {
+       _ptr_sfcb_trace_mask = (unsigned long *)vpDP;
+     }
+   }
 
    var = getenv("SFCB_TRACE");
    if (var != NULL) {
@@ -176,15 +204,23 @@ void _sfcb_trace(int level, char *file, int line, char *msg)
          strftime(tm, 20, "%m/%d/%Y %H:%M:%S", &cttm);
       }
 
-      if (colorTrace) {
-        changeTextColor(0);
-        fprintf(ferr, "[%i] [%s] %d/%p --- %s(%i) : %s\n", level, tm, currentProc, (void *)pthread_self(), file,
+      if (*_ptr_sfcb_trace_mask) {
+        if (_SFCB_TRACE_TO_SYSLOG) {
+          /* ERROR is the default syslog level, if a user does not specify INFO or DEBUG. 
+             ERROR guarantees output will end up in syslog */
+          mlogf(M_ERROR,M_SHOW,"[%i] [%s] %d/%p --- %s(%i) : %s\n", level, tm, currentProc, (void *)pthread_self(), file,
                 line, msg);
-        changeTextColor(1);
-      }
-      else {
-        fprintf(ferr, "[%i] [%s] %d/%p --- %s(%i) : %s\n", level, tm, currentProc, (void *)pthread_self(), file,
-                line, msg);
+        }
+        else if (colorTrace) {
+          changeTextColor(0);
+          fprintf(ferr, "[%i] [%s] %d/%p --- %s(%i) : %s\n", level, tm, currentProc, (void *)pthread_self(), file,
+                  line, msg);
+          changeTextColor(1);
+        }
+        else {
+          fprintf(ferr, "[%i] [%s] %d/%p --- %s(%i) : %s\n", level, tm, currentProc, (void *)pthread_self(), file,
+                  line, msg);
+        }
       }
 
       free(tm);
@@ -197,9 +233,10 @@ void _sfcb_trace(int level, char *file, int line, char *msg)
 
 }
 
-extern void _sfcb_set_trace_mask(int n)
+extern void _sfcb_set_trace_mask(unsigned long n)
 {
-   _sfcb_trace_mask = n;
+   unsigned long *pulDP = (unsigned long*)vpDP;
+   *pulDP = n;
 }
 
 extern void _sfcb_set_trace_file(char * file)
@@ -207,7 +244,11 @@ extern void _sfcb_set_trace_file(char * file)
   if (_SFCB_TRACE_FILE) {
     free (_SFCB_TRACE_FILE);
   }
-  if (strcmp(file,"stderr") == 0) {
+  if (strcmp(file, "syslog") == 0) {
+    _SFCB_TRACE_FILE = NULL;
+    _SFCB_TRACE_TO_SYSLOG = 1;
+  }
+  else if (strcmp(file,"stderr") == 0) {
     _SFCB_TRACE_FILE = NULL;
   } else {
     _SFCB_TRACE_FILE = strdup(file);

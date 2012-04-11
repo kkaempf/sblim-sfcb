@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.115 2012/03/30 23:43:05 buccella Exp $
+ * $Id: providerDrv.c,v 1.116 2012/04/11 22:55:17 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -64,7 +64,7 @@ char * opsName[];
    struct timeval sv,ev;
 
 #define TIMING_START(req,pInfo)						\
-      if (pInfo && req->sessionId && (_sfcb_trace_mask & TRACE_RESPONSETIMING) ) {\
+      if (pInfo && req->sessionId && (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING) ) {\
          gettimeofday(&sv,NULL);\
          getrusage(RUSAGE_SELF,&us);\
          getrusage(RUSAGE_CHILDREN,&cs);\
@@ -72,7 +72,7 @@ char * opsName[];
       }      
 
 #define TIMING_STOP(req,pInfo)					\
-      if (uset && (_sfcb_trace_mask & TRACE_RESPONSETIMING) ) { \
+      if (uset && (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING) ) { \
 	gettimeofday(&ev,NULL); \
 	getrusage(RUSAGE_SELF,&ue); \
 	getrusage(RUSAGE_CHILDREN,&ce); \

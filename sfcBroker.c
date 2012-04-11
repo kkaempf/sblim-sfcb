@@ -243,6 +243,7 @@ static void stopBroker(void *p)
    free((void *)sfcBrokerStart);
 
    pthread_mutex_unlock(&syncMtx);
+   _SFCB_TRACE_STOP();
  
    if (restartBroker) {
       char *emsg=strerror(errno);
@@ -707,19 +708,16 @@ int main(int argc, char *argv[])
      /* trace mask not specified, check in config file */
      getControlNum("traceMask",&tmask);
    }
-   
-   if (tmask) {
-     if (getControlNum("traceLevel",&tracelevel) || tracelevel == 0) {
-       /* no tracelevel found in config file, use default */
-       tracelevel = 1;
-     }
-     if (getenv("SFCB_TRACE_FILE") == NULL && 
-	 getControlChars("traceFile",&tracefile) == 0) {
-       /* only set tracefile from config file if not specified via env */
-       _SFCB_TRACE_SETFILE(tracefile);
-     }
-     _SFCB_TRACE_START(tracelevel,tmask);
+   if (getControlNum("traceLevel",&tracelevel) || tracelevel == 0) {
+     /* no tracelevel found in config file, use default */
+     tracelevel = 1;
    }
+   if (getenv("SFCB_TRACE_FILE") == NULL && 
+       getControlChars("traceFile",&tracefile) == 0) {
+     /* only set tracefile from config file if not specified via env */
+     _SFCB_TRACE_SETFILE(tracefile);
+   }
+   _SFCB_TRACE_START(tracelevel,tmask);
 
 //        SFCB_DEBUG
 #ifndef SFCB_DEBUG
