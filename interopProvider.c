@@ -788,6 +788,7 @@ initInterOp(const CMPIBroker * broker, const CMPIContext *ctx)
   CMPIData isinst=CMGetNext(isenm,NULL);
   CMPIData mc=CMGetProperty(isinst.value.inst,"DeliveryRetryAttempts",NULL);
   int RIEnabled=mc.value.uint16;
+  mc = CMGetProperty(isinst.value.inst, "Name", NULL);
 
   _SFCB_TRACE(1, ("--- checking for cim_listenerdestination"));
   op = CMNewObjectPath(broker, "root/interop", "cim_listenerdestination",
@@ -795,13 +796,8 @@ initInterOp(const CMPIBroker * broker, const CMPIContext *ctx)
   enm = _broker->bft->enumerateInstances(_broker, ctx, op, NULL, &st);
 
   if (enm) {
-    // Get the IndicationService name for SequenceContext migration
-    CMPIObjectPath * isop = CMNewObjectPath(_broker, "root/interop", "CIM_IndicationService", NULL);
-    CMPIEnumeration * isenm = _broker->bft->enumerateInstances(_broker, ctx, isop, NULL, NULL);
-    CMPIData isinst = CMGetNext(isenm, NULL);
-    CMPIData mc = CMGetProperty(isinst.value.inst, "Name", NULL);
-    CMPIData ld;
     // Loop through all the listeners
+    CMPIData ld;
     int ldcount=0;
     char context[100];
     while (enm->ft->hasNext(enm, &st)

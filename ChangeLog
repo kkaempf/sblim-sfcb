@@ -1,3 +1,8 @@
+2012-04-13 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* interopProvider.c:
+	[ 3517573 ] Problem with SequenceContext migration
+
 2012-04-13 Narasimha Sharoff <nsharoff@us.ibm.com>
 
 	* httpAdapter.c, httpComm.c:
