@@ -167,7 +167,7 @@ sbin_PROGRAMS = \
    sfcbd 
 
 bin_PROGRAMS = \
-   sfcbmofpp sfcbdump sfcbinst2mof
+   sfcbmofpp sfcbdump sfcbinst2mof sfcbtrace
 
 noinst_PROGRAMS = \
    sfcbdumpP32onI32 classSchema2c sfcbsem
@@ -409,6 +409,9 @@ sfcbdump_SOURCES=sfcbdump.c
 
 sfcbinst2mof_SOURCES=sfcbinst2mof.c
 sfcbinst2mof_LDADD = -lsfcFileRepository
+
+sfcbtrace_SOURCES=sfcbtrace.c
+sfcbtrace_LDADD = -lsfcBrokerCore
 
 classSchema2c_SOURCES=classSchema2c.c
 classSchema2c_LDADD=-lsfcBrokerCore

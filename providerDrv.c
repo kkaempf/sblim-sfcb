@@ -63,7 +63,7 @@ char           *opsName[];
    struct timeval sv,ev;
 
 #define TIMING_START(req,pInfo)						\
-      if (pInfo && req && (_sfcb_trace_mask & TRACE_RESPONSETIMING) ) {\
+      if (pInfo && req && (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING) ) {\
          gettimeofday(&sv,NULL);\
          getrusage(RUSAGE_SELF,&us);\
          getrusage(RUSAGE_CHILDREN,&cs);\

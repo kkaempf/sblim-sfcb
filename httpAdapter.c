@@ -1186,13 +1186,13 @@ doHttpRequest(CommHndl conn_fd)
     ctx.sessionId = sessionId;
 
 #ifdef SFCB_DEBUG
-    if ((_sfcb_trace_mask & TRACE_RESPONSETIMING)) {
+    if ((*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING)) {
       gettimeofday(&sv, NULL);
       getrusage(RUSAGE_SELF, &us);
       uset = 1;
     }
 
-    if ((_sfcb_trace_mask & TRACE_XMLIN)) {
+    if ((*_ptr_sfcb_trace_mask & TRACE_XMLIN)) {
       _sfcb_trace(1, __FILE__, __LINE__,
                   _sfcb_format_trace("-#- xmlIn %d bytes:\n%*s",
                                      inBuf.content_length,
@@ -1224,7 +1224,7 @@ doHttpRequest(CommHndl conn_fd)
   releaseAuthHandle();
 
 #ifdef SFCB_DEBUG
-  if (uset && (_sfcb_trace_mask & TRACE_RESPONSETIMING)) {
+  if (uset && (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING)) {
     gettimeofday(&ev, NULL);
     getrusage(RUSAGE_SELF, &ue);
     _sfcb_trace(1, __FILE__, __LINE__,

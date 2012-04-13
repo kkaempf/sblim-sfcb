@@ -527,7 +527,7 @@ genResponses(BinRequestContext * binCtx,
   struct timeval  sv,
                   ev;
 
-  if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
+  if (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING) {
     gettimeofday(&sv, NULL);
     getrusage(RUSAGE_SELF, &us);
   }
@@ -542,7 +542,7 @@ genResponses(BinRequestContext * binCtx,
   if (binCtx->pDone < binCtx->pCount)
     rs.segments[6].txt = NULL;
 #ifdef SFCB_DEBUG
-  if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
+  if (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING) {
     gettimeofday(&ev, NULL);
     getrusage(RUSAGE_SELF, &ue);
     _sfcb_trace(1, __FILE__, __LINE__,
@@ -1788,7 +1788,7 @@ handleCimRequest(CimRequestContext * ctx, int flags)
                            0 = format understood
                            1 = format not understood */
 
-  if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
+  if (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING) {
     gettimeofday(&sv, NULL);
     getrusage(RUSAGE_SELF, &us);
   }
@@ -1822,7 +1822,7 @@ handleCimRequest(CimRequestContext * ctx, int flags)
     hdr.binCtx->rHdr = &hdr;
 
 #ifdef SFCB_DEBUG
-    if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
+    if (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING) {
       gettimeofday(&ev, NULL);
       getrusage(RUSAGE_SELF, &ue);
       _sfcb_trace(1, __FILE__, __LINE__,

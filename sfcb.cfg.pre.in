@@ -265,6 +265,7 @@ sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 
 ## Location of the trace file.
 ## Can be overriden by setting environment variable SFCB_TRACE_FILE
+## The special value "syslog" will send trace to the syslog
 ## Default is stderr
 #traceFile: stderr
 

@@ -64,7 +64,7 @@ commWrite(CommHndl to, void *data, size_t count)
   _SFCB_ENTER(TRACE_HTTPDAEMON | TRACE_XMLOUT, "commWrite");
 
 #ifdef SFCB_DEBUG
-  if ((_sfcb_trace_mask & TRACE_XMLOUT)) {
+  if ((*_ptr_sfcb_trace_mask & TRACE_XMLOUT)) {
     char           *mp,
                    *m = alloca(count * 2),
         *d = (char *) data;

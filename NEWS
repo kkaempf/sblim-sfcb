@@ -91,6 +91,9 @@ Everything in 1.3.10, plus:
 Changes in 1.3.15
 =================
 
+New Features: 
+- 3501314 Add dynamic logging and syslog output to sfcb trace
+
 Bugs Fixed:
 - 3514627 unsupported sfcb.cfg param - use exit call
 - 3516184 commClose close socket when file hndl is null
