@@ -1,3 +1,8 @@
+2012-04-13 Narasimha Sharoff <nsharoff@us.ibm.com>
+
+	* httpAdapter.c, httpComm.c:
+	[ 3516184 ] commClose close socket when file hndl is null
+
 2012-04-10 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* ABTScript:

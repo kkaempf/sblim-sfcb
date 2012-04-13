@@ -152,6 +152,7 @@ commClose(CommHndl hndl)
 {
 
   _SFCB_ENTER(TRACE_HTTPDAEMON, "commClose");
+  if (hndl.socket == -1) return; /* socket was closed already */
 #if defined USE_SSL
   if (hndl.ssl) {
     if ((SSL_get_shutdown(hndl.ssl) & SSL_RECEIVED_SHUTDOWN))
@@ -159,16 +160,16 @@ commClose(CommHndl hndl)
     else
       SSL_clear(hndl.ssl);
     SSL_free(hndl.ssl);
-  } else
+  }
 #endif
-  if (hndl.file == NULL) {
-    close(hndl.socket);
-  } else {
+  if (hndl.file != NULL) {
     fclose(hndl.file);
     if (hndl.buf) {
       free(hndl.buf);
     }
   }
+  close(hndl.socket);
+  hndl.socket = -1;
   _SFCB_EXIT();
 }
 /* MODELINES */
