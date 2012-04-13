@@ -1,3 +1,8 @@
+2012-04-13 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* interopProvider.c:
+	[ 3517573 ] Problem with SequenceContext migration
+
 2012-04-13  Narasimhma Sharoff  <nsharoff@us.ibm.com>
 
 	* brokerOs.c, brokerUpc.c, native.h:
@@ -23,8 +28,8 @@
 
 2012-04-05  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
-        * control.c:
-        [ 3514627 ] unsupported sfcb.cfg param - use exit call
+	* control.c:
+	[ 3514627 ] unsupported sfcb.cfg param - use exit call
 
 2012-04-03  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
