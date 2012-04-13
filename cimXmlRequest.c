@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.71 2012/04/10 15:49:56 buccella Exp $
+ * $Id: cimXmlRequest.c,v 1.72 2012/04/13 18:05:40 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -549,7 +549,7 @@ static RespSegments genResponses(BinRequestContext * binCtx,
    struct rusage us,ue;
    struct timeval sv, ev;
 
-      if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
+   if (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING) {
 	gettimeofday(&sv,NULL);
 	getrusage(RUSAGE_SELF,&us);
       }
@@ -563,7 +563,7 @@ static RespSegments genResponses(BinRequestContext * binCtx,
    rs=iMethodResponse(binCtx->rHdr, sb);
    if (binCtx->pDone<binCtx->pCount) rs.segments[6].txt=NULL;
 #ifdef SFCB_DEBUG
-   if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
+   if (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING) {
       gettimeofday(&ev,NULL);
       getrusage(RUSAGE_SELF,&ue);
       _sfcb_trace(1,__FILE__,__LINE__,
@@ -2730,7 +2730,7 @@ RespSegments handleCimXmlRequest(CimXmlRequestContext * ctx, int flags)
    struct rusage us,ue;
    struct timeval sv, ev;
 
-      if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
+   if (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING) {
 	gettimeofday(&sv,NULL);
 	getrusage(RUSAGE_SELF,&us);
       }
@@ -2740,7 +2740,7 @@ RespSegments handleCimXmlRequest(CimXmlRequestContext * ctx, int flags)
    hdr.role=ctx->role;
 
 #ifdef SFCB_DEBUG
-   if (_sfcb_trace_mask & TRACE_RESPONSETIMING) {
+   if (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING) {
       gettimeofday(&ev,NULL);
       getrusage(RUSAGE_SELF,&ue);
       _sfcb_trace(1,__FILE__,__LINE__,
