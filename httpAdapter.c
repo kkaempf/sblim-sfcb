@@ -586,6 +586,7 @@ static void writeChunkResponse(BinRequestContext *ctx, BinResponseHdr *rh)
          RespSegments rs;
          rs=genFirstChunkErrorResponse(ctx, rh->rc-1, NULL);
          writeResponse(*ctx->commHndl, rs);
+         commFlush(*(ctx->commHndl));
          _SFCB_EXIT();
      }  
       writeChunkHeaders(ctx);
@@ -1171,6 +1172,7 @@ static void handleHttpRequest(int connFd, int sslMode)
    if (r < 0) {
       char *emsg=strerror(errno);
       mlogf(M_ERROR,M_SHOW,"--- fork handler: %s\n",emsg);
+      close(connFd);
       exit(1);
    }
 
