@@ -5,6 +5,7 @@ New features:
 
 - 3440300 Allow forced chunked responses
 - 3501314 Add dynamic logging and syslog output to sfcb trace
+- 3517530 Implement mark, release routines in CMPIBrokerMemFT
 
 Bugs fixed:
 
