@@ -1,3 +1,8 @@
+2012-04-16  Narasimhma Sharoff  <nsharoff@us.ibm.com>
+
+	* brokerOs.c, brokerUpc.c, native.h:
+	[ 3517530 ] Implement mark, release routines in CMPIBrokerMemFT
+
 2012-04-13  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* Makefile.am, cimRequest.c, httpAdapter.c, httpComm.c, providerDrv.c, 

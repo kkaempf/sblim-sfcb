@@ -245,6 +245,52 @@ CMPIBrokerExtFT brokerExt_FT = {
 };
 
 CMPIBrokerExtFT *CMPI_BrokerExt_Ftab = &brokerExt_FT;
+
+
+/*
+ * -----------------------------------------------
+ * CMPIBrokerMemFT -memory specific CIMOM routines
+ * ------------------------------------------------
+*/
+extern void *markHeap();
+extern void releaseHeap(void *);
+
+/* The following two are wrappers for markHeap() and releaseHeap()
+ * in support.c which allows for provider calls via broker->mft functions
+*/
+static CMPIGcStat *mark(const CMPIBroker *mb, CMPIStatus *rc)
+{
+   return((CMPIGcStat *)markHeap());
+}
+
+static CMPIStatus release(const CMPIBroker *mb, const CMPIGcStat *gc)
+{
+   CMPIStatus st = {CMPI_RC_OK, NULL};
+   releaseHeap((void *)gc);
+   return(st);
+}
+
+
+CMPIBrokerMemFT brokerMem_FT = {
+   CMPICurrentVersion,
+   mark,
+   release,
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   NULL,
+   NULL
+};
+
+CMPIBrokerMemFT *CMPI_BrokerMem_Ftab = &brokerMem_FT;
+
 /* MODELINES */
 /* DO NOT EDIT BELOW THIS COMMENT */
 /* Modelines are added by 'make pretty' */

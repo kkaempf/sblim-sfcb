@@ -124,7 +124,7 @@ deliverIndication(const CMPIBroker * mb, const CMPIContext *ctx,
   NativeSelectExp *se = activFilters;
 
   while (se) {
-    void *hc = markHeap(); /* 3497209:78376 */
+    CMPIGcStat *hc = (void *)(mb->mft->mark(mb, &st));
     /* Check for matching FROM class */
     for (x=0; x<se->qs->fcNext; x++) {
       if (CMClassPathIsA(mb, indop, se->qs->fClasses[x], &st)) {
@@ -132,7 +132,7 @@ deliverIndication(const CMPIBroker * mb, const CMPIContext *ctx,
         break;
       }
     }
-    releaseHeap(hc); /* 3497209:78376 - relase objs that are no longer reqd */
+    mb->mft->release(mb, hc);
     if (classMatch && se->exp.ft->evaluate(&se->exp, ind, &st)) {
       /*
        * apply a propertyfilter in case the query is not "SELECT * FROM
@@ -1334,13 +1334,14 @@ static CMPIBrokerFT request_FT = {
 CMPIBrokerFT   *RequestFT = &request_FT;
 
 extern CMPIBrokerExtFT brokerExt_FT;
+extern CMPIBrokerMemFT brokerMem_FT;
 
 static CMPIBroker _broker = {
   NULL,
   &request_FT,
   &native_brokerEncFT,
   &brokerExt_FT,
-  NULL
+  &brokerMem_FT
 };
 
 CMPIBroker     *Broker = &_broker;

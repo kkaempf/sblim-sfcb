@@ -113,6 +113,7 @@ void            native_release_CMPIContext(CMPIContext *);
 CMPIContext    *native_clone_CMPIContext(const CMPIContext *ctx);
 
 extern CMPIBrokerExtFT *CMPI_BrokerExt_Ftab;
+extern CMPIBrokerMemFT *CMPI_BrokerMem_Ftab;
 
 MsgSegment      setObjectPathMsgSegment(const CMPIObjectPath * op);
 CMPIInstance   *relocateSerializedInstance(void *area);
