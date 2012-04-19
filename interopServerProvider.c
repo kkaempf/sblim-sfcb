@@ -508,6 +508,7 @@ static CMPIStatus IndServiceCapabilitiesProviderEnumInstances(CMPIInstanceMI * m
    CMPIStatus st = { CMPI_RC_OK, NULL };
    CMPIObjectPath *op;
    CMPIInstance *ci = NULL;
+   long ctl=0;
 
    
    _SFCB_ENTER(TRACE_PROVIDERS, "IndServiceCapabilitiesProviderEnumInstances");
@@ -521,6 +522,15 @@ static CMPIStatus IndServiceCapabilitiesProviderEnumInstances(CMPIInstanceMI * m
    op=CMNewObjectPath(_broker,"root/interop","SFCB_IndicationServiceCapabilities",NULL);
    CMAddKey(op,"InstanceID","CIM:SFCB_ISC",CMPI_chars);
    ci = CBGetInstance(_broker, ctxLocal, op, properties, &st);
+
+   // Get the config options for these max vals and add them to the instance
+   getControlNum("MaxListenerDestinations", &ctl);
+   CMPIValue max = {.uint32 = ctl };
+   CMSetProperty(ci,"MaxListenerDestinations",&max,CMPI_uint32);
+
+   getControlNum("MaxActiveSubscriptions", &ctl);
+   max.uint32 = ctl;
+   CMSetProperty(ci,"MaxActiveSubscriptions",&max,CMPI_uint32);
 
    CMReturnInstance(rslt,ci);
    CMReturnDone(rslt);

@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.33 2012/04/11 22:55:17 buccella Exp $
+# $Id: sfcb.cfg.pre.in,v 1.34 2012/04/19 17:39:55 mchasal Exp $
 ##
 ## Sample Configuration for Small Footprint CIM Broker
 ## 
@@ -301,3 +301,14 @@ sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 ##               4, ignore (do nothing)
 #SubscriptionRemovalAction: 2
 
+## The maximum number of listener destinations that are allowable.
+## This threshold will prevent creation of new listener destinations,
+## but will not delete them if more are found.
+## Default is 100.
+#MaxListenerDestinations: 100
+
+## The maximum number of ACTIVE subscriptions allowed.
+## This threshold will prevent new activations,
+## but will not deactivate them if more are found.
+## Default is 100.
+#MaxActiveSubscriptions: 100
