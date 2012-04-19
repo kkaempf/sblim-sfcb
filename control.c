@@ -128,6 +128,8 @@ Control         init[] = {
   {"SubscriptionRemovalAction",1,"2"},
   {"indicationDeliveryThreadLimit",1,"30"},
   {"indicationDeliveryThreadTimeout",1,"0"},
+  {"MaxListenerDestinations",1,"100"},
+  {"MaxActiveSubscriptions",1,"100"},
 
 };
 

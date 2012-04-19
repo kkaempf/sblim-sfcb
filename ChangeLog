@@ -1,3 +1,11 @@
+2012-04-19 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* control.c, indCIMXMLHandler.c, interopServerProvider.c,
+	sfcb.cfg.pre.in, test/TestProviders/tests/Makefile.am,
+	test/TestProviders/tests/limitTest.sh:
+	[ 3513390 ] Enforce LD and subscription limits
+	(max for LD only)
+
 2012-04-16  Narasimhma Sharoff  <nsharoff@us.ibm.com>
 
 	* brokerOs.c, brokerUpc.c, native.h:
