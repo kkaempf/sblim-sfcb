@@ -1151,7 +1151,7 @@ getProviderContext(BinRequestContext * ctx)
   ComSockets      sockets;
   OperationHdr   *ohdr = ctx->oHdr;
 
-  _SFCB_ENTER(TRACE_PROVIDERMGR, "internalGetProviderContext");
+  _SFCB_ENTER(TRACE_PROVIDERMGR, "getProviderContext");
 
   l = sizeof(*ohdr) + ohdr->nameSpace.length + ohdr->className.length;
   buf = (char *) malloc(l + 8);
