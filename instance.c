@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.53 2011/11/23 18:22:16 mchasal Exp $
+ * $Id: instance.c,v 1.54 2012/05/11 20:05:11 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -77,6 +77,10 @@ static void instFillDefaultProperties(struct native_instance *inst,
 				      const char * ns, const char * cn);
 #endif
 
+static CMPIStatus __ift_internal_setPropertyFilter(CMPIInstance * instance,
+                                          const char **propertyList,
+                                          const char **keys);
+
 /****************************************************************************/
 
 static void __release_list(char **list)
@@ -104,6 +108,29 @@ static char **__duplicate_list(const char **list)
       }
    }
    return result;
+}
+
+
+static char **__make_key_list(const CMPIObjectPath * cop)
+{
+    char **keys = NULL;
+    int i, j;
+
+    if (cop) {
+        j = CMGetKeyCount(cop, NULL);
+
+        if (j) {
+            /* allocate extra element since list needs to be NULL terminated */
+            keys = calloc(j + 1, sizeof(char *));
+            for (i = 0; i < j; i++) {
+                CMPIString *keyName;
+                CMGetKeyAt(cop, i , &keyName, NULL);
+                keys[i] = strdup(CMGetCharsPtr(keyName, NULL));
+            }
+        }
+    }
+
+    return keys;
 }
 
 
@@ -304,6 +331,14 @@ static CMPIStatus __ift_setObjectPath(CMPIInstance * inst,
    int j;
    CMPIStatus rc = { CMPI_RC_OK, NULL };
 
+   /* in the case the instance is filtered need to reset the filter with new key list */
+   if (((struct native_instance *)inst)->filtered) {
+       char **props = ((struct native_instance *)inst)->property_list;
+       char **keys = __make_key_list(cop);
+       __ift_internal_setPropertyFilter(inst, (const char **)props, (const char **)keys);
+       __release_list(keys);
+   }
+
    /* get information out of objectpath */
    if (cop) {
       j = CMGetKeyCount(cop, &tmp1);
@@ -420,9 +455,9 @@ static CMPIObjectPath *__ift_getObjectPath(const CMPIInstance * instance,
 }
 
 
-static CMPIStatus __ift_setPropertyFilter(CMPIInstance * instance,
-                                          const char **propertyList, 
-					  const char **keys)
+static CMPIStatus __ift_internal_setPropertyFilter(CMPIInstance * instance,
+                                          const char **propertyList,
+                                          const char **keys)
 {
     int j,m;
     CMPIObjectPath * cop;
@@ -433,11 +468,6 @@ static CMPIStatus __ift_setPropertyFilter(CMPIInstance * instance,
     struct native_instance *i = (struct native_instance *) instance;
     struct native_instance *iNew,iTemp;
     
-    if (propertyList == NULL) {
-        /* NULL property list, no need to set filter */
-        CMReturn(CMPI_RC_OK);
-    }
-
     cop = TrackedCMPIObjectPath(instGetNameSpace(instance), instGetClassName(instance), NULL);
     if(cop) {
         if(i->mem_state == MEM_RELEASED || i->mem_state > 0) {
@@ -480,6 +510,36 @@ static CMPIStatus __ift_setPropertyFilter(CMPIInstance * instance,
     }
     
     CMReturn(CMPI_RC_OK);
+}
+
+
+static CMPIStatus __ift_setPropertyFilter(CMPIInstance * instance,
+                                          const char **propertyList,
+                                          const char **keys)
+{
+    CMPIStatus rc = { CMPI_RC_OK, NULL};
+    CMPIObjectPath *cop = NULL;
+    char **ikeys = NULL;
+
+    if (propertyList == NULL) {
+        /* NULL property list, no need to set filter */
+        CMReturn(CMPI_RC_OK);
+    }
+    if (instance == NULL) {
+       rc.rc = CMPI_RC_ERR_INVALID_HANDLE;
+    }
+    else {
+       /* CMPI 2.0 dictates that keyList is to be ignored by MB, and remains for Binary compat.
+	  Build keyList from instance objectpath to be passed to internal filter implementation */
+       cop = CMGetObjectPath(instance, NULL);
+       ikeys = __make_key_list(cop);
+
+       rc = __ift_internal_setPropertyFilter(instance, propertyList, (const char **)ikeys);
+
+       __release_list(ikeys);
+    }
+
+    return rc;
 }
 
 static CMPIData 

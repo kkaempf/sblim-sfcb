@@ -1,0 +1,5 @@
+<INSTANCE CLASSNAME="TEST_Person">
+<PROPERTY NAME="name" TYPE="string">
+<VALUE>Michael</VALUE>
+</PROPERTY>
+</INSTANCE>

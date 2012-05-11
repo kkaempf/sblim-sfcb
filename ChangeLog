@@ -1,3 +1,11 @@
+2012-05-11  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* instance.c, indCIMXMLHandler.c, internalProvider.c,
+	queryOperation.h, queryStatement.c, result.c,
+	test/xmltest/InstanceTest25GetWithPropertyFilter.xml:
+	[ 3525651 ] CMSetPropertyFilter not CMPI 2.0 compliant
+	(based on patch by Tyrel Datwyler)
+
 2012-04-19 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* control.c, indCIMXMLHandler.c, interopServerProvider.c,

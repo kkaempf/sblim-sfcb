@@ -264,7 +264,6 @@ static CMPIStatus enumInstances(CMPIInstanceMI * mi,
    CMPIObjectPath *op;
    CMPIArray *ar;
    CMPIData rv;
-   const char **keyList;
 
    _SFCB_ENTER(TRACE_INTERNALPROVIDER, "enumInstances");
    _SFCB_TRACE(1,("--- %s %s",nss,cns));
@@ -288,11 +287,7 @@ static CMPIStatus enumInstances(CMPIInstanceMI * mi,
       if ((bi=_getIndex(bnss,cns))!=NULL) {
 	for (ci=ipGetFirst(bi,&len,NULL,0); ci; ci=ipGetNext(bi,&len,NULL,0)) {
             if(properties) {
-               keyList = getKeyList(ci->ft->getObjectPath(ci, NULL));
-               ci->ft->setPropertyFilter(ci, properties, keyList);
-               if(keyList) {
-                  free(keyList);
-               }
+               ci->ft->setPropertyFilter(ci, properties, NULL);
             }
             _SFCB_TRACE(1,("--- returning instance %p",ci));
             retFnc(rslt,ci);
@@ -382,17 +377,12 @@ CMPIStatus InternalProviderGetInstance(CMPIInstanceMI * mi,
 {
    CMPIStatus st = { CMPI_RC_OK, NULL };
    CMPIInstance *ci;
-   const char ** keyList;
 
    _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderGetInstance");
    
    ci=internalProviderGetInstance(cop,&st);
    if(st.rc==CMPI_RC_OK && properties) {
-      keyList = getKeyList(ci->ft->getObjectPath(ci, NULL));
-      ci->ft->setPropertyFilter(ci, properties, keyList);
-      if(keyList) {
-         free(keyList);
-      }
+      ci->ft->setPropertyFilter(ci, properties, NULL);
    }
    
    if (st.rc==CMPI_RC_OK) {
@@ -475,7 +465,6 @@ CMPIStatus InternalProviderModifyInstance(CMPIInstanceMI * mi,
    const char *nss=ns->ft->getCharPtr(ns,NULL);
    const char *cns=cn->ft->getCharPtr(cn,NULL);
    const char *bnss=repositoryNs(nss);
-   const char **keyList;
 
    _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderSetInstance");
    
@@ -491,11 +480,7 @@ CMPIStatus InternalProviderModifyInstance(CMPIInstanceMI * mi,
    }
    
    if(properties) {
-     keyList = getKeyList(ci->ft->getObjectPath(ci, NULL));
-     ci->ft->setPropertyFilter((CMPIInstance*)ci, properties, keyList);
-     if(keyList) {
-        free(keyList);
-     }
+     ci->ft->setPropertyFilter((CMPIInstance*)ci, properties, NULL);
    }   
 
    len=getInstanceSerializedSize(ci);

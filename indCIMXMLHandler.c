@@ -270,7 +270,6 @@ CMPIStatus IndCIMXMLHandlerGetInstance(CMPIInstanceMI * mi,
 {
    CMPIStatus st;
    CMPIInstance*   ci;
-   const char** keyList;
 
    _SFCB_ENTER(TRACE_INDPROVIDER, "IndCIMXMLHandlerGetInstance");
 
@@ -281,11 +280,7 @@ CMPIStatus IndCIMXMLHandlerGetInstance(CMPIInstanceMI * mi,
       filterInternalProps(ci);
     }
     if (properties) {
-      keyList = getKeyList(ci->ft->getObjectPath(ci, NULL));
-      ci->ft->setPropertyFilter(ci, properties, keyList);
-      if (keyList) {
-        free(keyList);
-      }
+      ci->ft->setPropertyFilter(ci, properties, NULL);
     }
     CMReturnInstance(rslt, ci);
    }
