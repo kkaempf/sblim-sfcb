@@ -186,14 +186,12 @@ qsRelease(QLStatement * st)
 }
 
 static CMPIInstance *
-qsCloneAndFilter(QLStatement * st, CMPIInstance *ci, CMPIObjectPath * cop,
-                 char **kNames)
+qsCloneAndFilter(QLStatement * st, CMPIInstance *ci, CMPIObjectPath * cop)
 {
   CMPIInstance   *nic = CMNewInstance(Broker, cop, NULL);
   CMPICount       i,
                   c = CMGetPropertyCount(ci, NULL);
-  CMSetPropertyFilter(nic, (const char **) st->spNames,
-                      (const char **) kNames);
+  CMSetPropertyFilter(nic, (const char **) st->spNames, NULL);
   for (i = 0; i < c; i++) {
     CMPIString     *name;
     CMPIData        d = CMGetPropertyAt(ci, i, &name, NULL);

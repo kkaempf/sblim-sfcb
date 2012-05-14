@@ -234,7 +234,7 @@ struct qlPropertySource {
 struct qlStatementFt {
   void            (*release) (QLStatement *);
   CMPIInstance   *(*cloneAndFilter) (QLStatement *, CMPIInstance *,
-                                     CMPIObjectPath *, char **);
+                                     CMPIObjectPath *);
   void            (*setAllProperties) (QLStatement *, int allProperties);
   void            (*appendSelectPropertyName) (QLStatement *, char *name);
   void            (*addFromClass) (QLStatement *, char *cn, char *ca);

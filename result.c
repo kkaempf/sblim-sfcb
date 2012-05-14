@@ -303,7 +303,7 @@ __rft_returnInstance(const CMPIResult *result,
         if (r->qs->allProps == 0) {
           instance =
               r->qs->ft->cloneAndFilter(r->qs, (CMPIInstance *) instance,
-                                        CMGetObjectPath(instance,NULL), r->qs->keys);
+                                        CMGetObjectPath(instance,NULL));
           releaseInstance = 1;
         }
       } else
@@ -312,7 +312,7 @@ __rft_returnInstance(const CMPIResult *result,
       if (r->qs->allProps == 0) {
         instance =
             r->qs->ft->cloneAndFilter(r->qs, (CMPIInstance *) instance,
-                                      CMGetObjectPath(instance,NULL), r->qs->keys);
+                                      CMGetObjectPath(instance,NULL));
         releaseInstance = 1;
       }
     }

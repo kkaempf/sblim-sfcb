@@ -168,22 +168,6 @@ IndCIMXMLHandlerEnumInstanceNames(CMPIInstanceMI * mi,
   _SFCB_RETURN(st);
 }
 
-const char    **
-getKeyList(const CMPIObjectPath * cop)
-{
-  CMPIString     *s;
-  const char    **list;
-  int             i = cop->ft->getKeyCount(cop, NULL);
-  list = malloc((i + 1) * sizeof(char *));
-  list[i] = NULL;
-  while (i) {
-    i--;
-    cop->ft->getKeyAt(cop, i, &s, NULL);
-    list[i] = s->ft->getCharPtr(s, NULL);
-  }
-  return list;
-}
-
 void
 filterInternalProps(CMPIInstance* ci) 
 {
@@ -308,7 +292,6 @@ IndCIMXMLHandlerGetInstance(CMPIInstanceMI * mi,
 {
   CMPIStatus      st;
   CMPIInstance*   ci;
-  const char** keyList;
   _SFCB_ENTER(TRACE_INDPROVIDER, "IndCIMXMLHandlerGetInstance");
   
   ci = internalProviderGetInstance(cop, &st);
@@ -318,11 +301,7 @@ IndCIMXMLHandlerGetInstance(CMPIInstanceMI * mi,
       filterInternalProps(ci);
     }
     if (properties) {
-      keyList = getKeyList(ci->ft->getObjectPath(ci, NULL));
-      ci->ft->setPropertyFilter(ci, properties, keyList);
-      if (keyList) {
-        free(keyList);
-      }
+      ci->ft->setPropertyFilter(ci, properties, NULL);
     }
     CMReturnInstance(rslt, ci);
   }
