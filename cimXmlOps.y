@@ -361,7 +361,7 @@ buildGetInstanceRequest(void *parm)
     sreqSize += req->properties * sizeof(MsgSegment);
   sreq = calloc(1, sreqSize);
   sreq->hdr.operation = OPS_GetInstance;
-  sreq->hdr.count = req->properties + 2;
+  sreq->hdr.count = req->properties + GI_REQ_REG_SEGMENTS;
 
   path =
       TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
@@ -378,9 +378,11 @@ buildGetInstanceRequest(void *parm)
   }
   sreq->objectPath = setObjectPathMsgSegment(path);
   sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
   sreq->hdr.sessionId = hdr->sessionId;
 
   for (i = 0; i < req->properties; i++) {
+    fprintf(stderr, "setting filter prop %d to %s\n", i, req->propertyList.values[i].value);
     sreq->properties[i] =
         setCharsMsgSegment(req->propertyList.values[i].value);
   }
