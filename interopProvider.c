@@ -59,7 +59,6 @@ extern void memLinkObjectPath(CMPIObjectPath *op);
 static const CMPIBroker *_broker;
 static int firstTime=1;
 
-
 typedef struct filter {
    CMPIInstance *fci;
    QLStatement *qs;
@@ -773,6 +772,10 @@ void initInterOp(
    getControlNum("indicationDeliveryThreadTimeout",&IND_THREAD_TO);
    sem_init(&availThreadsSem, 0, MAX_IND_THREADS);
 
+   if (handlerHt) {
+     // Set the initial count of Listener Destinations
+     LDcount=handlerHt->ft->size(handlerHt);
+   }
    _SFCB_EXIT(); 
 }
 

@@ -50,7 +50,6 @@ extern ExpSegments exportIndicationReq(CMPIInstance *ci, char *id);
 extern void memLinkObjectPath(CMPIObjectPath *op);
 
 static const CMPIBroker *_broker;
-static int LDcount=-1;
 
 static int interOpNameSpace(const CMPIObjectPath *cop, CMPIStatus *st) 
  {   
@@ -879,49 +878,11 @@ int refillRetryQ (const CMPIContext * ctx)
     _SFCB_RETURN(0); 
 }
 
-int countLD (const CMPIContext * ctx) {
-    _SFCB_ENTER(TRACE_INDPROVIDER, "countLD");  
-    CMPIEnumeration *enm;
-    CMPIStatus st = { CMPI_RC_OK, NULL };
-    LDcount++; // Mark it initialized
-
-    // Enumerate the destinations
-    CMPIContext * ctxLocal = prepareUpcall((CMPIContext *)ctx);
-    CMPIObjectPath *ref=CMNewObjectPath(_broker,"root/interop","cim_listenerdestination",&st);
-    enm = _broker->bft->enumerateInstanceNames(_broker, ctxLocal, ref, &st);
-    while(enm && enm->ft->hasNext(enm, &st)) {
-       LDcount++;
-       enm->ft->getNext(enm, &st);
-    }
-    ref = CMNewObjectPath(_broker,"root/interop","cim_listenerdestinationcimxml",&st);
-    enm = _broker->bft->enumerateInstanceNames(_broker, ctxLocal, ref, &st);
-    while(enm && enm->ft->hasNext(enm, &st)) {
-       LDcount++;
-       enm->ft->getNext(enm, &st);
-    }
-    ref = CMNewObjectPath(_broker,"root/interop","cim_indicationhandlercimxml",&st);
-    enm = _broker->bft->enumerateInstanceNames(_broker, ctxLocal, ref, &st);
-    while(enm && enm->ft->hasNext(enm, &st)) {
-       LDcount++;
-       enm->ft->getNext(enm, &st);
-    }
-
-    CMRelease(ref);
-    CMRelease(ctxLocal);
-    _SFCB_TRACE(1,("--- initial count of destinations: %d.",LDcount));
-
-    _SFCB_RETURN(0);
-}
-
 int initIndCIMXML (const CMPIContext * ctx)
 {
     _SFCB_ENTER(TRACE_INDPROVIDER, "initIndCIMXML");  
     //Refill the queue if there were any from the last run
     refillRetryQ(ctx);
-    if ( LDcount == -1 ) {
-        //Get the count of ListenerDestinations
-        countLD(ctx);
-    }
     _SFCB_RETURN(0);
 }
 

@@ -1,3 +1,9 @@
+2012-05-16 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* control.h, indCIMXMLHandler.c, interopServerProvider.c:
+	[ 3513390 ] Enforce LD and subscription limits
+	Use hashtable instead of EI
+
 2012-05-11  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* instance.c, indCIMXMLHandler.c, internalProvider.c,
