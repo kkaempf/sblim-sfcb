@@ -148,7 +148,7 @@ extern int      semReleaseUnDo(int semid, int semnum);
 extern int      semMultiRelease(int semid, int semnum, int n);
 extern int      semGetValue(int semid, int semnum);
 extern int      semSetValue(int semid, int semnum, int value);
-extern int      initSem(int https, int provs);
+extern int      initSem(int provs);
 
 extern int      provProcSem;
 extern int      provWorkSem;
@@ -166,14 +166,12 @@ extern char    *httpPauseStr;
 /*
  * static ids 
  */
-#define HTTP_GUARD_ID 0
-#define HTTP_PROCS_ID 1
 
 /*
  * PROV_PROC_BASE_ID must be updated if the number of id's in the above
  * block changes. 
  */
-#define PROV_PROC_BASE_ID 2
+#define PROV_PROC_BASE_ID 0
 
 /*
  * constants for calculating per process ids 
@@ -195,9 +193,7 @@ extern char    *httpPauseStr;
 #define PROV_ALIVE(id) (((id)*(int)(PROV_PROC_NUM_SEMS))+PROV_PROC_ALIVE_ID+PROV_PROC_BASE_ID)
 
 extern ComSockets *sPairs;
-extern int      ptBase,
-                htBase,
-                htMax;
+extern int      ptBase;
 
 extern void     stopLocalConnectServer();
 extern void     localConnectServer();

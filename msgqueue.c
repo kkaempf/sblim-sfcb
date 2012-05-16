@@ -122,7 +122,7 @@ semSetValue(int semid, int semnum, int value)
 }
 
 int
-initSem(int https, int provs)
+initSem(int provs)
 {
   union semun     sun;
   int             i;
@@ -144,11 +144,6 @@ initSem(int https, int provs)
           sfcbSemKey);
     abort();
   }
-
-  sun.val = 1;
-  semctl(sfcbSem, HTTP_GUARD_ID, SETVAL, sun);
-  sun.val = https;
-  semctl(sfcbSem, HTTP_PROCS_ID, SETVAL, sun);
 
   for (i = 0; i < provs; i++) {
     sun.val = 1;

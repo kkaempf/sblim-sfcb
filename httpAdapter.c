@@ -91,7 +91,7 @@ int chunkMode = CHUNK_ALLOW;
 int             sfcbSSLMode = 0;        /* used as a global sslMode */
 int             httpLocalOnly = 0;      /* 1 = only listen on loopback
                                          * interface */
-static int      hMax;
+static long     hMax;
 static int      httpProcIdX;
 static int      stopAccepting = 0;
 static int      running = 0;
@@ -1855,8 +1855,7 @@ httpDaemon(int argc, char *argv[], int sslMode)
   int             i,
                   rc;
   char           *cp;
-  long            procs,
-                  httpPort;
+  long            httpPort;
   int             httpListenFd = -1;
   int             enableHttp = 0;
   fd_set          httpfds;
@@ -1906,10 +1905,8 @@ httpDaemon(int argc, char *argv[], int sslMode)
     udsPath = "/tmp/sfcbHttpSocket";
 #endif
 
-  hMax = htMax;                 /* max number of http procs */
-
-  if (getControlNum("httpProcs", &procs))
-    procs = 10;
+  if (getControlNum("httpProcs", &hMax))
+    hMax = 10;
   if (getControlBool("enableHttp", &enableHttp))
     enableHttp = 1;
 #ifdef HAVE_UDS
@@ -1925,7 +1922,7 @@ httpDaemon(int argc, char *argv[], int sslMode)
    * note: we check for enableHttps in sfcBroker 
    */
 
-  initHttpProcCtl(procs);
+  initHttpProcCtl(hMax);
 
   if (getControlBool("doBasicAuth", &doBa))
     doBa = 0;

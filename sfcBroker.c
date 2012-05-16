@@ -865,7 +865,7 @@ main(int argc, char *argv[])
     startHttp = 1;
   }
 
-  initSem(dSockets, pSockets);
+  initSem(pSockets);
   initProvProcCtl(pSockets);
   init_sfcBroker();
   initSocketPairs(pSockets, dSockets);
