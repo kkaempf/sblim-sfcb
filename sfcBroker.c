@@ -603,7 +603,6 @@ main(int argc, char *argv[])
       httpLocalOnly = 0;
   int             syslogLevel = LOG_ERR;
   long            dSockets,
-                  sSockets,
                   pSockets;
   char           *pauseStr;
 
@@ -818,8 +817,6 @@ main(int argc, char *argv[])
 
   if (getControlNum("httpProcs", (long *) &dSockets))
     dSockets = 10;
-  if (getControlNum("httpsProcs", (long *) &sSockets))
-    sSockets = 10;
   if (getControlNum("provProcs", (long *) &pSockets))
     pSockets = 16;
 
@@ -868,10 +865,10 @@ main(int argc, char *argv[])
     startHttp = 1;
   }
 
-  initSem(dSockets, sSockets, pSockets);
+  initSem(dSockets, pSockets);
   initProvProcCtl(pSockets);
   init_sfcBroker();
-  initSocketPairs(pSockets, dSockets, sSockets);
+  initSocketPairs(pSockets, dSockets);
 
   setSignal(SIGQUIT, handleSigquit, 0);
   setSignal(SIGINT, handleSigquit, 0);

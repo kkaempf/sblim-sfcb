@@ -65,7 +65,6 @@ Control         init[] = {
   {"httpProcs", 1, "8"},
   {"httpsPort", 1, "5989"},
   {"enableHttps", 2, "false"},
-  {"httpsProcs", 1, "8"},
   {"httpLocalOnly", 2, "false"},
   {"httpUserSFCB", 2, "true"},
   {"httpUser", 0, ""},

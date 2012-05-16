@@ -63,6 +63,8 @@ New features:
 
 Bugs fixed:
 
+- 2966659 Cleanup https daemon remnants
+
 Everything in 1.3.10, plus:
 
 - 3130727 CMPIPropertyMIFT.setProperty() missing objectpath keys

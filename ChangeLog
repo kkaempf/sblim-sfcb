@@ -1,3 +1,8 @@
+2012-05-16  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* control.c, msgqueue.c, msgqueue.h, sfcBroker.c:
+	[ 2966659 ] Cleanup https daemon remnants
+
 2012-05-14  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* indCIMXMLHandler.c, instance.c, internalProvider.c, queryOperation.h,

@@ -44,8 +44,7 @@ ComSockets     *sPairs;
 int             ptBase,
                 htBase,
                 stBase,
-                htMax,
-                stMax;
+                htMax;
 int             currentProc = 0;
 int             noProvPause = 0;
 char           *provPauseStr = NULL;
@@ -123,7 +122,7 @@ semSetValue(int semid, int semnum, int value)
 }
 
 int
-initSem(int https, int shttps, int provs)
+initSem(int https, int provs)
 {
   union semun     sun;
   int             i;
@@ -150,10 +149,6 @@ initSem(int https, int shttps, int provs)
   semctl(sfcbSem, HTTP_GUARD_ID, SETVAL, sun);
   sun.val = https;
   semctl(sfcbSem, HTTP_PROCS_ID, SETVAL, sun);
-  sun.val = 1;
-  semctl(sfcbSem, SHTTP_GUARD_ID, SETVAL, sun);
-  sun.val = shttps;
-  semctl(sfcbSem, SHTTP_PROCS_ID, SETVAL, sun);
 
   for (i = 0; i < provs; i++) {
     sun.val = 1;
@@ -635,10 +630,10 @@ spSendCtlResult(int *to, int *from, short code, unsigned long count,
 }
 
 void
-initSocketPairs(int provs, int https, int shttps)
+initSocketPairs(int provs, int https)
 {
   int             i,
-                  t = (provs * 2);      // +https+shttps;
+                  t = (provs * 2);      // +https;
 
   sPairs = (ComSockets *) malloc(sizeof(ComSockets) * t);
   mlogf(M_INFO, M_SHOW, "--- initSocketPairs: %d\n", t);
@@ -647,9 +642,7 @@ initSocketPairs(int provs, int https, int shttps)
   }
   ptBase = provs;
   htBase = ptBase + provs;
-  stBase = htBase + https;
   htMax = https;
-  stMax = shttps;
 }
 
 void
