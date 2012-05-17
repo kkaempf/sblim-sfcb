@@ -1,5 +1,5 @@
 /*
- * $Id: brokerUpc.c,v 1.40 2012/04/13 17:53:04 nsharoff Exp $
+ * $Id: brokerUpc.c,v 1.41 2012/05/17 21:45:11 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -351,7 +351,7 @@ static CMPIEnumeration *genericEnumRequest(const CMPIBroker * broker,
    CMPIObjectPath *copLocalCall;
    char* errstr = NULL; 
    int initrc = 0; 
-   int irc, c, i=-1;
+   int irc, c, i=-1, cnt=bhdr->count;
 
    _SFCB_ENTER(TRACE_UPCALLS, "genericEnumRequest");
    
@@ -367,7 +367,7 @@ static CMPIEnumeration *genericEnumRequest(const CMPIBroker * broker,
       	 sreqSize+=i*sizeof(MsgSegment);
       	 i=-1;
       	 while(props[++i]) {
-      	    bhdr->object[i+2] = setCharsMsgSegment(props[i]);
+      	    bhdr->object[i+cnt] = setCharsMsgSegment(props[i]);
       	 }
       	 bhdr->count+=i;      	 
       }
