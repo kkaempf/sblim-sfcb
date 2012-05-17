@@ -373,7 +373,8 @@ genericEnumRequest(const CMPIBroker * broker,
   int             initrc = 0;
   int             irc,
                   c,
-                  i = -1;
+                  i = -1,
+                  cnt = bhdr->count;
 
   _SFCB_ENTER(TRACE_UPCALLS, "genericEnumRequest");
 
@@ -389,7 +390,7 @@ genericEnumRequest(const CMPIBroker * broker,
       sreqSize += i * sizeof(MsgSegment);
       i = -1;
       while (props[++i]) {
-        bhdr->object[i + 2] = setCharsMsgSegment(props[i]);
+        bhdr->object[i + cnt] = setCharsMsgSegment(props[i]);
       }
       bhdr->count += i;
     }
