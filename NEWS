@@ -11,6 +11,8 @@ New features:
 Bugs fixed: 
 - 3495804 Cleanup: httpProcId still defined, wrong define in cimXmlGen
 - 3516167 Force kill sfcbd on stop if needed
+- 2966659 Cleanup https daemon remnants
+- 3527674 Faster Startup
 
 Changes in 1.4.2
 ================
@@ -62,8 +64,6 @@ New features:
 - 3095225 Implement Simple REST Requests
 
 Bugs fixed:
-
-- 2966659 Cleanup https daemon remnants
 
 Everything in 1.3.10, plus:
 

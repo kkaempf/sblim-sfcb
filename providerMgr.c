@@ -998,12 +998,17 @@ processProviderMgrRequests()
   sigprocmask(SIG_SETMASK, &mask, &old_mask);
 
   startUpProvider("root/interop", "$ClassProvider$");
+  /* wait until classProvider is finished init'ing */
+  semAcquire(sfcbSem,INIT_CLASS_PROV_ID);
 
 #ifdef SFCB_INCL_INDICATION_SUPPORT
   if (interOpProvInfoPtr != forceNoProvInfoPtr) {
-    sleep(2);
     startUpProvider("root/interop", "$InterOpProvider$");
+    /* note: we don't wait here for interopProvider to finish init'ing, 
+       because its init has some reqs that providerMgr will need to process.
+       httpAdapter waits for interop to init before accepting HTTP requests */
   }
+
 #endif
 #ifdef HAVE_SLP
   startUpProvider("root/interop", "$ProfileProvider$");
@@ -1144,8 +1149,7 @@ getProviderContext(BinRequestContext * ctx)
 {
   unsigned long int l;
   int             rc = 0,
-      i,
-      x;
+    i;
   char           *buf;
   ProvAddr       *as;
   ComSockets      sockets;
@@ -1167,7 +1171,6 @@ getProviderContext(BinRequestContext * ctx)
   ((OperationHdr *) buf)->nameSpace.data = (void *) l;
   l += ohdr->nameSpace.length;
   memcpy(buf + l, ohdr->className.data, ohdr->className.length);
-  x = l;
   ((OperationHdr *) buf)->className.data = (void *) l;
   l += ohdr->className.length;
 

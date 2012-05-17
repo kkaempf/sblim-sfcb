@@ -1138,6 +1138,9 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
                         atoi(val + sizeof(char))) > 0) ? cacheLimit : 10;
     }
 
+    /* let providerMgr know that we're odne init'ing  */
+    semRelease(sfcbSem,INIT_CLASS_PROV_ID);
+
     st.rc = CMPI_RC_OK;
   }
 

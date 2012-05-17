@@ -133,8 +133,10 @@ initSem(int provs)
     semctl(sfcbSem, 0, IPC_RMID, sun);
 
   if ((sfcbSem =
-       semget(sfcbSemKey, 4 + (provs * 3) + 3,
+       semget(sfcbSemKey, 
+              PROV_PROC_BASE_ID + (provs * PROV_PROC_NUM_SEMS) + PROV_PROC_NUM_SEMS,
               IPC_CREAT | IPC_EXCL | 0600)) == -1) {
+
     char           *emsg = strerror(errno);
     mlogf(M_ERROR, M_SHOW,
           "\n--- SFCB semaphore create key: 0x%x failed: %s\n", sfcbSemKey,
@@ -144,6 +146,10 @@ initSem(int provs)
           sfcbSemKey);
     abort();
   }
+
+  sun.val = 0; /* init as unacquirable */
+  semctl(sfcbSem, INIT_CLASS_PROV_ID, SETVAL, sun);
+  semctl(sfcbSem, INIT_PROV_MGR_ID, SETVAL, sun);
 
   for (i = 0; i < provs; i++) {
     sun.val = 1;

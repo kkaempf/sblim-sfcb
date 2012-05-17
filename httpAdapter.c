@@ -2099,6 +2099,10 @@ httpDaemon(int argc, char *argv[], int sslMode)
   maxfdp1 = (maxfdp1 > udsListenFd) ? maxfdp1 : (udsListenFd + 1);
 #endif
 
+  /* wait until providerMgr is ready to start accepting reqs
+     (that is, when interopProvider is finished initializing) */
+  semAcquire(sfcbSem, INIT_PROV_MGR_ID);
+
   for (;;) {
 
     /*

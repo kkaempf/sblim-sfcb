@@ -1,3 +1,9 @@
+2012-05-17  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* classProviderGz.c, httpAdapter.c, interopProvider.c,
+	msgqueue.c, msgqueue.h, providerMgr.c:
+	[ 3527674 ] Faster Startup
+
 2012-05-16  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* control.c, msgqueue.c, msgqueue.h, sfcBroker.c:

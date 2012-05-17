@@ -167,11 +167,15 @@ extern char    *httpPauseStr;
  * static ids 
  */
 
+#define INIT_CLASS_PROV_ID 0
+#define INIT_PROV_MGR_ID 1
+
+
 /*
  * PROV_PROC_BASE_ID must be updated if the number of id's in the above
  * block changes. 
  */
-#define PROV_PROC_BASE_ID 0
+#define PROV_PROC_BASE_ID 2
 
 /*
  * constants for calculating per process ids 

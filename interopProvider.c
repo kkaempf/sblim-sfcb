@@ -1568,6 +1568,8 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
 
   else if (strcasecmp(methodName, "_startup") == 0) {
     initInterOp(_broker, ctx);
+    /* let httpAdapter know that he can continue */
+    semRelease(sfcbSem,INIT_PROV_MGR_ID);
   }
 
   else {
