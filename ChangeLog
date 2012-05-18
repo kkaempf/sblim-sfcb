@@ -1,5 +1,9 @@
 2012-05-18  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* objectImpl.c:
+	[ 3528096 ] Error status codes sometimes not propigated for instances
+	(patch by Tyrel Datwyler)
+
 	* instance.c, test/TestProviders/cmpiTestMiscProvider.c,
 	test/TestProviders/test/TestMisc8.lines:
 	[ 3528074 ] Improve CMPIInstance Error Codes
