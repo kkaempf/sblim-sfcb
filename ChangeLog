@@ -1,3 +1,8 @@
+2012-05-18  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+        * indCIMXMLHander.c:
+        [ 3524819 ] sfcb may hang on ac call to indication subscription
+
 2012-05-17  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* brokerUpc.c, 

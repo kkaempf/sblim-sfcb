@@ -1004,7 +1004,13 @@ int countLD (const CMPIContext * ctx) {
 
 int initIndCIMXML(const CMPIContext * ctx)
 {
+    unsigned int ri;
     _SFCB_ENTER(TRACE_INDPROVIDER, "initIndCIMXML");  
+
+    /* If RI is disabled, return */
+    getControlUNum("DeliveryRetryAttempts", &ri);
+    if (!ri) _SFCB_RETURN(0);
+
     //Refill the queue if there were any from the last run
     refillRetryQ(ctx);
     if ( LDcount == -1 ) {
