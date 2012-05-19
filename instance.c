@@ -164,6 +164,10 @@ __ift_release(CMPIInstance *instance)
 {
   struct native_instance *i = (struct native_instance *) instance;
 
+  if (!instance->hdl) {
+    CMReturn(CMPI_RC_ERR_INVALID_HANDLE);
+  }
+
   if (i->mem_state && i->mem_state != MEM_RELEASED) {
     __release_list(i->property_list);
     __release_list(i->key_list);
@@ -180,8 +184,15 @@ static CMPIInstance *
 __ift_clone(const CMPIInstance *instance, CMPIStatus *rc)
 {
   struct native_instance *i = (struct native_instance *) instance;
-  struct native_instance *new = (struct native_instance *)
-      malloc(sizeof(struct native_instance));
+  struct native_instance *new;
+
+  if (!instance->hdl) {
+    if (rc)
+      CMSetStatus(rc, CMPI_RC_ERR_INVALID_HANDLE);
+    return NULL;
+  }
+
+  new = (struct native_instance*) malloc(sizeof(struct native_instance));
 
   new->refCount = 0;
   new->mem_state = MEM_NOT_TRACKED;
@@ -193,6 +204,8 @@ __ift_clone(const CMPIInstance *instance, CMPIStatus *rc)
       ClInstanceRebuild((ClInstance *) instance->hdl, NULL);
   ((CMPIInstance *) new)->ft = instance->ft;
 
+  if (rc)
+      CMSetStatus(rc, CMPI_RC_OK);
   return (CMPIInstance *) new;
 }
 
@@ -204,7 +217,7 @@ __ift_internal_getPropertyAt(const CMPIInstance *ci, CMPICount i,
   CMPIData        rv = { 0, CMPI_notFound, {0} };
   if (ClInstanceGetPropertyAt(inst, i, &rv, name, NULL)) {
     if (rc)
-      CMSetStatus(rc, CMPI_RC_ERR_NOT_FOUND);
+      CMSetStatus(rc, CMPI_RC_ERR_NO_SUCH_PROPERTY);
     return rv;
   }
 
@@ -239,8 +252,16 @@ CMPIData
 __ift_getPropertyAt(const CMPIInstance *ci, CMPICount i,
                     CMPIString **name, CMPIStatus *rc)
 {
+  CMPIData rv = { 0, CMPI_notFound, {0} };
   char           *sname;
-  CMPIData        rv = __ift_internal_getPropertyAt(ci, i, &sname, rc, 0);
+
+  if (!ci->hdl) {
+    if (rc)
+      CMSetStatus(rc, CMPI_RC_ERR_INVALID_HANDLE);
+    return rv;
+  }
+
+  rv = __ift_internal_getPropertyAt(ci, i, &sname, rc, 0);
   if (name) {
     *name = sfcb_native_new_CMPIString(sname, NULL, 0);
   }
@@ -250,17 +271,30 @@ __ift_getPropertyAt(const CMPIInstance *ci, CMPICount i,
 CMPIData
 __ift_getProperty(const CMPIInstance *ci, const char *id, CMPIStatus *rc)
 {
-  ClInstance     *inst = (ClInstance *) ci->hdl;
-  ClSection      *prps = &inst->properties;
+  ClInstance     *inst;
+  ClSection      *prps;
   CMPIData        rv = { 0, CMPI_notFound, {0} };
   int             i;
+
+  if (!ci->hdl) {
+    if (rc)
+      CMSetStatus(rc, CMPI_RC_ERR_INVALID_HANDLE);
+    return rv;
+  } else if (!id) {
+    if (rc)
+      CMSetStatus(rc, CMPI_RC_ERR_NO_SUCH_PROPERTY);
+    return rv;
+  }
+
+  inst = (ClInstance *) ci->hdl;
+  prps = &inst->properties;
 
   if ((i = ClObjectLocateProperty(&inst->hdr, prps, id)) != 0) {
     return __ift_getPropertyAt(ci, i - 1, NULL, rc);
   }
 
   if (rc)
-    CMSetStatus(rc, CMPI_RC_ERR_NOT_FOUND);
+    CMSetStatus(rc, CMPI_RC_ERR_NO_SUCH_PROPERTY);
   return rv;
 }
 
@@ -268,6 +302,13 @@ static CMPICount
 __ift_getPropertyCount(const CMPIInstance *ci, CMPIStatus *rc)
 {
   ClInstance     *inst = (ClInstance *) ci->hdl;
+
+  if (!ci->hdl) {
+    if (rc)
+      CMSetStatus(rc, CMPI_RC_ERR_INVALID_HANDLE);
+    return (CMPICount) 0;
+  }
+
   if (rc)
     CMSetStatus(rc, CMPI_RC_OK);
   return (CMPICount) ClInstanceGetPropertyCount(inst);
@@ -278,9 +319,15 @@ __ift_setProperty(const CMPIInstance *instance,
                   const char *name, const CMPIValue * value, CMPIType type)
 {
   struct native_instance *i = (struct native_instance *) instance;
-  ClInstance     *inst = (ClInstance *) instance->hdl;
+  ClInstance     *inst;
   CMPIData        data = { type, CMPI_goodValue, {0LL} };
   int             rc;
+
+  if (!instance->hdl) {
+    CMReturn(CMPI_RC_ERR_INVALID_HANDLE);
+  }
+
+  inst = (ClInstance *) instance->hdl;
 
   if (type == CMPI_chars) {
     /*
@@ -321,6 +368,7 @@ __ift_setProperty(const CMPIInstance *instance,
       ClInstanceFilterFlagProperty(inst, rc - 1);
     }
     if (rc < 0)
+      /* negative rc is a negated CMPI_RC_ERR return code */
       CMReturn(-rc);
   }
   CMReturn(CMPI_RC_OK);
@@ -354,6 +402,11 @@ __ift_setObjectPath(CMPIInstance *inst, const CMPIObjectPath * cop)
                  *cn;
   int             j;
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
+
+  if (!inst->hdl) {
+    CMSetStatus(&rc, CMPI_RC_ERR_INVALID_HANDLE);
+    return rc;
+  }
 
   /* in the case the instance is filtered need to reset the filter with new key list */
   if (((struct native_instance *)inst)->filtered) {
@@ -425,10 +478,17 @@ __ift_getObjectPath(const CMPIInstance *instance, CMPIStatus *rc)
   int             j,
                   f = 0;
   CMPIStatus      tmp;
-  const char     *cn =
-      ClInstanceGetClassName((ClInstance *) instance->hdl);
-  const char     *ns =
-      ClInstanceGetNameSpace((ClInstance *) instance->hdl);
+  const char     *cn;
+  const char     *ns;
+
+  if (!instance->hdl) {
+    if (rc)
+      CMSetStatus(rc, CMPI_RC_ERR_INVALID_HANDLE);
+    return NULL;
+  }
+
+  cn = ClInstanceGetClassName((ClInstance *) instance->hdl);
+  ns = ClInstanceGetNameSpace((ClInstance *) instance->hdl);
 
   CMPIObjectPath *cop;
   cop = TrackedCMPIObjectPath(ns, cn, rc);
@@ -568,7 +628,7 @@ static CMPIStatus __ift_setPropertyFilter(CMPIInstance * instance,
     /* NULL property list, no need to set filter */
     CMReturn(CMPI_RC_OK);
   }
-  if (instance == NULL) {
+  if (!instance->hdl) {
     rc.rc = CMPI_RC_ERR_INVALID_HANDLE;
   }
   else {

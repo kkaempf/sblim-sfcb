@@ -800,6 +800,7 @@ static int
 _testCMPIInstance()
 {
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
+  int             errors = 0;
 
   CMPIInstance   *instance = NULL;
   CMPIInstance   *clonedInstance = NULL;
@@ -818,9 +819,6 @@ _testCMPIInstance()
   const char     *name2 = "secondPropertyName";
   CMPIValue       value2;
   CMPIType        type = CMPI_uint64;
-  CMPIBoolean     dataEqual = 0;
-  CMPIBoolean     objectPathEqual = 0;
-  CMPIBoolean     cloneSuccessful = 0;
   CMPIString     *beforeObjPath = NULL;
   CMPIString     *afterObjPath = NULL;
   const char     *beforeString = NULL;
@@ -832,13 +830,18 @@ _testCMPIInstance()
   value2.uint32 = 20;
   rc = CMSetProperty(instance, name2, &value2, type);
   count = CMGetPropertyCount(instance, &rc);
-  returnedData1 = CMGetProperty(instance, name1, &rc);
-  if (returnedData1.value.uint32 == 10) {
-    dataEqual = 1;
+  /* count will vary based on what's in the MOF */
+  if (count != 5) {
+    errors = 1;
   }
-  returnedData2 = CMGetPropertyAt(instance, 2, &returnedName, &rc);
-  if (returnedData2.value.uint32 == 20) {
-    dataEqual = 1;
+  returnedData1 = CMGetProperty(instance, name1, &rc);
+  if (returnedData1.value.uint32 != 10) {
+    errors += 2;
+  }
+  /* this check is really SFCB-dependent, since position isn't guaranteed */
+  returnedData2 = CMGetPropertyAt(instance, 0, &returnedName, &rc);
+  if (returnedData2.value.uint32 != 20) {
+    errors += 4;
   }
   newObjPath = make_ObjectPath(_broker, _Namespace, _ClassName);
   returnedObjPath = CMGetObjectPath(instance, &rc);
@@ -850,28 +853,27 @@ _testCMPIInstance()
   afterObjPath = CMObjectPathToString(returnedObjPath, &rc);
   afterString = CMGetCharsPtr(afterObjPath, &rc);
   afterString = CMGetCharsPtr(CMGetNameSpace(returnedObjPath, &rc), &rc);
-  if (strcmp("newNamespace", afterString) == 0) {
-    objectPathEqual = 1;
+  if (strcmp("newNamespace", afterString) != 0) {
+    errors += 8;
   }
   clonedInstance = instance->ft->clone(instance, &rc);
   clonedData1 = CMGetProperty(clonedInstance, name1, &rc);
   rc = clonedInstance->ft->release(clonedInstance);
-  if (returnedData1.value.uint32 == clonedData1.value.uint32) {
-    cloneSuccessful = 1;
-  } else {
-    cloneSuccessful = 0;
-  }
+  if (returnedData1.value.uint32 != clonedData1.value.uint32) {
+    errors += 16;
+  } 
   CMGetProperty(instance, "noProperty", &rc);
   if (rc.rc != CMPI_RC_ERR_NO_SUCH_PROPERTY) {
-    return 1;
+    errors += 32;
   }
 
   CMGetPropertyAt(instance, 100, &returnedName, &rc);
   if (rc.rc != CMPI_RC_ERR_NO_SUCH_PROPERTY) {
-    return 1;
+    errors += 64;
   }
   rc = instance->ft->release(instance);
-  return 0;
+
+  return errors;
 }
 
 static int
