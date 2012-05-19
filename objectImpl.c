@@ -1678,7 +1678,7 @@ addObjectPropertyH(ClObjectHdr * hdr, ClSection * prps,
     else if (hdr->type == HDR_Instance &&
              od.type == CMPI_instance && (d.state & CMPI_nullValue) == 0) {
       if (d.type != CMPI_instance) {
-        _SFCB_RETURN(CMPI_RC_ERR_TYPE_MISMATCH);
+        _SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
       } else {
         (p + i - 1)->data = d;
         int             size = getInstanceSerializedSize(d.value.inst);
@@ -1697,7 +1697,7 @@ addObjectPropertyH(ClObjectHdr * hdr, ClSection * prps,
     else if (hdr->type == HDR_Args &&
             od.type == CMPI_instance && (d.state & CMPI_nullValue) == 0) {
        if (d.type != CMPI_instance) {
-          _SFCB_RETURN(CMPI_RC_ERR_TYPE_MISMATCH);
+          _SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
        }
        else {
           (p + i - 1)->data = d;
