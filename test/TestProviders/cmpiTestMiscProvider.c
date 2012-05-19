@@ -989,7 +989,6 @@ static int _testCMPIInstance ()
     /* count will vary based on what's in the MOF */
     if (count != 5)
     {
-      fprintf(stderr, "count is %d\n", count);
       errors=1;
     }
     returnedData1 = CMGetProperty(instance, name1, &rc);
@@ -997,16 +996,10 @@ static int _testCMPIInstance ()
     {
       errors+=2;
     }
-    int i;
-    for(i=0; i<count; i++) {
-          returnedData2 = CMGetPropertyAt(instance, i, &returnedName, &rc);
-	  fprintf(stderr, "property %d is %s\n", i, (char*)returnedName->hdl);
-    }
     /* this check is really SFCB-dependent, since position isn't guaranteed */
     returnedData2 = CMGetPropertyAt(instance, 0, &returnedName, &rc);
     if (returnedData2.value.uint32 != 20)
     {
-      fprintf(stderr, "returnedData2.value.uint32=%d\n", returnedData2.value.uint32);
       errors+=4;
     }
     newObjPath = make_ObjectPath(_broker, _Namespace, _ClassName);
