@@ -547,6 +547,7 @@ CMPIStatus deliverInd(
   static int id=1;
   char *resp;
   char *msg;
+  int rc = 0;
 
   if ((hci=internalProviderGetInstance(ref,&st))==NULL) {
      setStatus(&st,CMPI_RC_ERR_NOT_FOUND,NULL);
@@ -560,8 +561,10 @@ CMPIStatus deliverInd(
   sprintf(strId,"%d",id++);
   xs=exportIndicationReq(ind,strId);
   sb=segments2stringBuffer(xs.segments);
-  if (exportIndication((char*)dest->hdl,(char*)sb->ft->getCharPtr(sb), &resp, &msg)) {
-     setStatus(&st,CMPI_RC_ERR_FAILED,NULL);
+  rc = exportIndication((char*)dest->hdl,
+               (char*)sb->ft->getCharPtr(sb), &resp, &msg);
+  if (rc != 0) {
+     setStatus(&st,rc,NULL);
   }
   RespSegment rs = xs.segments[5];
   UtilStringBuffer* usb = (UtilStringBuffer*)rs.txt;
@@ -972,8 +975,13 @@ CMPIStatus IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
       // Now send the indication
       st = deliverInd(ref, in, ind);
 
-      if (st.rc != 0) {
-        if (RIEnabled){
+      switch (st.rc) {
+       case 0:   /* Success */
+       case 400: /* Bad Request XML */
+       case 501: /* Not Implemented */
+          break;
+       default:
+          if (RIEnabled){
             _SFCB_TRACE(1,("--- Indication delivery failed, adding to retry queue"));
             // Indication delivery failed, send to retry queue
             // build an element
@@ -1008,6 +1016,7 @@ CMPIStatus IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
             }
             CMRelease(ctxLocal);
         }
+      break;
       }
       CMRelease(ind);
    }
