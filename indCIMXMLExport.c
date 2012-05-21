@@ -325,15 +325,29 @@ getResponse(CurlData * cd, char **msg)
     // Use CURLINFO_HTTP_CODE instead of CURLINFO_RESPONSE_CODE
     // (more portable to older versions of curl)
     curl_easy_getinfo(cd->mHandle, CURLINFO_HTTP_CODE, &responseCode);
-    if (responseCode == 401) {
-      error = (cd->mUserPass) ? "Invalid username/password." :
-          "Username/password required.";
-      *msg = strdup(error);
-      rc = 3;
-    } else {
-      rc = 4;
-      *msg = getErrorMessage(rv);
-    }
+    switch(responseCode) {
+      case 200:
+         rc = 0; /* HTTP 200 is OK. set rc to 0 */
+         break;
+      case 400:
+         *msg = strdup("Bad Request");
+         rc = 400;
+         break;
+      case 401:
+         error = (cd->mUserPass) ? "Invalid username/password." :
+                                   "Username/password required.";
+         *msg = strdup(error);
+         rc = 401;
+         break;
+      case 501:
+         *msg = strdup("Not Implemented");
+         rc = 501;
+         break;
+      default:
+         *msg = getErrorMessage(rv);
+         rc = (int)responseCode;
+         break;
+    } 
     return rc;
   }
 
