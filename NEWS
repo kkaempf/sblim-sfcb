@@ -7,6 +7,7 @@ New features:
 - 3501314 Add dynamic logging and syslog output to sfcb trace
 - 3517530 Implement mark, release routines in CMPIBrokerMemFT
 - 3513390 Enforce LD and subscription limits
+- 3527920 RI and http responsecodes
 
 Bugs fixed:
 

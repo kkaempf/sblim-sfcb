@@ -1,6 +1,6 @@
 
 /*
- * $Id: indCIMXMLExport.c,v 1.15 2012/02/28 21:36:16 hellerda Exp $
+ * $Id: indCIMXMLExport.c,v 1.16 2012/05/21 17:22:37 nsharoff Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -266,21 +266,31 @@ static int getResponse(CurlData *cd, char **msg)
 
     rv = curl_easy_perform(cd->mHandle);
     if (rv) {
-        long responseCode = -1;
+        int responseCode = -1;
         char *error;
         // Use CURLINFO_HTTP_CODE instead of CURLINFO_RESPONSE_CODE
         // (more portable to older versions of curl)
         curl_easy_getinfo(cd->mHandle, CURLINFO_HTTP_CODE, &responseCode);
-        if (responseCode == 401) {
+        rc = responseCode; /* set the return code */
+        switch(responseCode) {
+          case 200:
+             rc = 0; /* HTTP 200 is OK. set rc to 0 */
+             break;
+          case 400:
+             *msg = strdup("Bad Request");
+             break;
+          case 401:
             error = (cd->mUserPass) ? "Invalid username/password." :
                                      "Username/password required.";
-            *msg=strdup(error);                         
-            rc=3;
+             *msg = strdup(error);
+             break;
+          case 501:
+             *msg = strdup("Not Implemented");
+             break;
+          default:
+             *msg = getErrorMessage(rv);
+             break;
         }
-        else {
-           rc=4;
-           *msg = getErrorMessage(rv);
-        }    
         return rc;
     }
     
