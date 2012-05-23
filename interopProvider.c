@@ -59,6 +59,10 @@ extern void memLinkObjectPath(CMPIObjectPath *op);
 static const CMPIBroker *_broker;
 static int firstTime=1;
 
+// Counts to enforce limits from cfg file
+static int LDcount=0;
+static int AScount=0;
+
 typedef struct filter {
    CMPIInstance *fci;
    QLStatement *qs;
@@ -582,9 +586,9 @@ static CMPIStatus processSubscription(
    char *key,*skey;
    CMPIDateTime *dt;
    CMPIValue val;
-    
+
    _SFCB_ENTER(TRACE_INDPROVIDER, "processSubscription()");
-   
+
    _SFCB_TRACE(1,("--- checking for existing subscription"));
    skey = normalizeObjectPathCharsDup(cop);
    if (getSubscription(skey)) {
@@ -606,13 +610,13 @@ static CMPIStatus processSubscription(
        free(key);
      }
    }
-   
+
    if (fi == NULL) {
       _SFCB_TRACE(1,("--- cannot find specified subscription filter"));
       setStatus(&st, CMPI_RC_ERR_NOT_FOUND, "Filter not found");
       _SFCB_RETURN(st);
    }
-   
+
    _SFCB_TRACE(1,("--- getting new subscription handle"));
    op = CMGetProperty(ci, "handler", &st).value.ref;
    /* ht key does not contain ns; need to check for it again here */
@@ -632,6 +636,25 @@ static CMPIStatus processSubscription(
       _SFCB_RETURN(st);
    }
 
+   // Get current state
+   CMPIData d = CMGetProperty(ci, "SubscriptionState", &st);
+   if (d.state != CMPI_goodValue) {
+       // Not given, assume enable
+       val.uint16 = 2;
+       st = CMSetProperty((CMPIInstance*)ci, "SubscriptionState", &val, CMPI_uint16);
+       d.value.uint16=2;
+   }
+   if(d.value.uint16 == 2) {
+      // Check if we are hitting the max
+      long cfgmax;
+      getControlNum("MaxActiveSubscriptions", &cfgmax);
+      if (AScount+1 > cfgmax) {
+         setStatus(&st,CMPI_RC_ERR_FAILED,"Subscription activation would exceed MaxActiveSubscription limit");
+         return st;
+      }
+      AScount++;
+   }
+
    _SFCB_TRACE(1,("--- setting subscription start time"));
    dt = CMNewDateTime(_broker,NULL);
    CMSetProperty((CMPIInstance *)ci, "SubscriptionStartTime", &dt, CMPI_dateTime);
@@ -646,18 +669,8 @@ static CMPIStatus processSubscription(
    /* activation succesful, try to enable it */
    if (st.rc == CMPI_RC_OK) {
      /* only enable if state is 2 (default) */
-     CMPIData d = CMGetProperty(ci, "SubscriptionState", &st);
-     if(d.state == CMPI_goodValue) {
-       if(d.value.uint16 == 2 && fi->useCount == 1) {
+     if(d.value.uint16 == 2 && fi->useCount == 1) {
          fowardSubscription(ctx, fi, OPS_EnableIndications, &st);
-       }
-     } else {
-       /* property not set, assume "enable" by default */
-       val.uint16 = 2;
-       st = CMSetProperty((CMPIInstance*)ci, "SubscriptionState", &val, CMPI_uint16);
-       if (fi->useCount == 1) {
-         fowardSubscription(ctx, fi, OPS_EnableIndications, &st);
-       }
      }
    }
       
@@ -958,7 +971,7 @@ CMPIStatus InteropProviderCreateInstance(
    CMPIValue valSNS;
 
    _SFCB_ENTER(TRACE_INDPROVIDER, "InteropProviderCreateInstance");
-  
+
    if (interOpNameSpace(cop,&st)!=1) _SFCB_RETURN(st);
    
    ciLocal = ci->ft->clone(ci, NULL);
@@ -971,7 +984,6 @@ CMPIStatus InteropProviderCreateInstance(
 
       st = verify_subscription(ctx, cop, ci); /* 3495060 */
       if (st.rc != CMPI_RC_OK) _SFCB_RETURN(st);
-
       st=processSubscription(_broker,ctx,ciLocal,copLocal);
    }
    else if (isa(nss, cns, "cim_indicationfilter")) {
@@ -1126,10 +1138,19 @@ CMPIStatus InteropProviderModifyInstance(
 		
 		if(newState.state == CMPI_goodValue) {
 			if(newState.value.uint16 == 2 && oldState.value.uint16 != 2) {
+                // Check if we've hit the max before we actvate
+                long cfgmax;
+                getControlNum("MaxActiveSubscriptions", &cfgmax);
+                if (AScount+1 > cfgmax) {
+                    setStatus(&st,CMPI_RC_ERR_FAILED,"Subscription activation would exceed MaxActiveSubscription limit");
+                    return st;
+                }
 				switchIndications(ctx, ci, OPS_EnableIndications);
+                AScount++;
 			}  
 			else if(newState.value.uint16 == 4 && oldState.value.uint16 != 4) {
 				switchIndications(ctx, ci, OPS_DisableIndications);
+                AScount--;
 			}
 		}
 		/*replace the instance in the hashtable*/
@@ -1196,10 +1217,23 @@ CMPIStatus InteropProviderDeleteInstance(
          if (fi->useCount==1) {
             char **fClasses=fi->qs->ft->getFromClassList(fi->qs);
             for ( ; *fClasses; fClasses++) {
-	      char *principal=ctx->ft->getEntry(ctx,CMPIPrincipal,NULL).value.string->hdl;
-	      genericSubscriptionRequest(principal, *fClasses, cns, fi, OPS_DeactivateFilter, NULL);
+	            char *principal=ctx->ft->getEntry(ctx,CMPIPrincipal,NULL).value.string->hdl;
+	            genericSubscriptionRequest(principal, *fClasses, cns, fi, OPS_DeactivateFilter, NULL);
             }
          }   
+         // get current state
+         ctxLocal = prepareUpcall((CMPIContext *)ctx);
+         CMPIInstance *ci = _broker->bft->getInstance(_broker, ctxLocal, cop, NULL, NULL);
+         CMRelease(ctxLocal);
+         CMPIData d = CMGetProperty(ci, "SubscriptionState", &st);
+         if (d.state != CMPI_goodValue) {
+            // Not given, assume enable
+            d.value.uint16=2;
+         }
+         if(d.value.uint16 == 2) {
+            // If this is an active sub, decrement the count
+            AScount--; 
+         }
          removeSubscription(su,key);
       }
       else setStatus(&st,CMPI_RC_ERR_NOT_FOUND,NULL);
@@ -1368,6 +1402,16 @@ CMPIStatus InteropProviderInvokeMethod(
    }
    
    else if (strcasecmp(methodName, "_addHandler") == 0) {
+      // check destination count
+      long cfgmax;
+      getControlNum("MaxListenerDestinations", &cfgmax);
+      if (LDcount+1 > cfgmax) {
+        setStatus(&st,CMPI_RC_ERR_FAILED,"Instance creation would exceed MaxListenerDestinations limit");
+        _SFCB_RETURN(st);
+      }
+      LDcount++;
+
+
       CMPIInstance *ci=in->ft->getArg(in,"handler",&st).value.inst;
       CMPIObjectPath *op=in->ft->getArg(in,"key",&st).value.ref;
       CMPIString *str=CDToString(_broker,op,NULL);
@@ -1383,8 +1427,10 @@ CMPIStatus InteropProviderInvokeMethod(
       if (ha) {
          if (ha->useCount) {
             setStatus(&st,CMPI_RC_ERR_FAILED,"Handler in use");
-         } 
-         else removeHandler(ha,key);   
+         } else {
+            removeHandler(ha,key);   
+            LDcount--;
+         }
       }
       else {
          setStatus(&st, CMPI_RC_ERR_NOT_FOUND, "Handler objectnot found");

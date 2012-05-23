@@ -1,5 +1,5 @@
 /*
- * $Id: control.h,v 1.6 2012/05/16 16:12:37 mchasal Exp $
+ * $Id: control.h,v 1.7 2012/05/23 21:58:55 mchasal Exp $
  *
  * (C) Copyright IBM Corp. 2005
  *
@@ -28,6 +28,4 @@ int getControlUNum(char *id, unsigned int *val);
 int getControlNum(char *id, long *val);
 int getControlBool(char *id, int *val);
 const char      * sfcBrokerStart;
-static int LDcount=0;
-
 #endif

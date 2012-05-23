@@ -360,15 +360,6 @@ CMPIStatus IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
 
    if (CMClassPathIsA(_broker, copLocal, "cim_listenerdestination", NULL)) {
 
-   // check destination count
-   long cfgmax;
-   getControlNum("MaxListenerDestinations", &cfgmax);
-   if (LDcount+1 > cfgmax) {
-        setStatus(&st,CMPI_RC_ERR_FAILED,"Instance creation would exceed MaxListenerDestinations limit");
-        CMRelease(ciLocal);
-        _SFCB_RETURN(st);              
-    }
-
     //get the creation timestamp
     struct timeval  tv;
     struct timezone tz;
@@ -399,7 +390,6 @@ CMPIStatus IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
     CMSetProperty(ciLocal, "SequenceContext", &scontext, CMPI_string);
     CMPIValue zarro = {.sint64 = -1 };
     CMSetProperty(ciLocal, "LastSequenceNumber", &zarro, CMPI_sint64);
-    LDcount++;
    }
 
    CMPIString *str=CDToString(_broker,copLocal,NULL);
@@ -494,7 +484,6 @@ CMPIStatus IndCIMXMLHandlerDeleteInstance(CMPIInstanceMI * mi,
 
    if (st.rc==CMPI_RC_OK) {
       st=InternalProviderDeleteInstance(NULL,ctx,rslt,cop);
-      LDcount--;
    }
    
    _SFCB_RETURN(st);
