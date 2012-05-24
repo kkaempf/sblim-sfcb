@@ -164,7 +164,7 @@ cleanup () {
     rm ./limitTest.xml
     rm ./limitTest.result
     wbemcat IndTest7DeleteFilter.xml > /dev/null
-    wbemcat limitTestDF2.xml > /dev/null
+    wbemcat limitTestDF2.XML > /dev/null
 }
 
 # Start of main
