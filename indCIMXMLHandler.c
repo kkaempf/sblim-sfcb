@@ -49,7 +49,6 @@ extern ExpSegments exportIndicationReq(CMPIInstance *ci, char *id);
 extern void     memLinkObjectPath(CMPIObjectPath * op);
 
 static const CMPIBroker *_broker;
-static int LDcount=-1;
 
 static int
 interOpNameSpace(const CMPIObjectPath * cop, CMPIStatus *st)
@@ -392,15 +391,6 @@ IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
 
   if (CMClassPathIsA(_broker, copLocal, "cim_listenerdestination", NULL)) {
 
-    // check destination count
-    long cfgmax;
-    getControlNum("MaxListenerDestinations", &cfgmax);
-    if (LDcount+1 > cfgmax) {
-      setStatus(&st,CMPI_RC_ERR_FAILED,"Instance creation would exceed MaxListenerDestinations limit");
-      CMRelease(ciLocal);
-      _SFCB_RETURN(st);              
-    }
-
     //get the creation timestamp
     struct timeval  tv;
     struct timezone tz;
@@ -431,7 +421,6 @@ IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
     CMSetProperty(ciLocal, "SequenceContext", &scontext, CMPI_string);
     CMPIValue zarro = {.sint64 = -1 };
     CMSetProperty(ciLocal, "LastSequenceNumber", &zarro, CMPI_sint64);
-    LDcount++;
   }
 
   CMPIString     *str = CDToString(_broker, copLocal, NULL);
@@ -533,7 +522,6 @@ IndCIMXMLHandlerDeleteInstance(CMPIInstanceMI * mi,
 
   if (st.rc == CMPI_RC_OK) {
     st = InternalProviderDeleteInstance(NULL, ctx, rslt, cop);
-    LDcount--;
   }
 
   _SFCB_RETURN(st);
@@ -969,41 +957,6 @@ int refillRetryQ (const CMPIContext * ctx)
   _SFCB_RETURN(0); 
 }
 
-
-int countLD (const CMPIContext * ctx) {
-    _SFCB_ENTER(TRACE_INDPROVIDER, "countLD");  
-    CMPIEnumeration *enm;
-    CMPIStatus st = { CMPI_RC_OK, NULL };
-    LDcount++; // Mark it initialized
-
-    // Enumerate the destinations
-    CMPIContext * ctxLocal = prepareUpcall((CMPIContext *)ctx);
-    CMPIObjectPath *ref=CMNewObjectPath(_broker,"root/interop","cim_listenerdestination",&st);
-    enm = _broker->bft->enumerateInstanceNames(_broker, ctxLocal, ref, &st);
-    while(enm && enm->ft->hasNext(enm, &st)) {
-       LDcount++;
-       enm->ft->getNext(enm, &st);
-    }
-    ref = CMNewObjectPath(_broker,"root/interop","cim_listenerdestinationcimxml",&st);
-    enm = _broker->bft->enumerateInstanceNames(_broker, ctxLocal, ref, &st);
-    while(enm && enm->ft->hasNext(enm, &st)) {
-       LDcount++;
-       enm->ft->getNext(enm, &st);
-    }
-    ref = CMNewObjectPath(_broker,"root/interop","cim_indicationhandlercimxml",&st);
-    enm = _broker->bft->enumerateInstanceNames(_broker, ctxLocal, ref, &st);
-    while(enm && enm->ft->hasNext(enm, &st)) {
-       LDcount++;
-       enm->ft->getNext(enm, &st);
-    }
-
-    CMRelease(ref);
-    CMRelease(ctxLocal);
-    _SFCB_TRACE(1,("--- initial count of destinations: %d.",LDcount));
-
-    _SFCB_RETURN(0);
-}
-
 int initIndCIMXML(const CMPIContext * ctx)
 {
     unsigned int ri;
@@ -1015,10 +968,6 @@ int initIndCIMXML(const CMPIContext * ctx)
 
     //Refill the queue if there were any from the last run
     refillRetryQ(ctx);
-    if ( LDcount == -1 ) {
-        //Get the count of ListenerDestinations
-        countLD(ctx);
-    }
     _SFCB_RETURN(0);
 }
 

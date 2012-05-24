@@ -54,6 +54,11 @@ extern void     setStatus(CMPIStatus *st, CMPIrc rc, char *msg);
 extern int      testNameSpace(char *ns, CMPIStatus *st);
 extern void     memLinkObjectPath(CMPIObjectPath * op);
 
+// Counts to enforce limits from cfg file
+static int LDcount=0;
+static int AScount=0;
+
+
 /*
  * ------------------------------------------------------------------------- 
  */
@@ -698,6 +703,24 @@ processSubscription(const CMPIBroker * broker,
     setStatus(&st, CMPI_RC_ERR_NOT_FOUND, "Handler not found");
     _SFCB_RETURN(st);
   }
+   // Get current state
+   CMPIData d = CMGetProperty(ci, "SubscriptionState", &st);
+   if (d.state != CMPI_goodValue) {
+       // Not given, assume enable
+       val.uint16 = 2;
+       st = CMSetProperty((CMPIInstance*)ci, "SubscriptionState", &val, CMPI_uint16);
+       d.value.uint16=2;
+   }
+   if(d.value.uint16 == 2) {
+      // Check if we are hitting the max
+      long cfgmax;
+      getControlNum("MaxActiveSubscriptions", &cfgmax);
+      if (AScount+1 > cfgmax) {
+         setStatus(&st,CMPI_RC_ERR_FAILED,"Subscription activation would exceed MaxActiveSubscription limit");
+         return st;
+      }
+      AScount++;
+   }
 
   _SFCB_TRACE(1, ("--- setting subscription start time"));
   dt = CMNewDateTime(_broker, NULL);
@@ -715,18 +738,8 @@ processSubscription(const CMPIBroker * broker,
   /* activation succesful, try to enable it */
   if (st.rc == CMPI_RC_OK) {
     /* only enable if state is 2 (default) */
-    CMPIData d = CMGetProperty(ci, "SubscriptionState", &st);
-    if(d.state == CMPI_goodValue) {
-      if(d.value.uint16 == 2 && fi->useCount == 1) {
-	fowardSubscription(ctx, fi, OPS_EnableIndications, &st);
-       }
-    } else {
-      /* property not set, assume "enable" by default */
-      val.uint16 = 2;
-      st = CMSetProperty((CMPIInstance*)ci, "SubscriptionState", &val, CMPI_uint16);
-      if (fi->useCount == 1) {
-	fowardSubscription(ctx, fi, OPS_EnableIndications, &st);
-      }
+    if(d.value.uint16 == 2 && fi->useCount == 1) {
+	    fowardSubscription(ctx, fi, OPS_EnableIndications, &st);
     }
   }
 
@@ -1262,9 +1275,18 @@ InteropProviderModifyInstance(CMPIInstanceMI * mi,
 
     if (newState.state == CMPI_goodValue) {
       if (newState.value.uint16 == 2 && oldState.value.uint16 != 2) {
+        // Check if we've hit the max before we actvate
+        long cfgmax;
+        getControlNum("MaxActiveSubscriptions", &cfgmax);
+        if (AScount+1 > cfgmax) {
+            setStatus(&st,CMPI_RC_ERR_FAILED,"Subscription activation would exceed MaxActiveSubscription limit");
+            return st;
+        }
         switchIndications(ctx, ci, OPS_EnableIndications);
+        AScount++;
       } else if (newState.value.uint16 == 4 && oldState.value.uint16 != 4) {
         switchIndications(ctx, ci, OPS_DisableIndications);
+        AScount--;
       }
     }
     /*
@@ -1341,6 +1363,19 @@ InteropProviderDeleteInstance(CMPIInstanceMI * mi,
           genericSubscriptionRequest(principal, *fClasses, cns, fi,
                                      OPS_DeactivateFilter, NULL);
         }
+      }
+      // get current state
+      ctxLocal = prepareUpcall((CMPIContext *)ctx);
+      CMPIInstance *ci = _broker->bft->getInstance(_broker, ctxLocal, cop, NULL, NULL);
+      CMRelease(ctxLocal);
+      CMPIData d = CMGetProperty(ci, "SubscriptionState", &st);
+      if (d.state != CMPI_goodValue) {
+         // Not given, assume enable
+         d.value.uint16=2;
+      }
+      if(d.value.uint16 == 2) {
+         // If this is an active sub, decrement the count
+         AScount--;
       }
       removeSubscription(su, key);
     } else
@@ -1531,6 +1566,15 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
   }
 
   else if (strcasecmp(methodName, "_addHandler") == 0) {
+    // check destination count
+    long cfgmax;
+    getControlNum("MaxListenerDestinations", &cfgmax);
+    if (LDcount+1 > cfgmax) {
+      setStatus(&st,CMPI_RC_ERR_FAILED,"Instance creation would exceed MaxListenerDestinations limit");
+      _SFCB_RETURN(st);
+    }
+    LDcount++;
+
     CMPIInstance   *ci = in->ft->getArg(in, "handler", &st).value.inst;
     CMPIObjectPath *op = in->ft->getArg(in, "key", &st).value.ref;
     CMPIString     *str = CDToString(_broker, op, NULL);
@@ -1550,6 +1594,7 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
         setStatus(&st, CMPI_RC_ERR_FAILED, "Handler in use");
       } else
         removeHandler(ha, key);
+        LDcount--;
     } else {
       setStatus(&st, CMPI_RC_ERR_NOT_FOUND, "Handler object not found");
     }
