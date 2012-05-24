@@ -1,3 +1,10 @@
+2012-05-23 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* control.h, indCIMXMLHandler.c, interopServerProvider.c,
+	test/TestProviders/tests/limitTest.sh:
+	[ 3513390 ] Enforce LD and subscription limits
+	Active Subscription limit, move LD check to interop
+
 2012-05-21  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
         * indCIMXMLExport.c, indCIMXMLHander.c:
