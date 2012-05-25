@@ -64,7 +64,7 @@ int semAcquireUnDo(int semid, int semnum)
    int rc;
    
    struct sembuf semBuf = {semnum,-1,SEM_UNDO};
-   while ((rc=semop(semid,&semBuf,1)) && (errno == EINTR));
+   while ((rc=semop(semid,&semBuf,1) < 0) && (errno == EINTR));
    return rc;
 }
 
@@ -82,7 +82,7 @@ int semRelease(int semid, int semnum)
    int rc;
    struct sembuf semBuf = {semnum,1,0};
   
-   while ((rc=semop(semid,&semBuf,1)) && (errno == EINTR));
+   while ((rc=semop(semid,&semBuf,1) < 0) && (errno == EINTR));
    return rc;
 }
 
@@ -91,7 +91,7 @@ int semReleaseUnDo(int semid, int semnum)
    int rc;
    struct sembuf semBuf = {semnum,1,SEM_UNDO};
   
-   while ((rc=semop(semid,&semBuf,1)) && (errno == EINTR));
+   while ((rc=semop(semid,&semBuf,1) < 0) && (errno == EINTR));
    return rc;
 }
 
@@ -99,7 +99,7 @@ int semMultiRelease(int semid, int semnum, int n)
 {
     int rc;
     struct sembuf semBuf = {semnum,1,0};
-    while ((rc=semop(semid,&semBuf,n)) && (errno == EINTR));
+    while ((rc=semop(semid,&semBuf,n) < 0) && (errno == EINTR));
     return rc;
 }
 
