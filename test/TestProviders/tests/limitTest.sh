@@ -163,8 +163,8 @@ cleanup () {
     sendxml ./limitTest.xml /dev/null
     rm ./limitTest.xml
     rm ./limitTest.result
-    wbemcat IndTest7DeleteFilter.xml > /dev/null
-    wbemcat limitTestDF2.XML > /dev/null
+    sendxml IndTest7DeleteFilter.xml /dev/null
+    sendxml limitTestDF2.XML /dev/null
 }
 
 # Start of main
@@ -356,8 +356,8 @@ POSTD='</KEYVALUE>
 # Create 100 subs
 lim=100
 j=1
-wbemcat IndTest1CreateFilter.xml > /dev/null
-wbemcat limitTestCF2.XML > /dev/null
+sendxml IndTest1CreateFilter.xml /dev/null
+sendxml limitTestCF2.XML /dev/null
 echo -n "  Testing Sub limit "
 while [ $j -le $lim ]
 do
@@ -388,7 +388,7 @@ done
 XML=$PRE"limitTest_f2"$MID"limitTest_1"$POST
 echo $XML > ./limitTest.xml
 sendxml ./limitTest.xml ./limit.result
-wbemcat limitTestDS2.XML > /dev/null
+sendxml limitTestDS2.XML /dev/null
 grep "limitTest" ./limit.result >/dev/null 2>&1
 if [ $? -eq 0 ]
 then
@@ -409,8 +409,8 @@ then
     exit 1;
 fi
 # but we shouldn't be able to activate it.
-wbemcat limitTestEnableSub.XML > ./limit.result
-wbemcat limitTestDS2.XML > /dev/null
+sendxml limitTestEnableSub.XML ./limit.result
+sendxml limitTestDS2.XML /dev/null
 grep "MaxActiveSubscription" ./limit.result >/dev/null 2>&1
 if [ $? -ne 0 ]
 then
