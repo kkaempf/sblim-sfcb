@@ -1,3 +1,8 @@
+2012-05-25  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* msgqueue.c:
+	[ 3529856 ] httpProcs limit can be broken
+
 2012-05-23 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* control.h, indCIMXMLHandler.c, interopServerProvider.c,
