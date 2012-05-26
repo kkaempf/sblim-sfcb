@@ -13,6 +13,7 @@ Bugs fixed:
 - 3516167 Force kill sfcbd on stop if needed
 - 2966659 Cleanup https daemon remnants
 - 3527674 Faster Startup
+- 3529879 Fixes for sfcb-ps test script
 
 Changes in 1.4.2
 ================
