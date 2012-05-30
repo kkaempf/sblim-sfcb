@@ -21,6 +21,7 @@ Bugs fixed:
 - 3528074 Improve CMPIInstance Error Codes
 - 3528096 Error status codes sometimes not propigated for instances
 - 3529856 httpProcs limit can be broken
+- 3527620 EnumerateClasses does not include qualifiers by default
 
 Changes in 1.3.14
 =================

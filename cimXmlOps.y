@@ -1146,7 +1146,7 @@ enumClasses
        $$.op.type = OPS_EnumerateClasses;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment(NULL);
-       $$.flags = FL_localOnly;
+       $$.flags = FL_localOnly|FL_includeQualifiers;
 
        setRequest(parm,&$$,sizeof(XtokEnumClasses),OPS_EnumerateClasses);
     }
@@ -1156,7 +1156,7 @@ enumClasses
        $$.op.type = OPS_EnumerateClasses;
        $$.op.nameSpace=setCharsMsgSegment($1);
        $$.op.className=setCharsMsgSegment($2.className);
-       $$.flags = ($2.flags & $2.flagsSet) | ((~$2.flagsSet) & FL_localOnly);
+       $$.flags = ($2.flags & $2.flagsSet) | ((~$2.flagsSet) & (FL_localOnly|FL_includeQualifiers));
 
        setRequest(parm,&$$,sizeof(XtokEnumClasses),OPS_EnumerateClasses);
     }
