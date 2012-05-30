@@ -3,6 +3,11 @@
 	* cimXmlOps.y:
 	[ 3527620 ] EnumerateClasses does not include qualifiers by default
 
+2012-05-25  Dave Heller <hellerda@us.ibm.com>
+
+	* extra/sfcb-ps:
+	[ 3529879 ] Fixes for sfcb-ps test script
+
 2012-05-25  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* msgqueue.c:

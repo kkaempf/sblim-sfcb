@@ -124,10 +124,10 @@ done
 
 if [ -n "$USE_PROC" ] ; then
    # For busybox ps
-   PS_INFO=$(ps | grep '[s]fcbd')
+   PS_INFO=$(ps | grep '[s]fcbd\b')
 else
    # Get everything from (standard) ps command
-   PS_INFO=$(ps -e -o pid,ppid,pgid,stat,cmd | grep '[s]fcbd')
+   PS_INFO=$(ps -e -o pid,ppid,pgid,stat,cmd | grep '[s]fcbd\b')
 fi
 
 if [ -n "$RAW_PS" ] ; then
@@ -175,7 +175,8 @@ echo "$PS_INFO" | while read pid ppid pgid stat cmd ; do
         SOCKET_TEST="`cat /proc/net/tcp* | grep ":176[45]" | \
           grep -o '\:\([0-9,A-F]\{8\} \)\{2\}\( *[0-9]*\)\{3\}' | \
           grep -o ' [0-9]*$' | \
-          while read inode; do ls -l /proc/$pid/fd/ | grep $inode; done`"
+          while read inode; do [ $inode -ne 0 ] && \
+          ls -l /proc/$pid/fd/ | grep $inode; done`"
     else
         # Use standard lsof for socket test
         SOCKET_TEST="`lsof -n -w -a -i :5988 -i :5989 -p $pid`"
