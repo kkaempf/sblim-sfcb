@@ -1,3 +1,8 @@
+2012-05-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimXmlOps.y:
+	[ 3527620 ] EnumerateClasses does not include qualifiers by default
+
 2012-05-25  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* msgqueue.c:
