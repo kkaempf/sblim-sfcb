@@ -298,6 +298,11 @@ sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 ## Default is 0 (no timeout)
 #indicationDeliveryThreadTimeout: 0
 
+## Timeout passed to curl for thread delivery. After this time has elapsed
+## the indication delivery is considered a failure.
+## Default is 10 seconds
+#indicationCurlTimeout: 10
+
 ##----------------------------Reliable Indications ----------------------------
 ## Interval between indication retry attempts
 ## Default is 20 seconds

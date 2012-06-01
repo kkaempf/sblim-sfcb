@@ -23,6 +23,7 @@
 #include <sfcCommon/utilft.h>
 #include "trace.h"
 #include <string.h>
+#include "control.h"
 
 extern UtilStringBuffer *newStringBuffer(int);
 extern int      getControlChars(char *id, char **val);
@@ -229,10 +230,11 @@ genRequest(CurlData * cd, char *url, char **msg)
     return 3;
   }
 
-  /*
-   * Set transfer timeout to 10 sec 
-   */
-  rv = curl_easy_setopt(cd->mHandle, CURLOPT_TIMEOUT, 10);
+  /* Set transfer timeout to config option or 10 sec */
+  long indicationCurlTimeout=10;
+  if (getControlNum("indicationCurlTimeout", &indicationCurlTimeout))
+        indicationCurlTimeout = 10;
+  rv = curl_easy_setopt(cd->mHandle, CURLOPT_TIMEOUT, indicationCurlTimeout);
 
   /*
    * Set username and password * / if (url.user.length() > 0 &&

@@ -1,3 +1,8 @@
+2012-06-01 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* control.h, indCIMXMLExport.c, sfcb.cfg.pre.in:
+	[ 3531210 ] Allow indication delivery timeout tuning
+
 2012-05-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* cimXmlOps.y:
