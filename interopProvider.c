@@ -1179,6 +1179,7 @@ InteropProviderCreateInstance(CMPIInstanceMI * mi,
       gethostname(hostName,511); /* should be the same as SystemName of IndicationService */
       CMAddKey(copLocal, "SystemName", hostName, CMPI_chars);
       CMSetProperty(ciLocal,"SystemName",hostName,CMPI_chars);
+      CMSetStatus(&st, CMPI_RC_OK);
     }
 
     for (ql = (char *) lang->hdl, i = 0, n = 0, m = strlen(ql); i < m; i++) {
