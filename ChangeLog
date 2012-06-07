@@ -1,3 +1,9 @@
+2012-06-06 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* indCIMXMLExport.c:
+	[ 3527920 ] RI and http response codes
+	Fix for curl errors not being caught
+
 2012-05-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* cimXmlOps.y:

@@ -1,6 +1,6 @@
 
 /*
- * $Id: indCIMXMLExport.c,v 1.17 2012/05/21 18:58:30 nsharoff Exp $
+ * $Id: indCIMXMLExport.c,v 1.18 2012/06/07 01:02:14 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -290,8 +290,14 @@ static int getResponse(CurlData *cd, char **msg)
              rc = 501;
              break;
           default:
+             if (responseCode != 0) {
+               // If we got an unrecognized response code, return it
+               rc = (int)responseCode;
+             } else {
+               // Otherwise there was some other curl error, return that
+               rc = (int)rv;
+             }
              *msg = getErrorMessage(rv);
-             rc = (int)responseCode;
              break;
         }
         return rc;
