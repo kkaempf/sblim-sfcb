@@ -346,8 +346,14 @@ getResponse(CurlData * cd, char **msg)
          rc = 501;
          break;
       default:
+         if (responseCode != 0) {
+           // If we got an unrecognized response code, return it
+           rc = (int)responseCode;
+         } else {
+           // Otherwise there was some other curl error, return that
+           rc = (int)rv;
+         }
          *msg = getErrorMessage(rv);
-         rc = (int)responseCode;
          break;
     } 
     return rc;
