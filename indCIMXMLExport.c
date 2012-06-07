@@ -1,6 +1,6 @@
 
 /*
- * $Id: indCIMXMLExport.c,v 1.18 2012/06/07 01:02:14 mchasal Exp $
+ * $Id: indCIMXMLExport.c,v 1.19 2012/06/07 02:56:09 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -25,6 +25,7 @@
 #include "utilft.h"
 #include "trace.h"
 #include <string.h>
+#include "control.h"
 
 extern UtilStringBuffer *newStringBuffer(int);
 extern int getControlChars(char *id, char **val);
@@ -185,8 +186,11 @@ static int genRequest(CurlData *cd, char *url, char **msg)
         return 3;
     }
 
-    /* Set transfer timeout to 10 sec */
-    rv = curl_easy_setopt(cd->mHandle, CURLOPT_TIMEOUT, 10);
+    /* Set transfer timeout to config option or 10 sec */
+    long indicationCurlTimeout=10;
+    if (getControlNum("indicationCurlTimeout", &indicationCurlTimeout))
+          indicationCurlTimeout = 10;
+    rv = curl_easy_setopt(cd->mHandle, CURLOPT_TIMEOUT, indicationCurlTimeout);
 
     /* Set username and password * /
     if (url.user.length() > 0 && url.password.length() > 0) {

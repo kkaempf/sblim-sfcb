@@ -135,6 +135,7 @@ Control init[] = {
    {"indicationDeliveryThreadTimeout",1,"0"},
    {"MaxListenerDestinations",1,"100"},
    {"MaxActiveSubscriptions",1,"100"},
+   {"indicationCurlTimeout",1,"10"},
 };
 
 void sunsetControl()

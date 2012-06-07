@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.34 2012/04/19 17:39:55 mchasal Exp $
+# $Id: sfcb.cfg.pre.in,v 1.35 2012/06/07 02:56:09 mchasal Exp $
 ##
 ## Sample Configuration for Small Footprint CIM Broker
 ## 
@@ -277,6 +277,11 @@ sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 ## indications support is enabled. 
 ## Default is 0 (no timeout)
 #indicationDeliveryThreadTimeout: 0
+
+## Timeout passed to curl for thread delivery. After this time has elapsed
+## the indication delivery is considered a failure.
+## Default is 10 seconds
+#indicationCurlTimeout: 10
 
 ##----------------------------Reliable Indications ----------------------------
 ## Interval between indication retry attempts

@@ -1,5 +1,10 @@
 2012-06-06 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
+	* control.h, indCIMXMLExport.c, sfcb.cfg.pre.in:
+	[ 3531210 ] Allow indication delivery timeout tuning
+
+2012-06-06 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
 	* indCIMXMLExport.c:
 	[ 3527920 ] RI and http response codes
 	Fix for curl errors not being caught

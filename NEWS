@@ -8,6 +8,7 @@ New features:
 - 3517530 Implement mark, release routines in CMPIBrokerMemFT
 - 3513390 Enforce LD and subscription limits
 - 3527920 RI and http responsecodes
+- 3531210 Allow indication delivery timeout tuning
 
 Bugs fixed:
 
