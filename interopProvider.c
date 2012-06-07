@@ -1047,13 +1047,13 @@ CMPIStatus InteropProviderCreateInstance(
          provide this if the client does not */
       CMPIString *sysname=ciLocal->ft->getProperty(ciLocal,"SystemName",&st).value.string;
       if (sysname == NULL || sysname->hdl == NULL) {
- 	char hostName[512];
- 	hostName[0]=0;
-	gethostname(hostName,511); /* should be the same as SystemName of IndicationService */
-	CMAddKey(copLocal, "SystemName", hostName, CMPI_chars);
-	CMSetProperty(ciLocal,"SystemName",hostName,CMPI_chars);
+        char hostName[512];
+        hostName[0]=0;
+        gethostname(hostName,511); /* should be the same as SystemName of IndicationService */
+        CMAddKey(copLocal, "SystemName", hostName, CMPI_chars);
+        CMSetProperty(ciLocal,"SystemName",hostName,CMPI_chars);
+        CMSetStatus(&st, CMPI_RC_OK);
       }
-
 
       for (ql=(char*)lang->hdl,i=0,n=0,m=strlen(ql); i<m; i++) {
          if (ql[i]>' ') lng[n++]=ql[i];
