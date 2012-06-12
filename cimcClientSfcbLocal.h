@@ -500,6 +500,7 @@ extern          "C" {
   struct _ClientEnv {
     void           *hdl;
     ClientEnvFT    *ft;
+    unsigned int    options;
   };
 
   int             sameCMPIObjectPath(const CMPIObjectPath * cop1,

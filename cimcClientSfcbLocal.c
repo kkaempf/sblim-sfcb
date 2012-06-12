@@ -2077,7 +2077,7 @@ newDateTimeFromChars(ClientEnv *ce, const char *utcTime, CMPIStatus *rc)
 }
 
 ClientEnv      *
-_Create_SfcbLocal_Env(char *id)
+_Create_SfcbLocal_Env(char *id, unsigned int options, int *rc, char **msg)
 {
 
   static ClientEnvFT localFT = {
@@ -2101,6 +2101,7 @@ _Create_SfcbLocal_Env(char *id)
   ClientEnv      *env = (ClientEnv *) malloc(sizeof(ClientEnv));
   env->hdl = NULL;
   env->ft = &localFT;
+  env->options = options;
 
   // enable trace logging
   _SFCB_TRACE_INIT();

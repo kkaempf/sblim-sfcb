@@ -1,3 +1,8 @@
+2012-06-12  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimcClientSfcbLocal.c, cimcClientSfcbLocal.h:
+	[ 3534659 ] Match SfcbLocal to sfcc update
+
 2012-06-07 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* interopProvider.c:
