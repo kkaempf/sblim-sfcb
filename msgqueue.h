@@ -46,7 +46,8 @@
 #define MSG_X_LOCAL              9
 #define MSG_X_SFCB_PROVIDER      10
 
-#if defined(__GNU_LIBRARY__) && !defined(_SEM_SEMUN_UNDEFINED)
+#if defined(__FreeBSD__) || \
+    defined(__GNU_LIBRARY__) && !defined(_SEM_SEMUN_UNDEFINED)
 #else
 union semun {
    int val;
