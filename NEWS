@@ -134,7 +134,7 @@ New Features:
 - 3484025 Disable indication sequencing
 - 3462309 Do not allow multiple instances of sfcb
 - 3488688 Don't spawn logger for clients
-
+- 3495060 Verify filter and handler information during subscription
 
 Bugs Fixed: 
 
