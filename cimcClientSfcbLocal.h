@@ -180,6 +180,7 @@ typedef struct _ClientEnvFT {
 struct _ClientEnv {
    void *hdl;
    ClientEnvFT *ft;
+   unsigned int options;
 };
 
 int sameCMPIObjectPath ( const CMPIObjectPath *cop1, const CMPIObjectPath *cop2);

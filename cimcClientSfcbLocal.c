@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.46 2012/03/29 14:39:53 mchasal Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.47 2012/06/12 19:12:56 buccella Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -2019,7 +2019,7 @@ static CMPIDateTime *newDateTimeFromChars(ClientEnv* ce, const char *utcTime, CM
    return NewCMPIDateTimeFromChars(utcTime,rc); 
 }
 
-ClientEnv* _Create_SfcbLocal_Env(char *id)
+ClientEnv* _Create_SfcbLocal_Env(char *id, unsigned int options, int *rc, char **msg)
 {
  
    static ClientEnvFT localFT = {
@@ -2043,6 +2043,7 @@ ClientEnv* _Create_SfcbLocal_Env(char *id)
     ClientEnv *env = (ClientEnv*)malloc(sizeof(ClientEnv));
     env->hdl=NULL;
     env->ft=&localFT;
+    env->options = options;
 
     // enable trace logging
     _SFCB_TRACE_INIT();
