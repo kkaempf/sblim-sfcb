@@ -1,5 +1,9 @@
 2012-06-12  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* msgqueue.h:
+	[ 3533179 ] Double definition for union semun  in FreeBSD
+	(patch by PitRunner)
+
 	* cimcClientSfcbLocal.c, cimcClientSfcbLocal.h:
 	[ 3534659 ] Match SfcbLocal to sfcc update
 

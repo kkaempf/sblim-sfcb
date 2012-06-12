@@ -114,6 +114,7 @@ Bugs Fixed:
 - 3529856 httpProcs limit can be broken
 - 3527620 EnumerateClasses does not include qualifiers by default
 - 3532951 Filter creation fails with disable default properties
+- 3533179 Double definition for union semun  in FreeBSD
 
 Changes in 1.3.14
 =================

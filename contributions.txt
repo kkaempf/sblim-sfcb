@@ -205,3 +205,7 @@ Zane Bitter, Red Hat
 --------------------
 03/28/2012 [ 3510458 ] Malformed XML response to GetProperty
 03/28/2012 [ 3510456 ] GetProperty calls not passing keys to providers
+
+PitRunner
+---------
+06/12/2012 [ 3533179 ] Double definition for union semun  in FreeBSD
