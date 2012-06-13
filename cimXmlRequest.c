@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.72 2012/04/13 18:05:40 buccella Exp $
+ * $Id: cimXmlRequest.c,v 1.73 2012/06/13 21:21:09 nsharoff Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -530,10 +530,10 @@ static UtilStringBuffer *genEnumResponses(BinRequestContext * binCtx,
    sb = UtilFactory->newStrinBuffer(1024);
    
    if (binCtx->oHdr->type==OPS_EnumerateClassNames)
-      enum2xml(enm, sb, binCtx->type, XML_asClassName, binCtx->bHdr->flags);
+      enum2xml(enm, sb, binCtx->type, XML_asClassName, binCtx->bHdr->flags,  binCtx->httpHost);
    else if (binCtx->oHdr->type==OPS_EnumerateClasses)
-      enum2xml(enm, sb, binCtx->type, XML_asClass, binCtx->bHdr->flags);
-   else enum2xml(enm, sb, binCtx->type, binCtx->xmlAs,binCtx->bHdr->flags);
+      enum2xml(enm, sb, binCtx->type, XML_asClass, binCtx->bHdr->flags,  binCtx->httpHost);
+   else enum2xml(enm, sb, binCtx->type, binCtx->xmlAs,binCtx->bHdr->flags,  binCtx->httpHost);
    
    _SFCB_RETURN(sb);
 }
@@ -621,7 +621,7 @@ RespSegments genFirstChunkResponses(BinRequestContext * binCtx,
    UtilStringBuffer *sb;
    RespSegments rs;
 
-   _SFCB_ENTER(TRACE_CIMXMLPROC, "genResponses");
+   _SFCB_ENTER(TRACE_CIMXMLPROC, "genFirstChunkResponses");
 
    sb=genEnumResponses(binCtx,resp,arrlen);
 
@@ -654,7 +654,7 @@ RespSegments genLastChunkResponses(BinRequestContext * binCtx,
    UtilStringBuffer *sb; 
    RespSegments rs;
 
-   _SFCB_ENTER(TRACE_CIMXMLPROC, "genResponses");
+   _SFCB_ENTER(TRACE_CIMXMLPROC, "genLastChunkResponses");
 
    sb=genEnumResponses(binCtx,resp,arrlen);
 
@@ -997,6 +997,7 @@ static RespSegments enumClassNames(CimXmlRequestContext * ctx,
    binCtx.xmlAs=binCtx.noResp=0;
    binCtx.chunkedMode=0;
    binCtx.pAs=NULL;
+   binCtx.httpHost=ctx->host;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
    irc = getProviderContext(&binCtx, (OperationHdr *) req);
@@ -1051,6 +1052,7 @@ static RespSegments enumClasses(CimXmlRequestContext * ctx,
    binCtx.type=CMPI_class;
    binCtx.xmlAs=binCtx.noResp=0;
    binCtx.chunkFncs=ctx->chunkFncs;
+   binCtx.httpHost=ctx->host;
    
    if (ctx->teTrailers==0)
       hdr->chunkedMode=binCtx.chunkedMode=0;
@@ -1440,6 +1442,7 @@ static RespSegments enumInstanceNames(CimXmlRequestContext * ctx,
    binCtx.xmlAs=binCtx.noResp=0;
    binCtx.chunkedMode=0;
    binCtx.pAs=NULL;
+   binCtx.httpHost=ctx->host;
 
    _SFCB_TRACE(1, ("--- Getting Provider context"));
    irc = getProviderContext(&binCtx, (OperationHdr *) req);
@@ -1504,6 +1507,7 @@ static RespSegments enumInstances(CimXmlRequestContext * ctx, RequestHdr * hdr)
    binCtx.type=CMPI_instance;
    binCtx.xmlAs=binCtx.noResp=0;
    binCtx.chunkFncs=ctx->chunkFncs;
+   binCtx.httpHost=ctx->host;
    
    if (ctx->teTrailers==0) {
       hdr->chunkedMode=binCtx.chunkedMode=0;
@@ -1596,6 +1600,7 @@ static RespSegments execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
    binCtx.type=CMPI_instance;
    binCtx.xmlAs=XML_asObj; binCtx.noResp=0;
    binCtx.chunkFncs=ctx->chunkFncs;
+   binCtx.httpHost=ctx->host;
    
    if (ctx->teTrailers==0)
       hdr->chunkedMode=binCtx.chunkedMode=0;
@@ -1697,6 +1702,7 @@ static RespSegments associatorNames(CimXmlRequestContext * ctx,
    binCtx.xmlAs=XML_asObjectPath; binCtx.noResp=0;
    binCtx.chunkedMode=0;
    binCtx.pAs=NULL;
+   binCtx.httpHost=ctx->host;
 
    _SFCB_TRACE(1, ("--- Getting Provider context"));
    irc = getProviderContext(&binCtx, (OperationHdr *) req);
@@ -1789,6 +1795,7 @@ static RespSegments associators(CimXmlRequestContext * ctx, RequestHdr * hdr)
    binCtx.type=CMPI_instance;
    binCtx.xmlAs=XML_asObj; binCtx.noResp=0;
    binCtx.pAs=NULL;
+   binCtx.httpHost = ctx->host;
    binCtx.chunkFncs=ctx->chunkFncs;
    
    if (ctx->teTrailers==0)
@@ -1889,6 +1896,7 @@ static RespSegments referenceNames(CimXmlRequestContext * ctx, RequestHdr * hdr)
    binCtx.xmlAs=XML_asObjectPath; binCtx.noResp=0;
    binCtx.chunkedMode=0;
    binCtx.pAs=NULL;
+   binCtx.httpHost=ctx->host;
 
    _SFCB_TRACE(1, ("--- Getting Provider context"));
    irc = getProviderContext(&binCtx, (OperationHdr *) req);
@@ -1980,6 +1988,7 @@ static RespSegments references(CimXmlRequestContext * ctx, RequestHdr * hdr)
    binCtx.type=CMPI_instance;
    binCtx.xmlAs=XML_asObj; binCtx.noResp=0;
    binCtx.pAs=NULL;
+   binCtx.httpHost=ctx->host;
    binCtx.chunkFncs=ctx->chunkFncs;
    
    if (ctx->teTrailers==0)

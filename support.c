@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.39 2012/03/05 18:14:26 nsharoff Exp $
+ * $Id: support.c,v 1.40 2012/06/13 21:21:09 nsharoff Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -37,6 +37,7 @@
 #include "native.h"
 #include "trace.h"
 #include "config.h"
+#include "control.h"
 #include <pthread.h>
 
 #ifdef SFCB_IX86
@@ -1019,3 +1020,68 @@ char* sfcb_snprintf(const char* fmt, ...)
     return str;
 }
 
+/* If config hostnameLib=true, get custom hostname */
+extern void     libraryName(const char *dir, const char *location,
+                            const char *fullName, int buf_size);
+typedef int (*getSfcbHostname)(char *httpHost, char **hostname, 
+            unsigned int len);
+typedef int (*getSfcbSlpHostname)(char **hostname);
+static void *hostnameLib;
+static getSfcbHostname sfcbHostname;
+static getSfcbSlpHostname sfcbSlpHostname;
+int loadHostnameLib()
+{
+  char *ln;
+  char  dlName[512];
+  char *err;
+
+  hostnameLib = NULL;
+  if (getControlChars("sfcbCustomLib", &ln) == 0) {
+     libraryName(NULL, ln, dlName, 512);
+     if ((hostnameLib = dlopen(dlName, RTLD_LAZY))) {
+        dlerror();
+        sfcbHostname = dlsym(hostnameLib, "_sfcbGetResponseHostname");
+	if ((err = dlerror()) != NULL) {
+	   printf("dlsym failed for _sfcbGetResponseHostname: %s\n", err);
+           dlclose(hostnameLib);
+	   return -1;
+        }
+        dlerror();
+	sfcbSlpHostname = dlsym(hostnameLib, "_sfcGetSlpHostname");
+	if ((err = dlerror()) != NULL) {
+	   printf("dlsym failed for _sfcbGetSlpHostname: %s\n", err);
+           dlclose(hostnameLib);
+	   return -1;
+        }
+     }
+     else {
+	   printf("dlopen failed for sfcbCustomLib\n");
+	   return -1;
+     }
+  }
+  else {
+       printf("Cannot find the libary to open: %s\n", ln);
+       return -1;
+  }
+
+  return 0;
+}
+
+int getCustomHostname(char *httpHost, char **hn, unsigned int len)
+{
+    if (sfcbHostname) return(sfcbHostname(httpHost, hn, len));
+    return -1;
+}
+
+int getCustomSlpHostname(char **hn)
+{
+    if (sfcbSlpHostname) return(sfcbSlpHostname(hn));
+    return -1;
+}
+
+
+void unloadHostnameLib()
+{
+   if (hostnameLib) dlclose(hostnameLib);
+   return;
+}

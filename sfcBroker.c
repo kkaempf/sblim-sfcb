@@ -76,6 +76,9 @@ extern void uninitSocketPairs();
 extern void sunsetControl();
 extern void uninitGarbageCollector();
 
+extern  int loadHostnameLib();
+extern void unloadHostnameLib();
+
 extern TraceId traceIds[];
 
 extern unsigned long exFlags;
@@ -244,6 +247,8 @@ static void stopBroker(void *p)
 
    pthread_mutex_unlock(&syncMtx);
    _SFCB_TRACE_STOP();
+
+   unloadHostnameLib();
  
    if (restartBroker) {
       char *emsg=strerror(errno);
@@ -813,6 +818,12 @@ int main(int argc, char *argv[])
    if ((enableHttp || enableHttps) && dSockets > 0) {
      startHttp = 1;
    }
+
+   if (loadHostnameLib() == -1) {
+      printf("--- Failed to load sfcCustomLib. Exiting\n");
+      exit(1);
+   }
+
    
    initSem(dSockets,sSockets,pSockets);
    initProvProcCtl(pSockets);

@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.117 2012/02/29 23:12:44 buccella Exp $  
+# $Id: Makefile.am,v 1.118 2012/06/13 21:21:09 nsharoff Exp $  
 #
 #  Makefile.am
 # 
@@ -93,11 +93,7 @@ HTTP_ADAPTER_LIBS = libsfcHttpAdapter.la
 HTTP_ADAPTER_LIBS_LINK = -lsfcHttpAdapter
 endif
 
-if SLP_HOSTNAME_LIB
-SLP_HOSTNAME_LIBS = libsfcSlpHostname.la
-else
-SLP_HOSTNAME_LIBS =
-endif
+SFC_CUSTOM_LIB = libsfcCustomLib.la
 
 if QUALREP
 QUALREP_LIBS = libsfcQualifierProvider.la
@@ -163,7 +159,7 @@ sfcblib_LTLIBRARIES = \
    $(QUALREP_LIBS) \
    $(INDICATION_LIBS) \
    $(PAM_LIBS) \
-   $(SLP_HOSTNAME_LIBS) \
+   $(SFC_CUSTOM_LIB) \
    $(ACCOUNT_PASSTHRU_LIBS) 
 
 if TEST_ENABLED 
@@ -278,10 +274,8 @@ libsfcHttpAdapter_la_LIBADD=-lsfcBrokerCore $(CIMXMLCODEC_LIBS_LINK)
 libsfcHttpAdapter_la_DEPENDENCIES=libsfcBrokerCore.la $(CIMXMLCODEC_LIBS)
 endif
 
-if SLP_HOSTNAME_LIB
-libsfcSlpHostname_la_SOURCES = \
-   sfcSlpHostname.c
-endif
+libsfcCustomLib_la_SOURCES = \
+   sfcCustomLib.c
 
 libsfcBasicAuthentication_la_SOURCES = \
    sfcBasicAuthentication.c

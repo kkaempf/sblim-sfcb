@@ -1,4 +1,4 @@
-# $Id: sfcb.cfg.pre.in,v 1.35 2012/06/07 02:56:09 mchasal Exp $
+# $Id: sfcb.cfg.pre.in,v 1.36 2012/06/13 21:21:09 nsharoff Exp $
 ##
 ## Sample Configuration for Small Footprint CIM Broker
 ## 
@@ -51,6 +51,10 @@ useChunking:    true
 ## Maximum ContentLength of an HTTP request allowed.
 ## Default is 100000000
 #httpMaxContentLength: 100000000
+
+## Customization library - user can modify the logic of one or more routine(s)
+## But, do not remove any functions or change the function signature.
+sfcbCustomLib:   sfcCustomLib
 
 ## Enable basic authentication for HTTP and HTTPS connections
 ## Default is false
@@ -233,13 +237,6 @@ sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 ## Default is 600
 #slpRefreshInterval: 600
 
-## Name of the library that will return the hostname to use in the SLP 
-## useful if current system hostname is not valid for advertisment. 
-## You probably don't need this. See example, sfcSlpHostname.c.
-## Only applies if configured with --enable-slp-hostname-lib.
-## Default is sfcSlpHostname
-#slpHostnameLib: sfcSlpHostname
-   
 
 ##------------------------------------ Trace ----------------------------------
 

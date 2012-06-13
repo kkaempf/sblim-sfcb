@@ -56,6 +56,7 @@ extern CMPIData __ift_internal_getPropertyAt(const CMPIInstance * ci,
 					     CMPICount i, char ** name,
 					     CMPIStatus * rc, int readonly);
 extern int invalid_uint(const char *v, const CMPIType type);
+extern int getCustomHostname(char *httpHost, char **hn, unsigned int len);
 
 
 const char *opGetClassNameChars(CMPIObjectPath * cop);
@@ -575,7 +576,8 @@ static int lnsPath2xml(CMPIObjectPath * ci, UtilStringBuffer * sb)
    _SFCB_RETURN(0);
 }
 
-static int nsPath2xml(CMPIObjectPath * ci, UtilStringBuffer * sb)
+
+static int nsPath2xml(CMPIObjectPath * ci, UtilStringBuffer * sb, char *httpHost)
 {
    _SFCB_ENTER(TRACE_CIMXMLPROC, "nsPath2xml");
    char * hn = CMGetCharPtr(CMGetHostname(ci,NULL));
@@ -585,12 +587,9 @@ static int nsPath2xml(CMPIObjectPath * ci, UtilStringBuffer * sb)
    if (hn && *hn) {
       sb->ft->appendChars(sb, hn);
    } else {
-      hn = malloc(HOST_NAME_MAX);
-      if(gethostname(hn, HOST_NAME_MAX) == 0) {
-        sb->ft->appendChars(sb, hn);
-       } else {
-        SFCB_APPENDCHARS_BLOCK(sb, "localhost");
-      }
+      hn = calloc(1, HOST_NAME_MAX);
+      getCustomHostname(httpHost, &hn, HOST_NAME_MAX);
+      sb->ft->appendChars(sb, hn);
       free (hn);
    }
    SFCB_APPENDCHARS_BLOCK(sb, "</HOST>\n");
@@ -622,7 +621,7 @@ static int refValue2xml(CMPIObjectPath * ci, UtilStringBuffer * sb)
     char * hn = CMGetCharPtr(CMGetHostname(ci,NULL));
     if (hn && *hn && ns && *ns) {
       SFCB_APPENDCHARS_BLOCK(sb, "<INSTANCEPATH>\n");
-      nsPath2xml(ci, sb);
+      nsPath2xml(ci, sb, NULL);
     } else if (ns && *ns) {
       SFCB_APPENDCHARS_BLOCK(sb, "<LOCALINSTANCEPATH>\n");
       lnsPath2xml(ci, sb);
@@ -1047,7 +1046,7 @@ static int className2xml(CMPIObjectPath * op, UtilStringBuffer * sb)
 }
 
 int enum2xml(CMPIEnumeration * enm, UtilStringBuffer * sb, CMPIType type,
-                    int xmlAs, unsigned int flags)
+                    int xmlAs, unsigned int flags, char *httpHost)
 {
    CMPIObjectPath *cop;
    CMPIInstance *ci;
@@ -1062,7 +1061,7 @@ int enum2xml(CMPIEnumeration * enm, UtilStringBuffer * sb, CMPIType type,
          else if (xmlAs==XML_asObjectPath) {
             SFCB_APPENDCHARS_BLOCK(sb, "<OBJECTPATH>\n");
             SFCB_APPENDCHARS_BLOCK(sb, "<INSTANCEPATH>\n");
-            nsPath2xml(cop, sb);
+            nsPath2xml(cop, sb, httpHost);
             instanceName2xml(cop, sb);
             SFCB_APPENDCHARS_BLOCK(sb, "</INSTANCEPATH>\n");
             SFCB_APPENDCHARS_BLOCK(sb, "</OBJECTPATH>\n");
@@ -1079,7 +1078,7 @@ int enum2xml(CMPIEnumeration * enm, UtilStringBuffer * sb, CMPIType type,
          if (xmlAs==XML_asObj) {
             SFCB_APPENDCHARS_BLOCK(sb, "<VALUE.OBJECTWITHPATH>\n");
             SFCB_APPENDCHARS_BLOCK(sb, "<INSTANCEPATH>\n");
-            nsPath2xml(cop, sb);
+            nsPath2xml(cop, sb, httpHost);
          }
          else
             SFCB_APPENDCHARS_BLOCK(sb, "<VALUE.NAMEDINSTANCE>\n");

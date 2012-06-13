@@ -10,6 +10,7 @@ New features:
 - 3527920 RI and http responsecodes
 - 3531210 Allow indication delivery timeout tuning
 - 3534659 Match SfcbLocal to sfcc update
+- 3334977 sfcb custom library and hostname
 
 Bugs fixed:
 
