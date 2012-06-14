@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlParser.c,v 1.37 2012/02/11 19:43:32 nsharoff Exp $
+ * $Id: cimXmlParser.c,v 1.38 2012/06/14 23:43:20 buccella Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -359,7 +359,7 @@ static int xmlUnescape(char *buf, char *end)
         // we didn't do anything, return 0
         return 0;
     }
-    if (semiloc-buf > MAX_UNESC_CHAR_LEN) 
+    if (semiloc-buf >= MAX_UNESC_CHAR_LEN) 
     {
         // if there's more than 10 characters in the unescaped string, then
         // it is either not an escaped char or it is malformed...  just return

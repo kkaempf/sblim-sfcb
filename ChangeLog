@@ -1,3 +1,8 @@
+2012-06-14  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimXmlParser.c:
+	[ 3535313 ] xmlUnescape may access memory beyond its buffer
+
 2012-06-13  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
 	* cimslpCMPI.c, cimXmlGen.c, cimXmlGen.h, cimXmlRequest.c,
