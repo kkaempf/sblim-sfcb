@@ -38,7 +38,7 @@ extern void     libraryName(const char *dir, const char *location,
 extern char    *configfile;
 CMPIContext    *prepareUpcall(const CMPIContext *ctx);
 
-extern int getCustomSlpHostname(char **hn)
+extern int getCustomSlpHostname(char **hn);
 
 // helper function ... until better solution is found to get to the
 // interop Namespace
