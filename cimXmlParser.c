@@ -350,7 +350,7 @@ xmlUnescape(char *buf, char *end)
     // we didn't do anything, return 0
     return 0;
   }
-  if (semiloc - buf > MAX_UNESC_CHAR_LEN) {
+  if (semiloc - buf >= MAX_UNESC_CHAR_LEN) {
     // if there's more than 10 characters in the unescaped string, then
     // it is either not an escaped char or it is malformed...  just return
     return 0;

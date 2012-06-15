@@ -1,3 +1,8 @@
+2012-06-15  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimXmlParser.c:
+	[ 3535313 ] xmlUnescape may access memory beyond its buffer
+
 2012-06-12  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* msgqueue.h:
