@@ -21,7 +21,7 @@
 # ===========================================================================
 
 # Indication flood limit (don't set less than 101)
-lim=1000
+lim=500
 
 
 sendxml () {
@@ -304,7 +304,8 @@ do
 done
 sleep 20 # Let the retries catch up
 count=$(grep IndicationTime $ODIR/SFCB_Listener.txt  | wc -l)
-if [ $count -eq $lim ] 
+halfcount=`expr $count / 2` # 2 indication messages are sent for each indication (interop, interop2)
+if [ $halfcount -eq $lim ] 
 then
     echo " received $count of $lim: PASSED"
 else

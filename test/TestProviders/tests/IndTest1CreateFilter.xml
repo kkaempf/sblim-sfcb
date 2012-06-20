@@ -29,9 +29,17 @@
             <PROPERTY NAME="QueryLanguage" TYPE="string"> 
               <VALUE>WQL</VALUE>
             </PROPERTY>
+
             <PROPERTY NAME="SourceNamespace" TYPE="string"> 
               <VALUE>root/interop</VALUE>
             </PROPERTY>
+
+            <PROPERTY.ARRAY NAME="SourceNamespaces" TYPE="string"> 
+	      <VALUE.ARRAY>
+              <VALUE>root/interop</VALUE>
+              <VALUE>root/interop2</VALUE>
+	      </VALUE.ARRAY>
+            </PROPERTY.ARRAY>
           </INSTANCE>
         </IPARAMVALUE>
       </IMETHODCALL>
