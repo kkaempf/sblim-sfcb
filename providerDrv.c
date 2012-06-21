@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.116 2012/04/11 22:55:17 buccella Exp $
+ * $Id: providerDrv.c,v 1.117 2012/06/21 16:48:49 nsharoff Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2069,7 +2069,7 @@ static BinResponseHdr *execQuery(BinRequestHdr * hdr, ProviderInfo * info, int r
       CMPICount i,c;
       int ok=1;
  
-      qs=parseQuery(MEM_TRACKED,(char*)req->query.data,(char*)req->queryLang.data,NULL,&irc);   
+      qs=parseQuery(MEM_TRACKED,(char*)req->query.data,(char*)req->queryLang.data,NULL,NULL,&irc);   
       if (irc) {
          rci.rc=CMPI_RC_ERR_INVALID_QUERY;
          resp = errorResp(&rci);

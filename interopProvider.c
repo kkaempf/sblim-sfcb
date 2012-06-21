@@ -71,6 +71,7 @@ typedef struct filter {
    char *lang;
    char *type;
    char *sns;
+   CMPIArray* snsa;
 } Filter;
 
 typedef struct handler {
@@ -208,7 +209,8 @@ static Filter *addFilter(
 	QLStatement * qs, 
 	const char * query,
 	const char * lang,
-	const char * sns)
+	const char * sns,
+	const CMPIArray *snsa)
 {
    Filter * fi;
       
@@ -232,6 +234,8 @@ static Filter *addFilter(
    fi->query=strdup(query);
    fi->lang=strdup(lang);
    fi->sns=strdup(sns);
+   if (snsa) fi->snsa=snsa->ft->clone(snsa, NULL);
+   else fi->snsa = NULL;
    fi->type=NULL;
    filterHt->ft->put(filterHt,key,fi);
    _SFCB_RETURN(fi);
@@ -270,6 +274,7 @@ static void removeFilter(
       free(fi->query);
       free(fi->lang);
       free(fi->sns);
+      if (fi->snsa) CMRelease(fi->snsa);
       free (fi);
    }   
 
@@ -423,73 +428,93 @@ CMPIStatus genericSubscriptionRequest(
    
    _SFCB_ENTER(TRACE_INDPROVIDER, "genericSubscriptionRequest");
    _SFCB_TRACE(4, ("principal %s, class %s, type %s, optype %d",principal, cn, type, optype));
-   
-   if (rrc) *rrc=0;
-   path = TrackedCMPIObjectPath(fi->sns, cn, &rc);
-   
-   sreq.principal = setCharsMsgSegment(principal);
-   sreq.objectPath = setObjectPathMsgSegment(path);
-   sreq.query = setCharsMsgSegment(fi->query);
-   sreq.language = setCharsMsgSegment(fi->lang);
-   sreq.type = setCharsMsgSegment((char*)type);
-   fi->type=strdup(type);
-   sreq.sns = setCharsMsgSegment(fi->sns);
-   sreq.filterId=fi;
 
-   req.nameSpace = setCharsMsgSegment(fi->sns);
-   req.className = setCharsMsgSegment((char*) cn);
-
-   memset(&binCtx,0,sizeof(BinRequestContext));
-   binCtx.oHdr = &req;
-   binCtx.bHdr = &sreq.hdr;
-   binCtx.bHdrSize = sizeof(sreq);
-   binCtx.chunkedMode=binCtx.xmlAs=0;
-
-   _SFCB_TRACE(1, ("--- getProviderContext for %s-%s",fi->sns,cn));
-   
-   irc = getProviderContext(&binCtx, &req);
-
-   if (irc == MSG_X_PROVIDER) {      
-      _SFCB_TRACE(1, ("--- Invoking Providers"));
-      /* one good provider makes success */
-      resp = invokeProviders(&binCtx,&err,&cnt);
-      if (err == 0) {
-	setStatus(&st,0,NULL);
-      } else {
-	setStatus(&st,resp[err-1]->rc,NULL);
-	for (i=0; i<binCtx.pCount; i++) {
-	  if (resp[i]->rc == 0) {
-	    setStatus(&st,0,NULL);
-	    break;
-	  }
+   /*
+    * Use SourceNamespaces[] when provided. Iterate through the array
+    * of namespaces and activate filters.
+    *
+    * SourceNameSpace is used only when the SourceNamespaces[] is null
+    */
+    int n,j;
+    char *save_sns = fi->sns; /* Save original fi->sns */
+    char *tmpns = malloc(512); /* Length of namespace */
+    if (fi->snsa == NULL) n = 1; /* SourceNamespace when array is NULL */
+    else n = CMGetArrayCount(fi->snsa, NULL);
+    for (j=0; j < n; j++) {
+        if (fi->snsa != NULL) {
+           strcpy(tmpns,
+            CMGetCharPtr(CMGetArrayElementAt(fi->snsa, j, NULL).value.string));
+           fi->sns = tmpns; /* replacing the sns pointer */
+           printf("NSN:RemoveThis->activating filter ns[%d]:%s\n",j,fi->sns);
 	}
-      }
-   }
+        if (rrc) *rrc=0;
+        path = TrackedCMPIObjectPath(fi->sns, cn, &rc);
    
-   else {
-      if (rrc) *rrc=irc;
-      if (irc==MSG_X_PROVIDER_NOT_FOUND) setStatus(&st,CMPI_RC_ERR_FAILED,
-         "No eligible indication provider found");
-      else {
-         char msg[512];
-         snprintf(msg,511,"Failing to find eligible indication provider. Rc: %d",irc);
-         setStatus(&st,CMPI_RC_ERR_FAILED,msg);
-      }   
-   }   
+        sreq.principal = setCharsMsgSegment(principal);
+        sreq.objectPath = setObjectPathMsgSegment(path);
+        sreq.query = setCharsMsgSegment(fi->query);
+        sreq.language = setCharsMsgSegment(fi->lang);
+        sreq.type = setCharsMsgSegment((char*)type);
+        fi->type=strdup(type);
+        sreq.sns = setCharsMsgSegment(fi->sns);
+        sreq.filterId=fi;
+
+        req.nameSpace = setCharsMsgSegment(fi->sns);
+        req.className = setCharsMsgSegment((char*) cn);
+
+        memset(&binCtx,0,sizeof(BinRequestContext));
+        binCtx.oHdr = &req;
+        binCtx.bHdr = &sreq.hdr;
+        binCtx.bHdrSize = sizeof(sreq);
+        binCtx.chunkedMode=binCtx.xmlAs=0;
+
+        _SFCB_TRACE(1, ("--- getProviderContext for %s-%s",fi->sns,cn));
    
-   if (resp) {
-      cnt = binCtx.pCount;
-      while (cnt--) {
-        if (resp[cnt]) {
-	  free(resp[cnt]);
+        irc = getProviderContext(&binCtx, &req);
+
+        if (irc == MSG_X_PROVIDER) {      
+           _SFCB_TRACE(1, ("--- Invoking Providers"));
+           /* one good provider makes success */
+           resp = invokeProviders(&binCtx,&err,&cnt);
+           if (err == 0) {
+	     setStatus(&st,0,NULL);
+           } else {
+	      setStatus(&st,resp[err-1]->rc,NULL);
+	      for (i=0; i<binCtx.pCount; i++) {
+	          if (resp[i]->rc == 0) {
+	             setStatus(&st,0,NULL);
+	             break;
+	          }
+	      }
+           }
         }
-      }
-      free(resp);
-      closeProviderContext(&binCtx);
-  }
-   if(fi->type) {
-      free(fi->type);
-   }
+        else {
+           if (rrc) *rrc=irc;
+           if (irc==MSG_X_PROVIDER_NOT_FOUND) setStatus(&st,CMPI_RC_ERR_FAILED,
+              "No eligible indication provider found");
+           else {
+              char msg[512];
+              snprintf(msg,511,"Failing to find eligible indication provider. Rc: %d",irc);
+              setStatus(&st,CMPI_RC_ERR_FAILED,msg);
+           }   
+        }   
+   
+        if (resp) {
+           cnt = binCtx.pCount;
+           while (cnt--) {
+                 if (resp[cnt]) {
+	            free(resp[cnt]);
+                 }
+           }
+           free(resp);
+           closeProviderContext(&binCtx);
+        }
+        if (fi->type) {
+           free(fi->type);
+        }
+    }
+    fi->sns = save_sns; /* restore back fi->sns */
+    if (tmpns) free(tmpns);
  
    _SFCB_RETURN(st);
 }
@@ -542,7 +567,7 @@ int fowardSubscription(
                      " or no provider found");
       _SFCB_RETURN(-1);
    } 
-     
+
    setStatus(st, CMPI_RC_OK, NULL);
    _SFCB_RETURN(0);
 }
@@ -692,6 +717,7 @@ void initInterOp(
    CMPIObjectPath *cop;
    CMPIContext *ctxLocal;
    char *key,*query,*lng,*sns;
+   CMPIArray *snsa = NULL;
    QLStatement *qs=NULL;
    int rc;
     
@@ -710,9 +736,10 @@ void initInterOp(
          query=(char*)CMGetProperty(ci,"query",&st).value.string->hdl;
          lng=(char*)CMGetProperty(ci,"querylanguage",&st).value.string->hdl;
          sns=(char*)CMGetProperty(ci,"SourceNamespace",&st).value.string->hdl;
-         qs=parseQuery(MEM_NOT_TRACKED,query,lng,sns,&rc);
+         snsa=ci->ft->getProperty(ci,"SourceNamespaces",&st).value.array;
+         qs=parseQuery(MEM_NOT_TRACKED,query,lng,sns,snsa,&rc);
          key=normalizeObjectPathCharsDup(cop);
-         addFilter(ci,key,qs,query,lng,sns);
+         addFilter(ci,key,qs,query,lng,sns,snsa);
       }
       CMRelease(enm);
    }  
@@ -1031,6 +1058,9 @@ CMPIStatus InteropProviderCreateInstance(
           sns = CMGetArrayElementAt(snsa, 0, NULL).value.string;
           valSNS.string = sns;
           ciLocal->ft->setProperty(ciLocal, "SourceNamespace", &valSNS, CMPI_string);
+          valSNS.array = snsa;
+          ciLocal->ft->setProperty(ciLocal, "SourceNamespaces", &valSNS, CMPI_stringA);
+
           CMSetStatus(&st, CMPI_RC_OK);
       }
       // If SourceNamespaces isn't set, use the SourceNamespace
@@ -1074,7 +1104,7 @@ CMPIStatus InteropProviderCreateInstance(
          _SFCB_RETURN(st); 
       }
       
-      qs=parseQuery(MEM_NOT_TRACKED,(char*)query->hdl,lng,(char*)sns->hdl,&rc);
+      qs=parseQuery(MEM_NOT_TRACKED,(char*)query->hdl,lng,(char*)sns->hdl,snsa,&rc);
       if (rc) {
          free(key);
          setStatus(&st,CMPI_RC_ERR_INVALID_QUERY,"Query parse error");
@@ -1082,7 +1112,7 @@ CMPIStatus InteropProviderCreateInstance(
          _SFCB_RETURN(st);         
       }
 
-      addFilter(ciLocal,key,qs,(char*)query->hdl,lng,(char*)sns->hdl);
+      addFilter(ciLocal,key,qs,(char*)query->hdl,lng,(char*)sns->hdl,snsa);
    }
    
    else {

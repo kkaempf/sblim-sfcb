@@ -1,6 +1,6 @@
 
 /*
- * $Id: queryStatement.c,v 1.17 2012/05/11 20:05:11 buccella Exp $
+ * $Id: queryStatement.c,v 1.18 2012/06/21 16:50:14 nsharoff Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -158,6 +158,7 @@ static void qsRelease(QLStatement *st)
     	if(st->sns) {
     	    free(st->sns);
     	}
+	if (st->snsa) CMRelease(st->snsa);
     	/* free everything but the first element of allocList, which is
     	 * the memory allocated for the QLStatement itself, see
     	 * newQLStatement(...). The struct is then freed after the loop */
@@ -240,7 +241,7 @@ static QLStatementFt stmtFt={
 };   
    
 
-QLStatement *parseQuery(int mode, const char *query, const char *lang, const char *sns, int *rc)
+QLStatement *parseQuery(int mode, const char *query, const char *lang, const char *sns, CMPIArray *snsa, int *rc)
 {
    QLStatement *qs=NULL;
    QLCollector ctlFt={
@@ -269,6 +270,10 @@ QLStatement *parseQuery(int mode, const char *query, const char *lang, const cha
 
    if (sns) qs->sns=strdup(sns);
    else sns=NULL;
+
+   /* copy the Sourcenamespaces[] array*/
+   if (snsa) qs->snsa=snsa->ft->clone(snsa, NULL);
+   else qs->snsa=NULL;
    
    return qs;
 }

@@ -1,6 +1,6 @@
 
 /*
- * $Id: selectexp.c,v 1.11 2007/10/02 09:02:11 mihajlov Exp $
+ * $Id: selectexp.c,v 1.12 2012/06/21 16:50:14 nsharoff Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -147,7 +147,7 @@ static NativeSelectExp *__new_exp(int mode, const char *queryString,
    
    
    /*fprintf(stderr,"*** new select expression: %s %s\n",queryString, language);*/
-   exp.qs=parseQuery(mode,(char*)queryString, (char*)language, (char*) sns, &irc);
+   exp.qs=parseQuery(mode,(char*)queryString, (char*)language, (char*) sns, NULL, &irc);
    if (irc) {
       if (rc) CMSetStatus(rc, CMPI_RC_ERR_INVALID_QUERY);
       return NULL;

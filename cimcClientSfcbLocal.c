@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.47 2012/06/12 19:12:56 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.48 2012/06/21 16:46:59 nsharoff Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -781,7 +781,7 @@ static CMPIEnumeration * execQuery(
    CMPIString *ns=cop->ft->getNameSpace(cop,NULL);
    
    oHdr.nameSpace=setCharsMsgSegment((char*)ns->hdl);
-   qs=parseQuery(MEM_TRACKED,query,lang,NULL,&irc);
+   qs=parseQuery(MEM_TRACKED,query,lang,NULL,NULL,&irc);
 
    if (irc) {
       CIMCSetStatusWithChars(rc, CMPI_RC_ERR_INVALID_QUERY,

@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.73 2012/06/13 21:21:09 nsharoff Exp $
+ * $Id: cimXmlRequest.c,v 1.74 2012/06/21 16:46:59 nsharoff Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1568,7 +1568,7 @@ static RespSegments execQuery(CimXmlRequestContext * ctx, RequestHdr * hdr)
    hdr->className=req->op.className.data;
 
    qs=parseQuery(MEM_TRACKED,(char*)req->op.query.data,
-      (char*)req->op.queryLang.data,NULL,&irc);   
+      (char*)req->op.queryLang.data,NULL,NULL,&irc);   
    
    fCls=qs->ft->getFromClassList(qs);
    if (irc) {
