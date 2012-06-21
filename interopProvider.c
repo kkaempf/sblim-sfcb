@@ -445,7 +445,7 @@ CMPIStatus genericSubscriptionRequest(
            strcpy(tmpns,
             CMGetCharPtr(CMGetArrayElementAt(fi->snsa, j, NULL).value.string));
            fi->sns = tmpns; /* replacing the sns pointer */
-           printf("NSN:RemoveThis->activating filter ns[%d]:%s\n",j,fi->sns);
+           _SFCB_TRACE(4, ("--- activating filter ns[%d]:%s",j,fi->sns));
 	}
         if (rrc) *rrc=0;
         path = TrackedCMPIObjectPath(fi->sns, cn, &rc);
