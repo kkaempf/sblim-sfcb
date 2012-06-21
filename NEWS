@@ -11,6 +11,7 @@ New features:
 - 3531210 Allow indication delivery timeout tuning
 - 3534659 Match SfcbLocal to sfcc update
 - 3334977 sfcb custom library and hostname
+- 3532494 interopProvider not honoring SourceNamespaces[] correctly
 
 Bugs fixed:
 
