@@ -1146,6 +1146,7 @@ int getCustomHostname(char *httpHost, char **hn, unsigned int len)
 int getCustomSlpHostname(char **hn)
 {
     if (sfcbSlpHostname) return(sfcbSlpHostname(hn));
+    return -1;
 }
 
 void unloadHostnameLib()
