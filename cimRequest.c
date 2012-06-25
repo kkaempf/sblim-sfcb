@@ -505,11 +505,14 @@ genEnumResponses(BinRequestContext * binCtx,
   sb = UtilFactory->newStrinBuffer(1024);
 
   if (binCtx->oHdr->type == OPS_EnumerateClassNames)
-    enum2xml(enm, sb, binCtx->type, XML_asClassName, binCtx->bHdr->flags);
+    enum2xml(enm, sb, binCtx->type, XML_asClassName, binCtx->bHdr->flags,
+             binCtx->httpHost);
   else if (binCtx->oHdr->type == OPS_EnumerateClasses)
-    enum2xml(enm, sb, binCtx->type, XML_asClass, binCtx->bHdr->flags);
+    enum2xml(enm, sb, binCtx->type, XML_asClass, binCtx->bHdr->flags,
+             binCtx->httpHost);
   else
-    enum2xml(enm, sb, binCtx->type, binCtx->xmlAs, binCtx->bHdr->flags);
+    enum2xml(enm, sb, binCtx->type, binCtx->xmlAs, binCtx->bHdr->flags,
+             binCtx->httpHost);
 
   _SFCB_RETURN(sb);
 }
@@ -599,7 +602,7 @@ genFirstChunkResponses(BinRequestContext * binCtx,
   UtilStringBuffer *sb;
   RespSegments    rs;
 
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "genResponses");
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "genFirstChunkResponses");
 
   sb = genEnumResponses(binCtx, resp, arrlen);
 
@@ -635,7 +638,7 @@ genLastChunkResponses(BinRequestContext * binCtx,
   UtilStringBuffer *sb;
   RespSegments    rs;
 
-  _SFCB_ENTER(TRACE_CIMXMLPROC, "genResponses");
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "genLastChunkResponses");
 
   sb = genEnumResponses(binCtx, resp, arrlen);
 
@@ -786,6 +789,7 @@ enumClassNames(CimRequestContext * ctx, RequestHdr * hdr)
   _SFCB_ENTER(TRACE_CIMXMLPROC, "enumClassNames");
 
   hdr->binCtx->commHndl = ctx->commHndl;
+  hdr->binCtx->httpHost = ctx->host;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
   irc = getProviderContext(hdr->binCtx);
@@ -831,6 +835,7 @@ enumClasses(CimRequestContext * ctx, RequestHdr * hdr)
 
   hdr->binCtx->commHndl = ctx->commHndl;
   hdr->binCtx->chunkFncs = ctx->chunkFncs;
+  hdr->binCtx->httpHost = ctx->host;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
   irc = getProviderContext(hdr->binCtx);
@@ -1046,6 +1051,7 @@ enumInstanceNames(CimRequestContext * ctx, RequestHdr * hdr)
   RespSegments    rs;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
+  hdr->binCtx->httpHost = ctx->host;
   irc = getProviderContext(hdr->binCtx);
 
   _SFCB_TRACE(1, ("--- Provider context gotten"));
@@ -1092,6 +1098,7 @@ enumInstances(CimRequestContext * ctx, RequestHdr * hdr)
 
   hdr->binCtx->commHndl = ctx->commHndl;
   hdr->binCtx->chunkFncs = ctx->chunkFncs;
+  hdr->binCtx->httpHost = ctx->host;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
   irc = getProviderContext(hdr->binCtx);
@@ -1141,6 +1148,7 @@ execQuery(CimRequestContext * ctx, RequestHdr * hdr)
 
   hdr->binCtx->commHndl = ctx->commHndl;
   hdr->binCtx->chunkFncs = ctx->chunkFncs;
+  hdr->binCtx->httpHost = ctx->host;
 
   if (ctx->teTrailers == 0)
     hdr->chunkedMode = hdr->binCtx->chunkedMode = 0;
@@ -1197,6 +1205,7 @@ associatorNames(CimRequestContext * ctx, RequestHdr * hdr)
   hdr->binCtx->commHndl = ctx->commHndl;
   hdr->binCtx->chunkFncs = ctx->chunkFncs;
   hdr->chunkedMode = hdr->binCtx->chunkedMode = 0;
+  hdr->binCtx->httpHost = ctx->host;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
   irc = getProviderContext(hdr->binCtx);
@@ -1238,6 +1247,7 @@ associators(CimRequestContext * ctx, RequestHdr * hdr)
 
   hdr->binCtx->commHndl = ctx->commHndl;
   hdr->binCtx->chunkFncs = ctx->chunkFncs;
+  hdr->binCtx->httpHost = ctx->host;
 
   if (ctx->teTrailers == 0)
     hdr->chunkedMode = hdr->binCtx->chunkedMode = 0;
@@ -1295,6 +1305,7 @@ referenceNames(CimRequestContext * ctx, RequestHdr * hdr)
   BinResponseHdr **resp;
 
   hdr->binCtx->commHndl = ctx->commHndl;
+  hdr->binCtx->httpHost = ctx->host;
 
   _SFCB_TRACE(1, ("--- Getting Provider context"));
   irc = getProviderContext(hdr->binCtx);
@@ -1336,6 +1347,7 @@ references(CimRequestContext * ctx, RequestHdr * hdr)
 
   hdr->binCtx->commHndl = ctx->commHndl;
   hdr->binCtx->chunkFncs = ctx->chunkFncs;
+  hdr->binCtx->httpHost = ctx->host;
 
   if (ctx->teTrailers == 0)
     hdr->chunkedMode = hdr->binCtx->chunkedMode = 0;

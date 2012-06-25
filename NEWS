@@ -101,6 +101,7 @@ New Features:
 - 3513390 Enforce LD and subscription limits
 - 3527920 RI and http responsecodes
 - 3534659 Match SfcbLocal to sfcc update
+- 3534977 sfcb custom library and hostname
 
 Bugs Fixed:
 - 3514627 unsupported sfcb.cfg param - use exit call

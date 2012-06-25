@@ -139,6 +139,7 @@ typedef struct binRequestContext {
   CMPIType        type;
   ProvAddr        provA;
   ProvAddr       *pAs;
+  char           *httpHost;
   unsigned long   pCount,
                   pDone;
   unsigned long   rCount;

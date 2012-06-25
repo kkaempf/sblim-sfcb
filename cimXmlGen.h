@@ -50,7 +50,8 @@ extern int      instance2xml(CMPIInstance *ci, UtilStringBuffer * sb,
                              unsigned int flags);
 extern int      args2xml(CMPIArgs * args, UtilStringBuffer * sb);
 extern int      enum2xml(CMPIEnumeration *enm, UtilStringBuffer * sb,
-                         CMPIType type, int xmlAs, unsigned int flags);
+                         CMPIType type, int xmlAs, unsigned int flags,
+                         char *httpHost);
 extern int      qualiEnum2xml(CMPIEnumeration *enm, UtilStringBuffer * sb);
 extern CMPIValue union2CMPIValue(CMPIType type, char *val,
                                  XtokValueArray * arr);

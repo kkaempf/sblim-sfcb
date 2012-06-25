@@ -38,6 +38,8 @@ extern void     libraryName(const char *dir, const char *location,
 extern char    *configfile;
 CMPIContext    *prepareUpcall(const CMPIContext *ctx);
 
+extern int getCustomSlpHostname(char **hn)
+
 // helper function ... until better solution is found to get to the
 // interop Namespace
 char          **
@@ -249,28 +251,6 @@ getSLPData(cimomConfig cfg, const CMPIBroker *_broker,
   // to the calling function
   char           *sn;
 
-#ifdef SLP_HOSTNAME_LIB
-  static void    *hostnameLib = NULL;
-  static getSlpHostname gethostname;
-  char           *ln;
-  char            dlName[512];
-  int             err;
-
-  err = 1;
-  if (getControlChars("slpHostnamelib", &ln) == 0) {
-    libraryName(NULL, ln, dlName, 512);
-    if ((hostnameLib = dlopen(dlName, RTLD_LAZY))) {
-      gethostname = dlsym(hostnameLib, "_sfcGetSlpHostname");
-      if (gethostname)
-        err = 0;
-    }
-  }
-  if (err)
-    mlogf(M_ERROR, M_SHOW,
-          "--- SLP Hostname exit %s not found. Defaulting to system hostname.\n",
-          dlName);
-#endif
-
   _SFCB_ENTER(TRACE_SLP, "getSLPData");
 
   memset(&rs, 0, sizeof(cimSLPService));
@@ -290,17 +270,7 @@ getSLPData(cimomConfig cfg, const CMPIBroker *_broker,
     sn = myGetProperty(ci[0], "SystemName");
 
 #ifdef SLP_HOSTNAME_LIB
-    if (!err) {
-      char           *tmp;
-      if ((err = gethostname(&tmp))) {
-        free(sn);
-        sn = tmp;
-      } else {
-        printf
-            ("-#- SLP call to %s for hostname failed. Defaulting to system hostname.\n",
-             dlName);
-      }
-    }
+  getCustomSlpHostname(char **sn);
 #endif
     rs.url_syntax = getUrlSyntax(sn, cfg.commScheme, cfg.port);
     rs.service_hi_name = myGetProperty(ci[0], "ElementName");
