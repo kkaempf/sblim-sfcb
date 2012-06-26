@@ -1,3 +1,10 @@
+2012-06-26  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+        * cimcClientSfcbLocal.c, cimXmlRequest.c, interopProvider.c,
+          providerDrv.c, queryOperation.h, queryStatement.c,
+          selectexp.c:
+        [ 3532494 ] interopProvider not honoring SourceNamespaces[] correctly
+
 2012-06-25  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
         * cimslpCMPI.c, cimXmlGen.c, cimXmlGen.h, cimXmlRequest.c,

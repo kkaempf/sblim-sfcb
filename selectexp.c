@@ -162,7 +162,7 @@ __new_exp(int mode, const char *queryString,
    */
   exp.qs =
       parseQuery(mode, (char *) queryString, (char *) language,
-                 (char *) sns, &irc);
+                 (char *) sns, NULL, &irc);
   if (irc) {
     if (rc)
       CMSetStatus(rc, CMPI_RC_ERR_INVALID_QUERY);

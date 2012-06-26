@@ -102,6 +102,7 @@ New Features:
 - 3527920 RI and http responsecodes
 - 3534659 Match SfcbLocal to sfcc update
 - 3534977 sfcb custom library and hostname
+- 3532494 interopProvider not honoring SourceNamespaces[] correctly
 
 Bugs Fixed:
 - 3514627 unsupported sfcb.cfg param - use exit call

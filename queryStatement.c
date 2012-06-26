@@ -172,6 +172,7 @@ qsRelease(QLStatement * st)
     if (st->sns) {
       free(st->sns);
     }
+    if (st->snsa) CMRelease(st->snsa);
     /*
      * free everything but the first element of allocList, which is the
      * memory allocated for the QLStatement itself, see
@@ -265,7 +266,7 @@ static QLStatementFt stmtFt = {
 
 QLStatement    *
 parseQuery(int mode, const char *query, const char *lang, const char *sns,
-           int *rc)
+           CMPIArray *snsa, int *rc)
 {
   QLStatement    *qs = NULL;
   QLCollector     ctlFt = {
@@ -299,6 +300,10 @@ parseQuery(int mode, const char *query, const char *lang, const char *sns,
     qs->sns = strdup(sns);
   else
     sns = NULL;
+
+  /* copy the Sourcenamespaces[] array*/
+  if (snsa) qs->snsa=snsa->ft->clone(snsa, NULL);
+  else qs->snsa=NULL;
 
   return qs;
 }

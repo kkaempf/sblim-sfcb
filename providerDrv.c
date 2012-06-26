@@ -2402,7 +2402,7 @@ execQuery(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
     int             ok = 1;
 
     qs = parseQuery(MEM_TRACKED, (char *) req->query.data,
-                    (char *) req->queryLang.data, NULL, &irc);
+                    (char *) req->queryLang.data, NULL, NULL, &irc);
     if (irc) {
       rci.rc = CMPI_RC_ERR_INVALID_QUERY;
       resp = errorResp(&rci);

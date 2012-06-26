@@ -799,7 +799,7 @@ execQuery(Client * mb,
   CMPIString     *ns = cop->ft->getNameSpace(cop, NULL);
 
   oHdr.nameSpace = setCharsMsgSegment((char *) ns->hdl);
-  qs = parseQuery(MEM_TRACKED, query, lang, NULL, &irc);
+  qs = parseQuery(MEM_TRACKED, query, lang, NULL, NULL, &irc);
 
   if (irc) {
      CIMCSetStatusWithChars(rc, CMPI_RC_ERR_INVALID_QUERY,

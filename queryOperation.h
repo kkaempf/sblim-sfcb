@@ -271,6 +271,7 @@ struct qlStatement {
                   allocMax;
   void          **allocList;
   char           *sns;
+  CMPIArray      *snsa;
 };
 
 struct qlCollector {
@@ -286,7 +287,8 @@ struct qlControl {
 };
 
 extern QLStatement *parseQuery(int mode, const char *query,
-                               const char *lang, const char *sns, int *rc);
+                               const char *lang, const char *sns, 
+                               CMPIArray *snsa, int *rc);
 
 #endif
 

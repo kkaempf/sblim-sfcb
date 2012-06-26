@@ -878,7 +878,7 @@ buildExecQueryRequest(void *parm)
   hdr->className = req->op.className.data;
 
   qs = parseQuery(MEM_TRACKED, (char *) req->op.query.data,
-                  (char *) req->op.queryLang.data, NULL, &irc);
+                  (char *) req->op.queryLang.data, NULL, NULL, &irc);
 
   fCls = qs->ft->getFromClassList(qs);
   if (irc) {
