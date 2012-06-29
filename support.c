@@ -1155,6 +1155,20 @@ void unloadHostnameLib()
    return;
 }
 
+CMPIContext * prepareNorespCtx(const CMPIContext *ctx)
+{
+  /*
+   * used to allow calls without waiting for the response to be returned
+   */
+  CMPIContext    *ctxLocal;
+  ctxLocal = native_clone_CMPIContext(ctx);
+  CMPIValue       val;
+  val.boolean = 1;
+  ctxLocal->ft->addEntry(ctxLocal, "noResp", &val, CMPI_boolean);
+  return ctxLocal;
+}
+
+
 /* MODELINES */
 /* DO NOT EDIT BELOW THIS COMMENT */
 /* Modelines are added by 'make pretty' */

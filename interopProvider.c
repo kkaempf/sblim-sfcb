@@ -94,6 +94,12 @@ static UtilHashTable *filterHt = NULL;
 static UtilHashTable *handlerHt = NULL;
 static UtilHashTable *subscriptionHt = NULL;
 
+// Mutex's to protect the hash tables
+static pthread_mutex_t filterHTlock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t handlerHTlock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t subHTlock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t subDelLock = PTHREAD_MUTEX_INITIALIZER;
+
 /* for indication delivery */
 static long MAX_IND_THREADS;
 static long IND_THREAD_TO;
@@ -155,6 +161,7 @@ addSubscription(const CMPIInstance *ci,
 
   _SFCB_ENTER(TRACE_INDPROVIDER, "addSubscription");
 
+  pthread_mutex_lock(&subHTlock);
   if (subscriptionHt == NULL) {
     subscriptionHt = UtilFactory->newHashTable(61, UtilHashTable_charKey);
     subscriptionHt->ft->setReleaseFunctions(subscriptionHt, free, NULL);
@@ -163,9 +170,10 @@ addSubscription(const CMPIInstance *ci,
   _SFCB_TRACE(1, ("-- Subscription: %s\n", key));
 
   su = subscriptionHt->ft->get(subscriptionHt, key);
-  if (su)
+  if (su) {
+    pthread_mutex_unlock(&subHTlock);
     _SFCB_RETURN(NULL);
-
+  }
   su = (Subscription *) malloc(sizeof(Subscription));
   su->sci = CMClone(ci, NULL);
   su->fi = fi;
@@ -174,6 +182,7 @@ addSubscription(const CMPIInstance *ci,
   ha->useCount++;
   subscriptionHt->ft->put(subscriptionHt, key, su);
 
+  pthread_mutex_unlock(&subHTlock);
   _SFCB_RETURN(su);
 }
 
@@ -204,6 +213,7 @@ removeSubscription(Subscription * su, char *key)
 {
   _SFCB_ENTER(TRACE_INDPROVIDER, "removeSubscription");
 
+  pthread_mutex_lock(&subHTlock);
   if (subscriptionHt) {
     subscriptionHt->ft->remove(subscriptionHt, key);
     if (su) {
@@ -214,10 +224,13 @@ removeSubscription(Subscription * su, char *key)
     }
   }
   if (su) {
-    CMRelease(su->sci);
+    if (su->sci) {
+      CMRelease(su->sci);
+    }
     free(su);
   }
 
+  pthread_mutex_unlock(&subHTlock);
   _SFCB_EXIT();
 }
 
@@ -239,14 +252,17 @@ addFilter(const CMPIInstance *ci,
   _SFCB_TRACE(1, ("--- Filter: >%s<", key));
   _SFCB_TRACE(1, ("--- query: >%s<", query));
 
+  pthread_mutex_lock(&filterHTlock);
   if (filterHt == NULL) {
     filterHt = UtilFactory->newHashTable(61, UtilHashTable_charKey);
     filterHt->ft->setReleaseFunctions(filterHt, free, NULL);
   }
 
   fi = filterHt->ft->get(filterHt, key);
-  if (fi)
+  if (fi) {
+    pthread_mutex_unlock(&filterHTlock);
     _SFCB_RETURN(NULL);
+  }
 
   fi = (Filter *) malloc(sizeof(Filter));
   fi->fci = CMClone(ci, NULL);
@@ -259,6 +275,7 @@ addFilter(const CMPIInstance *ci,
   else fi->snsa = NULL;
   fi->type = NULL;
   filterHt->ft->put(filterHt, key, fi);
+  pthread_mutex_unlock(&filterHTlock);
   _SFCB_RETURN(fi);
 }
 
@@ -290,6 +307,7 @@ removeFilter(Filter * fi, char *key)
 {
   _SFCB_ENTER(TRACE_INDPROVIDER, "removeFilter");
 
+  pthread_mutex_lock(&filterHTlock);
   if (filterHt) {
     filterHt->ft->remove(filterHt, key);
   }
@@ -303,6 +321,7 @@ removeFilter(Filter * fi, char *key)
     free(fi);
   }
 
+  pthread_mutex_unlock(&filterHTlock);
   _SFCB_EXIT();
 }
 
@@ -318,6 +337,7 @@ addHandler(CMPIInstance *ci, CMPIObjectPath * op)
 
   _SFCB_ENTER(TRACE_INDPROVIDER, "addHandler");
 
+  pthread_mutex_lock(&handlerHTlock);
   if (handlerHt == NULL) {
     handlerHt = UtilFactory->newHashTable(61, UtilHashTable_charKey);
     handlerHt->ft->setReleaseFunctions(handlerHt, free, NULL);
@@ -331,6 +351,7 @@ addHandler(CMPIInstance *ci, CMPIObjectPath * op)
     _SFCB_TRACE(1, ("--- Handler already registered %p", ha));
     if (key)
       free(key);
+    pthread_mutex_unlock(&handlerHTlock);
     _SFCB_RETURN(NULL);
   }
 
@@ -340,6 +361,7 @@ addHandler(CMPIInstance *ci, CMPIObjectPath * op)
   ha->useCount = 0;
   handlerHt->ft->put(handlerHt, key, ha);
 
+  pthread_mutex_unlock(&handlerHTlock);
   _SFCB_RETURN(ha);
 }
 
@@ -370,6 +392,7 @@ removeHandler(Handler * ha, char *key)
 {
   _SFCB_ENTER(TRACE_INDPROVIDER, "removeHandler");
 
+  pthread_mutex_lock(&handlerHTlock);
   if (handlerHt) {
     handlerHt->ft->remove(handlerHt, key);
   }
@@ -379,9 +402,9 @@ removeHandler(Handler * ha, char *key)
     free(ha);
   }
 
+  pthread_mutex_unlock(&handlerHTlock);
   _SFCB_EXIT();
 }
-
 
 /* 
  * Similar to addHandler(), but useCount is maintained
@@ -401,10 +424,12 @@ static Handler *updateHandler(CMPIInstance *ci,
       
   _SFCB_TRACE(1,("--- Handler: %s",key));
    
+  pthread_mutex_lock(&handlerHTlock);
   // do we need to check??
   if ((ha=handlerHt->ft->get(handlerHt,key))==NULL) {
     _SFCB_TRACE(1,("--- No handler %p",ha));
     if(key) free(key);
+    pthread_mutex_unlock(&handlerHTlock);
     _SFCB_RETURN(NULL);
   }
 
@@ -413,6 +438,7 @@ static Handler *updateHandler(CMPIInstance *ci,
   ha->hop=CMClone(op,NULL);
   handlerHt->ft->put(handlerHt,key,ha);
    
+  pthread_mutex_unlock(&handlerHTlock);
   _SFCB_RETURN(ha);
 }
 
@@ -1293,10 +1319,12 @@ InteropProviderModifyInstance(CMPIInstanceMI * mi,
     /*
      * check if SubscriptionState changed enable/disableIndication 
      */
+    pthread_mutex_lock(&subHTlock);
     su = getSubscription(key);
     free(key);
     if (!su) {
       st.rc = CMPI_RC_ERR_NOT_FOUND;
+      pthread_mutex_unlock(&subHTlock);
       return st;
     }
     oldInst = su->sci;
@@ -1312,6 +1340,7 @@ InteropProviderModifyInstance(CMPIInstanceMI * mi,
         getControlNum("MaxActiveSubscriptions", &cfgmax);
         if (AScount+1 > cfgmax) {
             setStatus(&st,CMPI_RC_ERR_FAILED,"Subscription activation would exceed MaxActiveSubscription limit");
+            pthread_mutex_unlock(&subHTlock);
             return st;
         }
         switchIndications(ctx, ci, OPS_EnableIndications);
@@ -1326,6 +1355,7 @@ InteropProviderModifyInstance(CMPIInstanceMI * mi,
      */
     CMRelease(su->sci);
     su->sci = CMClone(ci, NULL);
+    pthread_mutex_unlock(&subHTlock);
 
   } else if (isa("root/interop", cns, "cim_listenerdestination")) {
     char *key = normalizeObjectPathCharsDup(cop);
@@ -1383,6 +1413,7 @@ InteropProviderDeleteInstance(CMPIInstanceMI * mi,
   _SFCB_ENTER(TRACE_INDPROVIDER, "InteropProviderDeleteInstance");
 
   if (isa(nss, cns, "cim_indicationsubscription")) {
+    pthread_mutex_lock(&subDelLock);
     _SFCB_TRACE(1, ("--- delete cim_indicationsubscription %s", key));
     if ((su = getSubscription(key))) {
       fi = su->fi;
@@ -1412,6 +1443,7 @@ InteropProviderDeleteInstance(CMPIInstanceMI * mi,
       removeSubscription(su, key);
     } else
       setStatus(&st, CMPI_RC_ERR_NOT_FOUND, NULL);
+    pthread_mutex_unlock(&subDelLock);
   }
 
   else if (isa(nss, cns, "cim_indicationfilter")) {
@@ -1552,6 +1584,7 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
     CMRelease(ind);
     CMAddArg(hin, "nameSpace", ns, CMPI_chars);
 
+    pthread_mutex_lock(&subHTlock);
     if (subscriptionHt)
       for (i = subscriptionHt->ft->getFirst(subscriptionHt,
                                             (void **) &suName,
@@ -1595,6 +1628,7 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
 	    mlogf(M_ERROR,M_SHOW,"pthread_create() failed for indication delivery thread\n");
         }
       }
+    pthread_mutex_unlock(&subHTlock);
   }
 
   else if (strcasecmp(methodName, "_addHandler") == 0) {

@@ -266,6 +266,10 @@ setContext(BinRequestContext * binCtx, OperationHdr * oHdr,
   bHdr->sessionId =
       ctx->ft->getEntry(ctx, "CMPISessionId", NULL).value.uint32;
 
+  ctxData = ctx->ft->getEntry(ctx, "noResp", NULL);
+  binCtx->noResp = (ctxData.state == CMPI_nullValue) ? 0 : ctxData.value.boolean;
+
+
   binCtx->oHdr = oHdr;
   binCtx->bHdr = bHdr;
   binCtx->bHdrSize = size;
@@ -862,7 +866,7 @@ deleteInstance(const CMPIBroker * broker,
                const CMPIContext *context, const CMPIObjectPath * cop)
 {
   BinRequestContext binCtx;
-  BinResponseHdr *resp;
+  BinResponseHdr *resp = NULL;
   DeleteInstanceReq sreq = BINREQ(OPS_DeleteInstance, DI_REQ_REG_SEGMENTS);
   OperationHdr    oHdr = { OPS_DeleteInstance, 2 };
   CMPIStatus      st = { CMPI_RC_OK, NULL };
@@ -911,9 +915,11 @@ deleteInstance(const CMPIBroker * broker,
 
       resp = invokeProvider(&binCtx);
       closeProviderContext(&binCtx);
-      resp->rc--;
-      buildStatus(resp, &st);
-      free(resp);
+      if (resp) {
+	resp->rc--;
+	buildStatus(resp, &st);
+	free(resp);
+      }
     } else
       st = setErrorStatus(irc);
 

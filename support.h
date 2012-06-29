@@ -219,6 +219,8 @@ extern double   timevalDiff(struct timeval *sv, struct timeval *ev);
 
 char           *sfcb_snprintf(const char *fmt, ...);
 
+CMPIContext * prepareNorespCtx(const CMPIContext *ctx);
+
 #if defined(__ia64__)
 #define PADDING_LEN(s) ( (s)%sizeof(void *) ? sizeof(void *) - (s)%sizeof(void *) : 0)
 #else

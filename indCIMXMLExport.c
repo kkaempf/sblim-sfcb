@@ -259,6 +259,8 @@ genRequest(CurlData * cd, char *url, char **msg)
   // Fail if we receive an error (HTTP response code >= 300)
   rv = curl_easy_setopt(cd->mHandle, CURLOPT_FAILONERROR, 1);
 
+  rv = curl_easy_setopt(cd->mHandle, CURLOPT_NOSIGNAL, 1);
+
   // Turn this on to enable debugging
   // rv = curl_easy_setopt(cd->mHandle, CURLOPT_VERBOSE, 1);
 

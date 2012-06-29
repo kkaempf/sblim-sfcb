@@ -1,3 +1,10 @@
+2012-06-29 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* brokerUpc.c, indCIMXMLExport.c, indCIMXMLHandler.c, interopProvider.c,
+	support.c, support.h:
+
+	[ 3539006 ] Possible indication deadlock 
+
 2012-06-28  Narasimha Sharoff  <nsharoff@us.ibm.com>
         * cimslpCMPI.c:
         [ 3538848 ] compile error in cimslpCMPI.c:291
