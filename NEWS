@@ -118,6 +118,7 @@ Bugs Fixed:
 - 3532951 Filter creation fails with disable default properties
 - 3533179 Double definition for union semun  in FreeBSD
 - 3535313 xmlUnescape may access memory beyond its buffer
+- 3538848 compile error in cimslpCMPI.c:291
 
 Changes in 1.3.14
 =================

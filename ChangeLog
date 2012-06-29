@@ -1,3 +1,7 @@
+2012-06-28  Narasimha Sharoff  <nsharoff@us.ibm.com>
+        * cimslpCMPI.c:
+        [ 3538848 ] compile error in cimslpCMPI.c:291
+
 2012-06-26  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
         * cimcClientSfcbLocal.c, cimXmlRequest.c, interopProvider.c,
