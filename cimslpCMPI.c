@@ -288,7 +288,7 @@ getSLPData(cimomConfig cfg, const CMPIBroker *_broker,
     sn = myGetProperty(ci[0], "SystemName");
 
 #ifdef SLP_HOSTNAME_LIB
-    getCustomSlpHostname(char **sn);
+    getCustomSlpHostname(&sn);
 #endif
 
     rs.url_syntax = getUrlSyntax(sn, cfg.commScheme, cfg.port);
