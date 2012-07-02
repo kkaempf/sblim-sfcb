@@ -1097,9 +1097,11 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
           CMPIContext    *pctx = native_clone_CMPIContext(ctx);
           pthread_create(&t, &tattr, &retryExport, (void *) pctx);
         }
-        CMRelease(ctxLocal);
       }
       break;
+    }
+    if (RIEnabled) {
+        CMRelease(ctxLocal);
     }
     CMRelease(ind);
   }
