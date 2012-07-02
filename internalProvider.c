@@ -636,6 +636,7 @@ getRefs(const CMPIContext *ctx, const CMPIResult *rslt,
       /*
        * for an unknown class we just return nothing 
        */
+      refs->ft->release(refs);
       _SFCB_RETURN(st);
     }
     path = CMNewObjectPath(_broker, ns, assocClass, NULL);
@@ -731,6 +732,7 @@ getRefs(const CMPIContext *ctx, const CMPIResult *rslt,
     CMPIInstance   *ci;
     UtilHashTable  *assocs =
         UtilFactory->newHashTable(61, UtilHashTable_charKey);
+    assocs->ft->setReleaseFunctions(assocs, free, NULL);
     UtilStringBuffer *pn = normalizeObjectPathStrBuf(cop);
     for (ci = refs->ft->getFirst(refs); ci; ci = refs->ft->getNext(refs)) {
       // Q: for ASSOC_NAME we should not require the
@@ -748,8 +750,9 @@ getRefs(const CMPIContext *ctx, const CMPIResult *rslt,
             CMPIInstance   *aci =
                 CBGetInstance(Broker, ctx, data.value.ref, propertyList,
                               &st);
-            assocs->ft->put(assocs, an->ft->getCharPtr(an), aci);
+            assocs->ft->put(assocs, strdup(an->ft->getCharPtr(an)), aci);
           }
+          an->ft->release(an);
         }
       }
 
@@ -764,7 +767,7 @@ getRefs(const CMPIContext *ctx, const CMPIResult *rslt,
             CMPIString     *tns = CMGetNameSpace(ref, NULL);
             if (tns == NULL || tns->hdl == NULL)
               CMSetNameSpace(ref, ns);
-            UtilStringBuffer *an = NULL;
+            UtilStringBuffer *an = NULL; /* alloc'd in objectPathEquals() */
             if (objectPathEquals(pn, ref, &an, 0) == 0) {
 
               if (resultClass == NULL
@@ -772,8 +775,9 @@ getRefs(const CMPIContext *ctx, const CMPIResult *rslt,
                 CMPIInstance   *aci =
                     CBGetInstance(Broker, ctx, ref, propertyList, &st);
                 if (aci)
-                  assocs->ft->put(assocs, an->ft->getCharPtr(an), aci);
+                  assocs->ft->put(assocs, strdup(an->ft->getCharPtr(an)), aci);
               }
+              an->ft->release(an);
             }
           }
         }
