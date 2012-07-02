@@ -407,6 +407,7 @@ TestInstanceProviderCreateInstance(CMPIInstanceMI * mi,
      */
     CMReturnObjectPath(rslt, cop);
     CMReturnDone(rslt);
+    CMRelease(inst);
   } else {
     CMReturn(CMPI_RC_ERR_NOT_SUPPORTED);
   }
