@@ -1,3 +1,8 @@
+2012-07-02  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* internalProvider.c, providerMgr.c:
+	[ 1901737 ] Memory leak in internalProvider.c
+
 2012-06-29 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* brokerUpc.c, indCIMXMLExport.c, indCIMXMLHandler.c, interopProvider.c,
