@@ -2234,13 +2234,13 @@ enumInstances(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
+  if (props)
+    free(props);
   if (rci.rc == CMPI_RC_OK) {
     xferLastResultBuffer(result, abs(requestor), 1);
     return NULL;
   } else
     resp = errorResp(&rci);
-  if (props)
-    free(props);
 
   _SFCB_RETURN(resp);
 }
@@ -2510,13 +2510,13 @@ associators(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
+  if (props)
+    free(props);
   if (rci.rc == CMPI_RC_OK) {
     xferLastResultBuffer(result, abs(requestor), 1);
     return NULL;
   } else
     resp = errorResp(&rci);
-  if (props)
-    free(props);
 
   _SFCB_RETURN(resp);
 }
@@ -2564,13 +2564,13 @@ references(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   TIMING_STOP(hdr, info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
+  if (props)
+    free(props);
   if (rci.rc == CMPI_RC_OK) {
     xferLastResultBuffer(result, abs(requestor), 1);
     return NULL;
   } else
     resp = errorResp(&rci);
-  if (props)
-    free(props);
 
   _SFCB_RETURN(resp);
 }
