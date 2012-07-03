@@ -1,5 +1,8 @@
 2012-07-02  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* indCIMXMLHandler.c:
+	[ 3539563 ] Memory leak in indCIMXMLHandler when Reliable Inds Enabled
+
 	* interopProvider.c:
 	[ 3539569 ] Leaks in interopProvider
 

@@ -4,6 +4,7 @@ Changes in 1.3.16
 
 Bugs fixed:
 - 3539569 Leaks in interopProvider
+- 3539563 Memory leak in indCIMXMLHandler when Reliable Inds Enabled
 
 Changes in 1.3.15
 =================
