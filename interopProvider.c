@@ -435,6 +435,7 @@ static Handler *updateHandler(CMPIInstance *ci,
 
   CMRelease(ha->hci);
   ha->hci=CMClone(ci,NULL);
+  CMRelease(ha->hop);
   ha->hop=CMClone(op,NULL);
   handlerHt->ft->put(handlerHt,key,ha);
    
@@ -735,6 +736,8 @@ processSubscription(const CMPIBroker * broker,
   if (fi == NULL) {
     _SFCB_TRACE(1, ("--- cannot find specified subscription filter"));
     setStatus(&st, CMPI_RC_ERR_NOT_FOUND, "Filter not found");
+    if (skey)
+      free(skey);
     _SFCB_RETURN(st);
   }
 
@@ -754,6 +757,8 @@ processSubscription(const CMPIBroker * broker,
   if (ha == NULL) {
     _SFCB_TRACE(1, ("--- cannot find specified subscription handler"));
     setStatus(&st, CMPI_RC_ERR_NOT_FOUND, "Handler not found");
+    if (skey)
+      free(skey);
     _SFCB_RETURN(st);
   }
    // Get current state
@@ -770,6 +775,8 @@ processSubscription(const CMPIBroker * broker,
       getControlNum("MaxActiveSubscriptions", &cfgmax);
       if (AScount+1 > cfgmax) {
          setStatus(&st,CMPI_RC_ERR_FAILED,"Subscription activation would exceed MaxActiveSubscription limit");
+	 if (skey)
+	   free(skey);
          return st;
       }
       AScount++;
