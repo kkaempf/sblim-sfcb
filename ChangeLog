@@ -1,5 +1,8 @@
 2012-07-02  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* test/TestProviders/cmpiTestInstanceProvider.c:
+        [ 3539555 ] Memory leak in TestInstanceProvider
+
 	* providerDrv.c:
 	[ 3539557 ] Memory leak in providerDrv with property list
 

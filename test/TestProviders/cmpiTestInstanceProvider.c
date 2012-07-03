@@ -374,6 +374,7 @@ CMPIStatus TestInstanceProviderCreateInstance (
         /* return object-path of instance */
         CMReturnObjectPath(rslt, cop);
         CMReturnDone(rslt);
+        CMRelease(inst);
     }
     else
     {
