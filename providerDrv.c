@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.117 2012/06/21 16:48:49 nsharoff Exp $
+ * $Id: providerDrv.c,v 1.118 2012/07/03 02:03:02 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1930,12 +1930,13 @@ static BinResponseHdr *enumInstances(BinRequestHdr * hdr, ProviderInfo * info,
    TIMING_STOP(hdr,info)
    _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
+   if (props) free(props);
+
    if (rci.rc == CMPI_RC_OK) {
       xferLastResultBuffer(result,abs(requestor),1);
       return NULL;       
    }
    else resp = errorResp(&rci);
-   if (props) free(props);
 
    _SFCB_RETURN(resp);
 }
@@ -2162,12 +2163,13 @@ static BinResponseHdr *associators(BinRequestHdr * hdr, ProviderInfo * info, int
    TIMING_STOP(hdr,info)
    _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
+   if (props) free(props);
+
    if (rci.rc == CMPI_RC_OK) {
       xferLastResultBuffer(result,abs(requestor),1);
       return NULL;       
    }
    else resp = errorResp(&rci);
-   if (props) free(props);
 
    _SFCB_RETURN(resp);
 }
@@ -2205,12 +2207,13 @@ static BinResponseHdr *references(BinRequestHdr * hdr, ProviderInfo * info, int 
    TIMING_STOP(hdr,info)
    _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
+   if (props) free(props);
+
    if (rci.rc == CMPI_RC_OK) {
       xferLastResultBuffer(result,abs(requestor),1);
       return NULL;       
    }
    else resp = errorResp(&rci);
-   if (props) free(props);
 
    _SFCB_RETURN(resp);
 }
