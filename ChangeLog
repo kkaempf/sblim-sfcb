@@ -1,3 +1,8 @@
+2012-07-02  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* interopProvider.c:
+	[ 3539569 ] Leaks in interopProvider
+
 2012-06-28  Narasimha Sharoff  <nsharoff@us.ibm.com>
 	* cimslpCMPI.c:
 	[ 3538848 ] compile error in cimslpCMPI.c:291
