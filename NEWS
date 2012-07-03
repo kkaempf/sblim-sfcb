@@ -7,6 +7,7 @@ Bugs fixed:
 - 3539563 Memory leak in indCIMXMLHandler when Reliable Inds Enabled
 - 3539557 Memory leak in providerDrv with property list
 - 3539555 Memory leak in TestInstanceProvider
+- 1901737 Memory leak in internalProvider.c
 
 Changes in 1.3.15
 =================

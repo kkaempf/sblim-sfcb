@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.82 2012/04/11 22:55:17 buccella Exp $
+ * $Id: providerMgr.c,v 1.83 2012/07/03 02:11:19 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -575,6 +575,7 @@ static int addAssocProviders(char *className, char *nameSpace, UtilList * provid
      for (child = children->ft->getFirst(children); child;
            child = children->ft->getNext(children)) {
          rc = addAssocProviders(child, nameSpace, providerList);
+         free(child);
          if (rc) _SFCB_RETURN(rc);
      }
      CMRelease(children);

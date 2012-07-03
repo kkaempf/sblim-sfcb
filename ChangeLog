@@ -1,5 +1,8 @@
 2012-07-02  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
+	* internalProvider.c, providerMgr.c:
+	[ 1901737 ] Memory leak in internalProvider.c
+
 	* test/TestProviders/cmpiTestInstanceProvider.c:
         [ 3539555 ] Memory leak in TestInstanceProvider
 
