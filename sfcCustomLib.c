@@ -68,3 +68,27 @@ extern int _sfcbGetResponseHostname(char *httpHost, char **hostname, unsigned in
 
      return 0;
 }
+
+/** \brief _sfcbIndAuditLog - log create, delete, and modify calls
+ *
+ *  Provides object information for indicaiton create, delete, and modify
+ *  Default action: return
+ *      operation - create/delete/modify
+ *      objinfo - information on the object
+*/
+extern void  _sfcbIndAuditLog(char *operation, char *objinfo)
+{
+       /* example - log to /tmp/indAudit.log
+       FILE *fp;
+       char *ts = ctime(&t);
+       fp = fopen("/tmp/indAudit.log", "a+");
+       if (fp != NULL) {
+          fwrite(operation, strlen(action), 1, fp);
+          fwrite(objinfo, strlen(msg), 1, fp);
+          fwrite("\n\n",2,1,fp);
+          fflush(fp);
+          fclose(fp);
+       }
+       */
+       return;
+}

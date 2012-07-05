@@ -1130,6 +1130,8 @@ CMPIStatus InteropProviderCreateInstance(
    if (st.rc==CMPI_RC_OK) {
       ctxLocal = prepareUpcall((CMPIContext *)ctx);
       CMReturnObjectPath(rslt, _broker->bft->createInstance(_broker, ctxLocal, copLocal, ciLocal, &st));
+      sfcbIndAuditLog("CreateInstance-> ",
+                      CMGetCharPtr(CMObjectPathToString(cop, NULL)));
       CMRelease(ctxLocal);
    }
     
@@ -1222,6 +1224,8 @@ CMPIStatus InteropProviderModifyInstance(
 	if (st.rc==CMPI_RC_OK) {
 		ctxLocal = prepareUpcall((CMPIContext *)ctx);
 		st = _broker->bft->modifyInstance(_broker, ctxLocal, cop, ci, properties);
+                sfcbIndAuditLog("Subscription:ModifyInstance-> ",
+                                CMGetCharPtr(CMObjectPathToString(cop, NULL)));
 		CMRelease(ctxLocal);		
 	}
 	_SFCB_RETURN(st);   
@@ -1291,6 +1295,8 @@ CMPIStatus InteropProviderDeleteInstance(
    if (st.rc==CMPI_RC_OK) {
       ctxLocal = prepareUpcall((CMPIContext *)ctx);
       st = _broker->bft->deleteInstance(_broker, ctxLocal, cop);
+      sfcbIndAuditLog("DeleteInstance-> ",
+                      CMGetCharPtr(CMObjectPathToString(cop, NULL)));
       CMRelease(ctxLocal);
    }
    
@@ -1455,6 +1461,8 @@ CMPIStatus InteropProviderInvokeMethod(
       CMPIString *ns=CMGetNameSpace(op,NULL);
       _SFCB_TRACE(1,("--- _addHandler %s %s",(char*)ns->hdl,(char*)str->hdl));
       addHandler(ci,op);     
+      sfcbIndAuditLog("CreateHandler-> ",
+                      CMGetCharPtr(CMObjectPathToString(op, NULL)));
    }
    
    else if (strcasecmp(methodName, "_removeHandler") == 0) {
@@ -1467,6 +1475,8 @@ CMPIStatus InteropProviderInvokeMethod(
          } else {
             removeHandler(ha,key);   
             LDcount--;
+            sfcbIndAuditLog("RemoveHandler-> ",
+                            CMGetCharPtr(CMObjectPathToString(op, NULL)));
          }
       }
       else {

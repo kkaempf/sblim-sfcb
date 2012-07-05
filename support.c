@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.40 2012/06/13 21:21:09 nsharoff Exp $
+ * $Id: support.c,v 1.41 2012/07/05 23:04:47 nsharoff Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -1026,9 +1026,11 @@ extern void     libraryName(const char *dir, const char *location,
 typedef int (*getSfcbHostname)(char *httpHost, char **hostname, 
             unsigned int len);
 typedef int (*getSfcbSlpHostname)(char **hostname);
+typedef void (*sfcbLog)(char *operation, char *objinfo);
 static void *hostnameLib;
 static getSfcbHostname sfcbHostname;
 static getSfcbSlpHostname sfcbSlpHostname;
+static sfcbLog indAuditLog;
 int loadHostnameLib()
 {
   char *ln;
@@ -1052,6 +1054,13 @@ int loadHostnameLib()
 	   printf("dlsym failed for _sfcbGetSlpHostname: %s\n", err);
            dlclose(hostnameLib);
 	   return -1;
+        }
+        dlerror();
+        indAuditLog = dlsym(hostnameLib, "_sfcbIndAuditLog");
+        if ((err = dlerror()) != NULL) {
+           printf("dlsym failed for _sfcbIndAuditLog: %s\n", err);
+           dlclose(hostnameLib);
+           return -1;
         }
      }
      else {
@@ -1079,6 +1088,11 @@ int getCustomSlpHostname(char **hn)
     return -1;
 }
 
+void sfcbIndAuditLog(char *operation, char *objinfo)
+{
+    if (indAuditLog) return(indAuditLog(operation, objinfo));
+    return;
+}
 
 void unloadHostnameLib()
 {
