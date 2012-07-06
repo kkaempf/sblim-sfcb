@@ -1,3 +1,8 @@
+2012-07-06  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* internalProvider.c, providerMgr.c:
+        Discrepancy between original patch (git) for 1901737 resulted in crash. Fixed.
+
 2012-07-05  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
 	* interopProvider.c, sfcCustomLib.c, support.c:

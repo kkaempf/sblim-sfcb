@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerMgr.c,v 1.83 2012/07/03 02:11:19 buccella Exp $
+ * $Id: providerMgr.c,v 1.84 2012/07/06 22:52:54 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1746,7 +1746,7 @@ static UtilList *_getAssocClassNames(const char *ns)
          ul = UtilFactory->newList();
          for (i = 0, m = CMGetArrayCount(ar, NULL); i < m; i++) {
             char *name=CMGetArrayElementAt(ar,i,NULL).value.string->hdl;
-            if (name) ul->ft->append(ul,name);
+            if (name) ul->ft->append(ul,strdup(name));
             _SFCB_TRACE(1,("--- assoc %s",name));
          }
       }

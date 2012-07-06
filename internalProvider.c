@@ -692,8 +692,8 @@ CMPIStatus getRefs(const CMPIContext * ctx,  const CMPIResult * rslt,
                   CMPIInstance *aci=CBGetInstance(Broker,ctx,data.value.ref,propertyList,&st);
                   assocs->ft->put(assocs, strdup(an->ft->getCharPtr(an)), aci);
                }                  
+	       an->ft->release(an);
             }
-            an->ft->release(an);
          } 
          
          else {
