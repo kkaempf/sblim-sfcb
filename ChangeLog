@@ -1,3 +1,14 @@
+2012-07-06  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* test/TestProviders/cmpiTestIndicationProvider.c,
+	  test/TestProviders/tests/IndRetryTest.sh,
+	  test/TestProviders/tests/IndTest1CreateFilter.xml,
+	  test/schema/root/interop/Test_Indication.reg,
+	  schema/root/interop2/Test_Indication.mof,
+	  test/stageschema.sh:
+	[ 3532494 ] interopProvider not honoring SourceNamespaces[] correctly
+	Test case for additional source namespace
+
 2012-07-02  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* interopProvider.c:

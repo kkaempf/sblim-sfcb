@@ -2,5 +2,5 @@
    provider: TestIndicationProvider
    location: TestIndicationProvider
    type: indication method
-   namespace: root/interop
+   namespace: root/interop root/interop2
 #

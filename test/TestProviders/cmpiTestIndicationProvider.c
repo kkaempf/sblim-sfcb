@@ -14,7 +14,11 @@ unsigned char   CMPI_true = 1;
 unsigned char   CMPI_false = 0;
 
 static int      enabled = 0;
+static int      activated = 0;
+static int      activated2 = 0;
 static int      _nextUID = 0;
+static int gen1 = 0;
+static int gen2 = 0;
 
 static void
 generateIndication(const char *methodname, const CMPIContext *ctx)
@@ -27,7 +31,7 @@ generateIndication(const char *methodname, const CMPIContext *ctx)
   CMPIStatus      rc;
   char            buffer[32];
 
-  if (enabled) {
+  if (enabled && activated) {
     cop = CMNewObjectPath(broker, "root/interop", "Test_Indication", &rc);
     inst = CMNewInstance(broker, cop, &rc);
 
@@ -46,9 +50,46 @@ generateIndication(const char *methodname, const CMPIContext *ctx)
     if (rc.rc != CMPI_RC_OK) {
       fprintf(stderr, "+++ Could not send the indication!\n");
     }
+    gen1++;
   }
-  fprintf(stderr, "+++ generateIndication() done\n");
+  fprintf(stderr, "+++ generateIndication() done %d\n", gen1);
 }
+
+static void
+generateIndication2(const char *methodname, const CMPIContext *ctx)
+{
+
+  CMPIInstance   *inst;
+  CMPIObjectPath *cop;
+  CMPIDateTime   *dat;
+  CMPIArray      *ar;
+  CMPIStatus      rc;
+  char            buffer[32];
+
+  if (enabled && activated2) {
+    cop = CMNewObjectPath(broker, "root/interop2", "Test_Indication", &rc);
+    inst = CMNewInstance(broker, cop, &rc);
+
+    sprintf(buffer, "%d", _nextUID++);
+    CMSetProperty(inst, "IndicationIdentifier", buffer, CMPI_chars);
+
+    dat = CMNewDateTime(broker, &rc);
+    CMSetProperty(inst, "IndicationTime", &dat, CMPI_dateTime);
+
+    CMSetProperty(inst, "MethodName", methodname, CMPI_chars);
+
+    ar = CMNewArray(broker, 0, CMPI_string, &rc);
+    CMSetProperty(inst, "CorrelatedIndications", &ar, CMPI_stringA);
+
+    rc = CBDeliverIndication(broker, ctx, "root/interop", inst);
+    if (rc.rc != CMPI_RC_OK) {
+      fprintf(stderr, "+++ Could not send the indication!\n");
+    }
+    gen2++;
+  }
+  fprintf(stderr, "+++ generateIndication2() done %d\n", gen2);
+}
+
 
 // ----------------------------------------------------------
 // ---
@@ -74,6 +115,7 @@ CMPIStatus      indProvInvokeMethod
     fprintf(stderr, "+++ PROVIDER NOT ENABLED\n");
   } else {
     generateIndication(method, ctx);
+    generateIndication2(method, ctx);
   }
 
   value.uint32 = 0;
@@ -115,7 +157,15 @@ CMPIStatus      indProvActivateFilter
     (CMPIIndicationMI * cThis, const CMPIContext *ctx,
      const CMPISelectExp *exp, const char *clsName,
      const CMPIObjectPath * classPath, CMPIBoolean firstActivation) {
-  fprintf(stderr, "+++ indProvActivateFilter()\n");
+
+  char* op = CMGetCharPtr(CMObjectPathToString(classPath, NULL));
+  fprintf (stderr, "+++ indProvActivateFilter() for %s\n", op);
+
+  if (strcmp(op, "root/interop:Test_Indication") == 0)
+    activated = 1;
+  else if (strcmp(op, "root/interop2:Test_Indication") == 0)
+    activated2 = 1;
+  
   CMReturn(CMPI_RC_OK);
 }
 
@@ -124,6 +174,15 @@ CMPIStatus      indProvDeActivateFilter
      const CMPISelectExp *filter, const char *clsName,
      const CMPIObjectPath * classPath, CMPIBoolean lastActivation) {
   fprintf(stderr, "+++ indProvDeActivateFilter\n");
+
+  char* op = CMGetCharPtr(CMObjectPathToString(classPath, NULL));
+  fprintf (stderr, "+++ indProvDeActivateFilter for %s\n", op);
+
+  if (strcmp(op, "root/interop:Test_Indication") == 0)
+    activated = 0;
+  else if (strcmp(op, "root/interop2:Test_Indication") == 0)
+    activated2 = 0;
+
   CMReturn(CMPI_RC_OK);
 }
 
