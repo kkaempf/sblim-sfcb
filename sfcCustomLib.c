@@ -80,11 +80,10 @@ extern void  _sfcbIndAuditLog(char *operation, char *objinfo)
 {
        /* example - log to /tmp/indAudit.log
        FILE *fp;
-       char *ts = ctime(&t);
        fp = fopen("/tmp/indAudit.log", "a+");
        if (fp != NULL) {
-          fwrite(operation, strlen(action), 1, fp);
-          fwrite(objinfo, strlen(msg), 1, fp);
+          fwrite(operation, strlen(operation), 1, fp);
+          fwrite(objinfo, strlen(objinfo), 1, fp);
           fwrite("\n\n",2,1,fp);
           fflush(fp);
           fclose(fp);
