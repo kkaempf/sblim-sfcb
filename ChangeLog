@@ -1,3 +1,8 @@
+2012-07-09  Narasimha Sharoff  <nsharoff@us.ibm.com>
+
+	* interopProvider.c, sfcCustomLib.c, support.c:
+	[ 3538858 ] custom routine to log indInst objinfo
+
 2012-07-06  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* test/TestProviders/cmpiTestIndicationProvider.c,

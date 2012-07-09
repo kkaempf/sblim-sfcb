@@ -95,6 +95,9 @@ Everything in 1.3.10, plus:
 Changes in 1.3.16
 =================
 
+New Features: 
+- 3538858 custom routine to log indInst objinfo
+
 Bugs fixed:
 
 - 3539006 Possible indication deadlock
@@ -103,6 +106,9 @@ Bugs fixed:
 - 3539557 Memory leak in providerDrv with property list
 - 3539563 Memory leak in indCIMXMLHandler when Reliable Inds Enabled
 - 3539569 Leaks in interopProvider
+
+New Features: 
+- 3501314 Add dynamic logging and syslog output to sfcb trace
 
 Changes in 1.3.15
 =================

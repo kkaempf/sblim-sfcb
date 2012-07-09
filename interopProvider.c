@@ -53,6 +53,7 @@ extern void     closeProviderContext(BinRequestContext * ctx);
 extern void     setStatus(CMPIStatus *st, CMPIrc rc, char *msg);
 extern int      testNameSpace(char *ns, CMPIStatus *st);
 extern void     memLinkObjectPath(CMPIObjectPath * op);
+extern void     sfcbIndAuditLog(char *, char *);
 
 // Counts to enforce limits from cfg file
 static int LDcount=0;
@@ -1292,6 +1293,8 @@ InteropProviderCreateInstance(CMPIInstanceMI * mi,
                        _broker->bft->createInstance(_broker, ctxLocal,
                                                     copLocal, ciLocal,
                                                     &st));
+    sfcbIndAuditLog("CreateInstance-> ", 
+                    CMGetCharPtr(CMObjectPathToString(cop, NULL)));
     CMRelease(ctxLocal);
   }
 
@@ -1392,6 +1395,8 @@ InteropProviderModifyInstance(CMPIInstanceMI * mi,
     ctxLocal = prepareUpcall((CMPIContext *) ctx);
     st = _broker->bft->modifyInstance(_broker, ctxLocal, cop, ci,
                                       properties);
+    sfcbIndAuditLog("Subscription:ModifyInstance-> ", 
+                    CMGetCharPtr(CMObjectPathToString(cop, NULL)));
     CMRelease(ctxLocal);
   }
   _SFCB_RETURN(st);
@@ -1471,6 +1476,8 @@ InteropProviderDeleteInstance(CMPIInstanceMI * mi,
   if (st.rc == CMPI_RC_OK) {
     ctxLocal = prepareUpcall((CMPIContext *) ctx);
     st = _broker->bft->deleteInstance(_broker, ctxLocal, cop);
+    sfcbIndAuditLog("DeleteInstance-> ", 
+                    CMGetCharPtr(CMObjectPathToString(cop, NULL)));
     CMRelease(ctxLocal);
   }
 
@@ -1656,6 +1663,8 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
                 ("--- _addHandler %s %s", (char *) ns->hdl,
                  (char *) str->hdl));
     addHandler(ci, op);
+    sfcbIndAuditLog("CreateHandler-> ",  
+                    CMGetCharPtr(CMObjectPathToString(op, NULL)));
   }
 
   else if (strcasecmp(methodName, "_removeHandler") == 0) {
@@ -1668,6 +1677,8 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
       } else
         removeHandler(ha, key);
         LDcount--;
+        sfcbIndAuditLog("RemoveHandler-> ", 
+                        CMGetCharPtr(CMObjectPathToString(op, NULL)));
     } else {
       setStatus(&st, CMPI_RC_ERR_NOT_FOUND, "Handler object not found");
     }
