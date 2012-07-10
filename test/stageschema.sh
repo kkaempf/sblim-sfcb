@@ -21,7 +21,7 @@ usage()
     echo "usage: $0 [-p prefix] [ -d testschemadir] [ -u ] " 1>&2 
 }
 
-NAMESPACE_DIRS="root/cimv2 root/interop root/interop2"
+NAMESPACE_DIRS="root/cimv2 root/interop"
 unstage=0
 
 args=`getopt p:d:u $*`

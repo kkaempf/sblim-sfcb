@@ -1,3 +1,9 @@
+2012-07-10 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* test/stageschema.sh, test/schema/root/interop2/*:
+	[ 3532494 ] interopProvider not honoring SourceNamespaces[] correctly
+	Test case schema incorrect
+
 2012-07-09  Narasimha Sharoff  <nsharoff@us.ibm.com>
 
 	* interopProvider.c, sfcCustomLib.c, support.c:
@@ -35,7 +41,6 @@
 
 	* brokerUpc.c, indCIMXMLExport.c, indCIMXMLHandler.c, interopProvider.c,
 	support.c, support.h:
-
 	[ 3539006 ] Possible indication deadlock 
 
 2012-06-28  Narasimha Sharoff  <nsharoff@us.ibm.com>
