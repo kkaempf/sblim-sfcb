@@ -1,3 +1,9 @@
+2012-07-10 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* test/stageschema.sh:
+	[ 3532494 ] interopProvider not honoring SourceNamespaces[] correctly
+	Test case schema incorrect
+
 2012-07-06  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* internalProvider.c, providerMgr.c:
