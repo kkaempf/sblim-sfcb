@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.c,v 1.41 2012/07/05 23:04:47 nsharoff Exp $
+ * $Id: support.c,v 1.42 2012/07/19 17:21:22 mchasal Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -1098,4 +1098,17 @@ void unloadHostnameLib()
 {
    if (hostnameLib) dlclose(hostnameLib);
    return;
+}
+
+CMPIContext * prepareNorespCtx(const CMPIContext *ctx)
+{
+   /*
+   * used to allow calls without waiting for the response to be returned
+   */
+   CMPIContext    *ctxLocal;
+   ctxLocal = native_clone_CMPIContext(ctx);
+   CMPIValue       val;
+   val.boolean = 1;
+   ctxLocal->ft->addEntry(ctxLocal, "noResp", &val, CMPI_boolean);
+   return ctxLocal;
 }

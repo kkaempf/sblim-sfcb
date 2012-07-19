@@ -37,6 +37,7 @@
 #include "native.h"
 #include "control.h"
 #include "instance.h"
+#include "support.h"
 
 extern void closeProviderContext(BinRequestContext* ctx);
 extern int exportIndication(char *url, char *payload, char **resp, char **msg);
@@ -794,7 +795,8 @@ void * retryExport (void * lctx)
                     // 2, delete the sub; 3, disable the sub; otherwise, nothing
                     if (ract == 2 ) {
                         _SFCB_TRACE(1,("--- Subscription threshold reached, deleting."));
-                        CBDeleteInstance(_broker, ctx, cur->sub);
+                        CMPIContext *ctxDel = prepareNorespCtx(ctx);
+                        CBDeleteInstance(_broker, ctxDel, cur->sub);
                         purge=cur;
                         cur=cur->next;
                         dqRetry(ctx,purge);

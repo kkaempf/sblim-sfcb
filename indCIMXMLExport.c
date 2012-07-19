@@ -1,6 +1,6 @@
 
 /*
- * $Id: indCIMXMLExport.c,v 1.19 2012/06/07 02:56:09 mchasal Exp $
+ * $Id: indCIMXMLExport.c,v 1.20 2012/07/19 17:21:22 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -214,6 +214,8 @@ static int genRequest(CurlData *cd, char *url, char **msg)
     
     // Fail if we receive an error (HTTP response code >= 300)
     rv = curl_easy_setopt(cd->mHandle, CURLOPT_FAILONERROR, 1);
+
+    rv = curl_easy_setopt(cd->mHandle, CURLOPT_NOSIGNAL, 1);
 
     // Turn this on to enable debugging
     // rv = curl_easy_setopt(mHandle, CURLOPT_VERBOSE, 1);

@@ -1,6 +1,6 @@
 
 /*
- * $Id: support.h,v 1.16 2009/03/10 19:18:19 buccella Exp $
+ * $Id: support.h,v 1.17 2012/07/19 17:21:22 mchasal Exp $
  *
  * support.h
  *
@@ -225,6 +225,8 @@ void uninitGarbageCollector();
 extern double timevalDiff(struct timeval *sv, struct timeval *ev);
 
 char* sfcb_snprintf(const char* fmt, ...); 
+
+CMPIContext * prepareNorespCtx(const CMPIContext *ctx);
 
 #if defined(__ia64__)
 #define PADDING_LEN(s) ( (s)%sizeof(void *) ? sizeof(void *) - (s)%sizeof(void *) : 0)

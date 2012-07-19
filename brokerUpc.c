@@ -1,5 +1,5 @@
 /*
- * $Id: brokerUpc.c,v 1.41 2012/05/17 21:45:11 buccella Exp $
+ * $Id: brokerUpc.c,v 1.42 2012/07/19 17:21:22 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -254,6 +254,9 @@ static void setContext(BinRequestContext * binCtx, OperationHdr * oHdr,
    ctxData=CMGetContextEntry(ctx,CMPIInvocationFlags,NULL);
    bHdr->flags=ctxData.value.Int;
    bHdr->sessionId=ctx->ft->getEntry(ctx,"CMPISessionId",NULL).value.uint32;
+   ctxData = ctx->ft->getEntry(ctx, "noResp", NULL);
+   binCtx->noResp = (ctxData.state == CMPI_nullValue) ? 0 : ctxData.value.boolean;
+
 
    binCtx->oHdr = oHdr;
    binCtx->bHdr = bHdr;
@@ -757,7 +760,7 @@ static CMPIStatus deleteInstance(const CMPIBroker * broker,
                                  const CMPIContext * context, const CMPIObjectPath * cop)
 {
    BinRequestContext binCtx;
-   BinResponseHdr *resp;
+   BinResponseHdr *resp = NULL;
    DeleteInstanceReq sreq = BINREQ(OPS_DeleteInstance, DI_REQ_REG_SEGMENTS);
    OperationHdr oHdr = { OPS_DeleteInstance, 2 };
    CMPIStatus st = { CMPI_RC_OK, NULL };
@@ -803,9 +806,11 @@ static CMPIStatus deleteInstance(const CMPIBroker * broker,
       
          resp = invokeProvider(&binCtx);
          closeProviderContext(&binCtx);
-         resp->rc--;
-         buildStatus(resp,&st);
-	 free(resp);
+         if (resp) {
+            resp->rc--;
+            buildStatus(resp,&st);
+	        free(resp);
+         }
       }
       else st = setErrorStatus(irc);
       
