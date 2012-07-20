@@ -63,8 +63,8 @@ struct _Class_Register_FT {
   void            (*release) (ClassRegister * br);
   ClassRegister  *(*clone) (ClassRegister * br);
 
-  CMPIConstClass *(*getClass) (ClassRegister * br, const char *clsName,
-                               void **id);
+  CMPIConstClass *(*getClass) (ClassRegister * br, const char *clsName);
+
   int             (*putClass) (ClassRegister * br, const char *className,
                                ClassRecord * cls);
   void            (*removeClass) (ClassRegister * br,
@@ -96,8 +96,8 @@ struct _Class_Register_FT {
 
 extern Class_Register_FT *ClassRegisterFT;
 
-static CMPIConstClass *getClass(ClassRegister * cr, const char *clsName,
-                                void **id);
+static CMPIConstClass *getClass(ClassRegister * cr, const char *clsName);
+
 int             traverseChildren(ClassRegister * cReg, const char *parent,
                                  const char *child);
 
@@ -558,7 +558,7 @@ putClass(ClassRegister * cr, const char *cn, ClassRecord * crec)
 }
 
 static CMPIConstClass *
-getClass(ClassRegister * cr, const char *clsName, void **id)
+getClass(ClassRegister * cr, const char *clsName)
 {
   ClassRecord    *crec;
   int             r;
@@ -725,7 +725,7 @@ ClassProviderEnumClassNames(CMPIClassMI * mi,
       }
     }
   } else {
-    CMPIConstClass *cls = getClass(cReg, cn, NULL);
+    CMPIConstClass *cls = getClass(cReg, cn);
     if (cls == NULL) {
       st.rc = CMPI_RC_ERR_INVALID_CLASS;
     } else if ((flgs & CMPI_FLAG_DeepInheritance) == 0) {
@@ -754,15 +754,12 @@ loopOnChildren(ClassRegister * cReg, char *cn, const CMPIResult *rslt)
 {
   UtilList       *ul = getChildren(cReg, cn);
   char           *child;
-  void           *cid;
 
   if (ul)
     for (child = (char *) ul->ft->getFirst(ul); child;
          child = (char *) ul->ft->getNext(ul)) {
-      CMPIConstClass *cl = getClass(cReg, child, &cid);
+      CMPIConstClass *cl = getClass(cReg, child);
       CMReturnInstance(rslt, (CMPIInstance *) cl);
-      if (cid == NULL)
-        CMRelease(cl);
       loopOnChildren(cReg, child, rslt);
     }
 }
@@ -815,7 +812,7 @@ ClassProviderEnumClasses(CMPIClassMI * mi,
         CMRelease(cls);
     }
   } else {
-    cls = getClass(cReg, cn, NULL);
+    cls = getClass(cReg, cn);
     if (cls == NULL) {
       st.rc = CMPI_RC_ERR_INVALID_CLASS;
     } else if ((flgs & CMPI_FLAG_DeepInheritance) == 0) {
@@ -824,10 +821,8 @@ ClassProviderEnumClasses(CMPIClassMI * mi,
       if (ul)
         for (child = (char *) ul->ft->getFirst(ul); child;
              child = (char *) ul->ft->getNext(ul)) {
-          cls = getClass(cReg, child, &cid);
+          cls = getClass(cReg, child);
           CMReturnInstance(rslt, (CMPIInstance *) cls);
-          if (cid == NULL)
-            CMRelease(cls);
         }
     } else if (cn && (flgs & CMPI_FLAG_DeepInheritance)) {
       loopOnChildren(cReg, cn, rslt);
@@ -851,7 +846,6 @@ ClassProviderGetClass(CMPIClassMI * mi,
                  *clLocal;
   ClassRegister  *cReg;
   int             rc;
-  void           *cid;
 
   _SFCB_ENTER(TRACE_PROVIDERS, "ClassProviderGetClass");
   _SFCB_TRACE(1, ("--- ClassName=\"%s\"", (char *) cn->hdl));
@@ -868,7 +862,7 @@ ClassProviderGetClass(CMPIClassMI * mi,
    * Make a cloned copy of the cached results to prevent thread
    * interference. 
    */
-  clLocal = getClass(cReg, (char *) cn->hdl, &cid);
+  clLocal = getClass(cReg, (char *) cn->hdl);
 
   if (clLocal) {
     _SFCB_TRACE(1, ("--- Class found"));
@@ -929,8 +923,7 @@ extern CMPIBoolean isAbstract(CMPIConstClass * cc);
 static int
 repCandidate(ClassRegister * cReg, char *cn)
 {
-  void           *cid;
-  CMPIConstClass *cl = getClass(cReg, cn, &cid);
+  CMPIConstClass *cl = getClass(cReg, cn);
   if (isAbstract(cl))
     return 0;
   ProviderInfo   *info;
@@ -948,7 +941,7 @@ repCandidate(ClassRegister * cReg, char *cn)
     cn = (char *) cl->ft->getCharSuperClassName(cl);
     if (cn == NULL)
       break;
-    cl = getClass(cReg, cn, &cid);
+    cl = getClass(cReg, cn);
   }
   _SFCB_RETURN(1);
 }
