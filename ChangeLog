@@ -1,3 +1,13 @@
+2012-07-29  Dave Heller <hellerda@us.ibm.com>
+
+	* sfcb.init-none.in, sfcb.init-redhat.in, sfcb.init-suse.in:
+	[ 3541554 ] insecure LD_LIBRARY_PATH usage
+
+2012-07-20  Dave Heller <hellerda@us.ibm.com>
+
+	* classProviderGz.c:
+	[ 3527714 ] Every other EnumerateClasses fails
+
 2012-07-10 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* test/stageschema.sh, test/schema/root/interop2/*:
