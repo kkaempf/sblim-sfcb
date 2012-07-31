@@ -99,11 +99,13 @@ ProfileProviderCleanup(CMPIInstanceMI * mi,
   _SFCB_ENTER(TRACE_INDPROVIDER, "ProfileProviderCleanup");
 #ifdef HAVE_SLP
   // Tell SLP update thread that we're shutting down
-  _SFCB_TRACE(1, ("--- Stopping SLP thread"));
-  pthread_kill(slpUpdateThread, SIGUSR2);
-  // Wait for thread to complete
-  pthread_join(slpUpdateThread, NULL);
-  _SFCB_TRACE(1, ("--- SLP Thread stopped"));
+  if (slpUpdateThread) {
+    _SFCB_TRACE(1, ("--- Stopping SLP thread"));
+    pthread_kill(slpUpdateThread, SIGUSR2);
+    // Wait for thread to complete
+    pthread_join(slpUpdateThread, NULL);
+    _SFCB_TRACE(1, ("--- SLP Thread stopped"));
+  }
 #endif // HAVE_SLP
   _SFCB_RETURN(st);
 }
