@@ -71,7 +71,11 @@ static void pRelease(ProviderRegister * br)
    char *key = NULL;
    ProviderInfo *info = NULL;
    HashTableIterator *it;
-   
+
+   /* doing start/stop in rapid succession can leave br->hdl uninitialized */
+   if (!bb)
+     return;
+
    for (it = bb->ht->ft->getFirst(bb->ht, (void **) &key, (void **) &info);
         key && it && info;
         it = bb->ht->ft->getNext(bb->ht, it, (void **) &key, (void **) &info)) {
