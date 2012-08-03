@@ -1363,6 +1363,10 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
   }
 
   else if (strcasecmp(methodName, "_startup") == 0) {
+
+    /* let providerMgr know that we're odne init'ing  */
+    semRelease(sfcbSem,INIT_CLASS_PROV_ID);
+
     st.rc = CMPI_RC_OK;
   }
 

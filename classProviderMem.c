@@ -1,4 +1,5 @@
 
+
 /*
  * $Id: classProviderMem.c,v 1.11 2009/12/17 20:15:48 buccella Exp $
  *
@@ -1047,6 +1048,10 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
   }
 
   else if (strcasecmp(methodName, "_startup") == 0) {
+
+    /* let providerMgr know that we're odne init'ing  */
+    semRelease(sfcbSem,INIT_CLASS_PROV_ID);
+
     st.rc = CMPI_RC_OK;
   }
 

@@ -1,3 +1,8 @@
+2012-08-03  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* classProvider.c, classProviderSf.c, classProviderMem.c:
+	Propagating changes made to classProviderGz for 3527674
+
 2012-07-29  Dave Heller <hellerda@us.ibm.com>
 
 	* sfcb.init-none.in, sfcb.init-redhat.in, sfcb.init-suse.in:
