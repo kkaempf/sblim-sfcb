@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.118 2012/07/03 02:03:02 buccella Exp $
+ * $Id: providerDrv.c,v 1.119 2012/08/08 21:30:52 hellerda Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -3018,7 +3018,8 @@ static void *processProviderInvocationRequestsThread(void *prms)
     if ((req->operation == OPS_GetQualifier) 
          || (req->operation == OPS_EnumerateQualifiers)) {
       for (i = 0; i < resp->count; i++) {
-        if (resp->object[i].data) {
+        /* SF:3546279 - only free on successful return */
+        if (resp->object[i].data && resp->object[i].type == MSG_SEG_QUALIFIER) {
           free(resp->object[i].data);
           resp->object[i].data = NULL;
         }

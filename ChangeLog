@@ -1,3 +1,8 @@
+2012-08-08 Dave Heller <hellerda@us.ibm.com>
+
+	* providerDrv.c:
+	[ 3546279 ] Core dump in providerDrv on Qualifier not found
+
 2012-08-08 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* httpAdapter.c, cimXmlRequest.c, cimXmlRequest.h, sfcBasicPAMAuthentication.c
