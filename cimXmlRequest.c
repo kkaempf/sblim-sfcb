@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.74 2012/06/21 16:46:59 nsharoff Exp $
+ * $Id: cimXmlRequest.c,v 1.75 2012/08/08 20:35:35 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -352,7 +352,7 @@ static RespSegments methodErrResponse(RequestHdr * hdr, char *error)
 #ifdef ALLOW_UPDATE_EXPIRED_PW
 
 static char    *
-getErrExpiredSegment()
+getErrExpiredSegment(char * type)
 {
   char* msg = sfcb_snprintf("<ERROR CODE=\"2\" \
 DESCRIPTION=\"User Account Expired\">\n\
@@ -360,10 +360,10 @@ DESCRIPTION=\"User Account Expired\">\n\
 <PROPERTY NAME=\"ErrorType\" TYPE=\"uint16\">\
 <VALUE>1</VALUE></PROPERTY>\n\
 <PROPERTY NAME=\"OtherErrorType\" TYPE=\"string\">\
-<VALUE>Password Expired</VALUE></PROPERTY>\n\
+<VALUE>%s</VALUE></PROPERTY>\n\
 <PROPERTY NAME=\"ProbableCause\" TYPE=\"uint16\">\
 <VALUE>117</VALUE></PROPERTY>\n\
-</INSTANCE>\n</ERROR>\n");
+</INSTANCE>\n</ERROR>\n",type);
 
   return msg;
 }
@@ -2731,7 +2731,7 @@ RespSegments sendHdrToHandler(RequestHdr* hdr, CimXmlRequestContext* ctx) {
   return rs;
 }
 
-RespSegments handleCimXmlRequest(CimXmlRequestContext * ctx, int flags)
+RespSegments handleCimXmlRequest(CimXmlRequestContext * ctx, int flags, char *more)
 {
    RespSegments rs;
    RequestHdr hdr;
@@ -2786,9 +2786,9 @@ RespSegments handleCimXmlRequest(CimXmlRequestContext * ctx, int flags)
      }
      else {    /* expired user tried to invoke non-UpdatePassword request */
        if (hdr.methodCall) { 
-	 rs = methodErrResponse(&hdr, getErrExpiredSegment());
+	 rs = methodErrResponse(&hdr, getErrExpiredSegment(more));
        } else {
-	 rs = iMethodErrResponse(&hdr, getErrExpiredSegment());
+	 rs = iMethodErrResponse(&hdr, getErrExpiredSegment(more));
        }
      }
    }

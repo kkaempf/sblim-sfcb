@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.118 2012/06/13 21:21:09 nsharoff Exp $  
+# $Id: Makefile.am,v 1.119 2012/08/08 20:35:35 mchasal Exp $  
 #
 #  Makefile.am
 # 
@@ -429,10 +429,10 @@ sfcbmofpp_SOURCES=mofpp.c
 sfcbdump_SOURCES=sfcbdump.c
 
 sfcbinst2mof_SOURCES=sfcbinst2mof.c
-sfcbinst2mof_LDADD = -lsfcFileRepository
+sfcbinst2mof_LDADD = -lsfcFileRepository -lsfcBrokerCore -lsfcUtil
 
 classSchema2c_SOURCES=classSchema2c.c
-classSchema2c_LDADD=-lsfcBrokerCore
+classSchema2c_LDADD=-lsfcBrokerCore -lsfcUtil
 classSchema2c_DEPENDENCIES=libsfcBrokerCore.la
 
 sfcbsem_SOURCES=sfcbsem.c

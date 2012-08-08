@@ -1,3 +1,8 @@
+2012-08-08 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* httpAdapter.c, cimXmlRequest.c, cimXmlRequest.h, sfcBasicPAMAuthentication.c
+	[ 3555395 ] Additional auth lib return codes
+
 2012-07-29  Dave Heller <hellerda@us.ibm.com>
 
 	* sfcb.init-none.in, sfcb.init-redhat.in, sfcb.init-suse.in:
@@ -11,7 +16,7 @@
 2012-07-19 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* brokerUpc.c, indCIMXMLExport.c, indCIMXMLHandler.c, interopProvider.c,
-support.c, support.h:
+	support.c, support.h:
 	[ 3539006 ] Possible indication deadlock 
 
 2012-07-10 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>

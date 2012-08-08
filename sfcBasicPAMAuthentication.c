@@ -1,6 +1,6 @@
 
 /*
- * $Id: sfcBasicPAMAuthentication.c,v 1.5 2012/03/12 22:30:52 buccella Exp $
+ * $Id: sfcBasicPAMAuthentication.c,v 1.6 2012/08/08 20:35:35 mchasal Exp $
  *
  * © Copyright IBM Corp. 2007
  *
@@ -33,6 +33,7 @@ struct auth_extras {
   char* clientIp;
   void* authHandle;
   const char* role;
+  char* ErrorDetail;
 };
 typedef struct auth_extras AuthExtras;
 
@@ -88,7 +89,19 @@ static int _sfcBasicAuthenticateRemote(char *user, char *pw, AuthExtras *extras)
     retval = 1;
   } 
   else if (rc == PAM_NEW_AUTHTOK_REQD || rc == PAM_ACCT_EXPIRED) {
-    retval = -1;
+    retval = -1; // Only valid if sfcb is built with --enable-expired-pw-update
+  }
+  else if (rc == PAM_AUTHINFO_UNAVAIL ) {
+    retval = -2; // Temporary server error
+    if (extras) {
+        extras->ErrorDetail="PAM info unavailable.";
+    }
+  }
+  else if (rc == PAM_SERVICE_ERR ) {
+    retval = -3; // Permanent server error
+    if (extras) {
+        extras->ErrorDetail="PAM server unreachable.";
+    }
   }
   else {
     retval = 0;

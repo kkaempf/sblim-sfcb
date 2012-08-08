@@ -61,7 +61,7 @@ typedef struct cimXmlRequestContext {
    int operation;
 } CimXmlRequestContext;
 
-extern RespSegments handleCimXmlRequest(CimXmlRequestContext * ctx, int flags);
+extern RespSegments handleCimXmlRequest(CimXmlRequestContext * ctx, int flags, char * type);
 extern int cleanupCimXmlRequest(RespSegments * rs);
 
 #ifdef ALLOW_UPDATE_EXPIRED_PW
