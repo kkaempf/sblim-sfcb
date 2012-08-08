@@ -3448,7 +3448,8 @@ processProviderInvocationRequestsThread(void *prms)
     if ((req->operation == OPS_GetQualifier) 
          || (req->operation == OPS_EnumerateQualifiers)) {
       for (i = 0; i < resp->count; i++) {
-        if (resp->object[i].data) {
+        /* SF:3546279 - only free on successful return */
+        if (resp->object[i].data && resp->object[i].type == MSG_SEG_QUALIFIER) {
           free(resp->object[i].data);
           resp->object[i].data = NULL;
         }
