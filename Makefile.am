@@ -1,4 +1,4 @@
-# $Id: Makefile.am,v 1.119 2012/08/08 20:35:35 mchasal Exp $  
+# $Id: Makefile.am,v 1.120 2012/08/14 21:13:23 buccella Exp $  
 #
 #  Makefile.am
 # 
@@ -176,7 +176,7 @@ sbin_PROGRAMS = \
    sfcbd 
 
 bin_PROGRAMS = \
-   sfcbmofpp sfcbdump sfcbinst2mof
+   sfcbmofpp sfcbdump sfcbinst2mof sfcbtrace
 
 noinst_PROGRAMS = \
    sfcbdumpP32onI32 classSchema2c sfcbsem
@@ -430,6 +430,9 @@ sfcbdump_SOURCES=sfcbdump.c
 
 sfcbinst2mof_SOURCES=sfcbinst2mof.c
 sfcbinst2mof_LDADD = -lsfcFileRepository -lsfcBrokerCore -lsfcUtil
+
+sfcbtrace_SOURCES=sfcbtrace.c
+sfcbtrace_LDADD = -lsfcBrokerCore
 
 classSchema2c_SOURCES=classSchema2c.c
 classSchema2c_LDADD=-lsfcBrokerCore -lsfcUtil
