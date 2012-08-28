@@ -1,6 +1,6 @@
 
 /*
- * $Id: indCIMXMLExport.c,v 1.20 2012/07/19 17:21:22 mchasal Exp $
+ * $Id: indCIMXMLExport.c,v 1.21 2012/08/28 23:07:55 hellerda Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -24,6 +24,7 @@
 #include <curl/curl.h>
 #include "utilft.h"
 #include "trace.h"
+#include <stdlib.h>
 #include <string.h>
 #include "control.h"
 
@@ -217,8 +218,9 @@ static int genRequest(CurlData *cd, char *url, char **msg)
 
     rv = curl_easy_setopt(cd->mHandle, CURLOPT_NOSIGNAL, 1);
 
-    // Turn this on to enable debugging
-    // rv = curl_easy_setopt(mHandle, CURLOPT_VERBOSE, 1);
+    char *curldebug = getenv("CURLDEBUG");
+    if (curldebug && strcasecmp(curldebug,"false"))
+      rv = curl_easy_setopt(cd->mHandle, CURLOPT_VERBOSE, 1);
     
     return 0;
 }
