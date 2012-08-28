@@ -17,6 +17,7 @@ Bugs fixed:
 - 3529879 Fixes for sfcb-ps test script
 - 3527714 Every other EnumerateClasses fails
 - 3541554 insecure LD_LIBRARY_PATH usage
+- 3562530 TestMiscProvider poorly tests CMGetPropertyAt
 
 Changes in 1.4.2
 ================
