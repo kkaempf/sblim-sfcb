@@ -22,6 +22,7 @@
 #include <curl/curl.h>
 #include <sfcCommon/utilft.h>
 #include "trace.h"
+#include <stdlib.h>
 #include <string.h>
 #include "control.h"
 
@@ -261,8 +262,9 @@ genRequest(CurlData * cd, char *url, char **msg)
 
   rv = curl_easy_setopt(cd->mHandle, CURLOPT_NOSIGNAL, 1);
 
-  // Turn this on to enable debugging
-  // rv = curl_easy_setopt(cd->mHandle, CURLOPT_VERBOSE, 1);
+  char *curldebug = getenv("CURLDEBUG");
+  if (curldebug && strcasecmp(curldebug,"false"))
+    rv = curl_easy_setopt(cd->mHandle, CURLOPT_VERBOSE, 1);
 
   return 0;
 }
