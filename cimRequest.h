@@ -87,7 +87,7 @@ typedef struct requestHdr {
   unsigned int    sessionId;
 } RequestHdr;
 
-extern RespSegments handleCimRequest(CimRequestContext * ctx, int flags);
+extern RespSegments handleCimRequest(CimRequestContext * ctx, int flags, char *more);
 extern int      cleanupCimXmlRequest(RespSegments * rs);
 
 #ifdef ALLOW_UPDATE_EXPIRED_PW

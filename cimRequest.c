@@ -324,7 +324,7 @@ methodErrResponse(RequestHdr * hdr, char *error)
 #ifdef ALLOW_UPDATE_EXPIRED_PW
 
 static char    *
-getErrExpiredSegment()
+getErrExpiredSegment(char * type)
 {
   char* msg = sfcb_snprintf("<ERROR CODE=\"2\" \
 DESCRIPTION=\"User Account Expired\">\n\
@@ -332,10 +332,10 @@ DESCRIPTION=\"User Account Expired\">\n\
 <PROPERTY NAME=\"ErrorType\" TYPE=\"uint16\">\
 <VALUE>1</VALUE></PROPERTY>\n\
 <PROPERTY NAME=\"OtherErrorType\" TYPE=\"string\">\
-<VALUE>Password Expired</VALUE></PROPERTY>\n\
+<VALUE>%s</VALUE></PROPERTY>\n\
 <PROPERTY NAME=\"ProbableCause\" TYPE=\"uint16\">\
 <VALUE>117</VALUE></PROPERTY>\n\
-</INSTANCE>\n</ERROR>\n");
+</INSTANCE>\n</ERROR>\n",type);
 
   return msg;
 }
@@ -1787,7 +1787,7 @@ static Scanner scanners[] = {
 static int scanner_count = sizeof(scanners) / sizeof(Scanner);
 
 RespSegments
-handleCimRequest(CimRequestContext * ctx, int flags)
+handleCimRequest(CimRequestContext * ctx, int flags, char * more)
 {
   RespSegments    rs;
   RequestHdr      hdr;
@@ -1867,9 +1867,9 @@ handleCimRequest(CimRequestContext * ctx, int flags)
       }
       else {    /* expired user tried to invoke non-UpdatePassword request */
 	if (hdr.methodCall) { 
-	  rs = methodErrResponse(&hdr, getErrExpiredSegment());
+	  rs = methodErrResponse(&hdr, getErrExpiredSegment(more));
 	} else {
-	  rs = iMethodErrResponse(&hdr, getErrExpiredSegment());
+	  rs = iMethodErrResponse(&hdr, getErrExpiredSegment(more));
 	}
       }
     }

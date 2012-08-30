@@ -448,8 +448,8 @@ RequestHdr
 scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
 {
   //fprintf(stderr, "path is '%s'\nverb is '%s'\n", ctx->path, ctx->verb);
-  RequestHdr reqHdr = { NULL, 0, 0, 0, 0, 0, 0, 0,
-                        NULL, 0, 0, 0, NULL, 0, 0,
+  RequestHdr reqHdr = { NULL, 0, 0, 0, NULL, NULL, 0, 0,
+                        NULL, 0, NULL, NULL, NULL, NULL, NULL, 0,
                       };
 
   if (strncasecmp(ctx->path, "/cimrs", 6) != 0) {

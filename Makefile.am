@@ -402,7 +402,7 @@ sfcbmofpp_SOURCES=mofpp.c
 sfcbdump_SOURCES=sfcbdump.c
 
 sfcbinst2mof_SOURCES=sfcbinst2mof.c
-sfcbinst2mof_LDADD = -lsfcFileRepository
+sfcbinst2mof_LDADD = -lsfcFileRepository -lsfcBrokerCore
 
 sfcbtrace_SOURCES=sfcbtrace.c
 sfcbtrace_LDADD = -lsfcBrokerCore

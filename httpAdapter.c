@@ -118,6 +118,8 @@ static void	print_cert(const char *cert_file, const STACK_OF(X509_NAME) *);
 #define AUTH_PASS 1
 #define AUTH_FAIL 0
 #define AUTH_EXPIRED -1
+#define AUTH_SERVTEMP -2
+#define AUTH_SERVPERM -3
 
 static key_t    httpProcSemKey;
 static key_t    httpWorkSemKey;
@@ -153,10 +155,11 @@ struct auth_extras {
   char* clientIp;
   void* authHandle;
   const char* role;
+  char* ErrorDetail;
 };
 typedef struct auth_extras AuthExtras;
 
-AuthExtras      extras = {NULL, NULL, NULL, NULL};
+AuthExtras      extras = {NULL, NULL, NULL, NULL, NULL};
 
 void releaseAuthHandle() {
   _SFCB_ENTER(TRACE_HTTPDAEMON, "releaseAuthHandle");
@@ -312,6 +315,8 @@ baValidate(char *cred, char **principal)
 
     if (ret == AUTH_PASS)  ret = AUTH_PASS;
     else if (ret == AUTH_EXPIRED)  ret = AUTH_EXPIRED;
+    else if (ret == AUTH_SERVTEMP)  ret = AUTH_SERVTEMP;
+    else if (ret == AUTH_SERVPERM)  ret = AUTH_SERVPERM;
     else  ret = AUTH_FAIL;
   }
 
@@ -620,7 +625,7 @@ writeChunkHeaders(BinRequestContext * ctx)
   static char     op[] = { "CIMOperation: MethodResponse\r\n" };
   static char     tenc[] = { "Transfer-encoding: chunked\r\n" };
   static char     trls[] =
-      { "Trailer: CIMError, CIMStatusCode, CIMStatusCodeDescription\r\n" };
+      { "Trailer: CIMError, CIMStatusCode, CIMStatusCodeDescription, SFCBErrorDetail\r\n" };
   static char     cclose[] = "Connection: close\r\n";
 
   _SFCB_ENTER(TRACE_HTTPDAEMON, "writeChunkHeaders");
@@ -1041,7 +1046,6 @@ doHttpRequest(CommHndl conn_fd)
     }
 #endif
   }
-
 #if defined USE_SSL
   if (doBa && sfcbSSLMode) {
     if (ccVerifyMode != CC_VERIFY_IGNORE) {
@@ -1068,6 +1072,9 @@ doHttpRequest(CommHndl conn_fd)
 
   int             authorized = 0;
   int             barc = 0;
+  // Reserve space for the additional headers
+  char * more=calloc(300,sizeof(char));
+
 #ifdef HAVE_UDS
   if (!discardInput && doUdsAuth) {
     struct sockaddr_un sun;
@@ -1101,28 +1108,50 @@ doHttpRequest(CommHndl conn_fd)
       //        fprintf(stderr, "client is: %s\n", ipstr);
 
       barc = baValidate(inBuf.authorization,&inBuf.principal);
+      if (extras.ErrorDetail) {
+        snprintf(more,256,"SFCBErrorDetail: %s\r\n",extras.ErrorDetail);
+      }
+
 
 #ifdef ALLOW_UPDATE_EXPIRED_PW
       if (barc == AUTH_EXPIRED) {
-	hcrFlags |= HCR_EXPIRED_PW;
-      }
-      else if (barc == AUTH_PASS) {
-	hcrFlags = 0; /* clear flags so non-expired user doesn't update pw */
-      }
-      else if (barc == AUTH_FAIL) {
+         hcrFlags |= HCR_EXPIRED_PW;
+         // Add the error detail to the CIM_Error instance
+         if (extras.ErrorDetail) {
+           snprintf(more,256,"%s",extras.ErrorDetail);
+         } else {
+           snprintf(more,256,"%s","Expired Password");
+         }
+       } else if (barc == AUTH_PASS) {
 #else
-      if (barc != AUTH_PASS) {
+       if (barc == AUTH_EXPIRED) {
+         strcat(more,"WWW-Authenticate: Basic realm=\"cimom\"\r\n");
+         genError(conn_fd, &inBuf, 401, "Unauthorized", more);
+         /* we continue to parse headers and empty the socket
+         to be graceful with the client */
+         discardInput=1;
+      } else if (barc == AUTH_PASS) {
 #endif
-	char            more[] =
-          "WWW-Authenticate: Basic realm=\"cimom\"\r\n";
-	genError(conn_fd, &inBuf, 401, "Unauthorized", more);
-	/*
-	 * we continue to parse headers and empty the socket to be graceful
-	 * with the client 
-	 */
-	discardInput = 1;
-      }
-  }
+        hcrFlags = 0; /* clear flags so non-expired user doesn't update pw */
+     } else if (barc == AUTH_SERVPERM) {
+        genError(conn_fd, &inBuf, 500, "Server Error", more);
+        /* we continue to parse headers and empty the socket
+        to be graceful with the client */
+        discardInput=1;
+     } else if (barc == AUTH_SERVTEMP) {
+        genError(conn_fd, &inBuf, 503, "Service Unavailable", more);
+        /* we continue to parse headers and empty the socket
+        to be graceful with the client */
+        discardInput=1;
+     } else if (barc == AUTH_FAIL) {
+        strcat(more,"WWW-Authenticate: Basic realm=\"cimom\"\r\n");
+        genError(conn_fd, &inBuf, 401, "Unauthorized", more);
+        /* we continue to parse headers and empty the socket
+        to be graceful with the client */
+        discardInput=1;
+    }
+   } // if (inBuf.authorization) {
+
 #if defined USE_SSL
     else if (sfcbSSLMode && ccVerifyMode != CC_VERIFY_IGNORE) {
       /*
@@ -1141,6 +1170,10 @@ doHttpRequest(CommHndl conn_fd)
     _SFCB_TRACE(1, ("--- exiting after missing content length."));
     commClose(conn_fd);
     freeBuffer(&inBuf);
+    if (more) {
+       free(more);
+       more=NULL;
+    }
     exit(1);
   }
 
@@ -1154,12 +1187,20 @@ doHttpRequest(CommHndl conn_fd)
     genError(conn_fd, &inBuf, 400, "Bad Request", NULL);
     _SFCB_TRACE(1, ("--- exiting after request timeout."));
     commClose(conn_fd);
+    if (more) {
+       free(more);
+       more=NULL;
+    }
     exit(1);
   }
   if (discardInput) {
     releaseAuthHandle();
     free(hdr);
     freeBuffer(&inBuf);
+    if (more) {
+       free(more);
+       more=NULL;
+    }
     _SFCB_RETURN(discardInput - 1);
   }
 
@@ -1203,9 +1244,13 @@ doHttpRequest(CommHndl conn_fd)
     }
 #endif
 
-    response = handleCimRequest(&ctx, hcrFlags);
+    response = handleCimRequest(&ctx, hcrFlags, more);
   } else {
     response = nullResponse;
+  }
+  if (more) {
+     free(more);
+     more=NULL;
   }
   free(hdr);
 
