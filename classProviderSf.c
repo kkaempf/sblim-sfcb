@@ -28,8 +28,8 @@
 
 static int      argc = 0;
 static char   **argv = NULL;
-static int      cSize = 8;      // can't be 0!
-static int      rSize = 8;      // can't be 0!
+static int      cSize = 20;      // can't be 0!
+static int      rSize = 20;      // can't be 0!
 
 typedef enum readCtl { stdRead, tempRead, cached } ReadCtl;
 
@@ -242,6 +242,8 @@ pruneCCache(ClassRegister * cr)
     crec = cb->lastCCached;
     DEQ_FROM_LIST(crec, cb->firstCCached, cb->lastCCached, nextCCached,
                   prevCCached);
+    // char* claz = CMGetCharPtr(crec->cachedCCls->ft->getClassName(crec->cachedCCls, NULL));
+    // fprintf(stderr, "--- pruning Ccache: %s\n", claz); 
     CMRelease(crec->cachedCCls);
     crec->cachedCCls = NULL;
     cb->cachedCCount--;
@@ -258,7 +260,11 @@ pruneRCache(ClassRegister * cr)
     crec = cb->lastRCached;
     DEQ_FROM_LIST(crec, cb->firstRCached, cb->lastRCached, nextRCached,
                   prevRCached);
-    fprintf(stderr, "pruning %s from cache\n", CMGetCharPtr(crec->cachedRCls->ft->getClassName(crec->cachedRCls, NULL))); 
+    // char* claz = CMGetCharPtr(crec->cachedRCls->ft->getClassName(crec->cachedRCls, NULL));
+    // fprintf(stderr, "--- pruning Rcache: %s\n", claz); 
+    // if (strcasecmp("CIM_LogicalElement", claz)) {
+    //   fprintf(stderr, "   qual count=%d\n", Clcrec->cachedRCls
+    // }
     CMRelease(crec->cachedRCls);
     crec->cachedRCls = NULL;
     cb->cachedRCount--;
@@ -587,10 +593,6 @@ cpyClass(ClClass * cl, CMPIConstClass * cc, unsigned char originId)
     prop->quals |= quals;
 
 
-    if (refName) {
-      // CJB free(refName);
-    }
-
     /* copy property qualifiers */
     for (iq = 0, mq = ClClassGetPropQualifierCount(ccl, i); iq < mq; iq++) {
       char           *qname;
@@ -599,27 +601,27 @@ cpyClass(ClClass * cl, CMPIConstClass * cc, unsigned char originId)
                                          &ccl->hdr);
       if (!(d.type & CMPI_ARRAY))
         sfcb_native_release_CMPIValue(d.type, &d.value);
-      // CJB free(qname);
     }
-    // CJB free(pname);
   }
 
- // char* ccl_name = ClObjectGetClString(&ccl->hdr, &ccl->name);
- // fprintf(stderr, " cpyClass %s: %d methods\n", ccl_name, ClClassGetMethodCount(ccl));
+ char* ccl_name = ClObjectGetClString(&ccl->hdr, &ccl->name);
+ //
+
   /* copy methods */
  for (i=0,m=ClClassGetMethodCount(ccl); i<m; i++) {
+   fprintf(stderr, " cpyClass %s: %d methods\n", ccl_name, ClClassGetMethodCount(ccl));
    ClClassGetMethodAt(ccl,i,&t,&name,&quals);
-   //   fprintf(stderr, "  meth %s, type %i\n", name, t);
+   fprintf(stderr, "  meth %s, ", name);
    methId=ClClassAddMethod(cl, name, t);
 
    meth=((ClMethod*)ClObjectGetClSection(&cl->hdr,&cl->methods))+methId-1;
    pmeth=((ClMethod*)ClObjectGetClSection(&ccl->hdr,&ccl->methods))+i;
 
    mq = ClClassGetMethQualifierCount(ccl,i);
-   fprintf(stderr, "   meth qual count = %d\n", mq);
+   fprintf(stderr, "qual count = %d\n", mq);
    for (iq=0; iq<mq; iq++) { 
      ClClassGetMethQualifierAt(ccl, pmeth, iq, &d, &name);
-     //      fprintf(stderr, "   name = %s\n", name);
+     fprintf(stderr, "     adding meth qual %s\n", name);
      ClClassAddMethodQualifier(&cl->hdr, meth, name, d); 
    }
   
@@ -628,7 +630,6 @@ cpyClass(ClClass * cl, CMPIConstClass * cc, unsigned char originId)
    for (ip=0; ip<mp; ip++) { 
       ClClassGetMethParameterAt(ccl, pmeth, ip, &p, &name);
       // fprintf(stderr, "cpyClass: param %s:\n", name);
-      // if (p.refName) fprintf(stderr, " refName=%s\n", p.refName);
       CMPIParameter cp; 
       cp.type = p.type;
       cp.arraySize = p.arraySize;
@@ -649,8 +650,7 @@ cpyClass(ClClass * cl, CMPIConstClass * cc, unsigned char originId)
    }
  }
 
- // ClClass* cls = crec->cachedCCls->hdl;
- cl->hdr.flags &= ~HDR_Rebuild; /* force it - CJB */
+ // cl->hdr.flags &= ~HDR_Rebuild; /* force it - CJB */
  return 0;
 }
 
