@@ -81,10 +81,15 @@ void runLogger(int listenFd, int level) {
  * sets up the logging pipe and forks off the logger process 
  */
 void startLogging(int level, int thread) {
+  /* we need to open the log and set parameters
+     such as priority and facility because CMPI
+     providers still call syslog() from
+     the main process (not the runLogger child) */
+  OPENLOG(level);
+
   /* if we're a client, just open the log and
      don't start a logger. */
   if (! thread ) {
-    OPENLOG(level);
     return;
   }
 
