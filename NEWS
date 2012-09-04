@@ -19,6 +19,7 @@ Bugs fixed:
 - 3527714 Every other EnumerateClasses fails
 - 3541554 insecure LD_LIBRARY_PATH usage
 - 3546279 Core dump in providerDrv on Qualifier not found
+- 3564757 stageschema.sh should detect errors in sfcbrepos
 
 Changes in 1.4.2
 ================

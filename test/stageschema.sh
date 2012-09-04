@@ -109,6 +109,9 @@ else
 fi
 
 # Rebuild the repository
-sfcbrepos -f
+if [ $unstage -ne 1 ]
+then
+    sfcbrepos -f || exit 1
+fi
 
 exit 0
