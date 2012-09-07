@@ -28,8 +28,8 @@
 
 static int      argc = 0;
 static char   **argv = NULL;
-static int      cSize = 20;      // can't be 0!
-static int      rSize = 20;      // can't be 0!
+static int      cSize = 10;      // can't be 0!
+static int      rSize = 10;      // can't be 0!
 
 typedef enum readCtl { stdRead, tempRead, cached } ReadCtl;
 
@@ -604,8 +604,7 @@ cpyClass(ClClass * cl, CMPIConstClass * cc, unsigned char originId)
     }
   }
 
- char* ccl_name = ClObjectGetClString(&ccl->hdr, &ccl->name);
- //
+ const char* ccl_name = ClObjectGetClString(&ccl->hdr, &ccl->name);
 
   /* copy methods */
  for (i=0,m=ClClassGetMethodCount(ccl); i<m; i++) {
@@ -739,8 +738,8 @@ getResolvedClass(ClassRegister * cr, const char *clsName,
 
     crec->cachedRCls = cc;
     cb->cachedRCount++;
-    if (cb->cachedRCount >= cSize) {
-      pruneRCache(cr);          /* should this be checking rSize? */
+    if (cb->cachedRCount >= rSize) {
+      pruneRCache(cr);
     }
     ENQ_TOP_LIST(crec, cb->firstRCached, cb->lastRCached, nextRCached,
                  prevRCached);
@@ -904,41 +903,41 @@ ClassProviderCleanup(CMPIClassMI * mi, const CMPIContext *ctx)
   ClassRecord    *crec;
   UtilList       *ul;
 
-  for (hit = nsHt->ft->getFirst(nsHt, (void **) &key, (void **) &cReg);
-       key && hit && cReg;
-       hit =
-       nsHt->ft->getNext(nsHt, hit, (void **) &key, (void **) &cReg)) {
-    gzclose(cReg->f);
-    free(cReg->vr);
-    free(cReg->fn);
+  // for (hit = nsHt->ft->getFirst(nsHt, (void **) &key, (void **) &cReg);
+  //      key && hit && cReg;
+  //      hit =
+  //      nsHt->ft->getNext(nsHt, hit, (void **) &key, (void **) &cReg)) {
+  //   gzclose(cReg->f);
+  //   free(cReg->vr);
+  //   free(cReg->fn);
 
-    ClassBase      *cb = (ClassBase *) (cReg + 1);
-    for (hitIt =
-         cb->it->ft->getFirst(cb->it, (void **) &key, (void **) &ul);
-         key && hitIt && ul;
-         hitIt =
-         cb->it->ft->getNext(cb->it, hitIt, (void **) &key,
-                             (void **) &ul)) {
-      if (ul)
-        CMRelease(ul);
-    }
-    CMRelease(cb->it);
+  //   ClassBase      *cb = (ClassBase *) (cReg + 1);
+  //   for (hitIt =
+  //        cb->it->ft->getFirst(cb->it, (void **) &key, (void **) &ul);
+  //        key && hitIt && ul;
+  //        hitIt =
+  //        cb->it->ft->getNext(cb->it, hitIt, (void **) &key,
+  //                            (void **) &ul)) {
+  //     if (ul)
+  //       CMRelease(ul);
+  //   }
+  //   CMRelease(cb->it);
 
-    for (hitHt =
-         cb->ht->ft->getFirst(cb->ht, (void **) &key, (void **) &crec);
-         key && hitHt && crec;
-         hitHt =
-         cb->ht->ft->getNext(cb->ht, hitHt, (void **) &key,
-                             (void **) &crec)) {
-      free(key);
-      if (crec->parent)
-        free(crec->parent);
-      free(crec);
-    }
-    CMRelease(cb->ht);
-    free(cReg);
-  }
-  CMRelease(nsHt);
+  //   for (hitHt =
+  //        cb->ht->ft->getFirst(cb->ht, (void **) &key, (void **) &crec);
+  //        key && hitHt && crec;
+  //        hitHt =
+  //        cb->ht->ft->getNext(cb->ht, hitHt, (void **) &key,
+  //                            (void **) &crec)) {
+  //     free(key);
+  //     if (crec->parent)
+  //       free(crec->parent);
+  //     free(crec);
+  //   }
+  //   CMRelease(cb->ht);
+  //   free(cReg);
+  // }
+  // CMRelease(nsHt);
   CMReturn(CMPI_RC_OK);
 }
 
@@ -1111,8 +1110,8 @@ ClassProviderEnumClasses(CMPIClassMI * mi,
         rctl = tempRead;
         CMPIConstClass *rcls = getResolvedClass(cReg, cn, crec, &rctl);
         CMReturnInstance(rslt, (CMPIInstance *) rcls);
-      //   if (rctl != cached)
-      //     CMRelease(rcls);
+        if (rctl != cached)
+          CMRelease(rcls);
       }
     }
   }
@@ -1237,22 +1236,25 @@ extern CMPIBoolean isAbstract(CMPIConstClass * cc);
 static int
 repCandidate(ClassRegister * cReg, char *cn)
 {
-  ReadCtl         ctl = stdRead;
+  ReadCtl         ctl = tempRead;
   CMPIConstClass *cl = getClass(cReg, cn, &ctl);
-  if (isAbstract(cl))
+  if (isAbstract(cl)) {
     return 0;
+  }
   ProviderInfo   *info;
 
   _SFCB_ENTER(TRACE_PROVIDERS, "repCandidate");
 
   if (strcasecmp(cn, "cim_indicationfilter") == 0 ||
-      strcasecmp(cn, "cim_indicationsubscription") == 0)
+      strcasecmp(cn, "cim_indicationsubscription") == 0) {
     _SFCB_RETURN(0);
+  }
 
   while (cn != NULL) {
     info = pReg->ft->getProvider(pReg, cn, INSTANCE_PROVIDER);
-    if (info)
+    if (info) {
       _SFCB_RETURN(0);
+    }
     cn = (char *) cl->ft->getCharSuperClassName(cl);
     if (cn == NULL)
       break;

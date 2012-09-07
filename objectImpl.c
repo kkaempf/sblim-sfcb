@@ -1362,8 +1362,8 @@ freeMethod(ClObjectHdr * hdr, ClMethod * m)
     fprintf(stderr, ", meth quals = %d\n", m->qualifiers.used);
     freeQualifiers(hdr, &(m)->qualifiers);
   }
-  // if (m)
-  //  freeParameters(hdr, &(m)->parameters);
+  if (m)
+   freeParameters(hdr, &(m)->parameters);
 
 
   _SFCB_EXIT();
