@@ -775,6 +775,7 @@ getClass(ClassRegister * cr, const char *clsName, enum readCtl *ctl)
     _SFCB_RETURN(NULL);
   }
 
+  /* class is not cached */
   if (crec->cachedCCls == NULL) {
     r = gzseek(cr->f, crec->position, SEEK_SET);
     buf = (char *) malloc(crec->length);
@@ -882,7 +883,7 @@ initialize(CMPIClassMI * mi, CMPIContext *ctx)
   } else {
   }
 
-  // CJB if (nsHt==NULL) nsHt=buildClassRegisters();
+  // if (nsHt==NULL) nsHt=buildClassRegisters(); why is this here? CJB
   CMReturn(CMPI_RC_OK);
 }
 
@@ -903,41 +904,42 @@ ClassProviderCleanup(CMPIClassMI * mi, const CMPIContext *ctx)
   ClassRecord    *crec;
   UtilList       *ul;
 
-  // for (hit = nsHt->ft->getFirst(nsHt, (void **) &key, (void **) &cReg);
-  //      key && hit && cReg;
-  //      hit =
-  //      nsHt->ft->getNext(nsHt, hit, (void **) &key, (void **) &cReg)) {
-  //   gzclose(cReg->f);
-  //   free(cReg->vr);
-  //   free(cReg->fn);
+  for (hit = nsHt->ft->getFirst(nsHt, (void **) &key, (void **) &cReg);
+       key && hit && cReg;
+       hit =
+       nsHt->ft->getNext(nsHt, hit, (void **) &key, (void **) &cReg)) {
+    gzclose(cReg->f);
+    free(cReg->vr);
+    free(cReg->fn);
 
-  //   ClassBase      *cb = (ClassBase *) (cReg + 1);
-  //   for (hitIt =
-  //        cb->it->ft->getFirst(cb->it, (void **) &key, (void **) &ul);
-  //        key && hitIt && ul;
-  //        hitIt =
-  //        cb->it->ft->getNext(cb->it, hitIt, (void **) &key,
-  //                            (void **) &ul)) {
-  //     if (ul)
-  //       CMRelease(ul);
-  //   }
-  //   CMRelease(cb->it);
+    ClassBase      *cb = (ClassBase *) (cReg + 1);
+    for (hitIt =
+         cb->it->ft->getFirst(cb->it, (void **) &key, (void **) &ul);
+         key && hitIt && ul;
+         hitIt =
+         cb->it->ft->getNext(cb->it, hitIt, (void **) &key,
+                             (void **) &ul)) 
+      {
+      if (ul)
+        CMRelease(ul);
+    }
+    CMRelease(cb->it);
 
-  //   for (hitHt =
-  //        cb->ht->ft->getFirst(cb->ht, (void **) &key, (void **) &crec);
-  //        key && hitHt && crec;
-  //        hitHt =
-  //        cb->ht->ft->getNext(cb->ht, hitHt, (void **) &key,
-  //                            (void **) &crec)) {
-  //     free(key);
-  //     if (crec->parent)
-  //       free(crec->parent);
-  //     free(crec);
-  //   }
-  //   CMRelease(cb->ht);
-  //   free(cReg);
-  // }
-  // CMRelease(nsHt);
+    for (hitHt =
+         cb->ht->ft->getFirst(cb->ht, (void **) &key, (void **) &crec);
+         key && hitHt && crec;
+         hitHt =
+         cb->ht->ft->getNext(cb->ht, hitHt, (void **) &key,
+                             (void **) &crec)) {
+      free(key);
+      if (crec->parent)
+        free(crec->parent);
+      free(crec);
+    }
+    CMRelease(cb->ht);
+    free(cReg);
+  }
+  CMRelease(nsHt);
   CMReturn(CMPI_RC_OK);
 }
 
@@ -1236,13 +1238,6 @@ extern CMPIBoolean isAbstract(CMPIConstClass * cc);
 static int
 repCandidate(ClassRegister * cReg, char *cn)
 {
-  ReadCtl         ctl = tempRead;
-  CMPIConstClass *cl = getClass(cReg, cn, &ctl);
-  if (isAbstract(cl)) {
-    return 0;
-  }
-  ProviderInfo   *info;
-
   _SFCB_ENTER(TRACE_PROVIDERS, "repCandidate");
 
   if (strcasecmp(cn, "cim_indicationfilter") == 0 ||
@@ -1250,9 +1245,20 @@ repCandidate(ClassRegister * cReg, char *cn)
     _SFCB_RETURN(0);
   }
 
+  ReadCtl         ctl = tempRead;
+  CMPIConstClass *cl = getClass(cReg, cn, &ctl);
+  if (isAbstract(cl)) {
+    if (ctl != cached)
+      CMRelease(cl);
+    _SFCB_RETURN(0);
+  }
+  ProviderInfo   *info;
+
   while (cn != NULL) {
     info = pReg->ft->getProvider(pReg, cn, INSTANCE_PROVIDER);
     if (info) {
+      if (ctl != cached)
+	CMRelease(cl);
       _SFCB_RETURN(0);
     }
     cn = (char *) cl->ft->getCharSuperClassName(cl);
@@ -1260,6 +1266,8 @@ repCandidate(ClassRegister * cReg, char *cn)
       break;
     cl = getClass(cReg, cn, &ctl);
   }
+  if (ctl != cached)
+    CMRelease(cl);
   _SFCB_RETURN(1);
 }
 
