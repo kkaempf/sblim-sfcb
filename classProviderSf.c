@@ -632,11 +632,10 @@ cpyClass(ClClass * cl, CMPIConstClass * cc, unsigned char originId)
       CMPIParameter cp; 
       cp.type = p.type;
       cp.arraySize = p.arraySize;
-      cp.refName = (p.refName) ? strdup(p.refName) : NULL;
+      cp.refName = p.refName;
 
       //      fprintf(stderr, "     meth param: %s\n", name);
       parmId=ClClassAddMethParameter(&cl->hdr, meth, name, cp);
-      
 
       parm = ((ClParameter*)ClObjectGetClSection(&cl->hdr,&meth->parameters))+parmId-1;
       pparm = ((ClParameter*)ClObjectGetClSection(&ccl->hdr,&pmeth->parameters))+ip;
@@ -896,50 +895,52 @@ initialize(CMPIClassMI * mi, CMPIContext *ctx)
 static CMPIStatus
 ClassProviderCleanup(CMPIClassMI * mi, const CMPIContext *ctx)
 {
-  HashTableIterator *hit,
-                 *hitHt,
-                 *hitIt;
-  char           *key;
-  ClassRegister  *cReg;
-  ClassRecord    *crec;
-  UtilList       *ul;
+  // HashTableIterator *hit,
+  //                *hitHt,
+  //                *hitIt;
+  // char           *key;
+  // ClassRegister  *cReg;
+  // ClassRecord    *crec;
+  // UtilList       *ul;
+  // fprintf(stderr, "1nsHT has %d/%d\n", nsHt->ft->size(nsHt),  nsHt->ft->buckets(nsHt));
 
-  for (hit = nsHt->ft->getFirst(nsHt, (void **) &key, (void **) &cReg);
-       key && hit && cReg;
-       hit =
-       nsHt->ft->getNext(nsHt, hit, (void **) &key, (void **) &cReg)) {
-    gzclose(cReg->f);
-    free(cReg->vr);
-    free(cReg->fn);
+  // for (hit = nsHt->ft->getFirst(nsHt, (void **) &key, (void **) &cReg);
+  //      key && hit && cReg;
+  //      hit =
+  //      nsHt->ft->getNext(nsHt, hit, (void **) &key, (void **) &cReg)) {
+  //   gzclose(cReg->f);
+  //   free(cReg->vr);
+  //   free(cReg->fn);
 
-    ClassBase      *cb = (ClassBase *) (cReg + 1);
-    for (hitIt =
-         cb->it->ft->getFirst(cb->it, (void **) &key, (void **) &ul);
-         key && hitIt && ul;
-         hitIt =
-         cb->it->ft->getNext(cb->it, hitIt, (void **) &key,
-                             (void **) &ul)) 
-      {
-      if (ul)
-        CMRelease(ul);
-    }
-    CMRelease(cb->it);
+  //   ClassBase      *cb = (ClassBase *) (cReg + 1);
+  //   for (hitIt =
+  //        cb->it->ft->getFirst(cb->it, (void **) &key, (void **) &ul);
+  //        key && hitIt && ul;
+  //        hitIt =
+  //        cb->it->ft->getNext(cb->it, hitIt, (void **) &key,
+  //                            (void **) &ul)) 
+  //     {
+  //     if (ul)
+  //       CMRelease(ul);
+  //   }
+  //   CMRelease(cb->it);
 
-    for (hitHt =
-         cb->ht->ft->getFirst(cb->ht, (void **) &key, (void **) &crec);
-         key && hitHt && crec;
-         hitHt =
-         cb->ht->ft->getNext(cb->ht, hitHt, (void **) &key,
-                             (void **) &crec)) {
-      free(key);
-      if (crec->parent)
-        free(crec->parent);
-      free(crec);
-    }
-    CMRelease(cb->ht);
-    free(cReg);
-  }
-  CMRelease(nsHt);
+  //   for (hitHt =
+  //        cb->ht->ft->getFirst(cb->ht, (void **) &key, (void **) &crec);
+  //        key && hitHt && crec;
+  //        hitHt =
+  //        cb->ht->ft->getNext(cb->ht, hitHt, (void **) &key,
+  //                            (void **) &crec)) {
+  //     free(key);
+  //     if (crec->parent)
+  //       free(crec->parent);
+  //     free(crec);
+  //   }
+  //   CMRelease(cb->ht);
+  //   free(cReg);
+  // }
+  // fprintf(stderr, "nsHT has %d/%d\n", nsHt->ft->size(nsHt),  nsHt->ft->buckets(nsHt));
+  // CMRelease(nsHt);
   CMReturn(CMPI_RC_OK);
 }
 
