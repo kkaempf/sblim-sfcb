@@ -20,6 +20,7 @@ Bugs fixed:
 - 3541554 insecure LD_LIBRARY_PATH usage
 - 3546279 Core dump in providerDrv on Qualifier not found
 - 3564757 stageschema.sh should detect errors in sfcbrepos
+- 3567083 configure should fail if sfcUtil.so not found
 
 Changes in 1.4.2
 ================
