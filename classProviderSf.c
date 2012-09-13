@@ -1254,6 +1254,7 @@ repCandidate(ClassRegister * cReg, char *cn)
     _SFCB_RETURN(0);
   }
   ProviderInfo   *info;
+  int cn_duped = 0;
 
   while (cn != NULL) {
     info = pReg->ft->getProvider(pReg, cn, INSTANCE_PROVIDER);
@@ -1262,9 +1263,20 @@ repCandidate(ClassRegister * cReg, char *cn)
 	CMRelease(cl);
       _SFCB_RETURN(0);
     }
-    cn = (char *) cl->ft->getCharSuperClassName(cl);
+
+    if (cn_duped) /* don't free the passed-in cn */
+      free(cn);
+    cn = (char*) cl->ft->getCharSuperClassName(cl);
     if (cn == NULL)
       break;
+    else {
+      cn = strdup(cn);
+      cn_duped = 1;
+    }
+
+    if (ctl != cached)
+      CMRelease(cl);
+    ctl = tempRead;
     cl = getClass(cReg, cn, &ctl);
   }
   if (ctl != cached)
