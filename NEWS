@@ -104,6 +104,7 @@ Changes in 1.3.16
 New Features: 
 - 3538858 custom routine to log indInst objinfo
 - 3555395 Additional auth lib return codes
+- 3567450 Clients shouldn't cause log messages
 
 Bugs fixed:
 

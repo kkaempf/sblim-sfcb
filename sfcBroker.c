@@ -55,6 +55,8 @@
 
 int             sfcBrokerPid = 0;
 
+extern int      sfcbUseSyslog;
+
 extern void     setExFlag(unsigned long f);
 extern char    *parseTarget(const char *target);
 extern UtilStringBuffer *instanceToString(CMPIInstance *ci, char **props);
@@ -611,6 +613,7 @@ main(int argc, char *argv[])
                   pSockets;
   char           *pauseStr;
 
+  sfcbUseSyslog=1;
   /* SF 3462309 - If there is an instance running already, return */
   int pid_found = 0;
   if ((pid_found = sfcb_is_running()) != 0) {

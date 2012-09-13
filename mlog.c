@@ -37,6 +37,12 @@ const char     *_mlog_id =
 FILE           *log_w_stream;
 int             logfds[2] = { 0, 0 };
 
+/* Global variable to control syslog usage, by default it will be disabled.
+The sfcbd process will enable this for itself, but most clients won't.
+set to 1 to enable syslog
+*/
+int             sfcbUseSyslog=0;
+
 /*
  * main function for the logger proc. Waits on a pipe and writes to syslog
  * Will exit when the other side of the pipe closes 
@@ -71,7 +77,9 @@ runLogger(int listenFd, int level)
       break;
     }
 
-    syslog(priosysl, "%s", buf + 1);
+    if (sfcbUseSyslog) {
+      syslog(priosysl, "%s", buf + 1);
+    }
 
   }
   return;
@@ -146,6 +154,10 @@ mlogf(int priority, int errout, const char *fmt, ...)
   va_list         ap;
 
   char            buf[LOG_MSG_MAX];
+
+  if (! sfcbUseSyslog) {
+      return;
+  }
 
   va_start(ap, fmt);
   // Leave a space for the /n on the end.
