@@ -4,6 +4,7 @@ New features:
 - 3538858 custom routine to log indInst objinfo
 - 3555395 Additional auth lib return codes
 - 3562538 Enable curl debug via env variable
+- 3567450 Clients shouldn't cause log messages
 
 Bugs fixed:
 - 3539569 Leaks in interopProvider

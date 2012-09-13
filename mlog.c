@@ -1,5 +1,5 @@
 /*
- * $Id: mlog.c,v 1.14 2012/02/17 22:54:59 mchasal Exp $
+ * $Id: mlog.c,v 1.15 2012/09/13 20:32:53 mchasal Exp $
  *
  * (C) Copyright IBM Corp. 2003, 2004
  *
@@ -18,7 +18,7 @@
  *
  */
 
-const char *_mlog_id = "$Id: mlog.c,v 1.14 2012/02/17 22:54:59 mchasal Exp $";
+const char *_mlog_id = "$Id: mlog.c,v 1.15 2012/09/13 20:32:53 mchasal Exp $";
 
 
 #include "mlog.h"
@@ -38,6 +38,12 @@ const char *_mlog_id = "$Id: mlog.c,v 1.14 2012/02/17 22:54:59 mchasal Exp $";
  
 FILE           *log_w_stream;
 int             logfds[2] = { 0, 0 };
+
+/* Global variable to control syslog usage, by default it will be disabled.
+The sfcbd process will enable this for itself, but most clients won't.
+set to 1 to enable syslog
+*/
+int             sfcbUseSyslog=0;
 
 /*
 + * main function for the logger proc. Waits on a pipe and writes to syslog
@@ -72,7 +78,9 @@ void runLogger(int listenFd, int level) {
       break;
     }
 
-    syslog(priosysl, "%s", buf + 1);
+    if (sfcbUseSyslog) {
+      syslog(priosysl, "%s", buf + 1);
+    }
 
   }
   return;
@@ -147,6 +155,10 @@ void mlogf(int priority, int errout, const char *fmt, ...) {
 
   va_list         ap;
   char            buf[LOG_MSG_MAX];
+
+  if (! sfcbUseSyslog) {
+      return;
+  }
  
   va_start(ap, fmt);
   // Leave a space for the /n on the end.

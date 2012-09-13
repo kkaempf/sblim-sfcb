@@ -1,6 +1,11 @@
+2012-09-13 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* sfcBroker.c, mlog.c:
+	[ 3567450 ] Clients shouldn't cause log messages
+
 2012-08-28  Dave Heller <hellerda@us.ibm.com>
 
-	* indCIMXMLExport.c
+	* indCIMXMLExport.c:
 	[ 3562538 ] Enable curl debug via env variable
 
 2012-08-08 Dave Heller <hellerda@us.ibm.com>
