@@ -1219,15 +1219,11 @@ static void
 freeParameters(ClObjectHdr * hdr, ClSection * s)
 {
   ClParameter    *p;
-  int             i,
-                  l;
+
   _SFCB_ENTER(TRACE_OBJECTIMPL, "freeParameters");
 
   p = (ClParameter *) ClObjectGetClSection(hdr, s);
 
-  // if (p)
-  //   for (i = 0, l = p->qualifiers.used; i < l; i++)
-  //     freeQualifiers(hdr, &(p + i)->qualifiers);
   if (isMallocedSection(s))
     free(s->sectionPtr);
 
@@ -1328,38 +1324,11 @@ copyMethods(int ofs, int max, char *to, ClSection * ts,
 }
 
 static void
-freeMethods(ClObjectHdr * hdr, ClSection * s)
-{
-  ClMethod       *m;
-  int             i,
-                  l;
-  _SFCB_ENTER(TRACE_OBJECTIMPL, "freeMethods");
-
-  m = (ClMethod *) ClObjectGetClSection(hdr, s);
-
-  if (m)
-    for (i = 0, l = m->qualifiers.used; i < l; i++)
-      freeQualifiers(hdr, &(m + i)->qualifiers);
- if (m)
-    for (i = 0, l = m->parameters.used; i < l; i++)
-      freeParameters(hdr, &(m + i)->parameters);
-  if (isMallocedSection(s))
-    free(s->sectionPtr);
-
-  _SFCB_EXIT();
-}
-
-static void
 freeMethod(ClObjectHdr * hdr, ClMethod * m)
 {
-  int             i,
-                  l;
   _SFCB_ENTER(TRACE_OBJECTIMPL, "freeMethod");
 
-
   if (m) {
-    fprintf(stderr, "  freeMethod: %s", ClObjectGetClString(hdr, &(m->id)));
-    fprintf(stderr, ", meth quals = %d\n", m->qualifiers.used);
     freeQualifiers(hdr, &(m)->qualifiers);
   }
   if (m)
@@ -1367,6 +1336,21 @@ freeMethod(ClObjectHdr * hdr, ClMethod * m)
 
 
   _SFCB_EXIT();
+}
+
+static void
+freeMethods(ClObjectHdr * hdr, ClSection * s, int meths)
+{
+    if (meths > 0) {
+      int m=0;
+      ClMethod* m_sec = (ClMethod *) ClObjectGetClSection(hdr, s);
+
+      for (; m < meths; m++) {
+	freeMethod(hdr, m_sec+m);
+      }
+      if (isMallocedSection(s))
+	free(s->sectionPtr);
+    }
 }
 
 int
@@ -1888,22 +1872,9 @@ ClClassFreeClass(ClClass * cls)
 {
   if (cls->hdr.flags & HDR_Rebuild) {
     int meths = ClClassGetMethodCount(cls);
-    int m=0;
-    fprintf(stderr, "     class has %d methods\n", meths);
     freeQualifiers(&cls->hdr, &cls->qualifiers);
     freeProperties(&cls->hdr, &cls->properties);
-    if (meths > 0) {
-      //      fprintf(stderr, "%d methods\n", meths);
-      ClSection* s = &cls->methods;
-      ClMethod* m_sec = (ClMethod *) ClObjectGetClSection(&cls->hdr, s);
-
-      for (; m < meths; m++) {
-	freeMethod(&cls->hdr, m_sec+m);
-      }
-      if (isMallocedSection(s))
-	free(s->sectionPtr);
-
-    }
+    freeMethods(&cls->hdr, &cls->methods, meths);
     freeStringBuf(&cls->hdr);
     freeArrayBuf(&cls->hdr);
   }
