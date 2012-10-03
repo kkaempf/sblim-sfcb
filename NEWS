@@ -114,6 +114,7 @@ Bugs fixed:
 - 3539557 Memory leak in providerDrv with property list
 - 3539563 Memory leak in indCIMXMLHandler when Reliable Inds Enabled
 - 3539569 Leaks in interopProvider
+- 3574169 revert interop2 stageschema
 
 New Features: 
 - 3501314 Add dynamic logging and syslog output to sfcb trace
