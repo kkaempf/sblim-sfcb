@@ -1,3 +1,8 @@
+2012-10-03  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* interopProvider.c, queryStatement.c:
+	[ 3573507 ] CreateInstance for IndicationFilter doesn't accept DMTF:CQL
+
 2012-10-03 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* test/stageschema.sh:

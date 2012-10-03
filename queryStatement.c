@@ -1,6 +1,6 @@
 
 /*
- * $Id: queryStatement.c,v 1.18 2012/06/21 16:50:14 nsharoff Exp $
+ * $Id: queryStatement.c,v 1.19 2012/10/03 19:21:15 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -259,7 +259,7 @@ QLStatement *parseQuery(int mode, const char *query, const char *lang, const cha
    ofs=0;
    ctl.statement=qs=newQLStatement(8,mode);
    if (strcasecmp(lang,"wql")==0) ctl.statement->lang=QL_WQL;
-   else if (strcasecmp(lang,"cql")==0 || strcasecmp(lang,"cim:cql")==0) {
+   else if (strcasecmp(lang,"cql")==0 || strcasecmp(lang,"cim:cql")==0 || strcasecmp(lang,"dmtf:cql")==0) {
      ctl.statement->lang=QL_CQL;
    } else ctl.statement->lang=0;
    
