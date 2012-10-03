@@ -1,3 +1,8 @@
+2012-10-03 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* test/stageschema.sh:
+	[ 3574169 ] revert interop2 stageschema
+
 2012-09-13 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* sfcBroker.c, mlog.c:
