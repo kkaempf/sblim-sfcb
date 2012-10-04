@@ -1257,7 +1257,8 @@ InteropProviderCreateInstance(CMPIInstanceMI * mi,
 
     _SFCB_TRACE(2, ("--- CIM query language %s %s", lang->hdl, lng));
     if (strcasecmp(lng, "wql") && strcasecmp(lng, "cql")
-        && strcasecmp(lng, "cim:cql")) {
+        && strcasecmp(lng, "cim:cql")
+        && strcasecmp(lng, "dmtf:cql")) {
       setStatus(&st, CMPI_RC_ERR_QUERY_LANGUAGE_NOT_SUPPORTED, NULL);
       _SFCB_RETURN(st);
     }

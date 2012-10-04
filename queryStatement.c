@@ -286,7 +286,8 @@ parseQuery(int mode, const char *query, const char *lang, const char *sns,
   if (strcasecmp(lang, "wql") == 0)
     ctl.statement->lang = QL_WQL;
   else if (strcasecmp(lang, "cql") == 0
-           || strcasecmp(lang, "cim:cql") == 0) {
+           || strcasecmp(lang, "cim:cql") == 0
+           || strcasecmp(lang, "dmtf:cql") == 0) {
     ctl.statement->lang = QL_CQL;
   } else
     ctl.statement->lang = 0;
