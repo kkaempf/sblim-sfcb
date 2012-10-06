@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.119 2012/08/08 21:30:52 hellerda Exp $
+ * $Id: providerDrv.c,v 1.120 2012/10/06 01:19:15 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -1224,8 +1224,8 @@ static BinResponseHdr *getClass(BinRequestHdr * hdr, ProviderInfo * info, int re
    
    _SFCB_ENTER(TRACE_PROVIDERDRV, "getClass");
    
-    char *cn=CMGetClassName(path,NULL)->hdl; 	 
-    char *ns=CMGetNameSpace(path,NULL)->hdl; 	 
+   _SFCB_TRACE_VAR(char *cn=CMGetClassName(path,NULL)->hdl); 	 
+   _SFCB_TRACE_VAR(char *ns=CMGetNameSpace(path,NULL)->hdl); 	 
    _SFCB_TRACE(1, ("--- Namespace %s ClassName %s",ns,cn));
    
    if (req->hdr.flags & FL_localOnly) flgs|=CMPI_FLAG_LocalOnly;

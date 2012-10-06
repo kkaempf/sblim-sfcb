@@ -1,3 +1,9 @@
+2012-10-05  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimcClientSfcbLocal.c, httpAdapter.c, indCIMXMLHandler.c,
+	interopProvider.c, providerDrv.c, trace.h:
+	[ 3574936 ] --disable-debug still allocates trace variables
+
 2012-10-03  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* interopProvider.c, queryStatement.c:

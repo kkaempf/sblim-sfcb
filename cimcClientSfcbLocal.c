@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.48 2012/06/21 16:46:59 nsharoff Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.49 2012/10/06 01:19:15 buccella Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -1178,6 +1178,7 @@ static CMPIEnumeration * referenceNames(
    _SFCB_RETURN(NULL);
 }
 
+#ifdef SFCB_DEBUG
 static CMPIValue convertFromStringValue(
    CMPIValue strcval, 
    CMPIType strctype, 
@@ -1298,6 +1299,7 @@ static CMPIValue convertFromStringValue(
 
    _SFCB_RETURN(newcval);
 } // convertFromStringValue
+#endif
 
 static CMPIArgs * convertFromStringArguments(
    CMPIConstClass *cls, 
@@ -1402,7 +1404,7 @@ static CMPIArgs * convertFromStringArguments(
                goto addacopy;
             }
             // convert the string value to defined type
-            CMPIValue newcval = convertFromStringValue(cdata.value, cdata.type, cparam.type, prc);
+            _SFCB_TRACE_VAR(CMPIValue newcval = convertFromStringValue(cdata.value, cdata.type, cparam.type, prc));
             if (prc && (prc->rc != CMPI_RC_OK)) {
                if (0 != vmpt) {
                   goto error2;
@@ -1411,7 +1413,7 @@ static CMPIArgs * convertFromStringArguments(
                prc->rc = CMPI_RC_OK;
                goto addacopy;
             }
-            CMPIStatus lrc = CMAddArg(argsnew, (char*)name->hdl, &newcval, cparam.type);
+            _SFCB_TRACE_VAR(CMPIStatus lrc = CMAddArg(argsnew, (char*)name->hdl, &newcval, cparam.type));
             _SFCB_TRACE(4,("--- IN argument: %s updated with ptype: %u status: %u",(char*)name->hdl,cparam.type,lrc.rc)); 
             continue;
          }

@@ -53,6 +53,7 @@ extern void closeProviderContext(BinRequestContext* ctx);
 extern void setStatus(CMPIStatus *st, CMPIrc rc, char *msg);
 extern int testNameSpace(char *ns, CMPIStatus *st);
 extern void memLinkObjectPath(CMPIObjectPath *op);
+extern void sfcbIndAuditLog(char *operation, char *objinfo);
 
 /* ------------------------------------------------------------------------- */
 
@@ -1445,8 +1446,8 @@ CMPIStatus InteropProviderInvokeMethod(
               i = subscriptionHt->ft->getNext(subscriptionHt,i, 
                  (void**)&suName, (void**)&su)) {
          if ((void*)su->fi==filterId) {
-            CMPIString *str=CDToString(_broker,su->ha->hop,NULL);
-            CMPIString *ns=CMGetNameSpace(su->ha->hop,NULL);
+            _SFCB_TRACE_VAR(CMPIString *str=CDToString(_broker,su->ha->hop,NULL));
+            _SFCB_TRACE_VAR(CMPIString *ns=CMGetNameSpace(su->ha->hop,NULL));
             _SFCB_TRACE(1,("--- invoke handler %s %s",(char*)ns->hdl,(char*)str->hdl));
             CMAddArg(hin,"subscription",&su->sci,CMPI_instance);
 
@@ -1495,8 +1496,8 @@ CMPIStatus InteropProviderInvokeMethod(
 
       CMPIInstance *ci=in->ft->getArg(in,"handler",&st).value.inst;
       CMPIObjectPath *op=in->ft->getArg(in,"key",&st).value.ref;
-      CMPIString *str=CDToString(_broker,op,NULL);
-      CMPIString *ns=CMGetNameSpace(op,NULL);
+      _SFCB_TRACE_VAR(CMPIString *str=CDToString(_broker,op,NULL));
+      _SFCB_TRACE_VAR(CMPIString *ns=CMGetNameSpace(op,NULL));
       _SFCB_TRACE(1,("--- _addHandler %s %s",(char*)ns->hdl,(char*)str->hdl));
       addHandler(ci,op);     
       sfcbIndAuditLog("CreateHandler-> ",
@@ -1526,8 +1527,8 @@ CMPIStatus InteropProviderInvokeMethod(
    else if (strcasecmp(methodName, "_updateHandler") == 0) {
       CMPIInstance *ci=in->ft->getArg(in,"handler",&st).value.inst;
       CMPIObjectPath *op=in->ft->getArg(in,"key",&st).value.ref;
-      CMPIString *str=CDToString(_broker,op,NULL);
-      CMPIString *ns=CMGetNameSpace(op,NULL);
+      _SFCB_TRACE_VAR(CMPIString *str=CDToString(_broker,op,NULL));
+      _SFCB_TRACE_VAR(CMPIString *ns=CMGetNameSpace(op,NULL));
       _SFCB_TRACE(1,("--- _updateHandler %s %s",(char*)ns->hdl,(char*)str->hdl));
       updateHandler(ci,op);     
    }

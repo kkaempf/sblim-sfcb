@@ -393,8 +393,8 @@ CMPIStatus IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
     CMSetProperty(ciLocal, "LastSequenceNumber", &zarro, CMPI_sint64);
    }
 
-   CMPIString *str=CDToString(_broker,copLocal,NULL);
-   CMPIString *ns=CMGetNameSpace(copLocal,NULL);
+   _SFCB_TRACE_VAR(CMPIString *str=CDToString(_broker,copLocal,NULL));
+   _SFCB_TRACE_VAR(CMPIString *ns=CMGetNameSpace(copLocal,NULL));
    _SFCB_TRACE(1,("--- handler %s %s",(char*)ns->hdl,(char*)str->hdl));
             
    in=CMNewArgs(_broker,NULL);
@@ -1014,7 +1014,6 @@ CMPIStatus IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
       CMRelease(ind);
    }
    else {
-      printf("--- ClassProvider: Invalid request %s\n", methodName);
       st.rc = CMPI_RC_ERR_METHOD_NOT_FOUND;
    }
 
