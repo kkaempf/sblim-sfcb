@@ -1389,8 +1389,8 @@ getClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getClass");
 
-  char           *cn = CMGetClassName(path, NULL)->hdl;
-  char           *ns = CMGetNameSpace(path, NULL)->hdl;
+  _SFCB_TRACE_VAR(char *cn = CMGetClassName(path, NULL)->hdl);
+  _SFCB_TRACE_VAR(char *ns = CMGetNameSpace(path, NULL)->hdl);
   _SFCB_TRACE(1, ("--- Namespace %s ClassName %s", ns, cn));
 
   if (req->hdr.flags & FL_localOnly)

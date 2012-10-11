@@ -1608,8 +1608,8 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
            subscriptionHt->ft->getNext(subscriptionHt, i,
                                        (void **) &suName, (void **) &su)) {
         if ((void *) su->fi == filterId) {
-          CMPIString     *str = CDToString(_broker, su->ha->hop, NULL);
-          CMPIString     *ns = CMGetNameSpace(su->ha->hop, NULL);
+          _SFCB_TRACE_VAR(CMPIString *str = CDToString(_broker, su->ha->hop, NULL));
+          _SFCB_TRACE_VAR(CMPIString *ns = CMGetNameSpace(su->ha->hop, NULL));
           _SFCB_TRACE(1,
                       ("--- invoke handler %s %s", (char *) ns->hdl,
                        (char *) str->hdl));
@@ -1658,8 +1658,8 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
 
     CMPIInstance   *ci = in->ft->getArg(in, "handler", &st).value.inst;
     CMPIObjectPath *op = in->ft->getArg(in, "key", &st).value.ref;
-    CMPIString     *str = CDToString(_broker, op, NULL);
-    CMPIString     *ns = CMGetNameSpace(op, NULL);
+    _SFCB_TRACE_VAR(CMPIString *str = CDToString(_broker, op, NULL));
+    _SFCB_TRACE_VAR(CMPIString *ns = CMGetNameSpace(op, NULL));
     _SFCB_TRACE(1,
                 ("--- _addHandler %s %s", (char *) ns->hdl,
                  (char *) str->hdl));
@@ -1690,8 +1690,8 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
   else if (strcasecmp(methodName, "_updateHandler") == 0) {
     CMPIInstance *ci=in->ft->getArg(in,"handler",&st).value.inst;
     CMPIObjectPath *op=in->ft->getArg(in,"key",&st).value.ref;
-    CMPIString *str=CDToString(_broker,op,NULL);
-    CMPIString *ns=CMGetNameSpace(op,NULL);
+    _SFCB_TRACE_VAR(CMPIString *str=CDToString(_broker,op,NULL));
+    _SFCB_TRACE_VAR(CMPIString *ns=CMGetNameSpace(op,NULL));
     _SFCB_TRACE(1,("--- _updateHandler %s %s",(char*)ns->hdl,(char*)str->hdl));
     updateHandler(ci,op);     
   }

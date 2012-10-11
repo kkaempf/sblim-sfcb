@@ -883,19 +883,21 @@ doHttpRequest(CommHndl conn_fd)
   static RespSegments nullResponse = { NULL, 0, 0, NULL, {{0, NULL}} };
   unsigned long   len;
   int             hl,
-                  rc,
-                  uset = 0;
+                  rc;
   char           *hdr,
                  *path;
   int             discardInput = 0;
   MsgSegment      msgs[2];
+  CimRequestContext ctx;
+  int             breakloop;
+  int             hcrFlags = 0;  /* flags to pass to handleCimRequest() */
+#ifdef SFCB_DEBUG
+  int             uset = 0;
   struct rusage   us,
                   ue;
   struct timeval  sv,
                   ev;
-  CimRequestContext ctx;
-  int             breakloop;
-  int             hcrFlags = 0;  /* flags to pass to handleCimRequest() */
+#endif
 
   _SFCB_ENTER(TRACE_HTTPDAEMON, "doHttpRequest");
 

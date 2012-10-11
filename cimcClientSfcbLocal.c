@@ -1212,6 +1212,7 @@ referenceNames(Client * mb,
   _SFCB_RETURN(NULL);
 }
 
+#ifdef SFCB_DEBUG
 static CMPIValue convertFromStringValue(CMPIValue strcval, 
                                         CMPIType strctype, 
                                         CMPIType xtype,
@@ -1331,6 +1332,7 @@ static CMPIValue convertFromStringValue(CMPIValue strcval,
 
   _SFCB_RETURN(newcval);
 } // convertFromStringValue
+#endif
 
 static CMPIArgs * convertFromStringArguments(CMPIConstClass *cls, 
                                              const char *method, 
@@ -1434,7 +1436,7 @@ static CMPIArgs * convertFromStringArguments(CMPIConstClass *cls,
           goto addacopy;
         }
         // convert the string value to defined type
-        CMPIValue newcval = convertFromStringValue(cdata.value, cdata.type, cparam.type, prc);
+        _SFCB_TRACE_VAR(CMPIValue newcval = convertFromStringValue(cdata.value, cdata.type, cparam.type, prc));
         if (prc && (prc->rc != CMPI_RC_OK)) {
           if (0 != vmpt) {
             goto error2;
@@ -1443,7 +1445,7 @@ static CMPIArgs * convertFromStringArguments(CMPIConstClass *cls,
           prc->rc = CMPI_RC_OK;
           goto addacopy;
         }
-        CMPIStatus lrc = CMAddArg(argsnew, (char*)name->hdl, &newcval, cparam.type);
+        _SFCB_TRACE_VAR(CMPIStatus lrc = CMAddArg(argsnew, (char*)name->hdl, &newcval, cparam.type));
         _SFCB_TRACE(4,("--- IN argument: %s updated with ptype: %u status: %u",(char*)name->hdl,cparam.type,lrc.rc)); 
         continue;
       }

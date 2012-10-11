@@ -116,9 +116,7 @@ Bugs fixed:
 - 3539563 Memory leak in indCIMXMLHandler when Reliable Inds Enabled
 - 3539569 Leaks in interopProvider
 - 3574169 revert interop2 stageschema
-
-New Features: 
-- 3501314 Add dynamic logging and syslog output to sfcb trace
+- 3574936 --disable-debug still allocates trace variables
 
 Changes in 1.3.15
 =================

@@ -1791,14 +1791,14 @@ handleCimRequest(CimRequestContext * ctx, int flags, char * more)
 {
   RespSegments    rs;
   RequestHdr      hdr;
+  int             parserc = 1; /* scanner recognition code
+                           0 = format understood
+                           1 = format not understood */
 #ifdef SFCB_DEBUG
   struct rusage   us,
                   ue;
   struct timeval  sv,
                   ev;
-  int             parserc = 1; /* scanner recognition code
-                           0 = format understood
-                           1 = format not understood */
 
   if (*_ptr_sfcb_trace_mask & TRACE_RESPONSETIMING) {
     gettimeofday(&sv, NULL);
