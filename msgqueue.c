@@ -118,10 +118,16 @@ int semSetValue(int semid, int semnum, int value)
 
 int initSem(int https, int shttps, int provs)
 {
+   _SFCB_ENTER(TRACE_MSGQUEUE, "initSem");
+
    union semun sun;
    int i;
    
-   sfcbSemKey=ftok(SFCB_BINARY,'S');
+   if ((sfcbSemKey=ftok(SFCB_BINARY,'S')) <=0) {
+      mlogf(M_ERROR,M_SHOW,"-#- Error creating semaphore key using path: %s (%s)\n", 
+          SFCB_BINARY, strerror(errno));
+      _SFCB_ABORT();
+   }
 
    if ((sfcbSem=semget(sfcbSemKey,1, 0600))!=-1) 
       semctl(sfcbSem,0,IPC_RMID,sun);
@@ -149,7 +155,7 @@ int initSem(int https, int shttps, int provs)
       semctl(sfcbSem,PROV_INUSE(i),SETVAL,sun);
       semctl(sfcbSem,PROV_ALIVE(i),SETVAL,sun);
    }      
-   return 0;   
+   _SFCB_RETURN(0);
 }
 
 int remSem()

@@ -1,3 +1,8 @@
+2012-10-24  Dave Heller <hellerda@us.ibm.com>
+
+	* msgqueue.c
+	[ 3579637 ] SFCB should check ftok return code
+
 2012-10-05  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* cimcClientSfcbLocal.c, httpAdapter.c, indCIMXMLHandler.c,
