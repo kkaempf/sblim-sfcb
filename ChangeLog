@@ -1,3 +1,8 @@
+2012-10-30  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* instance.c, brokerUpc.c:
+	[ 3582062 ] Various additional error checking
+
 2012-10-24  Dave Heller <hellerda@us.ibm.com>
 
 	* msgqueue.c

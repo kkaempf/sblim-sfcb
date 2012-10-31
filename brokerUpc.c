@@ -1,5 +1,5 @@
 /*
- * $Id: brokerUpc.c,v 1.42 2012/07/19 17:21:22 mchasal Exp $
+ * $Id: brokerUpc.c,v 1.43 2012/10/31 01:40:09 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -148,7 +148,12 @@ static CMPIStatus deliverIndication(const CMPIBroker* mb, const CMPIContext* ctx
 		     CMPI_uint64
 #endif		     
 		 );
-         CBInvokeMethod(mb,ctx,op,"_deliver",in,NULL,&st);
+	/* 85507 filterId was NULL on interopProvider side; check it here */
+	if (&se->filterId)
+	  CBInvokeMethod(mb,ctx,op,"_deliver",in,NULL,&st);
+	else
+	  mlogf(M_ERROR,M_SHOW,"--- Failed to queue indication for delivery: missing filter\n");
+
          CMRelease(op); /* 3497209 */
          CMRelease(in);
       }

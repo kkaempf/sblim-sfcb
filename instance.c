@@ -1,5 +1,5 @@
 /*
- * $Id: instance.c,v 1.55 2012/05/18 22:57:47 buccella Exp $
+ * $Id: instance.c,v 1.56 2012/10/31 01:40:09 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -73,7 +73,7 @@ struct native_instance {
 };
 
 #ifdef HAVE_DEFAULT_PROPERTIES 
-static void instFillDefaultProperties(struct native_instance *inst, 
+static int instFillDefaultProperties(struct native_instance *inst, 
 				      const char * ns, const char * cn);
 #endif
 
@@ -485,6 +485,11 @@ static CMPIObjectPath *__ift_getObjectPath(const CMPIInstance * instance,
 	 mtx = memAlloc(MEM_TRACKED, sizeof(CMPI_MUTEX_TYPE), &dummy);
 	 *mtx = Broker->xft->newMutex(0); 
       }
+      if (! *mtx) {
+         mlogf(M_ERROR, M_SHOW, "--- Could not get op for instance of %s; mutex creation failure\n", cn);
+         CMSetStatus(rc, CMPI_RC_ERR_FAILED);
+         return NULL;
+      }
       Broker->xft->lockMutex(*mtx);
       if (klt == NULL) klt = UtilFactory->newHashTable(61,
                  UtilHashTable_charKey | UtilHashTable_ignoreKeyCase);
@@ -860,7 +865,9 @@ CMPIInstance *internal_new_CMPIInstance(int mode, const CMPIObjectPath * cop,
 
 #ifdef HAVE_DEFAULT_PROPERTIES
    if(!override) {
-      instFillDefaultProperties(&instance,ns,cn);
+      if (instFillDefaultProperties(&instance,ns,cn)) {
+         mlogf(M_ERROR, M_SHOW, "--- Could not fill default properties for instance of %ss; mutex creation failure\n", cn);      
+      }
    }
 #endif
 
@@ -1019,7 +1026,7 @@ void setInstanceLocalMode(int mode)
 }
 
 #ifdef HAVE_DEFAULT_PROPERTIES 
-static void instFillDefaultProperties(struct native_instance *inst, 
+static int instFillDefaultProperties(struct native_instance *inst, 
 				      const char * ns, const char * cn)
 {
    static CMPI_MUTEX_TYPE * mtx = NULL;
@@ -1034,6 +1041,9 @@ static void instFillDefaultProperties(struct native_instance *inst,
    if (mtx == NULL) {
       mtx = malloc(sizeof(CMPI_MUTEX_TYPE));
       *mtx = Broker->xft->newMutex(0); 
+   }
+   if (!*mtx) {
+      return -1;
    }
    Broker->xft->lockMutex(*mtx);
    if (clt == NULL) clt = 
@@ -1075,6 +1085,8 @@ static void instFillDefaultProperties(struct native_instance *inst,
 	 }
       }
    }
+
+   return 0;
 }
 #endif
 
