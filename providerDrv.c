@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.120 2012/10/06 01:19:15 buccella Exp $
+ * $Id: providerDrv.c,v 1.121 2012/11/01 16:32:51 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2307,6 +2307,9 @@ static BinResponseHdr *activateFilter(BinRequestHdr *hdr, ProviderInfo* info,
    CMPIStatus rci = { CMPI_RC_OK, NULL };
    NativeSelectExp *se=NULL,*prev=NULL;
    CMPIObjectPath *path = relocateSerializedObjectPath(req->objectPath.data);
+   // Get the string of the classname
+   CMPIString *cn = path->ft->getClassName(path,NULL);
+   const char *cns = cn->ft->getCharPtr(cn,NULL);
    CMPIContext *ctx = native_new_CMPIContext(MEM_TRACKED,info);
    CMPIResult *result = native_new_CMPIResult(0,1,NULL);
    CMPIFlags flgs=0;
@@ -2366,11 +2369,11 @@ static BinResponseHdr *activateFilter(BinRequestHdr *hdr, ProviderInfo* info,
      authorizeFilterPreV1 fptr = 
        (authorizeFilterPreV1)info->indicationMI->ft->authorizeFilter;
      rci = fptr(info->indicationMI, ctx, result,
-		(CMPISelectExp*)se, type, path,
+		(CMPISelectExp*)se, cns, path,
 		PROVCHARS(req->principal.data));
    } else {
      rci = info->indicationMI->ft->authorizeFilter(info->indicationMI, ctx,
-						   (CMPISelectExp*)se, type, path,
+						   (CMPISelectExp*)se, cns, path,
 						   PROVCHARS(req->principal.data));
    }
    TIMING_STOP(hdr,info)
@@ -2386,7 +2389,7 @@ static BinResponseHdr *activateFilter(BinRequestHdr *hdr, ProviderInfo* info,
 		   (CMPISelectExp*)se, type, path);
       } else {
 	rci = info->indicationMI->ft->mustPoll(info->indicationMI, ctx, 
-                                               (CMPISelectExp*)se, type, path);
+                                               (CMPISelectExp*)se, cns, path);
       }
       TIMING_STOP(hdr,info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
@@ -2400,7 +2403,7 @@ static BinResponseHdr *activateFilter(BinRequestHdr *hdr, ProviderInfo* info,
 	       (CMPISelectExp*)se, type, path, 1);
       } else {
 	rci = info->indicationMI->ft->activateFilter(info->indicationMI, ctx,
-						     (CMPISelectExp*)se, type, path, 1);
+						     (CMPISelectExp*)se, cns, path, 1);
       }
       TIMING_STOP(hdr,info)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
@@ -2436,6 +2439,9 @@ static BinResponseHdr *deactivateFilter(BinRequestHdr *hdr, ProviderInfo* info,
    CMPIStatus rci = { CMPI_RC_OK, NULL };
    NativeSelectExp *se=NULL, *prev = NULL;
    CMPIObjectPath *path = relocateSerializedObjectPath(req->objectPath.data);
+   //Get the string of the classname
+   CMPIString *cn = path->ft->getClassName(path,NULL);
+   const char *cns = cn->ft->getCharPtr(cn,NULL);
    CMPIContext *ctx = native_new_CMPIContext(MEM_TRACKED,info);
    CMPIResult *result = native_new_CMPIResult(0,1,NULL);
    CMPIFlags flgs=0;
@@ -2470,7 +2476,7 @@ static BinResponseHdr *deactivateFilter(BinRequestHdr *hdr, ProviderInfo* info,
 		  (CMPISelectExp*)se, "", path, 1);
 	 } else {
 	   rci = info->indicationMI->ft->deActivateFilter(info->indicationMI, ctx,
-							  (CMPISelectExp*)se, "", path, 1);
+							  (CMPISelectExp*)se, cns, path, 1);
 	 }
 	 TIMING_STOP(hdr,info)
          if (rci.rc==CMPI_RC_OK) {
