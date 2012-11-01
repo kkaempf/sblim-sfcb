@@ -2681,6 +2681,9 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
       *prev = NULL;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
+  // Get the string of the classname
+  CMPIString *cn = path->ft->getClassName(path,NULL);
+  const char *cns = cn->ft->getCharPtr(cn,NULL);
   CMPIContext    *ctx = native_new_CMPIContext(MEM_TRACKED, info);
   CMPIResult     *result = native_new_CMPIResult(0, 1, NULL);
   CMPIFlags       flgs = 0;
@@ -2750,7 +2753,7 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   } else {
     rci = info->indicationMI->ft->authorizeFilter(info->indicationMI, ctx,
                                                   (CMPISelectExp *) se,
-                                                  type, path,
+                                                  cns, path,
                                                   PROVCHARS(req->principal.
                                                             data));
   }
@@ -2767,7 +2770,7 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
                  (CMPISelectExp *) se, type, path);
     } else {
       rci = info->indicationMI->ft->mustPoll(info->indicationMI, ctx,
-                                             (CMPISelectExp *) se, type,
+                                             (CMPISelectExp *) se, cns,
                                              path);
     }
     TIMING_STOP(hdr, info)
@@ -2783,7 +2786,7 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
     } else {
       rci = info->indicationMI->ft->activateFilter(info->indicationMI, ctx,
                                                    (CMPISelectExp *) se,
-                                                   type, path, 1);
+                                                   cns, path, 1);
     }
     TIMING_STOP(hdr, info)
         _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
@@ -2819,6 +2822,9 @@ deactivateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   NativeSelectExp *se = NULL, *prev = NULL;
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
+  // Get the string of the classname
+  CMPIString *cn = path->ft->getClassName(path,NULL);
+  const char *cns = cn->ft->getCharPtr(cn,NULL);
   CMPIContext    *ctx = native_new_CMPIContext(MEM_TRACKED, info);
   CMPIResult     *result = native_new_CMPIResult(0, 1, NULL);
   CMPIFlags       flgs = 0;
@@ -2867,7 +2873,7 @@ deactivateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
             info->indicationMI->ft->deActivateFilter(info->indicationMI,
                                                      ctx,
                                                      (CMPISelectExp *) se,
-                                                     "", path, 1);
+                                                     cns, path, 1);
       }
       TIMING_STOP(hdr, info)
       if (rci.rc == CMPI_RC_OK) {

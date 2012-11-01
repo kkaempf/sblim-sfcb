@@ -139,17 +139,21 @@ indProvIndicationCleanup(CMPIIndicationMI * cThis, const CMPIContext *ctx,
 
 CMPIStatus      indProvAuthorizeFilter
     (CMPIIndicationMI * cThis, const CMPIContext *ctx,
-     const CMPISelectExp *filter, const char *indType,
+     const CMPISelectExp *filter, const char *clsName,
      const CMPIObjectPath * classPath, const char *owner) {
 
+  char* op = CMGetCharPtr(CMObjectPathToString(classPath, NULL));
+  fprintf (stderr, "+++ indProvAuthorizeFilter for %s %s\n", op, clsName);
   CMReturn(CMPI_RC_OK);
 }
 
 CMPIStatus      indProvMustPoll
     (CMPIIndicationMI * cThis, const CMPIContext *ctx,
-     const CMPISelectExp *filter, const char *indType,
+     const CMPISelectExp *filter, const char *clsName,
      const CMPIObjectPath * classPath) {
 
+  char* op = CMGetCharPtr(CMObjectPathToString(classPath, NULL));
+  fprintf (stderr, "+++ indProvMustPoll for %s %s\n", op, clsName);
   CMReturn(CMPI_RC_OK);
 }
 
@@ -159,7 +163,7 @@ CMPIStatus      indProvActivateFilter
      const CMPIObjectPath * classPath, CMPIBoolean firstActivation) {
 
   char* op = CMGetCharPtr(CMObjectPathToString(classPath, NULL));
-  fprintf (stderr, "+++ indProvActivateFilter() for %s\n", op);
+  fprintf (stderr, "+++ indProvActivateFilter() for %s %s\n", op, clsName);
 
   if (strcmp(op, "root/interop:Test_Indication") == 0)
     activated = 1;
@@ -176,7 +180,7 @@ CMPIStatus      indProvDeActivateFilter
   fprintf(stderr, "+++ indProvDeActivateFilter\n");
 
   char* op = CMGetCharPtr(CMObjectPathToString(classPath, NULL));
-  fprintf (stderr, "+++ indProvDeActivateFilter for %s\n", op);
+  fprintf (stderr, "+++ indProvDeActivateFilter for %s %s\n", op, clsName);
 
   if (strcmp(op, "root/interop:Test_Indication") == 0)
     activated = 0;
