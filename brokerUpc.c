@@ -154,7 +154,12 @@ deliverIndication(const CMPIBroker * mb, const CMPIContext *ctx,
                CMPI_uint64
 #endif
           );
-      CBInvokeMethod(mb, ctx, op, "_deliver", in, NULL, &st);
+      /* 85507 filterId was NULL on interopProvider side; check it here */
+      if (&se->filterId)
+        CBInvokeMethod(mb,ctx,op,"_deliver",in,NULL,&st);
+      else
+        mlogf(M_ERROR,M_SHOW,"--- Failed to queue indication for delivery: missing filter\n");
+
       CMRelease(op);
       CMRelease(in);
     }

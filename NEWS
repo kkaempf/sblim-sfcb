@@ -118,6 +118,7 @@ Bugs fixed:
 - 3539569 Leaks in interopProvider
 - 3574169 revert interop2 stageschema
 - 3574936 --disable-debug still allocates trace variables
+- 3582062 Various additional error checking
 
 Changes in 1.3.15
 =================
