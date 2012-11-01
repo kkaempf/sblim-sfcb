@@ -1,6 +1,6 @@
 
 /*
- * $Id: providerDrv.c,v 1.121 2012/11/01 16:32:51 mchasal Exp $
+ * $Id: providerDrv.c,v 1.122 2012/11/01 21:38:23 mchasal Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2369,7 +2369,7 @@ static BinResponseHdr *activateFilter(BinRequestHdr *hdr, ProviderInfo* info,
      authorizeFilterPreV1 fptr = 
        (authorizeFilterPreV1)info->indicationMI->ft->authorizeFilter;
      rci = fptr(info->indicationMI, ctx, result,
-		(CMPISelectExp*)se, cns, path,
+		(CMPISelectExp*)se, type, path,
 		PROVCHARS(req->principal.data));
    } else {
      rci = info->indicationMI->ft->authorizeFilter(info->indicationMI, ctx,
