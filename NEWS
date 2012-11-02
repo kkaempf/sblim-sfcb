@@ -23,6 +23,7 @@ Bugs fixed:
 - 3567083 configure should fail if sfcUtil.so not found
 - 3573507 CreateInstance for IndicationFilter doesn't accept DMTF:CQL
 - 3579637 SFCB should check ftok return code
+- 3562530 TestMiscProvider poorly tests CMGetPropertyAt
 
 Changes in 1.4.2
 ================

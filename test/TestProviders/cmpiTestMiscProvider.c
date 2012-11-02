@@ -818,17 +818,21 @@ _testCMPIInstance()
   CMPIValue       value1;
   const char     *name2 = "secondPropertyName";
   CMPIValue       value2;
-  CMPIType        type = CMPI_uint64;
+  const char     *name3 = "parentProperty";
+  CMPIValue       value3;
   CMPIString     *beforeObjPath = NULL;
   CMPIString     *afterObjPath = NULL;
   const char     *beforeString = NULL;
   const char     *afterString = NULL;
   objPath = make_ObjectPath(_broker, _Namespace, _ClassName);
   instance = make_Instance(objPath);
-  value1.uint32 = 10;
-  rc = CMSetProperty(instance, name1, &value1, type);
-  value2.uint32 = 20;
-  rc = CMSetProperty(instance, name2, &value2, type);
+  value1.uint64 = 10;
+  rc = CMSetProperty(instance, name1, &value1, CMPI_uint64);
+  value2.uint64 = 20;
+  rc = CMSetProperty(instance, name2, &value2, CMPI_uint64);
+  CMPIString* blahString = CMNewString(_broker, "blah", &rc);
+  value3.string = blahString;
+  rc = CMSetProperty(instance, name3, &value3, CMPI_string);
   count = CMGetPropertyCount(instance, &rc);
   /* count will vary based on what's in the MOF */
   if (count != 5) {
@@ -838,9 +842,9 @@ _testCMPIInstance()
   if (returnedData1.value.uint32 != 10) {
     errors += 2;
   }
-  /* this check is really SFCB-dependent, since position isn't guaranteed */
-  returnedData2 = CMGetPropertyAt(instance, 0, &returnedName, &rc);
-  if (returnedData2.value.uint32 != 20) {
+  returnedData2 = CMGetPropertyAt(instance, 1, NULL, &rc);
+  /* we don't know what the actual data is at 1, but it should be valid */
+  if (returnedData2.state != CMPI_goodValue) {
     errors += 4;
   }
   newObjPath = make_ObjectPath(_broker, _Namespace, _ClassName);

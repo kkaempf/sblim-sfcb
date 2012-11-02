@@ -1092,6 +1092,7 @@ ClGetQualifierAt(ClClass * cls, ClQualifier * q, int id, CMPIData *data,
 }
 
 int
+
 ClClassGetQualifierAt(ClClass * cls, int id, CMPIData *data, char **name)
 {
   ClQualifier    *q;
@@ -1218,15 +1219,11 @@ static void
 freeParameters(ClObjectHdr * hdr, ClSection * s)
 {
   ClParameter    *p;
-  int             i,
-                  l;
+
   _SFCB_ENTER(TRACE_OBJECTIMPL, "freeParameters");
 
   p = (ClParameter *) ClObjectGetClSection(hdr, s);
 
-  if (p)
-    for (i = 0, l = p->qualifiers.used; i < l; i++)
-      freeQualifiers(hdr, &p->qualifiers);
   if (isMallocedSection(s))
     free(s->sectionPtr);
 
@@ -1327,25 +1324,33 @@ copyMethods(int ofs, int max, char *to, ClSection * ts,
 }
 
 static void
-freeMethods(ClObjectHdr * hdr, ClSection * s)
+freeMethod(ClObjectHdr * hdr, ClMethod * m)
 {
-  ClMethod       *m;
-  int             i,
-                  l;
-  _SFCB_ENTER(TRACE_OBJECTIMPL, "freeMethods");
+  _SFCB_ENTER(TRACE_OBJECTIMPL, "freeMethod");
 
-  m = (ClMethod *) ClObjectGetClSection(hdr, s);
+  if (m) {
+    freeQualifiers(hdr, &(m)->qualifiers);
+  }
+  if (m)
+   freeParameters(hdr, &(m)->parameters);
 
-  if (m)
-    for (i = 0, l = m->qualifiers.used; i < l; i++)
-      freeQualifiers(hdr, &m->qualifiers);
-  if (m)
-    for (i = 0, l = m->parameters.used; i < l; i++)
-      freeParameters(hdr, &m->parameters);
-  if (isMallocedSection(s))
-    free(s->sectionPtr);
 
   _SFCB_EXIT();
+}
+
+static void
+freeMethods(ClObjectHdr * hdr, ClSection * s, int meths)
+{
+    if (meths > 0) {
+      int m=0;
+      ClMethod* m_sec = (ClMethod *) ClObjectGetClSection(hdr, s);
+
+      for (; m < meths; m++) {
+	freeMethod(hdr, m_sec+m);
+      }
+      if (isMallocedSection(s))
+	free(s->sectionPtr);
+    }
 }
 
 int
@@ -1355,7 +1360,7 @@ ClClassGetMethQualifierCount(ClClass * cls, int id)
 
   m = (ClMethod *) ClObjectGetClSection(&cls->hdr, &cls->methods);
   if (id < 0 || id > cls->methods.used)
-    return 1;
+    return -1;
   return (m + id)->qualifiers.used;
 }
 
@@ -1366,7 +1371,7 @@ ClClassGetMethParameterCount(ClClass * cls, int id)
 
   m = (ClMethod *) ClObjectGetClSection(&cls->hdr, &cls->methods);
   if (id < 0 || id > cls->methods.used)
-    return 1;
+    return -1;
   return (m + id)->parameters.used;
 }
 
@@ -1377,7 +1382,7 @@ ClClassGetMethParmQualifierCount(ClClass * cls, ClMethod * m, int id)
 
   p = (ClParameter *) ClObjectGetClSection(&cls->hdr, &m->parameters);
   if (id < 0 || id > p->qualifiers.used)
-    return 1;
+    return -1;
   return (p + id)->qualifiers.used;
 }
 
@@ -1866,9 +1871,10 @@ void
 ClClassFreeClass(ClClass * cls)
 {
   if (cls->hdr.flags & HDR_Rebuild) {
+    int meths = ClClassGetMethodCount(cls);
     freeQualifiers(&cls->hdr, &cls->qualifiers);
     freeProperties(&cls->hdr, &cls->properties);
-    freeMethods(&cls->hdr, &cls->methods);
+    freeMethods(&cls->hdr, &cls->methods, meths);
     freeStringBuf(&cls->hdr);
     freeArrayBuf(&cls->hdr);
   }
@@ -2010,7 +2016,7 @@ ClClassGetPropQualifierCount(ClClass * cls, int id)
 
   p = (ClProperty *) ClObjectGetClSection(&cls->hdr, &cls->properties);
   if (id < 0 || id > cls->properties.used)
-    return 1;
+    return -1;
   return (p + id)->qualifiers.used;
 }
 

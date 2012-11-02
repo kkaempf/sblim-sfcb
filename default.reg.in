@@ -1,10 +1,10 @@
 [$ClassProvider$]
    provider: ClassProvider
-   location: sfcClassProviderGz
+   location: sfcClassProviderSf
    type: class method
    unload: never
    namespace: *
-   parameters: cacheLimit=10
+#   parameters: cacheLimit=10
 #
 [$DefaultProvider$]
    provider: InternalProvider
