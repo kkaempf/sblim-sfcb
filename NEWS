@@ -22,6 +22,7 @@ Bugs fixed:
 - 3579637 SFCB should check ftok return code
 - 3582062 Various additional error checking
 - 3580137 Classname needed in *ActivateFilter
+- 3585274 Local connect kills tracing
 
 Changes in 1.3.15
 =================

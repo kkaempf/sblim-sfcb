@@ -121,7 +121,7 @@ void _sfcb_trace_init()
    FILE *ferr = NULL;
    int tryid = 0xDEB001;
 
-   while ((shmid = shmget(tryid, sizeof(unsigned long), (IPC_CREAT | 0660))) < 0 && (errno == EEXIST)) tryid++;
+   while ((shmid = shmget(tryid, sizeof(unsigned long), (IPC_EXCL | IPC_CREAT | 0660))) < 0 && (errno == EEXIST)) tryid++;
    mlogf(M_INFO,M_SHOW,"--- Shared memory ID for tracing: %x\n", tryid);
    if (shmid < 0) {
      mlogf(M_ERROR,M_SHOW, "shmget(%x) failed in %s at line %d.\n", tryid, __FILE__, __LINE__ );
