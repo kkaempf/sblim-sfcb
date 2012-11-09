@@ -576,14 +576,9 @@ int main(int argc, char *argv[])
    int syslogLevel=LOG_ERR;
    long dSockets,sSockets,pSockets;
    char *pauseStr;
+   int daemonize=0;
 
    sfcbUseSyslog=1;
-   /* SF 3462309 - If there is an instance running already, return */
-   int pid_found = 0;
-   if ((pid_found = sfcb_is_running()) != 0) {
-      mlogf(M_ERROR, M_SHOW, " --- A previous instance of sfcbd [%d] is running. Exiting.\n", pid_found);
-      exit(1);
-   }
 
    name = strrchr(argv[0], '/');
    if (name != NULL) ++name;
@@ -627,8 +622,7 @@ int main(int argc, char *argv[])
 	       break;
 
 	   case 'd':
-	       daemon(0, 0);
-	       currentProc=sfcBrokerPid=getpid(); /* req. on some systems */
+           daemonize=1;
 	       break;
 
 	   case 'h':
@@ -686,6 +680,18 @@ int main(int argc, char *argv[])
    {
       fprintf(stderr,"SFCB not started: unrecognized config property %s\n",argv[optind]);
       usage(1);
+   }
+
+   /* SF 3462309 - If there is an instance running already, return */
+   int pid_found = 0;
+   if ((pid_found = sfcb_is_running()) != 0) {
+      mlogf(M_ERROR, M_SHOW, " --- A previous instance of sfcbd [%d] is running. Exiting.\n", pid_found);
+      exit(1);
+   }
+
+   if (daemonize){
+    daemon(0, 0);
+    currentProc=sfcBrokerPid=getpid(); /* req. on some systems */
    }
 
    startLogging(syslogLevel,1);
