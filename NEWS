@@ -121,6 +121,7 @@ Bugs fixed:
 - 3582062 Various additional error checking
 - 3580137 Classname needed in *ActivateFilter
 - 3585274 Local connect kills tracing
+- 3528056 sfcbd --version doesn't always work
 
 Changes in 1.3.15
 =================
