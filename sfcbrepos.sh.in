@@ -154,6 +154,13 @@ then
 	fi
     fi
     
+    # Check which ClassProvider we're using. If ClassProviderSf, -t is needed (at least for now)
+    if [ -z "$reduced" ] && [ -z "$force" ] && grep ClassProviderSf $registrationdir/providerRegister > /dev/null
+    then
+            echo "ClassProviderSf being used. Adding -t option."
+            reduced="-t"
+    fi
+
     # Compile all staged namespace directories
     instmigfile=/tmp/sfcbinst.mof
     mofsubdirs=`find $stagingdir/mofs/* -type d -print 2> /dev/null`
