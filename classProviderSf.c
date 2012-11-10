@@ -401,15 +401,17 @@ newClassRegister(char *fname)
       }
 
       if (first) {
-        int             v = -1;
+        int v = -1;
+        int r = -1;
         first = 0;
-        if (ClVerifyObjImplLevel(cr->vr))
-          continue;
+	if (ClVerifyObjImplLevel(cr->vr) && (r = cr->vr->options == ClTypeClassReducedRep)) 
+	  continue;
+
         if (cr->vr)
           v = cr->vr->objImplLevel;
         mlogf(M_ERROR, M_SHOW,
-              "--- %s contains unsupported object implementation format (%d) - directory skipped\n",
-              fin, v);
+              "--- %s contains unsupported object implementation format (level %d%s) - directory skipped\n",
+              fin, v, (r) ? ", reduced" : ", not reduced" );
         return NULL;
       }
 
@@ -822,7 +824,7 @@ getClass(ClassRegister * cr, const char *clsName, ReadCtl *ctl)
     cc->ft = CMPIConstClassFT;
     cc->ft->relocate(cc);
 
-    char* claz = CMGetCharPtr(cc->ft->getClassName(cc, NULL));
+    //    char* claz = CMGetCharPtr(cc->ft->getClassName(cc, NULL));
 
     if (*ctl == tempRead) {
       _SFCB_RETURN(cc);
