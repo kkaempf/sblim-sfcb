@@ -1648,6 +1648,9 @@ getClass(Client * mb,
   _SFCB_TRACE(1, ("--- Getting Provider context"));
   irc = getProviderContext(&binCtx);
 
+  CMRelease(ns);
+  CMRelease(cn);
+
   _SFCB_TRACE(1, ("--- Provider context gotten"));
   if (irc == MSG_X_PROVIDER) {
     resp = invokeProvider(&binCtx);
