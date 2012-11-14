@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.49 2012/10/06 01:19:15 buccella Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.50 2012/11/14 22:04:28 mchasal Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -1617,6 +1617,9 @@ static CMPIConstClass * getClass(
 
    _SFCB_TRACE(1, ("--- Getting Provider context"));
    irc = getProviderContext(&binCtx, (OperationHdr *) &oHdr);
+
+   CMRelease(ns);
+   CMRelease(cn);
 
    _SFCB_TRACE(1, ("--- Provider context gotten"));
    if (irc == MSG_X_PROVIDER) {

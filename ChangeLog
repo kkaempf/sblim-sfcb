@@ -1,3 +1,9 @@
+2012-11-14 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* cimcClientSfcbLocal.c:
+	[ 3381209 ] Memory leak inside getClass() used by invokeMethod()
+	(Patch contributed by sanbid)
+
 2012-11-09 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* sfcBroker.c:
