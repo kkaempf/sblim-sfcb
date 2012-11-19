@@ -1,3 +1,8 @@
+2012-11-19  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* brokerUpc.c:
+	[ 3588557 ] Object path in deliverIndication can remain resident
+
 2012-11-14 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* cimcClientSfcbLocal.c:

@@ -1,5 +1,5 @@
 /*
- * $Id: brokerUpc.c,v 1.43 2012/10/31 01:40:09 buccella Exp $
+ * $Id: brokerUpc.c,v 1.44 2012/11/19 23:07:47 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -32,6 +32,7 @@
 #include "msgqueue.h"
 #include "utilft.h"
 #include "config.h"
+#include "objectpath.h"
 
 #ifdef HAVE_INDICATIONS
 #define SFCB_INCL_INDICATION_SUPPORT 1
@@ -159,8 +160,9 @@ static CMPIStatus deliverIndication(const CMPIBroker* mb, const CMPIContext* ctx
       }
       classMatch = 0; /* 3483200 */
       se=se->next;
-   }   
-   
+   }
+   CMRelease(indop); /* 3588557 */
+
    _SFCB_RETURN(st);
 #else 
 
