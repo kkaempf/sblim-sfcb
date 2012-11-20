@@ -25,6 +25,7 @@ Bugs fixed:
 - 3579637 SFCB should check ftok return code
 - 3562530 TestMiscProvider poorly tests CMGetPropertyAt
 - 3585929 Additional ClassProviderSf prep work
+- 3588775 Startup will hang if indication support is disabled
 
 Changes in 1.4.2
 ================

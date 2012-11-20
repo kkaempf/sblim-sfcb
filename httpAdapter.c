@@ -2148,7 +2148,9 @@ httpDaemon(int argc, char *argv[], int sslMode)
 
   /* wait until providerMgr is ready to start accepting reqs
      (that is, when interopProvider is finished initializing) */
+#ifdef SFCB_INCL_INDICATION_SUPPORT
   semAcquire(sfcbSem, INIT_PROV_MGR_ID);
+#endif
 
   for (;;) {
 
