@@ -166,6 +166,7 @@ deliverIndication(const CMPIBroker * mb, const CMPIContext *ctx,
     classMatch = 0; /* 3483200 */
     se = se->next;
   }
+  CMRelease(indop); /* 3588557 */
 
   _SFCB_RETURN(st);
 #else
