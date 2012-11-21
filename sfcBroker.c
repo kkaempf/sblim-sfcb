@@ -425,10 +425,7 @@ startHttpd(int argc, char *argv[], int sslMode)
           "--- Error retrieving http user info from config file.\n");
     exit(2);
   }
-  if (httpSFCB) {
-    // This indicates that we should use the SFCB user by default
-    httpuid = -1;
-  } else {
+  if (!httpSFCB) {
     // Get the user specified in the config file
     if (getControlChars("httpUser", &httpUser)) {
       mlogf(M_ERROR, M_SHOW,
@@ -456,7 +453,7 @@ startHttpd(int argc, char *argv[], int sslMode)
   }
   if (pid == 0) {
     currentProc = getpid();
-    if (httpuid != -1) {
+    if (!httpSFCB) {
       // Set the real and effective uids
       rc = setreuid(httpuid, httpuid);
       if (rc == -1) {
