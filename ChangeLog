@@ -1,3 +1,8 @@
+2012-11-21  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* sfcBroker.c:
+	[ 3452703 ] Default http uid used causes unexpected behavior
+
 2012-11-19  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* brokerUpc.c:
