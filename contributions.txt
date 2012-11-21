@@ -200,6 +200,7 @@ Josef Moellers
 Santosh Bidaralli, Dell
 -----------------------
 06/22/2011 [ 3324578 ] getInstance() up call does not close provider context
+11/14/2012 [ 3381209 ] Memory leak inside getClass() used by invokeMethod()
 
 Zane Bitter, Red Hat
 --------------------
