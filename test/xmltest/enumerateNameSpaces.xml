@@ -5,7 +5,7 @@
       <IMETHODCALL NAME="EnumerateInstances">
         <LOCALNAMESPACEPATH>
           <NAMESPACE NAME="root"/>
-          <NAMESPACE NAME="PG_InterOp"/>
+          <NAMESPACE NAME="InterOp"/>
         </LOCALNAMESPACEPATH>
         <IPARAMVALUE NAME="ClassName">
           <CLASSNAME NAME="CIM_Namespace"/>

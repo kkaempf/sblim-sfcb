@@ -9,6 +9,7 @@ New features:
 - 3506453 Support peer cert verification for SSL indications
 - 3531210 Allow indication delivery timeout tuning
 - 3562538 Enable curl debug via env variable
+- 3590203 Remove pg_interop checking in SFCB 1.4
 
 Bugs fixed: 
 - 3495804 Cleanup: httpProcId still defined, wrong define in cimXmlGen

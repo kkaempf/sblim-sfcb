@@ -539,10 +539,7 @@ getNsReg(const CMPIObjectPath * ref, int *rc)
 
   if (nsi && nsi->hdl) {
     ns = (char *) nsi->hdl;
-    if (strcasecmp(ns, "root/pg_interop") == 0)
-      cReg = nsHt->ft->get(nsHt, "root/interop");
-    else
-      cReg = nsHt->ft->get(nsHt, ns);
+    cReg = nsHt->ft->get(nsHt, ns);
     return cReg;
   }
 

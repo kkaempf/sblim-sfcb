@@ -122,7 +122,7 @@ static int
 interOpNameSpace(const CMPIObjectPath * cop, CMPIStatus *st)
 {
   char           *ns = (char *) CMGetNameSpace(cop, NULL)->hdl;
-  if (strcasecmp(ns, "root/interop") && strcasecmp(ns, "root/pg_interop")) {
+  if (strcasecmp(ns, "root/interop")) {
     if (st)
       setStatus(st, CMPI_RC_ERR_FAILED,
                 "Object must reside in root/interop");
