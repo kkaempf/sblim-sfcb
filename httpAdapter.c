@@ -195,10 +195,6 @@ typedef struct _buffer {
 } Buffer;
 
 #ifdef HAVE_IPV6
-#define USE_INET6
-#endif
-
-#ifdef USE_INET6
 static int fallback_ipv4;
 #endif
 
@@ -1100,7 +1096,7 @@ doHttpRequest(CommHndl conn_fd)
       struct sockaddr_storage from;
       socklen_t from_len = sizeof(from);
       getpeername(conn_fd.socket, (struct sockaddr *)&from, &from_len);
-#ifdef USE_INET6
+#ifdef HAVE_IPV6
       char ipstr[INET6_ADDRSTRLEN] = {0};
 #else
       char ipstr[INET_ADDRSTRLEN] = {0};
@@ -1661,7 +1657,7 @@ getSocket()
   int             fd;
   int             ru = 1;
 
-#ifdef USE_INET6                // need to check
+#ifdef HAVE_IPV6                // need to check
   fd = socket(PF_INET6, SOCK_STREAM, IPPROTO_TCP);
   if (fd < 0) {
     mlogf(M_INFO, M_SHOW, "--- Using IPv4 address\n");
@@ -1670,14 +1666,14 @@ getSocket()
   }
 #else
   fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-#endif                          // USE_INET6
+#endif                          // HAVE_IPV6
   setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *) &ru, sizeof(ru));
   if (bindSocketToDevice(fd) == -1) return -1;
 
   return fd;
 }
 
-#ifdef USE_INET6
+#ifdef HAVE_IPV6
 static struct sockaddr *
 prepSockAddr6(int port, void *ssin, socklen_t * sin_len)
 {
@@ -1729,7 +1725,7 @@ bindToPort(int sock, int port, void *ssin, socklen_t * sin_len)
   if (getControlBool("httpLocalOnly", &httpLocalOnly))
     httpLocalOnly = 0;
 
-#ifdef USE_INET6
+#ifdef HAVE_IPV6
   if (!fallback_ipv4)
     sin = prepSockAddr6(port, ssin, sin_len);
   else
@@ -1796,7 +1792,7 @@ static void
 acceptRequest(int sock, void *ssin, socklen_t sin_len, int sslMode)
 {
 
-#ifdef USE_INET6
+#ifdef HAVE_IPV6
   struct sockaddr_in6 *sin = ssin;
 #else
   struct sockaddr_in *sin = ssin;
@@ -1892,7 +1888,7 @@ int
 httpDaemon(int argc, char *argv[], int sslMode)
 {
 
-#ifdef USE_INET6
+#ifdef HAVE_IPV6
   struct sockaddr_in6 httpSin;
 #else
   struct sockaddr_in httpSin;
@@ -1909,7 +1905,7 @@ httpDaemon(int argc, char *argv[], int sslMode)
   int             maxfdp1;      /* highest-numbered fd +1 */
 
 #ifdef USE_SSL
-#ifdef USE_INET6
+#ifdef HAVE_IPV6
   struct sockaddr_in6 httpsSin;
 #else
   struct sockaddr_in httpsSin;

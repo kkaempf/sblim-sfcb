@@ -96,8 +96,11 @@ AC_ARG_ENABLE(docs,
 		[Enable generation of API documentation.])])
 
 AC_ARG_ENABLE(ipv6,
-	[AC_HELP_STRING([--enable-ipv6],
-		[include ipv6 support for SFCB.])])
+	[AC_HELP_STRING([--disable-ipv6],
+		[Disable IPv6 support for SFCB])],
+	[enable_ipv6=$enableval],
+	[enable_ipv6="yes"]
+	)
 
 AC_ARG_ENABLE(tests,
 	[AC_HELP_STRING([--enable-tests(=TESTS)],
