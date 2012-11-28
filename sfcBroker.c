@@ -927,6 +927,7 @@ mlogf(M_INFO, M_SHOW, "--- Request handlers enabled:%s\n",rtmsg);
 
   processProviderMgrRequests();
 
+  stopBroker(NULL);
   return 0;
 }
 /* MODELINES */
