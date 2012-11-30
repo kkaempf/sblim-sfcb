@@ -377,23 +377,6 @@ handleSigChld(int sig)
   errno = oerrno;
 }
 
-#ifdef NEEDS_CLEANUP
-static void
-handleSigterm(int sig)
-{
-
-  if (!terminating) {
-    fprintf(stderr, "--- %s - %d exiting due to signal %d\n", processName,
-            currentProc, sig);
-    dumpTiming(currentProc);
-  }
-  terminating = 1;
-  if (providerProcess)
-    kill(currentProc, SIGKILL);
-  exit(1);
-}
-#endif
-
 static void
 handleSigSegv(int sig)
 {

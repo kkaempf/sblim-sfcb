@@ -29,6 +29,7 @@ Bugs fixed:
 - 3585929 Additional ClassProviderSf prep work
 - 3588775 Startup will hang if indication support is disabled
 - 3590827 Exit if classprovider fails
+- 3591112 NEEDS_CLEANUP ifdef
 
 Changes in 1.4.2
 ================

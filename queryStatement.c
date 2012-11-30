@@ -209,16 +209,6 @@ qcClear(QLCollector * qc)
   qc->propName = NULL;
 }
 
-#ifdef NEEDS_CLEANUP
-static QLOperand *
-newNameOperand(QLStatement * qs)
-{
-  QLOperand      *o = newPropQueryOperand(qs, newPropertyNameData(qs));
-  QL_TRACE(fprintf(stderr, "newNameOperand %p\n", o));
-  return o;
-}
-#endif
-
 static void
 qcAddPropIdentifier(QLCollector * qc, QLStatement * qs, char *cls,
                     char *prop, int index)
