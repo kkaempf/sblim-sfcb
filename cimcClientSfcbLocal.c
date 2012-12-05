@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimcClientSfcbLocal.c,v 1.50 2012/11/14 22:04:28 mchasal Exp $
+ * $Id: cimcClientSfcbLocal.c,v 1.51 2012/12/05 23:29:02 mchasal Exp $
  *
  * © Copyright IBM Corp. 2006, 2007
  *
@@ -2024,6 +2024,11 @@ static CMPIDateTime *newDateTimeFromChars(ClientEnv* ce, const char *utcTime, CM
    return NewCMPIDateTimeFromChars(utcTime,rc); 
 }
 
+void _Cleanup_SfcbLocal_Env(void)
+{
+    _SFCB_TRACE_STOP();
+}
+
 ClientEnv* _Create_SfcbLocal_Env(char *id, unsigned int options, int *rc, char **msg)
 {
  
@@ -2063,7 +2068,8 @@ ClientEnv* _Create_SfcbLocal_Env(char *id, unsigned int options, int *rc, char *
        }
        _SFCB_TRACE_START(tracelevel, tracemask);
     }
-    
+   
+    atexit(_Cleanup_SfcbLocal_Env); 
     return env;
  }
 /* ************************************************************************************** */
