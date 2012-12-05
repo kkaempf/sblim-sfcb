@@ -93,7 +93,7 @@ extern void     dump(char *msg, void *a, int l);
 extern void     showClHdr(void *ihdr);
 extern int      forkProvider(ProviderInfo * info, char **msg);
 
-static int      startUpProvider(const char *ns, const char *name);
+static int      startUpProvider(const char *ns, const char *name, int noResp);
 
 extern void    *markHeap();
 extern void     releaseHeap(void *hc);
@@ -995,13 +995,19 @@ processProviderMgrRequests()
   sigfillset(&mask);
   sigprocmask(SIG_SETMASK, &mask, &old_mask);
 
-  startUpProvider("root/interop", "$ClassProvider$");
+  rc=startUpProvider("root/interop", "$ClassProvider$",0);
+  if (rc != 0 ) {
+    mlogf(M_ERROR,M_SHOW,"--- ClassProvider failed to start, rc:%d\n",rc);
+    sigprocmask(SIG_SETMASK, &old_mask, NULL);
+    _SFCB_RETURN();
+  }
+    
   /* wait until classProvider is finished init'ing */
   semAcquire(sfcbSem,INIT_CLASS_PROV_ID);
 
 #ifdef SFCB_INCL_INDICATION_SUPPORT
   if (interOpProvInfoPtr != forceNoProvInfoPtr) {
-    startUpProvider("root/interop", "$InterOpProvider$");
+    startUpProvider("root/interop", "$InterOpProvider$",1);
     /* note: we don't wait here for interopProvider to finish init'ing, 
        because its init has some reqs that providerMgr will need to process.
        httpAdapter waits for interop to init before accepting HTTP requests */
@@ -1009,7 +1015,7 @@ processProviderMgrRequests()
 
 #endif
 #ifdef HAVE_SLP
-  startUpProvider("root/interop", "$ProfileProvider$");
+  startUpProvider("root/interop", "$ProfileProvider$",1);
 #endif
    sigprocmask(SIG_SETMASK, &old_mask, NULL);
 
@@ -1766,7 +1772,7 @@ isChild(const char *ns, const char *parent, const char *child)
 }
 
 static int
-startUpProvider(const char *ns, const char *name)
+startUpProvider(const char *ns, const char *name, int noResp)
 {
   _SFCB_ENTER(TRACE_PROVIDERMGR, "startUpProvider");
 
@@ -1785,8 +1791,8 @@ startUpProvider(const char *ns, const char *name)
   irc = _methProvider(&binCtx, &req);
 
   if (irc == MSG_X_PROVIDER) {
-    localInvokeMethod(&binCtx, path, "_startup", in, NULL, &rc, 1);
-    irc = (rc.rc == CMPI_RC_OK);
+    localInvokeMethod(&binCtx, path, "_startup", in, NULL, &rc, noResp);
+    irc=rc.rc;
   } else
     irc = 0;
 

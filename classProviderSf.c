@@ -1407,6 +1407,7 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
   cReg = getNsReg(ref, &rc);
   if (cReg == NULL) {
     CMPIStatus      st = { CMPI_RC_ERR_INVALID_NAMESPACE, NULL };
+    semRelease(sfcbSem,INIT_CLASS_PROV_ID);
     _SFCB_RETURN(st);
   }
 
