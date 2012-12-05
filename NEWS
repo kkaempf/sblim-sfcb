@@ -11,6 +11,7 @@ New features:
 - 3562538 Enable curl debug via env variable
 - 3590203 Remove pg_interop checking in SFCB 1.4
 - 3590202 Enable IPv6 by default for SFCB 1.4
+- 3592822 Bump schema to 2.34
 
 Bugs fixed: 
 - 3495804 Cleanup: httpProcId still defined, wrong define in cimXmlGen
