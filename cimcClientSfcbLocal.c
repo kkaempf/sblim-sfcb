@@ -2081,6 +2081,12 @@ newDateTimeFromChars(ClientEnv *ce, const char *utcTime, CMPIStatus *rc)
   return NewCMPIDateTimeFromChars(utcTime, rc);
 }
 
+void _Cleanup_SfcbLocal_Env(void)
+{
+printf("MCS stop\n");
+    _SFCB_TRACE_STOP();
+}
+
 ClientEnv      *
 _Create_SfcbLocal_Env(char *id, unsigned int options, int *rc, char **msg)
 {
@@ -2121,6 +2127,7 @@ _Create_SfcbLocal_Env(char *id, unsigned int options, int *rc, char **msg)
     }
     _SFCB_TRACE_START(tracelevel, tracemask);
   }
+  atexit(_Cleanup_SfcbLocal_Env);
 
   return env;
 }

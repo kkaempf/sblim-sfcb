@@ -133,6 +133,7 @@ Bugs fixed:
 - 3588557 Object path in deliverIndication can remain resident
 - 3452703 Default http uid used causes unexpected behavior
 - 3381209 Memory leak inside getClass() used by invokeMethod()
+- 3593006 trace shared mem leak
 
 Changes in 1.3.15
 =================
