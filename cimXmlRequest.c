@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlRequest.c,v 1.75 2012/08/08 20:35:35 mchasal Exp $
+ * $Id: cimXmlRequest.c,v 1.76 2012/12/12 22:09:30 buccella Exp $
  *
  * © Copyright IBM Corp. 2005, 2007
  *
@@ -2163,11 +2163,15 @@ static RespSegments invokeMethod(CimXmlRequestContext * ctx, RequestHdr * hdr)
 	 _SFCB_RETURN(rsegs);
        }
      }
-      
-      if (p->value.value) {
-	CMPIValue val = str2CMPIValue(p->type, p->value, &p->valueRef, req->op.nameSpace.data, &st);
-	CMAddArg(in, p->name, &val, p->type);
-      }
+
+     if (p->value.value) {
+       CMPIValue val = str2CMPIValue(p->type, p->value, &p->valueRef, req->op.nameSpace.data, &st);
+       if (st.rc) {
+         rsegs = methodErrResponse(hdr, getErrSegment(st.rc, NULL));
+         _SFCB_RETURN(rsegs);
+       }
+       CMAddArg(in, p->name, &val, p->type);
+     }
    }
 
    sreq.in = setArgsMsgSegment(in);

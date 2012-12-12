@@ -28,6 +28,7 @@ Bugs fixed:
 - 3588557 Object path in deliverIndication can remain resident
 - 3452703 Default http uid used causes unexpected behavior
 - 3593006 trace shared mem leak
+- 3582039 SFCB should reject empty <VALUE> in most instances
 
 Changes in 1.3.15
 =================

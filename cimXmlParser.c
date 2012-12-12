@@ -1,6 +1,6 @@
 
 /*
- * $Id: cimXmlParser.c,v 1.38 2012/06/14 23:43:20 buccella Exp $
+ * $Id: cimXmlParser.c,v 1.39 2012/12/12 22:09:30 buccella Exp $
  *
  *  © Copyright IBM Corp. 2005, 2007
  *
@@ -947,6 +947,7 @@ static int procValue(YYSTYPE * lvalp, ParserControl * parm)
       char *v;
       if (attrsOk(parm->xmb, elm, attr, "VALUE", ZTOK_VALUE)) {
          v=getContent(parm->xmb); /* v is a pointer to where the content starts*/
+         lvalp->xtokValue.isEmpty = (v != NULL && strlen(v) > 0) ? 0 : 1;
          lvalp->xtokValue.value = v;
          return XTOK_VALUE;
       }
@@ -1019,6 +1020,7 @@ static int procValueNamedInstance(YYSTYPE * lvalp, ParserControl * parm)
       if (attrsOk(parm->xmb, elm, attr, "VALUE.NAMEDINSTANCE",
            ZTOK_VALUENAMEDINSTANCE)) {
          lvalp->xtokValue.value = getContent(parm->xmb);
+         lvalp->xtokValue.isEmpty = 0;
          return XTOK_VALUENAMEDINSTANCE;
       }
    }
@@ -1035,6 +1037,7 @@ static int procInstancePath(YYSTYPE * lvalp, ParserControl * parm)
       if (attrsOk(parm->xmb, elm, attr, "INSTANCEPATH",
            ZTOK_INSTANCEPATH)) {
          lvalp->xtokValue.value = getContent(parm->xmb);
+         lvalp->xtokValue.isEmpty = 0;
          return XTOK_INSTANCEPATH;
       }
    }
@@ -1051,6 +1054,7 @@ static int procNameSpacePath(YYSTYPE * lvalp, ParserControl * parm)
       if (attrsOk(parm->xmb, elm, attr, "NAMESPACEPATH",
            ZTOK_NAMESPACEPATH)) {
          lvalp->xtokValue.value = getContent(parm->xmb);
+         lvalp->xtokValue.isEmpty = 0;
          return XTOK_NAMESPACEPATH;
       }
    }
@@ -1067,6 +1071,7 @@ static int procValueReference(YYSTYPE * lvalp, ParserControl * parm)
       if (attrsOk(parm->xmb, elm, attr, "VALUE.REFERENCE",
            ZTOK_VALUEREFERENCE)) {
          lvalp->xtokValue.value = getContent(parm->xmb);
+         lvalp->xtokValue.isEmpty = 0;
          return XTOK_VALUEREFERENCE;
       }
    }

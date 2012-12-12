@@ -1,0 +1,32 @@
+<!-- A test for 3582039: SFCB should reject empty VALUE in most instances
+     SFCB should reject this XML because param AnInt has a child with an empty VALUE tag. 
+     Checking occurs before it is sent to a provider, so no specific provider needs to be
+     installed for this test to work.
+-->
+
+<?xml version="1.0" encoding="utf-8" ?>
+<CIM CIMVERSION="2.0" DTDVERSION="2.0">
+ <MESSAGE ID="87872" PROTOCOLVERSION="1.0">
+  <SIMPLEREQ>
+    <METHODCALL NAME="nonexistantmethod">
+      <LOCALCLASSPATH>
+        <LOCALNAMESPACEPATH>
+          <NAMESPACE NAME="root"/>
+          <NAMESPACE NAME="cimv2"/>
+        </LOCALNAMESPACEPATH>
+        <CLASSNAME NAME="Sample_Method"/>
+       </LOCALCLASSPATH>
+       <PARAMVALUE NAME="Name" PARAMTYPE="string">
+         <VALUE></VALUE>
+       </PARAMVALUE>
+       <PARAMVALUE NAME="AnIntArr" PARAMTYPE="uint16">
+	 <VALUE.ARRAY>
+         <VALUE></VALUE>
+	 </VALUE.ARRAY>
+       </PARAMVALUE>
+
+     </METHODCALL>
+   </SIMPLEREQ>
+ </MESSAGE>
+</CIM>
+

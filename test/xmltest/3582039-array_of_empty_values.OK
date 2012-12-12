@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<CIM CIMVERSION="2.0" DTDVERSION="2.0">
+<MESSAGE ID="87872" PROTOCOLVERSION="1.0">
+<SIMPLERSP>
+<METHODRESPONSE NAME="nonexistantmethod">
+<ERROR CODE="4" DESCRIPTION="One or more parameter values passed to the method were invalid"/>
+</METHODRESPONSE>
+</SIMPLERSP>
+</MESSAGE>
+</CIM>

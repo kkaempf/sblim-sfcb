@@ -349,6 +349,12 @@ CMPIValue str2CMPIValue(CMPIType type, XtokValue val, XtokValueReference *ref, c
       type=guessType(val.value);
    }
 
+   /* empty VALUE for numerics is invalid XML (DSP201) */
+   if ((val.isEmpty) && (type & CMPI_UINT) && !(type & CMPI_ARRAY)) {
+     status->rc = CMPI_RC_ERR_INVALID_PARAMETER;
+     return (CMPIValue)CMPI_null;
+   }
+
    if (type & CMPI_ARRAY) {
      /* array type received -- needs special handling */
      int i, max;
@@ -370,13 +376,17 @@ CMPIValue str2CMPIValue(CMPIType type, XtokValue val, XtokValueReference *ref, c
      value.array = TrackedCMPIArray(max,t,NULL);
      if (value.array != NULL) {
        for (i=0; i<max; i++) {
-	 v = str2CMPIValue(t, arr->values[i], refarr->values+i,ns, &rc);
-	 CMSetArrayElementAt(value.array, i, &v, t); 
+         v = str2CMPIValue(t, arr->values[i], refarr->values+i,ns, &rc);
+         if (rc.rc) {
+           status->rc = rc.rc;
+           return (CMPIValue)CMPI_null;    
+         }
+         CMSetArrayElementAt(value.array, i, &v, t); 
        }
        return value;
      }
    }
-   
+
    switch (type) {
    case CMPI_char16:
       value.char16 = *val.value;

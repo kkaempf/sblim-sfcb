@@ -1,3 +1,9 @@
+2012-12-12  Chris Buccella  <buccella@linux.vnet.ibm.com>
+
+	* cimXmlGen.c, cimXmlParser.c, cimXmlParser.h, cimXmlRequest.c,
+	test/xmltest/3582039-*.[xml,OK]:
+	[ 3582039 ] SFCB should reject empty <VALUE> in most instances
+
 2012-12-05 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
 
 	* cimcClientSfcbLocal.c:
