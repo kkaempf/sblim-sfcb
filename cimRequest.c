@@ -1848,14 +1848,11 @@ handleCimRequest(CimRequestContext * ctx, int flags, char * more)
 #endif
     if (hdr.rc) {
       if (hdr.methodCall) {
-        rs = methodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
-                                                 "invalid methodcall payload"));
+        rs = methodErrResponse(&hdr, getErrSegment(hdr.rc, hdr.errMsg));
       } else {
         if(!hdr.errMsg) hdr.errMsg = strdup("invalid imethodcall payload");
         rs = iMethodErrResponse(&hdr, getErrSegment(hdr.rc,
                                                   hdr.errMsg));
-//      rs = iMethodErrResponse(&hdr, getErrSegment(CMPI_RC_ERR_FAILED,
-//                                                  "invalid imethodcall XML"));
       }
     } 
 #ifdef ALLOW_UPDATE_EXPIRED_PW

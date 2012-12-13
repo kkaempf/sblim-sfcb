@@ -1427,10 +1427,15 @@ buildInvokeMethodRequest(void *parm)
     }
 
     if (p->value.value) {
-      CMPIValue       val = str2CMPIValue(p->type, p->value, &p->valueRef,
-                                          req->op.nameSpace.data, &st);
+      CMPIValue val = str2CMPIValue(p->type, p->value, &p->valueRef, req->op.nameSpace.data, &st);
+      if (st.rc) {
+        hdr->rc = st.rc;
+        hdr->errMsg = NULL;
+        return;
+      }
       CMAddArg(in, p->name, &val, p->type);
     }
+
   }
 
   sreq->in = setArgsMsgSegment(in);

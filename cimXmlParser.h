@@ -99,6 +99,7 @@ typedef struct xtokValue {
     struct xtokClass *class;
   };
   TypeValue       type;
+  char isEmpty;
 } XtokValue;
 
 typedef struct xtokValueArray {
