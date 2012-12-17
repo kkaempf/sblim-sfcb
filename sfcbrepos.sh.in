@@ -2,12 +2,10 @@
 
 usage() 
 {
-    echo "usage: $0 [-h] [-f] [-i] [-b backendopt] [-c cimschemadir] [-s stagingdir] [-r registrationdir] " 1>&2 
+    echo "usage: $0 [-h] [-f] [-i] [-b backendopt] [-c cimschemadir] [-s stagingdir] [-r registrationdir] [-t format]" 1>&2 
 }
-
-args=`getopt fhtzib:s:r:c:X: $*`
+args=`getopt fhzib:s:r:c:t:X: $*`
 rc=$?
-
 if [ $rc = 127 ]
 then
     echo "warning: getopt not found ...continue without syntax check"
@@ -19,6 +17,8 @@ then
 fi
 
 set -- $args
+
+cpformat="auto"
 
 while [ -n "$1" ]
 do
@@ -40,8 +40,8 @@ do
 	  shift 2;;
       -c) cimschemadir=$2
 	  shift 2;;
-      -t) reduced="-t"
-          shift;;
+      -t) cpformat="$2"
+          shift 2;;
       -z) compress=1
           shift;;
       --) shift;
@@ -154,11 +154,16 @@ then
 	fi
     fi
     
-    # Check which ClassProvider we're using. If ClassProviderSf, -t is needed (at least for now)
-    if [ -z "$reduced" ] && [ -z "$force" ] && grep ClassProviderSf $registrationdir/providerRegister > /dev/null
+    # Check which ClassProvider we're using, and set $cpformat if "-t auto". If ClassProviderSf, "-t sf" is required (at least for now)
+    if [ "$cpformat" = "sf" ]
     then
-            echo "ClassProviderSf being used. Adding -t option."
-            reduced="-t"
+            cpformat="-t"
+    elif [ "$cpformat" = "auto" ] && grep ClassProviderSf $registrationdir/providerRegister > /dev/null
+    then
+            echo "Sf format being used."
+            cpformat="-t"
+    else
+            cpformat=""
     fi
 
     # Compile all staged namespace directories
@@ -198,7 +203,7 @@ then
         else
             instmigopt=""
         fi
-	    if ! sfcbmof -d $repositorydir -n $namespace -o classSchemas -I $cimschemadir -i CIM_Schema.mof $reduced $backendopt $instmigopt $mofdir/*.mof $globalmofs
+	    if ! sfcbmof -d $repositorydir -n $namespace -o classSchemas -I $cimschemadir -i CIM_Schema.mof $cpformat $backendopt $instmigopt $mofdir/*.mof $globalmofs
 	    then
             rm -f $instmigfile 2> /dev/null
 		    echo Failed compiling the MOF files. >&2

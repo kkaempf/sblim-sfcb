@@ -31,6 +31,7 @@ Bugs fixed:
 - 3588775 Startup will hang if indication support is disabled
 - 3590827 Exit if classprovider fails
 - 3591112 NEEDS_CLEANUP ifdef
+- 3591102 sfcbrepos and -t
 
 Changes in 1.4.2
 ================

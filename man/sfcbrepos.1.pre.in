@@ -54,6 +54,11 @@ qualifiers will often significantly reduce the size of the class repository.
 \fB\-X\fR \fIplatform\fR
 Alias of \fB-b\fR
 .TP
+\fB\-t\fR \fIformat\fR
+The format for the class repository. \fIsf\fR for reduced-size repositories read by 
+ClassProviderSf. Default is \fIauto\fR, which will auto-detect based on the contents of the 
+\fIproviderRegister\fR file.
+.TP
 \fB\-h\fR
 Display usage information and exit.
 .SH FILES
