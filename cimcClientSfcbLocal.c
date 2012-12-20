@@ -2083,7 +2083,6 @@ newDateTimeFromChars(ClientEnv *ce, const char *utcTime, CMPIStatus *rc)
 
 void _Cleanup_SfcbLocal_Env(void)
 {
-printf("MCS stop\n");
     _SFCB_TRACE_STOP();
 }
 
