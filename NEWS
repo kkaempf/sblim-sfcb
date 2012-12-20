@@ -32,6 +32,7 @@ Bugs fixed:
 - 3590827 Exit if classprovider fails
 - 3591112 NEEDS_CLEANUP ifdef
 - 3591102 sfcbrepos and -t
+- 3597939 Small leaks in cimXmlOps
 
 Changes in 1.4.2
 ================

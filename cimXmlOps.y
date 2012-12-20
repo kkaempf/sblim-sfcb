@@ -1420,6 +1420,7 @@ buildInvokeMethodRequest(void *parm)
       rc = updateMethodParamTypes(hdr);
 
       if (rc != CMPI_RC_OK) {
+        free(sreq);
         hdr->rc = rc;
         hdr->errMsg = NULL;
         return;
@@ -1429,6 +1430,7 @@ buildInvokeMethodRequest(void *parm)
     if (p->value.value) {
       CMPIValue val = str2CMPIValue(p->type, p->value, &p->valueRef, req->op.nameSpace.data, &st);
       if (st.rc) {
+        free(sreq);
         hdr->rc = st.rc;
         hdr->errMsg = NULL;
         return;

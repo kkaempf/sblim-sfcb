@@ -757,10 +757,12 @@ createClass(CimRequestContext * ctx, RequestHdr * hdr)
                          ((CreateClassReq *)(hdr->binCtx->bHdr))
                          ->cls.data);
     ClClassFreeClass(cl->hdl);
+    free(cl);
     if (resp->rc == CMPI_RC_OK) {
       if (resp) {
         free(resp);
       }
+      free(hdr->binCtx->bHdr);
       _SFCB_RETURN(iMethodResponse(hdr, NULL));
     }
     rs = iMethodErrResponse(hdr, getErrSegment(resp->rc,
