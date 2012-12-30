@@ -54,11 +54,15 @@ typedef struct control {
 static UtilHashTable *ct = NULL;
 
 char           *configfile = NULL;
+char           *ip4List= NULL;
+char           *ip6List= NULL;
 
 // Control initial values
 // { property, type, value}
 // Type: 0=string, 1=num, 2=bool, 3=unstripped string
 Control         init[] = {
+  {"ip4AddrList", 0, NULL},
+  {"ip6AddrList", 0, NULL},
   {"httpPort", 1, "5988"},
   {"enableHttp", 2, "true"},
   {"enableUds", 2, "true"},

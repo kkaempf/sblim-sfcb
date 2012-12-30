@@ -145,6 +145,7 @@ extern char    *getErrTrailer(int id, int rc, char *m);
 extern void     dumpTiming(int pid);
 extern char    *configfile;
 extern int      inet_aton(const char *cp, struct in_addr *inp);
+extern int      inet_pton(int af, const char *cp, void *buf);
 
 static unsigned int sessionId;
 extern char    *opsName[];
@@ -1651,15 +1652,14 @@ bindSocketToDevice(int sockfd)
 }
 
 static int
-getSocket()
+getSocket(sa_family_t fam)
 {
-  int             fd;
+  int             fd = -1;
   int             ru = 1;
 
 #ifdef HAVE_IPV6                // need to check
-  fd = socket(PF_INET6, SOCK_STREAM, IPPROTO_TCP);
+  if (fam==AF_INET6) fd = socket(PF_INET6, SOCK_STREAM, IPPROTO_TCP);
   if (fd < 0) {
-    mlogf(M_INFO, M_SHOW, "--- Using IPv4 address\n");
     fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     fallback_ipv4 = 1;
   }
@@ -1674,7 +1674,7 @@ getSocket()
 
 #ifdef HAVE_IPV6
 static struct sockaddr *
-prepSockAddr6(int port, void *ssin, socklen_t * sin_len)
+prepSockAddr6(char *ip, int port, void *ssin, socklen_t * sin_len)
 {
   struct sockaddr_in6 *sin = ssin;
 
@@ -1682,10 +1682,14 @@ prepSockAddr6(int port, void *ssin, socklen_t * sin_len)
   memset(sin, 0, *sin_len);
 
   sin->sin6_family = AF_INET6;
-  if (httpLocalOnly)
+  if (httpLocalOnly) {
     sin->sin6_addr = in6addr_loopback;
-  else
-    sin->sin6_addr = in6addr_any;
+  } else {
+    if (!inet_pton(AF_INET6, ip, &(sin->sin6_addr))) {
+      mlogf(M_ERROR, M_SHOW, "--- IP: %s is not a valid IPv6 address\n", ip);
+      return NULL;
+    }
+  }
   sin->sin6_port = htons(port);
 
   return (struct sockaddr *) sin;
@@ -1694,7 +1698,7 @@ prepSockAddr6(int port, void *ssin, socklen_t * sin_len)
 
 
 static struct sockaddr *
-prepSockAddr4(int port, void *ssin, socklen_t * sin_len)
+prepSockAddr4(char *ip, int port, void *ssin, socklen_t * sin_len)
 {
   struct sockaddr_in *sin = ssin;
 
@@ -1705,15 +1709,19 @@ prepSockAddr4(int port, void *ssin, socklen_t * sin_len)
   if (httpLocalOnly) {
     const char *loopback_int = "127.0.0.1";
     inet_aton(loopback_int, &(sin->sin_addr));
-  } else
-    sin->sin_addr.s_addr = INADDR_ANY;
+  } else {
+    if (!inet_aton(ip, &(sin->sin_addr))) {
+      mlogf(M_ERROR, M_SHOW, "--- IP: %s is not a valid IPv4 address\n", ip);
+      return NULL;
+    }
+  }
   sin->sin_port = htons(port);
 
   return (struct sockaddr *) sin;
 }
 
 static int
-bindToPort(int sock, int port, void *ssin, socklen_t * sin_len)
+bindToPort(int sock, int port, char *ip, void *ssin, socklen_t * sin_len)
 {
   struct sockaddr *sin;
 
@@ -1725,21 +1733,17 @@ bindToPort(int sock, int port, void *ssin, socklen_t * sin_len)
  
   char *l = "";
   char *r = "";
-  char *ip;
-
-  ip = httpLocalOnly ? "127.0.0.1" : "0.0.0.0";
 
 #ifdef HAVE_IPV6
   if (!fallback_ipv4) {
     l = "[";
     r = "]";
-    ip = httpLocalOnly ? "::1" : "::";
-    if (!(sin = prepSockAddr6(port, ssin, sin_len)))
+    if (!(sin = prepSockAddr6(ip, port, ssin, sin_len)))
       return 1;
   }
   else
 #endif
-    if (!(sin = prepSockAddr4(port, ssin, sin_len)))
+    if (!(sin = prepSockAddr4(ip, port, ssin, sin_len)))
       return 1;
 
   int maxtries = 5;
@@ -1916,7 +1920,8 @@ initSSL()
 #endif                          // USE_SSL
 
 int
-httpDaemon(int argc, char *argv[], int sslMode)
+httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr,
+    sa_family_t ipAddrFam, int sfcbPid)
 {
 
 #ifdef HAVE_IPV6
@@ -2093,11 +2098,11 @@ httpDaemon(int argc, char *argv[], int sslMode)
   }
 
   if (enableHttp) {
-    httpListenFd = getSocket();
+    httpListenFd = getSocket(ipAddrFam);
   }
 #ifdef USE_SSL
   if (sslMode) {
-    httpsListenFd = getSocket();
+    httpsListenFd = getSocket(ipAddrFam);
   }
 #endif                          // USE_SSL
 #ifdef HAVE_UDS
@@ -2120,12 +2125,12 @@ httpDaemon(int argc, char *argv[], int sslMode)
 
   int bindrc = 0;
   if (enableHttp) {
-    bindrc = bindToPort(httpListenFd, httpPort, &httpSin, &httpSin_len);
+    bindrc = bindToPort(httpListenFd, httpPort, ipAddr, &httpSin, &httpSin_len);
   }
 #ifdef USE_SSL
   if (sslMode) {
     bindrc |=
-        bindToPort(httpsListenFd, httpsPort, &httpsSin, &httpsSin_len);
+        bindToPort(httpsListenFd, httpsPort, ipAddr, &httpsSin, &httpsSin_len);
   }
 #endif
 #ifdef HAVE_UDS

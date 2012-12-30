@@ -12,6 +12,27 @@
 ## 
 
 ##------------------------------------- HTTP ----------------------------------
+## List of IPv4 addresses to bind to. The default behavior is to bind to any
+## available IP address. To bind to specific IPs enter a comma delimited list
+## of IPv4 addresses here. Note that a loopback address must be explicitly
+## listed if that is desired. Do not include "0.0.0.0" (i.e. INADDR_ANY) as it
+## will conflict with other addresses. All addresses are bound to http and/or
+## https according to the values of enableHttp and enableHttps.
+## The value listed here is ignored if the -4 option is set on the command line.
+## Default is an empty list, which implies bind to any available IP.
+#ip4AddrList:
+
+## List of IPv6 addresses to bind to. The default behavior is to bind to any
+## available IP address. To bind to specific IPs enter a comma delimited list
+## of IPv6 addresses here. These addresses are bound in addition to any IPv4
+## addresses listed above. Note that a loopback address must be explicitly
+## listed if that is desired. Do not include "::" (i.e. IN6ADDR_ANY) as it
+## will conflict with other addresses. All addresses are bound to http and/or
+## https according to the values of enableHttp and enableHttps.
+## The value listed here is ignored if the -6 option is set on the command line.
+## Default is an empty list, which implies bind to any available IP.
+#ip6AddrList:
+
 ## Enable HTTP. 
 ## Default is true. If HTTPS is configured, default is false.
 enableHttp:     @SFCB_CONF_HTTP@
@@ -39,7 +60,8 @@ httpPort:       5988
 ## Default is 8
 httpProcs:      8
 
-## Do not allow HTTP request from anywhere except localhost.
+## Do not allow HTTP request from anywhere except localhost. Overrides all
+## other IP address configuration.
 ## Default is false
 #httpLocalOnly: false
 

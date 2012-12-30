@@ -64,7 +64,7 @@ extern int      init_sfcBroker();
 extern CMPIBroker *Broker;
 extern void     initProvProcCtl(int);
 extern void     processTerminated(int pid);
-extern int      httpDaemon(int argc, char *argv[], int sslMode);
+extern int      httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr, sa_family_t ipAddrFam);
 extern void     processProviderMgrRequests();
 
 extern int      stopNextProc();
@@ -107,6 +107,8 @@ long sslMode=0;
 static int startHttpd(int argc, char *argv[], int sslMode);
 
 extern char    *configfile;
+extern char    *ip4List;
+extern char    *ip6List;
 
 int trimws = 1;
 
@@ -125,6 +127,14 @@ typedef struct startedThreadAdapter {
 } StartedThreadAdapter;
 
 StartedThreadAdapter *lastStartedThreadAdapter = NULL;
+
+typedef struct ipAddr {
+ char * addrStr;
+ sa_family_t addrFam;
+} IpAddr;
+
+IpAddr *ipAddrList=NULL;
+int ipAddrCnt = 0;
 
 void
 addStartedAdapter(int pid)
@@ -466,33 +476,38 @@ startHttpd(int argc, char *argv[], int sslMode)
     }
   }
 
-  pid = fork();
-  if (pid < 0) {
-    char           *emsg = strerror(errno);
-    mlogf(M_ERROR, M_SHOW, "-#- http fork: %s", emsg);
-    exit(2);
-  }
-  if (pid == 0) {
-    currentProc = getpid();
-    if (!httpSFCB) {
-      // Set the real and effective uids
-      rc = setreuid(httpuid, httpuid);
-      if (rc == -1) {
-        mlogf(M_ERROR, M_SHOW, "--- Changing uid for http failed.\n");
-        exit(2);
+  int i;
+  for (i = 0; i < ipAddrCnt; i++) {
+    mlogf(M_INFO, M_SHOW, "--- Starting adapter for IP: %s\n",
+        (ipAddrList + i)->addrStr);
+    pid = fork();
+    if (pid < 0) {
+      char *emsg = strerror(errno);
+      mlogf(M_ERROR, M_SHOW, "-#- http fork: %s", emsg);
+      exit(2);
+    }
+    if (pid == 0) {
+      currentProc = getpid();
+      if (!httpSFCB) {
+        // Set the real and effective uids
+        rc = setreuid(httpuid, httpuid);
+        if (rc == -1) {
+          mlogf(M_ERROR, M_SHOW, "--- Changing uid for http failed.\n");
+          exit(2);
+        }
       }
+      if (httpDaemon(argc, argv, sslMode, (ipAddrList + i)->addrStr,
+          (ipAddrList + i)->addrFam)) {
+        //kill(sfcPid, 3);          /* if port in use, shutdown */
+                                    /* (don't do this anymore - xxxxxxx) */
+      }
+      closeSocket(&sfcbSockets,cRcv,"startHttpd");
+      closeSocket(&resultSockets,cAll,"startHttpd");
+      exit(0);
     }
-
-    if (httpDaemon(argc, argv, sslMode)) {
-      //kill(sfcPid, 3);          /* if port in use, shutdown */
-                                  /* (don't do this anymore - 3597805) */
+    else {
+      addStartedAdapter(pid);
     }
-
-    closeSocket(&sfcbSockets, cRcv, "startHttpd");
-    closeSocket(&resultSockets, cAll, "startHttpd");
-    exit(0);
-  } else {
-    addStartedAdapter(pid);
   }
   return 0;
 }
@@ -551,6 +566,8 @@ usage(int status)
       "                                 components to trace; ? lists the available",
       "                                 components with their bitmask and exits",
       " -v, --version                   output version information and exit",
+      " -4, --ipv4-addr-list            comma-separated list of IPv4 addresses to bind",
+      " -6, --ipv6-addr-list            comma-separated list of IPv6 addresses to bind",
       " -i, --disable-repository-default-inst-prov To disable entry into the default provider",
       "",
       "For SBLIM package updates and additional information, please see",
@@ -661,12 +678,14 @@ main(int argc, char *argv[])
     {"syslog-level", required_argument, 0, 'l'},
     {"trace-components", required_argument, 0, 't'},
     {"version", no_argument, 0, 'v'},
+    {"ipv4-addr-list", required_argument, 0, '4'},
+    {"ipv6-addr-list", required_argument, 0, '6'},
     {"disable-repository-default-inst-provider", no_argument, 0, 'i'},
     {0, 0, 0, 0}
   };
 
   while ((c =
-          getopt_long(argc, argv, "c:dhkst:vil:", long_options,
+          getopt_long(argc, argv, "c:dhkst:v4:6:il:", long_options,
                       0)) != -1) {
     switch (c) {
     case 0:
@@ -711,6 +730,14 @@ main(int argc, char *argv[])
 
     case 'v':
       version();
+
+    case '4':
+      ip4List = strdup(optarg);
+      break;
+
+    case '6':
+      ip6List = strdup(optarg);
+      break;
 
     case 'i':
       disableDefaultProvider = 1;
@@ -902,6 +929,68 @@ main(int argc, char *argv[])
      printf("--- Failed to load sfcCustomLib. Exiting\n");
      exit(1);
   }
+
+#ifndef LOCAL_CONNECT_ONLY_ENABLE
+  if ((ipAddrList = calloc(1, sizeof(IpAddr))) == 0) {
+    mlogf(M_ERROR,M_SHOW,"-#- Failed to alloc memory for ipAddrList.\n");
+    exit(2);
+  }
+  // Command line option takes precedence over config file
+  if (!ip4List)
+    getControlChars("ip4AddrList",&ip4List);
+  if (ip4List && !httpLocalOnly) {
+    char* t = strtok(ip4List,",");
+    while(t) {
+      ipAddrList[ipAddrCnt].addrStr = strdup(t);
+      ipAddrList[ipAddrCnt].addrFam = AF_INET;
+      ipAddrCnt++;
+      t = strtok(NULL,",");
+      if ((ipAddrList = realloc(ipAddrList,(ipAddrCnt+1)*sizeof(IpAddr))) == 0) {
+        mlogf(M_ERROR,M_SHOW,"-#- Failed to realloc memory for ipAddrList.\n");
+        exit(2);
+      }
+    }
+  }
+#ifdef HAVE_IPV6
+  if (!ip6List)
+    getControlChars("ip6AddrList",&ip6List);
+  if (ip6List && !httpLocalOnly) {
+    char* t = strtok(ip6List,",");
+    while(t) {
+      ipAddrList[ipAddrCnt].addrStr = strdup(t);
+      ipAddrList[ipAddrCnt].addrFam = AF_INET6;
+      ipAddrCnt++;
+      t = strtok(NULL,",");
+      if ((ipAddrList = realloc(ipAddrList,(ipAddrCnt+1)*sizeof(IpAddr))) == 0) {
+        mlogf(M_ERROR,M_SHOW,"-#- Failed to realloc memory for ipAddrList.\n");
+        exit(2);
+      }
+    }
+  }
+  if (ipAddrCnt == 0) {
+    if (httpLocalOnly) {
+      mlogf(M_INFO,M_SHOW,"--- Bind to loopback address\n");
+      ipAddrList[ipAddrCnt].addrStr = "::1";
+    } else {
+      mlogf(M_INFO,M_SHOW,"--- Bind to any available IP address\n");
+      ipAddrList[ipAddrCnt].addrStr = "::";
+    }
+    ipAddrList[ipAddrCnt].addrFam = AF_INET6;
+    ipAddrCnt++;
+  }
+#endif
+  if (ipAddrCnt == 0) {
+    if (httpLocalOnly) {
+      mlogf(M_INFO,M_SHOW,"--- Bind to loopback address\n");
+      ipAddrList[ipAddrCnt].addrStr = "127.0.0.1";
+    } else {
+      mlogf(M_INFO,M_SHOW,"--- Bind to any available IP address\n");
+      ipAddrList[ipAddrCnt].addrStr = "0.0.0.0";
+    }
+    ipAddrList[ipAddrCnt].addrFam = AF_INET6;
+    ipAddrCnt++;
+  }
+#endif // LOCAL_CONNECT_ONLY_ENABLE
 
   initSem(pSockets);
   initProvProcCtl(pSockets);
