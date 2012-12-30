@@ -100,7 +100,11 @@ static char   **restartArgv;
 static int      restartArgc;
 static int      adaptersStopped = 0,
     providersStopped = 0,
-    restartBroker = 0;
+    restartBroker = 0,
+    inaHttpdRestart=0;
+
+long sslMode=0;
+static int startHttpd(int argc, char *argv[], int sslMode);
 
 extern char    *configfile;
 
@@ -226,6 +230,7 @@ stopBroker(void *p)
          * no adapters found 
          */
         adaptersStopped = 1;
+        fprintf(stderr, "--- All adapters stopped.\n");
       }
       pthread_mutex_unlock(&sdMtx);
     }
@@ -359,6 +364,7 @@ handleSigChld(int sig)
         if (left == 0) {
           fprintf(stderr, "--- Adapters stopped\n");
           adaptersStopped = 1;
+          if (!stopping && !inaHttpdRestart) kill(getpid(),SIGQUIT);
         }
         pthread_attr_init(&tattr);
         pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
@@ -375,6 +381,38 @@ handleSigChld(int sig)
     }
   }
   errno = oerrno;
+}
+
+static void
+handleSigUsr2(int sig)
+{
+#ifndef LOCAL_CONNECT_ONLY_ENABLE
+   struct timespec waitTime;
+   int rc, sa=0;
+
+   inaHttpdRestart=1;
+   while(!adaptersStopped) {
+       pthread_mutex_lock(&sdMtx);
+       waitTime.tv_sec=time(NULL)+1; //5
+       waitTime.tv_nsec=0;
+       if (sa==0) fprintf(stderr,"--- Stopping http adapters\n");
+       sa++;
+       if (stopNextAdapter()) {
+          rc=pthread_cond_timedwait(&sdCnd,&sdMtx,&waitTime);
+       }
+       else {
+         /* no adapters found */
+         fprintf(stderr,"--- All http adapters stopped.\n");
+         adaptersStopped=1;
+       }
+       pthread_mutex_unlock(&sdMtx);
+   }
+
+   fprintf(stderr,"--- Restarting http adapters...\n");
+   startHttpd(restartArgc, restartArgv, sslMode);
+   adaptersStopped=0;
+   inaHttpdRestart=0;
+#endif // LOCAL_CONNECT_ONLY_ENABLE
 }
 
 static void
@@ -446,14 +484,15 @@ startHttpd(int argc, char *argv[], int sslMode)
     }
 
     if (httpDaemon(argc, argv, sslMode)) {
-      kill(sfcPid, 3);          /* if port in use, shutdown */
+      //kill(sfcPid, 3);          /* if port in use, shutdown */
+                                  /* (don't do this anymore - 3597805) */
     }
 
     closeSocket(&sfcbSockets, cRcv, "startHttpd");
     closeSocket(&resultSockets, cAll, "startHttpd");
+    exit(0);
   } else {
     addStartedAdapter(pid);
-    return 0;
   }
   return 0;
 }
@@ -575,7 +614,7 @@ main(int argc, char *argv[])
   int             c,
                   i;
   long            tmask = 0,
-      sslMode = 0,
+      //sslMode = 0,   /* 3597805 */
       sslOMode = 0,
       tracelevel = 0;
   char           *tracefile = NULL;
@@ -871,7 +910,6 @@ main(int argc, char *argv[])
 
   setSignal(SIGQUIT, handleSigquit, 0);
   setSignal(SIGINT, handleSigquit, 0);
-
   setSignal(SIGTERM, handleSigquit, 0);
   setSignal(SIGHUP, handleSigHup, 0);
 
@@ -907,6 +945,7 @@ mlogf(M_INFO, M_SHOW, "--- Request handlers enabled:%s\n",rtmsg);
 
   setSignal(SIGSEGV, handleSigSegv, SA_ONESHOT);
   setSignal(SIGCHLD, handleSigChld, 0);
+  setSignal(SIGUSR2, handleSigUsr2, 0);
 
   processProviderMgrRequests();
 

@@ -4,6 +4,7 @@ Changes in 1.4.4
 Everything in 1.3.17 (see below), plus: 
 
 New features:
+- 3597805 Restart HTTP daemon without restarting SFCB
 
 Bugs fixed:
 
