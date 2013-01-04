@@ -1071,7 +1071,8 @@ ClassProviderEnumClassNames(CMPIClassMI * mi,
   }
 
   else {
-    CMPIConstClass *cls = getClass(cReg, cn, NULL);
+    ReadCtl         ctl = tempRead;
+    CMPIConstClass *cls = getClass(cReg, cn, &ctl);
     if (cls == NULL) {
       st.rc = CMPI_RC_ERR_INVALID_CLASS;
     } else if ((flgs & CMPI_FLAG_DeepInheritance) == 0) {

@@ -8,6 +8,7 @@ New features:
 - 3597806 Bind to arbitrary list of IP addresses in SFCB
 
 Bugs fixed:
+- 3599526 segfault during ecn with classProviderSf
 
 Changes in 1.4.3
 ================
