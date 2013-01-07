@@ -1109,38 +1109,43 @@ int loadHostnameLib()
 
   hostnameLib = NULL;
   if (getControlChars("sfcbCustomLib", &ln) == 0) {
-     libraryName(NULL, ln, dlName, 512);
-     if ((hostnameLib = dlopen(dlName, RTLD_LAZY))) {
-        dlerror();
-        sfcbHostname = dlsym(hostnameLib, "_sfcbGetResponseHostname");
-	if ((err = dlerror()) != NULL) {
-	   printf("dlsym failed for _sfcbGetResponseHostname: %s\n", err);
-           dlclose(hostnameLib);
-	   return -1;
-        }
-        dlerror();
-	sfcbSlpHostname = dlsym(hostnameLib, "_sfcGetSlpHostname");
-	if ((err = dlerror()) != NULL) {
-	   printf("dlsym failed for _sfcbGetSlpHostname: %s\n", err);
-           dlclose(hostnameLib);
-	   return -1;
-        }
-        dlerror();
-        indAuditLog = dlsym(hostnameLib, "_sfcbIndAuditLog");
-        if ((err = dlerror()) != NULL) {
-           printf("dlsym failed for _sfcbIndAuditLog: %s\n", err);
-           dlclose(hostnameLib);
-           return -1;
-        }
-     }
-     else {
-	   printf("dlopen failed for sfcbCustomLib\n");
-	   return -1;
-     }
+    libraryName(NULL, ln, dlName, 512);
+    hostnameLib = dlopen(dlName, RTLD_LAZY);
+    if (!hostnameLib) {
+      libraryName(SFCB_LIBDIR, ln, dlName, 512);
+      hostnameLib = dlopen(dlName, RTLD_LAZY);
+    }
+    if (hostnameLib) {
+      dlerror();
+      sfcbHostname = dlsym(hostnameLib, "_sfcbGetResponseHostname");
+      if ((err = dlerror()) != NULL) {
+        printf("dlsym failed for _sfcbGetResponseHostname: %s\n", err);
+        dlclose(hostnameLib);
+        return -1;
+      }
+      dlerror();
+      sfcbSlpHostname = dlsym(hostnameLib, "_sfcGetSlpHostname");
+      if ((err = dlerror()) != NULL) {
+        printf("dlsym failed for _sfcbGetSlpHostname: %s\n", err);
+        dlclose(hostnameLib);
+        return -1;
+      }
+      dlerror();
+      indAuditLog = dlsym(hostnameLib, "_sfcbIndAuditLog");
+      if ((err = dlerror()) != NULL) {
+        printf("dlsym failed for _sfcbIndAuditLog: %s\n", err);
+        dlclose(hostnameLib);
+        return -1;
+      }
+    }
+    else {
+      printf("dlopen failed for sfcbCustomLib\n");
+      return -1;
+    }
   }
   else {
-       printf("Cannot find the libary to open: %s\n", ln);
-       return -1;
+    printf("Cannot find the libary to open: %s\n", ln);
+    return -1;
   }
 
   return 0;
