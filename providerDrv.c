@@ -809,6 +809,7 @@ static int getProcess(ProviderInfo * info, ProviderProcess ** proc)
             setSignal(SIGHUP, SIG_IGN,0);
             setSignal(SIGPIPE, handleSigPipe,0);
             setSignal(SIGUSR1, handleSigUsr1,0);
+            setSignal(SIGUSR2, SIG_IGN,0);
             
             setSignal(SIGSEGV, handleSigSegv,SA_ONESHOT);
 

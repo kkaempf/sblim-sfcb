@@ -1,3 +1,9 @@
+2013-01-08  Dave Heller <hellerda@us.ibm.com>
+
+	* cimXmlRequest.c httpAdapter.c mlog.c msgqueue.c providerDrv.c
+	sfcBroker.c
+	[ 3597805 ] Restart HTTP daemon without restarting SFCB
+
 2013-01-07  Dave Heller <hellerda@us.ibm.com>
 
 	* support.c

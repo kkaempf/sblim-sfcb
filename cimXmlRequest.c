@@ -52,10 +52,12 @@
 #define SFCB_ASM(x)
 #endif
 
+#ifdef NEEDS_CLEANUP
 #ifdef LOCAL_CONNECT_ONLY_ENABLE
 // from httpAdapter.c
 int chunkMode = CHUNK_NEVER;
 #endif // LOCAL_CONNECT_ONLY_ENABLE
+#endif
 
 typedef struct handler {
    RespSegments(*handler) (CimXmlRequestContext *, RequestHdr * hdr);

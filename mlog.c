@@ -109,6 +109,7 @@ void startLogging(int level, int thread) {
     setSignal(SIGINT, SIG_IGN, 0);
     setSignal(SIGTERM, SIG_IGN, 0);
     setSignal(SIGHUP, SIG_IGN, 0);
+    setSignal(SIGUSR2, SIG_IGN, 0);
 
     runLogger(logfds[0], level);
 

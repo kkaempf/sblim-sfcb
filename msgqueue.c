@@ -633,12 +633,12 @@ void closeSocket(ComSockets *sp, ComCloseOpt o,char *by)
    _SFCB_ENTER(TRACE_MSGQUEUE | TRACE_SOCKETS, "closeSocket");
    
    if ((o==cRcv || o==cAll) && sp->receive!=0) {
-     _SFCB_TRACE(1,("--- %s closing: %d - %d %d\n",by,sp->receive,getInode(sp->receive),currentProc));       
+     _SFCB_TRACE(1,("--- %s closing: %d - %d %d",by,sp->receive,getInode(sp->receive),currentProc));       
       close (sp->receive); 
       sp->receive=0;
    }   
    if ((o==cSnd || o==cAll) && sp->send!=0) {
-     _SFCB_TRACE(1,("--- %s closing: %d - %d %d\n",by,sp->send,getInode(sp->send),currentProc));       
+     _SFCB_TRACE(1,("--- %s closing: %d - %d %d",by,sp->send,getInode(sp->send),currentProc));       
       close (sp->send); 
       sp->send=0;
    }   

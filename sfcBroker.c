@@ -102,6 +102,10 @@ extern void dumpTiming(int pid);
 static char **restartArgv;
 static int restartArgc;
 static int adaptersStopped=0,providersStopped=0,restartBroker=0;
+static int inaHttpdRestart=0;
+
+long sslMode=0;
+static int startHttpd(int argc, char *argv[], int sslMode);
 
 int trimws=1;
 
@@ -217,9 +221,10 @@ static void stopBroker(void *p)
             rc=pthread_cond_timedwait(&sdCnd,&sdMtx,&waitTime);
          }
          else {
-	   /* no adapters found */
-	   adaptersStopped=1;
-	 }
+            fprintf(stderr,"-- All adapters stopped.\n");
+            /* no adapters found */
+            adaptersStopped=1;
+         }
          pthread_mutex_unlock(&sdMtx);
       }
       
@@ -343,6 +348,7 @@ static void handleSigChld(int sig)
             if (left==0) {
                fprintf(stderr,"--- Adapters stopped\n");
                adaptersStopped=1;
+               if (!stopping && !inaHttpdRestart) kill(getpid(),SIGQUIT);
             }   
             pthread_attr_init(&tattr);
             pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);      
@@ -360,6 +366,37 @@ static void handleSigChld(int sig)
       }
    }
    errno = oerrno;
+}
+
+static void handleSigUsr2(int sig)
+{
+#ifndef LOCAL_CONNECT_ONLY_ENABLE
+   struct timespec waitTime;
+   int rc, sa=0;
+
+   inaHttpdRestart=1;
+   while(!adaptersStopped) {
+       pthread_mutex_lock(&sdMtx);
+       waitTime.tv_sec=time(NULL)+1; //5
+       waitTime.tv_nsec=0;
+       if (sa==0) fprintf(stderr,"--- Stopping http adapters\n");
+       sa++;
+       if (stopNextAdapter()) {
+          rc=pthread_cond_timedwait(&sdCnd,&sdMtx,&waitTime);
+       }
+       else {
+         /* no adapters found */
+         fprintf(stderr,"--- All http adapters stopped.\n");
+         adaptersStopped=1;
+       }
+       pthread_mutex_unlock(&sdMtx);
+   }
+
+   fprintf(stderr,"--- Restarting http adapters...\n");
+   startHttpd(restartArgc, restartArgv, sslMode);
+   adaptersStopped=0;
+   inaHttpdRestart=0;
+#endif // LOCAL_CONNECT_ONLY_ENABLE
 }
 
 #ifdef NEEDS_CLEANUP
@@ -423,32 +460,32 @@ static int startHttpd(int argc, char *argv[], int sslMode)
      }
     }
 
-   pid= fork();
+   pid = fork();
    if (pid < 0) {
-      char *emsg=strerror(errno);
-      mlogf(M_ERROR,M_SHOW, "-#- http fork: %s",emsg);
-      exit(2);
+     char *emsg = strerror(errno);
+     mlogf(M_ERROR, M_SHOW, "-#- http fork: %s", emsg);
+     exit(2);
    }
    if (pid == 0) {
-      currentProc=getpid();
-      if (!httpSFCB) {
-          // Set the real and effective uids
-          rc=setreuid(httpuid,httpuid);
-          if (rc == -1) {
-              mlogf(M_ERROR,M_SHOW,"--- Changing uid for http failed.\n");
-              exit(2);
-          }
-      }
-   
-      if (httpDaemon(argc, argv, sslMode)) {
-	kill(sfcPid, 3);          /* if port in use, shutdown */
-      }
-      closeSocket(&sfcbSockets,cRcv,"startHttpd");
-      closeSocket(&resultSockets,cAll,"startHttpd");
+     currentProc = getpid();
+     if (!httpSFCB) {
+       // Set the real and effective uids
+       rc = setreuid(httpuid, httpuid);
+       if (rc == -1) {
+         mlogf(M_ERROR, M_SHOW, "--- Changing uid for http failed.\n");
+         exit(2);
+       }
+     }
+     if (httpDaemon(argc, argv, sslMode)) {
+       //kill(sfcPid, 3);          /* if port in use, shutdown */
+                                   /* (don't do this anymore - xxxxxxx) */
+     }
+     closeSocket(&sfcbSockets,cRcv,"startHttpd");
+     closeSocket(&resultSockets,cAll,"startHttpd");
+     exit(0);
    }
    else {
-      addStartedAdapter(pid);
-      return 0;
+     addStartedAdapter(pid);
    }
    return 0;
 }
@@ -564,7 +601,7 @@ static void version()
 int main(int argc, char *argv[])
 {
    int c, i;
-   long tmask = 0, sslMode=0,sslOMode=0, tracelevel=0;
+   long tmask = 0, sslOMode=0, tracelevel=0;
    char * tracefile = NULL;
 #ifdef HAVE_UDS
    int enableUds=0;
@@ -603,7 +640,7 @@ int main(int argc, char *argv[])
 	   { "syslog-level",     required_argument, 0,        'l' },
 	   { "trace-components", required_argument, 0,        't' },
 	   { "version",          no_argument,       0,        'v' },
-           { "disable-repository-default-inst-provider", no_argument,       0,        'i' },
+	   { "disable-repository-default-inst-provider", no_argument,  0, 'i' },
 	   { 0, 0, 0, 0 }
        };
 
@@ -651,9 +688,9 @@ int main(int argc, char *argv[])
 	   case 'v':
 	       version();
 
-           case 'i':
-               disableDefaultProvider=1;
-               break;
+	   case 'i':
+	       disableDefaultProvider=1;
+	       break;
 
 	   case 'l':
             if (strcmp(optarg,"LOG_ERR")==0) {
@@ -830,7 +867,7 @@ int main(int argc, char *argv[])
       exit(1);
    }
 
-   
+
    initSem(dSockets,sSockets,pSockets);
    initProvProcCtl(pSockets);
    init_sfcBroker();
@@ -838,7 +875,6 @@ int main(int argc, char *argv[])
 
    setSignal(SIGQUIT, handleSigquit,0);
    setSignal(SIGINT,  handleSigquit,0);
-   
    setSignal(SIGTERM, handleSigquit,0);
    setSignal(SIGHUP,  handleSigHup,0);
 
@@ -865,6 +901,7 @@ int main(int argc, char *argv[])
 
    setSignal(SIGSEGV, handleSigSegv,SA_ONESHOT);
    setSignal(SIGCHLD, handleSigChld,0);
+   setSignal(SIGUSR2, handleSigUsr2,0);
    
    processProviderMgrRequests();
 

@@ -1498,7 +1498,6 @@ getSocket()
   return fd;
 }
 
-
 #ifdef USE_INET6
 static struct sockaddr *
 prepSockAddr6(int port, void *ssin, socklen_t * sin_len)
@@ -1527,7 +1526,7 @@ prepSockAddr4(int port, void *ssin, socklen_t * sin_len)
 
   *sin_len = sizeof(*sin);
   memset(sin, 0, *sin_len);
-	
+    
   sin->sin_family = AF_INET;
   if (httpLocalOnly) {
     const char *loopback_int = "127.0.0.1";
@@ -1538,7 +1537,6 @@ prepSockAddr4(int port, void *ssin, socklen_t * sin_len)
 
   return (struct sockaddr *) sin;
 }
-
 
 static int
 bindToPort(int sock, int port, void *ssin, socklen_t * sin_len)
@@ -1551,20 +1549,48 @@ bindToPort(int sock, int port, void *ssin, socklen_t * sin_len)
   if (getControlBool("httpLocalOnly", &httpLocalOnly))
     httpLocalOnly = 0;
 
+  char *ip = httpLocalOnly ? "127.0.0.1" : "0.0.0.0";
+
 #ifdef USE_INET6
-  if (!fallback_ipv4)
-    sin = prepSockAddr6(port, ssin, sin_len);
+  if (!fallback_ipv4) {
+    ip = httpLocalOnly ? "[::1]" : "[::]";
+    if (!(sin = prepSockAddr6(port, ssin, sin_len)))
+      return 1;
+  }
   else
 #endif
-    sin = prepSockAddr4(port, ssin, sin_len);
+    if (!(sin = prepSockAddr4(port, ssin, sin_len)))
+      return 1;
 
-  if (bind(sock, sin, *sin_len) || listen(sock, 10)) {
-    mlogf(M_ERROR, M_SHOW, "--- Cannot listen on port %ld (%s)\n", port,
+  int maxtries = 5;
+  int i = maxtries;
+  while (1) {
+    if (!bind(sock, sin, *sin_len)) {
+      if (!listen(sock, 10)) {
+        break;
+      } else {
+        mlogf(M_ERROR, M_SHOW, "--- Cannot listen on socket %s:%d (%s)\n",
+            ip, port, strerror(errno));
+        return 1;
+      }
+    } else if (errno==EADDRINUSE) {
+      if (--i <= 0) {
+        mlogf(M_ERROR, M_SHOW,
+            "--- Cannot bind to socket %s:%d after %d attempts. (%s)\n",
+            ip, port, maxtries, strerror(errno));
+        return 1;
+      }
+      mlogf(M_ERROR, M_SHOW,
+          "--- Socket %s:%d not ready (%s), retrying...\n", ip, port,
           strerror(errno));
-    sleep(1);
-    return 1;
+      sleep(1);
+    } else {
+      mlogf(M_ERROR, M_SHOW, "--- Cannot bind to socket %s:%d (%s)\n", 
+          ip, port, strerror(errno));
+      return 1;
+    }
   }
-
+  mlogf(M_ERROR, M_SHOW, "--- Listening on socket %s:%d\n", ip, port);
   return 0;
 }
 
@@ -1908,7 +1934,7 @@ int httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
   }
 #endif
 
-  int             bindrc = 0;
+  int bindrc = 0;
   if (enableHttp) {
     bindrc = bindToPort(httpListenFd, httpPort, &httpSin, &httpSin_len);
   }
@@ -1926,8 +1952,7 @@ int httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
 #endif
 
   if (bindrc > 0)
-    return 1;                   /* if can't bind to port, return 1 to
-                                 * shutdown sfcb */
+    return 1;                   /* if can't bind to port, return 1 */
 
   if (!debug) {
     int             rc = fork();
@@ -1946,6 +1971,7 @@ int httpDaemon(int argc, char *argv[], int sslMode, int sfcbPid)
   setSignal(SIGINT, SIG_IGN, 0);
   setSignal(SIGTERM, SIG_IGN, 0);
   setSignal(SIGHUP, SIG_IGN, 0);
+  setSignal(SIGUSR2, SIG_IGN, 0);
 
 #if defined USE_SSL
   if (sslMode) {
