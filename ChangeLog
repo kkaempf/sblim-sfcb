@@ -1,3 +1,8 @@
+2013-01-07  Dave Heller <hellerda@us.ibm.com>
+
+	* support.c
+	[ 3599329 ] dlopen failed for sfcbCustomLib
+
 2012-12-12  Chris Buccella  <buccella@linux.vnet.ibm.com>
 
 	* cimXmlGen.c, cimXmlParser.c, cimXmlParser.h, cimXmlRequest.c,

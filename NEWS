@@ -3,7 +3,7 @@ Changes in 1.3.17
 New features: 
 
 Bugs fixed:
-
+- 3599329 dlopen failed for sfcbCustomLib
 
 Changes in 1.3.16
 =================
