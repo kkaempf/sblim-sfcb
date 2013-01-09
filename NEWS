@@ -10,6 +10,7 @@ New features:
 Bugs fixed:
 - 3599526 segfault during ecn with classProviderSf
 - 3599329 dlopen failed for sfcbCustomLib
+- 3600125 Share client tracing shm segment
 
 Changes in 1.4.3
 ================
