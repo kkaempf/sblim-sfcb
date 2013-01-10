@@ -75,7 +75,7 @@ extern int yylex(void *);
 extern void sfcQueryErr(char*,char*,char*);
 extern void yyError(char*);
 extern void yyerror(char*);
-extern void sfcQueryError(char* s1);
+extern void sfcQueryError(const char* s1);
 extern char * qsStrDup(QLStatement *qs, char *str);
 extern QLOperand* newNameQueryOperand(QLStatement *qs, char* val);
 
@@ -467,7 +467,7 @@ functionArg
 builtInFunction
     :  TOK_IDENTIFIER functionArg    
     {
-       int fnc=QL_FNC_NoFunction;
+       int fnc __attribute__ ((unused)) =QL_FNC_NoFunction;
        if (QS->lang==QL_CQL) {
           if (strcasecmp($1,"classname")==0) fnc=QL_FNC_Classname;
           else if (strcasecmp($1,"namespacename")==0) fnc=QL_FNC_Namespacename;

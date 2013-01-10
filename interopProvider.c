@@ -911,9 +911,7 @@ initInterOp(const CMPIBroker * broker, const CMPIContext *ctx)
     CMPIStatus st;
     while (enm->ft->hasNext(enm, &st)
            && (ci = (enm->ft->getNext(enm, &st)).value.inst)) {
-      CMPIObjectPath *hop;
       cop = CMGetObjectPath(ci, &st);
-      hop = CMGetKey(cop, "handler", NULL).value.ref;
       st = processSubscription(broker,ctx,ci,cop);
       /* if the on-disk repo is modified between startups, it is
          possible for a subscription instance to exist w/o a filter or

@@ -716,7 +716,6 @@ stopLocalConnectServer()
   static struct sockaddr_un *serverAddr;
   int             sock,
                   size = 0;
-  unsigned long int l;
   char           *path;
 
   if (getControlChars("localSocketPath", &path) != 0) {
@@ -740,7 +739,7 @@ stopLocalConnectServer()
     return;
   }
 
-  l = write(sock, &size, sizeof(size));
+  write(sock, &size, sizeof(size));
   close(sock);
 }
 

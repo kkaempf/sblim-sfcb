@@ -32,8 +32,8 @@
 #include "queryOperation.h"
 
 #define CIMCSetStatusWithChars(st,rcp,chars) \
-      { if (st != NULL) { (st)->rc=(rcp); \
-        (st)->msg=NewCMPIString((chars),NULL); }}
+      { (st)->rc=(rcp); \
+        (st)->msg=NewCMPIString((chars),NULL); }
 
 //#define NewCMPIString sfcb_native_new_CMPIString
 
@@ -163,8 +163,6 @@ cloneClient(Client * cl, CMPIStatus *st)
   CMPIStatus      rc;
   CIMCSetStatusWithChars(&rc, CMPI_RC_ERR_NOT_SUPPORTED,
                          "Clone function not supported");
-  if (st)
-    *st = rc;
   return NULL;
 }
 
@@ -233,7 +231,6 @@ cpyEnumResponses(BinRequestContext * binCtx,
   CMPIArray      *ar,
                  *art;
   CMPIEnumeration *enm;
-  CMPIStatus      rc;
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "genEnumResponses");
 
@@ -251,8 +248,8 @@ cpyEnumResponses(BinRequestContext * binCtx,
         object.cls = relocateSerializedConstClass(resp[i]->object[j].data);
       }
       // object.inst=CMClone(object.inst,NULL);
-      rc = CMSetArrayElementAt(ar, c, (CMPIValue *) & object.inst,
-                               binCtx->type);
+      CMSetArrayElementAt(ar, c, (CMPIValue *) & object.inst,
+			  binCtx->type);
     }
   }
 
@@ -802,7 +799,8 @@ execQuery(Client * mb,
   qs = parseQuery(MEM_TRACKED, query, lang, NULL, NULL, &irc);
 
   if (irc) {
-     CIMCSetStatusWithChars(rc, CMPI_RC_ERR_INVALID_QUERY,
+    if (rc)
+      CIMCSetStatusWithChars(rc, CMPI_RC_ERR_INVALID_QUERY,
         "syntax error in query.");
      _SFCB_RETURN(NULL);
   }
@@ -810,7 +808,8 @@ execQuery(Client * mb,
   fCls = qs->ft->getFromClassList(qs);
   if (fCls == NULL || *fCls == NULL) {
     mlogf(M_ERROR, M_SHOW, "--- from clause missing\n");
-    CIMCSetStatusWithChars(rc, CMPI_RC_ERR_INVALID_QUERY,
+    if (rc)
+      CIMCSetStatusWithChars(rc, CMPI_RC_ERR_INVALID_QUERY,
        "required from clause is missing.");
     _SFCB_RETURN(NULL);
   }

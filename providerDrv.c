@@ -318,7 +318,6 @@ int
 testStartedProc(int pid, int *left)
 {
   ProviderProcess *pp = provProc;
-  ProviderInfo   *info;
   int             i,
                   stopped = 0;
 
@@ -327,7 +326,6 @@ testStartedProc(int pid, int *left)
     if ((pp + i)->pid == pid) {
       stopped = 1;
       (pp + i)->pid = 0;
-      info = (pp + i)->firstProv;
       if (pReg)
          pReg->ft->resetProvider(pReg, pid);
     }
@@ -1550,7 +1548,7 @@ enumClasses(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIObjectPath *path =
       relocateSerializedObjectPath(req->objectPath.data);
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
-  CMPIArray      *r;
+  //  CMPIArray      *r;
   CMPIResult     *result =
       native_new_CMPIResult(requestor < 0 ? 0 : requestor, 0, NULL);
   CMPIContext    *ctx = native_new_CMPIContext(MEM_TRACKED, info);
@@ -1572,7 +1570,8 @@ enumClasses(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
       rci =
       info->classMI->ft->enumClasses(info->classMI, ctx, result, path);
   TIMING_STOP(hdr, info)
-      r = native_result2array(result);
+    //need to release ignored return value?
+    //      native_result2array(result);
 
   _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
@@ -2141,7 +2140,6 @@ modifyInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIStatus      rci = { CMPI_RC_OK, NULL };
   CMPIResult     *result = native_new_CMPIResult(0, 1, NULL);
   CMPIContext    *ctx = native_new_CMPIContext(MEM_TRACKED, info);
-  CMPICount       count;
   BinResponseHdr *resp;
   CMPIFlags       flgs = 0;
   char          **props = NULL;
@@ -2170,7 +2168,6 @@ modifyInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
   if (rci.rc == CMPI_RC_OK) {
-    count = 1;
     resp =
         (BinResponseHdr *) calloc(1,
                                   sizeof(BinResponseHdr) -

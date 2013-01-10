@@ -985,8 +985,6 @@ processProviderMgrRequests()
   unsigned long   rl;
   int             rc,
                   options = 0;
-  char           *cn,
-                 *ns;
   MqgStat         mqg;
 
   _SFCB_ENTER(TRACE_PROVIDERMGR, "processProviderMgrRequests");
@@ -1037,8 +1035,6 @@ processProviderMgrRequests()
               (void *) ((long) req->className.data + (char *) req);
         else
           req->className.data = NULL;
-        cn = (char *) req->className.data;
-        ns = (char *) req->nameSpace.data;
         options = req->options;
 
         _SFCB_TRACE(1,
@@ -1812,7 +1808,6 @@ _getConstClassChildren(const char *ns, const char *cn)
   OperationHdr    req = { OPS_InvokeMethod, 1 };
   CMPIArgs       *in = NewCMPIArgs(NULL);
   CMPIArgs       *out = NULL;
-  CMPIData        data;
   CMPIArray      *ar = NULL;
   CMPIStatus      rc;
   UtilList       *ul = NULL;
@@ -1830,8 +1825,7 @@ _getConstClassChildren(const char *ns, const char *cn)
   irc = _methProvider(&binCtx, &req);
 
   if (irc == MSG_X_PROVIDER) {
-    data =
-        localInvokeMethod(&binCtx, path, "getchildren", in, &out, &rc, 0);
+    localInvokeMethod(&binCtx, path, "getchildren", in, &out, &rc, 0);
     if (out) {
       ar = CMGetArg(out, "children", &rc).value.array;
       ul = UtilFactory->newList(NULL, NULL);
@@ -1863,7 +1857,6 @@ _getAssocClassNames(const char *ns)
   OperationHdr    req = { OPS_InvokeMethod, 1 };
   CMPIArgs       *in = NewCMPIArgs(NULL);
   CMPIArgs       *out = NULL;
-  CMPIData        data;
   CMPIArray      *ar;
   CMPIStatus      rc;
   UtilList       *ul = NULL;
@@ -1881,7 +1874,7 @@ _getAssocClassNames(const char *ns)
   irc = _methProvider(&binCtx, &req);
 
   if (irc == MSG_X_PROVIDER) {
-    data = localInvokeMethod(&binCtx, path, "getassocs", in, &out, &rc, 0);
+    localInvokeMethod(&binCtx, path, "getassocs", in, &out, &rc, 0);
     if (out) {
       ar = CMGetArg(out, "assocs", &rc).value.array;
       ul = UtilFactory->newList(NULL, NULL);

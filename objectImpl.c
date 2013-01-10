@@ -1218,11 +1218,7 @@ copyParameters(int ofs, int max, char *to, ClSection * ts,
 static void
 freeParameters(ClObjectHdr * hdr, ClSection * s)
 {
-  ClParameter    *p;
-
   _SFCB_ENTER(TRACE_OBJECTIMPL, "freeParameters");
-
-  p = (ClParameter *) ClObjectGetClSection(hdr, s);
 
   if (isMallocedSection(s))
     free(s->sectionPtr);

@@ -83,10 +83,6 @@ extern TraceId  traceIds[];
 extern unsigned long exFlags;
 static int      startHttp = 0;
 
-#ifdef HAVE_JDBC
-static int      startDbp = 1;
-#endif
-
 char           *name;
 extern int      collectStat;
 
@@ -193,7 +189,7 @@ static void
 stopBroker(void *p)
 {
   struct timespec waitTime;
-  int rc,sa=0,sp=0, count = 0;
+  int sa=0,sp=0, count = 0;
 
   /* SF 3497096 bugzilla 77022 */
   /* stopping is set to prevent other threads calling this routine */
@@ -234,7 +230,7 @@ stopBroker(void *p)
         fprintf(stderr, "--- Stopping adapters\n");
       sa++;
       if (stopNextAdapter()) {
-        rc = pthread_cond_timedwait(&sdCnd, &sdMtx, &waitTime);
+        pthread_cond_timedwait(&sdCnd, &sdMtx, &waitTime);
       } else {
         /*
          * no adapters found 
@@ -253,7 +249,7 @@ stopBroker(void *p)
         fprintf(stderr, "--- Stopping providers\n");
       sp++;
       if (stopNextProc()) {
-        rc = pthread_cond_timedwait(&sdCnd, &sdMtx, &waitTime);
+        pthread_cond_timedwait(&sdCnd, &sdMtx, &waitTime);
       }
       // else providersStopped=1;
       pthread_mutex_unlock(&sdMtx);
@@ -398,7 +394,7 @@ handleSigUsr2(int sig)
 {
 #ifndef LOCAL_CONNECT_ONLY_ENABLE
    struct timespec waitTime;
-   int rc, sa=0;
+   int sa=0;
 
    inaHttpdRestart=1;
    while(!adaptersStopped) {
@@ -408,7 +404,7 @@ handleSigUsr2(int sig)
        if (sa==0) fprintf(stderr,"--- Stopping http adapters\n");
        sa++;
        if (stopNextAdapter()) {
-          rc=pthread_cond_timedwait(&sdCnd,&sdMtx,&waitTime);
+          pthread_cond_timedwait(&sdCnd,&sdMtx,&waitTime);
        }
        else {
          /* no adapters found */
@@ -442,12 +438,11 @@ handleSigSegv(int sig)
 static int
 startHttpd(int argc, char *argv[], int sslMode)
 {
-  int             pid,
-                  sfcPid = currentProc;
+  int             pid;
   int             httpSFCB,
                   rc;
   char           *httpUser;
-  uid_t           httpuid;
+  uid_t           httpuid = 0;
   struct passwd  *passwd;
 
   // Get/check http user info
@@ -513,35 +508,6 @@ startHttpd(int argc, char *argv[], int sslMode)
 }
 
 #endif                          // LOCAL_CONNECT_ONLY_ENABLE
-
-#ifdef HAVE_JDBC
-
-extern int      dbpDaemon(int argc, char *argv[], int sslMode,
-                          int sfcbPid);
-static int
-startDbpd(int argc, char *argv[], int sslMode)
-{
-  int             pid,
-                  sfcPid = currentProc;
-  // sleep(2);
-  pid = fork();
-  if (pid < 0) {
-    perror("dbpd fork");
-    exit(2);
-  }
-  if (pid == 0) {
-    currentProc = getpid();
-    dbpDaemon(argc, argv, sslMode, sfcPid);
-    closeSocket(&sfcbSockets, cRcv, "startHttpd");
-    closeSocket(&resultSockets, cAll, "startHttpd");
-  } else {
-    addStartedAdapter(pid);
-    return 0;
-  }
-  return 0;
-}
-
-#endif
 
 static void
 usage(int status)
@@ -632,7 +598,6 @@ main(int argc, char *argv[])
                   i;
   long            tmask = 0,
       //sslMode = 0,   /* 3597805 */
-      sslOMode = 0,
       tracelevel = 0;
   char           *tracefile = NULL;
 #ifdef HAVE_UDS
@@ -850,16 +815,10 @@ main(int argc, char *argv[])
     enableHttps = 0;
 
   sslMode = enableHttps;
-#ifdef HAVE_UDS
-  sslOMode = sslMode & !enableHttp & !enableUds;
-#else
-  sslOMode = sslMode & !enableHttp;
-#endif
 #else
   mlogf(M_INFO, M_SHOW, "--- SSL not configured\n");
   enableHttps = 0;
   sslMode = 0;
-  sslOMode = 0;
 #endif
 
   if (getControlBool("useChunking", &useChunking))
@@ -1021,16 +980,6 @@ main(int argc, char *argv[])
   strcat(rtmsg,"CIMrs ");
 #endif
 mlogf(M_INFO, M_SHOW, "--- Request handlers enabled:%s\n",rtmsg);
-
-#ifdef HAVE_JDBC
-  // Start dbProtocol-Daemon
-  if (startDbp) {
-    if (sslMode)
-      startDbpd(argc, argv, 1);
-    if (!sslOMode)
-      startDbpd(argc, argv, 0);
-  }
-#endif
 
   setSignal(SIGSEGV, handleSigSegv, SA_ONESHOT);
   setSignal(SIGCHLD, handleSigChld, 0);

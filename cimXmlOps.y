@@ -70,7 +70,7 @@ extern int      noChunking;
 
 
 
-extern int yyerror(char*);
+extern int yyerror(const char*);
 extern int yylex (void *lvalp, ParserControl *parm);
 //extern MsgSegment setInstanceMsgSegment(const CMPIInstance *ci);
 
@@ -602,8 +602,7 @@ buildCreateClassRequest(void *parm)
   for (m = ms->first; m; m = m->next) {
     ClMethod       *meth;
     ClParameter    *cl_parm;
-    int             methId,
-                    parmId;
+    int             methId;
 
     methId = ClClassAddMethod(cl, m->name, m->type);
     meth =
@@ -628,7 +627,7 @@ buildCreateClassRequest(void *parm)
       pa.type = r->type;
       pa.arraySize = (unsigned int) r->arraySize;
       pa.refName = r->refClass;
-      parmId = ClClassAddMethParameter(&cl->hdr, meth, r->name, pa);
+      ClClassAddMethParameter(&cl->hdr, meth, r->name, pa);
       cl_parm = ((ClParameter *)
               ClObjectGetClSection(&cl->hdr,
                                    &meth->parameters)) + methId - 1;

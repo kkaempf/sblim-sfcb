@@ -43,7 +43,7 @@ struct _ClassRegister {
   int             assocs,
                   topAssocs;
   char           *fn;
-  gzFile         *f;
+  gzFile          f;
 };
 typedef struct _ClassRegister ClassRegister;
 
@@ -797,7 +797,6 @@ static CMPIConstClass *
 getClass(ClassRegister * cr, const char *clsName, ReadCtl *ctl)
 {
   ClassRecord    *crec;
-  int             r;
   CMPIConstClass *cc;
   char           *buf;
 
@@ -812,9 +811,9 @@ getClass(ClassRegister * cr, const char *clsName, ReadCtl *ctl)
 
   /* class is not cached */
   if (crec->cachedCCls == NULL) {
-    r = gzseek(cr->f, crec->position, SEEK_SET);
+    gzseek(cr->f, crec->position, SEEK_SET);
     buf = (char *) malloc(crec->length);
-    r = gzread(cr->f, buf, crec->length);
+    gzread(cr->f, buf, crec->length);
 
     cc = NEW(CMPIConstClass);
     cc->hdl = buf;
@@ -1022,11 +1021,9 @@ ClassProviderEnumClassNames(CMPIClassMI * mi,
   char           *cn = NULL;
   CMPIFlags       flgs = 0;
   CMPIString     *cni;
-  ClassBase      *cb;
   Iterator        it;
   char           *key;
-  int             rc,
-                  n;
+  int             rc;
   ClassRecord    *crec;
   CMPIObjectPath *op;
   ClassRegister  *cReg;
@@ -1048,7 +1045,6 @@ ClassProviderEnumClassNames(CMPIClassMI * mi,
     if (cn && *cn == 0)
       cn = NULL;
   }
-  cb = (ClassBase *) cReg->hdl;
 
   cReg->ft->wLock(cReg);
 
@@ -1056,7 +1052,6 @@ ClassProviderEnumClassNames(CMPIClassMI * mi,
     cn = NULL;
 
   if (cn == NULL) {
-    n = 0;
     for (it = cReg->ft->getFirstClassRecord(cReg, &key, &crec);
          key && it && crec;
          it = cReg->ft->getNextClassRecord(cReg, it, &key, &crec)) {
@@ -1125,7 +1120,6 @@ ClassProviderEnumClasses(CMPIClassMI * mi,
   char           *cn = NULL;
   CMPIFlags       flgs = 0;
   CMPIString     *cni;
-  ClassBase      *cb;
   Iterator        it;
   char           *key;
   int             rc;
@@ -1151,7 +1145,6 @@ ClassProviderEnumClasses(CMPIClassMI * mi,
     if (cn && *cn == 0)
       cn = NULL;
   }
-  cb = (ClassBase *) cReg->hdl;
 
   if (cn == NULL) {
     for (it = cReg->ft->getFirstClassRecord(cReg, &key, &crec);

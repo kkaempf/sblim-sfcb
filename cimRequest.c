@@ -480,7 +480,6 @@ genEnumResponses(BinRequestContext * binCtx,
   CMPIArray      *ar;
   UtilStringBuffer *sb;
   CMPIEnumeration *enm;
-  CMPIStatus      rc;
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "genEnumResponses");
 
@@ -496,7 +495,7 @@ genEnumResponses(BinRequestContext * binCtx,
         object = relocateSerializedConstClass(resp[i]->object[j].data);
       }
 
-      rc = arraySetElementNotTrackedAt(ar, c, (CMPIValue *) & object,
+      arraySetElementNotTrackedAt(ar, c, (CMPIValue *) & object,
                                        binCtx->type);
     }
   }
@@ -572,7 +571,6 @@ genQualifierResponses(BinRequestContext * binCtx, BinResponseHdr * resp)
   int             j;
   CMPIEnumeration *enm;
   void           *object;
-  CMPIStatus      rc;
   void           *genheap;
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "genQualifierResponses");
@@ -581,7 +579,7 @@ genQualifierResponses(BinRequestContext * binCtx, BinResponseHdr * resp)
 
   for (j = 0; j < resp->count; j++) {
     object = relocateSerializedQualifier(resp->object[j].data);
-    rc = arraySetElementNotTrackedAt(ar, j, (CMPIValue *) & object,
+    arraySetElementNotTrackedAt(ar, j, (CMPIValue *) & object,
                                      binCtx->type);
   }
 

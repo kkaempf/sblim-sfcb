@@ -558,8 +558,7 @@ ClassProviderEnumClassNames(CMPIClassMI * mi,
   ClassBase      *cb;
   HashTableIterator *it;
   char           *key;
-  int             rc,
-                  n;
+  int             rc;
   CMPIConstClass *cls;
   CMPIObjectPath *op;
   ClassRegister  *cReg;
@@ -589,7 +588,6 @@ ClassProviderEnumClassNames(CMPIClassMI * mi,
     cn = NULL;
 
   if (cn == NULL) {
-    n = 0;
     for (it = cb->ht->ft->getFirst(cb->ht, (void **) &key, (void **) &cls);
          key && it && cls;
          it =

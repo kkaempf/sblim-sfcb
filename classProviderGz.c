@@ -34,7 +34,7 @@ struct _ClassRegister {
   int             assocs,
                   topAssocs;
   char           *fn;
-  gzFile         *f;
+  gzFile          f;
 };
 typedef struct _ClassRegister ClassRegister;
 
@@ -184,7 +184,6 @@ getFirstClass(ClassRegister * cr, char **cn, CMPIConstClass ** cls,
   CMPIConstClass *cc;
   ClassBase      *cb = (ClassBase *) cr->hdl;
   ClassRecord    *crec;
-  int             r;
 
   Iterator        i =
       cb->ht->ft->getFirst(cb->ht, (void **) cn, (void **) &crec);
@@ -198,10 +197,10 @@ getFirstClass(ClassRegister * cr, char **cn, CMPIConstClass ** cls,
   }
   *id = NULL;
 
-  r = gzseek(cr->f, crec->position, SEEK_SET);
+  gzseek(cr->f, crec->position, SEEK_SET);
 
   buf = (char *) malloc(crec->length);
-  r = gzread(cr->f, buf, crec->length);
+  gzread(cr->f, buf, crec->length);
 
   cc = NEW(CMPIConstClass);
   cc->hdl = buf;
@@ -219,7 +218,6 @@ getNextClass(ClassRegister * cr, Iterator ip, char **cn,
   CMPIConstClass *cc;
   ClassBase      *cb = (ClassBase *) cr->hdl;
   ClassRecord    *crec;
-  int             r;
 
   Iterator        i =
       cb->ht->ft->getNext(cb->ht, ip, (void **) cn, (void **) &crec);
@@ -233,10 +231,10 @@ getNextClass(ClassRegister * cr, Iterator ip, char **cn,
   }
   *id = NULL;
 
-  r = gzseek(cr->f, crec->position, SEEK_SET);
+  gzseek(cr->f, crec->position, SEEK_SET);
 
   buf = (char *) malloc(crec->length);
-  r = gzread(cr->f, buf, crec->length);
+  gzread(cr->f, buf, crec->length);
 
   cc = NEW(CMPIConstClass);
   cc->hdl = buf;
@@ -558,7 +556,6 @@ static CMPIConstClass *
 getClass(ClassRegister * cr, const char *clsName)
 {
   ClassRecord    *crec;
-  int             r;
   CMPIConstClass *cc;
   char           *buf;
 
@@ -573,9 +570,9 @@ getClass(ClassRegister * cr, const char *clsName)
 
   if (crec->cachedCls == NULL) {
     // fprintf(stderr,"--- reading class %s\n",clsName);
-    r = gzseek(cr->f, crec->position, SEEK_SET);
+    gzseek(cr->f, crec->position, SEEK_SET);
     buf = (char *) malloc(crec->length);
-    r = gzread(cr->f, buf, crec->length);
+    gzread(cr->f, buf, crec->length);
 
     cc = NEW(CMPIConstClass);
     cc->hdl = buf;
@@ -675,11 +672,9 @@ ClassProviderEnumClassNames(CMPIClassMI * mi,
   char           *cn = NULL;
   CMPIFlags       flgs = 0;
   CMPIString     *cni;
-  ClassBase      *cb;
   Iterator        it;
   char           *key;
-  int             rc,
-                  n;
+  int             rc;
   ClassRecord    *crec;
   CMPIObjectPath *op;
   ClassRegister  *cReg;
@@ -701,7 +696,6 @@ ClassProviderEnumClassNames(CMPIClassMI * mi,
     if (cn && *cn == 0)
       cn = NULL;
   }
-  cb = (ClassBase *) cReg->hdl;
 
   cReg->ft->wLock(cReg);
 
@@ -709,7 +703,6 @@ ClassProviderEnumClassNames(CMPIClassMI * mi,
     cn = NULL;
 
   if (cn == NULL) {
-    n = 0;
     for (it = cReg->ft->getFirstClassRecord(cReg, &key, &crec);
          key && it && crec;
          it = cReg->ft->getNextClassRecord(cReg, it, &key, &crec)) {
@@ -770,7 +763,6 @@ ClassProviderEnumClasses(CMPIClassMI * mi,
   char           *cn = NULL;
   CMPIFlags       flgs = 0;
   CMPIString     *cni;
-  ClassBase      *cb;
   Iterator        it;
   char           *key;
   int             rc;
@@ -795,7 +787,6 @@ ClassProviderEnumClasses(CMPIClassMI * mi,
     if (cn && *cn == 0)
       cn = NULL;
   }
-  cb = (ClassBase *) cReg->hdl;
 
   if (cn == NULL) {
     for (it = cReg->ft->getFirstClass(cReg, &key, &cls, &cid);

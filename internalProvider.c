@@ -183,7 +183,6 @@ InternalProviderEnumInstanceNames(CMPIInstanceMI * mi,
                  *out;
   CMPIObjectPath *op;
   CMPIArray      *ar;
-  CMPIData        rv;
 
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderEnumInstanceNames");
   _SFCB_TRACE(1, ("%s %s", nss, cns));
@@ -192,7 +191,7 @@ InternalProviderEnumInstanceNames(CMPIInstanceMI * mi,
   out = CMNewArgs(Broker, NULL);
   CMAddArg(in, "class", cns, CMPI_chars);
   op = CMNewObjectPath(Broker, nss, "$ClassProvider$", &sti);
-  rv = CBInvokeMethod(Broker, ctx, op, "getallchildren", in, out, &sti);
+  CBInvokeMethod(Broker, ctx, op, "getallchildren", in, out, &sti);
   ar = CMGetArg(out, "children", NULL).value.array;
   if (ar)
     ac = CMGetArrayCount(ar, NULL);
@@ -254,7 +253,6 @@ enumInstances(CMPIInstanceMI * mi,
                  *out;
   CMPIObjectPath *op;
   CMPIArray      *ar;
-  CMPIData        rv;
 
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "enumInstances");
   _SFCB_TRACE(1, ("--- %s %s", nss, cns));
@@ -268,7 +266,7 @@ enumInstances(CMPIInstanceMI * mi,
 
   op = CMNewObjectPath(Broker, nss, "$ClassProvider$", &sti);
   _SFCB_TRACE(1, ("--- getallchildren"));
-  rv = CBInvokeMethod(Broker, ctx, op, "getallchildren", in, out, &sti);
+  CBInvokeMethod(Broker, ctx, op, "getallchildren", in, out, &sti);
   _SFCB_TRACE(1, ("--- getallchildren rc: %d", sti.rc));
 
   ar = CMGetArg(out, "children", NULL).value.array;
@@ -628,12 +626,11 @@ getRefs(const CMPIContext *ctx, const CMPIResult *rslt,
   }
 
   else {
-    CMPIData        rv;
     CMPIObjectPath *op =
         CMNewObjectPath(Broker, ns, "$ClassProvider$", &st);
     CMPIArgs       *in = CMNewArgs(Broker, NULL);
     CMPIArgs       *out = CMNewArgs(Broker, NULL);
-    rv = CBInvokeMethod(Broker, ctx, op, "getassocs", in, out, &st);
+    CBInvokeMethod(Broker, ctx, op, "getassocs", in, out, &st);
     if (out) {
       int             i,
                       m;

@@ -412,7 +412,6 @@ rebuild(BlobIndex * bi, const char *id, void *blob, int blen)
                   xt = 0,
                   dt = 0, 
                   rc = 0;
-  unsigned long   pos;
   char           *xn = alloca(strlen(bi->dir) + 8);
   char           *dn = alloca(strlen(bi->dir) + 8);
   FILE           *x,
@@ -432,7 +431,7 @@ rebuild(BlobIndex * bi, const char *id, void *blob, int blen)
   if (len)
     copy(d, bi->fd, bi->dlen - (bi->bofs + bi->blen), bi->bofs + bi->blen);
   dt += len;
-  pos = ftell(d);
+  //pos = ftell(d);
   if (blen)
     rc = fwrite(blob,blen,1,d) - 1;
   dt += blen;

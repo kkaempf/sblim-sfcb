@@ -183,6 +183,7 @@ genRequest(CurlData * cd, char *url, char **msg)
    */
   rv = curl_easy_setopt(cd->mHandle, CURLOPT_POST, 1);
 
+
   /*
    * Enable endpoint cert verification as required
    */
@@ -265,6 +266,11 @@ genRequest(CurlData * cd, char *url, char **msg)
   char *curldebug = getenv("CURLDEBUG");
   if (curldebug && strcasecmp(curldebug,"false"))
     rv = curl_easy_setopt(cd->mHandle, CURLOPT_VERBOSE, 1);
+
+  if (rv) {
+    *msg = strdup("Some curl opts failed during setup");
+    return 2;
+  }
 
   return 0;
 }

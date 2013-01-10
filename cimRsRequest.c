@@ -415,14 +415,10 @@ stringsort(const void *p1, const void *p2)
 
 void getSortedKeys(CimRsReq *rsReq)
 {
-  CMPIObjectPath *op;
-  CMPIStatus rc;
   CMPIArray  *klist;
   char ** keyNames; 
   //int i,keyCount=0;
   int i;
-  // Get a const class object
-  op = NewCMPIObjectPath(rsReq->ns, rsReq->cn,&rc);
   CMPIConstClass *cc = getConstClass(rsReq->ns,rsReq->cn);
   // Get the key list and count
   klist = cc->ft->getKeyList(cc);

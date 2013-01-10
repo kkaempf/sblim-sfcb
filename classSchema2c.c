@@ -102,8 +102,7 @@ static void
 buildClassSource(ClassRegister * cr, char *ns)
 {
   ClassBase      *cb = (ClassBase *) (cr + 1);
-  UtilHashTable  *ct = cb->ht,
-      *it;
+  UtilHashTable  *ct = cb->ht;
   HashTableIterator *i;
   char           *cn;
   CMPIConstClass *cc;
@@ -112,9 +111,9 @@ buildClassSource(ClassRegister * cr, char *ns)
   int             j;
   int             size;
 
-  it = cb->it = UtilFactory->newHashTable(61,
-                                          UtilHashTable_charKey |
-                                          UtilHashTable_ignoreKeyCase);
+  cb->it = UtilFactory->newHashTable(61,
+                                     UtilHashTable_charKey |
+                                     UtilHashTable_ignoreKeyCase);
 
   fprintf(stdout, "\n#include \"classSchemaMem.h\"\n\n");
   fprintf(stdout, "\n#include <stddef.h>\n\n");

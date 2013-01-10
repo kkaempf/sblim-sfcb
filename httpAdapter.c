@@ -1296,7 +1296,7 @@ handleHttpRequest(int connFd, int sslMode)
   CommHndl        conn_fd;
   int             isReady;
   fd_set          httpfds;
-  struct sembuf   procReleaseUnDo = { 0, 1, SEM_UNDO };
+  //  struct sembuf   procReleaseUnDo = { 0, 1, SEM_UNDO };
   struct timeval  httpTimeout;
   int             breakloop;
 
@@ -1310,7 +1310,7 @@ handleHttpRequest(int connFd, int sslMode)
     for (httpProcIdX = 0; httpProcIdX < hMax; httpProcIdX++)
       if (semGetValue(httpProcSem, httpProcIdX + 1) == 0)
         break;
-    procReleaseUnDo.sem_num = httpProcIdX + 1;
+    //    procReleaseUnDo.sem_num = httpProcIdX + 1;
 
     sessionId++;
     r = fork();
@@ -1930,7 +1930,7 @@ httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr,
   struct sockaddr_in httpSin;
 #endif
 
-  socklen_t       httpSin_len;
+  socklen_t       httpSin_len = 0;
   int             i,
                   rc;
   char           *cp;
@@ -2249,10 +2249,9 @@ get_cert(int preverify_ok, X509_STORE_CTX * x509_ctx)
   _SFCB_ENTER(TRACE_HTTPDAEMON, "get_cert");
 
   char    buf[256];
-  int     err, depth;
+  int     depth;
 
   x509 = X509_STORE_CTX_get_current_cert(x509_ctx);
-  err = X509_STORE_CTX_get_error(x509_ctx);
   depth = X509_STORE_CTX_get_error_depth(x509_ctx);
 
   _SFCB_TRACE(2, ("--- Verify peer certificate chain: level %d:", depth));
@@ -2305,7 +2304,7 @@ ccValidate(X509 * certificate, char **principal, int mode)
 static int
 load_cert(const char *cert_file)
 {
-  STACK_OF(x509_NAME) *cert_names;
+  STACK_OF(X509_NAME) *cert_names;
 
   if (cert_file == NULL) {
         mlogf(M_ERROR, M_SHOW,

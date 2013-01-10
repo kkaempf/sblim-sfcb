@@ -320,7 +320,6 @@ IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
   CMPIArgs       *in,
                  *out = NULL;
   CMPIObjectPath *op;
-  CMPIData        rv;
   unsigned short  persistenceType;
 
   _SFCB_ENTER(TRACE_INDPROVIDER, "IndCIMXMLHandlerCreateInstance");
@@ -433,13 +432,13 @@ IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
   CMAddArg(in, "key", &copLocal, CMPI_ref);
   op = CMNewObjectPath(_broker, "root/interop",
                        "cim_indicationsubscription", &st);
-  rv = CBInvokeMethod(_broker, ctx, op, "_addHandler", in, out, &st);
+  CBInvokeMethod(_broker, ctx, op, "_addHandler", in, out, &st);
 
   if (st.rc == CMPI_RC_OK) {
     st = InternalProviderCreateInstance(NULL, ctx, rslt, copLocal, ciLocal);
   }
   else {
-    rv=CBInvokeMethod(_broker,ctx,op,"_removeHandler",in,out,NULL);
+    CBInvokeMethod(_broker,ctx,op,"_removeHandler",in,out,NULL);
   }
 
   _SFCB_RETURN(st);
@@ -460,7 +459,6 @@ IndCIMXMLHandlerModifyInstance(CMPIInstanceMI * mi,
   CMPIString *cn = CMGetClassName(cop, NULL);
   const char *cns = cn->ft->getCharPtr(cn,NULL);
   CMPIArgs *in;
-  CMPIData rv;
         
   _SFCB_ENTER(TRACE_INDPROVIDER, "IndCIMXMLHandlerModifyInstance");   
    
@@ -480,13 +478,13 @@ IndCIMXMLHandlerModifyInstance(CMPIInstanceMI * mi,
     CMAddArg(in,"key",&cop,CMPI_ref);
     /* cn needs to be IndicationSub to route the IM call to interopProv */
     CMPIObjectPath* sop=CMNewObjectPath(_broker,"root/interop","cim_indicationsubscription",&st);
-    rv = CBInvokeMethod(_broker,ctx,sop,"_updateHandler",in,NULL,&st);
+    CBInvokeMethod(_broker,ctx,sop,"_updateHandler",in,NULL,&st);
 
     if (st.rc==CMPI_RC_OK) {
       st=InternalProviderModifyInstance(NULL,ctx,rslt,cop,ci,properties);
     }
     else {
-      rv=CBInvokeMethod(_broker,ctx,sop,"_removeHandler",in,NULL,NULL);
+      CBInvokeMethod(_broker,ctx,sop,"_removeHandler",in,NULL,NULL);
     }
 
   }
@@ -504,7 +502,6 @@ IndCIMXMLHandlerDeleteInstance(CMPIInstanceMI * mi,
   CMPIArgs       *in,
                  *out = NULL;
   CMPIObjectPath *op;
-  CMPIData        rv;
 
   _SFCB_ENTER(TRACE_INDPROVIDER, "IndCIMXMLHandlerDeleteInstance");
 
@@ -519,7 +516,7 @@ IndCIMXMLHandlerDeleteInstance(CMPIInstanceMI * mi,
   CMAddArg(in, "key", &cop, CMPI_ref);
   op = CMNewObjectPath(_broker, "root/interop",
                        "cim_indicationsubscription", &st);
-  rv = CBInvokeMethod(_broker, ctx, op, "_removeHandler", in, out, &st);
+  CBInvokeMethod(_broker, ctx, op, "_removeHandler", in, out, &st);
 
   if (st.rc == CMPI_RC_OK) {
     st = InternalProviderDeleteInstance(NULL, ctx, rslt, cop);
@@ -578,12 +575,11 @@ IndCIMXMLHandlerMethodCleanup(CMPIMethodMI * mi,
  *  the target destination
  */
 
-CMPIStatus
+int
 deliverInd(const CMPIObjectPath * ref, const CMPIArgs * in, CMPIInstance * ind)
 {
   _SFCB_ENTER(TRACE_INDPROVIDER, "deliverInd");
-  CMPIInstance   *hci,
-                 *sub;
+  CMPIInstance   *hci;
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIString     *dest;
   char            strId[64];
@@ -595,21 +591,16 @@ deliverInd(const CMPIObjectPath * ref, const CMPIArgs * in, CMPIInstance * ind)
   int            rc = 0;
 
   if ((hci = internalProviderGetInstance(ref, &st)) == NULL) {
-    setStatus(&st, CMPI_RC_ERR_NOT_FOUND, NULL);
-    _SFCB_RETURN(st);
+    _SFCB_RETURN(1);
   }
   dest = CMGetProperty(hci, "destination", NULL).value.string;
   _SFCB_TRACE(1, ("--- destination: %s\n", (char *) dest->hdl));
-  sub = CMGetArg(in, "subscription", NULL).value.inst;
 
   sprintf(strId, "%d", id++);
   xs = exportIndicationReq(ind, strId);
   sb = segments2stringBuffer(xs.segments);
   rc = exportIndication((char*)dest->hdl,
                (char*)sb->ft->getCharPtr(sb), &resp, &msg);
-  if (rc != 0) {
-     setStatus(&st,rc,NULL);
-  }
   RespSegment     rs = xs.segments[5];
   UtilStringBuffer *usb = (UtilStringBuffer *) rs.txt;
   CMRelease(usb);
@@ -618,7 +609,7 @@ deliverInd(const CMPIObjectPath * ref, const CMPIArgs * in, CMPIInstance * ind)
     free(resp);
   if (msg)
     free(msg);
-  _SFCB_RETURN(st);
+  _SFCB_RETURN(rc);
 }
 
 // Retry queue element and control vars
@@ -782,6 +773,7 @@ retryExport(void *lctx)
   sigaction(SIGUSR2, &sa, NULL);
 
   CMPIStatus      st = { CMPI_RC_OK, NULL };
+  int             rc = 0;
 
   ctxLocal = prepareUpcall(ctx);
 
@@ -841,11 +833,11 @@ retryExport(void *lctx)
         if(retryShutdown) break; // Provider shutdown
         pthread_mutex_lock(&RQlock);
       }
-      st = deliverInd(ref, in, iinst);
-      if ((st.rc == 0) || (cur->count >= maxcount - 1)) {
+      rc = deliverInd(ref, in, iinst);
+      if ((rc == 0) || (cur->count >= maxcount - 1)) {
         // either it worked, or we maxed out on retries
         // If it succeeded, clear the failtime
-        if (st.rc == 0) {
+        if (rc == 0) {
           _SFCB_TRACE(1,("--- Indication succeeded."));
           sfc = 0;
           CMSetProperty(sub, "DeliveryFailureTime", &sfc, CMPI_uint64);
@@ -985,6 +977,7 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
 
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIStatus      circ = { CMPI_RC_OK, NULL };
+  int             drc = 0;
   struct timeval tv;
   struct timezone tz;
   static unsigned int indID=1;
@@ -1056,9 +1049,9 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
     }
 
     // Now send the indication
-    st = deliverInd(ref, in, ind);
+    drc = deliverInd(ref, in, ind);
 
-    switch (st.rc) {
+    switch (drc) {
       case 0:   /* Success */
       case 400: /* Bad Request XML */
       case 501: /* Not Implemented */
