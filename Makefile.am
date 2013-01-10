@@ -149,16 +149,6 @@ sfcblib_LTLIBRARIES = \
    $(SFC_CUSTOM_LIB) \
    $(ACCOUNT_PASSTHRU_LIBS) 
 
-if TEST_ENABLED 
-sfcblib_LTLIBRARIES += \
-   libTestAssociationProvider.la \
-   libTestMethodProvider.la \
-   libTestInstanceProvider.la \
-   libTestMiscProvider.la \
-   libTestExecQueryProvider.la \
-   libTestIndicationProvider.la
-endif
-
 sbin_PROGRAMS = \
    sfcbd 
 
@@ -316,39 +306,6 @@ libsfcClassProviderMem_la_SOURCES = \
    classProviderMem.c classSchemaMem.c interop_classSchema.c
 libsfcClassProviderMem_la_LIBADD=-lsfcBrokerCore
 libsfcClassProviderMem_la_DEPENDENCIES=libsfcBrokerCore.la
-
-# Building providers in the test/TestProviders directory
-if TEST_ENABLED
-libTestAssociationProvider_la_SOURCES = \
-   test/TestProviders/cmpiTestAssociationProvider.c
-libTestAssociationProvider_la_LIBADD = -lsfcBrokerCore
-libTestAssociationProvider_la_DEPENDENCIES=libsfcBrokerCore.la
-
-libTestMethodProvider_la_SOURCES = \
-   test/TestProviders/cmpiTestMethodProvider.c
-libTestMethodProvider_la_LIBADD = -lsfcBrokerCore
-libTestMethodProvider_la_DEPENDENCIES=libsfcBrokerCore.la
-
-libTestInstanceProvider_la_SOURCES = \
-   test/TestProviders/cmpiTestInstanceProvider.c
-libTestInstanceProvider_la_LIBADD = -lsfcBrokerCore
-libTestInstanceProvider_la_DEPENDENCIES=libsfcBrokerCore.la
-
-libTestMiscProvider_la_SOURCES = \
-   test/TestProviders/cmpiTestMiscProvider.c
-libTestMiscProvider_la_LIBADD = -lsfcBrokerCore
-libTestMiscProvider_la_DEPENDENCIES=libsfcBrokerCore.la
-
-libTestExecQueryProvider_la_SOURCES = \
-   test/TestProviders/cmpiTestExecQueryProvider.c
-libTestExecQueryProvider_la_LIBADD = -lsfcBrokerCore
-libTestExecQueryProvider_la_DEPENDENCIES=libsfcBrokerCore.la
-
-libTestIndicationProvider_la_SOURCES = \
-   test/TestProviders/cmpiTestIndicationProvider.c
-libTestIndicationProvider_la_LIBADD = -lsfcBrokerCore
-libTestIndicationProvider_la_DEPENDENCIES=libsfcBrokerCore.la
-endif
 
 # if we enable CIMrs requests, then compile in the CIMrs
 # request processor
