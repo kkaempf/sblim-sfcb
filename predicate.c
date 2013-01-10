@@ -70,15 +70,14 @@ __eft_getData(const CMPIPredicate *pred, CMPIType *type,
 
   if (op) {
     if (op->opr == QL_bin) {
-      QLOpd           type = QL_Invalid;
       if (op->lhon)
         o = op->lhon;
       else
         o = op->rhon;
       if (o->lhod && o->lhod->type != QL_PropertyName)
-        type = o->lhod->type;
+	*type = (o->lhod->type < 0) ? CMPI_null : (CMPIType)o->lhod->type;
       else if (o->rhod && o->rhod->type != QL_PropertyName)
-        type = o->rhod->type;
+	*type = (o->rhod->type < 0) ? CMPI_null : (CMPIType)o->rhod->type;
       if (opc)
         *opc = o->opr;
       if (lhs) {

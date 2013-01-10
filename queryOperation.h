@@ -52,21 +52,22 @@ typedef struct qlCollector QLCollector;
 
 extern void    *qsAlloc(QLStatement * qs, unsigned int size);
 
+/* use negative number to avoid collisions with CMPI types */
 typedef enum qlOpd {
-  QL_Invalid,
-  QL_NotFound,
-  QL_Null,
-  QL_Integer,
-  QL_UInteger,
-  QL_Double,
-  QL_Boolean,
-  QL_Chars,
-  QL_Char,
-  QL_PropertyName,
-  QL_Name,
-  QL_Inst,
-  QL_Ref,
-  QL_DateTime,
+  QL_Invalid = -2,
+  QL_NotFound = -1,
+  QL_Null = CMPI_null,
+  QL_Integer = CMPI_SINT,
+  QL_UInteger = CMPI_UINT,
+  QL_Double = CMPI_real64,
+  QL_Boolean = CMPI_boolean,
+  QL_Chars = CMPI_chars,
+  QL_Char = CMPI_char16,
+  QL_PropertyName = CMPI_string,
+  QL_Name = CMPI_nameString,
+  QL_Inst = CMPI_instance,
+  QL_Ref = CMPI_ref,
+  QL_DateTime = CMPI_dateTime,
 } QLOpd;
 
 typedef enum qlFnc {
