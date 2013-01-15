@@ -23,6 +23,7 @@
 #include <signal.h>
 #include <time.h>
 #include <pthread.h>
+#include <sys/resource.h>
 
 #include "cmpi/cmpidt.h"
 #include "providerRegister.h"

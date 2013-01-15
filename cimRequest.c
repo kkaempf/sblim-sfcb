@@ -20,6 +20,8 @@
  *
  */
 
+#include <sys/resource.h>
+
 #include "cmpi/cmpidt.h"
 #include "cimXmlGen.h"
 #include "cimXmlParser.h"

@@ -62,6 +62,8 @@
 #include <sys/fsuid.h>
 #endif
 
+#include <sys/resource.h>
+
 #include "httpComm.h"
 #include "sfcVersion.h"
 #include "control.h"
