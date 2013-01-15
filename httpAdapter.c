@@ -141,7 +141,7 @@ extern RespSegments genChunkResponses(BinRequestContext *,
                                       BinResponseHdr **, int);
 extern RespSegments genFirstChunkErrorResponse(BinRequestContext * binCtx,
                                                int rc, char *msg);
-extern char    *getErrTrailer(int id, int rc, char *m);
+extern char    *getErrTrailer(int rc, char *m);
 extern void     dumpTiming(int pid);
 extern char    *configfile;
 extern int      inet_aton(const char *cp, struct in_addr *inp);
@@ -177,7 +177,7 @@ typedef int     (*Authenticate2) (char *principal, char *pwd, AuthExtras *extras
 typedef struct _buffer {
   char           *data,
                  *content;
-  int             length,
+  unsigned int    length,
                   size,
                   ptr;
   unsigned int    content_length;
@@ -266,7 +266,7 @@ baValidate(char *cred, char **principal)
 {
   char           *auth,
                  *pw = NULL;
-  int             i;
+  unsigned int    i;
   static void    *authLib = NULL;
   static Authenticate authenticate = NULL;
   static Authenticate2 authenticate2=NULL;
@@ -322,7 +322,7 @@ baValidate(char *cred, char **principal)
 }
 
 static void
-handleSigChld(int sig)
+handleSigChld(int __attribute__ ((unused)) sig)
 {
   const int       oerrno = errno;
   pid_t           pid;
@@ -350,7 +350,7 @@ handleSigChld(int sig)
 }
 
 static void
-stopProc(void *p)
+stopProc()
 {
   // printf("--- %s draining %d\n",processName,running);
   for (;;) {
@@ -364,7 +364,7 @@ stopProc(void *p)
 }
 
 static void
-handleSigUsr1(int sig)
+handleSigUsr1(int __attribute__ ((unused)) sig)
 {
   pthread_t       t;
   pthread_attr_t  tattr;
@@ -377,7 +377,7 @@ handleSigUsr1(int sig)
   }
 }
 
-static void handleSigPipe(int sig)
+static void handleSigPipe(int __attribute__ ((unused)) sig)
 {
   exit(1);
 }
@@ -733,7 +733,7 @@ writeChunkResponse(BinRequestContext * ctx, BinResponseHdr * rh)
 
     sprintf(status, "CIMStatusCode: %d\r\n", (int) (rh->rc - 1));
     if (rh->rc != 1)
-      desc = getErrTrailer(73, rh->rc - 1, NULL);
+      desc = getErrTrailer(rh->rc - 1, NULL);
 
     commWrite(*(ctx->commHndl), eStr, strlen(eStr));
     commWrite(*(ctx->commHndl), status, strlen(status));
@@ -1290,7 +1290,7 @@ doHttpRequest(CommHndl conn_fd)
  *
  */
 static void
-handleHttpRequest(int connFd, int sslMode)
+handleHttpRequest(int connFd, int __attribute__ ((unused)) sslMode)
 {
   int             r;
   CommHndl        conn_fd;
@@ -1612,7 +1612,7 @@ handleHttpRequest(int connFd, int sslMode)
 }
 
 int
-isDir(const char *path)
+isDir(const char __attribute__ ((unused)) *path)
 {
 #if defined (HAVE_SYS_STAT_H) && defined (USE_SSL)
   struct stat     sb;
@@ -2048,8 +2048,8 @@ httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr,
       doFork = 1;
     else if (strcmp(argv[i], "-nF") == 0)
       doFork = 0;
-    else if (strcmp(argv[i], "-H") == 0);
-    ++i;
+    else if (strcmp(argv[i], "-H") == 0)
+      ++i;
   }
 
   name = argv[0];

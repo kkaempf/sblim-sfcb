@@ -946,7 +946,7 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
         setSignal(SIGSEGV, handleSigSegv, SA_ONESHOT);
 
         // If requested, change the uid of the provider
-	//	if (info->uid != -1) {
+	if (info->uid != -1) {
           _SFCB_TRACE(1,
                       ("--- Changing uid of provider, %s, to %d(%s)",
                        info->providerName, info->uid, info->user));
@@ -957,7 +957,7 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
                   info->providerName);
             _SFCB_RETURN(-1);
           }
-	  //	}
+	}
 
         curProvProc = (*proc);
         resultSockets = sPairs[(*proc)->id + ptBase];

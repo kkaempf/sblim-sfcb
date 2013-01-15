@@ -13,6 +13,7 @@ Bugs fixed:
 - 3600125 Share client tracing shm segment
 - 3600283 Fixup compiler warnings from gcc 4.7
 - 3600159 TestProviders should have their own Makefile
+- 3601026 Fixup compiler warnings from -Wextra
 
 Changes in 1.4.3
 ================

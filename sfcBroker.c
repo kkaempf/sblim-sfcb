@@ -25,7 +25,6 @@
 #include <sfcCommon/utilft.h>
 #include "string.h"
 #include "cimXmlParser.h"
-// #include "brokerOs.c"
 
 #include <unistd.h>
 #include <errno.h>
@@ -59,7 +58,6 @@ extern int      sfcbUseSyslog;
 
 extern void     setExFlag(unsigned long f);
 extern char    *parseTarget(const char *target);
-extern UtilStringBuffer *instanceToString(CMPIInstance *ci, char **props);
 extern int      init_sfcBroker();
 extern CMPIBroker *Broker;
 extern void     initProvProcCtl(int);
@@ -186,7 +184,7 @@ static int      stopping = 0;
 extern int      remSem();
 
 static void
-stopBroker(void *p)
+stopBroker()
 {
   struct timespec waitTime;
   int sa=0,sp=0, count = 0;
@@ -285,7 +283,7 @@ stopBroker(void *p)
 }
 
 static void
-signalBroker(void *p)
+signalBroker()
 {
   pthread_mutex_lock(&sdMtx);
   pthread_cond_signal(&sdCnd);
@@ -309,7 +307,7 @@ startLocalConnectServer()
 }
 
 static void
-handleSigquit(int sig)
+handleSigquit(int __attribute__ ((unused)) sig)
 {
 
   pthread_t       t;
@@ -342,7 +340,7 @@ handleSigHup(int sig)
 }
 
 static void
-handleSigChld(int sig)
+handleSigChld(int __attribute__ ((unused)) sig)
 {
 
   const int       oerrno = errno;
@@ -390,7 +388,7 @@ handleSigChld(int sig)
 }
 
 static void
-handleSigUsr2(int sig)
+handleSigUsr2(int __attribute__ ((unused)) sig)
 {
 #ifndef LOCAL_CONNECT_ONLY_ENABLE
    struct timespec waitTime;
@@ -422,7 +420,7 @@ handleSigUsr2(int sig)
 }
 
 static void
-handleSigSegv(int sig)
+handleSigSegv(int __attribute__ ((unused)) sig)
 {
   fprintf(stderr, "-#- %s - %d exiting due to a SIGSEGV signal\n",
           processName, currentProc);
@@ -540,7 +538,7 @@ usage(int status)
       "    the SBLIM homepage at http://sblim.sourceforge.net"
     };
 
-    int             i;
+    unsigned int i;
 
     fprintf(stdout, "Usage: %s [options]\n", name);
     for (i = 0; i < sizeof(help) / sizeof(char *); i++)

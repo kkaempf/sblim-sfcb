@@ -41,7 +41,6 @@
 
 extern MsgSegment setArgsMsgSegment(const CMPIArgs * args);
 extern CMPIArgs *relocateSerializedArgs(void *area);
-extern UtilStringBuffer *instanceToString(CMPIInstance *ci, char **props);
 extern MsgSegment setInstanceMsgSegment(const CMPIInstance *ci);
 extern void     memLinkObjectPath(CMPIObjectPath * op);
 
@@ -296,7 +295,7 @@ static void
 cpyResult(CMPIResult *result, CMPIArray *ar, int *c)
 {
   CMPIArray      *r;
-  int             j,
+  unsigned int    j,
                   m;
 
   r = native_result2array(result);
@@ -313,7 +312,7 @@ cpyResult(CMPIResult *result, CMPIArray *ar, int *c)
 static void
 cpyResponse(BinResponseHdr * resp, CMPIArray *ar, int *c, CMPIType type)
 {
-  int             j;
+  unsigned long   j;
   void           *tObj;
 
   for (j = 0; j < resp->count; *c = (*c) + 1, j++) {
@@ -383,8 +382,8 @@ genericEnumRequest(const CMPIBroker * broker,
   int             initrc = 0;
   int             irc,
                   c,
-                  i = -1,
-                  cnt = bhdr->count;
+                  i = -1;
+  unsigned long   cnt = bhdr->count;
 
   _SFCB_ENTER(TRACE_UPCALLS, "genericEnumRequest");
 
@@ -419,11 +418,12 @@ genericEnumRequest(const CMPIBroker * broker,
       BinResponseHdr *resp;
       ProviderInfo   *pInfo;
       int             local;
+      unsigned long   j;
       ar = TrackedCMPIArray(0, retType, NULL);
-      for (resp = NULL, c = 0, i = 0; i < binCtx.pCount;
-           i++, binCtx.pDone++) {
+      for (resp = NULL, c = 0, j = 0; j < binCtx.pCount;
+           j++, binCtx.pDone++) {
         local = 0;
-        binCtx.provA = binCtx.pAs[i];
+        binCtx.provA = binCtx.pAs[j];
         for (pInfo = activProvs; pInfo; pInfo = pInfo->next) {
           if (pInfo->provIds.ids == binCtx.provA.ids.ids) {
             copLocalCall = (CMPIObjectPath *) cop;
@@ -953,8 +953,8 @@ execQuery(const CMPIBroker * broker,
   int             initrc = 0;
   char           *errstr = NULL;
   int             irc,
-                  i,
                   c;
+  unsigned long   i;
 
   _SFCB_ENTER(TRACE_UPCALLS, "execQuery");
 

@@ -186,8 +186,8 @@ getQualifier(CMPIConstClass * cc, const char *name, CMPIStatus *rc)
   CMPIData        rv_notfound = { 0, CMPI_notFound, {0} };
   CMPIData        rv;
   char           *qname;
-  int             i;
-  CMPICount       cnt = ClClassGetQualifierCount(cls);
+  CMPICount       cnt = ClClassGetQualifierCount(cls),
+                  i;
 
   for (i = 0; i < cnt; i++) {
     if (ClClassGetQualifierAt(cls, i, &rv, &qname)) {
