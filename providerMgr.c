@@ -1074,7 +1074,7 @@ processProviderMgrRequests()
 void
 closeProviderContext(BinRequestContext * ctx)
 {
-  int             i = 0;
+  unsigned long i = 0;
   _SFCB_ENTER(TRACE_PROVIDERMGR, "closeProviderContext");
   for (i = 0; i < ctx->pCount; i++) {
     if (semAcquireUnDo(sfcbSem,PROV_GUARD(ctx->pAs[i].ids.procId))) {
@@ -1254,11 +1254,11 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
 {
   _SFCB_ENTER(TRACE_PROVIDERMGR | TRACE_CIMXMLPROC, "intInvokeProvider");
   _SFCB_TRACE(1, ("--- localMode: %d", localMode));
-  int             i,
-                  ol,
+  int             ol,
                   rc;
-  long            l;
-  unsigned long   size = ctx->bHdrSize;
+  unsigned long   size = ctx->bHdrSize,
+                  l,
+                  i;
   char           *buf;
   BinRequestHdr  *hdr = ctx->bHdr;
   BinResponseHdr *resp = NULL;
@@ -1478,7 +1478,7 @@ invokeProviders(BinRequestContext * binCtx, int *err, int *count)
   _SFCB_ENTER(TRACE_PROVIDERMGR | TRACE_CIMXMLPROC, "invokeProviders");
   BinResponseHdr **resp;
   ComSockets      sockets;
-  int             i;
+  unsigned long   i;
 
   if (localMode) {
     pthread_mutex_lock(&resultsocketMutex);

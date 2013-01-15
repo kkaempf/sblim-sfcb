@@ -59,7 +59,7 @@ static int      releaseSem();
 int
 _sfcCertificateAuthenticate(X509 * cert, char **principal, int mode)
 {
-  int             i;
+  unsigned int    i;
   size_t          der_buflen = 0;
   unsigned char   der_buf[MAX_CERTIFICATE];
   unsigned char  *der_bufp = der_buf;

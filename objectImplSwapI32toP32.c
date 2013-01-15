@@ -87,7 +87,7 @@ typedef struct {
 } CLP32_ClProperty;
 
 static          CLP32_CMPIData
-copyI32toP32Data(ClObjectHdr * hdr, CMPIData *fd)
+copyI32toP32Data(CMPIData *fd)
 {
   CLP32_CMPIData  td;
 
@@ -142,7 +142,7 @@ copyI32toP32Data(ClObjectHdr * hdr, CMPIData *fd)
 }
 
 static int
-p32SizeQualifiers(ClObjectHdr * hdr, ClSection * s)
+p32SizeQualifiers(ClSection * s)
 {
   long            sz;
 
@@ -170,7 +170,7 @@ copyI32toP32Qualifiers(int ofs, char *to, CLP32_ClSection * ts,
 
   for (i = 0; i < fs->used; i++, tq++, fq++) {
     tq->id.id = bswap_32(fq->id.id);
-    tq->data = copyI32toP32Data(from, &fq->data);
+    tq->data = copyI32toP32Data(&fq->data);
   }
 
   ts->sectionOffset = bswap_32(ofs);
@@ -190,7 +190,7 @@ p32SizeProperties(ClObjectHdr * hdr, ClSection * s)
 
   for (l = s->used; l > 0; l--, p++) {
     if (p->qualifiers.used)
-      sz += p32SizeQualifiers(hdr, &p->qualifiers);
+      sz += p32SizeQualifiers(&p->qualifiers);
   }
   return ALIGN(sz, CLALIGN);
 }
@@ -218,7 +218,7 @@ copyI32toP32Properties(int ofs, char *to, CLP32_ClSection * ts,
     tp->padP32 = 0L;
     tp->id.id = bswap_32(fp->id.id);
     tp->refName.id = bswap_32(fp->refName.id);
-    tp->data = copyI32toP32Data(from, &fp->data);
+    tp->data = copyI32toP32Data(&fp->data);
     tp->flags = bswap_16(fp->flags);
     tp->quals = fp->quals;
     tp->originId = fp->originId;
@@ -248,7 +248,7 @@ p32SizeParameters(ClObjectHdr * hdr, ClSection * s)
 
   for (l = s->used; l > 0; l--, p++) {
     if (p->qualifiers.used)
-      sz += p32SizeQualifiers(hdr, &p->qualifiers);
+      sz += p32SizeQualifiers(&p->qualifiers);
   }
   return ALIGN(sz, CLALIGN);
 }
@@ -304,7 +304,7 @@ p32SizeMethods(ClObjectHdr * hdr, ClSection * s)
 
   for (l = s->used; l > 0; l--, m++) {
     if (m->qualifiers.used)
-      sz += p32SizeQualifiers(hdr, &m->qualifiers);
+      sz += p32SizeQualifiers(&m->qualifiers);
     if (m->parameters.used)
       sz += p32SizeParameters(hdr, &m->parameters);
   }
@@ -425,7 +425,7 @@ copyI32toP32ArrayBuf(int ofs, CLP32_ClObjectHdr * th, ClObjectHdr * fh)
 {
   ClArrayBuf     *fb = getArrayBufPtr(fh);
   CLP32_ClArrayBuf *tb = (CLP32_ClArrayBuf *) (((char *) th) + ofs);
-  int             i,
+  unsigned int    i,
                   l,
                   il;
   unsigned short  flags;
@@ -447,7 +447,7 @@ copyI32toP32ArrayBuf(int ofs, CLP32_ClObjectHdr * th, ClObjectHdr * fh)
 
   th->arrayBufOffset = bswap_32(ofs);
   for (i = 0; i < fb->bUsed; i++)
-    tb->buf[i] = copyI32toP32Data(fh, &fb->buf[i]);
+    tb->buf[i] = copyI32toP32Data(&fb->buf[i]);
 
   tb->iMax = bswap_16(fb->iUsed);
   tb->iUsed = bswap_16(fb->iUsed);
@@ -466,7 +466,7 @@ p32SizeClassH(ClObjectHdr * hdr, ClClass * cls)
 {
   long            sz = sizeof(CLP32_ClClass);
 
-  sz += p32SizeQualifiers(hdr, &cls->qualifiers);
+  sz += p32SizeQualifiers(&cls->qualifiers);
   sz += p32SizeProperties(hdr, &cls->properties);
   sz += p32SizeMethods(hdr, &cls->methods);
   sz += p32SizeStringBuf(hdr);
@@ -480,7 +480,7 @@ p32SizeInstanceH(ClObjectHdr * hdr, ClInstance * inst)
 {
   long            sz = sizeof(CLP32_ClInstance);
 
-  sz += p32SizeQualifiers(hdr, &inst->qualifiers);
+  sz += p32SizeQualifiers(&inst->qualifiers);
   sz += p32SizeProperties(hdr, &inst->properties);
   sz += p32SizeStringBuf(hdr);
   sz += p32SizeArrayBuf(hdr);
@@ -493,7 +493,7 @@ p32SizeQualifierH(ClObjectHdr * hdr, ClQualifierDeclaration * qual)
 {
   long            sz = sizeof(CLP32_ClQualifierDeclaration);
 
-  sz += p32SizeQualifiers(hdr, &qual->qualifierData);
+  sz += p32SizeQualifiers(&qual->qualifierData);
   sz += p32SizeStringBuf(hdr);
   sz += p32SizeArrayBuf(hdr);
 
@@ -501,7 +501,7 @@ p32SizeQualifierH(ClObjectHdr * hdr, ClQualifierDeclaration * qual)
 }
 
 void           *
-swapI32toP32Class(ClClass * cls, int *size)
+swapI32toP32Class(ClClass * cls, unsigned int *size)
 {
   ClObjectHdr    *hdr = &cls->hdr;
   int             ofs = sizeof(CLP32_ClClass);

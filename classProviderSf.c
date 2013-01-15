@@ -76,8 +76,6 @@ typedef struct _ClassBase {
 struct _Class_Register_FT {
   int             version;
   void            (*release) (ClassRegister * br);
-  ClassRegister  *(*clone) (ClassRegister * br);
-
   CMPIConstClass *(*getResolvedClass) (ClassRegister * br,
                                        const char *clsName,
                                        ClassRecord * crec, ReadCtl * ctl);
@@ -152,12 +150,6 @@ release(ClassRegister * cr)
   free(cr->fn);
   cb->ht->ft->release(cb->ht);
   free(cr);
-}
-
-static ClassRegister *
-regClone(ClassRegister * cr)
-{
-  return NULL;
 }
 
 void
@@ -386,8 +378,8 @@ newClassRegister(char *fname)
     s = hdr.size;
     *((ClObjectHdr *) buf) = hdr;
 
-    if (gzread(cr->f, buf + sizeof(hdr), hdr.size - sizeof(hdr)) ==
-        hdr.size - sizeof(hdr)) {
+    int gzr = gzread(cr->f, buf + sizeof(hdr), hdr.size - sizeof(hdr));
+    if (gzr && (unsigned int)gzr == hdr.size - sizeof(hdr)) {
       if (vRec) {
         cr->vr = (ClVersionRecord *) buf;
         if (strcmp(cr->vr->id, "sfcb-rep")) {
@@ -579,7 +571,7 @@ putClass(ClassRegister * cr, const char *cn, ClassRecord * crec)
  cc - class we're copying from (parent)
  */
 static int
-cpyClass(ClClass * cl, CMPIConstClass * cc, unsigned char originId)
+cpyClass(ClClass * cl, CMPIConstClass * cc)
 {
   ClClass        *ccl = (ClClass *) cc->hdl;
   CMPIData        d;
@@ -669,7 +661,7 @@ cpyClass(ClClass * cl, CMPIConstClass * cc, unsigned char originId)
 
       parm = ((ClParameter*)ClObjectGetClSection(&cl->hdr,&meth->parameters))+parmId-1;
       pparm = ((ClParameter*)ClObjectGetClSection(&ccl->hdr,&pmeth->parameters))+ip;
-      mq=ClClassGetMethParamQualifierCount(ccl,parm);
+      mq=ClClassGetMethParamQualifierCount(parm);
       //      fprintf(stderr, "       meth param qual count = %d\n", mq);
       for (iq=0; iq<mq; iq++) { 
       	ClClassGetMethParamQualifierAt(ccl, pparm, iq, &d, &name);
@@ -693,14 +685,11 @@ mergeParents(ClassRegister * cr, ClClass * cl, char *p,
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIConstClass *pcc = NULL;
-  unsigned char   originId = 0;
   char           *np = NULL;
   ReadCtl         ctl;
 
   if (cc) {
-    if (p)
-      originId = ClClassAddGrandParent(cl, p);
-    cpyClass(cl, cc, originId);
+    cpyClass(cl, cc);
   }
   if (p) {
     ctl = *rctl;
@@ -854,7 +843,6 @@ getClass(ClassRegister * cr, const char *clsName, ReadCtl *ctl)
 static Class_Register_FT ift = {
   1,
   release,
-  regClone,
   getResolvedClass,
   getClass,
   putClass,

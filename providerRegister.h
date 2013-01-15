@@ -125,7 +125,6 @@ extern          "C" {
   struct _Provider_Register_FT {
     int             version;
     void            (*release) (ProviderRegister * br);
-    ProviderRegister *(*clone) (ProviderRegister * br);
     ProviderInfo   *(*getProvider) (ProviderRegister * br,
                                     const char *clsName,
                                     unsigned long type);

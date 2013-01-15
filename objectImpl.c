@@ -209,8 +209,8 @@ addClStringN(ClObjectHdr * hdr, const char *str, unsigned int length)
 {
   _SFCB_ENTER(TRACE_OBJECTIMPL, "addClString");
 
-  int             nmax = 16,
-      l;
+  unsigned int  nmax = 16,
+                l;
 
   // see addClObject - hack to get anything into a stringbuffer
   if (length) {
@@ -307,10 +307,10 @@ addClArray(ClObjectHdr * hdr, CMPIData d)
   _SFCB_ENTER(TRACE_OBJECTIMPL, "addClArray");
 
   struct native_array *ar = (struct native_array *) d.value.array;
-  int             nmax = 16,
-      l = ar->size + 1,
-      i,
-      m;
+  unsigned int    nmax = 16,
+                  l = ar->size + 1,
+                  i,
+                  m;
   ClArrayBuf     *buf;
   CMPIData        td,
                  *dp;
@@ -649,7 +649,7 @@ replaceClArray(ClObjectHdr * hdr, int id, CMPIData d)
 }
 
 static int
-copyStringBuf(int ofs, int sz, ClObjectHdr * th, ClObjectHdr * fh)
+copyStringBuf(int ofs, ClObjectHdr * th, ClObjectHdr * fh)
 {
   _SFCB_ENTER(TRACE_OBJECTIMPL, "copyStringBuf");
 
@@ -681,7 +681,7 @@ copyStringBuf(int ofs, int sz, ClObjectHdr * th, ClObjectHdr * fh)
 }
 
 static int
-copyArrayBuf(int ofs, int sz, ClObjectHdr * th, ClObjectHdr * fh)
+copyArrayBuf(int ofs, ClObjectHdr * th, ClObjectHdr * fh)
 {
   _SFCB_ENTER(TRACE_OBJECTIMPL, "copyArrayBuf");
 
@@ -716,7 +716,7 @@ copyArrayBuf(int ofs, int sz, ClObjectHdr * th, ClObjectHdr * fh)
 static char    *
 cat2string(stringControl * sc, const char *str)
 {
-  int             nmax,
+  unsigned int    nmax,
                   l = strlen(str) + 1;
   if (str) {
     if (sc->str == NULL) {
@@ -1013,7 +1013,7 @@ ClClassAddMethParamQualifier(ClObjectHdr * hdr, ClParameter * p,
 }
 
 static void
-freeQualifiers(ClObjectHdr * hdr, ClSection * s)
+freeQualifiers(ClSection * s)
 {
   if (isMallocedSection(s))
     free(s->sectionPtr);
@@ -1043,7 +1043,7 @@ addQualifierToString(stringControl * sc, ClObjectHdr * hdr,
 }
 
 static long
-sizeQualifiers(ClObjectHdr * hdr, ClSection * s)
+sizeQualifiers(ClSection * s)
 {
   long            sz;
 
@@ -1052,7 +1052,7 @@ sizeQualifiers(ClObjectHdr * hdr, ClSection * s)
 }
 
 static int
-copyQualifiers(int ofs, int max, char *to, ClSection * ts,
+copyQualifiers(int ofs, char *to, ClSection * ts,
                ClObjectHdr * from, ClSection * fs)
 {
   ClQualifier    *q;
@@ -1131,7 +1131,7 @@ locateParameter(ClObjectHdr * hdr, ClSection * prms, const char *id)
 }
 
 int
-ClClassGetMethParamQualifierCount(ClClass * cls, ClParameter * p)
+ClClassGetMethParamQualifierCount(ClParameter * p)
 {
   return p->qualifiers.used;
 }
@@ -1186,13 +1186,13 @@ sizeParameters(ClObjectHdr * hdr, ClSection * s)
 
   for (l = s->used; l > 0; l--, p++) {
     if (p->qualifiers.used)
-      sz += sizeQualifiers(hdr, &p->qualifiers);
+      sz += sizeQualifiers(&p->qualifiers);
   }
   return ALIGN(sz, CLALIGN);
 }
 
 static long
-copyParameters(int ofs, int max, char *to, ClSection * ts,
+copyParameters(int ofs, char *to, ClSection * ts,
                ClObjectHdr * from, ClSection * fs)
 {
   ClParameter    *fp = (ClParameter *) ClObjectGetClSection(from, fs);
@@ -1208,7 +1208,7 @@ copyParameters(int ofs, int max, char *to, ClSection * ts,
 
   for (i = ts->used; i > 0; i--, fp++, tp++) {
     if (tp->qualifiers.used)
-      l += copyQualifiers(ofs + l, max, to, &tp->qualifiers, from,
+      l += copyQualifiers(ofs + l, to, &tp->qualifiers, from,
                           &fp->qualifiers);
   }
 
@@ -1216,7 +1216,7 @@ copyParameters(int ofs, int max, char *to, ClSection * ts,
 }
 
 static void
-freeParameters(ClObjectHdr * hdr, ClSection * s)
+freeParameters(ClSection * s)
 {
   _SFCB_ENTER(TRACE_OBJECTIMPL, "freeParameters");
 
@@ -1284,7 +1284,7 @@ sizeMethods(ClObjectHdr * hdr, ClSection * s)
 
   for (l = s->used; l > 0; l--, m++) {
     if (m->qualifiers.used)
-      sz += sizeQualifiers(hdr, &m->qualifiers);
+      sz += sizeQualifiers(&m->qualifiers);
     if (m->parameters.used)
       sz += sizeParameters(hdr, &m->parameters);
   }
@@ -1293,7 +1293,7 @@ sizeMethods(ClObjectHdr * hdr, ClSection * s)
 }
 
 static long
-copyMethods(int ofs, int max, char *to, ClSection * ts,
+copyMethods(int ofs, char *to, ClSection * ts,
             ClObjectHdr * from, ClSection * fs)
 {
   ClMethod       *fp = (ClMethod *) ClObjectGetClSection(from, fs);
@@ -1309,10 +1309,10 @@ copyMethods(int ofs, int max, char *to, ClSection * ts,
 
   for (i = ts->used; i > 0; i--, fp++, tp++) {
     if (tp->qualifiers.used)
-      l += copyQualifiers(ofs + l, max, to, &tp->qualifiers, from,
+      l += copyQualifiers(ofs + l, to, &tp->qualifiers, from,
                           &fp->qualifiers);
     if (tp->parameters.used)
-      l += copyParameters(ofs + l, max, to, &tp->parameters, from,
+      l += copyParameters(ofs + l, to, &tp->parameters, from,
                           &fp->parameters);
   }
 
@@ -1320,16 +1320,14 @@ copyMethods(int ofs, int max, char *to, ClSection * ts,
 }
 
 static void
-freeMethod(ClObjectHdr * hdr, ClMethod * m)
+freeMethod(ClMethod * m)
 {
   _SFCB_ENTER(TRACE_OBJECTIMPL, "freeMethod");
 
-  if (m) {
-    freeQualifiers(hdr, &(m)->qualifiers);
-  }
   if (m)
-   freeParameters(hdr, &(m)->parameters);
-
+    freeQualifiers(&(m)->qualifiers);
+  if (m)
+    freeParameters(&(m)->parameters);
 
   _SFCB_EXIT();
 }
@@ -1342,7 +1340,7 @@ freeMethods(ClObjectHdr * hdr, ClSection * s, int meths)
       ClMethod* m_sec = (ClMethod *) ClObjectGetClSection(hdr, s);
 
       for (; m < meths; m++) {
-	freeMethod(hdr, m_sec+m);
+	freeMethod(m_sec+m);
       }
       if (isMallocedSection(s))
 	free(s->sectionPtr);
@@ -1434,7 +1432,7 @@ freeProperties(ClObjectHdr * hdr, ClSection * s)
 
   if (p)
     for (i = 0, l = s->used; i < l; i++) {
-      freeQualifiers(hdr, &(p + i)->qualifiers);
+      freeQualifiers(&(p + i)->qualifiers);
     }
   if (isMallocedSection(s))
     free(s->sectionPtr);
@@ -1493,13 +1491,13 @@ sizeProperties(ClObjectHdr * hdr, ClSection * s)
 
   for (l = s->used; l > 0; l--, p++) {
     if (p->qualifiers.used)
-      sz += sizeQualifiers(hdr, &p->qualifiers);
+      sz += sizeQualifiers(&p->qualifiers);
   }
   return ALIGN(sz, CLALIGN);
 }
 
 static long
-copyProperties(int ofs, int max, char *to, ClSection * ts,
+copyProperties(int ofs, char *to, ClSection * ts,
                ClObjectHdr * from, ClSection * fs)
 {
   ClProperty     *fp = (ClProperty *) ClObjectGetClSection(from, fs);
@@ -1515,7 +1513,7 @@ copyProperties(int ofs, int max, char *to, ClSection * ts,
 
   for (i = ts->used; i > 0; i--, fp++, tp++)
     if (tp->qualifiers.used)
-      l += copyQualifiers(ofs + l, max, to, &tp->qualifiers, from,
+      l += copyQualifiers(ofs + l, to, &tp->qualifiers, from,
                           &fp->qualifiers);
 
   return ALIGN(l, CLALIGN);
@@ -1796,7 +1794,7 @@ sizeClassH(ClObjectHdr * hdr, ClClass * cls)
 {
   long            sz = sizeof(*cls);
 
-  sz += sizeQualifiers(hdr, &cls->qualifiers);
+  sz += sizeQualifiers(&cls->qualifiers);
   sz += sizeProperties(hdr, &cls->properties);
   sz += sizeMethods(hdr, &cls->methods);
   sz += sizeStringBuf(hdr);
@@ -1823,15 +1821,15 @@ rebuildClassH(ClObjectHdr * hdr, ClClass * cls, void *area)
   *nc = *cls;
 
   nc->hdr.flags &= ~HDR_Rebuild;
-  ofs += copyQualifiers(ofs, sz, (char *) nc, &nc->qualifiers, hdr,
+  ofs += copyQualifiers(ofs, (char *) nc, &nc->qualifiers, hdr,
                         &cls->qualifiers);
-  ofs += copyProperties(ofs, sz, (char *) nc, &nc->properties, hdr,
+  ofs += copyProperties(ofs, (char *) nc, &nc->properties, hdr,
                         &cls->properties);
-  ofs += copyMethods(ofs, sz, (char *) nc, &nc->methods, hdr,
+  ofs += copyMethods(ofs, (char *) nc, &nc->methods, hdr,
                      &cls->methods);
 
-  ofs += copyStringBuf(ofs, sz, &nc->hdr, hdr);
-  ofs += copyArrayBuf(ofs, sz, &nc->hdr, hdr);
+  ofs += copyStringBuf(ofs, &nc->hdr, hdr);
+  ofs += copyArrayBuf(ofs, &nc->hdr, hdr);
 
   nc->hdr.size = ALIGN(sz, CLALIGN);
 
@@ -1845,13 +1843,6 @@ ClClass        *
 ClClassRebuildClass(ClClass * cls, void *area)
 {
   return rebuildClassH(&cls->hdr, cls, area);
-}
-
-ClClass        *
-ClClassEndianRebuildClass(ClClass * cls, void *area, int mode)
-{
-  ClClass        *cl = rebuildClassH(&cls->hdr, cls, area);
-  return cl;
 }
 
 void
@@ -1868,7 +1859,7 @@ ClClassFreeClass(ClClass * cls)
 {
   if (cls->hdr.flags & HDR_Rebuild) {
     int meths = ClClassGetMethodCount(cls);
-    freeQualifiers(&cls->hdr, &cls->qualifiers);
+    freeQualifiers(&cls->qualifiers);
     freeProperties(&cls->hdr, &cls->properties);
     freeMethods(&cls->hdr, &cls->methods, meths);
     freeStringBuf(&cls->hdr);
@@ -2171,7 +2162,7 @@ sizeInstanceH(ClObjectHdr * hdr, ClInstance * inst)
 {
   long            sz = sizeof(*inst);
 
-  sz += sizeQualifiers(hdr, &inst->qualifiers);
+  sz += sizeQualifiers(&inst->qualifiers);
   sz += sizeProperties(hdr, &inst->properties);
   sz += sizeStringBuf(hdr);
   sz += sizeArrayBuf(hdr);
@@ -2195,12 +2186,12 @@ rebuildInstanceH(ClObjectHdr * hdr, ClInstance * inst, void *area)
 
   *ni = *inst;
   ni->hdr.flags &= ~HDR_Rebuild;
-  ofs += copyQualifiers(ofs, sz, (char *) ni, &ni->qualifiers, hdr,
+  ofs += copyQualifiers(ofs, (char *) ni, &ni->qualifiers, hdr,
                         &inst->qualifiers);
-  ofs += copyProperties(ofs, sz, (char *) ni, &ni->properties, hdr,
+  ofs += copyProperties(ofs, (char *) ni, &ni->properties, hdr,
                         &inst->properties);
-  ofs += copyStringBuf(ofs, sz, &ni->hdr, hdr);
-  ofs += copyArrayBuf(ofs, sz, &ni->hdr, hdr);
+  ofs += copyStringBuf(ofs, &ni->hdr, hdr);
+  ofs += copyArrayBuf(ofs, &ni->hdr, hdr);
 
   ni->hdr.size = ALIGN(sz, CLALIGN);
 
@@ -2226,7 +2217,7 @@ void
 ClInstanceFree(ClInstance * inst)
 {
   if (inst->hdr.flags & HDR_Rebuild) {
-    freeQualifiers(&inst->hdr, &inst->qualifiers);
+    freeQualifiers( &inst->qualifiers);
     freeProperties(&inst->hdr, &inst->properties);
     freeStringBuf(&inst->hdr);
     freeArrayBuf(&inst->hdr);
@@ -2440,9 +2431,9 @@ rebuildObjectPathH(ClObjectHdr * hdr, ClObjectPath * op, void *area)
 
   *nop = *op;
   nop->hdr.flags &= ~HDR_Rebuild;
-  ofs += copyProperties(ofs, sz, (char *) nop, &nop->properties, hdr,
+  ofs += copyProperties(ofs, (char *) nop, &nop->properties, hdr,
                         &op->properties);
-  ofs += copyStringBuf(ofs, sz, &nop->hdr, hdr);
+  ofs += copyStringBuf(ofs, &nop->hdr, hdr);
   nop->hdr.size = ALIGN(sz, CLALIGN);
 
   _SFCB_RETURN(nop);
@@ -2474,7 +2465,7 @@ ClObjectPathFree(ClObjectPath * op)
 }
 
 char           *
-ClObjectPathToString(ClObjectPath * op)
+ClObjectPathToString(ClObjectPath __attribute__ ((unused)) *op)
 {
   stringControl   sc = { NULL, 0, 32 };
   // ClProperty *p;
@@ -2644,10 +2635,10 @@ rebuildArgsH(ClObjectHdr * hdr, ClArgs * arg, void *area)
 
   *nop = *arg;
   nop->hdr.flags &= ~HDR_Rebuild;
-  ofs += copyProperties(ofs, sz, (char *) nop, &nop->properties, hdr,
+  ofs += copyProperties(ofs, (char *) nop, &nop->properties, hdr,
                         &arg->properties);
-  ofs += copyStringBuf(ofs, sz, &nop->hdr, hdr);
-  ofs += copyArrayBuf(ofs, sz, &nop->hdr, hdr);
+  ofs += copyStringBuf(ofs, &nop->hdr, hdr);
+  ofs += copyArrayBuf(ofs, &nop->hdr, hdr);
   nop->hdr.size = ALIGN(sz, CLALIGN);
 
   _SFCB_RETURN(nop);
@@ -2790,7 +2781,7 @@ sizeQualifierDeclarationH(ClObjectHdr * hdr, ClQualifierDeclaration * q)
 {
   long            sz = sizeof(*q);
 
-  sz += sizeQualifiers(hdr, &q->qualifierData);
+  sz += sizeQualifiers(&q->qualifierData);
   sz += sizeStringBuf(hdr);
   sz += sizeArrayBuf(hdr);
 
@@ -2819,10 +2810,10 @@ rebuildQualifierH(ClObjectHdr * hdr, ClQualifierDeclaration * q,
 
   nq->hdr.flags &= ~HDR_Rebuild;
   ofs +=
-      copyQualifiers(ofs, sz, (char *) nq, &nq->qualifierData, hdr,
+      copyQualifiers(ofs, (char *) nq, &nq->qualifierData, hdr,
                      &q->qualifierData);
-  ofs += copyStringBuf(ofs, sz, &nq->hdr, hdr);
-  ofs += copyArrayBuf(ofs, sz, &nq->hdr, hdr);
+  ofs += copyStringBuf(ofs, &nq->hdr, hdr);
+  ofs += copyArrayBuf(ofs, &nq->hdr, hdr);
 
   nq->hdr.size = ALIGN(sz, CLALIGN);
 
@@ -2888,7 +2879,7 @@ void
 ClQualifierFree(ClQualifierDeclaration * q)
 {
   if (q->hdr.flags & HDR_Rebuild) {
-    freeQualifiers(&q->hdr, &q->qualifierData);
+    freeQualifiers(&q->qualifierData);
     freeStringBuf(&q->hdr);
     freeArrayBuf(&q->hdr);
   }

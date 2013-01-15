@@ -55,8 +55,8 @@ extern int getCustomHostname(char *httpHost, char **hn, unsigned int len);
 
 const char     *opGetClassNameChars(CMPIObjectPath * cop);
 
-#define DATA2XML(data,obj,name,refname,btag,etag,sb,qsb,inst,param)    \
-  data2xml((data),(obj),(name),(refname),(btag),sizeof(btag)-1,(etag), \
+#define DATA2XML(data,name,refname,btag,etag,sb,qsb,inst,param)    \
+  data2xml((data),(name),(refname),(btag),sizeof(btag)-1,(etag), \
 	   sizeof(etag)-1,(sb),(qsb),(inst),(param))
 
 char           *
@@ -713,7 +713,7 @@ method2xml(CMPIType type, CMPIString *name, char *bTag, char *eTag,
 }
 
 void
-data2xml(CMPIData *data, void *obj, CMPIString *name,
+data2xml(CMPIData *data, CMPIString *name,
          CMPIString *refName, char *bTag, int bTagLen, char *eTag,
          int eTagLen, UtilStringBuffer * sb, UtilStringBuffer * qsb,
          int inst, int param)
@@ -861,13 +861,13 @@ param2xml(CMPIParameter * pdata, CMPIConstClass * cls, ClParameter * parm,
   UtilStringBuffer *qsb = NULL;
 
   if (flags & FL_includeQualifiers) {
-    m = ClClassGetMethParamQualifierCount(cl, parm);
+    m = ClClassGetMethParamQualifierCount(parm);
     if (m)
       qsb = UtilFactory->newStrinBuffer(1024);
     for (i = 0; i < m; i++) {
       ClClassGetMethParamQualifierAt(cl, parm, i, &data,
                                      (char **) &qname.hdl);
-      DATA2XML(&data, cls, &qname, NULL, "<QUALIFIER NAME=\"",
+      DATA2XML(&data, &qname, NULL, "<QUALIFIER NAME=\"",
                "</QUALIFIER>\n", qsb, NULL, 0, 0);
     }
   }
@@ -953,7 +953,7 @@ cls2xml(CMPIConstClass * cls, UtilStringBuffer * sb, unsigned int flags)
   if (flags & FL_includeQualifiers)
     for (i = 0, m = ClClassGetQualifierCount(cl); i < m; i++) {
       data = cls->ft->getQualifierAt(cls, i, &name, NULL);
-      DATA2XML(&data, cls, name, NULL, "<QUALIFIER NAME=\"",
+      DATA2XML(&data, name, NULL, "<QUALIFIER NAME=\"",
                "</QUALIFIER>\n", sb, NULL, 0, 0);
     }
 
@@ -965,21 +965,21 @@ cls2xml(CMPIConstClass * cls, UtilStringBuffer * sb, unsigned int flags)
     if (flags & FL_includeQualifiers)
       for (q = 0, qm = ClClassGetPropQualifierCount(cl, i); q < qm; q++) {
         qdata = internalGetPropQualAt(cls, i, q, &qname, NULL);
-        DATA2XML(&qdata, cls, qname, NULL, "<QUALIFIER NAME=\"",
+        DATA2XML(&qdata, qname, NULL, "<QUALIFIER NAME=\"",
                  "</QUALIFIER>\n", qsb, NULL, 0, 0);
         CMRelease(qname);
         sfcb_native_release_CMPIValue(qdata.type, &qdata.value);
       }
     if (data.type & CMPI_ARRAY)
-      DATA2XML(&data, cls, name, NULL, "<PROPERTY.ARRAY NAME=\"",
+      DATA2XML(&data, name, NULL, "<PROPERTY.ARRAY NAME=\"",
                "</PROPERTY.ARRAY>\n", sb, qsb, 0, 0);
     else {
       type = dataType(data.type);
       if (*type == '*') {
-        DATA2XML(&data, cls, name, refName, "<PROPERTY.REFERENCE NAME=\"",
+        DATA2XML(&data, name, refName, "<PROPERTY.REFERENCE NAME=\"",
                  "</PROPERTY.REFERENCE>\n", sb, qsb, 0, 0);
       } else
-        DATA2XML(&data, cls, name, NULL, "<PROPERTY NAME=\"",
+        DATA2XML(&data, name, NULL, "<PROPERTY NAME=\"",
                  "</PROPERTY>\n", sb, qsb, 0, 0);
     }
     CMRelease(name);
@@ -1002,7 +1002,7 @@ cls2xml(CMPIConstClass * cls, UtilStringBuffer * sb, unsigned int flags)
       for (q = 0, qm = ClClassGetMethQualifierCount(cl, i); q < qm; q++) {
         ClClassGetMethQualifierAt(cl, meth, q, &qdata, &sname);
         name = sfcb_native_new_CMPIString(sname, NULL, 2);
-        DATA2XML(&qdata, cls, name, NULL, "<QUALIFIER NAME=\"",
+        DATA2XML(&qdata, name, NULL, "<QUALIFIER NAME=\"",
                  "</QUALIFIER>\n", qsb, NULL, 0, 0);
       }
     }
@@ -1055,15 +1055,15 @@ instance2xml(CMPIInstance *ci, UtilStringBuffer * sb, unsigned int flags)
         __ift_internal_getPropertyAt(ci, i, (char **) &name.hdl, NULL, 1);
 
     if (data.type & CMPI_ARRAY) {
-      DATA2XML(&data, ci, &name, NULL, "<PROPERTY.ARRAY NAME=\"",
+      DATA2XML(&data, &name, NULL, "<PROPERTY.ARRAY NAME=\"",
                "</PROPERTY.ARRAY>\n", sb, qsb, 1, 0);
     } else {
       type = dataType(data.type);
       if (*type == '*')
-        DATA2XML(&data, ci, &name, NULL, "<PROPERTY.REFERENCE NAME=\"",
+        DATA2XML(&data, &name, NULL, "<PROPERTY.REFERENCE NAME=\"",
                  "</PROPERTY.REFERENCE>\n", sb, qsb, 1, 0);
       else
-        DATA2XML(&data, ci, &name, NULL, "<PROPERTY NAME=\"",
+        DATA2XML(&data, &name, NULL, "<PROPERTY NAME=\"",
                  "</PROPERTY>\n", sb, qsb, 1, 0);
     }
 
@@ -1100,7 +1100,7 @@ args2xml(CMPIArgs * args, UtilStringBuffer * sb)
     CMPIData        data;
     data = CMGetArgAt(args, i, &name, NULL);
 
-    DATA2XML(&data, args, name, NULL, "<PARAMVALUE NAME=\"",
+    DATA2XML(&data, name, NULL, "<PARAMVALUE NAME=\"",
              "</PARAMVALUE>\n", sb, NULL, 1, 1);
 
     if ((data.type & (CMPI_ENC | CMPI_ARRAY)) && data.value.inst) {
@@ -1289,7 +1289,7 @@ qualifierDeclaration2xml(CMPIQualifierDecl * q, UtilStringBuffer * sb)
   if (data.state == CMPI_goodValue) {
     if (data.type & CMPI_ARRAY) {
       SFCB_APPENDCHARS_BLOCK(sb, "<VALUE.ARRAY>\n");
-      int             i;
+      unsigned int i;
       for (i = 0;
            i < data.value.array->ft->getSize(data.value.array, NULL); i++)
         value2xml(data.value.array->ft->

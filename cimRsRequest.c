@@ -41,7 +41,7 @@
 #define RES_Quals                15
 #define RES_QuallsCollection     16
 
-int parseCimRsQueryParams(char* p) {
+int parseCimRsQueryParams(char __attribute__ ((unused)) *p) {
   return 0;
 }
 
@@ -90,7 +90,7 @@ static char* percentDecode(char* s) {
    /cimrs/namespaces/{ns}/classes?istopclass
    /cimrs/namespaces/{ns}/classes/{cn}/instances/{keylist}/methods
  */
-static int checkEndingFragment(char* fragment, char* name, int nameLen) {
+static int checkEndingFragment(char* fragment, char __attribute__ ((unused)) *name, int nameLen) {
   /* /cimrs/namespaces/{ns}/classes/{cn}/associators */
   if (fragment[nameLen] == 0) {
     return 0;
@@ -260,7 +260,7 @@ static int parseInstanceFragment(CimRsReq* req, char* fragment) {
 }
 
 static void
-buildGetInstColl(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr)
+buildGetInstColl(CimRequestContext __attribute__ ((unused)) *ctx, CimRsReq *rsReq, RequestHdr *reqHdr)
 { 
   CMPIObjectPath *path;
   GetInstanceReq *sreq;
@@ -296,7 +296,7 @@ buildGetInstColl(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr)
 }
 
 static void
-buildGetClassColl(CimRequestContext *ctx, CimRsReq *rsReq, RequestHdr *reqHdr)
+buildGetClassColl(CimRequestContext __attribute__ ((unused)) *ctx, CimRsReq *rsReq, RequestHdr *reqHdr)
 { 
   CMPIObjectPath *path;
   GetInstanceReq *sreq;
@@ -418,7 +418,7 @@ void getSortedKeys(CimRsReq *rsReq)
   CMPIArray  *klist;
   char ** keyNames; 
   //int i,keyCount=0;
-  int i;
+  unsigned int i;
   CMPIConstClass *cc = getConstClass(rsReq->ns,rsReq->cn);
   // Get the key list and count
   klist = cc->ft->getKeyList(cc);
@@ -441,7 +441,7 @@ void getSortedKeys(CimRsReq *rsReq)
 }
 
 RequestHdr
-scanCimRsRequest(CimRequestContext *ctx, char *cimRsData, int *rc)
+scanCimRsRequest(CimRequestContext *ctx, char __attribute__ ((unused)) *cimRsData, int *rc)
 {
   //fprintf(stderr, "path is '%s'\nverb is '%s'\n", ctx->path, ctx->verb);
   RequestHdr reqHdr = { NULL, 0, 0, 0, NULL, NULL, 0, 0,

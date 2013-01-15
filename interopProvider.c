@@ -489,9 +489,9 @@ genericSubscriptionRequest(const char *principal,
   BinRequestContext binCtx;
   OperationHdr    req = { OPS_IndicationLookup, 2 };
   int             irc = 0,
-      err,
-      cnt,
-      i;
+                  err,
+                  cnt;
+  unsigned long   i;
 
   _SFCB_ENTER(TRACE_INDPROVIDER, "genericSubscriptionRequest");
   _SFCB_TRACE(4,
@@ -669,8 +669,6 @@ fowardSubscription(const CMPIContext *ctx,
 /*
  * ------------------------------------------------------------------------- 
  */
-
-extern UtilStringBuffer *instanceToString(CMPIInstance *ci, char **props);
 
 CMPIStatus
 switchIndications(const CMPIContext *ctx,

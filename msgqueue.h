@@ -68,7 +68,7 @@ typedef struct _spMessageHdr {
 typedef struct _msgSegment {
   void           *data;
   unsigned        type;
-  unsigned        length;
+  unsigned int    length;
 } MsgSegment;
 
 typedef struct msgXctl {

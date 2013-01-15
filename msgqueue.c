@@ -295,7 +295,7 @@ spRcvMsg(int *s, int *from, void **data, unsigned long *length,
   static char    *em = "rcvMsg receiving from";
   MqgStat         imqg;
   int             fromfd;
-  long int        maxlen;
+  unsigned long   maxlen;
   int             partRecvd = 0,
       totalRecvd = 0;
 
@@ -322,7 +322,7 @@ spRcvMsg(int *s, int *from, void **data, unsigned long *length,
 
   _SFCB_TRACE(1, ("--- Received info segment %d bytes", sizeof(spMsg)));
 
-  getControlNum("maxMsgLen", &maxlen);
+  getControlULong("maxMsgLen", &maxlen);
   *length = spMsg.totalSize;
 
   mqg->rdone = 1;
@@ -826,7 +826,7 @@ localConnectServer()
     }
 
     read(nsocket, &msg.size, sizeof(msg.size));
-    int             maxMsgSize =
+    unsigned int maxMsgSize =
         sizeof(struct _msg) - offsetof(struct _msg, oper);
     if (msg.size > maxMsgSize) {
       mlogf(M_INFO, M_SHOW,

@@ -132,7 +132,7 @@ qsAppendSelectPropertyName(QLStatement * st, char *pn)
 }
 
 static void
-qsAddFromClass(QLStatement * st, char *cn, char *ca)
+qsAddFromClass(QLStatement * st, char *cn, char __attribute__ ((unused)) *ca)
 {
   char          **cls =
       ensureCharsListSpace(st, &st->fClasses, &st->fcMax, st->fcNext);

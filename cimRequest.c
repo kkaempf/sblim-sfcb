@@ -68,8 +68,6 @@ typedef struct scanner {
 
 
 extern CMPIBroker *Broker;
-//extern UtilStringBuffer *newStringBuffer(int s);
-extern UtilStringBuffer *instanceToString(CMPIInstance *ci, char **props);
 extern const char *getErrorId(int c);
 extern const char *instGetClassName(CMPIInstance *ci);
 
@@ -272,7 +270,7 @@ getErrSegment(int rc, char *m)
  * return getErrSegment(rc.rc, NULL); } 
  */
 char           *
-getErrTrailer(int id, int rc, char *m)
+getErrTrailer(int rc, char *m)
 {
   char           *msg;
 
@@ -473,8 +471,8 @@ static UtilStringBuffer *
 genEnumResponses(BinRequestContext * binCtx,
                  BinResponseHdr ** resp, int arrLen)
 {
-  int             i,
-                  c,
+  int             c;
+  unsigned long   i,
                   j;
   void           *object;
   CMPIArray      *ar;
@@ -568,7 +566,7 @@ genQualifierResponses(BinRequestContext * binCtx, BinResponseHdr * resp)
   RespSegments    rs;
   UtilStringBuffer *sb;
   CMPIArray      *ar;
-  int             j;
+  unsigned long    j;
   CMPIEnumeration *enm;
   void           *object;
   void           *genheap;
@@ -652,7 +650,7 @@ genFirstChunkErrorResponse(BinRequestContext * binCtx, int rc, char *msg)
 }
 
 static          RespSegments
-getClass(CimRequestContext * ctx, RequestHdr * hdr)
+getClass(CimRequestContext __attribute__ ((unused)) *ctx, RequestHdr * hdr)
 {
   UtilStringBuffer *sb;
   int             irc;
@@ -696,7 +694,7 @@ getClass(CimRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-deleteClass(CimRequestContext * ctx, RequestHdr * hdr)
+deleteClass(CimRequestContext __attribute__ ((unused)) *ctx, RequestHdr * hdr)
 {
   int             irc;
   BinResponseHdr *resp;
@@ -734,7 +732,7 @@ deleteClass(CimRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-createClass(CimRequestContext * ctx, RequestHdr * hdr)
+createClass(CimRequestContext __attribute__ ((unused)) *ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "createClass");
   int             irc;
@@ -877,7 +875,7 @@ enumClasses(CimRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-getInstance(CimRequestContext * ctx, RequestHdr * hdr)
+getInstance(CimRequestContext __attribute__ ((unused)) *ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "getInstance");
   CMPIInstance   *inst;
@@ -920,7 +918,7 @@ getInstance(CimRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-deleteInstance(CimRequestContext * ctx, RequestHdr * hdr)
+deleteInstance(CimRequestContext __attribute__ ((unused)) *ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "deleteInstance");
   int             irc;
@@ -956,7 +954,7 @@ deleteInstance(CimRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-createInstance(CimRequestContext * ctx, RequestHdr * hdr)
+createInstance(CimRequestContext __attribute__ ((unused)) *ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "createInst");
   CMPIObjectPath *path;
@@ -997,7 +995,7 @@ createInstance(CimRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-modifyInstance(CimRequestContext * ctx, RequestHdr * hdr)
+modifyInstance(CimRequestContext __attribute__ ((unused)) *ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "modifyInstance");
   int             irc;
@@ -1394,7 +1392,7 @@ references(CimRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-invokeMethod(CimRequestContext * ctx, RequestHdr * hdr)
+invokeMethod(CimRequestContext __attribute__ ((unused)) *ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "invokeMethod");
   int             irc;
@@ -1466,7 +1464,7 @@ invokeMethod(CimRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-getProperty(CimRequestContext * ctx, RequestHdr * hdr)
+getProperty(CimRequestContext __attribute__ ((unused)) *ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "getProperty");
   CMPIInstance   *inst;
@@ -1514,7 +1512,7 @@ getProperty(CimRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-setProperty(CimRequestContext * ctx, RequestHdr * hdr)
+setProperty(CimRequestContext __attribute__ ((unused)) *ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "setProperty");
   int             irc;
@@ -1592,7 +1590,7 @@ enumQualifiers(CimRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-getQualifier(CimRequestContext * ctx, RequestHdr * hdr)
+getQualifier(CimRequestContext __attribute__ ((unused)) *ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "getQualifier");
   CMPIQualifierDecl *qual;
@@ -1636,7 +1634,7 @@ getQualifier(CimRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-deleteQualifier(CimRequestContext * ctx, RequestHdr * hdr)
+deleteQualifier(CimRequestContext __attribute__ ((unused)) *ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "deleteQualifier");
   int             irc;
@@ -1673,7 +1671,7 @@ deleteQualifier(CimRequestContext * ctx, RequestHdr * hdr)
 }
 
 static          RespSegments
-setQualifier(CimRequestContext * ctx, RequestHdr * hdr)
+setQualifier(CimRequestContext __attribute__ ((unused)) *ctx, RequestHdr * hdr)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "setQualifier");
   int             irc;
@@ -1717,7 +1715,7 @@ setQualifier(CimRequestContext * ctx, RequestHdr * hdr)
 #endif
 
 static          RespSegments
-notSupported(CimRequestContext * ctx, RequestHdr * hdr)
+notSupported(CimRequestContext __attribute__ ((unused)) *ctx, RequestHdr * hdr)
 {
   return iMethodErrResponse(hdr, strdup
                             ("<ERROR CODE=\"7\" DESCRIPTION=\"Operation not supported xx\"/>\n"));
@@ -1787,7 +1785,7 @@ static Scanner scanners[] = {
 static int scanner_count = sizeof(scanners) / sizeof(Scanner);
 
 RespSegments
-handleCimRequest(CimRequestContext * ctx, int flags, char * more)
+handleCimRequest(CimRequestContext * ctx, int __attribute__ ((unused)) flags, char __attribute__ ((unused)) *more)
 {
   RespSegments    rs;
   RequestHdr      hdr;

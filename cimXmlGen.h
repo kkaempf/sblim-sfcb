@@ -58,7 +58,7 @@ extern CMPIValue union2CMPIValue(CMPIType type, char *val,
 extern int      qualifierDeclaration2xml(CMPIQualifierDecl * q,
                                          UtilStringBuffer * sb);
 extern char    *XMLEscape(char *in, int *outlen);
-extern void     data2xml(CMPIData *data, void *obj, CMPIString *name,
+extern void     data2xml(CMPIData *data, CMPIString *name,
                          CMPIString *refName, char *bTag, int bTagLen,
                          char *eTag, int eTagLen, UtilStringBuffer * sb,
                          UtilStringBuffer * qsb, int inst, int param);

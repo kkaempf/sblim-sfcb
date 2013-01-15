@@ -87,12 +87,6 @@ pRelease(ProviderRegister * br)
   free(br);
 }
 
-static ProviderRegister *
-pClone(ProviderRegister * br)
-{
-  return NULL;
-}
-
 static int
 addProviderToHT(ProviderInfo * info, UtilHashTable * ht)
 {
@@ -464,7 +458,6 @@ removeProvider(ProviderRegister * br, const char *clsName)
 static Provider_Register_FT ift = {
   1,
   pRelease,
-  pClone,
   getProvider,
   putProvider,
   removeProvider,

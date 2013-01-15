@@ -76,7 +76,7 @@ typedef struct native_result NativeResult;
 static struct native_result *__new_empty_result(int, CMPIStatus *);
 
 static void
-prepResultBuffer(NativeResult * nr, int length)
+prepResultBuffer(NativeResult * nr, unsigned long length)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "prepResultBuffer");
 
@@ -101,13 +101,13 @@ prepResultBuffer(NativeResult * nr, int length)
 }
 
 static int
-xferResultBuffer(NativeResult * nr, int to, int more, int rc, int length)
+xferResultBuffer(NativeResult * nr, int to, int more, int rc, unsigned long length)
 {
   long            l =
       sizeof(BinResponseHdr) + ((nr->sNext - 1) * sizeof(MsgSegment));
-  int             i,
-                  dmy = -1,
-      s1 = l;
+  unsigned int    i;
+  int             dmy = -1,
+                  s1 = l;
 
   _SFCB_ENTER(TRACE_PROVIDERDRV, "xferResultBuffer");
 
@@ -147,7 +147,7 @@ xferLastResultBuffer(CMPIResult *result, int to, int rc)
  * already. 
  */
 static void    *
-nextResultBufferPos(NativeResult * nr, int type, int length)
+nextResultBufferPos(NativeResult * nr, int type, unsigned long length)
 {
   long            pos,
                   npos;
@@ -276,14 +276,11 @@ __rft_returnData(const CMPIResult *result,
   return returnData(result, val, type);
 }
 
-extern UtilStringBuffer *instanceToString(const CMPIInstance *ci,
-                                          char **props);
-
 static CMPIStatus
 __rft_returnInstance(const CMPIResult *result,
                      const CMPIInstance *instance)
 {
-  int             size,
+  unsigned long   size,
                   isInst = isInstance(instance);
   void           *ptr;
   NativeResult   *r = (NativeResult *) result;
@@ -335,12 +332,12 @@ __rft_returnInstance(const CMPIResult *result,
 
   if (isInst) {
     size = getInstanceSerializedSize(instance);
-    ptr = nextResultBufferPos(r, MSG_SEG_INSTANCE, (unsigned long)size);
+    ptr = nextResultBufferPos(r, MSG_SEG_INSTANCE, size);
     _SFCB_TRACE(1, ("--- Moving instance %d", size));
     getSerializedInstance(instance, ptr);       /* memcpy inst to ptr */
   } else {
     size = getConstClassSerializedSize((CMPIConstClass *) instance);
-    ptr = nextResultBufferPos(r, MSG_SEG_CONSTCLASS, (unsigned long)size);
+    ptr = nextResultBufferPos(r, MSG_SEG_CONSTCLASS, size);
     _SFCB_TRACE(1, ("--- Moving class %d", size));
     getSerializedConstClass((CMPIConstClass *) instance, ptr);
   }
@@ -354,7 +351,7 @@ static CMPIStatus
 __rft_returnObjectPath(const CMPIResult *result,
                        const CMPIObjectPath * cop)
 {
-  int             size;
+  unsigned long   size;
   void           *ptr;
   NativeResult   *r = (NativeResult *) result;
 
@@ -372,7 +369,7 @@ __rft_returnObjectPath(const CMPIResult *result,
 }
 
 static CMPIStatus
-__rft_returnDone(const CMPIResult *result)
+__rft_returnDone(const CMPIResult __attribute__ ((unused)) *result)
 {
   CMReturn(CMPI_RC_OK);
 }

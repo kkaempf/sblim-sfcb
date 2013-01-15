@@ -33,6 +33,8 @@
 #define CLP32_CMPIValueState CMPIValueState
 #define CLP32_CMPIValue CMPIValue
 
+#define UABS(i) (unsigned int)abs(i)
+
 typedef struct _CLP32_CMPIData {
   CLP32_CMPIType  type;
   CLP32_CMPIValueState state;
@@ -323,16 +325,15 @@ dumpString(const CLP32_ClObjectHdr * hdr, const CLP32_ClString * cs,
   CLP32_ClStrBuf *sb = NULL;
   int            *index = NULL;
   int             rc = 0;
-  if (abs(bswap_32(hdr->strBufOffset)) <= bswap_32(hdr->size)) {
+  if (UABS(bswap_32(hdr->strBufOffset)) <= bswap_32(hdr->size)) {
     sb = (void *) hdr + abs(bswap_32(hdr->strBufOffset));
     index = (void *) hdr + abs(bswap_32(sb->indexOffset));
     if (bswap_32(cs->id) == 0) {
       printf("%s NULL\n", prefix);
     } else if (bswap_32(cs->id) > 0
                && bswap_32(cs->id) <= bswap_32(sb->iMax)) {
-      if (bswap_32(index[bswap_32(cs->id) - 1]) >= 0
-          && (bswap_32(index[bswap_32(cs->id) - 1]) +
-              abs(bswap_32(hdr->strBufOffset))) < bswap_32(hdr->size)) {
+      if ((bswap_32(index[bswap_32(cs->id) - 1]) +
+            abs(bswap_32(hdr->strBufOffset))) < bswap_32(hdr->size)) {
         printf("%s \"%s\"\n", prefix,
                (char *) sb + offsetof(CLP32_ClStrBuf,
                                       buf) +
@@ -368,7 +369,7 @@ dumpStringBuffer(const CLP32_ClObjectHdr * hdr, const char *prefix)
   int             i;
   if (bswap_32(hdr->strBufOffset) == 0) {
     printf("%s * Empty string buffer\n", prefix);
-  } else if (abs(bswap_32(hdr->strBufOffset)) <= bswap_32(hdr->size)) {
+  } else if (UABS(bswap_32(hdr->strBufOffset)) <= bswap_32(hdr->size)) {
     sb = (void *) hdr + abs(bswap_32(hdr->strBufOffset));
     index = (void *) hdr + abs(bswap_32(sb->indexOffset));
     if ((bswap_16(sb->iUsed) * sizeof(int) +
@@ -406,7 +407,7 @@ dumpArrayBuffer(const CLP32_ClObjectHdr * hdr, const char *prefix)
   int             i;
   if (bswap_32(hdr->arrayBufOffset) == 0) {
     printf("%s * Empty array buffer\n", prefix);
-  } else if (abs(bswap_32(hdr->arrayBufOffset)) <= bswap_32(hdr->size)) {
+  } else if (UABS(bswap_32(hdr->arrayBufOffset)) <= bswap_32(hdr->size)) {
     ab = (void *) hdr + abs(bswap_32(hdr->arrayBufOffset));
     index = (void *) hdr + abs(bswap_32(ab->indexOffset));
     if ((bswap_16(ab->iUsed) * sizeof(int) +
@@ -449,7 +450,7 @@ dumpProperties(const CLP32_ClClass * cls, const char *prefix)
   char           *prefixbuf = NULL;
   if (bswap_32(cls->properties.sectionOffset) == 0) {
     printf("%s * Empty property section\n", prefix);
-  } else if (abs(bswap_32(cls->properties.sectionOffset)) <=
+  } else if (UABS(bswap_32(cls->properties.sectionOffset)) <=
              bswap_32(cls->hdr.size)) {
     cp = (void *) cls + abs(bswap_32(cls->properties.sectionOffset));
     if ((bswap_16(cls->properties.used) * sizeof(CLP32_ClProperty) +
@@ -499,7 +500,7 @@ dumpQualifiers(const CLP32_ClClass * cls, const char *prefix)
   char           *prefixbuf = NULL;
   if (bswap_32(cls->qualifiers.sectionOffset) == 0) {
     printf("%s * Empty qualifier section\n", prefix);
-  } else if (abs(bswap_32(cls->qualifiers.sectionOffset)) <=
+  } else if (UABS(bswap_32(cls->qualifiers.sectionOffset)) <=
              bswap_32(cls->hdr.size)) {
     cq = (void *) cls + abs(bswap_32(cls->qualifiers.sectionOffset));
     if ((bswap_16(cls->qualifiers.used) * sizeof(CLP32_ClQualifier) +
@@ -549,7 +550,7 @@ dumpMethods(const CLP32_ClClass * cls, const char *prefix)
   char           *prefixbuf = NULL;
   if (bswap_32(cls->methods.sectionOffset) == 0) {
     printf("%s * Empty method section\n", prefix);
-  } else if (abs(bswap_32(cls->methods.sectionOffset)) <=
+  } else if (UABS(bswap_32(cls->methods.sectionOffset)) <=
              bswap_32(cls->hdr.size)) {
     cm = (void *) cls + abs(bswap_32(cls->methods.sectionOffset));
     if ((bswap_16(cls->methods.used) * sizeof(CLP32_ClMethod) +

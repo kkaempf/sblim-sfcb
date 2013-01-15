@@ -121,7 +121,7 @@ dataValueToStringBuf(CMPIData d, CMPIInstance *inst)
     sb->ft->appendChars(sb, "{");
     struct native_array *na = (struct native_array *) d.value.array;
 
-    int             i = 0;
+    unsigned int i = 0;
     for (i = 0; i < na->size; i++) {
       if (i != 0)
         sb->ft->appendChars(sb, ",");

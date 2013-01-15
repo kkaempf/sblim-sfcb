@@ -63,6 +63,7 @@ __sft_clone(const CMPIString *string, CMPIStatus *rc)
 static const char    *
 __sft_getCharPtr(const CMPIString *string, CMPIStatus *rc)
 {
+  if (rc) CMSetStatus(rc, CMPI_RC_OK);
   return (const char *) string->hdl;
 }
 

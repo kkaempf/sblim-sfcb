@@ -145,8 +145,9 @@ _getIndex(const char *ns, const char *cn)
  */
 
 CMPIStatus
-InternalProviderCleanup(CMPIInstanceMI * mi,
-                        const CMPIContext *ctx, CMPIBoolean terminate)
+InternalProviderCleanup(CMPIInstanceMI __attribute__ ((unused)) *mi,
+                        const CMPIContext __attribute__ ((unused))*ctx, 
+                        CMPIBoolean __attribute__ ((unused)) terminate)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderCleanup");
@@ -161,7 +162,7 @@ InternalProviderCleanup(CMPIInstanceMI * mi,
  */
 
 CMPIStatus
-InternalProviderEnumInstanceNames(CMPIInstanceMI * mi,
+InternalProviderEnumInstanceNames(CMPIInstanceMI __attribute__ ((unused)) *mi,
                                   const CMPIContext *ctx,
                                   const CMPIResult *rslt,
                                   const CMPIObjectPath * ref)
@@ -229,10 +230,8 @@ InternalProviderEnumInstanceNames(CMPIInstanceMI * mi,
   _SFCB_RETURN(st);
 }
 
-UtilStringBuffer *instanceToString(CMPIInstance *ci, char **props);
-
 static CMPIStatus
-enumInstances(CMPIInstanceMI * mi,
+enumInstances(CMPIInstanceMI __attribute__ ((unused)) *mi,
               const CMPIContext *ctx, void *rslt,
               const CMPIObjectPath * ref,
               const char **properties,
@@ -375,8 +374,8 @@ internalProviderGetInstance(const CMPIObjectPath * cop, CMPIStatus *rc)
 }
 
 CMPIStatus
-InternalProviderGetInstance(CMPIInstanceMI * mi,
-                            const CMPIContext *ctx,
+InternalProviderGetInstance(CMPIInstanceMI __attribute__ ((unused)) *mi,
+                            const CMPIContext __attribute__ ((unused)) *ctx,
                             const CMPIResult *rslt,
                             const CMPIObjectPath * cop,
                             const char **properties)
@@ -399,8 +398,8 @@ InternalProviderGetInstance(CMPIInstanceMI * mi,
 }
 
 CMPIStatus
-InternalProviderCreateInstance(CMPIInstanceMI * mi,
-                               const CMPIContext *ctx,
+InternalProviderCreateInstance(CMPIInstanceMI __attribute__ ((unused)) *mi,
+                               const CMPIContext __attribute__ ((unused)) *ctx,
                                const CMPIResult *rslt,
                                const CMPIObjectPath * cop,
                                const CMPIInstance *ci)
@@ -461,9 +460,9 @@ InternalProviderCreateInstance(CMPIInstanceMI * mi,
 }
 
 CMPIStatus
-InternalProviderModifyInstance(CMPIInstanceMI * mi,
-                               const CMPIContext *ctx,
-                               const CMPIResult *rslt,
+InternalProviderModifyInstance(CMPIInstanceMI __attribute__ ((unused)) *mi,
+                               const CMPIContext __attribute__ ((unused)) *ctx,
+                               const CMPIResult __attribute__ ((unused)) *rslt,
                                const CMPIObjectPath * cop,
                                const CMPIInstance *ci,
                                const char **properties)
@@ -504,9 +503,9 @@ InternalProviderModifyInstance(CMPIInstanceMI * mi,
 }
 
 CMPIStatus
-InternalProviderDeleteInstance(CMPIInstanceMI * mi,
-                               const CMPIContext *ctx,
-                               const CMPIResult *rslt,
+InternalProviderDeleteInstance(CMPIInstanceMI __attribute__ ((unused)) *mi,
+                               const CMPIContext __attribute__ ((unused)) *ctx,
+                               const CMPIResult __attribute__ ((unused)) *rslt,
                                const CMPIObjectPath * cop)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
@@ -536,11 +535,12 @@ InternalProviderDeleteInstance(CMPIInstanceMI * mi,
 }
 
 CMPIStatus
-InternalProviderExecQuery(CMPIInstanceMI * mi,
-                          const CMPIContext *ctx,
-                          const CMPIResult *rslt,
-                          const CMPIObjectPath * cop,
-                          const char *lang, const char *query)
+InternalProviderExecQuery(CMPIInstanceMI __attribute__ ((unused)) *mi,
+                          const CMPIContext __attribute__ ((unused)) *ctx,
+                          const CMPIResult __attribute__ ((unused)) *rslt,
+                          const CMPIObjectPath __attribute__ ((unused)) *cop,
+                          const char __attribute__ ((unused)) *lang, 
+                          const char __attribute__ ((unused)) *query)
 {
   CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
   return st;
@@ -791,9 +791,9 @@ getRefs(const CMPIContext *ctx, const CMPIResult *rslt,
 }
 
 CMPIStatus
-InternalProviderAssociationCleanup(CMPIAssociationMI * mi,
-                                   const CMPIContext *ctx,
-                                   CMPIBoolean terminate)
+InternalProviderAssociationCleanup(CMPIAssociationMI __attribute__ ((unused)) *mi,
+                                   const CMPIContext __attribute__ ((unused)) *ctx,
+                                   CMPIBoolean __attribute__ ((unused)) terminate)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   _SFCB_ENTER(TRACE_INTERNALPROVIDER,
@@ -803,7 +803,7 @@ InternalProviderAssociationCleanup(CMPIAssociationMI * mi,
 }
 
 CMPIStatus
-InternalProviderAssociators(CMPIAssociationMI * mi,
+InternalProviderAssociators(CMPIAssociationMI __attribute__ ((unused)) *mi,
                             const CMPIContext *ctx,
                             const CMPIResult *rslt,
                             const CMPIObjectPath * cop,
@@ -821,7 +821,7 @@ InternalProviderAssociators(CMPIAssociationMI * mi,
 }
 
 CMPIStatus
-InternalProviderAssociatorNames(CMPIAssociationMI * mi,
+InternalProviderAssociatorNames(CMPIAssociationMI __attribute__ ((unused)) *mi,
                                 const CMPIContext *ctx,
                                 const CMPIResult *rslt,
                                 const CMPIObjectPath * cop,
@@ -837,7 +837,7 @@ InternalProviderAssociatorNames(CMPIAssociationMI * mi,
 }
 
 CMPIStatus
-InternalProviderReferences(CMPIAssociationMI * mi,
+InternalProviderReferences(CMPIAssociationMI __attribute__ ((unused)) *mi,
                            const CMPIContext *ctx,
                            const CMPIResult *rslt,
                            const CMPIObjectPath * cop,
@@ -852,7 +852,7 @@ InternalProviderReferences(CMPIAssociationMI * mi,
 }
 
 CMPIStatus
-InternalProviderReferenceNames(CMPIAssociationMI * mi,
+InternalProviderReferenceNames(CMPIAssociationMI __attribute__ ((unused)) *mi,
                                const CMPIContext *ctx,
                                const CMPIResult *rslt,
                                const CMPIObjectPath * cop,
@@ -872,21 +872,22 @@ InternalProviderReferenceNames(CMPIAssociationMI * mi,
  */
 
 CMPIStatus
-InternalProviderMethodCleanup(CMPIMethodMI * mi,
-                              const CMPIContext *ctx,
-                              CMPIBoolean terminate)
+InternalProviderMethodCleanup(CMPIMethodMI __attribute__ ((unused)) *mi,
+                              const CMPIContext __attribute__ ((unused)) *ctx,
+                              CMPIBoolean __attribute__ ((unused)) terminate)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   return st;
 }
 
 CMPIStatus
-InternalProviderInvokeMethod(CMPIMethodMI * mi,
-                             const CMPIContext *ctx,
-                             const CMPIResult *rslt,
-                             const CMPIObjectPath * ref,
-                             const char *methodName,
-                             const CMPIArgs * in, CMPIArgs * out)
+InternalProviderInvokeMethod(CMPIMethodMI __attribute__ ((unused)) *mi,
+                             const CMPIContext __attribute__ ((unused)) *ctx,
+                             const CMPIResult __attribute__ ((unused)) *rslt,
+                             const CMPIObjectPath __attribute__ ((unused)) *ref,
+                             const char __attribute__ ((unused)) *methodName,
+                             const CMPIArgs __attribute__ ((unused)) *in, 
+                             CMPIArgs __attribute__ ((unused)) *out)
 {
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderInvokeMethod");
   CMReturnWithChars(_broker, CMPI_RC_ERR_FAILED,
@@ -900,20 +901,21 @@ InternalProviderInvokeMethod(CMPIMethodMI * mi,
  */
 
 CMPIStatus
-InternalProviderPropertyCleanup(CMPIPropertyMI * mi,
-                                const CMPIContext *ctx,
-                                CMPIBoolean terminate)
+InternalProviderPropertyCleanup(CMPIPropertyMI __attribute__ ((unused)) *mi,
+                                const CMPIContext __attribute__ ((unused)) *ctx,
+                                CMPIBoolean __attribute__ ((unused)) terminate)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   return st;
 }
 
 CMPIStatus
-InternalProviderSetProperty(CMPIPropertyMI * mi,
-                            const CMPIContext *ctx,
-                            const CMPIResult *rslt,
-                            const CMPIObjectPath * ref,
-                            const char *propName, const CMPIData data)
+InternalProviderSetProperty(CMPIPropertyMI __attribute__ ((unused)) *mi,
+                            const CMPIContext __attribute__ ((unused)) *ctx,
+                            const CMPIResult __attribute__ ((unused)) *rslt,
+                            const CMPIObjectPath __attribute__ ((unused)) *ref,
+                            const char __attribute__ ((unused)) *propName, 
+                            const CMPIData __attribute__ ((unused)) data)
 {
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderSetProperty");
   CMReturnWithChars(_broker, CMPI_RC_ERR_FAILED,
@@ -921,11 +923,11 @@ InternalProviderSetProperty(CMPIPropertyMI * mi,
 }
 
 CMPIStatus
-InternalProviderGetProperty(CMPIPropertyMI * mi,
-                            const CMPIContext *ctx,
-                            const CMPIResult *rslt,
-                            const CMPIObjectPath * ref,
-                            const char *propName)
+InternalProviderGetProperty(CMPIPropertyMI __attribute__ ((unused)) *mi,
+                            const CMPIContext __attribute__ ((unused)) *ctx,
+                            const CMPIResult __attribute__ ((unused)) *rslt,
+                            const CMPIObjectPath __attribute__ ((unused)) *ref,
+                            const char __attribute__ ((unused)) *propName)
 {
   _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderGetProperty");
   CMReturnWithChars(_broker, CMPI_RC_ERR_FAILED,

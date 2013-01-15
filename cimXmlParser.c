@@ -45,7 +45,7 @@ typedef struct tags {
  * TODO: be more graceful than just exit() 
  */
 static void
-Throw(XmlBuffer * xb, char *msg)
+Throw(XmlBuffer __attribute__ ((unused)) *xb, char *msg)
 {
   printf("*** Error: %s\n", msg);
   exit(1);
@@ -297,7 +297,7 @@ attrsOk(XmlBuffer * xb, const XmlElement * e, XmlAttr * r,
  */
 
 static char    *
-getValue(XmlBuffer * xb, const char *v)
+getValue(XmlBuffer * xb, const char __attribute__ ((unused)) *v)
 {
   skipWS(xb);
   char            dlm = 0;
@@ -393,7 +393,7 @@ xmlUnescape(char *buf, char *end)
     // string len
     return diflen - 1;
   } else {
-    int             i = 0;
+    unsigned int i = 0;
     // expecting a known/defined escape character, ie &lt;
     strncpy(escchar, buf, (int) (semiloc - buf + 1));
     for (i = 0; i < sizeof(xmlEscapeTab) / sizeof(struct _xmlescape); i++) {
@@ -495,7 +495,7 @@ static int      num_types = sizeof(types) / sizeof(Types) - 1;
 // static XmlBuffer* xmb;
 
 static int
-procCim(YYSTYPE * lvalp, ParserControl * parm)
+procCim(YYSTYPE __attribute__ ((unused)) *lvalp, ParserControl * parm)
 {
   static XmlElement elm[] = {
     {"CIMVERSION"},
@@ -534,7 +534,7 @@ procMessage(YYSTYPE * lvalp, ParserControl * parm)
 }
 
 static int
-procSimplereq(YYSTYPE * lvalp, ParserControl * parm)
+procSimplereq(YYSTYPE __attribute__ ((unused)) *lvalp, ParserControl * parm)
 {
   static XmlElement elm[] = {
     {NULL}
@@ -576,7 +576,7 @@ procMethodCall(YYSTYPE * lvalp, ParserControl * parm)
 }
 
 static int
-procImethodCall(YYSTYPE * lvalp, ParserControl * parm)
+procImethodCall(YYSTYPE __attribute__ ((unused)) *lvalp, ParserControl * parm)
 {
   static XmlElement elm[] = {
     {"NAME"},
@@ -641,7 +641,7 @@ procImethodCall(YYSTYPE * lvalp, ParserControl * parm)
 }
 
 static int
-procLocalNameSpacePath(YYSTYPE * lvalp, ParserControl * parm)
+procLocalNameSpacePath(YYSTYPE __attribute__ ((unused)) *lvalp, ParserControl * parm)
 {
   static XmlElement elm[] = {
     {NULL}
@@ -658,7 +658,7 @@ procLocalNameSpacePath(YYSTYPE * lvalp, ParserControl * parm)
 }
 
 static int
-procLocalClassPath(YYSTYPE * lvalp, ParserControl * parm)
+procLocalClassPath(YYSTYPE __attribute__ ((unused)) *lvalp, ParserControl * parm)
 {
   static XmlElement elm[] = {
     {NULL}
@@ -674,7 +674,7 @@ procLocalClassPath(YYSTYPE * lvalp, ParserControl * parm)
 }
 
 static int
-procLocalInstancePath(YYSTYPE * lvalp, ParserControl * parm)
+procLocalInstancePath(YYSTYPE __attribute__ ((unused)) *lvalp, ParserControl * parm)
 {
   static XmlElement elm[] = {
     {NULL}
@@ -800,7 +800,7 @@ static IParm    iParms[] = {
 };
 
 static int
-procIParamValue(YYSTYPE * lvalp, ParserControl * parm)
+procIParamValue(YYSTYPE __attribute__ ((unused)) *lvalp, ParserControl * parm)
 {
   static XmlElement elm[] = {
     {"NAME"},
@@ -982,7 +982,7 @@ procValue(YYSTYPE * lvalp, ParserControl * parm)
 }
 
 static int
-procCdata(YYSTYPE * lvalp, ParserControl * parm)
+procCdata(YYSTYPE __attribute__ ((unused)) *lvalp, ParserControl * parm)
 {
   static XmlElement elm[] = {
     {NULL}
@@ -1008,7 +1008,7 @@ procCdata(YYSTYPE * lvalp, ParserControl * parm)
 }
 
 static int
-procValueArray(YYSTYPE * lvalp, ParserControl * parm)
+procValueArray(YYSTYPE __attribute__ ((unused)) *lvalp, ParserControl * parm)
 {
   static XmlElement elm[] = {
     {NULL}
@@ -1023,7 +1023,7 @@ procValueArray(YYSTYPE * lvalp, ParserControl * parm)
 }
 
 static int
-procValueRefArray(YYSTYPE * lvalp, ParserControl * parm)
+procValueRefArray(YYSTYPE __attribute__ ((unused)) *lvalp, ParserControl * parm)
 {
   static XmlElement elm[] = {
     {NULL}
@@ -1074,7 +1074,7 @@ procInstancePath(YYSTYPE * lvalp, ParserControl * parm)
 }
 
 static int
-procNameSpacePath(YYSTYPE * lvalp, ParserControl * parm)
+procNameSpacePath(YYSTYPE __attribute__ ((unused)) *lvalp, ParserControl * parm)
 {
   static XmlElement elm[] = {
     {NULL}
@@ -1109,7 +1109,7 @@ procValueReference(YYSTYPE * lvalp, ParserControl * parm)
 }
 
 static int
-procXml(YYSTYPE * lvalp, ParserControl * parm)
+procXml(YYSTYPE __attribute__ ((unused)) *lvalp, ParserControl * parm)
 {
   static XmlElement elm[] = { {"version"},
   {"encoding"},

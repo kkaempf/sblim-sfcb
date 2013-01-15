@@ -46,7 +46,6 @@ typedef struct _ClassBase {
 struct _Class_Register_FT {
   int             version;
   void            (*release) (ClassRegister * br);
-  ClassRegister  *(*clone) (ClassRegister * br);
   CMPIConstClass *(*getClass) (ClassRegister * br, const char *clsName);
   int             (*putClass) (ClassRegister * br, CMPIConstClass * cls);
   void            (*removeClass) (ClassRegister * br,
@@ -101,12 +100,6 @@ release(ClassRegister * cr)
   free(cr->fn);
   cb->ht->ft->release(cb->ht);
   free(cr);
-}
-
-static ClassRegister *
-regClone(ClassRegister * cr)
-{
-  return NULL;
 }
 
 void
@@ -256,7 +249,7 @@ newClassRegister(ClassSchema * cs, const char *ns)
 }
 
 static int
-cpyClass(ClClass * cl, CMPIConstClass * cc, unsigned char originId)
+cpyClass(ClClass * cl, CMPIConstClass * cc)
 {
   ClClass        *ccl = (ClClass *) cc->hdl;
   CMPIData        d;
@@ -323,7 +316,7 @@ cpyClass(ClClass * cl, CMPIConstClass * cc, unsigned char originId)
               ClObjectGetClSection(&cl->hdr,
                                    &meth->parameters)) + parmId - 1;
 
-      for (iq = 0, mq = ClClassGetMethParamQualifierCount(ccl, parm);
+      for (iq = 0, mq = ClClassGetMethParamQualifierCount(parm);
            iq < mq; iq++) {
         ClClassGetMethParamQualifierAt(ccl, parm, iq, &d, &name);
         ClClassAddMethParamQualifier(&cl->hdr, parm, name, d);
@@ -339,7 +332,6 @@ mergeParents(ClassRegister * cr, ClClass * cl, char *p,
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIConstClass *pcc = NULL;
-  unsigned char   originId = 0;
 
   if (p) {
     pcc = getClass(cr, p);
@@ -347,11 +339,11 @@ mergeParents(ClassRegister * cr, ClClass * cl, char *p,
       st.rc = CMPI_RC_ERR_INVALID_SUPERCLASS;
       return st;
     }
-    cpyClass(cl, pcc, originId);
+    cpyClass(cl, pcc);
   }
 
   if (cc) {
-    cpyClass(cl, cc, originId);
+    cpyClass(cl, cc);
   }
 
   return st;
@@ -488,7 +480,6 @@ getClass(ClassRegister * cr, const char *clsName)
 static Class_Register_FT ift = {
   1,
   release,
-  regClone,
   getClass,
   putClass,
   removeClass,

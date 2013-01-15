@@ -353,13 +353,15 @@ instCompare(QLOperand * self, QLOperand * op, QLPropertySource * src)
 }
 
 static char    *
-instToString(QLOperand * op)
+instToString(QLOperand __attribute__ ((unused)) *op)
 {
   return qsStrDup(NULL, "*** instance ***");
 }
 
 static int
-nameCompare(QLOperand * self, QLOperand * op, QLPropertySource * src)
+nameCompare(QLOperand __attribute__ ((unused)) *self, 
+            QLOperand __attribute__ ((unused)) *op, 
+            QLPropertySource __attribute__ ((unused)) *src)
 {
   mlogf(M_ERROR, M_SHOW, "--- nameCompare\n");
   /*
@@ -502,7 +504,7 @@ newInstQueryOperand(QLStatement * qs, CMPIInstance *ci)
 
 QLOperand      *
 newFncQueryOperand(QLStatement * qs, QLFnc fnc, QLOpd argType,
-                   void *argVal)
+                   void __attribute__ ((unused)) *argVal)
 {
   QLOperand      *op = qsAllocNew(qs, QLOperand);
   QL_TRACE(fprintf(stderr, "--- newFncQueryOperand %p\n", argVal));
@@ -612,7 +614,7 @@ relEliminateNots(QLOperation * op, int invert)
 }
 
 static int
-isBinaryOperation(QLOperation * op)
+isBinaryOperation(QLOperation __attribute__ ((unused)) *op)
 {
   return 0;
 }
@@ -850,7 +852,8 @@ QLOperationFt   qlNotOperationFt = {
 };
 
 int
-_isNullEvaluate(QLOperation * op, QLPropertySource * source)
+_isNullEvaluate(QLOperation __attribute__ ((unused)) *op, 
+                QLPropertySource __attribute__ ((unused)) *source)
 {
   QL_TRACE(fprintf
            (stderr, "--- unexpected invocation of _isNullEvaluate\n"));
@@ -901,7 +904,8 @@ QLOperationFt   qlIsNullOperationFt = {
 };
 
 int
-_isNotNullEvaluate(QLOperation * op, QLPropertySource * source)
+_isNotNullEvaluate(QLOperation __attribute__ ((unused)) *op, 
+QLPropertySource __attribute__ ((unused)) *source)
 {
   QL_TRACE(fprintf
            (stderr, "--- unexpected invocation of _isNotNullEvaluate\n"));
@@ -941,7 +945,8 @@ QLOperationFt   qlIsNotNullOperationFt = {
 };
 
 int
-_binEvaluate(QLOperation * op, QLPropertySource * source)
+_binEvaluate(QLOperation __attribute__ ((unused)) *op, 
+             QLPropertySource __attribute__ ((unused)) *source)
 {
   QL_TRACE(fprintf
            (stderr, "--- unexpected invocation of _isNotNullEvaluate\n"));
@@ -971,7 +976,7 @@ binOperation(QLOperation * op)
 }
 
 int
-binIsBinaryOperation(QLOperation * op)
+binIsBinaryOperation(QLOperation __attribute__ ((unused)) *op)
 {
   return 1;
 }
@@ -1458,7 +1463,7 @@ likeToString(QLOperation * op)
 }
 
 QLOp
-likeOperation(QLOperation * op)
+likeOperation(QLOperation __attribute__ ((unused)) *op)
 {
   return QL_LIKE;
 }
@@ -1507,7 +1512,7 @@ notLikeToString(QLOperation * op)
 }
 
 QLOp
-notLikeOperation(QLOperation * op)
+notLikeOperation(QLOperation __attribute__ ((unused)) *op)
 {
   return QL_NOT_LIKE;
 }

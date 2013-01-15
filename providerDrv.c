@@ -450,7 +450,7 @@ stopNextProc()
  static int hasBeenCleaned(ProvLibAndTypes* list, int type, void* plib, int* index) {
    int rc = 0;
    int i;
-   for (i=0; list[i].lib > 0; i++) {
+   for (i=0; list[i].lib; i++) {
      if (list[i].lib == plib) {
        rc = list[i].types & type;
        break;
@@ -460,8 +460,9 @@ stopNextProc()
    return rc;
  }
 
+/* merge some of this cleanup stuff with providerIdleThread? */
 static void
-stopProc(void *p)
+stopProc()
 {
   ProviderInfo   *pInfo;
   CMPIContext    *ctx = NULL;
@@ -510,7 +511,7 @@ stopProc(void *p)
   exit(0);
 }
 
-static void handleSigPipe(int sig) 
+static void handleSigPipe(int __attribute__ ((unused)) sig) 
 {
   // Got a sigpipe, but we don't want to do anything about it because it could
   // cause the provider to unload improperly.
@@ -520,7 +521,7 @@ static void handleSigPipe(int sig)
 
 
 static void
-handleSigSegv(int sig)
+handleSigSegv(int __attribute__ ((unused)) sig)
 {
   Parms          *threads = activeThreadsFirst;
   int dmy = -1;
@@ -536,7 +537,7 @@ handleSigSegv(int sig)
 }
 
 static void
-handleSigUsr1(int sig)
+handleSigUsr1(int __attribute__ ((unused)) sig)
 {
   pthread_t       t;
   pthread_attr_t  tattr;
@@ -619,7 +620,7 @@ providerIdleThread()
           }
           if ((val=semGetValue(sfcbSem,PROV_INUSE(proc->id)))==0) {            
 	    /* providerTimeoutInterval reached? */
-            if ((now - proc->lastActivity) > provTimeoutInterval) { 
+            if ((unsigned long)(now - proc->lastActivity) > provTimeoutInterval) { 
               ctx = native_new_CMPIContext(MEM_TRACKED, NULL);
               noBreak = 0;
 
@@ -945,7 +946,7 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
         setSignal(SIGSEGV, handleSigSegv, SA_ONESHOT);
 
         // If requested, change the uid of the provider
-        if (info->uid != -1) {
+	//	if (info->uid != -1) {
           _SFCB_TRACE(1,
                       ("--- Changing uid of provider, %s, to %d(%s)",
                        info->providerName, info->uid, info->user));
@@ -956,7 +957,7 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
                   info->providerName);
             _SFCB_RETURN(-1);
           }
-        }
+	  //	}
 
         curProvProc = (*proc);
         resultSockets = sPairs[(*proc)->id + ptBase];
@@ -1127,7 +1128,8 @@ typedef struct provHandler {
 static long 
 makeSafeResponse(BinResponseHdr* hdr, BinResponseHdr** out) 
 {
-  int i, rvl=0, ol, size;
+  int rvl=0, ol, size;
+  unsigned long i;
   long len;
   char str_time[26];
   BinResponseHdr *outHdr = NULL;
@@ -1329,7 +1331,7 @@ makePropertyList(int n, MsgSegment * ms)
 }
 
 static BinResponseHdr *
-deleteClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+deleteClass(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "deleteClass");
   TIMING_PREP;
@@ -1370,7 +1372,7 @@ deleteClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-getClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+getClass(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   TIMING_PREP;
   GetClassReq *req = (GetClassReq *) hdr;
@@ -1384,7 +1386,7 @@ getClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   BinResponseHdr *resp;
   CMPIFlags       flgs = 0;
   char          **props = NULL;
-  int             i;
+  unsigned int    i;
 
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getClass");
 
@@ -1438,7 +1440,7 @@ getClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-createClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+createClass(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "createClass");
   TIMING_PREP;
@@ -1480,7 +1482,7 @@ createClass(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-enumClassNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+enumClassNames(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   TIMING_PREP;
   EnumClassNamesReq *req = (EnumClassNamesReq *) hdr;
@@ -1493,7 +1495,7 @@ enumClassNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPICount       count;
   BinResponseHdr *resp;
   CMPIFlags       flgs = req->hdr.flags;
-  int             i;
+  unsigned int    i;
 
   _SFCB_ENTER(TRACE_PROVIDERDRV, "enumClassNames");
 
@@ -1601,7 +1603,7 @@ enumQualifiers(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIContext    *ctx = native_new_CMPIContext(MEM_TRACKED, info);
   BinResponseHdr *resp;
   CMPIFlags       flgs = req->hdr.flags;
-  int             i;
+  unsigned int    i;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
                     CMPI_uint32);
@@ -1644,7 +1646,7 @@ enumQualifiers(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-setQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+setQualifier(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "setQualifier");
   TIMING_PREP;
@@ -1684,7 +1686,7 @@ setQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-getQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+getQualifier(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getQualifier");
   TIMING_PREP;
@@ -1696,7 +1698,7 @@ getQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPIContext    *ctx = native_new_CMPIContext(MEM_TRACKED, info);
   CMPICount       count;
   BinResponseHdr *resp;
-  int             i;
+  unsigned int    i;
   CMPIFlags       flgs = 0;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
@@ -1734,7 +1736,7 @@ getQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-deleteQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+deleteQualifier(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "deleteQualifier");
   TIMING_PREP;
@@ -1774,7 +1776,7 @@ deleteQualifier(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 #endif
 
 static BinResponseHdr *
-getProperty(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+getProperty(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getProperty");
   TIMING_PREP;
@@ -1833,7 +1835,7 @@ getProperty(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-setProperty(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+setProperty(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "setProperty");
   TIMING_PREP;
@@ -1885,7 +1887,7 @@ setProperty(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-invokeMethod(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+invokeMethod(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "invokeMethod");
   TIMING_PREP;
@@ -1964,7 +1966,7 @@ invokeMethod(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-getInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+getInstance(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getInstance");
   TIMING_PREP;
@@ -1979,7 +1981,7 @@ getInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   BinResponseHdr *resp;
   CMPIFlags       flgs = 0;
   char          **props = NULL;
-  int             i;
+  unsigned int    i;
 
   if (req->hdr.flags & FL_localOnly)
     flgs |= CMPI_FLAG_LocalOnly;
@@ -2036,7 +2038,7 @@ getInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-deleteInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+deleteInstance(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "deleteInstance");
   TIMING_PREP;
@@ -2078,7 +2080,7 @@ deleteInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-createInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+createInstance(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "createInstance");
   TIMING_PREP;
@@ -2092,7 +2094,7 @@ createInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
   CMPICount       count;
   BinResponseHdr *resp;
   CMPIFlags       flgs = 0;
-  int             i;
+  unsigned int    i;
 
   ctx->ft->addEntry(ctx, CMPIInvocationFlags, (CMPIValue *) & flgs,
                     CMPI_uint32);
@@ -2130,7 +2132,7 @@ createInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-modifyInstance(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+modifyInstance(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "modifyInstance");
   TIMING_PREP;
@@ -2668,7 +2670,7 @@ referenceNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 #ifdef SFCB_INCL_INDICATION_SUPPORT
 
 static BinResponseHdr *
-activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV | TRACE_INDPROVIDER, "activateFilter");
   TIMING_PREP;
@@ -2810,7 +2812,7 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-deactivateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+deactivateFilter(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV | TRACE_INDPROVIDER, "deactivateFilter");
   TIMING_PREP;
@@ -2900,7 +2902,7 @@ deactivateFilter(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-enableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+enableIndications(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV | TRACE_INDPROVIDER, "enableIndications");
   TIMING_PREP;
@@ -2947,7 +2949,7 @@ enableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 static BinResponseHdr *
-disableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+disableIndications(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV | TRACE_INDPROVIDER, "disableIndications");
   TIMING_PREP;
@@ -2997,7 +2999,9 @@ disableIndications(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 #endif
 
 static BinResponseHdr *
-opNotSupported(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+opNotSupported(BinRequestHdr __attribute__ ((unused)) *hdr, 
+               ProviderInfo __attribute__ ((unused)) *info, 
+               int __attribute__ ((unused)) requestor)
 {
   BinResponseHdr *resp;
   CMPIStatus      rci = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
@@ -3184,7 +3188,7 @@ doLoadProvider(ProviderInfo * info, char *dlName, int dlName_length)
 }
 
 static BinResponseHdr *
-loadProvider(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
+loadProvider(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "loadProvider");
 
@@ -3325,9 +3329,9 @@ processProviderInvocationRequestsThread(void *prms)
   ProvHandler     hdlr;
   Parms          *parms = (Parms *) prms;
   BinRequestHdr  *req = parms->req;
-  int             i,
-                  requestor = 0,
-      initRc = 0;
+  int             requestor = 0,
+                  initRc = 0;
+  unsigned long   i;
   char           *errstr = NULL;
   char msg[1024];
 

@@ -103,7 +103,7 @@ getSfcbUuid()
 // ------------------------------------------------------------------
 
 static int
-genNameSpaceData(const char *ns, const char *dn, int dbl,
+genNameSpaceData(const char *ns, int dbl,
                  const CMPIResult *rslt, CMPIObjectPath * op,
                  CMPIInstance *ci)
 {
@@ -147,7 +147,7 @@ gatherNameSpacesData(const char *dn, int dbl,
       }
       closedir(de_test);
 
-      genNameSpaceData(n,de->d_name,dbl,rslt,op,ci);
+      genNameSpaceData(n,dbl,rslt,op,ci);
       gatherNameSpacesData(n,dbl,rslt,op,ci);
       free(n);
     }
@@ -627,7 +627,7 @@ ComMechProviderEnumInstances(CMPIInstanceMI * mi,
   CMPIInstance   *ci;
   CMPIUint16      mech;
   CMPIBoolean     bul = 0;
-  int             i;
+  unsigned int    i;
 
   CMPIArray      *fps;
   CMPIUint16      fpa[6] = { 2, 3, 5, 6, 7, 9 };

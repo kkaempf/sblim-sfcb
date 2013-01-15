@@ -79,8 +79,7 @@ __oft_release(CMPIObjectPath * cop)
 static CMPIObjectPath *
 __oft_clone(const CMPIObjectPath * op, CMPIStatus *rc)
 {
-  CMPIStatus      tmp;
-  struct native_cop *ncop = __new_empty_cop(MEM_NOT_TRACKED, &tmp);
+  struct native_cop *ncop = __new_empty_cop(MEM_NOT_TRACKED, rc);
   ClObjectPath   *cop = (ClObjectPath *) op->hdl;
   ncop->cop.hdl = ClObjectPathRebuild(cop, NULL);
 
@@ -358,44 +357,6 @@ __oft_toString(const CMPIObjectPath * cop, CMPIStatus *rc)
   char            str[4096] = { 0 };
   sfcb_pathToChars(cop, rc, str);
   return sfcb_native_new_CMPIString(str, rc, 0);
-}
-
-char           *
-oft_toCharsNormalized(const CMPIObjectPath * cop, CMPIConstClass * cls,
-                      int full, CMPIStatus *rc)
-{
-  char            str[2048] = { 0 };
-  CMPIString     *cn;
-  CMPIString     *name;
-  CMPIData        data;
-  CMPIStatus      irc;
-  unsigned long   quals;
-  unsigned int    i,
-                  n,
-                  m;
-  char           *v;
-
-  cn = __oft_getClassName(cop, rc);
-  strcat(str, (char *) cn->hdl);
-
-  for (n = 0, i = 0, m = cls->ft->getPropertyCount(cls, rc); i < m; i++) {
-    getPropertyQualsAt(cls, i, &name, &quals, NULL, NULL);
-    if (quals & 1) {
-      data = __oft_getKey(cop, (const char *) name->hdl, &irc);
-      if (irc.rc == CMPI_RC_OK) {
-        if (n)
-          strcat(str, ",");
-        else
-          strcat(str, ".");
-        strcat(str, (char *) name->hdl);
-        strcat(str, "=");
-        v = sfcb_value2Chars(data.type, &data.value);
-        strcat(str, v);
-        free(v);
-      }
-    }
-  }
-  return strdup(str);
 }
 
 static CMPIObjectPathFT oft = {

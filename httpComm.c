@@ -68,7 +68,7 @@ commWrite(CommHndl to, void *data, size_t count)
     char           *mp,
                    *m = alloca(count * 2),
         *d = (char *) data;
-    int             i;
+    unsigned int    i;
     _SFCB_TRACE(1, ("->> xmlOut %d bytes:\n", count));
     for (mp = m, i = 0; i < count; i++)
       switch (d[i]) {

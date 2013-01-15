@@ -160,10 +160,10 @@ setupControl(char *fn)
   FILE           *in;
   char            fin[1024],
                  *stmt = NULL;
-  int             i,
-                  m,
-                  n = 0,
-      err = 0;
+  unsigned short  n = 0,
+                  err = 0;
+  unsigned int    i,
+                  m;
   CntlVals        rv;
   char *configFile;
 
@@ -301,10 +301,39 @@ getControlUNum(char *id, unsigned int *val)
 {
   Control        *ctl;
   int             rc = -1;
+
+  if (ct == NULL) {
+    setupControl(configfile);
+  }
+
   if ((ctl = ct->ft->get(ct, id))) {
     if (ctl->type == 1 && isdigit(ctl->strValue[0])) {
       unsigned long   tmp = strtoul(ctl->strValue, NULL, 0);
       if (tmp < UINT_MAX) {
+        *val = tmp;
+        return 0;
+      }
+    }
+    rc = -2;
+  }
+  *val = 0;
+  return rc;
+}
+
+int
+getControlULong(char *id, unsigned long *val)
+{
+  Control        *ctl;
+  int             rc = -1;
+
+  if (ct == NULL) {
+    setupControl(configfile);
+  }
+
+  if ((ctl = ct->ft->get(ct, id))) {
+    if (ctl->type == 1 && isdigit(ctl->strValue[0])) {
+      unsigned long   tmp = strtoul(ctl->strValue, NULL, 0);
+      if (tmp < ULONG_MAX) {
         *val = tmp;
         return 0;
       }

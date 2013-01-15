@@ -624,7 +624,7 @@ __ift_internal_setPropertyFilter(CMPIInstance *instance,
 
 static CMPIStatus __ift_setPropertyFilter(CMPIInstance * instance,
                                           const char **propertyList,
-                                          const char **keys)
+                                          const char __attribute__ ((unused)) **keys)
 {
   CMPIStatus rc = { CMPI_RC_OK, NULL};
   CMPIObjectPath *cop = NULL;
@@ -972,75 +972,6 @@ NewCMPIInstance(CMPIObjectPath * cop, CMPIStatus *rc)
   return internal_new_CMPIInstance(MEM_NOT_TRACKED, cop, rc, 0);
 }
 
-static void
-dataToString(CMPIData d, UtilStringBuffer * sb)
-{
-  char            str[256];
-  char           *sp = str;
-
-  if (d.type & CMPI_ARRAY) {
-    sb->ft->appendChars(sb, "[]");
-    return;
-  }
-  if (d.type & CMPI_UINT) {
-    unsigned long long ul = 0LL;
-    switch (d.type) {
-    case CMPI_uint8:
-      ul = d.value.uint8;
-      break;
-    case CMPI_uint16:
-      ul = d.value.uint16;
-      break;
-    case CMPI_uint32:
-      ul = d.value.uint32;
-      break;
-    case CMPI_uint64:
-      ul = d.value.uint64;
-      break;
-    }
-    sprintf(str, "%llu", ul);
-  } else if (d.type & CMPI_SINT) {
-    long long       sl = 0LL;
-    switch (d.type) {
-    case CMPI_sint8:
-      sl = d.value.sint8;
-      break;
-    case CMPI_sint16:
-      sl = d.value.sint16;
-      break;
-    case CMPI_sint32:
-      sl = d.value.sint32;
-      break;
-    case CMPI_sint64:
-      sl = d.value.sint64;
-      break;
-    }
-    sprintf(str, "%lld", sl);
-  } else if (d.type == CMPI_string) {
-    sp = (char *) d.value.string->hdl;
-  }
-  sb->ft->appendChars(sb, sp);
-}
-
-UtilStringBuffer *
-instanceToString(CMPIInstance *ci, char **props)
-{
-  unsigned int    i,
-                  m;
-  CMPIData        data;
-  CMPIString     *name;
-  UtilStringBuffer *sb = UtilFactory->newStrinBuffer(64);
-
-  for (i = 0, m = CMGetPropertyCount(ci, NULL); i < m; i++) {
-    data = CMGetPropertyAt(ci, i, &name, NULL);
-    sb->ft->appendChars(sb, (char *) name->hdl);
-    SFCB_APPENDCHARS_BLOCK(sb, "=");
-    dataToString(data, sb);
-    SFCB_APPENDCHARS_BLOCK(sb, "\n");
-  }
-  return sb;
-}
-
 const char     *
 instGetClassName(CMPIInstance *ci)
 {
@@ -1058,7 +989,7 @@ instGetNameSpace(CMPIInstance *ci)
 int
 instanceCompare(CMPIInstance *inst1, CMPIInstance *inst2)
 {
-  int             c,
+  unsigned int    c,
                   i;
   CMPIStatus      st = { CMPI_RC_OK, NULL };
   CMPIData        d1,

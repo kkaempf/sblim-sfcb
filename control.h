@@ -25,6 +25,7 @@ int             setupControl(char *fn);
 void            sunsetControl();
 int             getControlChars(char *id, char **val);
 int             getControlUNum(char *id, unsigned int *val);
+int             getControlULong(char *id, unsigned long *val);
 int             getControlNum(char *id, long *val);
 int             getControlBool(char *id, int *val);
 const char      * sfcBrokerStart;

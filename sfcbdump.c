@@ -27,6 +27,7 @@
 
 #define BINARY_NAME argv[0]
 #define SCHEMA_NAME argv[optind]
+#define UABS(i) (unsigned int)abs(i)
 
 typedef enum { REC_VER,
   REC_HDR,
@@ -271,14 +272,14 @@ dumpString(const ClObjectHdr * hdr, const ClString * cs,
   ClStrBuf       *sb = NULL;
   int            *index = NULL;
   int             rc = 0;
-  if (abs(hdr->strBufOffset) <= hdr->size) {
+  if (UABS(hdr->strBufOffset) <= hdr->size) {
     sb = (void *) hdr + abs(hdr->strBufOffset);
     index = (void *) hdr + abs(sb->indexOffset);
     if (cs->id == 0) {
       printf("%s NULL\n", prefix);
     } else if (cs->id > 0 && cs->id <= sb->iMax) {
       if (index[cs->id - 1] >= 0 &&
-          (index[cs->id - 1] + abs(hdr->strBufOffset)) < hdr->size) {
+          (index[cs->id - 1] + UABS(hdr->strBufOffset)) < hdr->size) {
         printf("%s \"%s\"\n", prefix,
                (char *) sb + offsetof(ClStrBuf, buf) + index[cs->id - 1]);
       } else {
@@ -312,7 +313,7 @@ dumpStringBuffer(const ClObjectHdr * hdr, const char *prefix)
   int             i;
   if (hdr->strBufOffset == 0) {
     printf("%s * Empty string buffer\n", prefix);
-  } else if (abs(hdr->strBufOffset) <= hdr->size) {
+  } else if (UABS(hdr->strBufOffset) <= hdr->size) {
     sb = (void *) hdr + abs(hdr->strBufOffset);
     index = (void *) hdr + abs(sb->indexOffset);
     if ((sb->iUsed * sizeof(int) + abs(hdr->strBufOffset)) <= hdr->size) {
@@ -348,7 +349,7 @@ dumpArrayBuffer(const ClObjectHdr * hdr, const char *prefix)
   int             i;
   if (hdr->arrayBufOffset == 0) {
     printf("%s * Empty array buffer\n", prefix);
-  } else if (abs(hdr->arrayBufOffset) <= hdr->size) {
+  } else if (UABS(hdr->arrayBufOffset) <= hdr->size) {
     ab = (void *) hdr + abs(hdr->arrayBufOffset);
     index = (void *) hdr + abs(ab->indexOffset);
     if ((ab->iUsed * sizeof(int) + abs(hdr->arrayBufOffset)) <= hdr->size) {
@@ -387,7 +388,7 @@ dumpProperties(const ClClass * cls, const char *prefix)
   char           *prefixbuf = NULL;
   if (cls->properties.sectionOffset == 0) {
     printf("%s * Empty property section\n", prefix);
-  } else if (abs(cls->properties.sectionOffset) <= cls->hdr.size) {
+  } else if (UABS(cls->properties.sectionOffset) <= cls->hdr.size) {
     cp = (void *) cls + abs(cls->properties.sectionOffset);
     if ((cls->properties.used * sizeof(ClProperty) +
          abs(cls->properties.sectionOffset))
@@ -434,7 +435,7 @@ dumpQualifiers(const ClClass * cls, const char *prefix)
   char           *prefixbuf = NULL;
   if (cls->qualifiers.sectionOffset == 0) {
     printf("%s * Empty qualifier section\n", prefix);
-  } else if (abs(cls->qualifiers.sectionOffset) <= cls->hdr.size) {
+  } else if (UABS(cls->qualifiers.sectionOffset) <= cls->hdr.size) {
     cq = (void *) cls + abs(cls->qualifiers.sectionOffset);
     if ((cls->qualifiers.used * sizeof(ClQualifier) +
          abs(cls->qualifiers.sectionOffset))
@@ -481,7 +482,7 @@ dumpMethods(const ClClass * cls, const char *prefix)
   char           *prefixbuf = NULL;
   if (cls->methods.sectionOffset == 0) {
     printf("%s * Empty method section\n", prefix);
-  } else if (abs(cls->methods.sectionOffset) <= cls->hdr.size) {
+  } else if (UABS(cls->methods.sectionOffset) <= cls->hdr.size) {
     cm = (void *) cls + abs(cls->methods.sectionOffset);
     if ((cls->methods.used * sizeof(ClMethod) +
          abs(cls->methods.sectionOffset))

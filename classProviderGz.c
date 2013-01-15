@@ -55,14 +55,12 @@ typedef struct _ClassBase {
   MRWLOCK         mrwLock;
   ClassRecord    *firstCached,
                  *lastCached;
-  int             cachedCount;
+  unsigned int    cachedCount;
 } ClassBase;
 
 struct _Class_Register_FT {
   int             version;
   void            (*release) (ClassRegister * br);
-  ClassRegister  *(*clone) (ClassRegister * br);
-
   CMPIConstClass *(*getClass) (ClassRegister * br, const char *clsName);
 
   int             (*putClass) (ClassRegister * br, const char *className,
@@ -125,12 +123,6 @@ release(ClassRegister * cr)
   free(cr->fn);
   cb->ht->ft->release(cb->ht);
   free(cr);
-}
-
-static ClassRegister *
-regClone(ClassRegister * cr)
-{
-  return NULL;
 }
 
 void
@@ -366,8 +358,8 @@ newClassRegister(char *fname)
     s = hdr.size;
     *((ClObjectHdr *) buf) = hdr;
 
-    if (gzread(cr->f, buf + sizeof(hdr), hdr.size - sizeof(hdr)) ==
-        hdr.size - sizeof(hdr)) {
+    int gzr = gzread(cr->f, buf + sizeof(hdr), hdr.size - sizeof(hdr));
+    if (gzr && (unsigned int)gzr == hdr.size - sizeof(hdr)) {
       if (vRec) {
         cr->vr = (ClVersionRecord *) buf;
         if (strcmp(cr->vr->id, "sfcb-rep")) {
@@ -599,7 +591,6 @@ getClass(ClassRegister * cr, const char *clsName)
 static Class_Register_FT ift = {
   1,
   release,
-  regClone,
   getClass,
   putClass,
   NULL,

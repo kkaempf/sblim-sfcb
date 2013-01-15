@@ -90,8 +90,8 @@ getIndexRecordCase(BlobIndex * bi, const char *key, size_t keyl,
   static const char *num = "0123456789";
   char           *tokenptr;
   char           *kbptr;
-  int             elen,
-                  ekl;
+  int             elen;
+  unsigned int    ekl;
   int             blen,
                   bofs;
   int             slen;
@@ -405,7 +405,7 @@ adjust(BlobIndex * bi, int pos, int adj)
 }
 
 static int
-rebuild(BlobIndex * bi, const char *id, void *blob, int blen)
+rebuild(BlobIndex * bi, void *blob, int blen)
 {
   int             ofs,
                   len,
@@ -589,7 +589,7 @@ addBlob(const char *ns, const char *cls, char *id, void *blob, int len)
         idxe[ep] = ' ';
         memcpy(bi->index + bi->dSize, idxe, es);
         bi->dSize += es;
-        if (rebuild(bi,id,blob,len) != 0) { fdHandleError(bi); return -1; }
+        if (rebuild(bi,blob,len) != 0) { fdHandleError(bi); return -1; }
       }
     }
 
@@ -643,7 +643,7 @@ deleteBlob(const char *ns, const char *cls, const char *id)
       } else {
         fseek(bi->fd, 0, SEEK_END);
         bi->dlen = ftell(bi->fd);
-        if (rebuild(bi,id,NULL,0) != 0) { fdHandleError(bi); return -1; }
+        if (rebuild(bi,NULL,0) != 0) { fdHandleError(bi); return -1; }
         freeBlobIndex(&bi, 1);
         return 0;
       }

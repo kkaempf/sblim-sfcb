@@ -48,7 +48,7 @@
 
 #define LOCALCLASSNAME "ClassProvider"
 
-typedef void   *(*SwapClass) (ClClass * cls, int *size);
+typedef void   *(*SwapClass) (ClClass * cls, unsigned int *size);
 static SwapClass swapEntryClass;
 static int      swapMode;
 
@@ -108,8 +108,8 @@ buildClassSource(ClassRegister * cr, char *ns)
   CMPIConstClass *cc;
   ClObjectHdr    *hdr;
   unsigned char  *buf;
-  int             j;
-  int             size;
+  unsigned int    j,
+                  size;
 
   cb->it = UtilFactory->newHashTable(61,
                                      UtilHashTable_charKey |

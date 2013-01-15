@@ -143,8 +143,11 @@ static ClientConnectionFT conFt = {
  * --------------------------------------------------------------------------
  */
 
+/* cld isn't used, but we need to keep it around for now.
+   need to orchestrate the change with sfcc */
+
 ClientConnection *
-initConnection(ClientData * cld)
+initConnection(ClientData __attribute__ ((unused)) *cld)
 {
   ClientConnection *c =
       (ClientConnection *) calloc(1, sizeof(ClientConnection));
@@ -158,10 +161,9 @@ initConnection(ClientData * cld)
  */
 
 static Client  *
-cloneClient(Client * cl, CMPIStatus *st)
+cloneClient(Client __attribute__ ((unused)) *cl, CMPIStatus *st)
 {
-  CMPIStatus      rc;
-  CIMCSetStatusWithChars(&rc, CMPI_RC_ERR_NOT_SUPPORTED,
+  CIMCSetStatusWithChars(st, CMPI_RC_ERR_NOT_SUPPORTED,
                          "Clone function not supported");
   return NULL;
 }
@@ -220,9 +222,9 @@ static CMPIEnumeration *
 cpyEnumResponses(BinRequestContext * binCtx,
                  BinResponseHdr ** resp, int arrLen)
 {
-  int             i,
-                  c,
-                  j;
+  unsigned long   i,
+                  j,
+                  c;
   union o {
     CMPIInstance   *inst;
     CMPIObjectPath *path;
@@ -300,7 +302,7 @@ ctxErrResponse(BinRequestContext * ctx, CMPIStatus *rc)
 static void
 closeSockets(BinRequestContext * binCtx)
 {
-  int             c;
+  unsigned long c;
   for (c = 0; c < binCtx->pCount; c++) {
     close(binCtx->pAs[c].socket);
   }
@@ -632,7 +634,7 @@ createInstance(Client * mb,
 static CMPIStatus
 modifyInstance(Client * mb,
                CMPIObjectPath * cop,
-               CMPIInstance *inst, CMPIFlags flags, char **properties)
+               CMPIInstance *inst, CMPIFlags __attribute__ ((unused)) flags, char **properties)
 {
   int             pCount = 0,
       irc,
@@ -1568,9 +1570,11 @@ invokeMethod(Client * mb,
 }
 
 static CMPIStatus
-setProperty(Client * mb,
-            CMPIObjectPath * cop,
-            const char *name, CMPIValue * value, CMPIType type)
+setProperty(Client __attribute__ ((unused)) *mb,
+            CMPIObjectPath __attribute__ ((unused)) *cop,
+            const char __attribute__ ((unused)) *name, 
+            CMPIValue __attribute__ ((unused)) *value, 
+            CMPIType __attribute__ ((unused)) type)
 {
   CMPIStatus      rc;
   CMSetStatus(&rc, CMPI_RC_ERR_NOT_SUPPORTED);
@@ -1579,8 +1583,10 @@ setProperty(Client * mb,
 }
 
 static CMPIData
-getProperty(Client * mb,
-            CMPIObjectPath * cop, const char *name, CMPIStatus *rc)
+getProperty(Client __attribute__ ((unused)) *mb,
+            CMPIObjectPath __attribute__ ((unused)) *cop, 
+            const char __attribute__ ((unused)) *name, 
+            CMPIStatus __attribute__ ((unused)) *rc)
 {
   CMPIData        retval = { 0, CMPI_notFound, {0l} };
   if (rc)
@@ -2031,51 +2037,51 @@ CMPIConnect2(ClientEnv *ce, const char *hn, const char *scheme,
 }
 
 static CMPIInstance *
-newInstance(ClientEnv *ce, const CMPIObjectPath * op, CMPIStatus *rc)
+newInstance(ClientEnv __attribute__ ((unused)) *ce, const CMPIObjectPath * op, CMPIStatus *rc)
 {
   return NewCMPIInstance((CMPIObjectPath *) op, rc);
 }
 
 static CMPIString *
-newString(ClientEnv *ce, const char *ptr, CMPIStatus *rc)
+newString(ClientEnv __attribute__ ((unused)) *ce, const char *ptr, CMPIStatus *rc)
 {
   return NewCMPIString(ptr, rc);
 }
 
 static CMPIObjectPath *
-newObjectPath(ClientEnv *ce, const char *ns, const char *cn,
+newObjectPath(ClientEnv __attribute__ ((unused)) *ce, const char *ns, const char *cn,
               CMPIStatus *rc)
 {
   return NewCMPIObjectPath(ns, cn, rc);
 }
 
 static CMPIArgs *
-newArgs(ClientEnv *ce, CMPIStatus *rc)
+newArgs(ClientEnv __attribute__ ((unused)) *ce, CMPIStatus *rc)
 {
   return NewCMPIArgs(rc);
 }
 
 static CMPIArray *
-newArray(ClientEnv *ce, CMPICount max, CMPIType type, CMPIStatus *rc)
+newArray(ClientEnv __attribute__ ((unused)) *ce, CMPICount max, CMPIType type, CMPIStatus *rc)
 {
   return NewCMPIArray(max, type, rc);
 }
 
 static CMPIDateTime *
-newDateTime(ClientEnv *ce, CMPIStatus *rc)
+newDateTime(ClientEnv __attribute__ ((unused)) *ce, CMPIStatus *rc)
 {
   return NewCMPIDateTime(rc);
 }
 
 static CMPIDateTime *
-newDateTimeFromBinary(ClientEnv *ce, CMPIUint64 binTime,
+newDateTimeFromBinary(ClientEnv __attribute__ ((unused)) *ce, CMPIUint64 binTime,
                       CMPIBoolean interval, CMPIStatus *rc)
 {
   return NewCMPIDateTimeFromBinary(binTime, interval, rc);
 }
 
 static CMPIDateTime *
-newDateTimeFromChars(ClientEnv *ce, const char *utcTime, CMPIStatus *rc)
+newDateTimeFromChars(ClientEnv __attribute__ ((unused)) *ce, const char *utcTime, CMPIStatus *rc)
 {
   return NewCMPIDateTimeFromChars(utcTime, rc);
 }
@@ -2086,7 +2092,8 @@ void _Cleanup_SfcbLocal_Env(void)
 }
 
 ClientEnv      *
-_Create_SfcbLocal_Env(char *id, unsigned int options, int *rc, char **msg)
+_Create_SfcbLocal_Env(char __attribute__ ((unused)) *id, unsigned int options, 
+                      int __attribute__ ((unused)) *rc, char __attribute__ ((unused)) **msg)
 {
 
   static ClientEnvFT localFT = {

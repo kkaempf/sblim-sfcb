@@ -270,12 +270,12 @@ setArgsMsgSegment(CMPIArgs * args)
   return s;
 }
 
-CMPIString     *
-args2String(CMPIArgs * arg, CMPIStatus *rc)
-{
-  char           *argstr = ClArgsToString((ClArgs *) arg->hdl);
-  return sfcb_native_new_CMPIString(argstr, NULL, 0);
-}
+/* CMPIString     * */
+/* args2String(CMPIArgs * arg, CMPIStatus *rc) */
+/* { */
+/*   char           *argstr = ClArgsToString((ClArgs *) arg->hdl); */
+/*   return sfcb_native_new_CMPIString(argstr, NULL, 0); */
+/* } */
 
 /*****************************************************************************/
 

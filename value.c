@@ -336,7 +336,7 @@ extended_strcmp(const char *s1, const char *s2)
 int
 sfcb_comp_CMPIValue(CMPIValue * val1, CMPIValue * val2, CMPIType type)
 {
-  int             c;
+  unsigned int    c;
   CMPIValue       tempVal1,
                   tempVal2;
   CMPIString     *s1,
