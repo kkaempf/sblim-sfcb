@@ -40,6 +40,7 @@
 #include "native.h"
 #include "control.h"
 #include "config.h"
+#include "sfcbmacs.h"
 
 #define NEW(x) ((x *) malloc(sizeof(x)))
 
@@ -50,7 +51,6 @@
 #include "cmpimacsx.h"
 
 static const CMPIBroker *_broker;
-static CMPIStatus okSt = { CMPI_RC_OK, NULL };
 
 void
 ElementCapabilitiesInitInstances(const CMPIContext *ctx)
@@ -142,13 +142,8 @@ ElementCapabilitiesReferenceNames(CMPIAssociationMI * mi,
   return okSt;
 }
 
-CMPIStatus
-ElementCapabilitiesAssociationCleanup(CMPIAssociationMI * mi,
-                                      const CMPIContext *ctx,
-                                      CMPIBoolean terminate)
-{
-  return okSt;
-}
+/* ElementCapabilitiesAssociationCleanup */
+static CMPIStatus okCleanup(ElementCapabilities,Association);
 
 static CMPIAssociationMIFT assocMIFT__ElementCapabilities = {
   CMPICurrentVersion,

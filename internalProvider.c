@@ -35,6 +35,7 @@
 #include "internalProvider.h"
 #include "native.h"
 #include "objectpath.h"
+#include "sfcbmacs.h"
 
 #define LOCALCLASSNAME "InternalProvider"
 
@@ -47,15 +48,9 @@ extern CMPIInstance *relocateSerializedInstance(void *area);
 extern char    *sfcb_value2Chars(CMPIType type, CMPIValue * value);
 extern CMPIObjectPath *getObjectPath(char *path, char **msg);
 extern CMPIBroker *Broker;
-//extern UtilStringBuffer *newStringBuffer(int s);
 extern void     setStatus(CMPIStatus *st, CMPIrc rc, const char *msg);
 
 static const CMPIBroker *_broker;
-
-/*
- * static int cpy2lower(char *in, char *out) { int i = 0; while ((out[i] = 
- * tolower(in[i++])) != 0); return i - 1; } 
- */
 
 static CMPIInstance *
 instifyBlob(void *blob)
@@ -534,17 +529,8 @@ InternalProviderDeleteInstance(CMPIInstanceMI __attribute__ ((unused)) *mi,
   _SFCB_RETURN(st);
 }
 
-CMPIStatus
-InternalProviderExecQuery(CMPIInstanceMI __attribute__ ((unused)) *mi,
-                          const CMPIContext __attribute__ ((unused)) *ctx,
-                          const CMPIResult __attribute__ ((unused)) *rslt,
-                          const CMPIObjectPath __attribute__ ((unused)) *cop,
-                          const char __attribute__ ((unused)) *lang, 
-                          const char __attribute__ ((unused)) *query)
-{
-  CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
-  return st;
-}
+/* InternalProviderExecQuery */
+static CMPIStatus notSupCMPI_EQ(InternalProvider);
 
 /*
  * ------------------------------------------------------------------ *
@@ -790,17 +776,8 @@ getRefs(const CMPIContext *ctx, const CMPIResult *rslt,
   }
 }
 
-CMPIStatus
-InternalProviderAssociationCleanup(CMPIAssociationMI __attribute__ ((unused)) *mi,
-                                   const CMPIContext __attribute__ ((unused)) *ctx,
-                                   CMPIBoolean __attribute__ ((unused)) terminate)
-{
-  CMPIStatus      st = { CMPI_RC_OK, NULL };
-  _SFCB_ENTER(TRACE_INTERNALPROVIDER,
-              "InternalProviderAssociationCleanup");
-
-  _SFCB_RETURN(st);
-}
+/* InternalProviderAssociationCleanup */
+static CMPIStatus okCleanup(InternalProvider,Association);
 
 CMPIStatus
 InternalProviderAssociators(CMPIAssociationMI __attribute__ ((unused)) *mi,
@@ -871,28 +848,11 @@ InternalProviderReferenceNames(CMPIAssociationMI __attribute__ ((unused)) *mi,
  * ------------------------------------------------------------------ 
  */
 
-CMPIStatus
-InternalProviderMethodCleanup(CMPIMethodMI __attribute__ ((unused)) *mi,
-                              const CMPIContext __attribute__ ((unused)) *ctx,
-                              CMPIBoolean __attribute__ ((unused)) terminate)
-{
-  CMPIStatus      st = { CMPI_RC_OK, NULL };
-  return st;
-}
+/* InternalProviderMethodCleanup */
+static CMPIStatus okCleanup(InternalProvider,Method);
 
-CMPIStatus
-InternalProviderInvokeMethod(CMPIMethodMI __attribute__ ((unused)) *mi,
-                             const CMPIContext __attribute__ ((unused)) *ctx,
-                             const CMPIResult __attribute__ ((unused)) *rslt,
-                             const CMPIObjectPath __attribute__ ((unused)) *ref,
-                             const char __attribute__ ((unused)) *methodName,
-                             const CMPIArgs __attribute__ ((unused)) *in, 
-                             CMPIArgs __attribute__ ((unused)) *out)
-{
-  _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderInvokeMethod");
-  CMReturnWithChars(_broker, CMPI_RC_ERR_FAILED,
-                    "DefaultProvider does not support invokeMethod operations");
-}
+/* InternalProviderInvokeMethod */
+static CMPIStatus notSupCMPI_IM(InternalProvider);
 
 /*
  * ------------------------------------------------------------------ *
@@ -900,39 +860,14 @@ InternalProviderInvokeMethod(CMPIMethodMI __attribute__ ((unused)) *mi,
  * ------------------------------------------------------------------ 
  */
 
-CMPIStatus
-InternalProviderPropertyCleanup(CMPIPropertyMI __attribute__ ((unused)) *mi,
-                                const CMPIContext __attribute__ ((unused)) *ctx,
-                                CMPIBoolean __attribute__ ((unused)) terminate)
-{
-  CMPIStatus      st = { CMPI_RC_OK, NULL };
-  return st;
-}
+/* InternalProviderPropertyCleanup */
+static CMPIStatus okCleanup(InternalProvider,Property);
 
-CMPIStatus
-InternalProviderSetProperty(CMPIPropertyMI __attribute__ ((unused)) *mi,
-                            const CMPIContext __attribute__ ((unused)) *ctx,
-                            const CMPIResult __attribute__ ((unused)) *rslt,
-                            const CMPIObjectPath __attribute__ ((unused)) *ref,
-                            const char __attribute__ ((unused)) *propName, 
-                            const CMPIData __attribute__ ((unused)) data)
-{
-  _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderSetProperty");
-  CMReturnWithChars(_broker, CMPI_RC_ERR_FAILED,
-                    "DefaultProvider does not support property operations");
-}
+/* InternalProviderSetProperty */
+static CMPIStatus notSupCMPI_SP(InternalProvider);
 
-CMPIStatus
-InternalProviderGetProperty(CMPIPropertyMI __attribute__ ((unused)) *mi,
-                            const CMPIContext __attribute__ ((unused)) *ctx,
-                            const CMPIResult __attribute__ ((unused)) *rslt,
-                            const CMPIObjectPath __attribute__ ((unused)) *ref,
-                            const char __attribute__ ((unused)) *propName)
-{
-  _SFCB_ENTER(TRACE_INTERNALPROVIDER, "InternalProviderGetProperty");
-  CMReturnWithChars(_broker, CMPI_RC_ERR_FAILED,
-                    "DefaultProvider does not support property operations");
-}
+/* InternalProviderGetProperty */
+static CMPIStatus notSupCMPI_GP(InternalProvider);
 
 /*
  * ------------------------------------------------------------------ *

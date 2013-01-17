@@ -46,6 +46,7 @@
 #include "control.h"
 #include "config.h"
 #include "objectpath.h"
+#include "sfcbmacs.h"
 
 #define NEW(x) ((x *) malloc(sizeof(x)))
 
@@ -57,8 +58,6 @@
 
 static const CMPIBroker *_broker;
 static CMPIStatus invClassSt = { CMPI_RC_ERR_INVALID_CLASS, NULL };
-static CMPIStatus notSuppSt = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
-static CMPIStatus okSt = { CMPI_RC_OK, NULL };
 
 // ------------------------------------------------------------------
 
@@ -719,9 +718,7 @@ static CMPIStatus
 ServerProviderCleanup(CMPIInstanceMI * mi, const CMPIContext *ctx,
                       CMPIBoolean terminate)
 {
-  CMPIStatus      st = { CMPI_RC_OK, NULL };
-
-  return (st);
+  return okSt;
 }
 
 static CMPIStatus
@@ -814,15 +811,8 @@ ServerProviderEnumInstances(CMPIInstanceMI * mi,
   return okSt;
 }
 
-static CMPIStatus
-ServerProviderCreateInstance(CMPIInstanceMI * mi,
-                             const CMPIContext *ctx,
-                             const CMPIResult *rslt,
-                             const CMPIObjectPath * cop,
-                             const CMPIInstance *ci)
-{
-  return notSuppSt;
-}
+/* ServerProviderCreateInstance */
+static CMPIStatus notSupCMPI_CI(ServerProvider);
 
 static CMPIStatus
 ServerProviderModifyInstance(CMPIInstanceMI * mi,
@@ -832,7 +822,7 @@ ServerProviderModifyInstance(CMPIInstanceMI * mi,
                              const CMPIInstance *ci,
                              const char **properties)
 {
-  CMPIStatus      rc = { CMPI_RC_ERR_NOT_SUPPORTED, 0 };
+  CMPIStatus      rc = notSupSt;
   CMPIContext    *ctxLocal;
   CMPIValue       val;
 
@@ -871,24 +861,11 @@ ServerProviderModifyInstance(CMPIInstanceMI * mi,
   return rc;
 }
 
-static CMPIStatus
-ServerProviderDeleteInstance(CMPIInstanceMI * mi,
-                             const CMPIContext *ctx,
-                             const CMPIResult *rslt,
-                             const CMPIObjectPath * ref)
-{
-  return notSuppSt;
-}
+/* ServerProviderDeleteInstance */
+static CMPIStatus notSupCMPI_DI(ServerProvider);
 
-static CMPIStatus
-ServerProviderExecQuery(CMPIInstanceMI * mi,
-                        const CMPIContext *ctx,
-                        const CMPIResult *rslt,
-                        const CMPIObjectPath * cop,
-                        const char *lang, const char *query)
-{
-  return notSuppSt;
-}
+/* ServerProviderExecQuery */
+static CMPIStatus notSupCMPI_EQ(ServerProvider);
 
 void
 ServerProviderInitInstances(const CMPIContext *ctx)
@@ -930,16 +907,8 @@ CMInstanceMIStub(ServerProvider, ServerProvider, _broker,
 
 /*---------------------- Association interface --------------------------*/
 
-CMPIStatus
-ServerProviderAssociationCleanup(CMPIAssociationMI * mi,
-                                 const CMPIContext *ctx,
-                                 CMPIBoolean terminate)
-{
-  CMPIStatus      st = { CMPI_RC_OK, NULL };
-  _SFCB_ENTER(TRACE_PROVIDERS, "ServerProviderAssociationCleanup");
-
-  _SFCB_RETURN(st);
-}
+/* ServerProviderAssociationCleanup */
+static CMPIStatus okCleanup(ServerProvider,Association);
 
 /** \brief buildAssoc - Builds the Association instances
  *

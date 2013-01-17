@@ -31,6 +31,7 @@
 #include "providerRegister.h"
 #include "trace.h"
 #include "control.h"
+#include "sfcbmacs.h"
 
 #include "cmpi/cmpidt.h"
 #include "cmpi/cmpift.h"

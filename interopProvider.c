@@ -23,6 +23,8 @@
 #include "cmpi/cmpift.h"
 #include "cmpi/cmpimacs.h"
 
+#include "sfcbmacs.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -1484,21 +1486,8 @@ InteropProviderDeleteInstance(CMPIInstanceMI * mi,
   _SFCB_RETURN(st);
 }
 
-/*
- * ------------------------------------------------------------------------- 
- */
-
-CMPIStatus
-InteropProviderExecQuery(CMPIInstanceMI * mi,
-                         const CMPIContext *ctx,
-                         const CMPIResult *rslt,
-                         const CMPIObjectPath * cop,
-                         const char *lang, const char *query)
-{
-  CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
-  _SFCB_ENTER(TRACE_INDPROVIDER, "InteropProviderExecQuery");
-  _SFCB_RETURN(st);
-}
+/* InteropProviderExecQuery */
+static CMPIStatus notSupCMPI_EQ(InteropProvider);
 
 /*
  * --------------------------------------------------------------------------
@@ -1510,14 +1499,9 @@ InteropProviderExecQuery(CMPIInstanceMI * mi,
  * --------------------------------------------------------------------------
  */
 
-CMPIStatus
-InteropProviderMethodCleanup(CMPIMethodMI * mi,
-                             const CMPIContext *ctx, CMPIBoolean terminate)
-{
-  CMPIStatus      st = { CMPI_RC_OK, NULL };
-  _SFCB_ENTER(TRACE_INDPROVIDER, "InteropProviderMethodCleanup");
-  _SFCB_RETURN(st);
-}
+/* InteropProviderMethodCleanup */
+static CMPIStatus okCleanup(InteropProvider,Method);
+
 
 /*
  * ------------------------------------------------------------------------- 
@@ -1716,15 +1700,8 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
  * --------------------------------------------------------------------------
  */
 
-CMPIStatus
-InteropProviderAssociationCleanup(CMPIAssociationMI * mi,
-                                  const CMPIContext *ctx,
-                                  CMPIBoolean terminate)
-{
-  CMPIStatus      st = { CMPI_RC_OK, NULL };
-  _SFCB_ENTER(TRACE_INDPROVIDER, "InteropProviderAssociationCleanup");
-  _SFCB_RETURN(st);
-}
+/* InteropProviderAssociationCleanup */
+static CMPIStatus okCleanup(InteropProvider,Association);
 
 /*
  * ------------------------------------------------------------------------- 

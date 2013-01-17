@@ -780,8 +780,7 @@ ClassProviderSetClass(CMPIClassMI * mi,
                       const CMPIResult *rslt,
                       const CMPIObjectPath * cop, const CMPIConstClass * ci)
 {
-  CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
-  return st;
+  return notSupSt;
 }
 
 static CMPIStatus
@@ -912,13 +911,8 @@ loopOnChildCount(ClassRegister * cReg, char *cn, int *i, int ignprov)
   _SFCB_EXIT();
 }
 
-static CMPIStatus
-ClassProviderMethodCleanup(CMPIMethodMI * mi,
-                           const CMPIContext *ctx, CMPIBoolean terminate)
-{
-  CMPIStatus      st = { CMPI_RC_OK, NULL };
-  return st;
-}
+/* ClassProviderMethodCleanup */
+static CMPIStatus okCleanup(ClassProvider,Method);
 
 static CMPIStatus
 ClassProviderInvokeMethod(CMPIMethodMI * mi,
