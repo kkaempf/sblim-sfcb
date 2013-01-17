@@ -20,34 +20,36 @@
 # 
 # 
 
-libTestAssociationProvider_la_SOURCES = cmpiTestAssociationProvider.c
-libTestAssociationProvider_la_LIBADD = -lsfcBrokerCore
-libTestAssociationProvider_la_DEPENDENCIES=libsfcBrokerCore.la
+MAINTAINERCLEANFILES = Makefile.in
 
-libTestMethodProvider_la_SOURCES = cmpiTestMethodProvider.c
-libTestMethodProvider_la_LIBADD = -lsfcBrokerCore
-libTestMethodProvider_la_DEPENDENCIES=libsfcBrokerCore.la
+AM_CPPFLAGS=-I$(top_srcdir)
+AM_LDFLAGS=-L"$(top_builddir)/.libs"
 
-libTestInstanceProvider_la_SOURCES = cmpiTestInstanceProvider.c
-libTestInstanceProvider_la_LIBADD = -lsfcBrokerCore
-libTestInstanceProvider_la_DEPENDENCIES=libsfcBrokerCore.la
+sfcbprovtestdir=$(libdir)/sfcb
 
-libTestMiscProvider_la_SOURCES = cmpiTestMiscProvider.c
-libTestMiscProvider_la_LIBADD = -lsfcBrokerCore
-libTestMiscProvider_la_DEPENDENCIES=libsfcBrokerCore.la
-
-libTestExecQueryProvider_la_SOURCES = cmpiTestExecQueryProvider.c
-libTestExecQueryProvider_la_LIBADD = -lsfcBrokerCore
-libTestExecQueryProvider_la_DEPENDENCIES=libsfcBrokerCore.la
-
-libTestIndicationProvider_la_SOURCES = cmpiTestIndicationProvider.c
-libTestIndicationProvider_la_LIBADD = -lsfcBrokerCore
-libTestIndicationProvider_la_DEPENDENCIES=libsfcBrokerCore.la
-
-sfcblib_LTLIBRARIES += \
+sfcbprovtest_LTLIBRARIES = \
    libTestAssociationProvider.la \
    libTestMethodProvider.la \
    libTestInstanceProvider.la \
    libTestMiscProvider.la \
    libTestExecQueryProvider.la \
    libTestIndicationProvider.la
+
+libTestAssociationProvider_la_SOURCES = cmpiTestAssociationProvider.c
+libTestAssociationProvider_la_LIBADD = -lsfcBrokerCore
+
+libTestMethodProvider_la_SOURCES = cmpiTestMethodProvider.c
+libTestMethodProvider_la_LIBADD = -lsfcBrokerCore
+
+libTestInstanceProvider_la_SOURCES = cmpiTestInstanceProvider.c
+libTestInstanceProvider_la_LIBADD = -lsfcBrokerCore
+
+libTestMiscProvider_la_SOURCES = cmpiTestMiscProvider.c
+libTestMiscProvider_la_LIBADD = -lsfcBrokerCore
+
+libTestExecQueryProvider_la_SOURCES = cmpiTestExecQueryProvider.c
+libTestExecQueryProvider_la_LIBADD = -lsfcBrokerCore
+
+libTestIndicationProvider_la_SOURCES = cmpiTestIndicationProvider.c
+libTestIndicationProvider_la_LIBADD = -lsfcBrokerCore
+

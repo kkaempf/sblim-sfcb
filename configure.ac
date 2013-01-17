@@ -263,7 +263,8 @@ if [test "$enable_tests"]; then
     AC_CONFIG_FILES([test/finaltest/Makefile])
     # Enable the various tests
     if [test "$test_providers" == "yes"]; then
-       TEST_SUBDIRS="$TEST_SUBDIRS TestProviders/tests"
+       TEST_SUBDIRS="$TEST_SUBDIRS TestProviders TestProviders/tests"
+       AC_CONFIG_FILES([test/TestProviders/Makefile])
        AC_CONFIG_FILES([test/TestProviders/tests/Makefile])
     fi
 
