@@ -14,6 +14,7 @@ Bugs fixed:
 - 3600283 Fixup compiler warnings from gcc 4.7
 - 3600159 TestProviders should have their own Makefile
 - 3601026 Fixup compiler warnings from -Wextra
+- 3599437 missing include of <sys/resource.h>
 
 Changes in 1.4.3
 ================
