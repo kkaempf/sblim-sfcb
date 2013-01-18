@@ -2050,8 +2050,7 @@ httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr,
       doFork = 1;
     else if (strcmp(argv[i], "-nF") == 0)
       doFork = 0;
-    else if (strcmp(argv[i], "-H") == 0)
-      ++i;
+    ++i;
   }
 
   name = argv[0];
