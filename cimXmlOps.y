@@ -44,8 +44,10 @@
 extern CMPIConstClass initConstClass(ClClass * cl);
 extern MsgSegment setConstClassMsgSegment(CMPIConstClass * cl);
 extern MsgSegment setInstanceMsgSegment(CMPIInstance *ci);
-extern CMPIQualifierDecl initQualifier(ClQualifierDeclaration * qual);
 extern MsgSegment setArgsMsgSegment(CMPIArgs * args);
+#ifdef HAVE_QUALREP
+extern CMPIQualifierDecl initQualifier(ClQualifierDeclaration * qual);
+#endif
 
 int updateMethodParamTypes(RequestHdr * hdr);
 //
@@ -1169,6 +1171,8 @@ buildSetPropertyRequest(void *parm)
   binCtx->pAs = NULL;
 }
 
+#ifdef HAVE_QUALREP
+
 static void
 buildGetQualifierRequest(void *parm)
 {
@@ -1361,6 +1365,13 @@ buildEnumQualifiersRequest(void *parm)
   binCtx->chunkedMode = 0;
   binCtx->pAs = NULL;
 }
+#else
+
+static void buildDeleteQualifierRequest(void *parm) { return; }
+static void buildGetQualifierRequest(void *parm) { return; }
+static void buildSetQualifierRequest(void *parm) { return; }
+static void buildEnumQualifiersRequest(void *parm) { return; }
+#endif  // HAVE_QUALREP
 
 static void
 buildInvokeMethodRequest(void *parm)
