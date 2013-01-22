@@ -78,7 +78,6 @@
 
 unsigned long   exFlags = 0;
 static char    *name;
-static int      debug;
 static int      doBa;
 #ifdef HAVE_UDS
 static int      doUdsAuth;
@@ -211,7 +210,6 @@ initHttpProcCtl(int p)
   union semun     sun;
   int             i;
 
-  mlogf(M_INFO, M_SHOW, "--- Max Http procs: %d\n", p);
   if ((httpProcSem = semget(httpProcSemKey, 1, 0600)) != -1)
     semctl(httpProcSem, 0, IPC_RMID, sun);
 
@@ -931,6 +929,7 @@ doHttpRequest(CommHndl conn_fd)
   } else if (rc == 3) {
     genError(conn_fd, &inBuf, 400, "Bad Request", NULL);
     _SFCB_TRACE(1, ("--- exiting after request timeout."));
+    if (!doFork) _SFCB_RETURN(1);
     commClose(conn_fd);
     exit(1);
   }
@@ -939,7 +938,9 @@ doHttpRequest(CommHndl conn_fd)
     /*
      * no buffer data - end of file - quit 
      */
-    _SFCB_TRACE(1, ("--- HTTP connection EOF, quit %d ", currentProc));
+    _SFCB_TRACE(1, ("--- HTTP connection EOF, normal termination"));
+    if (!doFork) _SFCB_RETURN(1);
+    _SFCB_TRACE(1, ("--- Request processor exiting %d", currentProc));
     commClose(conn_fd);
     exit(1);
   }
@@ -972,6 +973,7 @@ doHttpRequest(CommHndl conn_fd)
   if (badReq) {
     genError(conn_fd, &inBuf, 400, "Bad Request", NULL);
     _SFCB_TRACE(1, ("--- exiting after malformed header."));
+    if (!doFork) _SFCB_RETURN(1);
     commClose(conn_fd);
     exit(1);
   }
@@ -989,6 +991,7 @@ doHttpRequest(CommHndl conn_fd)
       if (cp[0] == '-') {
         genError(conn_fd, &inBuf, 400, "Negative Content-Length", NULL);
         _SFCB_TRACE(1, ("--- exiting: content-length too big"));
+        if (!doFork) _SFCB_RETURN(1);
         commClose(conn_fd);
         exit(1);
       }
@@ -999,6 +1002,7 @@ doHttpRequest(CommHndl conn_fd)
                  "Error converting Content-Length to a decimal value",
                  NULL);
         _SFCB_TRACE(1, ("--- exiting: content-length conversion error"));
+        if (!doFork) _SFCB_RETURN(1);
         commClose(conn_fd);
         exit(1);
       }
@@ -1007,12 +1011,14 @@ doHttpRequest(CommHndl conn_fd)
         genError(conn_fd, &inBuf, 501,
                  "Server misconfigured (httpMaxContentLength)", NULL);
         _SFCB_TRACE(1, ("--- exiting: bad config httpMaxContentLength"));
+        if (!doFork) _SFCB_RETURN(1);
         commClose(conn_fd);
         exit(1);
       }
       if ((clen >= UINT_MAX) || ((maxLen) && (clen > maxLen))) {
         genError(conn_fd, &inBuf, 413, "Request Entity Too Large", NULL);
         _SFCB_TRACE(1, ("--- exiting: content-length too big"));
+        if (!doFork) _SFCB_RETURN(1);
         commClose(conn_fd);
         exit(1);
       }
@@ -1064,6 +1070,7 @@ doHttpRequest(CommHndl conn_fd)
          */
         mlogf(M_ERROR, M_SHOW,
               "\n--- Client certificate not accessible - closing connection\n");
+        if (!doFork) _SFCB_RETURN(1);
         commClose(conn_fd);
         exit(1);
       }
@@ -1169,12 +1176,13 @@ doHttpRequest(CommHndl conn_fd)
       genError(conn_fd, &inBuf, 411, "Length Required", NULL);
     }
     _SFCB_TRACE(1, ("--- exiting after missing content length."));
-    commClose(conn_fd);
     freeBuffer(&inBuf);
     if (more) {
        free(more);
        more=NULL;
     }
+    if (!doFork) _SFCB_RETURN(1);
+    commClose(conn_fd);
     exit(1);
   }
 
@@ -1187,11 +1195,12 @@ doHttpRequest(CommHndl conn_fd)
   if (rc < 0) {
     genError(conn_fd, &inBuf, 400, "Bad Request", NULL);
     _SFCB_TRACE(1, ("--- exiting after request timeout."));
-    commClose(conn_fd);
     if (more) {
        free(more);
        more=NULL;
     }
+    if (!doFork) _SFCB_RETURN(1);
+    commClose(conn_fd);
     exit(1);
   }
   if (discardInput) {
@@ -1304,9 +1313,8 @@ handleHttpRequest(int connFd, int __attribute__ ((unused)) sslMode)
 
   _SFCB_ENTER(TRACE_HTTPDAEMON, "handleHttpRequest");
 
-  _SFCB_TRACE(1, ("--- Forking request processor"));
-
   if (doFork) {
+    _SFCB_TRACE(1, ("--- Forking request processor"));
     semAcquire(httpWorkSem, 0);
     semAcquire(httpProcSem, 0);
     for (httpProcIdX = 0; httpProcIdX < hMax; httpProcIdX++)
@@ -1581,8 +1589,10 @@ handleHttpRequest(int connFd, int __attribute__ ((unused)) sslMode)
         /*
          * no persistence wanted or exceeded - quit 
          */
+        _SFCB_TRACE(1,("--- keepalive disabled or max requests exceeded"));
         break;
       }
+      _SFCB_TRACE(1, ("--- keepalive enabled, waiting for new request"));
       /*
        * wait for next request or timeout 
        */
@@ -1603,8 +1613,10 @@ handleHttpRequest(int connFd, int __attribute__ ((unused)) sslMode)
     } while (1);
 
     commClose(conn_fd);
-    if (!doFork)
-      return;
+    if (!doFork) {
+      _SFCB_TRACE(1, ("--- Request processor completed"));
+      _SFCB_EXIT();
+    }
 
     _SFCB_TRACE(1, ("--- Request processor exiting %d", currentProc));
     dumpTiming(currentProc);
@@ -1933,8 +1945,7 @@ httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr,
 #endif
 
   socklen_t       httpSin_len = 0;
-  int             i,
-                  rc;
+  int             rc;
   char           *cp;
   long            httpPort;
   int             httpListenFd = -1;
@@ -1961,7 +1972,6 @@ httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr,
   socklen_t       sun_len;
 #endif
 
-  debug = 1;
   doFork = 1;
 
   _SFCB_ENTER(TRACE_HTTPDAEMON, "httpDaemon");
@@ -1997,11 +2007,12 @@ httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr,
     udsPath = NULL;
 #endif
 
-  if (!enableHttp)
-    httpPort = -1;
-  /*
-   * note: we check for enableHttps in sfcBroker 
-   */
+  /* note: we check if httpProcs==0 in sfcBroker and disable http accordingly */
+  mlogf(M_INFO, M_SHOW, "--- Max Http procs: %d\n", hMax);
+  if (hMax == 1) {
+    mlogf(M_INFO, M_SHOW, "--- Forking of http request handlers disabled\n");
+    doFork = 0;
+  }
 
   initHttpProcCtl(hMax);
 
@@ -2028,29 +2039,6 @@ httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr,
   if (getControlChars("useChunking", &chunkStr) == 0) {
     if (strcmp(chunkStr, "false") == 0)  chunkMode = CHUNK_NEVER;
     else if (strcmp(chunkStr, "always") == 0)  chunkMode = CHUNK_FORCE;
-  }
-
-  /*
-   * grab commandline options 
-   */
-  i = 1;
-  while (i < argc && argv[i][0] == '-') {
-    if (strcmp(argv[i], "-D") == 0)
-      debug = 1;
-    else if (strcmp(argv[i], "-nD") == 0)
-      debug = 0;
-    else if (strcmp(argv[i], "-p") == 0 && i + 1 < argc) {
-      ++i;
-      httpPort = (unsigned short) atoi(argv[i]);
-    } else if (strcmp(argv[i], "-tm") == 0) {
-      if (isdigit(*argv[i + 1])) {
-        ++i;
-      }
-    } else if (strcmp(argv[i], "-F") == 0)
-      doFork = 1;
-    else if (strcmp(argv[i], "-nF") == 0)
-      doFork = 0;
-    ++i;
   }
 
   name = argv[0];
@@ -2143,16 +2131,6 @@ httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr,
 
   if (bindrc > 0)
     return 1;                   /* if can't bind to port, return 1 */
-
-  if (!debug) {
-    int             rc = fork();
-    if (rc == -1) {
-      char           *emsg = strerror(errno);
-      mlogf(M_ERROR, M_SHOW, "--- fork daemon: %s", emsg);
-      exit(1);
-    } else if (rc)
-      exit(0);
-  }
 
   currentProc = getpid();
 
