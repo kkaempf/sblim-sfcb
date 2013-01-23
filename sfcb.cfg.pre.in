@@ -57,6 +57,9 @@ httpPort:       5988
 #httpUser: 
 
 ## Max number of HTTP processes.  
+## Setting to 0 disables starting of HTTP adapter and allows connections via
+## LocalConnect only.  Setting to 1 enables no-fork mode which prevents forking
+## of request handler processes.
 ## Default is 8
 httpProcs:      8
 
