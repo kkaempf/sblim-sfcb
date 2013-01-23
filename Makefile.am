@@ -153,7 +153,7 @@ sbin_PROGRAMS = \
    sfcbd 
 
 bin_PROGRAMS = \
-   sfcbmofpp sfcbdump sfcbinst2mof sfcbtrace
+   sfcbmofpp sfcbdump sfcbinst2mof sfcbtrace sfcbproc
 
 noinst_PROGRAMS = \
    sfcbdumpP32onI32 classSchema2c sfcbsem
@@ -357,6 +357,8 @@ sfcbd_DEPENDENCIES=libsfcBrokerCore.la $(CIMXMLCODEC_LIBS) $(HTTP_ADAPTER_LIBS)
 sfcbmofpp_SOURCES=mofpp.c
 
 sfcbdump_SOURCES=sfcbdump.c
+
+sfcbproc_SOURCES=sfcbproc.c
 
 sfcbinst2mof_SOURCES=sfcbinst2mof.c
 sfcbinst2mof_LDADD = -lsfcFileRepository -lsfcBrokerCore
