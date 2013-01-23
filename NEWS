@@ -2,6 +2,7 @@ Changes in 1.3.17
 =================
 New features: 
 - 3597805 Restart HTTP daemon without restarting SFCB
+- 3599160 Add sfcbproc utility
 
 Bugs fixed:
 - 3599329 dlopen failed for sfcbCustomLib

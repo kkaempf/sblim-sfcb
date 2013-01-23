@@ -1,3 +1,8 @@
+2013-01-22  Dave Heller <hellerda@us.ibm.com>
+
+	* sfcbproc.c, Makefile.am
+	[ 3599160 ] Add sfcbproc utility
+
 2013-01-08  Dave Heller <hellerda@us.ibm.com>
 
 	* cimXmlRequest.c httpAdapter.c mlog.c msgqueue.c providerDrv.c
