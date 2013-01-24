@@ -13,6 +13,7 @@
 #include <cimRequest.h>
 
 extern RequestHdr scanCimXmlRequest(CimRequestContext *ctx, char *xmlData, int *rc);
+int trimws;
 
 int
 main(void)

@@ -601,6 +601,10 @@ const char     *ClObjectGetClObject(ClObjectHdr * hdr, ClString * id);
 #endif                          // SETCLPFX
 
 #endif
+#ifdef UNITTEST
+extern int      oi_test();
+#endif
+
 /* MODELINES */
 /* DO NOT EDIT BELOW THIS COMMENT */
 /* Modelines are added by 'make pretty' */

@@ -32,13 +32,13 @@ TESTS = xmlUnescape newCMPIInstance EmbeddedTests newDateTime
 check_PROGRAMS = xmlUnescape newCMPIInstance EmbeddedTests newDateTime
 
 xmlUnescape_SOURCES = xmlUnescape.c
-xmlUnescape_LDADD = -lsfcCimXmlCodec -lsfcHttpAdapter
+xmlUnescape_LDADD = -lsfcBrokerCore -lsfcCimXmlCodec -lsfcHttpAdapter 
 
 newCMPIInstance_SOURCES = newCMPIInstance.c
-newCMPIInstance_LDADD = -lsfcCimXmlCodec -lsfcHttpAdapter
+newCMPIInstance_LDADD = -lsfcCimXmlCodec -lsfcHttpAdapter -lsfcBrokerCore
 
 EmbeddedTests_SOURCES = EmbeddedTests.c 
-EmbeddedTests_LDADD = -lsfcCimXmlCodec -lsfcHttpAdapter
+EmbeddedTests_LDADD = -lsfcCimXmlCodec -lsfcHttpAdapter -lsfcBrokerCore
 
 newDateTime_SOURCES = newDateTime.c
 newDateTime_LDADD = -lsfcBrokerCore
