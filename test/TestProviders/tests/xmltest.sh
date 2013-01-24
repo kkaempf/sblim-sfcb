@@ -23,6 +23,8 @@
 
 _RC=0
 TESTDIR=.
+red='\e[0;31m' # red, to change FAILED output color
+unred='\e[0m' # no color
 
 # Check for wbemcat utility
 if ! which wbemcat > /dev/null; then
@@ -62,7 +64,9 @@ do
        fi
 
        if [ $? -ne 0 ]; then
+          echo -ne $red
           echo "FAILED to send CIM-XML request"
+          echo -ne $unred
           _RC=1
           continue
        fi
@@ -71,7 +75,9 @@ do
        # Either using a full copy of the expected output (testname.OK)
        if [ -f $_TESTOK ] ; then
             if ! diff --brief $_TESTOK $_TESTRESULT > /dev/null; then
+                echo -ne $red
                 echo "FAILED output not as expected"
+                echo -ne $unred
                 _RC=1;
                 continue
     
@@ -93,7 +99,9 @@ do
                 text=$(echo $line | awk '{ line=substr($line, 2); print line; }' )
                 if  grep --q "$text" $_TESTRESULT  ; then
                     if [ $passed -eq 0 ] ; then
+                        echo -ne $red
                         echo "FAILED disallowed line found"
+                        echo -ne $unred
                         passed=1
                         _RC=1;
                     fi
@@ -104,7 +112,9 @@ do
                 # Check for required lines
                 if ! grep --q "$line" $_TESTRESULT  ; then
                     if [ $passed -eq 0 ] ; then
+                        echo -ne $red
                         echo "FAILED required line not found"
+                        echo -ne $unred
                         passed=1
                         _RC=1;
                     fi

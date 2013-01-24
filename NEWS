@@ -7,6 +7,7 @@ New features:
 - 3597805 Restart HTTP daemon without restarting SFCB
 - 3597806 Bind to arbitrary list of IP addresses in SFCB
 - 3601386 Add test for EmbeddedObject output
+- 3599160 Add sfcbproc utility
 
 Bugs fixed:
 - 3599526 segfault during ecn with classProviderSf
@@ -17,6 +18,8 @@ Bugs fixed:
 - 3601026 Fixup compiler warnings from -Wextra
 - 3599437 missing include of <sys/resource.h>
 - 3601301 Add stubs for empty CMPI functions for internal providers
+- 2878328 sfcb and mofc won't compile with --disable-qualifierrep
+- 3601661 Reenable no-fork http adapter mode
 
 Changes in 1.4.3
 ================
