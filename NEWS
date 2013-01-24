@@ -8,6 +8,7 @@ New features:
 - 3597806 Bind to arbitrary list of IP addresses in SFCB
 - 3601386 Add test for EmbeddedObject output
 - 3599160 Add sfcbproc utility
+- 3601943 ObjectImpl unit test
 
 Bugs fixed:
 - 3599526 segfault during ecn with classProviderSf
