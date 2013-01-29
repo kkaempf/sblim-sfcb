@@ -1627,6 +1627,32 @@ addObjectPropertyH(ClObjectHdr * hdr, ClSection * prps,
             (char *) addClString(hdr, d.value.chars);
       }
     }
+    /* added from 2778345 */
+    else if (od.type == CMPI_string && (d.state & CMPI_nullValue) == 0) {
+      char *pClString = NULL;
+      if ((p + i - 1)->quals && ClProperty_Q_EmbeddedObject)
+        _SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
+
+      switch (d.type) {
+      case CMPI_chars:
+        pClString = d.value.chars;
+        break;
+      case CMPI_string:
+        pClString = d.value.string->hdl;
+        break;
+      default:
+        _SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
+      }
+      if (pClString) {
+        if (od.value.string) {
+          _SFCB_RETURN(-CMPI_RC_ERR_TYPE_MISMATCH);
+        }
+        (p + i - 1)->data = d;
+        (p + i - 1)->data.value.chars =
+          (char *) addClString(hdr, pClString);
+        (p + i - 1)->data.type=CMPI_chars;
+      }
+    }
 
     else if (od.type == CMPI_dateTime && (d.state & CMPI_nullValue) == 0) {
       char            chars[26];
