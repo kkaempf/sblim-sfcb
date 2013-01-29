@@ -21,6 +21,8 @@ Bugs fixed:
 - 3601301 Add stubs for empty CMPI functions for internal providers
 - 2878328 sfcb and mofc won't compile with --disable-qualifierrep
 - 3601661 Reenable no-fork http adapter mode
+- 2990304 Enhancements for sfcb
+- 2778345 There is no response at GetClass after CreateClass
 
 Changes in 1.4.3
 ================
