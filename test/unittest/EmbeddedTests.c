@@ -21,6 +21,7 @@
 // Include the header file for each embedded test routine.
 #include "trace.h"
 #include "queryOperation.h"
+#include "objectImpl.h"
 
 int
 main(void)
@@ -37,6 +38,11 @@ main(void)
 
   printf("  Testing queryOperation.c ...\n");
   rc = queryOperation_test();
+  if (rc != 0)
+    fail = 1;
+
+  printf("  Testing objectImpl.c ...\n");
+  rc = oi_test();
   if (rc != 0)
     fail = 1;
 

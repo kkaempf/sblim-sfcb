@@ -2946,65 +2946,235 @@ ClArgsToString(ClArgs * arg)
   return sc.str;
 }
 
-// #define MAIN_TEST
-#ifdef MAIN_TEST
-
-extern CMPIArray *NewCMPIArray(CMPICount size, CMPIType type,
-                               CMPIStatus *rc);
-extern CMPIArgs *NewCMPIArgs(CMPIStatus *rc);
-extern CMPIInstance *NewCMPIInstance(CMPIObjectPath * cop, CMPIStatus *rc);
-extern CMPIObjectPath *NewCMPIObjectPath(const char *nameSpace,
-                                         const char *className,
-                                         CMPIStatus *rc);
-extern unsigned long getArgsSerializedSize(CMPIArgs * args);
-extern unsigned long getInstanceSerializedSize(CMPIInstance *ci);
-
+#ifdef UNITTEST
+// Embedded unittest routine
 int
-main()
+oi_test()
 {
-  int             val = 37,
-      s;
-  // SFCB_ASM("int $3");
-  {
-    CMPIObjectPath *cop = NewCMPIObjectPath("root", "myClass", NULL);
-    CMPIInstance   *inst = NewCMPIInstance(cop, NULL);
-    CMPIArgs       *arg = NewCMPIArgs(NULL);
-    CMPIArray      *ar = NewCMPIArray(1, CMPI_sint32, NULL);
-    CMSetArrayElementAt(ar, 0, &val, CMPI_sint32);
-    printf("CMPI_sint32A: %p\n", (void *) CMPI_sint32A);
-    CMPIData        ad = CMGetArrayElementAt(ar, 0, NULL);
-    printf("ad.sin32: %d\n", ad.value.sint32);
-    CMAddArg(arg, "test", &ar, CMPI_sint32A);
-    CMPIData        d = CMGetArg(arg, "test", NULL);
-    ad = CMGetArrayElementAt(d.value.array, 0, NULL);
-    printf("ad.sin32: %d\n", ad.value.sint32);
-    s = getArgsSerializedSize(arg);
+  int           i,fail = 0;
+  const char          *str;
+  CMPIStatus    rc;
 
-    CMPIArgs       *narg = CMClone(arg, NULL);
-    s = getArgsSerializedSize(arg);
+  // Some CMPI based tests
+  CMPIObjectPath *cop = NewCMPIObjectPath("root", "myClass", &rc);
+  if (rc.rc != CMPI_RC_OK) {
+    printf("Failed to create object path, rc: %d msg:%s\n",rc.rc,(char *)rc.msg);
+    fail = 1;
+  }
+  CMPIInstance *inst = NewCMPIInstance(cop, &rc);
+  if (rc.rc != CMPI_RC_OK) {
+    printf("Failed to create instance, rc: %d msg:%s\n",rc.rc,(char *)rc.msg);
+    fail = 1;
+  }
+  i=isInstance(inst);
+  if (!i) {
+    printf("Failed isInstance check, rc=%d\n",i);
+    fail = 1;
+  }
+  i=isInstance(cop);
+  if (i) {
+    printf("Failed negative isInstance check, rc=%d\n",i);
+    fail = 1;
   }
 
-  {
-    CMPIObjectPath *cop = NewCMPIObjectPath("root", "myClass", NULL);
-    CMPIInstance   *inst = NewCMPIInstance(cop, NULL);
-    CMPIArray      *ar = NewCMPIArray(1, CMPI_sint32, NULL);
-    CMSetArrayElementAt(ar, 0, &val, CMPI_sint32);
-    printf("CMPI_sint32A: %p\n", (void *) CMPI_sint32A);
-    CMPIData        ad = CMGetArrayElementAt(ar, 0, NULL);
-    printf("ad.sin32: %d\n", ad.value.sint32);
-    CMSetProperty(inst, "test", &ar, CMPI_sint32A);
-    CMPIData        d = CMGetProperty(inst, "test", NULL);
-    ad = CMGetArrayElementAt(d.value.array, 0, NULL);
-    printf("ad.sin32: %d\n", ad.value.sint32);
-    s = getInstanceSerializedSize(inst);
-
-    CMPIInstance   *ninst = CMClone(inst, NULL);
-    s = getInstanceSerializedSize(ninst);
+  //Do some array checks
+  CMPIArray *ar = NewCMPIArray(1, CMPI_sint32, &rc);
+  if (rc.rc != CMPI_RC_OK) {
+    printf("Failed to create CMPI array, rc: %d msg:%s\n",rc.rc,(char *)rc.msg);
+    fail = 1;
+  }
+  int val = 37;
+  CMSetArrayElementAt(ar, 0, &val, CMPI_sint32);
+  CMPIData ad = CMGetArrayElementAt(ar, 0, &rc);
+  if (rc.rc != CMPI_RC_OK) {
+    printf("Failed to get CMPI array element, rc: %d msg:%s\n",rc.rc,(char *)rc.msg);
+    fail = 1;
+  }
+  if (ad.value.sint32 != val) {
+    printf("Fetched array element value not as expected, expected: %d got:%d\n",val,ad.value.sint32);
+    fail = 1;
+  }
+  CMSetProperty(inst, "test", &ar, CMPI_sint32A);
+  CMPIData d = CMGetProperty(inst, "test", &rc);
+  if (rc.rc != CMPI_RC_OK) {
+    printf("Failed to get CMPI property, rc: %d msg:%s\n",rc.rc,(char *)rc.msg);
+    fail = 1;
+  }
+  ad = CMGetArrayElementAt(d.value.array, 0, &rc);
+  if (rc.rc != CMPI_RC_OK) {
+    printf("Failed to get CMPI array element, rc: %d msg:%s\n",rc.rc,(char *)rc.msg);
+    fail = 1;
+  }
+  if (ad.value.sint32 != val) {
+    printf("Instance array element value not as expected, expected: %d got:%d\n",val,ad.value.sint32);
+    fail = 1;
   }
 
-  return 0;
+  //CLobject tests
+
+  //CLObjectPath tests
+  ClObjectPath *clop=ClObjectPathNew("root","myClass");
+  if (clop == NULL) {
+    printf("Failed to create CLObjectPath\n");
+    fail = 1;
+  }
+  ClObjectPath *clop2=ClObjectPathRebuild(clop,NULL);
+  if (clop2 == NULL) {
+    printf("Failed to rebuild CLObjectPath\n");
+    fail = 1;
+  }
+  str=ClObjectPathToString(clop);
+  // Not implemented, so not checked
+
+  //Set it twice to test replace string
+  ClObjectPathSetHostName(clop,"testhost2");
+  ClObjectPathSetHostName(clop,"testhost");
+  str=ClObjectPathGetHostName(clop);
+  if (strcmp(str,"testhost") != 0) {
+    printf("Failed to get/set hostname from objectpath:%s\n",str);
+    fail = 1;
+  }
+  ClObjectPathSetNameSpace(clop, "root2");
+  str=ClObjectPathGetNameSpace(clop);
+  if (strcmp(str,"root2") != 0) {
+    printf("Failed to get/set namespace from objectpath:%s\n",str);
+    fail = 1;
+  }
+  ClObjectPathSetClassName(clop, "myClass2");
+  str=ClObjectPathGetClassName(clop);
+  if (strcmp(str,"myClass2") != 0) {
+    printf("Failed to get/set classname from objectpath:%s\n",str);
+    fail = 1;
+  }
+
+  // CLinstance checks
+  ClInstance * cli=ClInstanceNewFromMof("root", "myClass");
+  if (cli == NULL) {
+    printf("Failed to create CLinstance from MOF\n");
+    fail = 1;
+  }
+  ClInstance *cli2=ClInstanceRebuild(cli,NULL);
+  if (cli2 == NULL) {
+    printf("Failed to rebuild CLinstance\n");
+    fail = 1;
+  }
+
+  unsigned long li=ClSizeInstance(cli);
+  if (li == 0) {
+    printf("Failed to size CLinstance.\n");
+    fail = 1;
+  }
+  str=ClInstanceToString(cli);
+  if (strstr(str,"Instance") == NULL) {
+    printf("Failed to get string from instance:%s\n",str);
+    fail = 1;
+  }
+  str=ClInstanceGetNameSpace(cli);
+  if (strcmp(str,"root") != 0) {
+    printf("Failed to get namespace from instance:%s\n",str);
+    fail = 1;
+  }
+  str=ClInstanceGetClassName(cli);
+  if (strcmp(str,"myClass") != 0) {
+    printf("Failed to get namespace from instance:%s\n",str);
+    fail = 1;
+  }
+
+  ClClass * clc=ClClassNew("myClass","myPClass");
+  if (clc == NULL) {
+    printf("Failed to create ClClass.\n");
+    fail = 1;
+  }
+  unsigned char cch=ClClassAddGrandParent(clc, "myGClass");
+  // not sure of the failure case here
+
+  i=ClClassAddProperty(clc,"tprop" ,d,"testref");
+  if (i != 1) {
+    printf("Failed to add property to ClClass.\n");
+    fail = 1;
+  }
+  ClClass *clc2=ClClassRebuildClass(clc,NULL);
+  if (clc2 == NULL) {
+    printf("Failed to rebuild ClClass.\n");
+    fail = 1;
+  }
+
+  i=ClClassGetPropertyCount(clc);
+  if (i != 1) {
+    printf("Failed to get property count for ClClass.\n");
+    fail = 1;
+  }
+
+  li=ClSizeClass(clc);
+  if (li == 0) {
+    printf("Failed to size ClClass.\n");
+    fail = 1;
+  }
+  str=ClClassToString(clc);
+  if (strstr(str,"class") == NULL) {
+    printf("Failed to get string from ClClass:%s\n",str);
+    fail = 1;
+  }
+
+  //Args tests
+  ClArgs * cla=ClArgsNew();
+  if (cla == NULL) {
+    printf("Failed to create ClArgs object.\n");
+    fail = 1;
+  }
+  li=ClSizeArgs(cla);
+  if (li == 0) {
+    printf("Failed to size ClArgs.\n");
+    fail = 1;
+  }
+  ClArgs *cla2=ClArgsRebuild(cla,NULL);
+  if (cla2 == NULL) {
+    printf("Failed to rebuild ClArgs object.\n");
+    fail = 1;
+  }
+  i=ClArgsAddArg(cla,"test",d);
+  if (i == 0) {
+    printf("Failed to add arg to ClArgs.\n");
+    fail = 1;
+  }
+  i=ClArgsGetArgCount(cla);
+  if (i == 0) {
+    printf("Failed to get arg count.\n");
+    fail = 1;
+  }
+  i=ClArgsGetArgAt(cla, 2, NULL, NULL);
+  if (i != 1) {
+    printf("Failed to catch bad arg count.\n");
+    fail = 1;
+  }
+
+// Qualifiers
+  ClQualifierDeclaration * clq=ClQualifierDeclarationNew("root","myQual");
+  if (clq == NULL) {
+    printf("Failed to create ClQualifier object.\n");
+    fail = 1;
+  }
+  li=ClSizeQualifierDeclaration(clq);
+  if (li == 0) {
+    printf("Failed to size ClQualifier.\n");
+    fail = 1;
+  }
+  ClQualifierDeclaration *clq2=ClQualifierRebuildQualifier(clq,NULL);
+  if (clq2 == NULL) {
+    printf("Failed to rebuild ClQualifier object.\n");
+    fail = 1;
+  }
+
+  ClClassFreeClass(clc);
+  ClInstanceFree(cli);
+  ClObjectPathFree(clop);
+  ClArgsFree(cla);
+
+  // Return the final result
+  return fail;
 }
 #endif
+
 /* MODELINES */
 /* DO NOT EDIT BELOW THIS COMMENT */
 /* Modelines are added by 'make pretty' */
