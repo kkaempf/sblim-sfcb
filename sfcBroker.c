@@ -255,6 +255,9 @@ stopBroker()
     if (providersStopped)
       break;
   }
+
+  mlogf(M_NOTICE,M_QUIET,"--- %s V" sfcHttpDaemonVersion " stopped - %d\n", name, currentProc);
+
   remSem();
 
   uninit_sfcBroker();
@@ -607,7 +610,7 @@ main(int argc, char *argv[])
       doBa = 0,
       enableInterOp = 0,
       httpLocalOnly = 0;
-  int             syslogLevel = LOG_ERR;
+  int             syslogLevel   = LOG_NOTICE;
   long            dSockets,
                   pSockets;
   char           *pauseStr;
@@ -744,7 +747,7 @@ main(int argc, char *argv[])
 
   startLogging(syslogLevel,1);
 
-  mlogf(M_INFO, M_SHOW, "--- %s V" sfcHttpDaemonVersion " started - %d\n",
+  mlogf(M_NOTICE, M_SHOW, "--- %s V" sfcHttpDaemonVersion " started - %d\n",
         name, currentProc);
 
   //get the creation timestamp for the sequence context

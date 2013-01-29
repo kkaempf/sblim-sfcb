@@ -213,3 +213,7 @@ Zane Bitter, Red Hat
 PitRunner
 ---------
 06/12/2012 [ 3533179 ] Double definition for union semun  in FreeBSD
+
+Bas ten Berge
+-------------
+01/29/2013 [ 2990304 ] Enhancements for sfcb

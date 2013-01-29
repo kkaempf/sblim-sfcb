@@ -185,6 +185,9 @@ mlogf(int priority, int errout, const char *fmt, ...)
     case M_INFO:
       priosysl = LOG_INFO;
       break;
+    case M_NOTICE:
+      priosysl=LOG_NOTICE;
+      break;
     case M_ERROR:
     default:
       priosysl = LOG_ERR;

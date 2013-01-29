@@ -23,6 +23,7 @@
 #define M_DEBUG 1
 #define M_INFO  2
 #define M_ERROR 3
+#define M_NOTICE 4
 
 #define M_SHOW  1
 #define M_QUIET 0

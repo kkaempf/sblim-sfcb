@@ -2255,7 +2255,7 @@ ccValidate(X509 * certificate, char **principal, int mode)
   Validate        validate;
   _SFCB_ENTER(TRACE_HTTPDAEMON, "ccValidate");
 
-  if (getControlChars("certificateAuthlib", &ln) == 0) {
+  if (getControlChars("certificateAuthLib", &ln) == 0) {
     libraryName(NULL, ln, dlName, 512);
     if ((authLib = dlopen(dlName, RTLD_LAZY))) {
       validate = dlsym(authLib, "_sfcCertificateAuthenticate");
