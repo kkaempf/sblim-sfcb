@@ -44,10 +44,24 @@
 #define SFCB_LIBDIR "/usr/lib"
 #endif
 
+union ctl_num {
+  _Bool b;
+  unsigned int uint;
+  long slong;
+  unsigned long ulong;
+};
+
 typedef struct control {
   char           *id;
+#define CTL_STRING  0
+#define CTL_USTRING 1 /* unstripped string */
+#define CTL_BOOL    2
+#define CTL_LONG    3
+#define CTL_ULONG   4
+#define CTL_UINT    5
   int             type;
   char           *strValue;
+  union ctl_num   intValue;
   int             dupped;
 } Control;
 
@@ -57,83 +71,80 @@ char           *configfile = NULL;
 char           *ip4List= NULL;
 char           *ip6List= NULL;
 
-// Control initial values
-// { property, type, value}
-// Type: 0=string, 1=num, 2=bool, 3=unstripped string
+/* Control initial values
+ { property, type, value} */
 Control         init[] = {
-  {"ip4AddrList", 0, NULL},
-  {"ip6AddrList", 0, NULL},
-  {"httpPort", 1, "5988"},
-  {"enableHttp", 2, "true"},
-  {"enableUds", 2, "true"},
-  {"httpProcs", 1, "8"},
-  {"httpsPort", 1, "5989"},
-  {"enableHttps", 2, "false"},
-  {"httpLocalOnly", 2, "false"},
-  {"httpUserSFCB", 2, "true"},
-  {"httpUser", 0, ""},
+  {"ip4AddrList", CTL_STRING, NULL, {0}},
+  {"ip6AddrList", CTL_STRING, NULL, {0}},
+  {"httpPort", CTL_LONG, NULL, {.slong=5988}},
+  {"enableHttp", CTL_BOOL, NULL, {.b=1}},
+  {"enableUds", CTL_BOOL,  NULL, {.b=1}},
+  {"httpProcs", CTL_LONG, NULL, {.slong=8}},
+  {"httpsPort", CTL_LONG, NULL, {.slong=5989}},
+  {"enableHttps", CTL_BOOL, NULL, {.b=0}},
+  {"httpLocalOnly", CTL_BOOL, NULL, {.b=0}},
+  {"httpUserSFCB", CTL_BOOL, NULL, {.b=1}},
+  {"httpUser", CTL_STRING, "", {0}},
 #ifdef HAVE_SLP
-  {"enableSlp", 2, "true"},
-  {"slpRefreshInterval", 1, "600"},
+  {"enableSlp", CTL_BOOL, NULL, {.b=1}},
+  {"slpRefreshInterval", CTL_LONG, NULL, {.slong=600}},
 #endif
-  {"provProcs", 1, "32"},
-  {"sfcbCustomLib",   0, "sfcCustomLib"},
-  {"basicAuthLib", 0, "sfcBasicAuthentication"},
-  {"basicAuthEntry",   0, "_sfcBasicAuthenticate"},
-  {"doBasicAuth", 2, "false"},
-  {"doUdsAuth", 2, "false"},
+  {"provProcs", CTL_LONG, NULL, {.slong=32}},
+  {"sfcbCustomLib", CTL_STRING, "sfcCustomLib"},
+  {"basicAuthLib", CTL_STRING, "sfcBasicAuthentication"},
+  {"basicAuthEntry", CTL_STRING, "_sfcBasicAuthenticate"},
+  {"doBasicAuth", CTL_BOOL, NULL, {.b=0}},
+  {"doUdsAuth", CTL_BOOL, NULL, {.b=0}},
 
-  {"useChunking", 2, "false"},
-  {"chunkSize", 1, "50000"},
+  {"useChunking", CTL_BOOL, NULL, {.b=1}},
+  {"chunkSize", CTL_LONG, NULL, {.slong=50000}},
 
-  {"trimWhitespace",      2, "true"},
+  {"trimWhitespace", CTL_BOOL, NULL, {.b=1}},
 
-  {"keepaliveTimeout", 1, "15"},
-  {"keepaliveMaxRequest", 1, "10"},
-  {"selectTimeout", 1, "5"},
+  {"keepaliveTimeout", CTL_LONG, NULL, {.slong=15}},
+  {"keepaliveMaxRequest", CTL_LONG, NULL, {.slong=10}},
+  {"selectTimeout", CTL_LONG, NULL, {.slong=5}},
 
-  {"providerSampleInterval", 1, "30"},
-  {"providerTimeoutInterval", 1, "60"},
-  {"providerAutoGroup", 2, "true"},
-  {"providerDefaultUserSFCB", 2, "true"},
-  {"providerDefaultUser", 0, ""},
+  {"providerSampleInterval", CTL_LONG, NULL, {.slong=30}},
+  {"providerTimeoutInterval", CTL_LONG, NULL, {.slong=60}},
+  {"providerAutoGroup", CTL_BOOL, NULL, {.b=1}},
+  {"providerDefaultUserSFCB", CTL_BOOL, NULL, {.b=1}},
+  {"providerDefaultUser", CTL_STRING, ""},
 
-  {"sslKeyFilePath", 0, SFCB_CONFDIR "/file.pem"},
-  {"sslCertificateFilePath", 0, SFCB_CONFDIR "/server.pem"},
-  {"sslCertList", 0, SFCB_CONFDIR "/clist.pem"},
-  {"sslCiphers", 0, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"},
+  {"sslKeyFilePath", CTL_STRING, SFCB_CONFDIR "/file.pem"},
+  {"sslCertificateFilePath", CTL_STRING, SFCB_CONFDIR "/server.pem"},
+  {"sslCertList", CTL_STRING, SFCB_CONFDIR "/clist.pem"},
+  {"sslCiphers", CTL_STRING, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"},
 
-  {"registrationDir", 0, SFCB_STATEDIR "/registration"},
-  {"providerDirs", 3, SFCB_LIBDIR " " CMPI_LIBDIR " " LIBDIR},  /* 3:
-                                                                 * unstripped 
-                                                                 */
+  {"registrationDir", CTL_STRING, SFCB_STATEDIR "/registration"},
+  {"providerDirs", CTL_USTRING, SFCB_LIBDIR " " CMPI_LIBDIR " " LIBDIR},
 
-  {"enableInterOp", 2, "true"},
-  {"sslClientTrustStore", 0, SFCB_CONFDIR "/client.pem"},
-  {"sslClientCertificate", 0, "ignore"},
-  {"sslIndicationReceiverCert", 0, "ignore" },
-  {"certificateAuthLib", 0, "sfcCertificateAuthentication"},
-  {"localSocketPath", 0, "/tmp/sfcbLocalSocket"},
-  {"httpSocketPath", 0, "/tmp/sfcbHttpSocket"},
-  {"socketPathGroupPerm",   0, NULL},
+  {"enableInterOp", CTL_BOOL, NULL, {.b=1}},
+  {"sslClientTrustStore", CTL_STRING, SFCB_CONFDIR "/client.pem"},
+  {"sslClientCertificate", CTL_STRING, "ignore"},
+  {"sslIndicationReceiverCert", CTL_STRING, "ignore" },
+  {"certificateAuthLib", CTL_STRING, "sfcCertificateAuthentication"},
+  {"localSocketPath", CTL_STRING, "/tmp/sfcbLocalSocket"},
+  {"httpSocketPath", CTL_STRING, "/tmp/sfcbHttpSocket"},
+  {"socketPathGroupPerm", CTL_STRING, NULL},
 
-  {"traceFile", 0, "stderr"},
-  {"traceLevel", 1, "0"},
-  {"traceMask", 1, "0"},
+  {"traceFile", CTL_STRING, "stderr"},
+  {"traceLevel", CTL_LONG, NULL, {.slong=0}},
+  {"traceMask", CTL_LONG, NULL, {.slong=0}},
 
-  {"httpMaxContentLength", 1, "100000000"},
-  {"validateMethodParamTypes", 2, "false"},
-  {"maxMsgLen", 1, "10000000"},
-  {"networkInterface", 3, NULL},
-  {"DeliveryRetryInterval",1,"20"},
-  {"DeliveryRetryAttempts",1,"3"},
-  {"SubscriptionRemovalTimeInterval",1,"2592000"},
-  {"SubscriptionRemovalAction",1,"2"},
-  {"indicationDeliveryThreadLimit",1,"30"},
-  {"indicationDeliveryThreadTimeout",1,"0"},
-  {"MaxListenerDestinations",1,"100"},
-  {"MaxActiveSubscriptions",1,"100"},
-  {"indicationCurlTimeout",1,"10"},
+  {"httpMaxContentLength", CTL_UINT, NULL, {.uint=100000000}},
+  {"validateMethodParamTypes", CTL_BOOL, NULL, {.b=0}},
+  {"maxMsgLen", CTL_ULONG, NULL, {.ulong=10000000}},
+  {"networkInterface", CTL_USTRING, NULL},
+  {"DeliveryRetryInterval", CTL_UINT, NULL, {.uint=20}},
+  {"DeliveryRetryAttempts", CTL_UINT, NULL, {.uint=3}},
+  {"SubscriptionRemovalTimeInterval", CTL_UINT, NULL, {.uint=2592000}},
+  {"SubscriptionRemovalAction", CTL_UINT, NULL, {.uint=2}},
+  {"indicationDeliveryThreadLimit", CTL_LONG, NULL, {.slong=30}},
+  {"indicationDeliveryThreadTimeout", CTL_LONG, NULL, {.slong=0}},
+  {"MaxListenerDestinations", CTL_LONG, NULL, {.slong=100}},
+  {"MaxActiveSubscriptions", CTL_LONG, NULL, {.slong=100}},
+  {"indicationCurlTimeout", CTL_LONG, NULL, {.slong=10}},
 };
 
 void
@@ -154,6 +165,20 @@ sunsetControl()
   }
 }
 
+static int 
+getUNum(char* str, unsigned long *val, unsigned int max) {
+
+  if (isdigit(str[0])) {
+    unsigned long   tmp = strtoul(str, NULL, 0);
+    if (tmp < max) {
+      *val = tmp;
+      return 0;
+    }
+  }
+  *val = 0;
+  return -1;
+}
+
 int
 setupControl(char *fn)
 {
@@ -169,13 +194,6 @@ setupControl(char *fn)
 
   if (ct)
     return 0;
-
-  ct = UtilFactory->newHashTable(61, UtilHashTable_charKey |
-                                 UtilHashTable_ignoreKeyCase);
-
-  for (i = 0, m = sizeof(init) / sizeof(Control); i < m; i++) {
-    ct->ft->put(ct, init[i].id, &init[i]);
-  }
 
   if (fn) {
     if (strlen(fn) >= sizeof(fin))
@@ -201,6 +219,15 @@ setupControl(char *fn)
     return -2;
   }
 
+  /* populate HT with default values */
+  ct = UtilFactory->newHashTable(61, UtilHashTable_charKey |
+                                 UtilHashTable_ignoreKeyCase);
+
+  for (i = 0, m = sizeof(init) / sizeof(Control); i < m; i++) {
+    ct->ft->put(ct, init[i].id, &init[i]);
+  }
+
+  /* run through the config file lines */
   while (fgets(fin, 1024, in)) {
     n++;
     if (stmt)
@@ -216,18 +243,70 @@ setupControl(char *fn)
     case 2:
       for (i = 0; i < sizeof(init) / sizeof(Control); i++) {
         if (strcmp(rv.id, init[i].id) == 0) {
-          if (init[i].type == 3) {
-            /*
-             * unstripped character string 
-             */
+          /* unstripped character string */
+          if (init[i].type == CTL_USTRING) {
             init[i].strValue = strdup(rv.val);
             if (strchr(init[i].strValue, '\n'))
               *(strchr(init[i].strValue, '\n')) = 0;
             init[i].dupped = 1;
-          } else {
+          }
+          /* string */
+          else if (init[i].type == CTL_STRING) {
             init[i].strValue = strdup(cntlGetVal(&rv));
             init[i].dupped = 1;
           }
+          /* numeric */
+          else {
+
+            char* val = cntlGetVal(&rv);
+            long slval;
+            unsigned long ulval;
+
+            switch (init[i].type) {
+
+            case CTL_BOOL:
+              if (strcasecmp(val, "true") == 0) {
+                init[i].intValue.b = 1;
+              }
+              else if (strcasecmp(val, "false") == 0) {
+                init[i].intValue.b = 0;
+              }
+              else {
+                err = 1;
+              }
+              break;
+
+            case CTL_LONG:
+              slval = strtol(val, NULL, 0);
+              init[i].intValue.slong = slval;
+              break;
+
+            case CTL_ULONG:
+              if (getUNum(val, &ulval, ULONG_MAX) == 0) {
+                init[i].intValue.ulong = ulval;
+              }
+              else {
+                err = 1;
+              }
+              break;
+
+            case CTL_UINT:
+              if (getUNum(val, &ulval, UINT_MAX) == 0) {
+                init[i].intValue.uint = (unsigned int)ulval;
+              }
+              else {
+                err = 1;
+              }
+              break;
+            }
+
+            if (!err) {
+              ct->ft->put(ct, init[i].id, &init[i]);
+            }
+
+          }
+          if (err) break;
+
           goto ok;
         }
       }
@@ -237,9 +316,11 @@ setupControl(char *fn)
     ok:
       break;
     case 3:
-      break;
+      break;  /* control line is just a comment */
     }
+    if (err) break;
   }
+
   if (stmt)
     free(stmt);
 
@@ -265,7 +346,7 @@ getControlChars(char *id, char **val)
   }
 
   if ((ctl = ct->ft->get(ct, id))) {
-    if (ctl->type == 0 || ctl->type == 3) {
+    if (ctl->type == CTL_STRING || ctl->type == CTL_USTRING) {
       *val = ctl->strValue;
       return 0;
     }
@@ -286,8 +367,8 @@ getControlNum(char *id, long *val)
   }
 
   if ((ctl = ct->ft->get(ct, id))) {
-    if (ctl->type == 1) {
-      *val = strtol(ctl->strValue, NULL, 0);
+    if (ctl->type == CTL_LONG) {
+      *val = ctl->intValue.slong;
       return 0;
     }
     rc = -2;
@@ -307,12 +388,9 @@ getControlUNum(char *id, unsigned int *val)
   }
 
   if ((ctl = ct->ft->get(ct, id))) {
-    if (ctl->type == 1 && isdigit(ctl->strValue[0])) {
-      unsigned long   tmp = strtoul(ctl->strValue, NULL, 0);
-      if (tmp < UINT_MAX) {
-        *val = tmp;
-        return 0;
-      }
+    if (ctl->type == CTL_UINT) {
+      *val = ctl->intValue.uint;
+      return 0;
     }
     rc = -2;
   }
@@ -331,12 +409,9 @@ getControlULong(char *id, unsigned long *val)
   }
 
   if ((ctl = ct->ft->get(ct, id))) {
-    if (ctl->type == 1 && isdigit(ctl->strValue[0])) {
-      unsigned long   tmp = strtoul(ctl->strValue, NULL, 0);
-      if (tmp < ULONG_MAX) {
-        *val = tmp;
-        return 0;
-      }
+    if (ctl->type == CTL_ULONG) {
+      *val = ctl->intValue.ulong;
+      return 0;
     }
     rc = -2;
   }
@@ -347,11 +422,15 @@ getControlULong(char *id, unsigned long *val)
 int
 getControlBool(char *id, int *val)
 {
+  if (ct == NULL) {
+    setupControl(configfile);
+  }
+
   Control        *ctl;
   int             rc = -1;
   if ((ctl = ct->ft->get(ct, id))) {
-    if (ctl->type == 2) {
-      *val = strcasecmp(ctl->strValue, "true") == 0;
+    if (ctl->type == CTL_BOOL) {
+      *val = ctl->intValue.b;
       return 0;
     }
     rc = -2;
@@ -359,6 +438,8 @@ getControlBool(char *id, int *val)
   *val = 0;
   return rc;
 }
+
+
 /* MODELINES */
 /* DO NOT EDIT BELOW THIS COMMENT */
 /* Modelines are added by 'make pretty' */
