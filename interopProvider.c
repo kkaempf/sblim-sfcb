@@ -1067,7 +1067,9 @@ InteropProviderEnumInstances(CMPIInstanceMI * mi,
     if (strcasecmp(CMGetCharPtr(CMGetClassName(cop, NULL)), "cim_indicationsubscription") == 0) {
       filterInternalProps(ci);
     }
-
+    if (properties) {
+      ci->ft->setPropertyFilter(ci, properties, NULL);
+    }
     CMReturnInstance(rslt, ci);
   }
   if (enm)
@@ -1102,7 +1104,9 @@ InteropProviderGetInstance(CMPIInstanceMI * mi,
     if (strcasecmp(CMGetCharPtr(CMGetClassName(cop, NULL)), "cim_indicationsubscription") == 0) {
       filterInternalProps(ci);
     }
-
+    if (properties) {
+      ci->ft->setPropertyFilter(ci, properties, NULL);
+    }
     CMReturnInstance(rslt, ci);
   }
 

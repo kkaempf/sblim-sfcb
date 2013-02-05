@@ -9,6 +9,7 @@ New features:
 - 3601386 Add test for EmbeddedObject output
 - 3599160 Add sfcbproc utility
 - 3601943 ObjectImpl unit test
+- 2766931 Property filters for interop and interopserver providers
 
 Bugs fixed:
 - 3599526 segfault during ecn with classProviderSf

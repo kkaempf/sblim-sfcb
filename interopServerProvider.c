@@ -472,6 +472,9 @@ IndServiceProviderGetInstance(CMPIInstanceMI * mi,
 
 #endif
 
+  if (properties) {
+    ci->ft->setPropertyFilter(ci, properties, NULL);
+  }
   CMReturnInstance(rslt,ci);
   CMReturnDone(rslt);
 
@@ -497,6 +500,7 @@ IndServiceProviderEnumInstances(CMPIInstanceMI * mi,
   CMPIContext *ctxLocal;
   ctxLocal = native_clone_CMPIContext(ctx);
   CMPIValue val;
+  CMPIInstance *ci=NULL;
   val.string = sfcb_native_new_CMPIString("$DefaultProvider$", NULL,0);
   ctxLocal->ft->addEntry(ctxLocal, "rerouteToProvider", &val, CMPI_string);
 
@@ -505,7 +509,11 @@ IndServiceProviderEnumInstances(CMPIInstanceMI * mi,
   indServices = CBEnumInstances(_broker, ctxLocal, op, properties, &st);
 
   while (CMHasNext(indServices, NULL)) {
-    CMReturnInstance(rslt, CMGetNext(indServices, NULL).value.inst);
+    ci=CMGetNext(indServices, NULL).value.inst;
+    if (properties) {
+      ci->ft->setPropertyFilter(ci, properties, NULL);
+    }
+    CMReturnInstance(rslt, ci);
   }
   CMReturnDone(rslt);
 
