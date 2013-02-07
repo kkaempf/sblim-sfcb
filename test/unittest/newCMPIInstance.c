@@ -24,6 +24,7 @@ extern CMPIInstance *internal_new_CMPIInstance(int mode,
                                                const CMPIObjectPath * cop,
                                                CMPIStatus *rc,
                                                int override);
+int trimws;
 
 int
 main(void)
