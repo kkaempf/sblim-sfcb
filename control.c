@@ -72,7 +72,7 @@ char           *ip4List= NULL;
 char           *ip6List= NULL;
 
 /* Control initial values
- { property, type, value} */
+ { property, type, string value, numeric value} */
 Control         init[] = {
   {"ip4AddrList", CTL_STRING, NULL, {0}},
   {"ip6AddrList", CTL_STRING, NULL, {0}},
@@ -90,9 +90,9 @@ Control         init[] = {
   {"slpRefreshInterval", CTL_LONG, NULL, {.slong=600}},
 #endif
   {"provProcs", CTL_LONG, NULL, {.slong=32}},
-  {"sfcbCustomLib", CTL_STRING, "sfcCustomLib"},
-  {"basicAuthLib", CTL_STRING, "sfcBasicAuthentication"},
-  {"basicAuthEntry", CTL_STRING, "_sfcBasicAuthenticate"},
+  {"sfcbCustomLib", CTL_STRING, "sfcCustomLib", {0}},
+  {"basicAuthLib", CTL_STRING, "sfcBasicAuthentication", {0}},
+  {"basicAuthEntry", CTL_STRING, "_sfcBasicAuthenticate", {0}},
   {"doBasicAuth", CTL_BOOL, NULL, {.b=0}},
   {"doUdsAuth", CTL_BOOL, NULL, {.b=0}},
 
@@ -109,33 +109,33 @@ Control         init[] = {
   {"providerTimeoutInterval", CTL_LONG, NULL, {.slong=60}},
   {"providerAutoGroup", CTL_BOOL, NULL, {.b=1}},
   {"providerDefaultUserSFCB", CTL_BOOL, NULL, {.b=1}},
-  {"providerDefaultUser", CTL_STRING, ""},
+  {"providerDefaultUser", CTL_STRING, "", {0}},
 
-  {"sslKeyFilePath", CTL_STRING, SFCB_CONFDIR "/file.pem"},
-  {"sslCertificateFilePath", CTL_STRING, SFCB_CONFDIR "/server.pem"},
-  {"sslCertList", CTL_STRING, SFCB_CONFDIR "/clist.pem"},
-  {"sslCiphers", CTL_STRING, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"},
+  {"sslKeyFilePath", CTL_STRING, SFCB_CONFDIR "/file.pem", {0}},
+  {"sslCertificateFilePath", CTL_STRING, SFCB_CONFDIR "/server.pem", {0}},
+  {"sslCertList", CTL_STRING, SFCB_CONFDIR "/clist.pem", {0}},
+  {"sslCiphers", CTL_STRING, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH", {0}},
 
-  {"registrationDir", CTL_STRING, SFCB_STATEDIR "/registration"},
-  {"providerDirs", CTL_USTRING, SFCB_LIBDIR " " CMPI_LIBDIR " " LIBDIR},
+  {"registrationDir", CTL_STRING, SFCB_STATEDIR "/registration", {0}},
+  {"providerDirs", CTL_USTRING, SFCB_LIBDIR " " CMPI_LIBDIR " " LIBDIR, {0}},
 
   {"enableInterOp", CTL_BOOL, NULL, {.b=1}},
-  {"sslClientTrustStore", CTL_STRING, SFCB_CONFDIR "/client.pem"},
-  {"sslClientCertificate", CTL_STRING, "ignore"},
-  {"sslIndicationReceiverCert", CTL_STRING, "ignore" },
-  {"certificateAuthLib", CTL_STRING, "sfcCertificateAuthentication"},
-  {"localSocketPath", CTL_STRING, "/tmp/sfcbLocalSocket"},
-  {"httpSocketPath", CTL_STRING, "/tmp/sfcbHttpSocket"},
-  {"socketPathGroupPerm", CTL_STRING, NULL},
+  {"sslClientTrustStore", CTL_STRING, SFCB_CONFDIR "/client.pem", {0}},
+  {"sslClientCertificate", CTL_STRING, "ignore", {0}},
+  {"sslIndicationReceiverCert", CTL_STRING, "ignore", {0}},
+  {"certificateAuthLib", CTL_STRING, "sfcCertificateAuthentication", {0}},
+  {"localSocketPath", CTL_STRING, "/tmp/sfcbLocalSocket", {0}},
+  {"httpSocketPath", CTL_STRING, "/tmp/sfcbHttpSocket", {0}},
+  {"socketPathGroupPerm", CTL_STRING, NULL, {0}},
 
-  {"traceFile", CTL_STRING, "stderr"},
+  {"traceFile", CTL_STRING, "stderr", {0}},
   {"traceLevel", CTL_LONG, NULL, {.slong=0}},
   {"traceMask", CTL_LONG, NULL, {.slong=0}},
 
   {"httpMaxContentLength", CTL_UINT, NULL, {.uint=100000000}},
   {"validateMethodParamTypes", CTL_BOOL, NULL, {.b=0}},
   {"maxMsgLen", CTL_ULONG, NULL, {.ulong=10000000}},
-  {"networkInterface", CTL_USTRING, NULL},
+  {"networkInterface", CTL_USTRING, NULL, {0}},
   {"DeliveryRetryInterval", CTL_UINT, NULL, {.uint=20}},
   {"DeliveryRetryAttempts", CTL_UINT, NULL, {.uint=3}},
   {"SubscriptionRemovalTimeInterval", CTL_UINT, NULL, {.uint=2592000}},
