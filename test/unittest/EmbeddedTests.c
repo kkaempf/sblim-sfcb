@@ -22,6 +22,7 @@
 #include "trace.h"
 #include "queryOperation.h"
 #include "objectImpl.h"
+int trimws;
 
 int
 main(void)
