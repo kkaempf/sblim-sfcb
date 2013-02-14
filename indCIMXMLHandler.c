@@ -618,6 +618,7 @@ typedef struct rtelement {
   CMPIObjectPath * sub;  // Subscription
   CMPIObjectPath * ind;  // indication with key
   CMPIObjectPath * SFCBIndEle;  // SFCB_indicationelement
+  CMPIInstance * indInst; // holds actual instance
   int count;
   time_t lasttry;
   unsigned int instanceID;
@@ -658,29 +659,6 @@ enqRetry(RTElement * element, const CMPIContext * ctx, int repo)
     element->prev = RQtail;
     RQtail = element;
   }
-  if (repo==1) {
-    // If this needs to be persisted in the repo 
-    // (not the initial fill from refillRetryQ)
-    _SFCB_TRACE(1,("--- Creating SFCB_IndicationElement instance."));
-    CMPIObjectPath * op=CMNewObjectPath(_broker,"root/interop","SFCB_IndicationElement",NULL);
-    // Add the indID as the only key
-    CMAddKey(op,"IndicationID",&element->instanceID,CMPI_uint32);
-    // Create the instance
-    //element->SFCBIndEle=op;
-    element->SFCBIndEle=op->ft->clone(op,NULL);
-    CMPIInstance * ci=CMNewInstance(_broker,op,NULL);
-    // Set all the properties
-    CMSetProperty(ci,"IndicationID",&element->instanceID,CMPI_uint32);
-    CMSetProperty(ci,"RetryCount",&(RQtail->count),CMPI_uint32);
-    CMSetProperty(ci,"LastDelivery",&(RQtail->lasttry),CMPI_sint32);
-    CMSetProperty(ci,"ld",&(element->ref),CMPI_ref);
-    CMSetProperty(ci,"ind",&element->ind,CMPI_ref);
-    CMSetProperty(ci,"sub",&element->sub,CMPI_ref);
-    CBCreateInstance(_broker, ctx, op, ci, NULL);
-    CMRelease(op);
-    CMRelease(ci);
-  }
-
   if (pthread_mutex_unlock(&RQlock) != 0) {
     // lock failed
     return 1;
@@ -699,9 +677,9 @@ dqRetry(CMPIContext * ctx, RTElement * cur)
 {
   _SFCB_ENTER(TRACE_INDPROVIDER, "dqRetry");
   // Delete the instance in the repo
+  // Could use hashtable?
   CMPIObjectPath * op=CMNewObjectPath(_broker,"root/interop","SFCB_IndicationElement",NULL);
   CMAddKey(op,"IndicationID",&cur->instanceID,CMPI_uint32);
-  CBDeleteInstance(_broker,ctx,op);
   CBDeleteInstance(_broker,ctx,cur->ind);
   CMRelease(op);
 
@@ -804,14 +782,7 @@ retryExport(void *lctx)
     if(retryShutdown) break; // Provider shutdown
     ref = cur->ref;
     // Build the CMPIArgs that deliverInd needs
-    CMPIInstance *iinst=internalProviderGetInstance(cur->ind,&st);
-    if (st.rc != 0 ) {
-      mlogf(M_ERROR,M_SHOW,"Failed to retrieve indication instance from repository, rc:%d\n",st.rc);
-      purge=cur;
-      cur=cur->next;
-      dqRetry(ctx,purge);
-      continue;
-    }
+    CMPIInstance *iinst=cur->indInst;
     in=CMNewArgs(_broker,NULL);
     CMAddArg(in,"indication",&iinst,CMPI_instance);
     sub=internalProviderGetInstance(cur->sub,&st);
@@ -841,7 +812,6 @@ retryExport(void *lctx)
           _SFCB_TRACE(1,("--- Indication succeeded."));
           sfc = 0;
           CMSetProperty(sub, "DeliveryFailureTime", &sfc, CMPI_uint64);
-          CBModifyInstance(_broker, ctxLocal, cur->sub, sub, NULL);
         }
         // remove from queue in either case
         _SFCB_TRACE(1,("--- Indication removed."));
@@ -854,11 +824,6 @@ retryExport(void *lctx)
         cur->count++;
         gettimeofday(&tv, &tz);
         cur->lasttry = tv.tv_sec;
-
-        CMPIInstance * indele=internalProviderGetInstance(cur->SFCBIndEle,&st);
-        CMSetProperty(indele,"LastDelivery",&cur->lasttry,CMPI_sint32);
-        CMSetProperty(indele,"RetryCount",&cur->count,CMPI_uint32);
-        CBModifyInstance(_broker, ctxLocal, cur->SFCBIndEle, indele, NULL);
 
         CMPIData        sfcp =
             CMGetProperty(sub, "DeliveryFailureTime", NULL);
@@ -902,67 +867,6 @@ retryExport(void *lctx)
   CMRelease(ctxLocal);
   CMRelease(ctx);
   _SFCB_RETURN(NULL);
-}
-
-int refillRetryQ (const CMPIContext * ctx)
-{
-  _SFCB_ENTER(TRACE_INDPROVIDER, "refillRetryQ");  
-  int qfill=0;
-  if (RQhead==NULL) {
-    // The queue is empty, check if there are instances to be restored
-    CMPIObjectPath * op=CMNewObjectPath(_broker,"root/interop","SFCB_IndicationElement",NULL);
-    CMPIEnumeration * enm = _broker->bft->enumerateInstances(_broker, ctx, op, NULL, NULL);
-    while(enm && enm->ft->hasNext(enm, NULL)) {
-    // get the properties from the repo instance
-      CMPIData inst=CMGetNext(enm,NULL);
-      CMPIData indID=CMGetProperty(inst.value.inst,"indicationID",NULL);
-      CMPIData rcount=CMGetProperty(inst.value.inst,"retryCount",NULL);
-      CMPIData last=CMGetProperty(inst.value.inst,"lastDelivery",NULL);
-      CMPIData ind=CMGetProperty(inst.value.inst,"ind",NULL);
-      CMPIData sub=CMGetProperty(inst.value.inst,"sub",NULL);
-      CMPIData ld=CMGetProperty(inst.value.inst,"ld",NULL);
-      _SFCB_TRACE(1,("--- Requeueing indication id:%d",indID.value.Int));
-      // Rebuild the queue element
-      RTElement *element;
-      element = (RTElement *) malloc(sizeof(*element));
-      element->instanceID=indID.value.Int;
-      element->lasttry=last.value.Int;
-      element->count=rcount.value.Int;
-      element->ind=ind.value.ref->ft->clone(ind.value.ref,NULL);
-      element->ref=ld.value.ref->ft->clone(ld.value.ref,NULL);
-      element->sub=sub.value.ref->ft->clone(sub.value.ref,NULL);
-      CMPIObjectPath * indele=CMGetObjectPath(inst.value.inst,NULL);
-      element->SFCBIndEle=indele->ft->clone(indele,NULL);
-      // call enq
-      enqRetry(element,ctx,0);
-      qfill=1;
-    }
-    // spawn thread if we queued anything
-    if ((qfill == 1 ) && (retryRunning == 0)) {
-      retryRunning=1;
-      _SFCB_TRACE(1,("--- Starting retryExport thread"));
-      pthread_attr_init(&tattr);
-      pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
-      CMPIContext * pctx = native_clone_CMPIContext(ctx);
-      pthread_create(&t, &tattr,&retryExport,(void *) pctx);
-    }
-  }
-
-  _SFCB_RETURN(0); 
-}
-
-int initIndCIMXML(const CMPIContext * ctx)
-{
-    unsigned int ri;
-    _SFCB_ENTER(TRACE_INDPROVIDER, "initIndCIMXML");  
-
-    /* If RI is disabled, return */
-    getControlUNum("DeliveryRetryAttempts", &ri);
-    if (!ri) _SFCB_RETURN(0);
-
-    //Refill the queue if there were any from the last run
-    refillRetryQ(ctx);
-    _SFCB_RETURN(0);
 }
 
 CMPIStatus
@@ -1068,16 +972,12 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
         subop=CMGetObjectPath(sub,NULL);
         element->sub=subop->ft->clone(subop,NULL);
         element->ind=iop->ft->clone(iop,NULL);
+        element->indInst=ind->ft->clone(ind,NULL);
         // Store other attrs
         element->instanceID=indID;
         element->count=0;
         gettimeofday(&tv, &tz);
         element->lasttry=tv.tv_sec;
-        // Push the indication to the repo
-        CBCreateInstance(_broker, ctxLocal, iop, ind, &circ);
-        if (circ.rc != 0) {
-            mlogf(M_ERROR,M_SHOW,"Pushing indication instance to repository failed, rc:%d\n",circ.rc);
-        }
         indID++;
         // Add it to the retry queue
         enqRetry(element,ctx,1);
@@ -1106,7 +1006,7 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
   _SFCB_RETURN(st);
 }
 
-CMInstanceMIStub(IndCIMXMLHandler, IndCIMXMLHandler, _broker, initIndCIMXML(ctx) );
+CMInstanceMIStub(IndCIMXMLHandler, IndCIMXMLHandler, _broker, CMNoHook );
 CMMethodMIStub(IndCIMXMLHandler, IndCIMXMLHandler, _broker, CMNoHook);
 /* MODELINES */
 /* DO NOT EDIT BELOW THIS COMMENT */
