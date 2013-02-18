@@ -455,8 +455,9 @@ fi
 AC_CHECK_LIB(pthread,main)
 AC_CHECK_LIB(dl,main)
 AC_CHECK_LIB(z,main,[SFCB_LIBZ=-lz],[AC_MSG_ERROR([Could not find required libz])])
-AC_CHECK_LIB(sfcUtil,newStringBuffer,, \
-  [AC_MSG_ERROR([Could not find required sfcUtil. Is sfcCommon installed?])])
+# Test for the newest function here to make sure it's up to date.
+AC_CHECK_LIB(sfcUtil,invalid_uint,, \
+  [AC_MSG_ERROR([Function invalid_uint not found. Is the required version of sfcCommon installed?])])
 if test "$enable_indications" = "yes" ; then
    LOAD_INDICATION_PROVIDER=
    AC_DEFINE(HAVE_INDICATIONS,1,[Indication support enabled.])
