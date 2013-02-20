@@ -2,7 +2,7 @@
 /*
  * datetime.c
  *
- * (C) Copyright IBM Corp. 2005
+ * (C) Copyright IBM Corp. 2013
  *
  * THIS FILE IS PROVIDED UNDER THE TERMS OF THE ECLIPSE PUBLIC LICENSE
  * ("AGREEMENT"). ANY USE, REPRODUCTION OR DISTRIBUTION OF THIS FILE
@@ -135,24 +135,23 @@ chars2bin(const char *string, CMPIStatus *rc)
 
   else {
     struct tm       tmp;
+    time_t sse;
 
     memset(&tmp, 0, sizeof(struct tm));
     tzset();
 
-    tmp.tm_gmtoff = timezone;
-    tmp.tm_isdst = daylight;
     tmp.tm_mday = atoi(str + 6);
     str[6] = 0;
     tmp.tm_mon = atoi(str + 4) - 1;
     str[4] = 0;
     tmp.tm_year = atoi(str) - 1900;
 
-    if(mktime(&tmp) < 0) {
+    if((sse = timegm(&tmp)) < 0) {
        CMSetStatus(rc, CMPI_RC_ERR_INVALID_PARAMETER);
     }
 
     msecs = msecs + (secs * 1000000ULL);
-    msecs += (CMPIUint64) mktime(&tmp) * 1000000ULL;
+    msecs += (CMPIUint64) sse * 1000000ULL;
     // Add in the offset
     msecs -= offset * 1000000ULL;
   }

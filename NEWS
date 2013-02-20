@@ -28,6 +28,7 @@ Bugs fixed:
 - 3603454 control should do type conversions on startup
 - 2612 Don't persist indications
 - 2613 Check sfcCommon version
+- 2552 datetime conversions do not handle timezone
 
 Changes in 1.4.3
 ================
