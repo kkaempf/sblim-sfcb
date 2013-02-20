@@ -25,6 +25,7 @@ Bugs fixed:
 - 2990304 Enhancements for sfcb
 - 2778345 There is no response at GetClass after CreateClass
 - 3603454 control should do type conversions on startup
+- Sfcb #1 Streamline SLP
 
 Changes in 1.4.3
 ================

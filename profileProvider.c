@@ -40,7 +40,7 @@
 #ifdef HAVE_SLP
 #include <slp.h>
 #include "cimslpCMPI.h"
-#include "cimslpSLP.h"
+#include "cimslpUtil.h"
 #include "control.h"
 pthread_t       slpUpdateThread;
 pthread_once_t  slpUpdateInitMtx = PTHREAD_ONCE_INIT;
@@ -49,12 +49,94 @@ int             slpLifeTime = SLP_LIFETIME_DEFAULT;
 // This is an awfully brutish way
 // to track two adapters.
 char           *http_url = NULL;
-char           *http_attr = "NULL";
 char           *https_url = NULL;
-char           *https_attr = "NULL";
 
+static cimomConfig cfgHttp;
+static cimomConfig cfgHttps;
+static char* httpAdvert = NULL;
+static char* httpsAdvert = NULL;
 
-void
+/* flag to know if the advert has already been generated */
+static int registered = 0;
+
+static int     enableHttp,
+               enableHttps;
+static int     enableSlp = 0;
+
+// originally from cimslpSLP.c ***********************************************/
+
+static void
+onErrorFnc(SLPHandle hslp, SLPError errcode, void *cookie)
+{
+  *(SLPError *) cookie = errcode;
+
+  if (errcode) {
+    printf("Callback Code %i\n", errcode);
+  }
+}
+
+static void
+deregisterCIMService(const char *urlsyntax)
+{
+  SLPHandle       hslp;
+  SLPError        callbackerr = 0;
+  SLPError        err = 0;
+
+  _SFCB_ENTER(TRACE_SLP, "deregisterCIMService");
+  err = SLPOpen("", SLP_FALSE, &hslp);
+  if (err != SLP_OK) {
+    _SFCB_TRACE(1, ("Error opening slp handle %i\n", err));
+  }
+  err = SLPDereg(hslp, urlsyntax, onErrorFnc, &callbackerr);
+  if ((err != SLP_OK) || (callbackerr != SLP_OK)) {
+    printf
+        ("--- Error deregistering service with slp (%i) ... it will now timeout\n",
+         err);
+    _SFCB_TRACE(4, ("--- urlsyntax: %s\n", urlsyntax));
+  }
+  SLPClose(hslp);
+}
+
+static int
+registerCIMService(char** attrstring, int slpLifeTime, char **urlsyntax)
+{
+  SLPHandle       hslp;
+  SLPError        err = 0;
+  SLPError        callbackerr = 0;
+  int             retCode = 0;
+
+  _SFCB_ENTER(TRACE_SLP, "registerCIMService");
+
+  err = SLPOpen("", SLP_FALSE, &hslp);
+  if (err != SLP_OK) {
+    printf("Error opening slp handle %i\n", err);
+    retCode = err;
+  }
+
+  err = SLPReg(hslp,
+               *urlsyntax,
+               slpLifeTime,
+               NULL, *attrstring, SLP_TRUE, onErrorFnc, &callbackerr);
+  if(callbackerr != SLP_OK)
+    _SFCB_TRACE(2, ("--- SLP registration error, *urlsyntax = \"%s\"\n", *urlsyntax));
+
+  if ((err != SLP_OK) || (callbackerr != SLP_OK)) {
+    printf("Error registering service with slp %i\n", err);
+    retCode = err;
+  }
+
+  if (callbackerr != SLP_OK) {
+    printf("Error registering service with slp %i\n", callbackerr);
+    retCode = callbackerr;
+  }
+
+  SLPClose(hslp);
+
+  _SFCB_RETURN(retCode);
+}
+/* end from cimslpSLP.c ******************************************************/
+
+static void
 freeCFG(cimomConfig * cfg)
 {
 
@@ -65,7 +147,7 @@ freeCFG(cimomConfig * cfg)
   free(cfg->port);
 }
 
-void
+static void
 setUpDefaults(cimomConfig * cfg)
 {
   cfg->commScheme = strdup("http");
@@ -78,7 +160,7 @@ setUpDefaults(cimomConfig * cfg)
   cfg->certFile = NULL;
 }
 
-void
+static void
 setUpTimes(int *slpLifeTime, int *sleepTime)
 {
   if (*slpLifeTime < 16) {
@@ -117,8 +199,9 @@ ProfileProviderInvokeMethod(CMPIMethodMI * mi,
   CMPIStatus      st = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
   /* this may /seem/ useless, but we use startupProvider() to load 
      profileProvider via a method call; UPDATE_SLP_REG does the work on init */
-  if (strcmp(methodName, "_startup"))
+  if (strcmp(methodName, "_startup")) {
     st.rc = CMPI_RC_OK;
+  }
   _SFCB_RETURN(st);
 }
 
@@ -141,15 +224,9 @@ CMPIStatus ProfileProviderMethodCleanup(CMPIMethodMI * mi,
 
 #ifdef HAVE_SLP
 #define UPDATE_SLP_REG  spawnUpdateThread(ctx)
-void 
+static void 
 updateSLPReg(const CMPIContext *ctx, int slpLifeTime)
 {
-  cimSLPService   service;
-  cimomConfig     cfgHttp,
-                  cfgHttps;
-  int             enableHttp,
-                  enableHttps = 0;
-  int             enableSlp = 0;
   long            i;
   int             errC = 0;
 
@@ -159,51 +236,84 @@ updateSLPReg(const CMPIContext *ctx, int slpLifeTime)
 
   void* hc = markHeap();
 
-  getControlBool("enableSlp", &enableSlp);
   if(!enableSlp) {
     _SFCB_TRACE(1, ("--- SLP disabled"));
     pthread_mutex_unlock(&slpUpdateMtx);
     _SFCB_EXIT();
   }
-  setUpDefaults(&cfgHttp);
-  setUpDefaults(&cfgHttps);
 
-//  sleep(1);
-  getControlBool("enableHttp", &enableHttp);
+  /* generate the advertisement. the values shouldn't be changing, 
+     so only do this the first time */
+  if (!registered) {
+    setUpDefaults(&cfgHttp);
+    setUpDefaults(&cfgHttps);
+    char* url_syntax;
+
+    getControlBool("enableHttp", &enableHttp);
+    if (enableHttp) {
+      getControlNum("httpPort", &i);
+      free(cfgHttp.port);
+      cfgHttp.port = malloc(6 * sizeof(char));    // portnumber has max. 5
+      // digits
+      sprintf(cfgHttp.port, "%d", (int) i);
+      httpAdvert = getSLPData(cfgHttp, _broker, ctx, &url_syntax);
+      httpAdvert = realloc(httpAdvert, (strlen(httpAdvert) + 1) * sizeof(char));
+      freeCFG(&cfgHttp);
+
+      /*
+       * We have 2x urlsyntax:
+       * css.url_syntax, which is just the url, e.g.
+       *  http://somehost:someport
+       * urlsyntax, which is the complete service string as required by slp, e.g.
+       *  service:wbem:http://somehost:someport
+       */
+      http_url = (char *) malloc(strlen(url_syntax) + 14);
+      sprintf(http_url, "service:wbem:%s", url_syntax);
+      free(url_syntax);
+    }
+
+    getControlBool("enableHttps", &enableHttps);
+    if (enableHttps) {
+      free(cfgHttps.commScheme);
+      cfgHttps.commScheme = strdup("https");
+      getControlNum("httpsPort", &i);
+      free(cfgHttps.port);
+      cfgHttps.port = malloc(6 * sizeof(char));   // portnumber has max. 5
+      // digits 
+      sprintf(cfgHttps.port, "%d", (int) i);
+      /* these aren't used right now, but maybe in the future */
+      getControlChars("sslClientTrustStore", &cfgHttps.trustStore);
+      getControlChars("sslCertificateFilePath", &cfgHttps.certFile);
+      getControlChars("sslKeyFilePath", &cfgHttps.keyFile);
+
+      httpsAdvert = getSLPData(cfgHttps, _broker, ctx, &url_syntax);
+      httpsAdvert = realloc(httpsAdvert, (strlen(httpsAdvert) + 1) * sizeof(char));
+      freeCFG(&cfgHttps);
+
+      https_url = (char *) malloc(strlen(url_syntax) + 14);
+      sprintf(https_url, "service:wbem:%s", url_syntax);
+      free(url_syntax);
+
+    }
+
+    registered = 1;
+  }
+
+
+  /* register */
   if (enableHttp) {
-    getControlNum("httpPort", &i);
-    free(cfgHttp.port);
-    cfgHttp.port = malloc(6 * sizeof(char));    // portnumber has max. 5
-                                                // digits
-    sprintf(cfgHttp.port, "%d", (int) i);
-    service = getSLPData(cfgHttp, _broker, ctx, http_url);
-    if((errC = registerCIMService(service, slpLifeTime,
-                                  &http_url, &http_attr)) != 0) {
+    if((errC = registerCIMService(&httpAdvert, slpLifeTime,
+                                  &http_url)) != 0) {
       _SFCB_TRACE(1, ("--- Error registering http with SLP: %d", errC));
     }
   }
-  getControlBool("enableHttps", &enableHttps);
   if (enableHttps) {
-    free(cfgHttps.commScheme);
-    cfgHttps.commScheme = strdup("https");
-    getControlNum("httpsPort", &i);
-    free(cfgHttps.port);
-    cfgHttps.port = malloc(6 * sizeof(char));   // portnumber has max. 5
-                                                // digits 
-    sprintf(cfgHttps.port, "%d", (int) i);
-    getControlChars("sslClientTrustStore", &cfgHttps.trustStore);
-    getControlChars("sslCertificateFilePath", &cfgHttps.certFile);
-    getControlChars("sslKeyFilePath", &cfgHttps.keyFile);
-
-    service = getSLPData(cfgHttps, _broker, ctx, https_url);
-    if((errC = registerCIMService(service, slpLifeTime,
-                                  &https_url, &https_attr)) != 0) {
+    if((errC = registerCIMService(&httpsAdvert, slpLifeTime,
+                                  &https_url)) != 0) {
       _SFCB_TRACE(1, ("--- Error registering https with SLP: %d", errC));
     }
   }
   
-  freeCFG(&cfgHttp);
-  freeCFG(&cfgHttps);
   releaseHeap(hc);
   pthread_mutex_unlock(&slpUpdateMtx);
   return;
@@ -211,26 +321,25 @@ updateSLPReg(const CMPIContext *ctx, int slpLifeTime)
 
 static int slp_shutting_down = 0;
 
-void
+static void
 handle_sig_slp(int signum)
 {
   //Indicate that slp is shutting down
   slp_shutting_down = 1;
 }
 
-void
+static void
 slpUpdateInit(void)
 {
   slpUpdateThread = pthread_self();
 }
 
-void *
+static void *
 slpUpdate(void *args)
 {
   int             sleepTime;
   long            i;
   extern char    *configfile;
-  int             enableSlp = 0;
 
   // set slpUpdateThread to appropriate thread info
   pthread_once(&slpUpdateInitMtx, slpUpdateInit);
@@ -248,8 +357,8 @@ slpUpdate(void *args)
   CMPIContext *ctx = (CMPIContext *)args;
   // Get enableSlp config value
   setupControl(configfile);
-  getControlBool("enableSlp", &enableSlp);
   // If enableSlp is false, we don't really need this thread
+  getControlBool("enableSlp", &enableSlp);
   if(!enableSlp) {
     _SFCB_TRACE(1, ("--- SLP disabled in config. Update thread not starting."));
     _SFCB_RETURN(NULL);
@@ -274,15 +383,17 @@ slpUpdate(void *args)
   if(http_url) {
     _SFCB_TRACE(2, ("--- Deregistering http advertisement"));
     deregisterCIMService(http_url);
+    free(httpAdvert);
   }
   if(https_url) {
     _SFCB_TRACE(2, ("--- Deregistering https advertisement"));
     deregisterCIMService(https_url);
+    free(httpsAdvert);
   }
   _SFCB_RETURN(NULL);
 }
 
-void
+static void
 spawnUpdateThread(const CMPIContext *ctx)
 {
   pthread_attr_t  attr;

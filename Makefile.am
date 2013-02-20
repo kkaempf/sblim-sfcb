@@ -332,10 +332,8 @@ endif
 if SLP
 SLP_SRC = profileProvider.c \
           cimslpCMPI.c \
-          cimslpSLP.c \
           cimslpUtil.c
 SLP_INC = cimslpCMPI.h \
-          cimslpSLP.h \
           cimslpUtil.h
 
 else

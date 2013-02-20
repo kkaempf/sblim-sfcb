@@ -28,25 +28,6 @@
 #include "cmpi/cmpimacs.h"
 
 typedef struct {
-  char           *url_syntax;
-  char           *service_hi_name;
-  char           *service_hi_description;
-  char           *service_id;
-  char           *CommunicationMechanism;
-  char           *OtherCommunicationMechanismDescription;
-  char          **InteropSchemaNamespace;
-  char           *ProtocolVersion;
-  char          **FunctionalProfilesSupported;
-  char          **FunctionalProfileDescriptions;
-  char           *MultipleOperationsSupported;
-  char          **AuthenticationMechanismsSupported;
-  char          **AuthenticationMechansimDescriptions;
-  char          **Namespace;
-  char          **Classinfo;
-  char          **RegisteredProfilesSupported;
-} cimSLPService;
-
-typedef struct {
   char           *commScheme;   // http or https
   char           *cimhost;
   char           *port;
@@ -57,30 +38,8 @@ typedef struct {
   char           *keyFile;
 } cimomConfig;
 
-void            initializeService(cimSLPService * rs);
-cimSLPService   getSLPData(cimomConfig cfg, const CMPIBroker *_broker,
-                           const CMPIContext *ctx,
-                           const char *urlsyntax);
-char           *myGetProperty(CMPIInstance *instance, char *propertyName);
-char          **myGetPropertyArray(CMPIInstance *instance,
-                                   char *propertyName);
-char          **myGetPropertyArrayFromArray(CMPIInstance **instances,
-                                            char *propertyName);
-CMPIInstance  **myGetInstances(const CMPIBroker *_broker,
-                               const CMPIContext * ctx,
-                               const char *path,
-                               const char *objectname,
-                               const char *urlsyntax);
-char           *transformValue(char *cssf, CMPIObjectPath * op,
-                               char *propertyName);
-char          **transformValueArray(char **cssf, CMPIObjectPath * op,
-                                    char *propertyName);
-char          **myGetRegProfiles(const CMPIBroker *_broker,
-                                 CMPIInstance **instances,
-                                 const CMPIContext * ctx);
-char          **getInterOpNS();
-char           *getUrlSyntax(char *sn, char *cs, char *port);
-void            updateSLPReg(const CMPIContext *ctx, int slpLifeTime);
+char           *getSLPData(cimomConfig cfg, const CMPIBroker *_broker,
+                           const CMPIContext *ctx, char** url_syntax);
 
 #endif
 /* MODELINES */
