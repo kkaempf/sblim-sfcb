@@ -10,6 +10,7 @@ New features:
 - 3599160 Add sfcbproc utility
 - 3601943 ObjectImpl unit test
 - 2766931 Property filters for interop and interopserver providers
+- 2463 getClass does not expose method information for localconnect
 
 Bugs fixed:
 - 3599526 segfault during ecn with classProviderSf
