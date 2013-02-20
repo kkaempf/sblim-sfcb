@@ -77,6 +77,32 @@ struct _CMPIConstClass_FT {
                                             const char *prop,
                                             CMPIStatus *rc);
 
+  CMPIData        (*getMethod) (CMPIConstClass * cc, const char *name, 
+                                CMPIStatus* rc);
+  CMPIData        (*getMethodAt) (CMPIConstClass * cc, CMPICount i, 
+                                  CMPIString** name, CMPIStatus* rc);
+  CMPICount       (*getMethodCount) (CMPIConstClass * cc, CMPIStatus* rc);
+  
+  CMPIData        (*getMethodParameter) (CMPIConstClass * cc, const char *mname,
+                                         const char *pname, CMPIStatus* rc);
+  CMPIData        (*getMethodParameterAt) (CMPIConstClass * cc,
+                                           const char *mname,
+                                           unsigned int index,
+                                           CMPIString** name, CMPIStatus* rc);
+  CMPICount       (*getMethodParameterCount) (CMPIConstClass * cc, 
+                                              const char *mname,
+                                              CMPIStatus* rc);
+  
+  CMPIData        (*getMethodQualifier) (CMPIConstClass * cc, const char *mname,
+                                         const char *qname, CMPIStatus* rc);
+  CMPIData        (*getMethodQualifierAt) (CMPIConstClass * cc,
+                                           const char *mname,
+                                           unsigned int index,
+                                           CMPIString** name, CMPIStatus* rc);
+  CMPICount       (*getMethodQualifierCount) (CMPIConstClass * cc, 
+                                              const char *mname,
+                                              CMPIStatus* rc);
+
   /*
    * local functions for sfcb 
    */

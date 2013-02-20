@@ -259,6 +259,72 @@ getQualifierCount(CMPIConstClass * cc, CMPIStatus *rc)
 }
 
 CMPIData
+internalGetMethQualAt(CMPIConstClass * cc, CMPICount m, CMPICount i,
+                      CMPIString **name, CMPIStatus *rc)
+{
+  ClClass        *cls = (ClClass *) cc->hdl;
+  char           *n;
+  CMPIData        rv = { 0, CMPI_notFound, {0} };
+
+  ClMethod *mthd = (ClMethod *) ClObjectGetClSection(&cls->hdr, &cls->methods);
+  if (m > cls->methods.used)
+    return rv;
+  mthd = mthd + m;
+
+  if (ClClassGetMethQualifierAt(cls, mthd, i, &rv, name ? &n : NULL)) {
+    if (rc)
+      CMSetStatus(rc, CMPI_RC_ERR_NOT_FOUND);
+    if (name)
+      *name = sfcb_native_new_CMPIString(NULL, NULL, 0);
+    return rv;
+  }
+  if (rv.type == CMPI_chars) {
+    rv.value.string = sfcb_native_new_CMPIString(ClObjectGetClString
+                                                 (&cls->hdr,
+                                                  (ClString *) & rv.value.
+                                                  chars), NULL, 0);
+    rv.type = CMPI_string;
+  }
+  if (name) {
+    *name = sfcb_native_new_CMPIString(n, NULL, 0);
+  }
+  if (rc)
+    CMSetStatus(rc, CMPI_RC_OK);
+
+  return rv;
+}
+
+CMPIData
+internalGetMethParamAt(CMPIConstClass * cc, CMPICount m, CMPICount i,
+                      CMPIString **name, CMPIStatus *rc)
+{
+  ClClass        *cls = (ClClass *) cc->hdl;
+  char           *n;
+  CMPIData        rv = { 0, CMPI_notFound, {0} };
+  CMPIParameter   p;
+
+  ClMethod *mthd = (ClMethod *) ClObjectGetClSection(&cls->hdr, &cls->methods);
+  if (m > cls->methods.used)
+    return rv;
+  mthd = mthd + m;
+
+  if (ClClassGetMethParameterAt(cls, mthd, i, &p, name ? &n : NULL)) {
+    if (rc)
+      CMSetStatus(rc, CMPI_RC_ERR_NOT_FOUND);
+    if (name)
+      *name = sfcb_native_new_CMPIString(NULL, NULL, 0);
+    return rv;
+  }
+  rv.type = p.type;
+  if (name) {
+    *name = sfcb_native_new_CMPIString(n, NULL, 0);
+  }
+  if (rc)
+    CMSetStatus(rc, CMPI_RC_OK);
+  return rv;
+}
+
+CMPIData
 internalGetPropQualAt(CMPIConstClass * cc, CMPICount p, CMPICount i,
                       CMPIString **name, CMPIStatus *rc)
 {
@@ -444,6 +510,162 @@ getKeyList(CMPIConstClass * cc)
   return kar;
 }
 
+static CMPIData
+getMethod(CMPIConstClass * cc, const char *name, CMPIStatus *rc)
+{
+  ClClass        *cls = (ClClass *) cc->hdl;
+  CMPIData        rv_notfound = { 0, CMPI_notFound, {0} };
+  CMPIData        rv;
+  char           *mname;
+  CMPICount       cnt = ClClassGetMethodCount(cls),
+                  i;
+  unsigned long   quals;
+
+  for (i = 0; i < cnt; i++) {
+    if (ClClassGetMethodAt(cls, i, &rv.type, &mname, &quals)) {
+      if (rc)
+        CMSetStatus(rc, CMPI_RC_ERR_NOT_FOUND);
+      return rv_notfound;
+    }
+    if (strcasecmp(name, mname) == 0) {
+      if (rc)
+        CMSetStatus(rc, CMPI_RC_OK);
+      return rv;
+    };
+  }
+  if (rc)
+    CMSetStatus(rc, CMPI_RC_ERR_NOT_FOUND);
+  return rv_notfound;
+}
+
+static CMPIData
+getMethodAt(CMPIConstClass * cc, CMPICount i, CMPIString **name,
+               CMPIStatus *rc)
+{
+  ClClass        *cls = (ClClass *) cc->hdl;
+  char           *n;
+  CMPIData        rv = { 0, CMPI_notFound, {0} };
+  unsigned long   quals;
+  if (ClClassGetMethodAt(cls, i, &rv.type, &n, &quals)) {
+    if (rc)
+      CMSetStatus(rc, CMPI_RC_ERR_NOT_FOUND);
+    return rv;
+  }
+  if (name) {
+    *name = sfcb_native_new_CMPIString(n, NULL, 0);
+  }
+  if (rc)
+    CMSetStatus(rc, CMPI_RC_OK);
+  return rv;
+}
+
+static CMPICount
+getMethodCount(CMPIConstClass * cc, CMPIStatus *rc)
+{
+  ClClass        *cls = (ClClass *) cc->hdl;
+  if (rc)
+    CMSetStatus(rc, CMPI_RC_OK);
+  return (CMPICount) ClClassGetMethodCount(cls);
+}
+
+static CMPIData
+getMethodQualifier(CMPIConstClass * cc, const char *meth, const char *cmq,
+                 CMPIStatus *rc)
+{
+  ClClass        *cls = (ClClass *) cc->hdl;
+  ClSection      *mths = &cls->methods;
+  CMPIData        rv_notFound = { 0, CMPI_notFound, {0} };
+  CMPIData        rv;
+  CMPICount       m = ClClassLocateMethod(&cls->hdr, mths, meth);
+  CMPICount       num = ClClassGetMethQualifierCount(cls, m - 1);
+  CMPICount       i;
+  CMPIString     *name;
+
+  for (i = 0; i < num; i++) {
+    rv = internalGetMethQualAt(cc, m - 1, i, &name, rc);
+
+    if (strcasecmp(cmq, (char*)name->hdl) == 0) {
+      if (rc)
+        CMSetStatus(rc, CMPI_RC_OK);
+      return rv;
+    }
+  }
+  if (rc)
+    CMSetStatus(rc, CMPI_RC_ERR_NOT_FOUND);
+  return rv_notFound;
+}
+
+static CMPIData
+getMethodQualifierAt(CMPIConstClass * cc, const char *meth, CMPICount i,
+                   CMPIString **name, CMPIStatus *rc)
+{
+  ClClass        *cls = (ClClass *) cc->hdl;
+  ClSection      *mths = &cls->methods;
+  CMPICount       m = ClClassLocateMethod(&cls->hdr, mths, meth);
+  return internalGetMethQualAt(cc, m - 1, i, name, rc);
+}
+
+static CMPICount
+getMethodQualifierCount(CMPIConstClass * cc, const char *meth,
+                      CMPIStatus *rc)
+{
+  ClClass        *cls = (ClClass *) cc->hdl;
+  ClSection      *mths = &cls->methods;
+  CMPICount       m = ClClassLocateMethod(&cls->hdr, mths, meth);
+  if (rc)
+    CMSetStatus(rc, CMPI_RC_OK);
+  return ClClassGetMethQualifierCount(cls, m - 1);
+}
+
+static CMPIData
+getMethodParameter(CMPIConstClass * cc, const char *meth, const char *cmq,
+                 CMPIStatus *rc)
+{
+  ClClass        *cls = (ClClass *) cc->hdl;
+  ClSection      *mths = &cls->methods;
+  CMPIData        rv_notFound = { 0, CMPI_notFound, {0} };
+  CMPIData        rv;
+  CMPICount       m = ClClassLocateMethod(&cls->hdr, mths, meth);
+  CMPICount       num = ClClassGetMethParameterCount(cls, m - 1);
+  CMPICount       i;
+  CMPIString     *name;
+
+  for (i = 0; i < num; i++) {
+    rv = internalGetMethParamAt(cc, m - 1, i, &name, rc);
+
+    if (strcasecmp(cmq, (char*)name->hdl) == 0) {
+      if (rc)
+        CMSetStatus(rc, CMPI_RC_OK);
+      return rv;
+    }
+  }
+  if (rc)
+    CMSetStatus(rc, CMPI_RC_ERR_NOT_FOUND);
+  return rv_notFound;
+}
+
+static CMPIData
+getMethodParameterAt(CMPIConstClass * cc, const char *meth, CMPICount i,
+                   CMPIString **name, CMPIStatus *rc)
+{
+  ClClass        *cls = (ClClass *) cc->hdl;
+  ClSection      *mths = &cls->methods;
+  CMPICount       m = ClClassLocateMethod(&cls->hdr, mths, meth);
+  return internalGetMethParamAt(cc, m - 1, i, name, rc);
+}
+
+static CMPICount
+getMethodParameterCount(CMPIConstClass * cc, const char *meth,
+                      CMPIStatus *rc)
+{
+  ClClass        *cls = (ClClass *) cc->hdl;
+  ClSection      *mths = &cls->methods;
+  CMPICount       m = ClClassLocateMethod(&cls->hdr, mths, meth);
+  if (rc)
+    CMSetStatus(rc, CMPI_RC_OK);
+  return ClClassGetMethParameterCount(cls, m - 1);
+}
+
 struct _CMPIConstClass_FT ift = {
   1,
   release,
@@ -458,6 +680,15 @@ struct _CMPIConstClass_FT ift = {
   getPropQualifier,
   getPropQualifierAt,
   getPropQualifierCount,
+  getMethod,
+  getMethodAt,
+  getMethodCount,
+  getMethodParameter,
+  getMethodParameterAt,
+  getMethodParameterCount,
+  getMethodQualifier,
+  getMethodQualifierAt,
+  getMethodQualifierCount,
   getSuperClassName,
   getKeyList,
   toString,

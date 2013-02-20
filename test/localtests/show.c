@@ -1,6 +1,7 @@
 #include "CimClientLib/cmci.h"
 #include "CimClientLib/native.h"
 #include <unistd.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "show.h"
@@ -177,12 +178,41 @@ showInstance(CMPIInstance *instance)
     CMRelease(objectpath);
 }
 
+char *type2Chars(CMPIType type)
+{
+   if (type == CMPI_boolean) return "boolean";
+   if (type == CMPI_dateTime) return "datetime";
+   if (type == CMPI_uint8) return "uint8";
+   if (type == CMPI_uint16) return "uint16";
+   if (type == CMPI_uint32) return "uint32";
+   if (type == CMPI_uint64) return "uint64";
+   if (type == CMPI_sint8) return "sint8";
+   if (type == CMPI_sint16) return "sint16";
+   if (type == CMPI_sint32) return "sint32";
+   if (type == CMPI_sint64) return "sint64";
+   if (type == CMPI_real32) return "real32";
+   if (type == CMPI_real64) return "real64";
+   if (type == (CMPI_ARRAY | CMPI_chars)) return "ARRAY of chars";
+   if (type == (CMPI_ARRAY | CMPI_string)) return "ARRAY of strings";
+   if (type & (CMPI_INTEGER | CMPI_REAL)) return "numeric";
+   if (type & CMPI_chars) return "chars";
+   if (type & CMPI_string) return "string";
+   // TODO: handle remaining types
+#define SBUFLEN 32
+   char str[SBUFLEN];
+   snprintf(str, SBUFLEN, "unknown [CMPIType=%d]", (unsigned short) type);
+   return strdup(str);
+}
+
 void
 showClass(CMPIConstClass * class)
 {
   CMPIString     *classname = class->ft->getClassName(class, NULL);
   int             numproperties = class->ft->getPropertyCount(class, NULL);
-  int             i;
+  int             numqualifiers = class->ft->getQualifierCount(class, NULL);
+  int             nummethods = class->ft->getMethodCount(class, NULL);
+  int             numparameters;
+  int             i, j;
   char           *cv;
 
   if (classname && classname->hdl) {
@@ -215,6 +245,96 @@ showClass(CMPIConstClass * class)
       if (propertyname) {
         CMRelease(propertyname);
       }
+    }
+  }
+
+  if (numqualifiers)
+  {
+    printf("qualifiers:\n");
+    for (i=0; i<numqualifiers; i++)
+    {
+      CMPIString * qualifiername;
+      CMPIData data = class->ft->getQualifierAt(class, i, &qualifiername, NULL);
+
+      if (data.state==0)
+      {
+        cv = value2Chars(data.type, &data.value);
+        printf("\t%s=\"%.60s%s\n", (char *) qualifiername->hdl, cv,
+            (strlen(cv) > 60) ? "...\"" : "\"");
+        if(cv) free(cv);      
+      }
+      else
+        printf("\t%s=NIL\n", (char *)qualifiername->hdl);
+
+      if (qualifiername) CMRelease(qualifiername);
+    }
+  }
+
+  if (nummethods)
+  {
+    printf("methods:\n");
+    for (i=0; i<nummethods; i++)
+    {
+      CMPIString * methodname;
+      CMPIData data = class->ft->getMethodAt(class, i, &methodname, NULL);
+
+      printf("\tMethod=%s (%s)\n", (char *) methodname->hdl,
+          type2Chars(data.type));
+
+      numparameters = class->ft->getMethodParameterCount(class,
+          (char *) methodname->hdl, NULL );
+
+      if (numparameters)
+      {
+        printf("\tmethod parameters:\n");
+        for (j=0; j<numparameters; j++)
+        {
+          CMPIString * parametername;
+          CMPIData data = class->ft->getMethodParameterAt(class,
+              (char *) methodname->hdl, j, &parametername, NULL );
+
+          printf("\t\t%s (%s)\n", (char *) parametername->hdl,
+              type2Chars(data.type));
+
+          if (parametername) CMRelease(parametername);
+        }
+      }
+
+      numqualifiers = class->ft->getMethodQualifierCount(class,
+          (char *) methodname->hdl, NULL );
+
+      if (numqualifiers)
+      {
+        printf("\tmethod qualifiers:\n");
+        for (j=0; j<numqualifiers; j++)
+        {
+          CMPIString * qualifiername;
+          CMPIData data = class->ft->getMethodQualifierAt(class,
+              (char *) methodname->hdl, j, &qualifiername, NULL );
+
+          if (data.state==0)
+          {
+            if (data.type & CMPI_ARRAY) {
+              // TODO: properly print array values here
+              printf("\t\t%s (%s)\n", (char *) qualifiername->hdl,
+                  type2Chars(data.type));
+            }
+            else {
+              cv = value2Chars(data.type, &data.value);
+              printf("\t\t%s (%s)=\"%.60s%s\n", (char *) qualifiername->hdl,
+                  type2Chars(data.type), cv,
+                  (strlen(cv) > 60) ? "...\"" : "\"");
+              if(cv) free(cv);
+            }
+          }
+          else
+            printf("\t\t%s=NIL\n", (char *)qualifiername->hdl);
+
+          if (qualifiername) CMRelease(qualifiername);
+        }
+      }
+
+      if (methodname) CMRelease(methodname);
     }
   }
 
