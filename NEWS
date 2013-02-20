@@ -10,6 +10,7 @@ New features:
 - 3599160 Add sfcbproc utility
 - 3601943 ObjectImpl unit test
 - 2766931 Property filters for interop and interopserver providers
+- 2463 getClass does not expose method information for localconnect
 
 Bugs fixed:
 - 3599526 segfault during ecn with classProviderSf
@@ -27,7 +28,9 @@ Bugs fixed:
 - 3603454 control should do type conversions on startup
 - 2612 Don't persist indications
 - 2613 Check sfcCommon version
+- 2552 datetime conversions do not handle timezone
 - 2490 wbemcat should use URI perl module
+=======
 
 Changes in 1.4.3
 ================
