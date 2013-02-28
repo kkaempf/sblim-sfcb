@@ -59,6 +59,9 @@ static pthread_once_t nsHt_once = PTHREAD_ONCE_INIT;
 
 #define Iterator HashTableIterator*
 #define NEW(x) ((x *) calloc(1,sizeof(x)))
+
+void filterClass(CMPIConstClass* cimClass, const char** props);
+
 /* MODELINES */
 /* DO NOT EDIT BELOW THIS COMMENT */
 /* Modelines are added by 'make pretty' */

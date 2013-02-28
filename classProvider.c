@@ -902,6 +902,9 @@ ClassProviderGetClass(CMPIClassMI * mi,
   cl = getClass(cReg, (char *) cn->hdl);
   if (cl) {
     _SFCB_TRACE(1, ("--- Class found"));
+    if(properties) {
+      filterClass(cl, properties);
+    }
     CMReturnInstance(rslt, (CMPIInstance *) cl);
   } else {
     _SFCB_TRACE(1, ("--- Class not found"));

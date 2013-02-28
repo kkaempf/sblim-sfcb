@@ -2127,6 +2127,40 @@ ClClassGetMethParameterAt(ClClass * cls, ClMethod * m, int pid,
   return 0;
 }
 
+//This function checks whether Methods from the class are filtered or not
+int ClClassIsMethodAtFiltered(ClClass * inst, int id)
+{
+  ClMethod *p;
+  p = (ClMethod *) ClObjectGetClSection(&inst->hdr, &inst->methods);
+  if((p + id)->flags & ClProperty_Filtered) {
+    return 1;
+  }
+  else {
+    return 0;
+  }
+}
+
+//This function checks whether Properties from the class are filtered or not
+int ClClassIsPropertyAtFiltered(ClClass * inst, int id)
+{
+  ClProperty *p;
+  p = (ClProperty *) ClObjectGetClSection(&inst->hdr, &inst->properties);
+  if((p + id)->flags & ClProperty_Filtered) {
+    return 1;
+  }
+  else {
+    return 0;
+  }
+}
+
+void ClClassSetHasFilteredProps(ClClass *cls) {
+  cls->hdr.flags |= HDR_HasFilteredProps;
+}
+
+int ClClassHasFilteredProps(ClClass *cls) {
+  return ((cls->hdr.flags & HDR_HasFilteredProps) > 0);
+}
+
 // -------------------------------------------------------
 // -----
 // -- Instance support

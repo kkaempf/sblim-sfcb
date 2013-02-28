@@ -958,6 +958,9 @@ cls2xml(CMPIConstClass * cls, UtilStringBuffer * sb, unsigned int flags)
     }
 
   for (i = 0, m = ClClassGetPropertyCount(cl); i < m; i++) {
+    if(ClClassHasFilteredProps(cl) && ClClassIsPropertyAtFiltered(cl, i)) {
+      continue;
+    }
     qsb->ft->reset(qsb);
     data = getPropertyQualsAt(cls, i, &name, &quals, &refName, NULL);
     if (flags & FL_includeQualifiers)
@@ -993,6 +996,9 @@ cls2xml(CMPIConstClass * cls, UtilStringBuffer * sb, unsigned int flags)
     CMPIString     *name,
                    *mname;
 
+    if(ClClassHasFilteredProps(cl) && ClClassIsMethodAtFiltered(cl, i)) {
+      continue;
+    }
     qsb->ft->reset(qsb);
     ClClassGetMethodAt(cl, i, &mtype, &smname, &quals);
     mname = sfcb_native_new_CMPIString(smname, NULL, 2);

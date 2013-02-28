@@ -1220,6 +1220,9 @@ ClassProviderGetClass(CMPIClassMI * mi,
     _SFCB_TRACE(1, ("--- Class found"));
     cl = clLocal->ft->clone(clLocal, NULL);
     memLinkInstance((CMPIInstance *) cl);
+    if(properties) {
+      filterClass(cl, properties);
+    }
     CMReturnInstance(rslt, (CMPIInstance *) cl);
     if (ctl != cached)
       CMRelease(cl);

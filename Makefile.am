@@ -288,17 +288,17 @@ libsfccimAccountPassthroughProvider_la_DEPENDENCIES=libsfcBrokerCore.la
 endif
 
 libsfcClassProviderGz_la_SOURCES = \
-   classProviderGz.c
+   classProviderCommon.c classProviderGz.c
 libsfcClassProviderGz_la_LIBADD=-lsfcBrokerCore @SFCB_LIBZ@
 libsfcClassProviderGz_la_DEPENDENCIES=libsfcBrokerCore.la
 
 libsfcClassProviderSf_la_SOURCES = \
-   classProviderSf.c
+   classProviderCommon.c classProviderSf.c
 libsfcClassProviderSf_la_LIBADD=-lsfcBrokerCore @SFCB_LIBZ@
 libsfcClassProviderSf_la_DEPENDENCIES=libsfcBrokerCore.la
 
 libsfcClassProvider_la_SOURCES = \
-   classProvider.c
+   classProviderCommon.c classProvider.c
 libsfcClassProvider_la_LIBADD=-lsfcBrokerCore
 libsfcClassProvider_la_DEPENDENCIES=libsfcBrokerCore.la
 

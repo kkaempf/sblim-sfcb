@@ -157,6 +157,7 @@ typedef struct {
 #define HDR_StrBufferMalloced 16
 #define HDR_ArrayBufferMalloced 32
 #define HDR_FromMof 64
+#define HDR_HasFilteredProps 128
 #endif
   unsigned short  type;
 #ifndef SETCLPFX
@@ -517,6 +518,10 @@ extern int      ClClassGetMethParameterAt(ClClass * cls, ClMethod * m,
 extern int      ClClassGetMethParamQualifierAt(ClClass * cls,
                                                ClParameter * parm, int id,
                                                CMPIData *d, char **name);
+extern int      ClClassIsMethodAtFiltered(ClClass * inst, int id);
+extern int      ClClassIsPropertyAtFiltered(ClClass * inst, int id);
+extern void     ClClassSetHasFilteredProps(ClClass *c);
+extern int      ClClassHasFilteredProps(ClClass *c);
 extern int      isInstance(const CMPIInstance *ci);
 extern ClInstance *ClInstanceNew(const char *ns, const char *cn);
 extern ClInstance *ClInstanceNewFromMof(const char *ns, const char *cn);
@@ -575,25 +580,7 @@ extern void     ClQualifierRelocateQualifier(ClQualifierDeclaration * q);
 extern int      ClQualifierAddQualifier(ClObjectHdr * hdr,
                                         ClSection * qlfs, const char *id,
                                         CMPIData d);
-extern int
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-ClQualifierDeclarationGetQualifierData(ClQualifierDeclaration * q,
+extern int      ClQualifierDeclarationGetQualifierData(ClQualifierDeclaration * q,
                                        CMPIData *data);
 extern void     ClQualifierFree(ClQualifierDeclaration * q);
 const char     *ClObjectGetClObject(ClObjectHdr * hdr, ClString * id);

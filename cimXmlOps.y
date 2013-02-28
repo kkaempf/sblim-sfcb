@@ -384,7 +384,6 @@ buildGetInstanceRequest(void *parm)
   sreq->hdr.sessionId = hdr->sessionId;
 
   for (i = 0; i < req->properties; i++) {
-    fprintf(stderr, "setting filter prop %d to %s\n", i, req->propertyList.values[i].value);
     sreq->properties[i] =
         setCharsMsgSegment(req->propertyList.values[i].value);
   }
