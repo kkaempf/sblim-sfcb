@@ -217,3 +217,7 @@ PitRunner
 Bas ten Berge
 -------------
 01/29/2013 [ 2990304 ] Enhancements for sfcb
+
+Shreyas Deodhar, QLogic
+-----------------------
+02/27/2013 [sfcb-tix:#24] GetClass Operation does not filter the class
