@@ -749,10 +749,10 @@ getResolvedClass(ClassRegister * cr, const char *clsName,
     char orig_abst = mc->quals & ClClass_Q_Abstract;
 
     mergeParents(cr, mc, pn, cls, rctl);
-
     /* We want all our parents' qualifiers except for Abstract. 
-       Overwrite using original Abstract bit */
-    mc->quals &= orig_abst;
+       Clear and set using original Abstract bit */
+    mc->quals &= ~ClClass_Q_Abstract;
+    mc->quals |= orig_abst;
 
     if (*rctl == tempRead) {
       if (cls && (cls_ctl != cached))
