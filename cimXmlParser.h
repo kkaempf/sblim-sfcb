@@ -278,6 +278,12 @@ typedef struct xtokParamValue {
     XtokValueReference valueRef;
     XtokValueArray  valueArray;
     XtokValueRefArray valueRefArray;
+    /* Support new subelements in DSP0201 v2.3.1 */
+    char *className;
+    XtokInstanceName instanceName;
+//  XtokClass class;  /* FIXME resolve circular dependency */
+    XtokInstance instance;
+    XtokNamedInstance namedInstance;
   };
 } XtokParamValue;
 

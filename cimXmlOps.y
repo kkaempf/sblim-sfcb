@@ -1422,10 +1422,12 @@ buildInvokeMethodRequest(void *parm)
 
   for (p = req->paramValues.first; p; p = p->next) {
     /*
-     * Update untyped params (p->type==0) and verify those that were
-     * specified 
+     * Update untyped params (p->type==0) and verify those that were specified.
+     * (Unlikely to be untyped at this point. Even if no paramtype is given in
+     * the XML, the rule actions would assign one.)
      */
-    if (p->type == 0 || p->type == CMPI_ARRAY || vmpt) {
+    if (p->type == 0 || p->type == CMPI_ARRAY || p->type == CMPI_class || 
+        p->type == CMPI_instance || vmpt) {
       rc = updateMethodParamTypes(hdr);
 
       if (rc != CMPI_RC_OK) {
@@ -1435,7 +1437,10 @@ buildInvokeMethodRequest(void *parm)
         return;
       }
     }
-
+    /*
+     * TODO: Add support for PARAMVALUE subelements CLASS, CLASSNAME, INSTANCE,
+     * INSTANCENAME, VALUE.NAMEDINSTANCE, in addition to EmbeddedInstance.
+     */
     if (p->value.value) {
       CMPIValue val = str2CMPIValue(p->type, p->value, &p->valueRef, req->op.nameSpace.data, &st);
       if (st.rc) {
@@ -1545,6 +1550,11 @@ updateMethodParamTypes(RequestHdr * hdr)
           // fprintf(stderr, " is EmbeddedInstance\n");
           isEI = 1;
           break;
+          /*
+           * TODO: For PARAMVALUE subelements CLASS, CLASSNAME, INSTANCE,
+           * INSTANCENAME, VALUE.NAMEDINSTANCE, we probably want to skip
+           * the below repository check as well.
+           */
         }
       }
       if (isEI)
@@ -1554,6 +1564,7 @@ updateMethodParamTypes(RequestHdr * hdr)
     if ((ptok->type == 0) || (ptok->type == CMPI_ARRAY)) {
       /*
        * Type was unknown, fill it in 
+       * (unlikely at this point, see comment in buildInvokeMethodRequest)
        */
       // printf("parameter %s missing type, using %s\n", sname,
       // paramType(pdata.type));
@@ -2256,6 +2267,33 @@ paramValue
        $$.valueRefArray=$2;
        $$.type=CMPI_ARRAY | CMPI_ref;
     }   
+    /* Support new subelements in DSP0201 v2.3.1 */
+    | XTOK_PARAMVALUE className ZTOK_PARAMVALUE
+    {
+       $$.className=$2;
+       if (!$$.type) $$.type=CMPI_class;  /* should this be CMPI_string? */
+    }
+    | XTOK_PARAMVALUE instanceName ZTOK_PARAMVALUE
+    {
+       $$.instanceName=$2;
+       if (!$$.type) $$.type=CMPI_instance;
+    }
+    | XTOK_PARAMVALUE class ZTOK_PARAMVALUE
+    {
+       //$$.class=$2;
+       if (!$$.type) $$.type=CMPI_class;
+    }
+    | XTOK_PARAMVALUE instance ZTOK_PARAMVALUE
+    {
+       $$.instance=$2;
+       if (!$$.type) $$.type=CMPI_instance;
+    }
+    | XTOK_PARAMVALUE namedInstance ZTOK_PARAMVALUE
+    {
+       $$.namedInstance=$2;
+       /* should we ignore paramtype from the XML and always set to CMPI_instance? */
+       if (!$$.type) $$.type=CMPI_instance;
+    }
 ;
 
 /*

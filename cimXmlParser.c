@@ -487,6 +487,9 @@ static Types    types[] = {
   {"datetime", CMPI_dateTime},
   {"real32", CMPI_real32},
   {"real64", CMPI_real64},
+  {"reference", CMPI_ref},
+  {"class", CMPI_class},
+  {"instance", CMPI_instance},
   {NULL}
 };
 
@@ -733,12 +736,6 @@ procParamValue(YYSTYPE * lvalp, ParserControl * parm)
             lvalp->xtokParamValue.type = types[i].type;
             break;
           }
-        }
-        // is this right? why isn't reference covered by the types array
-        // in the loop above?
-        if (lvalp->xtokParamValue.type == 0) {
-          if (strcasecmp(attr[1].attr, "reference") == 0)
-            lvalp->xtokParamValue.type = CMPI_ref;
         }
       }
       if (attr[2].attr) {

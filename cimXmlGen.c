@@ -485,7 +485,14 @@ str2CMPIValue(CMPIType type, XtokValue val, XtokValueReference * ref,
     getKeyValueTypePtr("ref", NULL, ref, &value, &t, ns);
     break;
   case CMPI_instance:
+    /*
+     * TODO: Properly support PARAMVALUE subelements INSTANCE, INSTANCENAME,
+     * VALUE.NAMEDINSTANCE, in addition to EmbeddedInstance.
+     */
     value = makeFromEmbeddedObject(val, ns);
+    break;
+  case CMPI_class:
+    /* TODO: Properly support PARAMVALUE subelements CLASS, CLASSNAME. */
     break;
   default:
     mlogf(M_ERROR, M_SHOW, "%s(%d): invalid value %d-%p\n", __FILE__,
