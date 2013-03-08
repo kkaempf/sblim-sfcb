@@ -97,7 +97,7 @@ do
               notline=$(echo $line | awk '{ line=index($line,"!"); print line; }' )
               if [ "$notline" != 0 ] ; then
                 text=$(echo $line | awk '{ line=substr($line, 2); print line; }' )
-                if  grep --q "$text" $_TESTRESULT  ; then
+                if  grep -F --q "$text" $_TESTRESULT  ; then
                     if [ $passed -eq 0 ] ; then
                         printf $red
                         echo "FAILED disallowed line found"
@@ -110,7 +110,7 @@ do
                 fi
               else
                 # Check for required lines
-                if ! grep --q "$line" $_TESTRESULT  ; then
+                if ! grep -F --q "$line" $_TESTRESULT  ; then
                     if [ $passed -eq 0 ] ; then
                         printf $red
                         echo "FAILED required line not found"

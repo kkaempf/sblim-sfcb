@@ -396,7 +396,7 @@ newClassRegister(char *fname)
         int v = -1;
         int r = -1;
         first = 0;
-	if (ClVerifyObjImplLevel(cr->vr) && (r = cr->vr->options == ClTypeClassReducedRep)) 
+	if (ClVerifyObjImplLevel(cr->vr)) 
 	  continue;
 
         if (cr->vr)
@@ -713,6 +713,12 @@ getResolvedClass(ClassRegister * cr, const char *clsName,
 {
   _SFCB_ENTER(TRACE_PROVIDERS, "getResolvedClass");
   _SFCB_TRACE(1, ("--- classname %s cReg %p", clsName, cr));
+
+  /* if standard repo, skip straight to normal gc */
+  if (cr->vr->options != ClTypeClassReducedRep) {
+    return getClass(cr, clsName, rctl);
+  }
+
   CMPIConstClass *cc = NULL,
       *cls = NULL;
   ReadCtl         ctl = *rctl;

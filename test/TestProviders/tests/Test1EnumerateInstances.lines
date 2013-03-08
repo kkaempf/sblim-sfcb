@@ -1,0 +1,31 @@
+<INSTANCENAME CLASSNAME="Sample_Instance">
+<KEYBINDING NAME="Identifier">
+<KEYVALUE VALUETYPE="numeric">1</KEYVALUE>
+<INSTANCE CLASSNAME="Sample_Instance">
+<PROPERTY NAME="Identifier" TYPE="uint8">
+<VALUE>1</VALUE>
+<PROPERTY NAME="Einst" EmbeddedObject="object" TYPE="string">
+[CDATA[
+<PROPERTY NAME="Identifier" TYPE="uint8">
+<VALUE>1</VALUE>
+<PROPERTY NAME="Einst" EmbeddedObject="object" TYPE="string">
+<PROPERTY NAME="Message" TYPE="string">
+<VALUE>I&apos;m an EmbeddedObject</VALUE>
+<PROPERTY NAME="Message" TYPE="string">
+<VALUE>Hello World</VALUE>
+<INSTANCENAME CLASSNAME="Sample_Instance">
+<KEYBINDING NAME="Identifier">
+<KEYVALUE VALUETYPE="numeric">2</KEYVALUE>
+<INSTANCE CLASSNAME="Sample_Instance">
+<PROPERTY NAME="Identifier" TYPE="uint8">
+<VALUE>2</VALUE>
+<PROPERTY NAME="Einst" EmbeddedObject="object" TYPE="string">
+<PROPERTY NAME="Message" TYPE="string">
+<VALUE>Yo Planet</VALUE>
+<KEYVALUE VALUETYPE="numeric">3</KEYVALUE>
+<INSTANCE CLASSNAME="Sample_Instance">
+<PROPERTY NAME="Identifier" TYPE="uint8">
+<VALUE>3</VALUE>
+<PROPERTY NAME="Einst" EmbeddedObject="object" TYPE="string">
+<PROPERTY NAME="Message" TYPE="string">
+<VALUE>Hey Earth</VALUE>
