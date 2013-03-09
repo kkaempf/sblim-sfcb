@@ -1679,6 +1679,21 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
     _SFCB_TRACE(1,("--- _updateHandler %s %s",(char*)ns->hdl,(char*)str->hdl));
     updateHandler(ci,op);     
   }
+  else if (strcasecmp(methodName, "_getHandler") == 0) {
+    // Return a handler instance from the hashtable
+    CMPIObjectPath *op = CMGetArg(in, "handler", &st).value.ref;
+    CMPIString *ops=op->ft->toString(op,NULL);
+    char *key = normalizeObjectPathCharsDup(op);
+    Handler *ha = getHandler(key);
+
+    if (ha) {
+      CMAddArg(out, "hin", &ha->hci, CMPI_instance);
+    } else {
+      setStatus(&st, CMPI_RC_ERR_NOT_FOUND, "Handler object not found");
+    }
+    if (key)
+      free(key);
+  }
 
   else if (strcasecmp(methodName, "_startup") == 0) {
     initInterOp(_broker, ctx);

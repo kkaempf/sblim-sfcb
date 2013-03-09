@@ -880,7 +880,6 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
   _SFCB_ENTER(TRACE_INDPROVIDER, "IndCIMXMLHandlerInvokeMethod");
 
   CMPIStatus      st = { CMPI_RC_OK, NULL };
-  CMPIStatus      circ = { CMPI_RC_OK, NULL };
   int             drc = 0;
   struct timeval tv;
   struct timezone tz;
@@ -922,7 +921,15 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
       sub=CMGetArg(in,"subscription",NULL).value.inst;
       CMPIData handler=CMGetProperty(sub, "Handler", &st);
       CMPIObjectPath *hop=handler.value.ref;
-      CMPIInstance *hdlr=CBGetInstance(_broker, ctxLocal, hop, NULL, &st);
+      // Get the handler instance from the hashtable via a
+      // methodcall to interopProvider
+      in=CMNewArgs(_broker,NULL);
+      CMAddArg(in,"handler",&hop,CMPI_ref);
+      out=CMNewArgs(_broker,NULL);
+      CMPIObjectPath* sop=CMNewObjectPath(_broker,"root/interop","cim_indicationsubscription",&st);
+      CBInvokeMethod(_broker,ctx,sop,"_getHandler",in,out,&st);
+      CMPIInstance *hdlr=CMGetArg(out,"hin",NULL).value.inst;
+
       if (hdlr == NULL) {
          mlogf(M_ERROR,M_SHOW,"Deliver indication failed, hdlr is null. rc:%d\n",st.rc);
          _SFCB_RETURN(st);
@@ -947,7 +954,13 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
       if (lastseq.sint64 < 0) lastseq.sint64=0;
       // Update the last used number in the handler
       CMSetProperty(hdlr, "LastSequenceNumber", &lastseq.sint64, CMPI_sint64);
-      CBModifyInstance(_broker, ctxLocal, hop, hdlr, NULL);
+      in=CMNewArgs(_broker,NULL);
+      CMAddArg(in,"handler",&hdlr,CMPI_instance);
+      CMAddArg(in,"key",&hop,CMPI_ref);
+      CBInvokeMethod(_broker,ctx,sop,"_updateHandler",in,NULL,&st);
+      if (st.rc != CMPI_RC_OK) {
+         mlogf(M_ERROR,M_SHOW,"Failed to update LastSequenceNumber. rc:%d\n",st.rc);
+      }
       // And the indication
       CMSetProperty(ind, "SequenceNumber", &lastseq, CMPI_sint64);
     }
