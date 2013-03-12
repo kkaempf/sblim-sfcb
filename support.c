@@ -403,7 +403,6 @@ __flush_mt(managed_thread * mt)
 static void
 __cleanup_mt(void *ptr)
 {
-  _SFCB_ENTER(TRACE_MEMORYMGR, "__cleanup_mt");
   managed_thread *mt = (managed_thread *) ptr;
 
   // fprintf(stderr,"---- %d/%d cleanup_mt %x, %x\n", getpid(),
@@ -420,7 +419,7 @@ __cleanup_mt(void *ptr)
 
     if (mt) { free(mt); mt = NULL; }
   }
-  _SFCB_EXIT();
+  return;
 }
 
 static managed_thread *__memInit(int dontforce);
@@ -450,7 +449,6 @@ uninitGarbageCollector()
 static managed_thread *
 __init_mt()
 {
-  _SFCB_ENTER(TRACE_MEMORYMGR, "managed_thread");
   managed_thread *mt =
       (managed_thread *) calloc(1, sizeof(managed_thread) + 8);
 
@@ -467,7 +465,7 @@ __init_mt()
 
   CMPI_BrokerExt_Ftab->setThreadSpecific(__mm_key, mt);
 
-  _SFCB_RETURN(mt);
+  return(mt);
 }
 
 /**
@@ -489,7 +487,6 @@ __init_mm()
 static managed_thread *
 __memInit(int dontforce)
 {
-  _SFCB_ENTER(TRACE_MEMORYMGR, "__memInit");
   managed_thread *mt;
 
   CMPI_BrokerExt_Ftab->threadOnce(&__once, __init_mm);
