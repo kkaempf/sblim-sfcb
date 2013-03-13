@@ -110,6 +110,7 @@ void _sfcb_trace_start(int n)
 void _sfcb_trace_stop()
 {
   shmctl(shmid, IPC_RMID, 0);
+  shmdt(vpDP);
   _sfcb_debug = 0;
 }
 
