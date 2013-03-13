@@ -1,3 +1,8 @@
+2013-03-13 Michael Chase-Salerno <bratac@linux.vnet.ibm.com>
+
+	* trace.c, support.c:
+	[sfcb-tix:#28 Further shm trace id leak]
+
 2013-01-22  Dave Heller <hellerda@us.ibm.com>
 
 	* sfcbproc.c, Makefile.am
