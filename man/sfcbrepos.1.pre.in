@@ -46,17 +46,19 @@ rebuild the new sfcb repository without prompting.
 Do \fInot\fR migrate instances from previous repository
 .TP
 \fB\-b\fR \fIbackendopts\fR
-Set special backend options for sfcbmof.  Valid options are: \fBP32\fR - compile 
-for PowerPC target; \fBQ\fR - skip qualifiers in output file; \fBq\fR - skip 
-Description, ValueMap, and Values qualifiers in output file. Note: eliminating 
-qualifiers will often significantly reduce the size of the class repository.
+Set special backend options for sfcbmof.  Valid options are: \fIP32\fR - compile 
+for PowerPC target; \fIQ\fR - skip all string qualifiers in output file; \fIq\fR - skip 
+selected qualifiers (ArrayType, Deprecated, Description, MappingString, PUnit, UmlPackagePath, Units, 
+Version, ValueMap, and Values) in output file. 
+Note: eliminating qualifiers will often significantly reduce the size of the class repository.
 .TP
 \fB\-X\fR \fIplatform\fR
 Alias of \fB-b\fR
 .TP
 \fB\-t\fR \fIformat\fR
 The format for the class repository. \fIsf\fR for reduced-size repositories read by 
-ClassProviderSf. Default is \fIauto\fR, which will auto-detect based on the contents of the 
+ClassProviderSf. \fIstd\fR for standard repositories read by either ClassProviderSf or ClassProviderGz.
+Default is \fIauto\fR, which will auto-detect based on the contents of the 
 \fIproviderRegister\fR file.
 .TP
 \fB\-h\fR
