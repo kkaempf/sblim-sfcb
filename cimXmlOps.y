@@ -956,13 +956,13 @@ buildReferencesRequest(void *parm)
   if (req->objectName.bindings.next == 0) {
     free(sreq);
     hdr->rc = CMPI_RC_ERR_NOT_SUPPORTED;
-    hdr->errMsg = "References operation for classes not supported";
+    hdr->errMsg = strdup("References operation for classes not supported");
     return;
   }
   if (!req->objNameSet) {
     free(sreq);
     hdr->rc = CMPI_RC_ERR_INVALID_PARAMETER;
-    hdr->errMsg = "ObjectName parameter required";
+    hdr->errMsg = strdup("ObjectName parameter required");
     return;
   }
 
@@ -1024,12 +1024,12 @@ buildReferenceNamesRequest(void *parm)
 
   if (req->objectName.bindings.next == 0) {
     hdr->rc = CMPI_RC_ERR_NOT_SUPPORTED;
-    hdr->errMsg = "ReferenceNames operation for classes not supported";
+    hdr->errMsg = strdup("ReferenceNames operation for classes not supported");
     return;
   }
   if (!req->objNameSet) {
     hdr->rc = CMPI_RC_ERR_INVALID_PARAMETER;
-    hdr->errMsg = "ObjectName parameter required";
+    hdr->errMsg = strdup("ObjectName parameter required");
     return;
   }
 
@@ -3429,6 +3429,20 @@ associatorsParms
        $$.properties=0;
        $$.propertyList.values=0;
     }
+    | XTOK_IP_OBJECTNAME className ZTOK_IPARAMVALUE
+    {
+       // This is an unsupported operation. To ensure we handle with a friendly
+       // error message, make it appear as if INSTANCENAME with no KEYBINDING
+       // was passed in the XML.
+       $$.objectName.className = $2;
+       $$.objectName.bindings.next=0;
+       $$.objectName.bindings.keyBindings=NULL;
+       $$.objNameSet = 1;
+       $$.flags = $$.flagsSet = 0;
+       $$.resultClass=$$.role=0;
+       $$.properties=0;
+       $$.propertyList.values=0;
+    }
     | XTOK_IP_ASSOCCLASS className ZTOK_IPARAMVALUE
     {
        $$.assocClass = $2;
@@ -3590,7 +3604,7 @@ referencesParmsList
           $$.propertyList=$2.propertyList;
           $$.properties=$2.properties;
        }
-    }
+   }
 ;
 
 referencesParms
@@ -3603,6 +3617,17 @@ referencesParms
        $$.properties=0;
        $$.propertyList.values=0;
     }
+    | XTOK_IP_OBJECTNAME className ZTOK_IPARAMVALUE
+    {
+       $$.objectName.className = $2;
+       $$.objectName.bindings.next=0;
+       $$.objectName.bindings.keyBindings=NULL;
+       $$.objNameSet = 1;
+       $$.flags = $$.flagsSet = 0;
+       $$.resultClass=$$.role=0;
+       $$.properties=0;
+       $$.propertyList.values=0;
+    }
     | XTOK_IP_RESULTCLASS className ZTOK_IPARAMVALUE
     {
        $$.resultClass = $2;
@@ -3610,7 +3635,7 @@ referencesParms
        $$.role=0;
        $$.properties=0;
        $$.propertyList.values=0;
-    }
+   }
     | XTOK_IP_RESULTCLASS ZTOK_IPARAMVALUE
     {
        memset(&$$, 0, sizeof($$));
@@ -3737,6 +3762,14 @@ associatorNamesParms
        $$.objNameSet = 1;
        $$.assocClass=$$.resultClass=$$.role=$$.resultRole=0;
     }
+    | XTOK_IP_OBJECTNAME className ZTOK_IPARAMVALUE
+    {
+       $$.objectName.className = $2;
+       $$.objectName.bindings.next=0;
+       $$.objectName.bindings.keyBindings=NULL;
+       $$.objNameSet = 1;
+       $$.resultClass=$$.role=0;
+    }
     | XTOK_IP_ASSOCCLASS className ZTOK_IPARAMVALUE
     {
        $$.assocClass = $2;
@@ -3841,6 +3874,14 @@ referenceNamesParms
     : XTOK_IP_OBJECTNAME instanceName ZTOK_IPARAMVALUE
     {
        $$.objectName = $2;
+       $$.objNameSet = 1;
+       $$.resultClass=$$.role=0;
+    }
+    | XTOK_IP_OBJECTNAME className ZTOK_IPARAMVALUE
+    {
+       $$.objectName.className = $2;
+       $$.objectName.bindings.next=0;
+       $$.objectName.bindings.keyBindings=NULL;
        $$.objNameSet = 1;
        $$.resultClass=$$.role=0;
     }
