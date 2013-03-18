@@ -158,6 +158,9 @@ then
     if [ "$cpformat" = "sf" ]
     then
             cpformat="-t"
+    elif [ "$cpformat" = "std" ]
+    then
+            cpformat=""
     elif [ "$cpformat" = "auto" ] && grep ClassProviderSf $registrationdir/providerRegister > /dev/null
     then
             echo "Sf format being used."
