@@ -104,6 +104,7 @@ Control         init[] = {
   {"keepaliveTimeout", CTL_LONG, NULL, {.slong=15}},
   {"keepaliveMaxRequest", CTL_LONG, NULL, {.slong=10}},
   {"selectTimeout", CTL_LONG, NULL, {.slong=5}},
+  {"maxBindAttempts", CTL_LONG, NULL, {.slong=8}},
 
   {"providerSampleInterval", CTL_LONG, NULL, {.slong=30}},
   {"providerTimeoutInterval", CTL_LONG, NULL, {.slong=60}},

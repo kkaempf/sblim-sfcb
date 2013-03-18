@@ -1760,8 +1760,9 @@ bindToPort(int sock, int port, char *ip, void *ssin, socklen_t * sin_len)
     if (!(sin = prepSockAddr4(ip, port, ssin, sin_len)))
       return 1;
 
-  int maxtries = 5;
-  int i = maxtries;
+  long maxtries = 8;
+  getControlNum("maxBindAttempts", &maxtries);
+  int i = maxtries = maxtries <= 0 ? 1 : maxtries;  // ensure > 0
   while (1) {
     if (!bind(sock, sin, *sin_len)) {
       if (!listen(sock, 10)) {
