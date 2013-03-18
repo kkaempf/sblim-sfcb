@@ -98,6 +98,7 @@ Control init[] = {
    {"keepaliveTimeout",        1, "15"},
    {"keepaliveMaxRequest",     1, "10"},
    {"selectTimeout",           1, "5"},
+   {"maxBindAttempts",         1, "8"},
 
    {"providerSampleInterval",  1, "30"},
    {"providerTimeoutInterval", 1, "60"},

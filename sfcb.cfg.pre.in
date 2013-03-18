@@ -68,6 +68,10 @@ basicAuthLib:   @SFCB_CONF_BASICAUTHLIB@
 ## Default is 5
 #selectTimeout: 5
 
+## Maximum number of tries to bind a TCP socket before giving up.
+## Default is 8
+#maxBindAttempts: 8
+
 ## Name of the entry point into the authentication library
 ## The return code of this function will determine if auth passes or fails
 ## Default is: _sfcBasicAuthenticate
