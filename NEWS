@@ -1,8 +1,6 @@
 Changes in 1.4.4
 ================
 
-Everything in 1.3.17 (see below), plus: 
-
 New features:
 - 3597805 Restart HTTP daemon without restarting SFCB
 - 3597806 Bind to arbitrary list of IP addresses in SFCB
@@ -10,7 +8,7 @@ New features:
 - 3599160 Add sfcbproc utility
 - 3601943 ObjectImpl unit test
 - 2766931 Property filters for interop and interopserver providers
-- [Bugs:#2463] getClass does not expose method information for localconnect
+- [sfcb-tix:#16] getClass does not expose method information for localconnect
 
 Bugs fixed:
 - 3599526 segfault during ecn with classProviderSf
@@ -28,9 +26,21 @@ Bugs fixed:
 - 3603454 control should do type conversions on startup
 - [Bugs:#2612] Don't persist indications
 - [Bugs:#2613] Check sfcCommon version
-- [Bugs:#2552] datetime conversions do not handle timezone
+- [sfcb-tix:#21] datetime conversions do not handle timezone
 - [Bugs:#2490] wbemcat should use URI perl module
-- [Sfcb:#1] Streamline SLP
+- [sfcb-tix:#1] Streamline SLP
+- [sfcb-tix:#7] autoconfiscate.sh needs --force for all tools
+- [sfcb-tix:#24] GetClass Operation does not filter the class
+- [sfcb-tix:#25] classProviderSf drops Association qualifier on child classes
+- [sfcb-tix:#6] SFCB XML Parser Error with Instance as Parameter
+- [sfcb-tix:#26] ClassProviderSf should read standard repositories
+- [sfcb-tix:#13] Optimize Handler Sequence numbers
+- [sfcb-tix:#27] Bump schema to 2.35
+- [sfcb-tix:#28] Further shm trace id leak
+- [sfcb-tix:#19] Update q and Q options for sfcbmof
+- [sfcb-tix:#2] Problem with PropertyList on association classes
+- [sfcb-tix:#30] Make maxBindAttempts a configurable option
+- [sfcb-tix:#29] Add -t std option to sfcbrepos
 
 Changes in 1.4.3
 ================
