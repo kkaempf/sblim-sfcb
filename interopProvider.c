@@ -1682,7 +1682,6 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
   else if (strcasecmp(methodName, "_getHandler") == 0) {
     // Return a handler instance from the hashtable
     CMPIObjectPath *op = CMGetArg(in, "handler", &st).value.ref;
-    CMPIString *ops=op->ft->toString(op,NULL);
     char *key = normalizeObjectPathCharsDup(op);
     Handler *ha = getHandler(key);
 

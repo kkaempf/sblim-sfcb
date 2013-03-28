@@ -161,9 +161,6 @@ static int      idleThreadStartHandled = 0;
 
 ProviderInfo   *activProvs = NULL;
 
-static void increaseInUseSem(int id);
-static void decreaseInUseSem(int id);
-
 unsigned long   provSampleInterval = 10;
 unsigned long   provTimeoutInterval = 25;
 unsigned        provAutoGroup = 0;
@@ -376,52 +373,6 @@ stopNextProc()
    for (tmp = activProvs; tmp; tmp = tmp->next)
      count++;
    return count;
- }
-
- static void increaseInUseSem(int id)
- {
-   _SFCB_ENTER(TRACE_PROVIDERDRV, "increaseInUseSem");
-  
-   if (semAcquireUnDo(sfcbSem,PROV_GUARD(id))) {
-     mlogf(M_ERROR,M_SHOW,"-#- Fatal error acquiring semaphore for %d, reason: %s\n",
-           id, strerror(errno));
-     _SFCB_ABORT();
-   }
-   if (semReleaseUnDo(sfcbSem,PROV_INUSE(id))) {
-     mlogf(M_ERROR,M_SHOW,"-#- Fatal error increasing inuse semaphore for %d, reason: %s\n",
-           id, strerror(errno));
-     _SFCB_ABORT();
-   }
-   if (semReleaseUnDo(sfcbSem,PROV_GUARD(id))) {
-     mlogf(M_ERROR,M_SHOW,"-#- Fatal error releasing semaphore for %d, reason: %s\n",
-           id, strerror(errno));
-     _SFCB_ABORT();
-   }
-   _SFCB_EXIT();
- }
-
- static void decreaseInUseSem(int id)
- {
-   _SFCB_ENTER(TRACE_PROVIDERDRV, "decreaseInUseSem");
-  
-   if (semAcquireUnDo(sfcbSem,PROV_GUARD(id))) {
-     mlogf(M_ERROR,M_SHOW,"-#- Fatal error acquiring semaphore for %d, reason: %s\n",
-           id, strerror(errno));
-     _SFCB_ABORT();
-   }
-   if (semGetValue(sfcbSem,PROV_INUSE(id)) > 0) {
-     if (semAcquireUnDo(sfcbSem,PROV_INUSE(id))) {
-       mlogf(M_ERROR,M_SHOW,"-#- Fatal error decreasing inuse semaphore for %d, reason: %s\n",
-             id, strerror(errno));
-       _SFCB_ABORT();
-     }
-   }
-   if (semReleaseUnDo(sfcbSem,PROV_GUARD(id))) {
-     mlogf(M_ERROR,M_SHOW,"-#- Fatal error releasing semaphore for %d, reason: %s\n",
-           id, strerror(errno));
-     _SFCB_ABORT();
-   }
-   _SFCB_EXIT();
  }
 
  typedef struct _provLibAndTypes {
@@ -2668,6 +2619,52 @@ referenceNames(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 }
 
 #ifdef SFCB_INCL_INDICATION_SUPPORT
+
+ static void increaseInUseSem(int id)
+ {
+   _SFCB_ENTER(TRACE_PROVIDERDRV, "increaseInUseSem");
+
+   if (semAcquireUnDo(sfcbSem,PROV_GUARD(id))) {
+     mlogf(M_ERROR,M_SHOW,"-#- Fatal error acquiring semaphore for %d, reason: %s\n",
+           id, strerror(errno));
+     _SFCB_ABORT();
+   }
+   if (semReleaseUnDo(sfcbSem,PROV_INUSE(id))) {
+     mlogf(M_ERROR,M_SHOW,"-#- Fatal error increasing inuse semaphore for %d, reason: %s\n",
+           id, strerror(errno));
+     _SFCB_ABORT();
+   }
+   if (semReleaseUnDo(sfcbSem,PROV_GUARD(id))) {
+     mlogf(M_ERROR,M_SHOW,"-#- Fatal error releasing semaphore for %d, reason: %s\n",
+           id, strerror(errno));
+     _SFCB_ABORT();
+   }
+   _SFCB_EXIT();
+ }
+
+ static void decreaseInUseSem(int id)
+ {
+   _SFCB_ENTER(TRACE_PROVIDERDRV, "decreaseInUseSem");
+
+   if (semAcquireUnDo(sfcbSem,PROV_GUARD(id))) {
+     mlogf(M_ERROR,M_SHOW,"-#- Fatal error acquiring semaphore for %d, reason: %s\n",
+           id, strerror(errno));
+     _SFCB_ABORT();
+   }
+   if (semGetValue(sfcbSem,PROV_INUSE(id)) > 0) {
+     if (semAcquireUnDo(sfcbSem,PROV_INUSE(id))) {
+       mlogf(M_ERROR,M_SHOW,"-#- Fatal error decreasing inuse semaphore for %d, reason: %s\n",
+             id, strerror(errno));
+       _SFCB_ABORT();
+     }
+   }
+   if (semReleaseUnDo(sfcbSem,PROV_GUARD(id))) {
+     mlogf(M_ERROR,M_SHOW,"-#- Fatal error releasing semaphore for %d, reason: %s\n",
+           id, strerror(errno));
+     _SFCB_ABORT();
+   }
+   _SFCB_EXIT();
+ }
 
 static BinResponseHdr *
 activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) requestor)

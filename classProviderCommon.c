@@ -1,4 +1,7 @@
-#include "classProviderCommon.h"
+#include <string.h>
+#include "objectImpl.h"
+#include "constClass.h"
+#include "trace.h"
 
 //candidate for sfcCommon
 int contained_list(const char **list, const char *name)
