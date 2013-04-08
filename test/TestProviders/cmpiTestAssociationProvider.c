@@ -78,6 +78,10 @@ get_assoc_targetClass_ObjectPath(const CMPIBroker * broker,
     op = CMNewObjectPath(broker,
                          CMGetCharsPtr(CMGetNameSpace(ref, rc), NULL),
                          targetName, rc);
+
+    if (!op)
+      CMSetStatusWithChars(_broker, rc, CMPI_RC_ERR_FAILED,
+          "Create CMPIObjectPath failed in cmpiTestAssociationProvider");
   }
   return op;
 }
@@ -128,6 +132,20 @@ TestAssociationProviderAssociators(CMPIAssociationMI * mi,
                                         ref,
                                         _RefLeftClass,
                                         _RefRightClass, &rc);
+ 
+  /*
+   * check for a failure in creating the object path
+   */
+  if (rc.rc != CMPI_RC_OK)
+    return rc;
+
+  /*
+   * the target class does not belong to us so just return CMPI_RC_OK
+   */
+  if (!op) {
+    CMSetStatusWithChars( _broker, &rc, CMPI_RC_OK, NULL );
+    return rc;
+  }
 
   sourceClass = CMGetClassName(op, &rc);
 
@@ -182,6 +200,20 @@ TestAssociationProviderAssociatorNames(CMPIAssociationMI * mi,
                                         ref,
                                         _RefLeftClass,
                                         _RefRightClass, &rc);
+
+  /*
+   * check for a failure in creating the object path
+   */
+  if (rc.rc != CMPI_RC_OK)
+    return rc;
+
+  /*
+   * the target class does not belong to us so just return CMPI_RC_OK
+   */
+  if (!op) {
+    CMSetStatusWithChars( _broker, &rc, CMPI_RC_OK, NULL );
+    return rc;
+  }
 
   /*
    * create new object path of association 
@@ -245,6 +277,20 @@ TestAssociationProviderReferences(CMPIAssociationMI * mi,
                                         ref,
                                         _RefLeftClass,
                                         _RefRightClass, &rc);
+
+  /*
+   * check for a failure in creating the object path
+   */
+  if (rc.rc != CMPI_RC_OK)
+    return rc;
+
+  /*
+   * the target class does not belong to us so just return CMPI_RC_OK
+   */
+  if (!op) {
+    CMSetStatusWithChars( _broker, &rc, CMPI_RC_OK, NULL );
+    return rc;
+  }
 
   /*
    * create new object path of association 
@@ -335,6 +381,20 @@ TestAssociationProviderReferenceNames(CMPIAssociationMI * mi,
                                         ref,
                                         _RefLeftClass,
                                         _RefRightClass, &rc);
+
+  /*
+   * check for a failure in creating the object path
+   */
+  if (rc.rc != CMPI_RC_OK)
+    return rc;
+
+  /*
+   * the target class does not belong to us so just return CMPI_RC_OK
+   */
+  if (!op) {
+    CMSetStatusWithChars( _broker, &rc, CMPI_RC_OK, NULL );
+    return rc;
+  }
 
   /*
    * create new object path of association 
