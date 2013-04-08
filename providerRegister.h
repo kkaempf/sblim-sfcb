@@ -128,6 +128,8 @@ extern          "C" {
     ProviderInfo   *(*getProvider) (ProviderRegister * br,
                                     const char *clsName,
                                     unsigned long type);
+    ProviderInfo   *(*getProviderById) (ProviderRegister * br,
+                                        int id);
     int             (*putProvider) (ProviderRegister * br,
                                     const char *clsName,
                                     ProviderInfo * info);

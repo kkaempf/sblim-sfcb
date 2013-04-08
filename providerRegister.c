@@ -90,6 +90,9 @@ pRelease(ProviderRegister * br)
 static int
 addProviderToHT(ProviderInfo * info, UtilHashTable * ht)
 {
+  _SFCB_ENTER(TRACE_PROVIDERMGR, "addProviderToHT");
+  _SFCB_TRACE(1, ("--- Add pReg entry id: %d type=%lu %s (%s)",
+      info->id, info->type, info->providerName, info->className));
   ProviderInfo   *checkDummy;
   /*
    * first we add the provider to the providerRegister with the classname
@@ -106,7 +109,7 @@ addProviderToHT(ProviderInfo * info, UtilHashTable * ht)
     if (strcmp(checkDummy->providerName, info->providerName) == 0) {
       if (checkDummy->type != info->type) {
 	mlogf(M_ERROR,M_SHOW,"--- Conflicting registration types for class %s, provider %s\n", info->className, info->providerName);
-	return 1;
+	_SFCB_RETURN(1);
       }
       /* FIXME: check location, user, group, parms, unload */
       /* classname and provider name match, now check for namespace */
@@ -115,7 +118,7 @@ addProviderToHT(ProviderInfo * info, UtilHashTable * ht)
 	if (strcmp(checkDummy->ns[idx], info->ns[0]) == 0) {
 	  /* double registration - discard */
 	  freeInfoPtr(info);
-	  return 0;
+	  _SFCB_RETURN(0);
 	}
 	++idx;
       }
@@ -133,7 +136,7 @@ addProviderToHT(ProviderInfo * info, UtilHashTable * ht)
   } else {
     ht->ft->put(ht, info->className, info);
   }
-  return 0;
+  _SFCB_RETURN(0);
 }
 
 ProviderRegister *
@@ -405,6 +408,29 @@ getProvider(ProviderRegister * br, const char *clsName, unsigned long type)
 }
 
 static ProviderInfo *
+getProviderById(ProviderRegister * br, int id)
+{
+  ProviderBase   *bb = (ProviderBase *) br->hdl;
+  HashTableIterator *it;
+  char           *key = NULL;
+  ProviderInfo   *info = NULL;
+
+  for (it = bb->ht->ft->getFirst(bb->ht, (void **) &key, (void **) &info);
+       key && it && info;
+       it =
+       bb->ht->ft->getNext(bb->ht, it, (void **) &key, (void **) &info)) {
+
+    while (info) {
+      if (info->id == id) {
+        return info;
+      }
+      info = info->nextInRegister;
+    }
+  }
+  return NULL;
+}
+
+static ProviderInfo *
 locateProvider(ProviderRegister * br, const char *provName)
 {
   ProviderBase   *bb = (ProviderBase *) br->hdl;
@@ -459,6 +485,7 @@ static Provider_Register_FT ift = {
   1,
   pRelease,
   getProvider,
+  getProviderById,
   putProvider,
   removeProvider,
   locateProvider,
