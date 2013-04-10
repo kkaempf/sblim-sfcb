@@ -31,6 +31,7 @@ sfcbprovtest_LTLIBRARIES = \
    libTestAssociationProvider.la \
    libTestMethodProvider.la \
    libTestInstanceProvider.la \
+   libTestPulledInstanceProvider.la \
    libTestMiscProvider.la \
    libTestExecQueryProvider.la \
    libTestIndicationProvider.la
@@ -43,6 +44,9 @@ libTestMethodProvider_la_LIBADD = -lsfcBrokerCore
 
 libTestInstanceProvider_la_SOURCES = cmpiTestInstanceProvider.c
 libTestInstanceProvider_la_LIBADD = -lsfcBrokerCore
+
+libTestPulledInstanceProvider_la_SOURCES = cmpiTestPulledInstanceProvider.c
+libTestPulledInstanceProvider_la_LIBADD = -lsfcBrokerCore
 
 libTestMiscProvider_la_SOURCES = cmpiTestMiscProvider.c
 libTestMiscProvider_la_LIBADD = -lsfcBrokerCore

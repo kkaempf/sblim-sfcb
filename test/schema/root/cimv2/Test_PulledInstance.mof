@@ -1,0 +1,8 @@
+[Version ("1.0.0")]
+class TEST_PulledInstance
+{
+	[key,
+	read]
+	Uint32 Identifier;
+    string setCount ( [IN] uint32 InstanceCount);
+};

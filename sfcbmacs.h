@@ -26,6 +26,21 @@ static CMPIStatus __attribute__ ((unused)) okSt = { CMPI_RC_OK, NULL };
                       const CMPIResult __attribute__ ((unused)) *rslt,  \
                       const CMPIObjectPath __attribute__ ((unused)) * cop) { return notSupSt; }
 
+#define notSupCMPI_GI(pfx) \
+  pfx##GetInstance(CMPIInstanceMI __attribute__ ((unused)) *mi,      \
+                      const CMPIContext __attribute__ ((unused)) *ctx,  \
+                      const CMPIResult __attribute__ ((unused)) *rslt,  \
+                      const CMPIObjectPath __attribute__ ((unused)) * cop, \
+                      const char __attribute__ ((unused)) **properties) { return notSupSt; }
+
+#define notSupCMPI_MI(pfx) \
+  pfx##ModifyInstance(CMPIInstanceMI __attribute__ ((unused)) *mi,      \
+                      const CMPIContext __attribute__ ((unused)) *ctx,  \
+                      const CMPIResult __attribute__ ((unused)) *rslt,  \
+                      const CMPIObjectPath __attribute__ ((unused)) * cop, \
+                      const CMPIInstance __attribute__ ((unused)) *ci, \
+                      const char __attribute__ ((unused)) **properties) { return notSupSt; }
+
 #define notSupCMPI_SP(pfx) \
   pfx##SetProperty(CMPIPropertyMI __attribute__ ((unused)) *mi,         \
                    const CMPIContext __attribute__ ((unused)) *ctx,     \

@@ -1,0 +1,6 @@
+[TEST_PulledInstance]
+   provider: TestPulledInstanceProvider
+   location: TestPulledInstanceProvider
+   namespace: root/cimv2
+   type: instance method
+#
