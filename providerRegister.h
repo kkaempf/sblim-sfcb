@@ -135,8 +135,6 @@ extern          "C" {
                                     ProviderInfo * info);
     void            (*removeProvider) (ProviderRegister * br,
                                        const char *clsName);
-    ProviderInfo   *(*locateProvider) (ProviderRegister * br,
-                                       const char *provName);
     void            (*resetProvider) (ProviderRegister * br, int pid);
   };
 

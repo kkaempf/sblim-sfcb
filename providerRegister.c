@@ -422,29 +422,13 @@ getProviderById(ProviderRegister * br, int id)
 
     while (info) {
       if (info->id == id) {
+	free(it);
         return info;
       }
       info = info->nextInRegister;
     }
   }
-  return NULL;
-}
-
-static ProviderInfo *
-locateProvider(ProviderRegister * br, const char *provName)
-{
-  ProviderBase   *bb = (ProviderBase *) br->hdl;
-  HashTableIterator *it;
-  char           *key = NULL;
-  ProviderInfo   *info = NULL;
-
-  for (it = bb->ht->ft->getFirst(bb->ht, (void **) &key, (void **) &info);
-       key && it && info;
-       it =
-       bb->ht->ft->getNext(bb->ht, it, (void **) &key, (void **) &info)) {
-    if (strcasecmp(info->providerName, provName) == 0)
-      return info;
-  }
+  free(it);
   return NULL;
 }
 
@@ -488,7 +472,6 @@ static Provider_Register_FT ift = {
   getProviderById,
   putProvider,
   removeProvider,
-  locateProvider,
   resetProvider
 };
 
