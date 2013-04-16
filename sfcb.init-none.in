@@ -14,18 +14,18 @@ fi
 
 start() {
 	echo -n "Starting sfcb: "
-	@sbindir@/sfcbd -d && echo "done." && return 0 ||
+	PROFILER @sbindir@/sfcbd -d && echo "done." && return 0 ||
 	echo "failed."
 	return 1
 }	
 
 stop() {
     echo -n "Shutting down sfcb: "
-    if killall sfcbd
+    if killall KILLEXEC
     then
         sleep 3
         # If it hasn't died gracefully, kill it
-        if killall -KILL sfcbd 2>/dev/null
+        if killall -KILL KILLEXEC 2>/dev/null
         then
                 # In this case, it needed to be killed
                 echo "failed(killed)." 
@@ -44,7 +44,7 @@ stop() {
 
 reload() {
 	echo -n "Reloading sfcb configuration: "
-	killall -HUP sfcbd && echo "done." && return 0 ||
+	killall -HUP KILLEXEC && echo "done." && return 0 ||
 	echo "failed."
 	return 1
 }
@@ -58,7 +58,7 @@ case "$1" in
 	;;
     status)
 	echo -n "Checking SFCB status: "
-	ps --noheaders -C sfcbd || echo "stopped." 
+	ps --noheaders -C KILLEXEC || echo "stopped." 
 	;;
     restart)
     	stop

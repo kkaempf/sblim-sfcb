@@ -229,6 +229,8 @@ do
             test_cimrs=yes;;
         commands|command|cmd|cmds)
             test_cmd=yes;;
+        valgrind)
+            test_valgrind=yes;;
 	slp)
 	    if test "$enable_slp" == "yes"; then
 	       test_slp=yes
@@ -256,6 +258,8 @@ AM_CONDITIONAL(CMDTEST,[test "$test_cmd" == "yes"])
 AM_CONDITIONAL(SLPTEST,[test "$test_slp" == "yes"])
 AM_CONDITIONAL(PROVTEST,[test "$test_providers" == "yes"])
 AM_CONDITIONAL(PROVTEST,[test "$test_local" == "yes"])
+AM_CONDITIONAL(VALGRIND,[test "$test_valgrind"])
+
 if [test "$enable_tests"]; then
     # The order of TEST_SUBDIRS determines test
     # execution order.
@@ -309,8 +313,18 @@ if [test "$enable_tests"]; then
        AC_CONFIG_FILES([test/localtests/Makefile])	
     fi
 
+    if [test "$test_valgrind" == "yes"]; then
+        PROFILER="$PROFILER valgrind --leak-check=full --xml=yes --xml-file=/tmp/sfcb-vgout.xml --child-silent-after-fork=yes"
+        AC_SUBST(PROFILER)
+        KILLEXEC="-r memcheck.*"
+        AC_SUBST(KILLEXEC)
+    fi
+
     TEST_SUBDIRS="$TEST_SUBDIRS finaltest"
     AC_SUBST(TEST_SUBDIRS)
+else
+    KILLEXEC="sfcbd"
+    AC_SUBST(KILLEXEC)
 fi
 
 if [test "$test_gcov" == "yes"]; then

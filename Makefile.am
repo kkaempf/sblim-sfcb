@@ -460,7 +460,9 @@ endif
 
 sfcb: sfcb.$(INIT_STYLE) sblim-sfcb.service
 	sed -e s?$$\{prefix\}?$(prefix)?g \
-	-e s?$$\{exec_prefix\}?$(prefix)?g $< > $@
+	-e s?$$\{exec_prefix\}?$(prefix)?g \
+    -e s?KILLEXEC?"$(KILLEXEC)"?g \
+    -e s?PROFILER?"$(PROFILER)"?g $< > $@
 
 sblim-sfcb.service: sblim-sfcb.service.pre
 	sed -e s?$$\{exec_prefix\}?$(prefix)?g $< > $@
