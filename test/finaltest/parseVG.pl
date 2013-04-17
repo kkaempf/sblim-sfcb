@@ -3,7 +3,7 @@
 use XML::Parser;
 use XML::LibXML;
 
-my $xmlfile="/tmp/sfcb-vgoutbad.xml";
+my $xmlfile="/tmp/sfcb-vgout.xml";
 
 open XML, '<', $xmlfile or die "Can't open input file";
 my @contents = <XML>;
