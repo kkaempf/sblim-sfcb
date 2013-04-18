@@ -196,6 +196,7 @@ void           *memAddEncObj(int mode, void *ptr, size_t size, int *memId);
 void            memUnlinkEncObj(int memId);
 void            memLinkEncObj(void *ptr, int *memId);
 void            memLinkInstance(CMPIInstance *ci);
+void            memUnlinkInstance(CMPIInstance *ci);
 UtilList       *memAddUtilList(UtilList* ul);
 
 void           *markHeap();

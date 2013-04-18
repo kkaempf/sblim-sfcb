@@ -4,6 +4,7 @@
 
 static CMPIStatus __attribute__ ((unused)) notSupSt = { CMPI_RC_ERR_NOT_SUPPORTED, NULL };
 static CMPIStatus __attribute__ ((unused)) okSt = { CMPI_RC_OK, NULL };
+static CMPIStatus __attribute__ ((unused)) notFoundSt = { CMPI_RC_ERR_NOT_FOUND, NULL };
 
 #define notSupCMPI_EQ(pfx) \
   pfx##ExecQuery(CMPIInstanceMI __attribute__ ((unused)) *mi,           \

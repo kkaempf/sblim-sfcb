@@ -145,6 +145,13 @@ memLinkInstance(CMPIInstance *ci)
   memLinkEncObj(i, &i->mem_state);
 }
 
+void
+memUnlinkInstance(CMPIInstance *ci)
+{
+  struct native_instance *i = (struct native_instance *) ci;
+  memUnlinkEncObj(i->mem_state);
+}
+
 static int
 __contained_list(char **list, const char *name)
 {

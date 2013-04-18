@@ -58,6 +58,7 @@
 
 static const CMPIBroker *_broker;
 static CMPIStatus invClassSt = { CMPI_RC_ERR_INVALID_CLASS, NULL };
+static CMPIInstance *ISinst; //Global instance for IndicationService
 
 // ------------------------------------------------------------------
 
@@ -453,25 +454,8 @@ IndServiceProviderGetInstance(CMPIInstanceMI * mi,
     _SFCB_RETURN(st);
   }
 
-#ifdef SETTABLERETRY
-
-  /* check if it exists first */
-   CMPIContext *ctxLocal;
-   ctxLocal = native_clone_CMPIContext(ctx);
-   CMPIValue val;
-   val.string = sfcb_native_new_CMPIString("$DefaultProvider$", NULL,0);
-   ctxLocal->ft->addEntry(ctxLocal, "rerouteToProvider", &val, CMPI_string);
-
-   ci = CBGetInstance(_broker, ctxLocal, ref, properties, &st);
-
-#else
-
-   ci = CMNewInstance(_broker, op, &st);
-  
-  makeIndService(ci);
-
-#endif
-
+  ci = ISinst->ft->clone(ISinst, &st);
+  memLinkInstance(ci);
   if (properties) {
     ci->ft->setPropertyFilter(ci, properties, NULL);
   }
@@ -493,37 +477,8 @@ IndServiceProviderEnumInstances(CMPIInstanceMI * mi,
 
   _SFCB_ENTER(TRACE_PROVIDERS, "IndServiceProviderEnumInstances");
 
-#ifdef SETTABLERETRY
-   
-  CMPIObjectPath *op;
-  CMPIEnumeration *indServices = NULL;
-  CMPIContext *ctxLocal;
-  ctxLocal = native_clone_CMPIContext(ctx);
-  CMPIValue val;
-  CMPIInstance *ci=NULL;
-  val.string = sfcb_native_new_CMPIString("$DefaultProvider$", NULL,0);
-  ctxLocal->ft->addEntry(ctxLocal, "rerouteToProvider", &val, CMPI_string);
-
-  op = CMNewObjectPath(_broker, "root/interop", "CIM_IndicationService",
-                       NULL);
-  indServices = CBEnumInstances(_broker, ctxLocal, op, properties, &st);
-
-  while (CMHasNext(indServices, NULL)) {
-    ci=CMGetNext(indServices, NULL).value.inst;
-    if (properties) {
-      ci->ft->setPropertyFilter(ci, properties, NULL);
-    }
-    CMReturnInstance(rslt, ci);
-  }
+  CMReturnInstance(rslt, ISinst);
   CMReturnDone(rslt);
-
-  if (ctxLocal)
-    CMRelease(ctxLocal);
-
-#else
-  st = IndServiceProviderGetInstance(mi, ctx, rslt, NULL, properties);
-#endif
-
   _SFCB_RETURN(st);
 }
 
@@ -726,6 +681,7 @@ static CMPIStatus
 ServerProviderCleanup(CMPIInstanceMI * mi, const CMPIContext *ctx,
                       CMPIBoolean terminate)
 {
+  CMRelease(ISinst);
   return okSt;
 }
 
@@ -831,11 +787,12 @@ ServerProviderModifyInstance(CMPIInstanceMI * mi,
                              const char **properties)
 {
   CMPIStatus      rc = notSupSt;
-  CMPIContext    *ctxLocal;
-  CMPIValue       val;
 
   if (!CMClassPathIsA(_broker, cop, "cim_indicationservice", NULL))
     return rc;
+  // Check that we have the right OP for IndicationService
+  if ( objectpathCompare(cop,ISinst->ft->getObjectPath(ISinst,NULL))) 
+    return notFoundSt;
 
   // Get the settable props
   int settable=0;
@@ -859,15 +816,11 @@ ServerProviderModifyInstance(CMPIInstanceMI * mi,
   if (settable > 0) return rc;
 
   // Ok, all is well to continue with the operation...
-  ctxLocal = native_clone_CMPIContext(ctx);
-  val.string = sfcb_native_new_CMPIString("$DefaultProvider$", NULL, 0);
-  ctxLocal->ft->addEntry(ctxLocal, "rerouteToProvider", &val, CMPI_string);
-  rc = CBModifyInstance(_broker, ctxLocal, cop, ci, properties);
-  if (ctxLocal)
-    CMRelease(ctxLocal);
+  // Just replace the global instance with the new one.
+  ISinst=ci->ft->clone(ci,NULL);
   CMReturnInstance(rslt, ci);
-  return rc;
-}
+  return okSt;
+} 
 
 /* ServerProviderDeleteInstance */
 static CMPIStatus notSupCMPI_DI(ServerProvider);
@@ -879,34 +832,12 @@ void
 ServerProviderInitInstances(const CMPIContext *ctx)
 {
 
-  /* only applicable if we're relying on InternalProvider */
-#ifdef SETTABLERETRY
-
   CMPIStatus st;
-  CMPIInstance *ci;
-  CMPIObjectPath *op;
-
-  CMPIValue       val;
-  CMPIContext *ctxLocal;
-
-  ctxLocal = native_clone_CMPIContext(ctx);
-  val.string = sfcb_native_new_CMPIString("$DefaultProvider$", NULL, 0);
-  ctxLocal->ft->addEntry(ctxLocal, "rerouteToProvider", &val, CMPI_string);
-
-  op = makeIndServiceOP();
-
-  /* a brutal way to update values; because of this, changes don't persist */
-  CBDeleteInstance(_broker,ctxLocal,op);
-  ci = CMNewInstance(_broker, op, &st);
-
-  makeIndService(ci);
-
-  op = CMGetObjectPath(ci, &st);
-
-  CBCreateInstance(_broker, ctxLocal, op, ci, &st);
-  CMRelease(ctxLocal);
-#endif
-
+  CMPIObjectPath *ISop = makeIndServiceOP();
+  // This instance is always recreated, changes don't persist
+  ISinst = CMNewInstance(_broker, ISop, &st);
+  makeIndService(ISinst);
+  memUnlinkInstance(ISinst); // Prevent cleanup of the instance
   return;
 }
 
@@ -1168,18 +1099,14 @@ makeElementConforms(CMPIAssociationMI * mi,
                     CMPIObjectPath * rpop,
                     const char **propertyList, const char *target)
 {
-  CMPIEnumeration *isenm = NULL;
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   CMPIInstance   *eci = NULL;
 
-  // Get the single instance of IndicationService
-  isenm = _broker->bft->enumerateInstanceNames(_broker, ctx, isop, &rc);
-  CMPIData        isinst = CMGetNext(isenm, &rc);
-  // Get the IndicationProfile instance of RegisteredProfile
   CMAddKey(rpop, "InstanceID", "CIM:SFCB_IP", CMPI_chars);
   // Create an instance 
   eci = CMNewInstance(_broker, ecop, &rc);
-  CMSetProperty(eci, "ManagedElement", &(isinst.value), CMPI_ref);
+  CMPIValue ISval = {.ref = ISinst->ft->getObjectPath(ISinst,NULL) };
+  CMSetProperty(eci, "ManagedElement", &(ISval), CMPI_ref);
   CMSetProperty(eci, "ConformantStandard", &(rpop), CMPI_ref);
   if (strcasecmp(target, "Refs") == 0) {
     if (propertyList) {
@@ -1191,8 +1118,6 @@ makeElementConforms(CMPIAssociationMI * mi,
   }
   if (eci)
     CMRelease(eci);
-  if (isenm)
-    CMRelease(isenm);
   CMReturnDone(rslt);
   CMReturn(CMPI_RC_OK);
 }
@@ -1323,8 +1248,6 @@ static CMPIStatus handleAssocHostedService(CMPIAssociationMI* mi,
         && (CMClassPathIsA(_broker, cop, "cim_system", &rc) == 1)) {
       // A CIM_System was passed in so wee need to return either the
       // CIM_IndicationService instance or a CIM_HostedService association 
-      // 
-      // 
       // instance
       if (((strcasecmp(target, "Assocs") == 0)
            || (strcasecmp(target, "AssocNames") == 0))
@@ -1332,20 +1255,16 @@ static CMPIStatus handleAssocHostedService(CMPIAssociationMI* mi,
               || (strcasecmp(resultClass, "CIM_IndicationService") ==
                   0))) {
         // Return the CIM_IndicationService instance
-        CMPIEnumeration* isenm =
-            _broker->bft->enumerateInstances(_broker, ctx, isop, NULL,
-                                             &rc);
-        CMPIData        inst = CMGetNext(isenm, &rc);
+        CMPIInstance *inst = ISinst->ft->clone(ISinst,NULL);
+        memLinkInstance(inst);
         if (strcasecmp(target, "Assocs") == 0) {
           if (propertyList) {
-            CMSetPropertyFilter(inst.value.inst, propertyList, NULL);
+            CMSetPropertyFilter(inst, propertyList, NULL);
           }
-          CMReturnInstance(rslt, (inst.value.inst));
+          CMReturnInstance(rslt,inst);
         } else {
-          CMReturnObjectPath(rslt, CMGetObjectPath(inst.value.inst, NULL));
+          CMReturnObjectPath(rslt, CMGetObjectPath(inst, NULL));
         }
-        if (isenm)
-          CMRelease(isenm);
       } else if (resultClass == NULL
                  || (strcasecmp(resultClass, "CIM_HostedService") == 0)) {
         // Return the CIM_HostedService instance
