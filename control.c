@@ -286,6 +286,11 @@ int getControlUNum(char *id, unsigned int *val)
 {
  Control *ctl;
  int rc = -1;
+
+ if (ct == NULL) {
+   setupControl(configfile);
+ }
+
  if ((ctl = ct->ft->get(ct, id))) {
    if (ctl->type == 1 && isdigit(ctl->strValue[0])) {
      unsigned long tmp = strtoul(ctl->strValue,NULL,0);
@@ -304,6 +309,11 @@ int getControlBool(char *id, int *val)
 {
    Control *ctl;
    int rc = -1;
+
+   if (ct == NULL) {
+     setupControl(configfile);
+   }
+
    if ((ctl = ct->ft->get(ct, id))) {
       if (ctl->type == 2) {
          *val = strcasecmp(ctl->strValue,"true")==0;
