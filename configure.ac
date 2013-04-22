@@ -260,6 +260,8 @@ AM_CONDITIONAL(PROVTEST,[test "$test_providers" == "yes"])
 AM_CONDITIONAL(PROVTEST,[test "$test_local" == "yes"])
 AM_CONDITIONAL(VALGRIND,[test "$test_valgrind"])
 
+KILLEXEC="sfcbd"
+AC_SUBST(KILLEXEC)
 if [test "$enable_tests"]; then
     # The order of TEST_SUBDIRS determines test
     # execution order.
@@ -322,9 +324,6 @@ if [test "$enable_tests"]; then
 
     TEST_SUBDIRS="$TEST_SUBDIRS finaltest"
     AC_SUBST(TEST_SUBDIRS)
-else
-    KILLEXEC="sfcbd"
-    AC_SUBST(KILLEXEC)
 fi
 
 if [test "$test_gcov" == "yes"]; then
