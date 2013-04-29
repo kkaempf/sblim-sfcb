@@ -82,6 +82,12 @@ CVS_CHECK_OUT()
 
 SFCB_START()
 {
+    if [ -f /tmp/sfcb-vgout ]
+    then
+        rm /tmp/sfcb-vgout
+    fi
+    cp sfcb-vgsup.txt /tmp/
+
     /usr/local/etc/init.d/sfcb  start
     if [ $? -eq 0 ] ; then
         DUALOUT "SFCB start : SUCCESS" 
@@ -110,7 +116,15 @@ SFCB_RESULTFILES()
         find . -name "*.result" -print0 | xargs  -0 -r -I file cp  file --target-directory=$RESULTDIR --parents
     fi
 }
-
+SFCB_VALGRIND()
+{
+    # Check the Valgrind output if it's there
+    if [ -f /tmp/sfcb-vgout ]
+    then
+        echo "Checking Valgrind output...."
+        ./parseVG.pl
+    fi
+}
 SFCB_TESTS()
 {
     n=$((n+1)) # Keep track of test iteration
@@ -220,6 +234,7 @@ BUILD_SFCB()
                 DUALOUT "SECOND TEST RUN:" 
                 SFCB_TESTS
                 SFCB_STOP
+                SFCB_VALGRIND
                 SFCB_RESULTFILES
             else
                 RC=1

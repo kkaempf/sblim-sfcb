@@ -316,7 +316,7 @@ if [test "$enable_tests"]; then
     fi
 
     if [test "$test_valgrind" == "yes"]; then
-        PROFILER="$PROFILER valgrind --leak-check=full --xml=yes --xml-file=/tmp/sfcb-vgout.xml --child-silent-after-fork=yes"
+        PROFILER="$PROFILER touch /tmp/sfcb-suppressions \&\& valgrind --leak-check=full --log-file=/tmp/sfcb-vgout --trace-children=yes --suppressions=/tmp/sfcb-suppressions"
         AC_SUBST(PROFILER)
         KILLEXEC="-r memcheck.*"
         AC_SUBST(KILLEXEC)

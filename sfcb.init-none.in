@@ -23,7 +23,7 @@ stop() {
     echo -n "Shutting down sfcb: "
     if killall KILLEXEC
     then
-        sleep 3
+        sleep 5
         # If it hasn't died gracefully, kill it
         if killall -KILL KILLEXEC 2>/dev/null
         then
