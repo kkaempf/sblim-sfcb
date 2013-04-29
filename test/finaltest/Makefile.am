@@ -22,10 +22,4 @@
 
 MAINTAINERCLEANFILES = Makefile.in
 
-if VALGRIND
-TESTS = parseVG.pl finalcheck.sh 
-else
 TESTS = finalcheck.sh 
-endif
-
-

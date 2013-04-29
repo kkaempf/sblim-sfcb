@@ -86,7 +86,6 @@ SFCB_START()
     then
         rm /tmp/sfcb-vgout
     fi
-    cp sfcb-vgsup.txt /tmp/
 
     /usr/local/etc/init.d/sfcb  start
     if [ $? -eq 0 ] ; then
