@@ -1,0 +1,44 @@
+# This is a sample valgrind suppressions file for use with sfcb, 
+# specifically with the ABT test suite. 
+# These stanzas supress some common cases where valgrind will think there
+# is a leak due to the tracked memory support in sfcb.
+#
+# In order to use this with ABT, copy this file to /tmp/sfcb-suppressions
+# before running sfcb. 
+{
+   <newQLStatement>
+   Memcheck:Leak
+   ...
+   fun:newQLStatement
+}
+{
+    <addenc>
+    Memcheck:Leak
+    ...
+    fun:memAddEncObj
+}
+{
+    <addClStringN>
+    Memcheck:Leak
+    ...
+    fun:addClStringN
+}
+{
+    <ensureClSpace>
+    Memcheck:Leak
+    ...
+    fun:ensureClSpace
+}
+{
+    <__ift_clone>
+    Memcheck:Leak
+    ...
+    fun:__ift_clone
+}
+{
+    <clone>
+    Memcheck:Leak
+    ...
+    fun:clone
+}
+
