@@ -120,8 +120,15 @@ SFCB_VALGRIND()
     # Check the Valgrind output if it's there
     if [ -f /tmp/sfcb-vgout ]
     then
-        echo "Checking Valgrind output...."
-        ./parseVG.pl
+        DUALOUT "Checking Valgrind output...."
+        if $BASE_DIR/sfcb/test/ABT/parseVG.pl >> $BASE_DIR/$REPORT_SUMMARY
+	then
+            DUALOUT "Complete"
+	else
+            DUALOUT "Complete"
+	    RC=1
+	    cp $BASE_DIR/sfcb/sfcbLeaks.txt $REPORTDIR
+	fi
     fi
 }
 SFCB_TESTS()
