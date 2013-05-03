@@ -690,7 +690,7 @@ static ChunkFunctions httpChunkFunctions = {
 
 static int getHdrs(CommHndl conn_fd, Buffer * b, char *cmd)
 {
-   int first=1,total=0,isReady;
+   int checked=0,total=0,isReady;
    fd_set httpfds;
    int state=0;
    
@@ -727,14 +727,13 @@ static int getHdrs(CommHndl conn_fd, Buffer * b, char *cmd)
       add2buffer(b, buf, r);
       total+=r;
 
-      /* on first run through, ensure that this is a POST req. */
-      if (r && first) {
-         if (strncasecmp(buf,cmd,strlen(cmd)) != 0) { 
-	   /* not what we expected - still continue to read to
-	      not confuse the client */
+      /* Check that the HTTP verb is what we expect. If not,
+         continue to read anyway to not confuse the client. */
+      if (!checked && total >= strlen(cmd)) {
+         if (strncasecmp(b->data,cmd,strlen(cmd)) != 0) {
 	   state = 1;
 	 }
-         first=0;
+         checked=1;
       }
 
       /* success condition: end of header */
