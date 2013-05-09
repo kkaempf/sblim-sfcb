@@ -987,7 +987,7 @@ procCdata(YYSTYPE __attribute__ ((unused)) *lvalp, ParserControl * parm)
   XmlAttr         attr[1];
 
   if (tagEquals(parm->xmb, "![CDATA[")) {
-    parm->xmb->cur[0] = '>';
+    *(--parm->xmb->cur) = '>';
     char           *v;
     if (attrsOk(parm->xmb, elm, attr, "![CDATA[", ZTOK_CDATA)) {
 
