@@ -976,6 +976,19 @@ static MgrHandler mHandlers[] = {
   {NULL},                       // OPS_DeactivateFilter 29
   {NULL},                       // OPS_DisableIndications 30
   {NULL},                       // OPS_EnableIndications 31
+
+  {instProviderList},           // OPS_OpenEnumerateInstancePaths 32
+  {instProviderList},           // OPS_OpenEnumerateInstances 33
+  {assocProviderList},          // OPS_OpenAssociatorInstancePaths 34
+  {assocProviderList},          // OPS_OpenAssociatorInstances 35
+  {assocProviderList},          // OPS_OpenReferenceInstancePaths 36
+  {assocProviderList},          // OPS_OpenReferenceInstances 37
+  {instProviderList},           // OPS_OpenQueryInstances 38
+  {instProviderList},           // OPS_PullInstances 39
+  {instProviderList},           // OPS_PullInstancesWithPath 40
+  {instProviderList},           // OPS_PullInstancePaths 41
+  {notSupported},               // OPS_CloseEnumeration 42
+  {notSupported}                // OPS_EnumerationCount 43
 };
 
 void

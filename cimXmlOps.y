@@ -1644,6 +1644,156 @@ static void addParam(XtokParams *ps, XtokParam *p)
    ps->last=np;
 }
 
+static void
+buildOpenEnumInstanceRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  EnumInstancesReq *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  int    i,
+      sreqSize = sizeof(EnumInstancesReq);      // -sizeof(MsgSegment);
+  BinRequestContext *binCtx = hdr->binCtx;
+  
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildOpenEnumInstanceRequest");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokOpenEnumInstances *req = (XtokOpenEnumInstances *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path =
+      TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data,
+                            NULL);
+  if (req->properties)
+    sreqSize += req->properties * sizeof(MsgSegment);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = req->op.type;
+  sreq->hdr.count = req->properties + EI_REQ_REG_SEGMENTS;
+
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  for (i = 0; i < req->properties; i++) {
+    sreq->properties[i] =
+        setCharsMsgSegment(req->propertyList.values[i].value);
+  }
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->bHdr->flags = req->flags;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+
+  binCtx->type = CMPI_instance;
+  binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildPullInstancesRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  EnumInstancesReq *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  int sreqSize = sizeof(EnumInstancesReq);  // TODO
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildPullInstancesRequest");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokPullInstances *req = (XtokPullInstances *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path = TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data, NULL);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = req->op.type;
+
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+
+  binCtx->type = CMPI_instance;
+  binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+
+static void
+buildCloseEnumerationRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  EnumInstancesReq *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  int sreqSize = sizeof(EnumInstancesReq);  // TODO
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildCloseEnumerationRequest");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokCloseEnumeration *req = (XtokCloseEnumeration *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path = TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data, NULL);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = req->op.type;
+
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+
+  binCtx->type = CMPI_instance;
+  binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+static void
+buildEnumerationCountRequest(void *parm)
+{
+  CMPIObjectPath *path;
+  EnumInstancesReq *sreq;
+  RequestHdr     *hdr = &(((ParserControl *)parm)->reqHdr);
+  int sreqSize = sizeof(EnumInstancesReq);  // TODO
+  BinRequestContext *binCtx = hdr->binCtx;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "buildEnumerationCountRequest");
+
+  memset(binCtx, 0, sizeof(BinRequestContext));
+  XtokEnumerationCount *req = (XtokEnumerationCount *) hdr->cimRequest;
+  hdr->className = req->op.className.data;
+
+  path = TrackedCMPIObjectPath(req->op.nameSpace.data, req->op.className.data, NULL);
+  sreq = calloc(1, sreqSize);
+  sreq->hdr.operation = req->op.type;
+
+  sreq->principal = setCharsMsgSegment(hdr->principal);
+  sreq->userRole = setCharsMsgSegment(hdr->role);
+  sreq->objectPath = setObjectPathMsgSegment(path);
+  sreq->hdr.sessionId = hdr->sessionId;
+
+  binCtx->oHdr = (OperationHdr *) req;
+  binCtx->bHdr = &sreq->hdr;
+  binCtx->rHdr = hdr;
+  binCtx->bHdrSize = sreqSize;
+
+  binCtx->type = CMPI_instance;
+  binCtx->xmlAs = binCtx->noResp = 0;
+  binCtx->pAs = NULL;
+}
+
+
 %}
 
 %pure_parser
@@ -1662,6 +1812,7 @@ static void addParam(XtokParams *ps, XtokParam *p)
    char                          boolValue;
    char*                         className;
    void*                         tokCim;
+   uint64_t                      enumerationContext;
 
    XtokMessage                   xtokMessage;
    XtokNameSpace                 xtokNameSpace;
@@ -1776,6 +1927,50 @@ static void addParam(XtokParams *ps, XtokParam *p)
    XtokSetPropertyParms          xtokSetPropertyParms;
    XtokSetPropertyParmsList      xtokSetPropertyParmsList;
    
+   XtokOpenEnumInstancePaths                xtokOpenEnumInstancePaths;
+   XtokOpenEnumInstancePathsParmsList       xtokOpenEnumInstancePathsParmsList;
+   XtokOpenEnumInstancePathsParms           xtokOpenEnumInstancePathsParms;
+
+   XtokOpenEnumInstances                    xtokOpenEnumInstances;
+   XtokOpenEnumInstancesParmsList           xtokOpenEnumInstancesParmsList;
+   XtokOpenEnumInstancesParms               xtokOpenEnumInstancesParms;
+
+   XtokOpenAssociatorInstancePaths          xtokOpenAssociatorInstancePaths;
+   XtokOpenAssociatorInstancePathsParmsList xtokOpenAssociatorInstancePathsParmsList;
+   XtokOpenAssociatorInstancePathsParms     xtokOpenAssociatorInstancePathsParms;
+
+   XtokOpenAssociatorInstances              xtokOpenAssociatorInstances;
+   XtokOpenAssociatorInstancesParmsList     xtokOpenAssociatorInstancesParmsList;
+   XtokOpenAssociatorInstancesParms         xtokOpenAssociatorInstancesParms;
+
+   XtokOpenReferenceInstancePaths           xtokOpenReferenceInstancePaths;
+   XtokOpenReferenceInstancePathsParmsList  xtokOpenReferenceInstancePathsParmsList;
+   XtokOpenReferenceInstancePathsParms      xtokOpenReferenceInstancePathsParms;
+
+   XtokOpenReferenceInstances               xtokOpenReferenceInstances;
+   XtokOpenReferenceInstancesParmsList      xtokOpenReferenceInstancesParmsList;
+   XtokOpenReferenceInstancesParms          xtokOpenReferenceInstancesParms;
+
+   XtokOpenQueryInstances                   xtokOpenQueryInstances;
+   XtokOpenQueryInstancesParmsList          xtokOpenQueryInstancesParmsList;
+   XtokOpenQueryInstancesParms              xtokOpenQueryInstancesParms;
+
+   XtokPullInstances                   xtokPullInstances;
+   XtokPullInstancesParmsList          xtokPullInstancesParmsList;
+   XtokPullInstancesParms              xtokPullInstancesParms;
+
+   XtokPullInstancesWithPath           xtokPullInstancesWithPath;
+   XtokPullInstancesWithPathParmsList  xtokPullInstancesWithPathParmsList;
+   XtokPullInstancesWithPathParms      xtokPullInstancesWithPathParms;
+
+   XtokPullInstancePaths               xtokPullInstancePaths;
+   XtokPullInstancePathsParmsList      xtokPullInstancePathsParmsList;
+   XtokPullInstancePathsParms          xtokPullInstancePathsParms;
+
+   XtokCloseEnumeration                xtokCloseEnumeration;
+
+   XtokEnumerationCount                xtokEnumerationCount;
+
    XtokNewValue                  xtokNewValue;
    
    XtokScope                     xtokScope;
@@ -1891,6 +2086,63 @@ static void addParam(XtokParams *ps, XtokParam *p)
 %type  <xtokGetProperty>        getProperty
 %type  <xtokGetPropertyParm>    getPropertyParm
 
+%token <xtokOpenEnumInstancePaths>                XTOK_OPENENUMINSTANCEPATHS
+%type  <xtokOpenEnumInstancePaths>                openEnumInstancePaths
+%type  <xtokOpenEnumInstancePathsParmsList>       openEnumInstancePathsParmsList
+%type  <xtokOpenEnumInstancePathsParms>           openEnumInstancePathsParms
+
+%token <xtokOpenEnumInstances>                    XTOK_OPENENUMINSTANCES
+%type  <xtokOpenEnumInstances>                    openEnumInstances
+%type  <xtokOpenEnumInstancesParmsList>           openEnumInstancesParmsList
+%type  <xtokOpenEnumInstancesParms>               openEnumInstancesParms
+
+%token <xtokOpenAssociatorInstancePaths>          XTOK_OPENASSOCIATORINSTANCEPATHS
+%type  <xtokOpenAssociatorInstancePaths>          openAssociatorInstancePaths
+%type  <xtokOpenAssociatorInstancePathsParmsList> openAssociatorInstancePathsParmsList
+%type  <xtokOpenAssociatorInstancePathsParms>     openAssociatorInstancePathsParms
+
+%token <xtokOpenAssociatorInstances>              XTOK_OPENASSOCIATORINSTANCES
+%type  <xtokOpenAssociatorInstances>              openAssociatorInstances
+%type  <xtokOpenAssociatorInstancesParmsList>     openAssociatorInstancesParmsList
+%type  <xtokOpenAssociatorInstancesParms>         openAssociatorInstancesParms
+
+%token <xtokOpenReferenceInstancePaths>           XTOK_OPENREFERENCEINSTANCEPATHS
+%type  <xtokOpenReferenceInstancePaths>           openReferenceInstancePaths
+%type  <xtokOpenReferenceInstancePathsParmsList>  openReferenceInstancePathsParmsList
+%type  <xtokOpenReferenceInstancePathsParms>      openReferenceInstancePathsParms
+
+%token <xtokOpenReferenceInstances>               XTOK_OPENREFERENCEINSTANCES
+%type  <xtokOpenReferenceInstances>               openReferenceInstances
+%type  <xtokOpenReferenceInstancesParmsList>      openReferenceInstancesParmsList
+%type  <xtokOpenReferenceInstancesParms>          openReferenceInstancesParms
+
+%token <xtokOpenQueryInstances>                   XTOK_OPENQUERYINSTANCES
+%type  <xtokOpenQueryInstances>                   openQueryInstances
+%type  <xtokOpenQueryInstancesParmsList>          openQueryInstancesParmsList
+%type  <xtokOpenQueryInstancesParms>              openQueryInstancesParms
+
+%token <xtokPullInstances>                  XTOK_PULLINSTANCES
+%type  <xtokPullInstances>                  pullInstances
+%type  <xtokPullInstancesParmsList>         pullInstancesParmsList
+%type  <xtokPullInstancesParms>             pullInstancesParms
+
+%token <xtokPullInstancesWithPath>          XTOK_PULLINSTANCESWITHPATH
+%type  <xtokPullInstancesWithPath>          pullInstancesWithPath
+%type  <xtokPullInstancesWithPathParmsList> pullInstancesWithPathParmsList
+%type  <xtokPullInstancesWithPathParms>     pullInstancesWithPathParms
+
+%token <xtokPullInstancePaths>              XTOK_PULLINSTANCEPATHS
+%type  <xtokPullInstancePaths>              pullInstancePaths
+%type  <xtokPullInstancePathsParmsList>     pullInstancePathsParmsList
+%type  <xtokPullInstancePathsParms>         pullInstancePathsParms
+
+%token <xtokCloseEnumeration>               XTOK_CLOSEENUMERATION
+%type  <xtokCloseEnumeration>               closeEnumeration
+
+%token <xtokEnumerationCount>               XTOK_ENUMERATIONCOUNT
+%type  <xtokEnumerationCount>               enumerationCount
+
+
 %token <intValue>                ZTOK_IMETHODCALL
 
 %token <intValue>                XTOK_METHODCALL
@@ -1974,6 +2226,15 @@ static void addParam(XtokParams *ps, XtokParam *p)
 %token <value>                   XTOK_IP_QUALIFIERNAME
 %token <value>                   XTOK_IP_PROPERTYNAME
 %token <newValue>                XTOK_IP_NEWVALUE
+%token <className>               XTOK_IP_FILTERQUERYLANG
+%token <className>               XTOK_IP_FILTERQUERY
+%token <boolValue>               XTOK_IP_CONTINUEONERROR
+%token <boolValue>               XTOK_IP_ENDOFSEQUENCE   // OUT-only param
+%token <boolValue>               XTOK_IP_RETURNQUERYRESULTCLASS
+%token <value>                   XTOK_IP_OPERATIONTIMEOUT
+%token <value>                   XTOK_IP_MAXOBJECTCOUNT
+%token <enumerationContext>      XTOK_IP_ENUMERATIONCONTEXT
+%type  <enumerationContext>      enumerationContext
 
 %token <xtokPropertyList>        XTOK_IP_PROPERTYLIST
 %type  <boolValue>               boolValue
@@ -2152,6 +2413,42 @@ iMethodCall
     {
     }
     | XTOK_SETPROPERTY setProperty ZTOK_IMETHODCALL
+    {
+    }
+    | XTOK_OPENENUMINSTANCEPATHS openEnumInstancePaths ZTOK_IMETHODCALL
+    {
+    }
+    | XTOK_OPENENUMINSTANCES openEnumInstances ZTOK_IMETHODCALL
+    {
+    }
+    | XTOK_OPENASSOCIATORINSTANCES openAssociatorInstances ZTOK_IMETHODCALL
+    {
+    }
+    | XTOK_OPENASSOCIATORINSTANCEPATHS openAssociatorInstancePaths ZTOK_IMETHODCALL
+    {
+    }
+    | XTOK_OPENREFERENCEINSTANCES openReferenceInstances ZTOK_IMETHODCALL
+    {
+    }
+    | XTOK_OPENREFERENCEINSTANCEPATHS openReferenceInstancePaths ZTOK_IMETHODCALL
+    {
+    }
+    | XTOK_OPENQUERYINSTANCES openQueryInstances ZTOK_IMETHODCALL
+    {
+    }
+    | XTOK_PULLINSTANCES pullInstances ZTOK_IMETHODCALL
+    {
+    }
+    | XTOK_PULLINSTANCESWITHPATH pullInstancesWithPath ZTOK_IMETHODCALL
+    {
+    }
+    | XTOK_PULLINSTANCEPATHS pullInstancePaths ZTOK_IMETHODCALL
+    {
+    }
+    | XTOK_CLOSEENUMERATION closeEnumeration ZTOK_IMETHODCALL
+    {
+    }
+    | XTOK_ENUMERATIONCOUNT enumerationCount ZTOK_IMETHODCALL
     {
     }
     
@@ -4360,6 +4657,1369 @@ boolValue
     {
     if (strcasecmp($1.value,"true")==0) $$=1;
     if (strcasecmp($1.value,"false")==0) $$=0;
+    }
+;
+
+/*
+ *    openEnumInstancePaths
+*/
+
+openEnumInstancePaths
+    : localNameSpacePath
+    {
+       $$.op.count = EIN_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_OpenEnumerateInstancePaths;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+       $$.flags=0;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildEnumInstanceNamesRequest(parm);   // TODO
+    }
+    | localNameSpacePath openEnumInstancePathsParmsList
+    {
+       $$.op.count = EIN_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_OpenEnumerateInstancePaths;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment($2.className);
+       $$.flags = ($2.flags & $2.flagsSet) | ((~$2.flagsSet) & (FL_localOnly));
+       $$.operationTimeout=$2.operationTimeout;
+       $$.maxObjectCount=$2.maxObjectCount;
+       $$.filterQuery=$2.filterQuery;
+       $$.filterQueryLang=$2.filterQueryLang;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildEnumInstanceNamesRequest(parm);   // TODO
+    }
+;
+
+openEnumInstancePathsParmsList
+    : openEnumInstancePathsParms
+    {
+       if ($1.className) $$.className=$1.className;
+       $$.flags=$1.flags;
+       $$.flagsSet=$1.flagsSet;
+       if ($1.operationTimeout) $$.operationTimeout=$1.operationTimeout;
+       if ($1.maxObjectCount) $$.maxObjectCount=$1.maxObjectCount;
+       if ($1.filterQuery) $$.filterQuery=$1.filterQuery;
+       if ($1.filterQueryLang) $$.filterQueryLang=$1.filterQueryLang;
+    }
+    | openEnumInstancePathsParmsList openEnumInstancePathsParms
+    {
+       if ($2.className) $$.className=$2.className;
+       $$.flags=$1.flags|$2.flags;
+       $$.flagsSet=$1.flagsSet|$2.flagsSet;
+       if ($2.operationTimeout) $$.operationTimeout=$2.operationTimeout;
+       if ($2.maxObjectCount) $$.maxObjectCount=$2.maxObjectCount;
+       if ($2.filterQuery) $$.filterQuery=$2.filterQuery;
+       if ($2.filterQueryLang) $$.filterQueryLang=$2.filterQueryLang;
+    }
+;
+
+openEnumInstancePathsParms
+    : XTOK_IP_CLASSNAME className ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.className = $2;
+    }
+    | XTOK_IP_CONTINUEONERROR boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_continueOnError : 0 ;
+       $$.flagsSet = FL_continueOnError;
+    }
+    | XTOK_IP_CONTINUEONERROR ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_OPERATIONTIMEOUT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.operationTimeout=atoi($2.value);
+    }
+    | XTOK_IP_OPERATIONTIMEOUT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_MAXOBJECTCOUNT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.maxObjectCount=atoi($2.value);
+    }
+    | XTOK_IP_MAXOBJECTCOUNT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_FILTERQUERY value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.filterQuery=$2.value;
+    }
+    | XTOK_IP_FILTERQUERY ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_FILTERQUERYLANG value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.filterQueryLang=$2.value;
+    }
+    | XTOK_IP_FILTERQUERYLANG ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+;
+
+
+/*
+ *    openEnumInstances
+*/
+
+openEnumInstances
+    : localNameSpacePath
+    {
+       $$.op.count = EI_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_OpenEnumerateInstances;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+       $$.flags = FL_localOnly | FL_deepInheritance;
+       $$.propertyList.values = NULL;
+       $$.properties=0;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildOpenEnumInstanceRequest(parm);
+    }
+    | localNameSpacePath openEnumInstancesParmsList
+    {
+       $$.op.count = EI_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_OpenEnumerateInstances;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment($2.className);
+       $$.flags = ($2.flags & $2.flagsSet) | ((~$2.flagsSet) & (FL_localOnly));
+       $$.propertyList = $2.propertyList;
+       $$.properties=$2.properties;
+       $$.operationTimeout=$2.operationTimeout;
+       $$.maxObjectCount=$2.maxObjectCount;
+       $$.filterQuery=$2.filterQuery;
+       $$.filterQueryLang=$2.filterQueryLang;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildOpenEnumInstanceRequest(parm);
+    }
+;
+
+openEnumInstancesParmsList
+    : openEnumInstancesParms
+    {
+       $$.flags=$1.flags;
+       $$.flagsSet=$1.flagsSet;
+       if ($1.className) $$.className=$1.className;
+       if ($1.propertyList.values) {
+          $$.propertyList=$1.propertyList;
+          $$.properties=$1.properties;
+       }
+       if ($1.operationTimeout) $$.operationTimeout=$1.operationTimeout;
+       if ($1.maxObjectCount) $$.maxObjectCount=$1.maxObjectCount;
+       if ($1.filterQuery) $$.filterQuery=$1.filterQuery;
+       if ($1.filterQueryLang) $$.filterQueryLang=$1.filterQueryLang;
+    }
+    | openEnumInstancesParmsList openEnumInstancesParms
+    {
+       $$.flags=$1.flags|$2.flags;
+       $$.flagsSet=$1.flagsSet|$2.flagsSet;
+       if ($2.className) $$.className=$2.className;
+       if ($2.propertyList.values) {
+          $$.propertyList=$2.propertyList;
+          $$.properties=$2.properties;
+       }
+       if ($2.operationTimeout) $$.operationTimeout=$2.operationTimeout;
+       if ($2.maxObjectCount) $$.maxObjectCount=$2.maxObjectCount;
+       if ($2.filterQuery) $$.filterQuery=$2.filterQuery;
+       if ($2.filterQueryLang) $$.filterQueryLang=$2.filterQueryLang;
+    }
+;
+
+openEnumInstancesParms
+    : XTOK_IP_CLASSNAME className ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.className = $2;
+    }
+    | XTOK_IP_LOCALONLY boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_localOnly : 0 ;
+       $$.flagsSet = FL_localOnly;
+    }
+    | XTOK_IP_LOCALONLY ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_INCLUDEQUALIFIERS boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_includeQualifiers : 0 ;
+       $$.flagsSet = FL_includeQualifiers;
+    }
+    | XTOK_IP_INCLUDEQUALIFIERS ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_DEEPINHERITANCE boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_deepInheritance : 0 ;
+       $$.flagsSet = FL_deepInheritance;
+    }
+    | XTOK_IP_DEEPINHERITANCE ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_INCLUDECLASSORIGIN boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_includeClassOrigin : 0 ;
+       $$.flagsSet = FL_includeClassOrigin;
+    }
+    | XTOK_IP_INCLUDECLASSORIGIN ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_PROPERTYLIST valueArray ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.propertyList=$2;
+       $$.properties=$2.next;
+    }
+    | XTOK_IP_PROPERTYLIST ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_CONTINUEONERROR boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_continueOnError : 0 ;
+       $$.flagsSet = FL_continueOnError;
+    }
+    | XTOK_IP_CONTINUEONERROR ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_OPERATIONTIMEOUT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.operationTimeout=atoi($2.value);
+    }
+    | XTOK_IP_OPERATIONTIMEOUT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_MAXOBJECTCOUNT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.maxObjectCount=atoi($2.value);
+    }
+    | XTOK_IP_MAXOBJECTCOUNT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_FILTERQUERY value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.filterQuery=$2.value;
+    }
+    | XTOK_IP_FILTERQUERY ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_FILTERQUERYLANG value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.filterQueryLang=$2.value;
+    }
+    | XTOK_IP_FILTERQUERYLANG ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+;
+
+
+/*
+ *    openAssociatorInstancePaths
+*/
+
+openAssociatorInstancePaths
+    : localNameSpacePath
+    {
+       $$.op.count = AIN_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_OpenAssociatorInstancePaths;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+       $$.op.assocClass=setCharsMsgSegment(NULL);
+       $$.op.resultClass=setCharsMsgSegment(NULL);
+       $$.op.role=setCharsMsgSegment(NULL);
+       $$.op.resultRole=setCharsMsgSegment(NULL);
+       $$.objNameSet = 0;
+       // TODO what initialization needs to be done here?
+       //$$.flags = FL_localOnly | FL_deepInheritance;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildAssociatorNamesRequest(parm);  // TODO
+    }
+    | localNameSpacePath openAssociatorInstancePathsParmsList
+    {
+       $$.op.count = AIN_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_OpenAssociatorInstancePaths;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment($2.objectName.className);
+       $$.op.assocClass=setCharsMsgSegment($2.assocClass);
+       $$.op.resultClass=setCharsMsgSegment($2.resultClass);
+       $$.op.role=setCharsMsgSegment($2.role);
+       $$.op.resultRole=setCharsMsgSegment($2.resultRole);
+       $$.objectName = $2.objectName;
+       $$.objNameSet = $2.objNameSet;
+       $$.flags = ($2.flags & $2.flagsSet) | ((~$2.flagsSet) & (FL_localOnly));
+       $$.operationTimeout=$2.operationTimeout;
+       $$.maxObjectCount=$2.maxObjectCount;
+       $$.filterQuery=$2.filterQuery;
+       $$.filterQueryLang=$2.filterQueryLang;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildAssociatorNamesRequest(parm);  // TODO
+    }
+;
+
+openAssociatorInstancePathsParmsList
+    : openAssociatorInstancePathsParms
+    {
+       if ($1.objNameSet)  {
+          $$.objectName=$1.objectName;
+          $$.objNameSet=$1.objNameSet;
+       }
+       $$.assocClass=$1.assocClass;
+       $$.resultClass=$1.resultClass;
+       $$.role=$1.role;
+       $$.resultRole=$1.resultRole;
+       $$.flags=$1.flags;
+       $$.flagsSet=$1.flagsSet;
+       if ($1.operationTimeout) $$.operationTimeout=$1.operationTimeout;
+       if ($1.maxObjectCount) $$.maxObjectCount=$1.maxObjectCount;
+       if ($1.filterQuery) $$.filterQuery=$1.filterQuery;
+       if ($1.filterQueryLang) $$.filterQueryLang=$1.filterQueryLang;
+    }
+    | openAssociatorInstancePathsParmsList openAssociatorInstancePathsParms
+    {
+       if ($2.assocClass) $$.assocClass=$2.assocClass;
+       else if ($2.resultClass) $$.resultClass=$2.resultClass;
+       else if ($2.role) $$.role=$2.role;
+       else if ($2.resultRole) $$.resultRole=$2.resultRole;
+       else if ($2.objNameSet) {
+          $$.objectName=$2.objectName;
+          $$.objNameSet=$2.objNameSet;
+       }
+       $$.flags=$1.flags|$2.flags;
+       $$.flagsSet=$1.flagsSet|$2.flagsSet;
+       if ($2.operationTimeout) $$.operationTimeout=$2.operationTimeout;
+       if ($2.maxObjectCount) $$.maxObjectCount=$2.maxObjectCount;
+       if ($2.filterQuery) $$.filterQuery=$2.filterQuery;
+       if ($2.filterQueryLang) $$.filterQueryLang=$2.filterQueryLang;
+    }
+;
+
+openAssociatorInstancePathsParms
+    : XTOK_IP_INSTANCENAME instanceName ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.objectName = $2;
+       $$.objNameSet = 1;
+    }
+    | XTOK_IP_ASSOCCLASS className ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.assocClass = $2;
+    }
+    | XTOK_IP_ASSOCCLASS ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_RESULTCLASS className ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.resultClass = $2;
+    }
+    | XTOK_IP_RESULTCLASS ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_ROLE value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.role = $2.value;
+    }
+    | XTOK_IP_ROLE ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_RESULTROLE value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.resultRole = $2.value;
+    }
+    | XTOK_IP_RESULTROLE ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_CONTINUEONERROR boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_continueOnError : 0 ;
+       $$.flagsSet = FL_continueOnError;
+    }
+    | XTOK_IP_CONTINUEONERROR ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_OPERATIONTIMEOUT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.operationTimeout=atoi($2.value);
+    }
+    | XTOK_IP_OPERATIONTIMEOUT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_MAXOBJECTCOUNT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.maxObjectCount=atoi($2.value);
+    }
+    | XTOK_IP_MAXOBJECTCOUNT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_FILTERQUERY value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.filterQuery=$2.value;
+    }
+    | XTOK_IP_FILTERQUERY ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_FILTERQUERYLANG value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.filterQueryLang=$2.value;
+    }
+    | XTOK_IP_FILTERQUERYLANG ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+;
+
+
+/*
+ *    openAssociatorInstances
+*/
+
+openAssociatorInstances
+    : localNameSpacePath
+    {
+       $$.op.count = AI_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_OpenAssociatorInstances;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+       $$.op.assocClass=setCharsMsgSegment(NULL);
+       $$.op.resultClass=setCharsMsgSegment(NULL);
+       $$.op.role=setCharsMsgSegment(NULL);
+       $$.op.resultRole=setCharsMsgSegment(NULL);
+       $$.flags = 0;
+       $$.objNameSet = 0;
+       $$.propertyList.values = 0;
+       $$.properties=0;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildAssociatorsRequest(parm);  // TODO
+    }
+    | localNameSpacePath openAssociatorInstancesParmsList
+    {
+       $$.op.count = AI_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_OpenAssociatorInstances;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment($2.objectName.className);
+       $$.op.assocClass=setCharsMsgSegment($2.assocClass);
+       $$.op.resultClass=setCharsMsgSegment($2.resultClass);
+       $$.op.role=setCharsMsgSegment($2.role);
+       $$.op.resultRole=setCharsMsgSegment($2.resultRole);
+       $$.flags = ($2.flags & $2.flagsSet) | (~$2.flagsSet & 0);
+       $$.objectName = $2.objectName;
+       $$.objNameSet = $2.objNameSet;
+       $$.propertyList = $2.propertyList;
+       $$.properties=$2.properties;
+       $$.operationTimeout=$2.operationTimeout;
+       $$.maxObjectCount=$2.maxObjectCount;
+       $$.filterQuery=$2.filterQuery;
+       $$.filterQueryLang=$2.filterQueryLang;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildAssociatorsRequest(parm);  // TODO
+    }
+;
+
+openAssociatorInstancesParmsList
+    : openAssociatorInstancesParms
+    {
+       $$.flags=$1.flags;
+       $$.flagsSet=$1.flagsSet;
+       if ($1.objNameSet)  {
+          $$.objectName=$1.objectName;
+          $$.objNameSet = $1.objNameSet;
+       }
+       $$.assocClass=$1.assocClass;
+       $$.resultClass=$1.resultClass;
+       $$.role=$1.role;
+       $$.resultRole=$1.resultRole;
+       if ($1.propertyList.values) {
+          $$.propertyList=$1.propertyList;
+          $$.properties=$1.properties;
+       }
+       if ($1.operationTimeout) $$.operationTimeout=$1.operationTimeout;
+       if ($1.maxObjectCount) $$.maxObjectCount=$1.maxObjectCount;
+       if ($1.filterQuery) $$.filterQuery=$1.filterQuery;
+       if ($1.filterQueryLang) $$.filterQueryLang=$1.filterQueryLang;
+    }
+    | openAssociatorInstancesParmsList openAssociatorInstancesParms
+    {
+       $$.flags=$1.flags|$2.flags;
+       $$.flagsSet=$1.flagsSet|$2.flagsSet;
+       if ($2.assocClass) $$.assocClass=$2.assocClass;
+       else if ($2.resultClass) $$.resultClass=$2.resultClass;
+       else if ($2.role) $$.role=$2.role;
+       else if ($2.resultRole) $$.resultRole=$2.resultRole;
+       else if ($2.objNameSet) {
+          $$.objectName=$2.objectName;
+          $$.objNameSet=$2.objNameSet;
+       }
+       else if ($2.propertyList.values) {
+          $$.propertyList=$2.propertyList;
+          $$.properties=$2.properties;
+       }
+       if ($2.operationTimeout) $$.operationTimeout=$2.operationTimeout;
+       if ($2.maxObjectCount) $$.maxObjectCount=$2.maxObjectCount;
+       if ($2.filterQuery) $$.filterQuery=$2.filterQuery;
+       if ($2.filterQueryLang) $$.filterQueryLang=$2.filterQueryLang;
+    }
+;
+
+openAssociatorInstancesParms
+    : XTOK_IP_INSTANCENAME instanceName ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.objectName = $2;
+       $$.objNameSet = 1;
+    }
+    | XTOK_IP_ASSOCCLASS className ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.assocClass = $2;
+    }
+    | XTOK_IP_ASSOCCLASS ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_RESULTCLASS className ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.resultClass = $2;
+    }
+    | XTOK_IP_RESULTCLASS ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_ROLE value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.role = $2.value;
+    }
+    | XTOK_IP_ROLE ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_RESULTROLE value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.resultRole = $2.value;
+    }
+    | XTOK_IP_RESULTROLE ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_INCLUDEQUALIFIERS boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_includeQualifiers : 0 ;
+       $$.flagsSet = FL_includeQualifiers;
+    }
+    | XTOK_IP_INCLUDEQUALIFIERS ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_INCLUDECLASSORIGIN boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_includeClassOrigin : 0 ;
+       $$.flagsSet = FL_includeClassOrigin;
+    }
+    | XTOK_IP_INCLUDECLASSORIGIN ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_PROPERTYLIST valueArray ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.propertyList=$2;
+       $$.properties=$2.next;
+    }
+    | XTOK_IP_PROPERTYLIST ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_CONTINUEONERROR boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_continueOnError : 0 ;
+       $$.flagsSet = FL_continueOnError;
+    }
+    | XTOK_IP_CONTINUEONERROR ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_OPERATIONTIMEOUT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.operationTimeout=atoi($2.value);
+    }
+    | XTOK_IP_OPERATIONTIMEOUT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_MAXOBJECTCOUNT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.maxObjectCount=atoi($2.value);
+    }
+    | XTOK_IP_MAXOBJECTCOUNT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_FILTERQUERY value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.filterQuery=$2.value;
+    }
+    | XTOK_IP_FILTERQUERY ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_FILTERQUERYLANG value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.filterQueryLang=$2.value;
+    }
+    | XTOK_IP_FILTERQUERYLANG ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+;
+
+
+/*
+ *    openReferenceInstancePaths
+*/
+
+openReferenceInstancePaths
+    : localNameSpacePath
+    {
+       $$.op.count = RIN_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_OpenReferenceInstancePaths;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+       $$.op.resultClass=setCharsMsgSegment(NULL);
+       $$.op.role=setCharsMsgSegment(NULL);
+       $$.objNameSet=0;
+       // TODO what initialization needs to be done here?
+       //$$.flags = FL_localOnly | FL_deepInheritance;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildReferenceNamesRequest(parm);  // TODO
+    }
+    | localNameSpacePath openReferenceInstancePathsParmsList
+    {
+       $$.op.count = RIN_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_OpenReferenceInstancePaths;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment($2.objectName.className);
+       $$.op.resultClass=setCharsMsgSegment($2.resultClass);
+       $$.op.role=setCharsMsgSegment($2.role);
+       $$.objectName=$2.objectName;
+       $$.objNameSet=$2.objNameSet;
+       $$.flags = ($2.flags & $2.flagsSet) | ((~$2.flagsSet) & (FL_localOnly));
+       $$.operationTimeout=$2.operationTimeout;
+       $$.maxObjectCount=$2.maxObjectCount;
+       $$.filterQuery=$2.filterQuery;
+       $$.filterQueryLang=$2.filterQueryLang;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildReferenceNamesRequest(parm);  // TODO
+    }
+;
+
+openReferenceInstancePathsParmsList
+    : openReferenceInstancePathsParms
+    {
+       if ($1.objNameSet)  {
+          $$.objectName=$1.objectName;
+          $$.objNameSet=$1.objNameSet;
+       }
+       $$.resultClass=$1.resultClass;
+       $$.role=$1.role;
+       $$.flags=$1.flags;
+       $$.flagsSet=$1.flagsSet;
+       if ($1.operationTimeout) $$.operationTimeout=$1.operationTimeout;
+       if ($1.maxObjectCount) $$.maxObjectCount=$1.maxObjectCount;
+       if ($1.filterQuery) $$.filterQuery=$1.filterQuery;
+       if ($1.filterQueryLang) $$.filterQueryLang=$1.filterQueryLang;
+    }
+    | openReferenceInstancePathsParmsList openReferenceInstancePathsParms
+    {
+       if($2.objNameSet) {
+          $$.objectName=$2.objectName;
+          $$.objNameSet=$2.objNameSet;
+       }
+       else if($2.resultClass) $$.resultClass=$2.resultClass;
+       else if($2.role) $$.role=$2.role;
+       $$.flags=$1.flags|$2.flags;
+       $$.flagsSet=$1.flagsSet|$2.flagsSet;
+       if ($2.operationTimeout) $$.operationTimeout=$2.operationTimeout;
+       if ($2.maxObjectCount) $$.maxObjectCount=$2.maxObjectCount;
+       if ($2.filterQuery) $$.filterQuery=$2.filterQuery;
+       if ($2.filterQueryLang) $$.filterQueryLang=$2.filterQueryLang;
+    }
+;
+
+openReferenceInstancePathsParms
+    : XTOK_IP_INSTANCENAME instanceName ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.objectName = $2;
+       $$.objNameSet = 1;
+    }
+    | XTOK_IP_RESULTCLASS className ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.resultClass = $2;
+    }
+    | XTOK_IP_RESULTCLASS ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_ROLE value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.role = $2.value;
+    }
+    | XTOK_IP_ROLE ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_CONTINUEONERROR boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_continueOnError : 0 ;
+       $$.flagsSet = FL_continueOnError;
+    }
+    | XTOK_IP_CONTINUEONERROR ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_OPERATIONTIMEOUT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.operationTimeout=atoi($2.value);
+    }
+    | XTOK_IP_OPERATIONTIMEOUT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_MAXOBJECTCOUNT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.maxObjectCount=atoi($2.value);
+    }
+    | XTOK_IP_MAXOBJECTCOUNT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_FILTERQUERY value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.filterQuery=$2.value;
+    }
+    | XTOK_IP_FILTERQUERY ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_FILTERQUERYLANG value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.filterQueryLang=$2.value;
+    }
+    | XTOK_IP_FILTERQUERYLANG ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+;
+
+
+/*
+ *    openReferenceInstances
+*/
+
+openReferenceInstances
+    : localNameSpacePath
+    {
+       $$.op.count = RI_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_OpenReferenceInstances;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+       $$.op.resultClass=setCharsMsgSegment(NULL);
+       $$.op.role=setCharsMsgSegment(NULL);
+       $$.flags = 0;
+       $$.objNameSet = 0;
+       $$.propertyList.values = 0;
+       $$.properties=0;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildReferencesRequest(parm);  // TODO
+    }
+    | localNameSpacePath openReferenceInstancesParmsList
+    {
+       $$.op.count = RI_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_OpenReferenceInstances;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment($2.objectName.className);
+       $$.op.resultClass=setCharsMsgSegment($2.resultClass);
+       $$.op.role=setCharsMsgSegment($2.role);
+       $$.flags = ($2.flags & $2.flagsSet) | (~$2.flagsSet & 0);
+       $$.objectName = $2.objectName;
+       $$.objNameSet = $2.objNameSet;
+       $$.propertyList = $2.propertyList;
+       $$.properties=$2.properties;
+       $$.operationTimeout=$2.operationTimeout;
+       $$.maxObjectCount=$2.maxObjectCount;
+       $$.filterQuery=$2.filterQuery;
+       $$.filterQueryLang=$2.filterQueryLang;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildReferencesRequest(parm);  // TODO
+    }
+;
+
+openReferenceInstancesParmsList
+    : openReferenceInstancesParms
+    {
+       $$.flags=$1.flags;
+       $$.flagsSet=$1.flagsSet;
+       if ($1.objNameSet)  {
+          $$.objectName=$1.objectName;
+          $$.objNameSet = $1.objNameSet;
+       }
+       $$.resultClass=$1.resultClass;
+       $$.role=$1.role;
+       if ($1.propertyList.values) {
+          $$.propertyList=$1.propertyList;
+          $$.properties=$1.properties;
+       }
+       if ($1.operationTimeout) $$.operationTimeout=$1.operationTimeout;
+       if ($1.maxObjectCount) $$.maxObjectCount=$1.maxObjectCount;
+       if ($1.filterQuery) $$.filterQuery=$1.filterQuery;
+       if ($1.filterQueryLang) $$.filterQueryLang=$1.filterQueryLang;
+    }
+    | openReferenceInstancesParmsList openReferenceInstancesParms
+    {
+       $$.flags=$1.flags|$2.flags;
+       $$.flagsSet=$1.flagsSet|$2.flagsSet;
+       if ($2.resultClass) $$.resultClass=$2.resultClass;
+       else if ($2.role) $$.role=$2.role;
+       else if ($2.objNameSet) {
+          $$.objectName=$2.objectName;
+          $$.objNameSet=$2.objNameSet;
+       }
+       else if ($2.propertyList.values) {
+          $$.propertyList=$2.propertyList;
+          $$.properties=$2.properties;
+       }
+       if ($2.operationTimeout) $$.operationTimeout=$2.operationTimeout;
+       if ($2.maxObjectCount) $$.maxObjectCount=$2.maxObjectCount;
+       if ($2.filterQuery) $$.filterQuery=$2.filterQuery;
+       if ($2.filterQueryLang) $$.filterQueryLang=$2.filterQueryLang;
+   }
+;
+
+openReferenceInstancesParms
+    : XTOK_IP_INSTANCENAME instanceName ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.objectName = $2;
+       $$.objNameSet = 1;
+    }
+    | XTOK_IP_RESULTCLASS className ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.resultClass = $2;
+    }
+    | XTOK_IP_RESULTCLASS ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_ROLE value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.role = $2.value;
+    }
+    | XTOK_IP_ROLE ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_INCLUDEQUALIFIERS boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_includeQualifiers : 0 ;
+       $$.flagsSet = FL_includeQualifiers;
+    }
+    | XTOK_IP_INCLUDEQUALIFIERS ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_INCLUDECLASSORIGIN boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_includeClassOrigin : 0 ;
+       $$.flagsSet = FL_includeClassOrigin;
+    }
+    | XTOK_IP_INCLUDECLASSORIGIN ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_PROPERTYLIST valueArray ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.propertyList=$2;
+       $$.properties=$2.next;
+    }
+    | XTOK_IP_PROPERTYLIST ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_CONTINUEONERROR boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_continueOnError : 0 ;
+       $$.flagsSet = FL_continueOnError;
+    }
+    | XTOK_IP_CONTINUEONERROR ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_OPERATIONTIMEOUT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.operationTimeout=atoi($2.value);
+    }
+    | XTOK_IP_OPERATIONTIMEOUT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_MAXOBJECTCOUNT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.maxObjectCount=atoi($2.value);
+    }
+    | XTOK_IP_MAXOBJECTCOUNT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_FILTERQUERY value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.filterQuery=$2.value;
+    }
+    | XTOK_IP_FILTERQUERY ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_FILTERQUERYLANG value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.filterQueryLang=$2.value;
+    }
+    | XTOK_IP_FILTERQUERYLANG ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+;
+
+
+/*
+ *    openQueryInstances
+*/
+
+openQueryInstances
+    : localNameSpacePath
+    {
+       $$.op.count = EQ_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_OpenQueryInstances;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildExecQueryRequest(parm);  // TODO
+    }
+    | localNameSpacePath openQueryInstancesParmsList
+    {
+       $$.op.count = EQ_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_OpenQueryInstances;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+       $$.flags = ($2.flags & $2.flagsSet) | ((~$2.flagsSet) & (FL_localOnly));
+       $$.operationTimeout=$2.operationTimeout;
+       $$.maxObjectCount=$2.maxObjectCount;
+       $$.filterQuery=$2.filterQuery;
+       $$.filterQueryLang=$2.filterQueryLang;
+       $$.op.query=setCharsMsgSegment($2.filterQuery);
+       $$.op.queryLang=setCharsMsgSegment($2.filterQueryLang);
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildExecQueryRequest(parm);  // TODO
+    }
+;
+
+openQueryInstancesParmsList
+    : openQueryInstancesParms
+    {
+       $$.flags=$1.flags;
+       $$.flagsSet=$1.flagsSet;
+       if ($1.operationTimeout) $$.operationTimeout=$1.operationTimeout;
+       if ($1.maxObjectCount) $$.maxObjectCount=$1.maxObjectCount;
+       if ($1.filterQuery) $$.filterQuery=$1.filterQuery;
+       if ($1.filterQueryLang) $$.filterQueryLang=$1.filterQueryLang;
+    }
+    | openQueryInstancesParmsList openQueryInstancesParms
+    {
+       $$.flags=$1.flags|$2.flags;
+       $$.flagsSet=$1.flagsSet|$2.flagsSet;
+       if ($2.operationTimeout) $$.operationTimeout=$2.operationTimeout;
+       if ($2.maxObjectCount) $$.maxObjectCount=$2.maxObjectCount;
+       if ($2.filterQuery) $$.filterQuery=$2.filterQuery;
+       if ($2.filterQueryLang) $$.filterQueryLang=$2.filterQueryLang;
+    }
+;
+
+openQueryInstancesParms
+    : XTOK_IP_RETURNQUERYRESULTCLASS boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_returnQueryResultClass : 0 ;
+       $$.flagsSet = FL_returnQueryResultClass;
+    }
+    | XTOK_IP_RETURNQUERYRESULTCLASS ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_CONTINUEONERROR boolValue ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.flags = $2 ? FL_continueOnError : 0 ;
+       $$.flagsSet = FL_continueOnError;
+    }
+    | XTOK_IP_CONTINUEONERROR ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_OPERATIONTIMEOUT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.operationTimeout=atoi($2.value);
+    }
+    | XTOK_IP_OPERATIONTIMEOUT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_MAXOBJECTCOUNT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.maxObjectCount=atoi($2.value);
+    }
+    | XTOK_IP_MAXOBJECTCOUNT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_FILTERQUERY value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.filterQuery=$2.value;
+    }
+    | XTOK_IP_FILTERQUERY ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_FILTERQUERYLANG value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.filterQueryLang=$2.value;
+    }
+    | XTOK_IP_FILTERQUERYLANG ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+;
+
+/*
+ *    pullInstances
+*/
+
+pullInstances
+    : localNameSpacePath
+    {
+       $$.op.count = EI_REQ_REG_SEGMENTS;  // TODO
+       $$.op.type = OPS_PullInstances;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildPullInstancesRequest(parm);
+    }
+    | localNameSpacePath pullInstancesParmsList
+    {
+       $$.op.count = EI_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_PullInstances;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+       $$.maxObjectCount=$2.maxObjectCount;
+       $$.enumerationContext=$2.enumerationContext;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildPullInstancesRequest(parm);
+    }
+;
+
+pullInstancesParmsList
+    : pullInstancesParms
+    {
+       if ($1.maxObjectCount) $$.maxObjectCount=$1.maxObjectCount;
+       if ($1.enumerationContext) $$.enumerationContext=$1.enumerationContext;
+    }
+    | pullInstancesParmsList pullInstancesParms
+    {
+       if ($2.maxObjectCount) $$.maxObjectCount=$2.maxObjectCount;
+       if ($2.enumerationContext) $$.enumerationContext=$2.enumerationContext;
+    }
+;
+
+pullInstancesParms
+    : XTOK_IP_MAXOBJECTCOUNT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.maxObjectCount=atoi($2.value);
+    }
+    | XTOK_IP_MAXOBJECTCOUNT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_ENUMERATIONCONTEXT enumerationContext ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.enumerationContext=$2;
+    }
+    | XTOK_IP_ENUMERATIONCONTEXT ZTOK_IPARAMVALUE // TODO empty value; should this be allowed?
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+;
+
+
+/*
+ *    pullInstancesWithPath
+*/
+
+pullInstancesWithPath
+    : localNameSpacePath
+    {
+       $$.op.count = EI_REQ_REG_SEGMENTS;  // TODO
+       $$.op.type = OPS_PullInstancesWithPath;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+//     buildPullInstancePathsRequest(parm);
+       buildPullInstancesRequest(parm); // TODO  Or maybe this is acceptable...
+    }
+    | localNameSpacePath pullInstancesWithPathParmsList
+    {
+       $$.op.count = EI_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_PullInstancesWithPath;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+       $$.maxObjectCount=$2.maxObjectCount;
+       $$.enumerationContext=$2.enumerationContext;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+//     buildPullInstancesWithPathRequest(parm);
+       buildPullInstancesRequest(parm);
+    }
+;
+
+pullInstancesWithPathParmsList
+    : pullInstancesWithPathParms
+    {
+       if ($1.maxObjectCount) $$.maxObjectCount=$1.maxObjectCount;
+       if ($1.enumerationContext) $$.enumerationContext=$1.enumerationContext;
+    }
+    | pullInstancesWithPathParmsList pullInstancesWithPathParms
+    {
+       if ($2.maxObjectCount) $$.maxObjectCount=$2.maxObjectCount;
+       if ($2.enumerationContext) $$.enumerationContext=$2.enumerationContext;
+    }
+;
+
+pullInstancesWithPathParms
+    : XTOK_IP_MAXOBJECTCOUNT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.maxObjectCount=atoi($2.value);
+    }
+    | XTOK_IP_MAXOBJECTCOUNT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_ENUMERATIONCONTEXT enumerationContext ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.enumerationContext=$2;
+    }
+    | XTOK_IP_ENUMERATIONCONTEXT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+;
+
+
+/*
+ *    pullInstancePaths
+*/
+
+pullInstancePaths
+    : localNameSpacePath
+    {
+       $$.op.count = EI_REQ_REG_SEGMENTS;  // TODO
+       $$.op.type = OPS_PullInstances;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+//     buildPullInstancePathsRequest(parm);
+       buildPullInstancesRequest(parm); // TODO  Or maybe this is acceptable...
+    }
+    | localNameSpacePath pullInstancePathsParmsList
+    {
+       $$.op.count = EI_REQ_REG_SEGMENTS;
+       $$.op.type = OPS_PullInstances;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+       $$.maxObjectCount=$2.maxObjectCount;
+       $$.enumerationContext=$2.enumerationContext;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+//     buildPullInstancePathsRequest(parm);
+       buildPullInstancesRequest(parm);
+    }
+;
+
+pullInstancePathsParmsList
+    : pullInstancePathsParms
+    {
+       if ($1.maxObjectCount) $$.maxObjectCount=$1.maxObjectCount;
+       if ($1.enumerationContext) $$.enumerationContext=$1.enumerationContext;
+    }
+    | pullInstancePathsParmsList pullInstancePathsParms
+    {
+       if ($2.maxObjectCount) $$.maxObjectCount=$2.maxObjectCount;
+       if ($2.enumerationContext) $$.enumerationContext=$2.enumerationContext;
+    }
+;
+
+pullInstancePathsParms
+    : XTOK_IP_MAXOBJECTCOUNT value ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.maxObjectCount=atoi($2.value);
+    }
+    | XTOK_IP_MAXOBJECTCOUNT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+    | XTOK_IP_ENUMERATIONCONTEXT enumerationContext ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+       $$.enumerationContext=$2;
+    }
+    | XTOK_IP_ENUMERATIONCONTEXT ZTOK_IPARAMVALUE
+    {
+       memset(&$$, 0, sizeof($$));
+    }
+;
+
+/*
+ *    closeEnumeration
+*/
+
+closeEnumeration
+    : localNameSpacePath XTOK_IP_ENUMERATIONCONTEXT enumerationContext ZTOK_IPARAMVALUE
+    {
+       $$.op.count = EI_REQ_REG_SEGMENTS;  // TODO
+       $$.op.type = OPS_CloseEnumeration;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+       $$.enumerationContext=$3;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildCloseEnumerationRequest(parm);
+    }
+;
+
+/*
+ *    enumerationCount
+*/
+
+enumerationCount
+    : localNameSpacePath XTOK_IP_ENUMERATIONCONTEXT enumerationContext ZTOK_IPARAMVALUE
+    {
+       $$.op.count = EI_REQ_REG_SEGMENTS;  // TODO
+       $$.op.type = OPS_EnumerationCount;
+       $$.op.nameSpace=setCharsMsgSegment($1);
+       $$.op.className=setCharsMsgSegment(NULL);
+       $$.enumerationContext=$3;
+
+       setRequest(parm,&$$,sizeof($$),$$.op.type);
+       buildEnumerationCountRequest(parm);
+    }
+;
+
+
+enumerationContext
+    : XTOK_VALUE ZTOK_VALUE
+    {
+    $$=atol($1.value); // TODO need some checking here
     }
 ;
 

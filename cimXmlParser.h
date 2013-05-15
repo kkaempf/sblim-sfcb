@@ -35,11 +35,19 @@
 #include <providerMgr.h>
 #include "cimRequest.h"
 
+// TODO these need to be defined in cmpidt.h in cmpi-base...
+#   define CMPI_FLAG_ContinueOnError        16
+#   define CMPI_FLAG_ReturnQueryResultClass 32
+#   define CMPI_FLAG_EndOfSequence          64  // OUT only
+
 #define FL_localOnly CMPI_FLAG_LocalOnly
 #define FL_deepInheritance CMPI_FLAG_DeepInheritance
 #define FL_includeQualifiers CMPI_FLAG_IncludeQualifiers
 #define FL_includeClassOrigin CMPI_FLAG_IncludeClassOrigin
 #define FL_chunked 32
+#define FL_continueOnError CMPI_FLAG_ContinueOnError
+#define FL_returnQueryResultClass CMPI_FLAG_ReturnQueryResultClass
+#define FL_endOfSequence CMPI_FLAG_EndOfSequence  // OUT only
 
 typedef enum typeValRef {
   typeValRef_InstanceName,
@@ -723,6 +731,317 @@ typedef struct xtokReferences {
   int             properties;
   XtokValueArray  propertyList;
 } XtokReferences;
+
+
+/*
+ *    openEnumInstancePaths
+ */
+
+struct xtokOpenEnumInstancePathsParms {
+  char           *className;
+  unsigned int    flags;
+  unsigned int    flagsSet;
+  char           *filterQuery,
+                 *filterQueryLang;
+  uint32_t        operationTimeout;
+  uint32_t        maxObjectCount;
+};
+
+typedef struct xtokOpenEnumInstancePathsParms XtokOpenEnumInstancePathsParms;
+typedef struct xtokOpenEnumInstancePathsParms XtokOpenEnumInstancePathsParmsList;
+
+typedef struct xtokOpenEnumInstancePaths {
+  OperationHdr    op;
+  unsigned int    flags;
+  char           *filterQuery,
+                 *filterQueryLang;
+  uint32_t        operationTimeout;
+  uint32_t        maxObjectCount;
+} XtokOpenEnumInstancePaths;
+
+
+/*
+ *    openEnumInstances
+ */
+
+struct xtokOpenEnumInstancesParms {
+  char           *className;
+  unsigned int    flags;
+  unsigned int    flagsSet;
+  int             properties;
+  XtokValueArray  propertyList;
+  char           *filterQuery,
+                 *filterQueryLang;
+  uint32_t        operationTimeout;
+  uint32_t        maxObjectCount;
+};
+ 
+typedef struct xtokOpenEnumInstancesParms XtokOpenEnumInstancesParms;
+typedef struct xtokOpenEnumInstancesParms XtokOpenEnumInstancesParmsList;
+
+typedef struct xtokOpenEnumInstances {
+  OperationHdr    op;
+  unsigned int    flags;
+  int             properties;
+  XtokValueArray  propertyList;
+  char           *filterQuery,
+                 *filterQueryLang;
+  uint32_t        operationTimeout;
+  uint32_t        maxObjectCount;
+} XtokOpenEnumInstances;
+
+
+/*
+ *    openAssociatorInstancePaths
+ */
+
+struct xtokOpenAssociatorInstancePathsParms {
+  int             objNameSet;
+  XtokInstanceName objectName;
+  unsigned int    flags;
+  unsigned int    flagsSet;
+  char           *assocClass,
+                 *resultClass,
+                 *role,
+                 *resultRole,
+                 *filterQuery,
+                 *filterQueryLang;
+  uint32_t        operationTimeout;
+  uint32_t        maxObjectCount;
+};
+
+typedef struct xtokOpenAssociatorInstancePathsParms XtokOpenAssociatorInstancePathsParms;
+typedef struct xtokOpenAssociatorInstancePathsParms XtokOpenAssociatorInstancePathsParmsList;
+
+typedef struct xtokOpenAssociatorInstancePaths {
+  OperationHdr    op;
+  XtokInstanceName objectName;
+  int             objNameSet;
+  unsigned int    flags;
+  int             properties;
+  char           *filterQuery,
+                 *filterQueryLang;
+  uint32_t        operationTimeout;
+  uint32_t        maxObjectCount;
+} XtokOpenAssociatorInstancePaths;
+
+
+/*
+ *    openAssociatorInstances
+ */
+
+struct xtokOpenAssociatorInstancesParms {
+  unsigned int    flags;
+  unsigned int    flagsSet;
+  int             objNameSet;
+  XtokInstanceName objectName;
+  char           *assocClass,
+                 *resultClass,
+                 *role,
+                 *resultRole;
+  int             properties;
+  XtokValueArray  propertyList;
+  char           *filterQuery,
+                 *filterQueryLang;
+  uint32_t        operationTimeout;
+  uint32_t        maxObjectCount;
+};
+
+typedef struct xtokOpenAssociatorInstancesParms XtokOpenAssociatorInstancesParms;
+typedef struct xtokOpenAssociatorInstancesParms XtokOpenAssociatorInstancesParmsList;
+
+typedef struct xtokOpenAssociatorInstances {
+  OperationHdr    op;
+  XtokInstanceName objectName;
+  unsigned int    flags;
+  int             objNameSet;
+  int             properties;
+  XtokValueArray  propertyList;
+  char           *filterQuery,
+                 *filterQueryLang;
+  uint32_t        operationTimeout;
+  uint32_t        maxObjectCount;
+} XtokOpenAssociatorInstances;
+
+
+/*
+ *    openReferenceInstancePaths
+ */
+
+struct xtokOpenReferenceInstancePathsParms {
+  int             objNameSet;
+  XtokInstanceName objectName;
+  char           *resultClass,
+                 *role;
+  unsigned int    flags;
+  unsigned int    flagsSet;
+  char           *filterQuery,
+                 *filterQueryLang;
+  uint32_t        operationTimeout;
+  uint32_t        maxObjectCount;
+};
+typedef struct xtokOpenReferenceInstancePathsParms XtokOpenReferenceInstancePathsParms;
+typedef struct xtokOpenReferenceInstancePathsParms XtokOpenReferenceInstancePathsParmsList;
+
+typedef struct xtokOpenReferenceInstancePaths {
+  OperationHdr    op;
+  XtokInstanceName objectName;
+  int             objNameSet;
+  unsigned int    flags;
+  char           *filterQuery,
+                 *filterQueryLang;
+  uint32_t        operationTimeout;
+  uint32_t        maxObjectCount;
+} XtokOpenReferenceInstancePaths;
+
+
+/*
+ *    openReferenceInstances
+ */
+
+struct xtokOpenReferenceInstancesParms {
+  unsigned int    flags;
+  unsigned int    flagsSet;
+  int             objNameSet;
+  XtokInstanceName objectName;
+  char           *resultClass,
+                 *role;
+  int             properties;
+  XtokValueArray  propertyList;
+  char           *filterQuery,
+                 *filterQueryLang;
+  uint32_t        operationTimeout;
+  uint32_t        maxObjectCount;
+};
+
+typedef struct xtokOpenReferenceInstancesParms XtokOpenReferenceInstancesParms;
+typedef struct xtokOpenReferenceInstancesParms XtokOpenReferenceInstancesParmsList;
+
+typedef struct xtokOpenReferenceInstances {
+  OperationHdr    op;
+  XtokInstanceName objectName;
+  unsigned int    flags;
+  int             objNameSet;
+  int             properties;
+  XtokValueArray  propertyList;
+  char           *filterQuery,
+                 *filterQueryLang;
+  uint32_t        operationTimeout;
+  uint32_t        maxObjectCount;
+} XtokOpenReferenceInstances;
+
+
+/*
+ *    openQueryInstances
+ */
+
+struct xtokOpenQueryInstancesParms {
+  unsigned int    flags;
+  unsigned int    flagsSet;
+  char           *filterQuery,
+                 *filterQueryLang;
+  uint32_t        operationTimeout;
+  uint32_t        maxObjectCount;
+};
+
+typedef struct xtokOpenQueryInstancesParms XtokOpenQueryInstancesParms;
+typedef struct xtokOpenQueryInstancesParms XtokOpenQueryInstancesParmsList;
+
+typedef struct xtokOpenQueryInstances {
+  OperationHdr    op;
+  unsigned int    flags;
+  char           *filterQuery,
+                 *filterQueryLang;
+  uint32_t        operationTimeout;
+  uint32_t        maxObjectCount;
+} XtokOpenQueryInstances;
+
+
+/*
+ *    pullInstances
+ */
+
+struct xtokPullInstancesParms {
+  uint32_t        maxObjectCount;
+  uint64_t        enumerationContext;
+};
+typedef struct xtokPullInstancesParms XtokPullInstancesParms;
+typedef struct xtokPullInstancesParms XtokPullInstancesParmsList;
+
+typedef struct xtokPullInstances {
+  OperationHdr    op;
+  uint32_t        maxObjectCount;
+  uint64_t        enumerationContext;
+} XtokPullInstances;
+
+
+/*
+ *    pullInstancesWithPath
+ */
+
+struct xtokPullInstancesWithPathParms {
+  uint32_t        maxObjectCount;
+  uint64_t        enumerationContext;
+};
+typedef struct xtokPullInstancesWithPathParms XtokPullInstancesWithPathParms;
+typedef struct xtokPullInstancesWithPathParms XtokPullInstancesWithPathParmsList;
+
+typedef struct xtokPullInstancesWithPath {
+  OperationHdr    op;
+  uint32_t        maxObjectCount;
+  uint64_t        enumerationContext;
+} XtokPullInstancesWithPath;
+
+
+/*
+ *    pullInstancePaths
+ */
+
+struct xtokPullInstancePathsParms {
+  uint32_t        maxObjectCount;
+  uint64_t        enumerationContext;
+};
+typedef struct xtokPullInstancePathsParms XtokPullInstancePathsParms;
+typedef struct xtokPullInstancePathsParms XtokPullInstancePathsParmsList;
+
+typedef struct xtokPullInstancePaths {
+  OperationHdr    op;
+  uint32_t        maxObjectCount;
+  uint64_t        enumerationContext;
+} XtokPullInstancePaths;
+
+
+/*
+ *    closeEnumeration
+ */
+
+struct xtokCloseEnumerationsParms {
+  uint64_t        enumerationContext;
+};
+typedef struct xtokCloseEnumerationsParms XtokCloseEnumerationsParms;
+typedef struct xtokCloseEnumerationsParms XtokCloseEnumerationsParmsList;
+
+typedef struct xtokCloseEnumeration {
+  OperationHdr    op;
+  uint64_t        enumerationContext;
+} XtokCloseEnumeration;
+
+
+/*
+ *    enumerationCount
+ */
+
+struct xtokEnumerationCountParms {
+  uint64_t        enumerationContext;
+};
+typedef struct xtokEnumerationCountParms XtokEnumerationCountParms;
+typedef struct xtokEnumerationCountParms XtokEnumerationCountParmsList;
+
+typedef struct xtokEnumerationCount {
+  OperationHdr    op;
+  uint64_t        enumerationContext;
+} XtokEnumerationCount;
+
 
 /*
  *    enumQualifiers

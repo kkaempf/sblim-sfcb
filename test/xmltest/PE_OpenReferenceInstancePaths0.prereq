@@ -1,0 +1,47 @@
+#!/bin/sh
+cat > PE_OpenReferenceInstancePaths0.xml << EOF
+<?xml version="1.0" encoding="utf-8" ?>
+<CIM CIMVERSION="2.0" DTDVERSION="2.0">
+<MESSAGE ID="4711" PROTOCOLVERSION="1.0">
+<SIMPLEREQ>
+<IMETHODCALL NAME="OpenReferenceInstancePaths">
+<LOCALNAMESPACEPATH>
+  <NAMESPACE NAME="root"/>
+  <NAMESPACE NAME="cimv2"/>
+</LOCALNAMESPACEPATH>
+<IPARAMVALUE NAME="InstanceName">
+  <INSTANCENAME CLASSNAME="Linux_ComputerSystem">
+    <KEYBINDING NAME="CreationClassName">
+      <KEYVALUE VALUETYPE="string">Linux_ComputerSystem</KEYVALUE>
+    </KEYBINDING>
+    <KEYBINDING NAME="name">
+      <KEYVALUE VALUETYPE="string">$(hostname -f)</KEYVALUE>
+    </KEYBINDING>
+  </INSTANCENAME>
+</IPARAMVALUE>
+<IPARAMVALUE NAME="FilterQueryLanguage">
+  <VALUE>WQL</VALUE>
+</IPARAMVALUE>
+<!--IPARAMVALUE NAME="Role">
+  <VALUE>test</VALUE>
+</IPARAMVALUE-->
+<IPARAMVALUE NAME="FilterQuery">
+  <VALUE>select * from Linux_ComputerSystem</VALUE>
+</IPARAMVALUE>
+<IPARAMVALUE NAME="OperationTimeout">
+  <VALUE>60</VALUE>
+</IPARAMVALUE>
+<IPARAMVALUE NAME="ContinueOnError">
+  <VALUE>FALSE</VALUE>
+</IPARAMVALUE>
+<IPARAMVALUE NAME="MaxObjectCount">
+  <VALUE>100</VALUE>
+</IPARAMVALUE>
+</IMETHODCALL>
+</SIMPLEREQ>
+</MESSAGE>
+</CIM>
+EOF
+
+# The function in this test isn't implemented yet
+exit 2

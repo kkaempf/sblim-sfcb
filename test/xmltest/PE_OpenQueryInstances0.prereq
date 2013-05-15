@@ -1,0 +1,37 @@
+#!/bin/sh
+cat > PE_OpenQueryInstances0.xml << EOF
+<?xml version="1.0" encoding="utf-8" ?>
+<CIM CIMVERSION="2.0" DTDVERSION="2.0">
+<MESSAGE ID="4711" PROTOCOLVERSION="1.0">
+<SIMPLEREQ>
+<IMETHODCALL NAME="OpenQueryInstances">
+<LOCALNAMESPACEPATH>
+  <NAMESPACE NAME="root"/>
+  <NAMESPACE NAME="interop"/>
+</LOCALNAMESPACEPATH>
+<IPARAMVALUE NAME="ReturnQueryResultClass">
+  <VALUE>false</VALUE>
+</IPARAMVALUE>
+<IPARAMVALUE NAME="FilterQueryLanguage">
+  <VALUE>WQL</VALUE>
+</IPARAMVALUE>
+<IPARAMVALUE NAME="FilterQuery">
+  <VALUE>select RegisteredName,RegisteredVersion from SFCB_RegisteredProfile</VALUE>
+</IPARAMVALUE>
+<IPARAMVALUE NAME="OperationTimeout">
+  <VALUE>60</VALUE>
+</IPARAMVALUE>
+<IPARAMVALUE NAME="ContinueOnError">
+  <VALUE>FALSE</VALUE>
+</IPARAMVALUE>
+<IPARAMVALUE NAME="MaxObjectCount">
+  <VALUE>100</VALUE>
+</IPARAMVALUE>
+</IMETHODCALL>
+</SIMPLEREQ>
+</MESSAGE>
+</CIM>
+EOF
+
+# The function in this test isn't implemented yet
+exit 2

@@ -638,6 +638,30 @@ procImethodCall(YYSTYPE __attribute__ ((unused)) *lvalp, ParserControl * parm)
         return XTOK_DELETEQUALIFIER;
       if (strcasecmp(attr[0].attr, "enumerateQualifiers") == 0)
         return XTOK_ENUMQUALIFIERS;
+      if (strcasecmp(attr[0].attr, "openEnumerateInstancePaths") == 0)
+        return XTOK_OPENENUMINSTANCEPATHS;
+      if (strcasecmp(attr[0].attr, "openEnumerateInstances") == 0)
+        return XTOK_OPENENUMINSTANCES;
+      if (strcasecmp(attr[0].attr, "openAssociatorInstancePaths") == 0)
+        return XTOK_OPENASSOCIATORINSTANCEPATHS;
+      if (strcasecmp(attr[0].attr, "openAssociatorInstances") == 0)
+        return XTOK_OPENASSOCIATORINSTANCES;
+      if (strcasecmp(attr[0].attr, "openReferenceInstancePaths") == 0)
+        return XTOK_OPENREFERENCEINSTANCEPATHS;
+      if (strcasecmp(attr[0].attr, "openReferenceInstances") == 0)
+        return XTOK_OPENREFERENCEINSTANCES;
+      if (strcasecmp(attr[0].attr, "openQueryInstances") == 0)
+        return XTOK_OPENQUERYINSTANCES;
+      if (strcasecmp(attr[0].attr, "pullInstances") == 0)
+        return XTOK_PULLINSTANCES;
+      if (strcasecmp(attr[0].attr, "pullInstancesWithPath") == 0)
+        return XTOK_PULLINSTANCESWITHPATH;
+      if (strcasecmp(attr[0].attr, "pullInstancePaths") == 0)
+        return XTOK_PULLINSTANCEPATHS;
+      if (strcasecmp(attr[0].attr, "closeEnumeration") == 0)
+        return XTOK_CLOSEENUMERATION;
+      if (strcasecmp(attr[0].attr, "enumerationCount") == 0)
+        return XTOK_ENUMERATIONCOUNT;
     }
   }
   return 0;
@@ -793,7 +817,15 @@ static IParm    iParms[] = {
   {"qualifierdeclaration", XTOK_IP_QUALIFIERDECLARATION},
   {"qualifiername", XTOK_IP_QUALIFIERNAME},
   {"propertyname", XTOK_IP_PROPERTYNAME},
-  {"newValue", XTOK_IP_NEWVALUE}
+  {"newValue", XTOK_IP_NEWVALUE},
+  {"enumerationContext", XTOK_IP_ENUMERATIONCONTEXT},
+  {"filterQueryLanguage", XTOK_IP_FILTERQUERYLANG},
+  {"filterQuery", XTOK_IP_FILTERQUERY},
+  {"continueOnError", XTOK_IP_CONTINUEONERROR},
+  {"endOfSequence", XTOK_IP_ENDOFSEQUENCE},  // OUT only
+  {"returnQueryResultClass", XTOK_IP_RETURNQUERYRESULTCLASS},
+  {"operationTimeout", XTOK_IP_OPERATIONTIMEOUT},
+  {"maxObjectCount", XTOK_IP_MAXOBJECTCOUNT}
 };
 
 static int

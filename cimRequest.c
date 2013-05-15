@@ -1756,6 +1756,39 @@ static Handler  handlers[] = {
   {notSupported},               // OPS_EnumerateQualifiers 23
 #endif
   {invokeMethod},               // OPS_InvokeMethod 24
+  {NULL}, 
+  {NULL}, 
+  {NULL}, 
+  {NULL}, 
+  {NULL}, 
+  {NULL}, 
+  {NULL}, 
+  // TODO Create handlers for new OPS codes...
+//{openEnumerateInstancePaths}, // OPS_OpenEnumerateInstancePaths 32
+//{openEnumerateInstances},     // OPS_OpenEnumerateInstances 33
+//{openAssociatorInstancePaths},// OPS_OpenAssociatorInstancePaths 34
+//{openAssociatorInstances},    // OPS_OpenAssociatorInstances 36
+//{openReferenceInstancePaths}, // OPS_OpenReferenceInstancePaths 36
+//{openReferenceInstances},     // OPS_OpenReferenceInstances 37
+//{openQueryInstances},         // OPS_OpenQueryInstances 38
+//{pullInstances},              // OPS_PullInstances 39
+//{pullInstancesWithPath},      // OPS_PullInstancesWithPath 40
+//{pullInstancePaths},          // OPS_PullInstancePaths 41
+//{closeEnumeration},           // OPS_CloseEnumeration 42
+//{enumerationCount},           // OPS_EnumerationCount 43
+  // In the meantime set to notSupported or hack to call the legacy OP...
+  {enumInstanceNames},          // OPS_OpenEnumerateInstancePaths 32
+  {enumInstances},              // OPS_OpenEnumerateInstances 33
+  {associatorNames},            // OPS_OpenAssociatorInstancePaths 34
+  {associators},                // OPS_OpenAssociatorInstances 36
+  {referenceNames},             // OPS_OpenReferenceInstancePaths 36
+  {references},                 // OPS_OpenReferenceInstances 37
+  {execQuery},                  // OPS_OpenQueryInstances 38
+  {notSupported},               // OPS_PullInstances 39
+  {notSupported},               // OPS_PullInstancesWithPath 40
+  {notSupported},               // OPS_PullInstancePaths 41
+  {notSupported},               // OPS_CloseEnumeration 42
+  {notSupported}                // OPS_EnumerationCount 43
 };
 
 RespSegments sendHdrToHandler(RequestHdr* hdr, CimRequestContext* ctx) {

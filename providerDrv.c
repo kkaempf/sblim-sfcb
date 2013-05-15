@@ -3274,13 +3274,39 @@ static ProvHandler pHandlers[] = {
   {activateFilter},             // OPS_ActivateFilter 28
   {deactivateFilter},           // OPS_DeactivateFilter 29
   {disableIndications},         // OPS_DisableIndications 30
-  {enableIndications}           // OPS_EnableIndications 31
+  {enableIndications},          // OPS_EnableIndications 31
 #else
   {NULL},                       // OPS_ActivateFilter 28
   {NULL},                       // OPS_DeactivateFilter 29
   {NULL},                       // OPS_DisableIndications 30
-  {NULL}                        // OPS_EnableIndications 31
+  {NULL},                       // OPS_EnableIndications 31
 #endif
+  // TODO Create handlers for new OPS codes...
+//{openEnumerateInstancePaths}, // OPS_OpenEnumerateInstancePaths 32
+//{openEnumerateInstances},     // OPS_OpenEnumerateInstances 33
+//{openAssociatorInstancePaths},// OPS_OpenAssociatorInstancePaths 34
+//{openAssociatorInstances},    // OPS_OpenAssociatorInstances 35
+//{openReferenceInstancePaths}, // OPS_OpenReferenceInstancePaths 36
+//{openReferenceInstances},     // OPS_OpenReferenceInstances 37
+//{openQueryInstances},         // OPS_OpenQueryInstances 38
+//{pullInstances},              // OPS_PullInstances 39
+//{pullInstancesWithPath},      // OPS_PullInstancesWithPath 40
+//{pullInstancePaths},          // OPS_PullInstancePaths 41
+//{closeEnumeration},           // OPS_CloseEnumeration 42
+//{enumerationCount},           // OPS_EnumerationCount 43
+  // In the meantime set to opNotSupported or hack to call the legacy OP...
+  {enumInstanceNames},          // OPS_OpenEnumerateInstancePaths 32
+  {enumInstances},              // OPS_OpenEnumerateInstances 33
+  {associatorNames},            // OPS_OpenAssociatorInstancePaths 34
+  {associators},                // OPS_OpenAssociatorInstances 35
+  {referenceNames},             // OPS_OpenReferenceInstancePaths 36
+  {references},                 // OPS_OpenReferenceInstances 37
+  {execQuery},                  // OPS_OpenQueryInstances 38
+  {opNotSupported},             // OPS_PullInstances 39
+  {opNotSupported},             // OPS_PullInstancesWithPath 40
+  {opNotSupported},             // OPS_PullInstancePaths 41
+  {opNotSupported},             // OPS_CloseEnumeration 42
+  {opNotSupported}              // OPS_EnumerationCount 43
 };
 
 char           *opsName[] = {
@@ -3316,6 +3342,18 @@ char           *opsName[] = {
   "DeactivateFilter",
   "DisableIndications",
   "EnableIndications",
+  "OpenEnumerateInstances",
+  "OpenEnumerateInstancePaths",
+  "OpenReferenceInstances",
+  "OpenReferenceInstancePaths",
+  "OpenAssociatorInstances",
+  "OpenAssociatorInstancePaths",
+  "OpenQueryInstances",
+  "PullInstances",            
+  "PullInstancesWithPath",    
+  "PullInstancePaths",        
+  "CloseEnumeration",         
+  "EnumerationCount",         
 };
 
 static void    *

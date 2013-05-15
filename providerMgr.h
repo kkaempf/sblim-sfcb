@@ -61,6 +61,19 @@
 #define OPS_DisableIndications 30
 #define OPS_EnableIndications  31
 
+#define OPS_OpenEnumerateInstancePaths 32
+#define OPS_OpenEnumerateInstances 33
+#define OPS_OpenAssociatorInstancePaths 34
+#define OPS_OpenAssociatorInstances 35
+#define OPS_OpenReferenceInstancePaths 36
+#define OPS_OpenReferenceInstances 37
+#define OPS_OpenQueryInstances 38
+#define OPS_PullInstances 39
+#define OPS_PullInstancesWithPath 40
+#define OPS_PullInstancePaths 41
+#define OPS_CloseEnumeration 42
+#define OPS_EnumerationCount 43
+
 // this macro must be adjusted when when BinRequestHdr is changed
 #define BINREQ(oper,count) {{oper,0,NULL,0,0,count}}
 
