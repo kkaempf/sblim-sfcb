@@ -187,7 +187,7 @@ ensureClSpace(ClObjectHdr * hdr, ClSection * sct, int size, int iSize)
                      *t;
       f = ((char *) hdr) + sct->sectionOffset;
       t = malloc(max * size);
-      memcpy(t, f, max * size);
+      memcpy(t,f,sct->used*size);
       sct->max = max;
       setSectionPtr(sct, t);
     }
@@ -230,7 +230,7 @@ addClStringN(ClObjectHdr * hdr, const char *str, unsigned int length)
     buf->bMax = nmax;
     buf->bUsed = buf->iUsed = 0;
     buf->iMax = 16;
-    setStrIndexPtr(buf, malloc(sizeof(long) * 16));
+    setStrIndexPtr(buf, malloc(sizeof(*buf->indexPtr) * 16));
     hdr->flags |= HDR_Rebuild;
   }
 
@@ -244,16 +244,15 @@ addClStringN(ClObjectHdr * hdr, const char *str, unsigned int length)
         if (!isMallocedStrIndex(buf)) {
           void           *idx = buf->indexPtr;
           buf->iMax = nmax * 2;
-          setStrIndexPtr(buf, malloc(buf->iMax * sizeof(long)));
-          memcpy(buf->indexPtr, idx, nmax * sizeof(long));
+          setStrIndexPtr(buf, malloc(buf->iMax * sizeof(*buf->indexPtr)));
+          memcpy(buf->indexPtr, idx, nmax * sizeof(*buf->indexPtr));
         } else {
           buf->iMax = nmax * 2;
-          setStrIndexPtr(buf,
-                         realloc(buf->indexPtr, buf->iMax * sizeof(long)));
+	  setStrIndexPtr(buf, realloc(buf->indexPtr, buf->iMax * sizeof(*buf->indexPtr)));
         }
       } else {
         buf->iMax = 16;
-        setStrIndexPtr(buf, malloc(buf->iMax * sizeof(long)));
+        setStrIndexPtr(buf, malloc(buf->iMax * sizeof(*buf->indexPtr)));
       }
       hdr->flags |= HDR_Rebuild;
     }
@@ -325,7 +324,7 @@ addClArray(ClObjectHdr * hdr, CMPIData d)
     buf->bMax = nmax;
     buf->bUsed = buf->iUsed = 0;
     buf->iMax = 16;
-    setArrayIndexPtr(buf, malloc(sizeof(long) * 16));
+    setArrayIndexPtr(buf, malloc(sizeof(*buf->indexPtr) * 16));
     hdr->flags |= HDR_Rebuild;
   }
 
@@ -339,17 +338,15 @@ addClArray(ClObjectHdr * hdr, CMPIData d)
         if (!isMallocedArrayIndex(buf)) {
           void           *idx = buf->indexPtr;
           buf->iMax = nmax * 2;
-          setArrayIndexPtr(buf, malloc(buf->iMax * sizeof(long)));
-          memcpy(buf->indexPtr, idx, nmax * sizeof(long));
+          setArrayIndexPtr(buf, malloc(buf->iMax * sizeof(*buf->indexPtr)));
+          memcpy(buf->indexPtr, idx, nmax * sizeof(*buf->indexPtr));
         } else {
           buf->iMax = nmax * 2;
-          setArrayIndexPtr(buf,
-                           realloc(buf->indexPtr,
-                                   buf->iMax * sizeof(long)));
+	  setArrayIndexPtr(buf, realloc(buf->indexPtr, buf->iMax * sizeof(*buf->indexPtr)));
         }
       } else {
         buf->iMax = 16;
-        setArrayIndexPtr(buf, malloc(buf->iMax * sizeof(long)));
+	setArrayIndexPtr(buf, malloc(buf->iMax * sizeof(*buf->indexPtr)));
       }
       hdr->flags |= HDR_Rebuild;
     }
