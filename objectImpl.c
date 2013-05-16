@@ -504,6 +504,29 @@ replaceClString(ClObjectHdr * hdr, int id, const char *str){
   return replaceClStringN(hdr, id, str, 0);
 }
 
+static int getBufIndexLen(int *indexPtr, int bUsed, int iUsed, int index)
+{
+  /*
+   * Find length of 'string' in fb at given index.
+   * We cannot use strlen, because some items are not strings but embedded
+   * instances.
+   * We cannot simply substract fb->indexPtr[index+1] - fb->indexPtr[index],
+   * because the entries are not consecutive! They are shuffled by
+   * replaceClStringN().
+   * Therefore the only way to find a length of our 'string' is to find
+   * string, which starts immediately after it. Let's call it 'nearest'
+   * string. */
+  int nearest_start = bUsed;
+  int our_start = indexPtr[index];
+  int i;
+  for (i = 0; i<iUsed; i++)
+    if (indexPtr[i] > our_start && indexPtr[i] < nearest_start) {
+      nearest_start = indexPtr[i];
+    }
+  int len = nearest_start - our_start;
+  return len;
+}
+
 static void
 replaceClStringN(ClObjectHdr * hdr, int id, const char *str, unsigned int length)
 {
@@ -515,15 +538,20 @@ replaceClStringN(ClObjectHdr * hdr, int id, const char *str, unsigned int length
                   l,
                   u;
   ClStrBuf       *fb;
+  int            *oldIndexPtr;
 
   fb = getStrBufPtr(hdr);
   ts = (char *) malloc(fb->bUsed);
   fs = &fb->buf[0];
 
+  /* Copy indexPtr from the buffer, so we can compute lengths of items in it.*/
+ oldIndexPtr = (int*) malloc(sizeof(int)*fb->iUsed);
+ memcpy(oldIndexPtr, fb->indexPtr, sizeof(int)*fb->iUsed);
+
   for (u = i = 0; i < fb->iUsed; i++) {
     if (i != id - 1) {
       char           *f = fs + fb->indexPtr[i];
-      l = strlen(f) + 1;
+      l = getBufIndexLen(oldIndexPtr, fb->bUsed, fb->iUsed, i);
       fb->indexPtr[i] = u;
       memcpy(ts + u, f, l);
       u += l;
@@ -532,6 +560,7 @@ replaceClStringN(ClObjectHdr * hdr, int id, const char *str, unsigned int length
   memcpy(fs, ts, u);
   fb->bUsed = u;
   free(ts);
+  free(oldIndexPtr);
 
   i = addClStringN(hdr, str, length);
   fb = getStrBufPtr(hdr);  /* addClString may change the strbufptr */
@@ -555,16 +584,20 @@ removeClObject(ClObjectHdr * hdr, int id)
    char *ts, *fs;
    long i, l, u;
    ClStrBuf *fb;
+   int *oldIndexPtr;
 
    fb = getStrBufPtr(hdr);   
    ts = (char *) malloc(fb->bUsed); /* tmp string buffer */
    fs = &fb->buf[0];
+   /* Copy indexPtr from the buffer, so we can compute lengths of items in it.*/
+   oldIndexPtr = (int*) malloc(sizeof(int)*fb->iUsed);
+   memcpy(oldIndexPtr, fb->indexPtr, sizeof(int)*fb->iUsed);
 
    for (u = i = 0; i < fb->iUsed; i++) {
       if (i != id - 1) {    /* loop through and copy over all _other_ properties */
         //      fprintf(stderr, "replace: keeping %ld\n", i);
          char *f = fs + fb->indexPtr[i];
-         l = fb->indexPtr[i+1] - fb->indexPtr[i];
+	 l = getBufIndexLen(oldIndexPtr, fb->bUsed, fb->iUsed, i);
 
          /* Bugzilla 74159 - Align the string buffer & null terminate */
          /*if (l % sizeof(long) != 0) {
@@ -592,6 +625,7 @@ removeClObject(ClObjectHdr * hdr, int id)
    memcpy(fs, ts, u);
    fb->bUsed = u;
    free(ts);
+   free(oldIndexPtr);
 
    fb->iUsed--; /* fixup the item count, since we have one fewer elements */
 
