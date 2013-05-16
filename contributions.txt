@@ -221,3 +221,7 @@ Bas ten Berge
 Shreyas Deodhar, QLogic
 -----------------------
 02/27/2013 [sfcb-tix:#24] GetClass Operation does not filter the class
+
+Jan Safranek, Red Hat
+---------------------
+05/16/2013 [sfcb-tix:#37] indCIMXmlHandler coredumps in IndCIMXMLHandlerInvokeMethod with Embedded Instances
