@@ -5,27 +5,21 @@
 <PROPERTY NAME="Identifier" TYPE="uint8">
 <VALUE>1</VALUE>
 <PROPERTY NAME="Einst" EmbeddedObject="object" TYPE="string">
-[CDATA[
-<PROPERTY NAME="Identifier" TYPE="uint8">
-<VALUE>1</VALUE>
-<PROPERTY NAME="Einst" EmbeddedObject="object" TYPE="string">
-<PROPERTY NAME="Message" TYPE="string">
-<VALUE>I&apos;m an EmbeddedObject</VALUE>
+<VALUE>&lt;INSTANCE CLASSNAME=&quot;Sample_Instance&quot;&gt;
+&lt;PROPERTY NAME=&quot;Identifier&quot; TYPE=&quot;uint8&quot;&gt;
+&lt;VALUE&gt;1&lt;/VALUE&gt;
+&lt;/PROPERTY&gt;
+&lt;PROPERTY NAME=&quot;Einst&quot; EmbeddedObject=&quot;object&quot; TYPE=&quot;string&quot;&gt;
+&lt;/PROPERTY&gt;
+&lt;PROPERTY NAME=&quot;Message&quot; TYPE=&quot;string&quot;&gt;
+&lt;VALUE&gt;I&amp;apos;m an EmbeddedObject&lt;/VALUE&gt;
+&lt;/PROPERTY&gt;
+&lt;/INSTANCE&gt;
 <PROPERTY NAME="Message" TYPE="string">
 <VALUE>Hello World</VALUE>
-<INSTANCENAME CLASSNAME="Sample_Instance">
-<KEYBINDING NAME="Identifier">
 <KEYVALUE VALUETYPE="numeric">2</KEYVALUE>
-<INSTANCE CLASSNAME="Sample_Instance">
-<PROPERTY NAME="Identifier" TYPE="uint8">
 <VALUE>2</VALUE>
-<PROPERTY NAME="Einst" EmbeddedObject="object" TYPE="string">
-<PROPERTY NAME="Message" TYPE="string">
 <VALUE>Yo Planet</VALUE>
 <KEYVALUE VALUETYPE="numeric">3</KEYVALUE>
-<INSTANCE CLASSNAME="Sample_Instance">
-<PROPERTY NAME="Identifier" TYPE="uint8">
 <VALUE>3</VALUE>
-<PROPERTY NAME="Einst" EmbeddedObject="object" TYPE="string">
-<PROPERTY NAME="Message" TYPE="string">
 <VALUE>Hey Earth</VALUE>

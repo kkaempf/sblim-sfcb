@@ -59,6 +59,24 @@ const char     *opGetClassNameChars(CMPIObjectPath * cop);
   data2xml((data),(name),(refname),(btag),sizeof(btag)-1,(etag), \
 	   sizeof(etag)-1,(sb),(qsb),(inst),(param))
 
+static int add_escaped_instance(UtilStringBuffer *sb, CMPIInstance *inst)
+{
+  UtilStringBuffer *instance;
+
+  _SFCB_ENTER(TRACE_CIMXMLPROC, "add_escaped_instance");
+
+  instance = UtilFactory->newStrinBuffer(1024);
+  if (!instance)
+    _SFCB_RETURN(1);
+
+  instance2xml(inst, instance, 0);
+  char *escaped = XMLEscape((char *) instance->ft->getCharPtr(instance), NULL);
+  sb->ft->appendChars(sb, escaped);
+  free(escaped);
+  instance->ft->release(instance);
+  _SFCB_RETURN(0);
+}
+
 char           *
 XMLEscape(char *in, int *outlen)
 {
@@ -586,9 +604,10 @@ value2xml(CMPIData d, UtilStringBuffer * sb, int wv)
         splen = 0;
       }
     } else if (d.type == CMPI_instance) {
-      SFCB_APPENDCHARS_BLOCK(sb, "<![CDATA[");
-      instance2xml(d.value.inst, sb, 0);
-      SFCB_APPENDCHARS_BLOCK(sb, "]]>");
+      // SFCB_APPENDCHARS_BLOCK(sb, "<![CDATA[");
+      // instance2xml(d.value.inst, sb, 0);
+      // SFCB_APPENDCHARS_BLOCK(sb, "]]>");
+      add_escaped_instance(sb, d.value.inst);
       splen = 0;
     } else {
       mlogf(M_ERROR, M_SHOW, "%s(%d): invalid value2xml %d-%x\n", __FILE__,
@@ -805,9 +824,10 @@ data2xml(CMPIData *data, CMPIString *name,
         SFCB_APPENDCHARS_BLOCK(sb, "\" TYPE=\"string\">\n");
       if (data->value.inst) {
         SFCB_APPENDCHARS_BLOCK(sb, "<VALUE>");
-        SFCB_APPENDCHARS_BLOCK(sb, "<![CDATA[");
-        instance2xml(data->value.inst, sb, 0);
-        SFCB_APPENDCHARS_BLOCK(sb, "]]>");
+        // SFCB_APPENDCHARS_BLOCK(sb, "<![CDATA[");
+        // instance2xml(data->value.inst, sb, 0);
+        // SFCB_APPENDCHARS_BLOCK(sb, "]]>");
+        add_escaped_instance(sb, data->value.inst);
         SFCB_APPENDCHARS_BLOCK(sb, "</VALUE>\n");
       }
     }

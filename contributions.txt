@@ -225,3 +225,4 @@ Shreyas Deodhar, QLogic
 Jan Safranek, Red Hat
 ---------------------
 05/16/2013 [sfcb-tix:#37] indCIMXmlHandler coredumps in IndCIMXMLHandlerInvokeMethod with Embedded Instances
+05/17/2013 [sfcb-tix:#44] Escape XML for Embedded Instances Instead of Using CDATA
