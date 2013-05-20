@@ -615,6 +615,12 @@ getObjectPath(char *path, char **msg)
     u = pp + 1;
   }
 
+  if (p < u) {
+    if(msg) *msg = "Object Path malformed";
+    free(origu);
+    free(nname);
+    return NULL;
+  }
   cname = strnDup(u, p - u);
   // op = Broker->eft->newObjectPath(Broker, nname ? nname : "root/cimv2", 
   // 
