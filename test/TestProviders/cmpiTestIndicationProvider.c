@@ -41,6 +41,14 @@ generateIndication(const char *methodname, const CMPIContext *ctx)
     dat = CMNewDateTime(broker, &rc);
     CMSetProperty(inst, "IndicationTime", &dat, CMPI_dateTime);
 
+    CMPIObjectPath* cop1 = CMNewObjectPath(broker, "root/cimv2", "Sample_Instance", &rc);
+    CMPIValue value3;
+    value3.string = CMNewString(broker, "I'm an EmbeddedObject", &rc);
+    CMPIInstance* Einst;
+    Einst = CMNewInstance(broker, cop1, &rc);
+    CMSetProperty(Einst, "Message", &value3, CMPI_string);
+    CMSetProperty(inst, "EInst", &Einst, CMPI_instance);
+
     CMSetProperty(inst, "MethodName", methodname, CMPI_chars);
 
     ar = CMNewArray(broker, 0, CMPI_string, &rc);

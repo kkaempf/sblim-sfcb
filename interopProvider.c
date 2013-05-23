@@ -881,8 +881,7 @@ initInterOp(const CMPIBroker * broker, const CMPIContext *ctx)
       cop = CMGetObjectPath(ci, &st);
       if (RIEnabled) {
          // check and set context for migrated listeners.
-         CMPIInstance *ldi = _broker->bft->getInstance(_broker, ctxLocal, cop, NULL, NULL);
-         ld = CMGetProperty(ldi, "SequenceContext", NULL);
+         ld = CMGetProperty(ci, "SequenceContext", NULL);
          if (ld.state != CMPI_goodValue) {
              _SFCB_TRACE(1,("---  adding SequenceContext to migrated cim_listenerdestination"));
              // build and set the context string, we can't know the actual creation
@@ -891,12 +890,12 @@ initInterOp(const CMPIBroker * broker, const CMPIContext *ctx)
              sprintf (context,"%s#%sM%d#",mc.value.string->ft->getCharPtr(mc.value.string,NULL),sfcBrokerStart,ldcount);
              CMPIValue scontext;
              scontext.string = sfcb_native_new_CMPIString(context, NULL, 0);
-             CMSetProperty(ldi, "SequenceContext", &scontext, CMPI_string);
+             CMSetProperty(ci, "SequenceContext", &scontext, CMPI_string);
          }
          // Reset the sequence numbers on sfcb restart
          CMPIValue zarro = {.sint64 = -1 };
-         CMSetProperty(ldi, "LastSequenceNumber", &zarro, CMPI_sint64);
-         CBModifyInstance(_broker, ctxLocal, cop, ldi, NULL);
+         CMSetProperty(ci, "LastSequenceNumber", &zarro, CMPI_sint64);
+         CBModifyInstance(_broker, ctxLocal, cop, ci, NULL);
       }
       addHandler(ci, cop);
     }

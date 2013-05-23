@@ -218,11 +218,12 @@ __ift_clone(const CMPIInstance *instance, CMPIStatus *rc)
 
 CMPIData
 __ift_internal_getPropertyAt(const CMPIInstance *ci, CMPICount i,
-                             char **name, CMPIStatus *rc, int readonly)
+                             char **name, CMPIStatus *rc, int readonly,
+                             unsigned long* quals)
 {
   ClInstance     *inst = (ClInstance *) ci->hdl;
   CMPIData        rv = { 0, CMPI_notFound, {0} };
-  if (ClInstanceGetPropertyAt(inst, i, &rv, name, NULL)) {
+  if (ClInstanceGetPropertyAt(inst, i, &rv, name, quals)) {
     if (rc)
       CMSetStatus(rc, CMPI_RC_ERR_NO_SUCH_PROPERTY);
     return rv;
@@ -268,7 +269,7 @@ __ift_getPropertyAt(const CMPIInstance *ci, CMPICount i,
     return rv;
   }
 
-  rv = __ift_internal_getPropertyAt(ci, i, &sname, rc, 0);
+  rv = __ift_internal_getPropertyAt(ci, i, &sname, rc, 0, NULL);
   if (name) {
     *name = sfcb_native_new_CMPIString(sname, NULL, 0);
   }
@@ -319,6 +320,22 @@ __ift_getPropertyCount(const CMPIInstance *ci, CMPIStatus *rc)
   if (rc)
     CMSetStatus(rc, CMPI_RC_OK);
   return (CMPICount) ClInstanceGetPropertyCount(inst);
+}
+
+static CMPIStatus __ift_addPropertyQualifier(const CMPIInstance * instance,
+                                             const char *name,
+                                             const char *qualifier )
+{
+  ClInstance *inst;
+  int rc;
+
+  if (!instance->hdl) {
+    CMReturn(CMPI_RC_ERR_INVALID_HANDLE);
+  }
+
+  inst = (ClInstance *) instance->hdl;
+  rc = ClInstanceAddPropertyQualifierSpecial(inst, name, qualifier);
+  CMReturn(rc);
 }
 
 static CMPIStatus
@@ -508,7 +525,7 @@ __ift_getObjectPath(const CMPIInstance *instance, CMPIStatus *rc)
   while (j--) {
     char           *keyName;
     CMPIData        d =
-        __ift_internal_getPropertyAt(instance, j, &keyName, &tmp, 1);
+      __ift_internal_getPropertyAt(instance, j, &keyName, &tmp, 1, NULL);
     if (d.state & CMPI_keyValue) {
       CMAddKey(cop, keyName, &d.value, d.type);
       f++;
@@ -598,7 +615,7 @@ __ift_internal_setPropertyFilter(CMPIInstance *instance,
     iNew->property_list = __duplicate_list(propertyList);
     iNew->key_list = __duplicate_list(keys);
     for (j = 0, m = __ift_getPropertyCount(instance, &st); j < m; j++) {
-      data = __ift_internal_getPropertyAt(instance, j, &name, &st, 1);
+      data = __ift_internal_getPropertyAt(instance, j, &name, &st, 1, NULL);
       if (__contained_list((char **) propertyList, name)
           || __contained_list((char **) keys, name)) {
         if ((data.state & ~CMPI_keyValue) != 0) {
@@ -769,7 +786,7 @@ instance2String(CMPIInstance *inst, CMPIStatus *rc)
   add(&buf, &bp, &bm, "\n");
 
   for (i = 0, m = __ift_getPropertyCount(inst, rc); i < m; i++) {
-    data = __ift_internal_getPropertyAt(inst, i, &pname, rc, 1);
+    data = __ift_internal_getPropertyAt(inst, i, &pname, rc, 1, NULL);
     add(&buf, &bp, &bm, " ");
     add(&buf, &bp, &bm, pname);
     add(&buf, &bp, &bm, " = ");
@@ -1107,6 +1124,7 @@ instFillDefaultProperties(struct native_instance *inst,
       pd = cc->ft->getPropertyAt(cc, pc, &pn, &ps);
 
       /* if this prop is an EmbeddedObject, force type to CMPI_instance to allow CMSetProperty with a CMPI_Instance */
+      /* (also works for EmbeddedInstance, since the EmbeddedObject qual will also be set in that case */
       CMPIData pqd = cc->ft->getPropQualifier(cc, CMGetCharsPtr(pn, NULL), "EmbeddedObject", NULL);
       if ((pqd.state == CMPI_goodValue) && (pqd.value.boolean == 1)) {
 	pd.type = CMPI_instance;
@@ -1127,6 +1145,14 @@ instFillDefaultProperties(struct native_instance *inst,
         }
         __ift_setProperty(&inst->instance, CMGetCharsPtr(pn, NULL),
                           vp, pd.type);
+
+        /* Copy EmbeddedInstance qualifier from the class to the instance,
+           so we know, what to put into CIM-XML */
+        CMPIData pqd = cc->ft->getPropQualifier(cc, CMGetCharsPtr(pn, NULL), "EmbeddedInstance", NULL);
+        if ((pqd.state == CMPI_goodValue) && (pqd.value.string != NULL)) {
+          __ift_addPropertyQualifier(&inst->instance, CMGetCharsPtr(pn,NULL), "EmbeddedInstance");
+        }
+
       }
     }
   }

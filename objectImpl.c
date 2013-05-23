@@ -1012,7 +1012,11 @@ ClClassAddPropertyQualifierSpecial(ClObjectHdr * hdr, ClProperty * p,
     p->quals |= ClProperty_Q_Key;
   else if (strcasecmp(id, "embeddedobject") == 0)
     p->quals |= ClProperty_Q_EmbeddedObject;
-  else
+  /* Make EmbeddedInstance behave as EmbeddedObject, but be able to distinguish between them */
+  else if (strcasecmp(id, "embeddedinstance") == 0) {
+    p->quals |= ClProperty_Q_EmbeddedObject;
+    p->quals |= ClProperty_Q_EmbeddedInstance;
+  } else
     return ClClassAddQualifierSpecial(hdr, &p->qualifiers, id, d, arrHdr);
   return 0;
 }
@@ -2406,6 +2410,33 @@ ClInstanceGetPropertyAt(ClInstance * inst, int id, CMPIData *data,
 
   _SFCB_RETURN(0);
 }
+
+int ClInstanceAddPropertyQualifierSpecial(ClInstance *inst, const char *id,
+                                          const char *qualifier)
+{
+  int i;
+  ClProperty *p;
+
+  _SFCB_ENTER(TRACE_OBJECTIMPL, "ClInstanceAddPropertyQualifierSpecial");
+
+  i = ClObjectLocateProperty(&inst->hdr, &inst->properties, id);
+  if (i == 0)
+    /* cannot find the property */
+    _SFCB_RETURN(CMPI_RC_ERR_NO_SUCH_PROPERTY);
+
+  p = (ClProperty*) getSectionPtr(&inst->hdr, &inst->properties);
+  p = p + i - 1;
+
+  if (strcasecmp(qualifier, "embeddedinstance") == 0) {
+    p->quals |= ClProperty_Q_EmbeddedObject;
+    p->quals |= ClProperty_Q_EmbeddedInstance;
+  } else if (strcasecmp(qualifier, "embeddedobject") == 0) {
+    p->quals |= ClProperty_Q_EmbeddedObject;
+  }
+
+  _SFCB_RETURN(0)
+}
+
 
 int
 ClInstanceAddProperty(ClInstance * inst, const char *id, CMPIData d)

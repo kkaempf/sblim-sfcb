@@ -417,6 +417,24 @@ getPropQualifier(CMPIConstClass * cc, const char *cp, const char *cpq,
       return rv_notFound;
     }
   }
+  if (strcasecmp(cpq, "embeddedinstance") == 0) {
+    unsigned long quals;
+    getPropertyQualsAt(cc,p-1,NULL,&quals,NULL,rc);
+    if (quals &  ClProperty_Q_EmbeddedInstance) {
+      rv.type = CMPI_boolean;
+      rv.state = CMPI_goodValue;
+      rv.value.boolean = 1;
+      if (rc) {
+        CMSetStatus(rc, CMPI_RC_OK);
+      }
+      return rv;
+    } else {
+      if (rc) {
+        CMSetStatus(rc, CMPI_RC_ERR_NOT_FOUND);
+      }
+      return rv_notFound;
+    }
+  }
 
   for (i = 0; i < num; i++) {
     if (ClClassGetPropQualifierAt(cls, p - 1, i, &rv, &n) == 0

@@ -2,5 +2,6 @@
 class Test_Indication : CIM_ProcessIndication
 {
     string MethodName;
+    [EmbeddedObject] string Einst;
     [Static] uint32 SendTestIndication();
 };

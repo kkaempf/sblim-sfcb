@@ -50,14 +50,21 @@ extern CMPIData opGetKeyCharsAt(CMPIObjectPath * cop, unsigned int index,
                                 const char **name, CMPIStatus *rc);
 extern CMPIData __ift_internal_getPropertyAt(const CMPIInstance *ci,
                                              CMPICount i, char **name,
-                                             CMPIStatus *rc, int readonly);
+                                             CMPIStatus *rc, int readonly,
+                                             unsigned long* quals);
 extern int getCustomHostname(char *httpHost, char **hn, unsigned int len);
 
 const char     *opGetClassNameChars(CMPIObjectPath * cop);
 
+/* We introduce additional parameter in data2xml, use this macro when you want
+ * pass it, use the original when you want data2xml behave as usual */
+#define EMBDATA2XML(data,name,refname,btag,etag,sb,qsb,inst,param,embInst)  \
+  data2xml((data),(name),(refname),(btag),sizeof(btag)-1,(etag),          \
+           sizeof(etag)-1,(sb),(qsb),(inst),(param),(embInst))
+
 #define DATA2XML(data,name,refname,btag,etag,sb,qsb,inst,param)    \
   data2xml((data),(name),(refname),(btag),sizeof(btag)-1,(etag), \
-	   sizeof(etag)-1,(sb),(qsb),(inst),(param))
+	   sizeof(etag)-1,(sb),(qsb),(inst),(param),0)
 
 static int add_escaped_instance(UtilStringBuffer *sb, CMPIInstance *inst)
 {
@@ -742,10 +749,9 @@ void
 data2xml(CMPIData *data, CMPIString *name,
          CMPIString *refName, char *bTag, int bTagLen, char *eTag,
          int eTagLen, UtilStringBuffer * sb, UtilStringBuffer * qsb,
-         int inst, int param)
+         int inst, int param, int embInst)
 {
   _SFCB_ENTER(TRACE_CIMXMLPROC, "data2xml");
-
   char           *type;
 
   if (data->type & CMPI_ARRAY) {
@@ -764,7 +770,11 @@ data2xml(CMPIData *data, CMPIString *name,
       SFCB_APPENDCHARS_BLOCK(sb, "reference");
     } else if (((data->type & ~CMPI_ARRAY) == CMPI_instance)
                || ((data->type & ~CMPI_ARRAY) == CMPI_class)) {
-      SFCB_APPENDCHARS_BLOCK(sb, "string\" EmbeddedObject=\"object");
+      if (embInst == 1) {
+        SFCB_APPENDCHARS_BLOCK(sb, "\" EmbeddedObject=\"instance");
+      } else {
+        SFCB_APPENDCHARS_BLOCK(sb, "\" EmbeddedObject=\"object");
+      }
     } else {
       sb->ft->appendChars(sb, dataType(data->type));
     }
@@ -817,7 +827,11 @@ data2xml(CMPIData *data, CMPIString *name,
     else if (*type == '%') {
       sb->ft->appendBlock(sb, bTag, bTagLen);
       sb->ft->appendChars(sb, (char *) name->hdl);
-      SFCB_APPENDCHARS_BLOCK(sb, "\" EmbeddedObject=\"object");
+      if (embInst == 1) {
+        SFCB_APPENDCHARS_BLOCK(sb, "\" EmbeddedObject=\"instance");
+      } else {
+        SFCB_APPENDCHARS_BLOCK(sb, "\" EmbeddedObject=\"object");
+      }
       if (param)
         SFCB_APPENDCHARS_BLOCK(sb, "\" PARAMTYPE=\"string\">\n");
       else
@@ -869,9 +883,13 @@ quals2xml(unsigned long quals, UtilStringBuffer * sb)
     SFCB_APPENDCHARS_BLOCK(sb,
                            "<QUALIFIER NAME=\"Key\" TYPE=\"boolean\">\n"
                            "<VALUE>TRUE</VALUE>\n</QUALIFIER>\n");
-  if (quals & (ClProperty_Q_EmbeddedObject << 8))
+  if ((quals & (ClProperty_Q_EmbeddedObject << 8)) && !(quals & (ClProperty_Q_EmbeddedInstance << 8)))
     SFCB_APPENDCHARS_BLOCK(sb,
                            "<QUALIFIER NAME=\"EmbeddedObject\" TYPE=\"boolean\">\n"
+                           "<VALUE>TRUE</VALUE>\n</QUALIFIER>\n");
+  if (quals & (ClProperty_Q_EmbeddedInstance << 8))
+    SFCB_APPENDCHARS_BLOCK(sb,
+                           "<QUALIFIER NAME=\"EmbeddedInstance\" TYPE=\"boolean\">\n"
                            "<VALUE>TRUE</VALUE>\n</QUALIFIER>\n");
 }
 
@@ -880,8 +898,7 @@ param2xml(CMPIParameter * pdata, CMPIConstClass * cls, ClParameter * parm,
           CMPIString *pname, UtilStringBuffer * sb, unsigned int flags)
 {
   ClClass        *cl = (ClClass *) cls->hdl;
-  int             i,
-                  m;
+  int             i, m;
   CMPIData        data;
   CMPIString      qname;
   char           *etag = "</PARAMETER>\n";
@@ -947,12 +964,7 @@ int
 cls2xml(CMPIConstClass * cls, UtilStringBuffer * sb, unsigned int flags)
 {
   ClClass        *cl = (ClClass *) cls->hdl;
-  int             i,
-                  m,
-                  q,
-                  qm,
-                  p,
-                  pm;
+  int             i, m, q, qm, p, pm, embInst = 0;
   char           *type,
                  *superCls;
   CMPIString     *name,
@@ -1000,19 +1012,24 @@ cls2xml(CMPIConstClass * cls, UtilStringBuffer * sb, unsigned int flags)
         CMRelease(qname);
         sfcb_native_release_CMPIValue(qdata.type, &qdata.value);
       }
-    if (data.type & CMPI_ARRAY)
-      DATA2XML(&data, name, NULL, "<PROPERTY.ARRAY NAME=\"",
-               "</PROPERTY.ARRAY>\n", sb, qsb, 0, 0);
+    if (quals & ClProperty_Q_EmbeddedInstance) embInst = 1;
+
+    if (data.type & CMPI_ARRAY) EMBDATA2XML(&data,name,NULL,"<PROPERTY.ARRAY NAME=\"",
+                                            "</PROPERTY.ARRAY>\n", sb, qsb, 0, 0, embInst);
+
     else {
       type = dataType(data.type);
       if (*type == '*') {
-        DATA2XML(&data, name, refName, "<PROPERTY.REFERENCE NAME=\"",
-                 "</PROPERTY.REFERENCE>\n", sb, qsb, 0, 0);
-      } else
-        DATA2XML(&data, name, NULL, "<PROPERTY NAME=\"",
-                 "</PROPERTY>\n", sb, qsb, 0, 0);
+        EMBDATA2XML(&data,name,refName,"<PROPERTY.REFERENCE NAME=\"",
+                    "</PROPERTY.REFERENCE>\n", sb, qsb, 0, 0, embInst);
+
+      } 
+      else  EMBDATA2XML(&data,name,NULL,"<PROPERTY NAME=\"", "</PROPERTY>\n",
+                        sb, qsb, 0, 0, embInst);
+
     }
     CMRelease(name);
+    embInst = 0;
   }
 
   for (i = 0, m = ClClassGetMethodCount(cl); i < m; i++) {
@@ -1064,9 +1081,11 @@ instance2xml(CMPIInstance *ci, UtilStringBuffer * sb, unsigned int flags)
 {
   ClInstance     *inst = (ClInstance *) ci->hdl;
   int             i,
-                  m = ClInstanceGetPropertyCount(inst);
+                  m = ClInstanceGetPropertyCount(inst),
+                  embInst = 0;
   char           *type;
   UtilStringBuffer *qsb = UtilFactory->newStrinBuffer(1024);
+  unsigned long   quals;
 
   _SFCB_ENTER(TRACE_CIMXMLPROC, "instance2xml");
 
@@ -1085,19 +1104,20 @@ instance2xml(CMPIInstance *ci, UtilStringBuffer * sb, unsigned int flags)
       continue;
     }
     data =
-        __ift_internal_getPropertyAt(ci, i, (char **) &name.hdl, NULL, 1);
+      __ift_internal_getPropertyAt(ci, i, (char **) &name.hdl, NULL, 1, &quals);
+
+    if (quals & ClProperty_Q_EmbeddedInstance) {
+      embInst = 1;
+    }
 
     if (data.type & CMPI_ARRAY) {
-      DATA2XML(&data, &name, NULL, "<PROPERTY.ARRAY NAME=\"",
-               "</PROPERTY.ARRAY>\n", sb, qsb, 1, 0);
+      EMBDATA2XML(&data,&name,NULL,"<PROPERTY.ARRAY NAME=\"", "</PROPERTY.ARRAY>\n",
+                  sb, qsb, 1, 0, embInst);
     } else {
       type = dataType(data.type);
-      if (*type == '*')
-        DATA2XML(&data, &name, NULL, "<PROPERTY.REFERENCE NAME=\"",
-                 "</PROPERTY.REFERENCE>\n", sb, qsb, 1, 0);
-      else
-        DATA2XML(&data, &name, NULL, "<PROPERTY NAME=\"",
-                 "</PROPERTY>\n", sb, qsb, 1, 0);
+      if (*type == '*')  EMBDATA2XML(&data,&name,NULL,"<PROPERTY.REFERENCE NAME=\"",
+                                     "</PROPERTY.REFERENCE>\n", sb, qsb, 1,0, embInst);
+      else EMBDATA2XML(&data,&name,NULL,"<PROPERTY NAME=\"", "</PROPERTY>\n", sb, qsb, 1,0, embInst);
     }
 
     if (data.type & (CMPI_ENC | CMPI_ARRAY)) {  // don't get confused
@@ -1105,6 +1125,7 @@ instance2xml(CMPIInstance *ci, UtilStringBuffer * sb, unsigned int flags)
       if ((data.state & ~CMPI_keyValue) == 0 && data.type != CMPI_instance)
         data.value.inst->ft->release(data.value.inst);
     }
+    embInst = 0;
   }
   SFCB_APPENDCHARS_BLOCK(sb, "</INSTANCE>\n");
 

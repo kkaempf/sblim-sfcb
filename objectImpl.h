@@ -286,6 +286,7 @@ typedef struct {
 #ifndef SETCLPFX
 #define ClProperty_Q_Key 1
 #define ClProperty_Q_EmbeddedObject 8
+#define ClProperty_Q_EmbeddedInstance 16
 #endif
   unsigned char   originId;
                   PFX(CLPFX, ClSection) qualifiers;
@@ -534,6 +535,7 @@ extern int      ClInstanceGetPropertyCount(ClInstance * inst);
 extern int      ClInstanceGetPropertyAt(ClInstance * inst, int id,
                                         CMPIData *data, char **name,
                                         unsigned long *quals);
+extern int ClInstanceAddPropertyQualifierSpecial(ClInstance *inst, const char *id, const char *qualifier);
 extern int      ClInstanceAddProperty(ClInstance * inst, const char *id,
                                       CMPIData d);
 extern void     ClInstanceFilterFlagProperty(ClInstance * inst, int id);

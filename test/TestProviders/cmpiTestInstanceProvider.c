@@ -104,11 +104,13 @@ initialize()
   CMPIValue       value1,
                   value2,
                   value3,
+                  value4,
                   value_inst1,
                   value_inst2;
   CMPIInstance   *instance1,
                  *instance2,
                  *instance3,
+                 *Eobj,
                  *Einst;
   CMPIObjectPath *cop1,
                  *cop2,
@@ -116,6 +118,7 @@ initialize()
   value1.uint8 = 1;
   value2.string = CMNewString(_broker, "Hello World", &rc);
   value3.string = CMNewString(_broker, "I'm an EmbeddedObject", &rc);
+  value4.string = CMNewString(_broker, "I'm an EmbeddedInstance", &rc);
 
   /*
    * create a new array to hold the instances created 
@@ -144,10 +147,14 @@ initialize()
     CMSetProperty(instance1, "Message", &value2, CMPI_string);
 
     /* EmbeddedObject */
-    Einst = CMNewInstance(_broker, cop1, &rc);
-    CMSetProperty(Einst, "Message", &value3, CMPI_string);
-    CMSetProperty(instance1, "EInst", &Einst, CMPI_instance);
+    Eobj = CMNewInstance(_broker, cop1, &rc);
+    CMSetProperty(Eobj, "Message", &value3, CMPI_string);
+    CMSetProperty(instance1, "Eobj", &Eobj, CMPI_instance);
 
+    /* EmbeddedInstance */
+    Einst = CMNewInstance(_broker, cop1, &rc);
+    CMSetProperty(Einst, "Message", &value4, CMPI_string);
+    CMSetProperty(instance1, "Einst", &Einst, CMPI_instance);
 
     value_inst1.inst = instance1;
 

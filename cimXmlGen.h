@@ -61,7 +61,7 @@ extern char    *XMLEscape(char *in, int *outlen);
 extern void     data2xml(CMPIData *data, CMPIString *name,
                          CMPIString *refName, char *bTag, int bTagLen,
                          char *eTag, int eTagLen, UtilStringBuffer * sb,
-                         UtilStringBuffer * qsb, int inst, int param);
+                         UtilStringBuffer * qsb, int inst, int param, int embInst);
 CMPIType        guessType(char *val);
 
 extern int invalid_int(const char *v, const CMPIType type);

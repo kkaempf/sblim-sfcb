@@ -13,5 +13,8 @@ class Sample_Instance : Sample_Class
 	string Message;
 
         [EmbeddedObject]
+        string Eobj;
+
+        [EmbeddedInstance]
         string Einst;
 };
