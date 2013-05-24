@@ -115,6 +115,13 @@ if [ -d $SFCB_ROOT ]; then
     rm -rf $SFCB_ROOT
 fi
 
+# Set core file location
+coresave=`cat /proc/sys/kernel/core_pattern`
+mkdir -p /tmp/ABTcores
+rm -f /tmp/ABTcores/*
+echo "/tmp/ABTcores/core.%t.%e.%p.%s" > /proc/sys/kernel/core_pattern
+ulimit -c unlimited
+
 while [ $i -lt $index ]
 do
      bash $scriptDir/ABTScript $SFCB_ROOT "${TESTNAME[$i]}" $REPORT_DIR  "${TESTCONFIG[$i]}"
@@ -123,6 +130,9 @@ do
      fi
      let i="$i + 1"
 done
+
+# Restore core file location
+echo $coresave > /proc/sys/kernel/core_pattern
 
 if [ $testCount -eq $index ] ; then
     STATUS="SUCCESS"
