@@ -466,7 +466,7 @@ static int getSocketInodeList(int port, int addrFam, SockDescr **sockListPtr) {
       return cnt;
     }
 
-    if (locport == port) {  /* match */
+    if (locport == port && inode > 0) {  /* match */
 
       if (verbose)
         (sockList + cnt)->ip = ipHexToPres(addrFam, locaddr);
@@ -674,5 +674,5 @@ int main(int argc, char **argv) {
 
     printf("%5d %5d %5d %-4c %s\n", p->pid, p->ppid, p->pgrp, p->state, role);
   }
-  exit(0);
+  _exit(0);
 }
