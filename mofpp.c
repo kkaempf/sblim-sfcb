@@ -60,8 +60,15 @@ incOK(char *str, char **s, char **e, char **ifn, FILE ** f)
           if ((*e = strchr(str, '"'))) {
             ch = **e;
             **e = 0;
-            strcpy(fn, path);
-            strcat(fn, str);
+            if (str[0] != '\\' && str[0] != '/') {
+              /* str is relative path */
+              strcpy(fn,path);
+              strcat(fn,str);
+            } else {
+              /* str is absolute path */
+              strcpy(fn, str);
+            }
+
             *ifn = strdup(fn);
             **e = ch;
             (*e)++;

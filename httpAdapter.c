@@ -197,7 +197,7 @@ typedef struct _buffer {
 } Buffer;
 
 #ifdef HAVE_IPV6
-static int fallback_ipv4;
+extern int fallback_ipv4;
 #endif
 
 #define SET_HDR_CP(member, val)   member = val + strspn(val, " \t"); \

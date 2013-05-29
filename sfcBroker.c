@@ -104,6 +104,10 @@ extern char    *configfile;
 extern char    *ip4List;
 extern char    *ip6List;
 
+#ifdef HAVE_IPV6
+int fallback_ipv4 = 1;
+#endif
+
 int trimws = 1;
 
 typedef struct startedAdapter {
@@ -912,31 +916,35 @@ main(int argc, char *argv[])
     }
   }
 #ifdef HAVE_IPV6
-  if (!ip6List)
-    getControlChars("ip6AddrList",&ip6List);
-  if (ip6List && !httpLocalOnly) {
-    char* t = strtok(ip6List,",");
-    while(t) {
-      ipAddrList[ipAddrCnt].addrStr = strdup(t);
-      ipAddrList[ipAddrCnt].addrFam = AF_INET6;
-      ipAddrCnt++;
-      t = strtok(NULL,",");
-      if ((ipAddrList = realloc(ipAddrList,(ipAddrCnt+1)*sizeof(IpAddr))) == 0) {
-        mlogf(M_ERROR,M_SHOW,"-#- Failed to realloc memory for ipAddrList.\n");
-        exit(2);
+  struct stat buf;
+  if (stat("/proc/net/tcp6", &buf) == 0 && (buf.st_mode & S_IFMT) == S_IFREG) {
+    if (!ip6List)
+      getControlChars("ip6AddrList",&ip6List);
+    if (ip6List && !httpLocalOnly) {
+      char* t = strtok(ip6List,",");
+      while(t) {
+        ipAddrList[ipAddrCnt].addrStr = strdup(t);
+        ipAddrList[ipAddrCnt].addrFam = AF_INET6;
+        ipAddrCnt++;
+        t = strtok(NULL,",");
+        if ((ipAddrList = realloc(ipAddrList,(ipAddrCnt+1)*sizeof(IpAddr))) == 0) {
+          mlogf(M_ERROR,M_SHOW,"-#- Failed to realloc memory for ipAddrList.\n");
+          exit(2);
+        }
       }
     }
-  }
-  if (ipAddrCnt == 0) {
-    if (httpLocalOnly) {
-      mlogf(M_INFO,M_SHOW,"--- Bind to loopback address\n");
-      ipAddrList[ipAddrCnt].addrStr = "::1";
-    } else {
-      mlogf(M_INFO,M_SHOW,"--- Bind to any available IP address\n");
-      ipAddrList[ipAddrCnt].addrStr = "::";
+    if (ipAddrCnt == 0) {
+      if (httpLocalOnly) {
+        mlogf(M_INFO,M_SHOW,"--- Bind to loopback address\n");
+        ipAddrList[ipAddrCnt].addrStr = "::1";
+      } else {
+        mlogf(M_INFO,M_SHOW,"--- Bind to any available IP address\n");
+        ipAddrList[ipAddrCnt].addrStr = "::";
+      }
+      ipAddrList[ipAddrCnt].addrFam = AF_INET6;
+      ipAddrCnt++;
     }
-    ipAddrList[ipAddrCnt].addrFam = AF_INET6;
-    ipAddrCnt++;
+    fallback_ipv4 = 0;
   }
 #endif
   if (ipAddrCnt == 0) {
@@ -947,7 +955,7 @@ main(int argc, char *argv[])
       mlogf(M_INFO,M_SHOW,"--- Bind to any available IP address\n");
       ipAddrList[ipAddrCnt].addrStr = "0.0.0.0";
     }
-    ipAddrList[ipAddrCnt].addrFam = AF_INET6;
+    ipAddrList[ipAddrCnt].addrFam = AF_INET;
     ipAddrCnt++;
   }
 #endif // LOCAL_CONNECT_ONLY_ENABLE

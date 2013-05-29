@@ -15,6 +15,7 @@ TESTNAME=$2
 REPORT_DIR=$3
 CONFIGOPTIONS=$4
 COVERAGE_DIR="$BASE_DIR/sfcb/coverage"
+CORE_DIR="$BASE_DIR/cores/"
 REPORTDIR=$REPORT_DIR/"$TESTNAME"
 RESULTDIR=$REPORTDIR/xmlFailure_reportFiles
 HTMLFILE="$REPORTDIR/index.html"
@@ -27,6 +28,9 @@ if [ ! -d $BASE_DIR ]; then
 fi
 if [ ! -d "$REPORTDIR" ]; then
     mkdir -p "$REPORTDIR"
+fi
+if [ ! -d "$CORE_DIR" ]; then
+    mkdir -p "$CORE_DIR"
 fi
 
 #Output to the email and index.html files
@@ -115,6 +119,16 @@ SFCB_RESULTFILES()
         find . -name "*.result" -print0 | xargs  -0 -r -I file cp  file --target-directory=$RESULTDIR --parents
     fi
 }
+SFCB_CORE()
+{
+    # Check if any core files were generated
+    if [ "$(ls -A /tmp/ABTcores/)" ]
+    then
+	cp /tmp/ABTcores/* $CORE_DIR
+   	DUALOUT "FAILURE: Cores found, copied to $CORE_DIR"
+	RC=1
+    fi
+}  
 SFCB_VALGRIND()
 {
     # Check the Valgrind output if it's there
@@ -240,6 +254,7 @@ BUILD_SFCB()
                 DUALOUT "SECOND TEST RUN:" 
                 SFCB_TESTS
                 SFCB_STOP
+                SFCB_CORE
                 SFCB_VALGRIND
                 SFCB_RESULTFILES
             else
