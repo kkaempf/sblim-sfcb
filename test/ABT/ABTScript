@@ -233,6 +233,7 @@ BUILD_SFCB()
         if make install 1>>${REPORTDIR}/${MAKE_OUT} 2>&1
         then
             DUALOUT "MAKE INSTALL : SUCCESS" "./$MAKE_OUT"
+            sfcbrepos -fi # Ensure we have a clean repo
             if make postinstall 1>>${REPORTDIR}/${MAKE_OUT} 2>&1
             then
                 RC=0
