@@ -4,7 +4,6 @@
 </KEYBINDING>
 <KEYBINDING NAME="CreationClassName">
 <KEYVALUE VALUETYPE="string">CIM_ObjectManager</KEYVALUE>
-</KEYBINDING>
 </INSTANCENAME>
 </INSTANCEPATH>
 <INSTANCE CLASSNAME="CIM_ObjectManager">
@@ -13,46 +12,14 @@
 </PROPERTY>
 <PROPERTY NAME="GatherStatisticalData" TYPE="boolean">
 <VALUE>FALSE</VALUE>
-</PROPERTY>
-<PROPERTY NAME="Started" TYPE="boolean">
-</PROPERTY>
-<PROPERTY NAME="StartMode" TYPE="string">
-</PROPERTY>
-<PROPERTY NAME="PrimaryOwnerContact" TYPE="string">
-</PROPERTY>
-<PROPERTY NAME="PrimaryOwnerName" TYPE="string">
-</PROPERTY>
 <PROPERTY NAME="CreationClassName" TYPE="string">
 <VALUE>CIM_ObjectManager</VALUE>
-</PROPERTY>
 <PROPERTY NAME="SystemCreationClassName" TYPE="string">
 <VALUE>CIM_ComputerSystem</VALUE>
-</PROPERTY>
-<PROPERTY NAME="Caption" TYPE="string">
-</PROPERTY>
-<PROPERTY NAME="InstanceID" TYPE="string">
-</PROPERTY>
-<PROPERTY NAME="InstallDate" TYPE="datetime">
-</PROPERTY>
-<PROPERTY.ARRAY NAME="OperationalStatus" TYPE="uint16">
-</PROPERTY.ARRAY>
-<PROPERTY.ARRAY NAME="StatusDescriptions" TYPE="string">
-</PROPERTY.ARRAY>
-<PROPERTY NAME="Status" TYPE="string">
-</PROPERTY>
-<PROPERTY NAME="HealthState" TYPE="uint16">
-</PROPERTY>
 <PROPERTY NAME="EnabledState" TYPE="uint16">
 <VALUE>5</VALUE>
-</PROPERTY>
-<PROPERTY NAME="OtherEnabledState" TYPE="string">
-</PROPERTY>
 <PROPERTY NAME="RequestedState" TYPE="uint16">
 <VALUE>5</VALUE>
-</PROPERTY>
 <PROPERTY NAME="EnabledDefault" TYPE="uint16">
 <VALUE>2</VALUE>
-</PROPERTY>
-<PROPERTY NAME="TimeOfLastStateChange" TYPE="datetime">
-</PROPERTY>
 </INSTANCE>

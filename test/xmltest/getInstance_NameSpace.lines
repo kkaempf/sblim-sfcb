@@ -1,33 +1,13 @@
 <INSTANCE CLASSNAME="CIM_Namespace">
-<PROPERTY NAME="DescriptionOfClassType" TYPE="string">
-</PROPERTY>
-<PROPERTY NAME="ClassTypeVersion" TYPE="string">
-</PROPERTY>
-<PROPERTY NAME="ClassType" TYPE="uint16">
-</PROPERTY>
-<PROPERTY NAME="DescriptionOfClassInfo" TYPE="string">
 </PROPERTY>
 <PROPERTY NAME="ClassInfo" TYPE="uint16">
 <VALUE>0</VALUE>
-</PROPERTY>
 <PROPERTY NAME="Name" TYPE="string">
 <VALUE>root/interop</VALUE>
-</PROPERTY>
 <PROPERTY NAME="CreationClassName" TYPE="string">
 <VALUE>CIM_Namespace</VALUE>
-</PROPERTY>
 <PROPERTY NAME="ObjectManagerCreationClassName" TYPE="string">
 <VALUE>CIM_ObjectManager</VALUE>
-</PROPERTY>
 <PROPERTY NAME="SystemCreationClassName" TYPE="string">
 <VALUE>CIM_ComputerSystem</VALUE>
-</PROPERTY>
-<PROPERTY NAME="InstanceID" TYPE="string">
-</PROPERTY>
-<PROPERTY NAME="Caption" TYPE="string">
-</PROPERTY>
-<PROPERTY NAME="Description" TYPE="string">
-</PROPERTY>
-<PROPERTY NAME="ElementName" TYPE="string">
-</PROPERTY>
 </INSTANCE>

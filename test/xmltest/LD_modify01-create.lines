@@ -1,3 +1,4 @@
-<KEYBINDING NAME="CreationClassName">
 <KEYVALUE VALUETYPE="string">CIM_ListenerDestinationCIMXML</KEYVALUE>
 </KEYBINDING>
+<IMETHODRESPONSE NAME="CreateInstance">
+<INSTANCENAME CLASSNAME="CIM_ListenerDestinationCIMXML">

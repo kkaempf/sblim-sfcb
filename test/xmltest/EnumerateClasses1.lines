@@ -17,8 +17,4 @@
 <QUALIFIER NAME="Description" TYPE="string">
 <VALUE>The following class describes LogicalVolume as depicted on PDM&apos;sMr_LogicalVolume</VALUE>
 </QUALIFIER>
-<PROPERTY NAME="key" TYPE="sint32">
-<QUALIFIER NAME="Key" TYPE="boolean">
-<VALUE>TRUE</VALUE>
-</QUALIFIER>
 </PROPERTY>

@@ -3,38 +3,10 @@
 <KEYVALUE VALUETYPE="numeric">1</KEYVALUE>
 <INSTANCE CLASSNAME="Sample_Instance">
 <PROPERTY NAME="Identifier" TYPE="uint8">
-<PROPERTY NAME="Einst" EmbeddedObject="instance" TYPE="string">
-<VALUE>&lt;INSTANCE CLASSNAME=&quot;Sample_Instance&quot;&gt;
-&lt;PROPERTY NAME=&quot;Identifier&quot; TYPE=&quot;uint8&quot;&gt;
-&lt;VALUE&gt;1&lt;/VALUE&gt;
-&lt;/PROPERTY&gt;
-&lt;PROPERTY NAME=&quot;Einst&quot; EmbeddedObject=&quot;instance&quot; TYPE=&quot;string&quot;&gt;
-&lt;/PROPERTY&gt;
-&lt;PROPERTY NAME=&quot;Eobj&quot; EmbeddedObject=&quot;object&quot; TYPE=&quot;string&quot;&gt;
-&lt;/PROPERTY&gt;
-&lt;PROPERTY NAME=&quot;Message&quot; TYPE=&quot;string&quot;&gt;
-&lt;VALUE&gt;I&amp;apos;m an EmbeddedInstance&lt;/VALUE&gt;
-&lt;/PROPERTY&gt;
-&lt;/INSTANCE&gt;
-<PROPERTY NAME="Eobj" EmbeddedObject="object" TYPE="string">
-<VALUE>&lt;INSTANCE CLASSNAME=&quot;Sample_Instance&quot;&gt;
-&lt;PROPERTY NAME=&quot;Identifier&quot; TYPE=&quot;uint8&quot;&gt;
-&lt;VALUE&gt;1&lt;/VALUE&gt;
-&lt;/PROPERTY&gt;
-&lt;PROPERTY NAME=&quot;Einst&quot; EmbeddedObject=&quot;instance&quot; TYPE=&quot;string&quot;&gt;
-&lt;/PROPERTY&gt;
-&lt;PROPERTY NAME=&quot;Eobj&quot; EmbeddedObject=&quot;object&quot; TYPE=&quot;string&quot;&gt;
-&lt;/PROPERTY&gt;
-&lt;PROPERTY NAME=&quot;Message&quot; TYPE=&quot;string&quot;&gt;
-&lt;VALUE&gt;I&amp;apos;m an EmbeddedObject&lt;/VALUE&gt;
-&lt;/PROPERTY&gt;
-&lt;/INSTANCE&gt;
 <PROPERTY NAME="Message" TYPE="string">
 <VALUE>Hello World</VALUE>
 <KEYVALUE VALUETYPE="numeric">2</KEYVALUE>
 <VALUE>2</VALUE>
-<PROPERTY NAME="Einst" EmbeddedObject="instance" TYPE="string">
-<PROPERTY NAME="Eobj" EmbeddedObject="object" TYPE="string">
 <VALUE>Yo Planet</VALUE>
 <KEYVALUE VALUETYPE="numeric">3</KEYVALUE>
 <VALUE>3</VALUE>

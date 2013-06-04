@@ -30,6 +30,12 @@ else
   export SFCB_TEST_PROTOCOL=http
 endif
 
+if DEFAULT_PROPERTIES
+  export DEFAULT_PROPERTIES=yes
+else
+  export DEFAULT_PROPERTIES=no
+endif
+
 #Some wbemcat tests
 export SRCDIR=$(srcdir)
 TESTS = xmltest.sh 

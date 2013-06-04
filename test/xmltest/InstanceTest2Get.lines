@@ -5,9 +5,6 @@
 <IMETHODRESPONSE NAME="GetInstance">
 <IRETURNVALUE>
 <INSTANCE CLASSNAME="TEST_Person">
-<PROPERTY NAME="extraProperty" TYPE="string">
-<VALUE>defaultvalue</VALUE>
-</PROPERTY>
 <PROPERTY NAME="name" TYPE="string">
 <VALUE>Michael</VALUE>
 </PROPERTY>

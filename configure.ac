@@ -583,6 +583,7 @@ AM_CONDITIONAL(IPV6,[test "$enable_ipv6" == "yes"])
 AM_CONDITIONAL(LOCAL_CONNECT_NO_INDICATION,[test "$enable_local_connect_only" == "yes" -a "$enable_indications" == "no"])
 AM_CONDITIONAL(LOCAL_CONNECT_ONLY,[test "$enable_local_connect_only" == "yes"])
 AM_CONDITIONAL(ACCOUNT_PASSTHRU,[test "$enable_expired_pw_update" == "yes"])
+AM_CONDITIONAL(DEFAULT_PROPERTIES,[test "$enable_default_properties" == "yes"])
 
 AC_CONFIG_FILES([Makefile sfcb.spec sfcbrepos.sh sfcbstage.sh sfcbunstage.sh 
 	         sfcbuuid.sh sfcb.cfg.pre getSchema.sh.pre 20_indication.mof.pre

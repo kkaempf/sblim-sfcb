@@ -1,7 +1,5 @@
 <VALUE>Hello World</VALUE>
 </PROPERTY>
-<PROPERTY NAME="Identifier" TYPE="uint8">
-</PROPERTY>
 </INSTANCE>
 </VALUE.OBJECTWITHPATH>
 <VALUE.OBJECTWITHPATH>
@@ -9,7 +7,3 @@
 <INSTANCE CLASSNAME="Sample_Instance">
 <PROPERTY NAME="Message" TYPE="string">
 <VALUE>Yo Planet</VALUE>
-</PROPERTY>
-<PROPERTY NAME="Identifier" TYPE="uint8">
-</PROPERTY>
-</INSTANCE>
