@@ -674,5 +674,5 @@ int main(int argc, char **argv) {
 
     printf("%5d %5d %5d %-4c %s\n", p->pid, p->ppid, p->pgrp, p->state, role);
   }
-  _exit(0);
+  exit(0);
 }
