@@ -572,6 +572,37 @@ if DOCS
 	rm -rf $(DESTDIR)$(sfcbdocdir)/html
 endif
 
+# If sfcb.cfg already exists, install as sfcb.cfg.new
+install-sfcbconfDATA: $(sfcbconf_DATA)
+	@test -z "$(sfcbconfdir)" || $(MKDIR_P) "$(DESTDIR)$(sfcbconfdir)"; \
+	s="$(srcdir)/sfcb.cfg"; \
+	f="$(DESTDIR)$(sfcbconfdir)/$(sfcbconf_DATA)"; \
+	if test -f "$$f"; then \
+		if ! diff -wB "$$s" "$$f" >/dev/null 2>/dev/null; then \
+			echo "**********************************************************************"; \
+			echo "** existing config $$f preserved"; \
+			echo "** new config installed as $$f.new"; \
+			echo "** (you may want to merge config files when updating SFCB version)"; \
+			echo "**********************************************************************"; \
+			f="$$f".new; \
+		fi; \
+	fi; \
+	echo " $(INSTALL_DATA) $$s $$f"; \
+	$(INSTALL_DATA) "$$s" "$$f"
+
+# If sfcb.cfg.new exists, uninstall that instead of sfcb.cfg
+uninstall-sfcbconfDATA:
+	@f="$(DESTDIR)$(sfcbconfdir)/$(sfcbconf_DATA)"; \
+	if test -f "$$f".new; then \
+		echo "**********************************************************************"; \
+		echo "** removing $$f.new"; \
+		echo "** preserving $$f"; \
+		echo "**********************************************************************"; \
+		f="$$f".new; \
+	fi; \
+	echo " rm -f $$f"; \
+	rm -f "$$f"
+
 clean-local:
 	rm -f sfcbrepos sfcbstage sfcbunstage sfcbuuid sfcb.cfg getSchema.sh sfcb \
 		sfcb.init-redhat sfcb.init-suse sfcb.init-none sfcb-dox.conf \

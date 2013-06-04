@@ -82,7 +82,8 @@ echo "%{_sysconfdir}/init.d/sfcb" >> _pkg_list
 echo "%{_localstatedir}/lib/sfcb" >> _pkg_list
 echo "%{_bindir}/*" >> _pkg_list
 echo "%{_sbindir}/*" >> _pkg_list
-echo "%{_libdir}/*.so*" >> _pkg_list
+echo "%{_libdir}/sfcb/*.so*" >> _pkg_list
+echo "%{_libdir}/sfcb/*.la*" >> _pkg_list
 
 echo =======================================
 cat _pkg_list
