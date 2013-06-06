@@ -528,18 +528,19 @@ install-sfcbconfDATA: $(sfcbconf_DATA)
 	echo " $(INSTALL_DATA) $$s $$f"; \
 	$(INSTALL_DATA) "$$s" "$$f"
 
-# If sfcb.cfg.new exists, uninstall that instead of sfcb.cfg
+# Remove sfcb.cfg.new, move sfcb.cfg to sfcb.cfg.saved
 uninstall-sfcbconfDATA:
 	@f="$(DESTDIR)$(sfcbconfdir)/$(sfcbconf_DATA)"; \
 	if test -f "$$f".new; then \
-		echo "**********************************************************************"; \
-		echo "** removing $$f.new"; \
-		echo "** preserving $$f"; \
-		echo "**********************************************************************"; \
-		f="$$f".new; \
+		echo " rm -f $$f".new; \
+		rm -f "$$f.new"; \
 	fi; \
-	echo " rm -f $$f"; \
-	rm -f "$$f"
+	if test -f "$$f"; then \
+		echo "**********************************************************************"; \
+		echo "** moving $$f to $$f.saved"; \
+		mv "$$f" "$$f".saved; \
+		echo "**********************************************************************"; \
+	fi
 
 clean-local:
 	rm -f sfcbrepos sfcbstage sfcbunstage sfcbuuid sfcb.cfg getSchema.sh sfcb \
