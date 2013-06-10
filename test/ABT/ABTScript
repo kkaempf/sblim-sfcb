@@ -291,6 +291,7 @@ if [ ! -d $BASE_DIR/sfcb ]; then
     AUTO_CONF
 fi
 CONFIGURE_SFCB
+SFCB_CLEAN
 
 echo "<a href=./coverage/index.html>Code Coverage Report</a><br>" >> $HTMLFILE
 
