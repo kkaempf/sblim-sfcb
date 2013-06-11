@@ -81,7 +81,7 @@ getSfcbUuid()
         int             l = strlen(u);
         if (l)
           u[l - 1] = 0;
-        uuid = (char *) malloc(l + 32);
+        uuid = malloc(l + 32);
         strcpy(uuid, "sfcb:");
         strcat(uuid, u);
         fclose(uuidFile);
@@ -91,7 +91,7 @@ getSfcbUuid()
     } else if (u == NULL) {
       char            hostName[512];
       gethostname(hostName, 511);
-      u = (char *) malloc(strlen(hostName) + 32);
+      u = malloc(strlen(hostName) + 32);
       strcpy(u, "sfcb:NO-UUID-FILE-");
       strcat(u, hostName);
     }
@@ -136,7 +136,7 @@ gatherNameSpacesData(const char *dn, int dbl,
       if (strcmp(de->d_name, "..") == 0)
         continue;
       l = strlen(dn) + strlen(de->d_name) + 4;
-      n = (char *) malloc(l + 8);
+      n = malloc(l + 8);
       strcpy(n, dn);
       strcat(n, "/");
       strcat(n, de->d_name);
@@ -182,7 +182,7 @@ NameSpaceProviderGetInstance(CMPIInstanceMI * mi,
   name = CMGetKey(cop, "name", NULL).value.string;
 
   if (name && name->hdl) {
-    dn = (char *) alloca(strlen(dirn) + 32 + strlen((char *) name->hdl));
+    dn = alloca(strlen(dirn) + 32 + strlen((char *) name->hdl));
     strcpy(dn, dirn);
     if (dirn[strlen(dirn) - 1] != '/')
       strcat(dn, "/");
@@ -234,7 +234,7 @@ NameSpaceProviderEnumInstances(CMPIInstanceMI * mi,
     dir = "/var/lib/sfcb/registration";
   }
 
-  dn = (char *) alloca(strlen(dir) + 32);
+  dn = alloca(strlen(dir) + 32);
   strcpy(dn, dir);
   if (dir[strlen(dir) - 1] != '/')
     strcat(dn, "/");
@@ -277,7 +277,7 @@ NameSpaceProviderEnumInstanceNames(CMPIInstanceMI * mi,
     dir = "/var/lib/sfcb/registration";
   }
 
-  dn = (char *) alloca(strlen(dir) + 32);
+  dn = alloca(strlen(dir) + 32);
   strcpy(dn, dir);
   if (dir[strlen(dir) - 1] != '/')
     strcat(dn, "/");

@@ -91,7 +91,7 @@ escapeQuotes(char *in)
   if (in == NULL)
     return (NULL);
   l = strlen(in);
-  out = (char *) malloc((l * 2) + 1);   // worst case scenario - it's all
+  out = malloc((l * 2) + 1);   // worst case scenario - it's all
   // quotes
 
   for (i = 0, o = 0; i < l; i++) {

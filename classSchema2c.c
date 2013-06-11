@@ -177,8 +177,7 @@ buildClassSource(ClassRegister * cr, char *ns)
 static ClassRegister *
 newClassRegister(char *fname, char *ns)
 {
-  ClassRegister  *cr =
-      (ClassRegister *) malloc(sizeof(ClassRegister) + sizeof(ClassBase));
+  ClassRegister  *cr = malloc(sizeof(*cr) + sizeof(ClassBase));
   ClassBase      *cb = (ClassBase *) (cr + 1);
   FILE           *in;
   char            fin[1024];
@@ -232,7 +231,7 @@ newClassRegister(char *fname, char *ns)
       return NULL;
     }
 
-    buf = (char *) malloc(hdr.size);
+    buf = malloc(hdr.size);
     if (buf == NULL) {
       mlogf(M_ERROR, M_SHOW,
             "--- %s contains record(s) that are too long\n", fin);

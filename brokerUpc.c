@@ -605,7 +605,7 @@ getInstance(const CMPIBroker * broker,
     for (ps = 0, p = props; p && *p; p++, ps++) {
       sreqSize += sizeof(MsgSegment);
     }
-    sreq = (GetInstanceReq *) calloc(1, sreqSize);
+    sreq = calloc(1, sreqSize);
     sreq->hdr.count=ps+GI_REQ_REG_SEGMENTS;
     sreq->hdr.operation = OPS_GetInstance;
 
@@ -804,7 +804,7 @@ modifyInstance(const CMPIBroker * broker,
 
     for (ps = 0, p = props; p && *p; p++, ps++)
       sreqSize += sizeof(MsgSegment);
-    sreq = (ModifyInstanceReq *) calloc(1, sreqSize);
+    sreq = calloc(1, sreqSize);
     sreq->hdr.count=ps+MI_REQ_REG_SEGMENTS;
     sreq->hdr.operation = OPS_ModifyInstance;
 
@@ -1205,7 +1205,7 @@ invokeMethod(const CMPIBroker * broker, const CMPIContext *context,
     }
 
     size = sizeof(InvokeMethodReq) + (x * sizeof(MsgSegment));
-    sreq = (InvokeMethodReq *) calloc(1, size);
+    sreq = calloc(1, size);
     sreq->hdr.count=IM_REQ_REG_SEGMENTS+x;
     sreq->hdr.operation = OPS_InvokeMethod;
 

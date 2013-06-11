@@ -214,8 +214,7 @@ NewCMPISelectExp(const char *queryString,
 CMPISelectExp  *
 TempCMPISelectExp(QLStatement * qs)
 {
-  NativeSelectExp *exp =
-      (NativeSelectExp *) calloc(1, sizeof(NativeSelectExp));
+  NativeSelectExp *exp = calloc(1, sizeof(*exp));
   exp->exp = eFt;
   exp->qs = qs;
 

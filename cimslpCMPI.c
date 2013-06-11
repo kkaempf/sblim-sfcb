@@ -289,7 +289,7 @@ myGetRegProfiles(const CMPIBroker *_broker, CMPIInstance **instances,
   // string needs to be constructed ... but allocating dynamically would
   // involve too much burden and overhead (?)
 
-  retArr = (char **) malloc((i + 1) * sizeof(char *));
+  retArr = malloc((i + 1) * sizeof(char *));
 
   for (i = 0; instances[i] != NULL; i++) {
 
@@ -360,7 +360,7 @@ myGetRegProfiles(const CMPIBroker *_broker, CMPIInstance **instances,
           CMPIData data = CMGetNext(enumeration, NULL);
           propertyData = CMGetProperty(data.value.inst, "RegisteredName", &status);
           char *subprofilestring = value2Chars(propertyData.type, &propertyData.value);
-          retArr[j] = (char *) malloc(strlen(profilestring) + strlen(subprofilestring) + 2);
+          retArr[j] = malloc(strlen(profilestring) + strlen(subprofilestring) + 2);
           sprintf(retArr[j], "%s:%s", profilestring, subprofilestring);
           j++;
           free(subprofilestring);
@@ -457,8 +457,7 @@ getUrlSyntax(char *sn, char *cs, char *port)
   char           *url_syntax;
 
   // colon, double slash, colon, \0, service:wbem = 18
-  url_syntax =
-      (char *) malloc((strlen(sn) + strlen(cs) + strlen(port) + 18) * sizeof(char));
+  url_syntax = malloc((strlen(sn) + strlen(cs) + strlen(port) + 18) * sizeof(*url_syntax));
   sprintf(url_syntax, "%s://%s:%s", cs, sn, port);
 
   free(sn);
@@ -483,7 +482,7 @@ buildAttrString(char *name, char *value, char *attrstring)
     // multiply with 3 so that we do not have to enlarge the next run
     // already
     size = size + (length * 3);
-    attrstring = (char *) realloc(attrstring, size * sizeof(char));
+    attrstring = realloc(attrstring, size * sizeof(*attrstring));
   }
 
   if (strlen(attrstring) != 0) {
@@ -523,7 +522,7 @@ buildAttrStringFromArray(char *name, char **value, char *attrstring)
     // make sure that string is big enough to hold the result multiply with 
     // 3 so that we do not have to enlarge the next run already
     size = size + (length * 3);
-    attrstring = (char *) realloc(attrstring, size * sizeof(char));
+    attrstring = realloc(attrstring, size * sizeof(*attrstring));
   }
 
   if (strlen(attrstring) != 0) {

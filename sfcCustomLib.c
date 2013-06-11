@@ -41,7 +41,7 @@
 extern int _sfcGetSlpHostname(char **hostname)
 {
    char *sn;
-   sn = (char *) malloc((strlen("mycimom.com") + 1) * sizeof(char));
+   sn = malloc((strlen("mycimom.com") + 1) * sizeof(char));
    sn = strncpy(sn, "mycimom.com", strlen("mycimom.com") + 1);
    if (sn == NULL)
       return 0;

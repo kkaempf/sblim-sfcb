@@ -175,7 +175,7 @@ char           *
 _sfcb_format_trace(char *fmt, ...)
 {
   va_list         ap;
-  char           *msg = (char *) malloc(MAX_MSG_SIZE);
+  char           *msg = malloc(MAX_MSG_SIZE);
   va_start(ap, fmt);
   vsnprintf(msg, MAX_MSG_SIZE, fmt, ap);
   va_end(ap);
@@ -207,7 +207,7 @@ _sfcb_trace(int level, char *file, int line, char *msg)
 
   if (gettimeofday(&tv, &tz) == 0) {
     sec = tv.tv_sec + (tz.tz_minuteswest * -1 * 60);
-    tm = (char *) malloc(20 * sizeof(char));
+    tm = malloc(20 * sizeof(char));
     memset(tm, 0, 20 * sizeof(char));
     if (gmtime_r(&sec, &cttm) != NULL) {
       strftime(tm, 20, "%m/%d/%Y %H:%M:%S", &cttm);

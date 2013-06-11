@@ -267,7 +267,7 @@ updateSLPReg(const CMPIContext *ctx, int slpLifeTime)
        * urlsyntax, which is the complete service string as required by slp, e.g.
        *  service:wbem:http://somehost:someport
        */
-      http_url = (char *) malloc(strlen(url_syntax) + 14);
+      http_url = malloc(strlen(url_syntax) + 14);
       sprintf(http_url, "service:wbem:%s", url_syntax);
       free(url_syntax);
     }
@@ -290,7 +290,7 @@ updateSLPReg(const CMPIContext *ctx, int slpLifeTime)
       httpsAdvert = realloc(httpsAdvert, (strlen(httpsAdvert) + 1) * sizeof(char));
       freeCFG(&cfgHttps);
 
-      https_url = (char *) malloc(strlen(url_syntax) + 14);
+      https_url = malloc(strlen(url_syntax) + 14);
       sprintf(https_url, "service:wbem:%s", url_syntax);
       free(url_syntax);
 

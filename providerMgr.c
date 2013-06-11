@@ -346,7 +346,7 @@ lookupProviders(long type, char *className, char *nameSpace,
 
   _SFCB_ENTER(TRACE_PROVIDERMGR, "lookupProviders");
 
-  id = (char *) malloc(strlen(nameSpace) + strlen(className) + 8);
+  id = malloc(strlen(nameSpace) + strlen(className) + 8);
   strcpy(id, nameSpace);
   strcat(id, "|");
   strcat(id, className);
@@ -1172,7 +1172,7 @@ getProviderContext(BinRequestContext * ctx)
   _SFCB_ENTER(TRACE_PROVIDERMGR, "getProviderContext");
 
   l = sizeof(*ohdr) + ohdr->nameSpace.length + ohdr->className.length;
-  buf = (char *) malloc(l + 8);
+  buf = malloc(l + 8);
 
   memcpy(buf, ohdr, sizeof(*ohdr));
   if (localMode)
@@ -1227,7 +1227,7 @@ getProviderContext(BinRequestContext * ctx)
     _SFCB_TRACE(1, ("--- Provider count: %d", l));
     setInuseSem(ctx->provA.ids.ids);
     ctx->pCount = l + 1;
-    ctx->pAs = as = (ProvAddr *) malloc(sizeof(ProvAddr) * (l + 1));
+    ctx->pAs = as = malloc(sizeof(*as) * (l + 1));
     *as = ctx->provA;
 
     _SFCB_TRACE(1, ("--- Provider socket: %d - %lu %d %lu %s",
@@ -1303,7 +1303,7 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
           object[i].length);
   }
 
-  buf = (char *) malloc(l + 8);
+  buf = malloc(l + 8);
 
   if (ctx->noResp & 1) {
     hdr->options |= BRH_NoResp;

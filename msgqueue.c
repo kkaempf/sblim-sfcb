@@ -641,7 +641,7 @@ initSocketPairs(int provs, int https)
   int             i,
                   t = (provs * 2);      // +https;
 
-  sPairs = (ComSockets *) malloc(sizeof(ComSockets) * t);
+  sPairs = malloc(sizeof(*sPairs) * t);
   mlogf(M_INFO, M_SHOW, "--- initSocketPairs: %d\n", t);
   for (i = 0; i < t; i++) {
     socketpair(PF_LOCAL, SOCK_STREAM, 0, &sPairs[i].receive);

@@ -90,13 +90,12 @@ prepResultBuffer(NativeResult * nr, unsigned long length)
     nr->dMax *= 2;
 
   nr->dNext = 0;
-  nr->data = (char *) malloc(nr->dMax);
+  nr->data = malloc(nr->dMax);
 
   nr->sMax = nr->dMax / 400;
   nr->sNext = 0;
-  nr->resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-                                       ((nr->sMax -
-                                         1) * sizeof(MsgSegment)));
+  nr->resp = calloc(1, sizeof(BinResponseHdr) + ((nr->sMax -
+                                  1) * sizeof(MsgSegment)));
   _SFCB_EXIT();
 }
 
@@ -166,7 +165,7 @@ nextResultBufferPos(NativeResult * nr, int type, unsigned long length)
     if (!nr->requestor || length >= nr->dMax) {
       while (nr->dNext + length >= nr->dMax)
         nr->dMax *= 2;
-      nr->data = (char *) realloc(nr->data, nr->dMax);
+      nr->data = realloc(nr->data, nr->dMax);
     }
     /*
      * xfering current contents to make enough room 
@@ -180,10 +179,8 @@ nextResultBufferPos(NativeResult * nr, int type, unsigned long length)
 
   if (nr->sNext == nr->sMax) {
     nr->sMax *= 2;
-    nr->resp =
-        (BinResponseHdr *) realloc(nr->resp,
-                                   sizeof(BinResponseHdr) +
-                                   ((nr->sMax - 1) * sizeof(MsgSegment)));
+    nr->resp = realloc(nr->resp, sizeof(BinResponseHdr) +
+                   ((nr->sMax - 1) * sizeof(MsgSegment)));
   }
 
   /*
@@ -228,13 +225,13 @@ __rft_clone(const CMPIResult *result, CMPIStatus *rc)
   *nr = *or;
 
   if (or->data) {
-    nr->data = (char *) malloc(or->dMax);
+    nr->data = malloc(or->dMax);
     memcpy(nr->data, or->data, or->dMax);
   }
   if (or->resp) {
     int             s =
         sizeof(BinResponseHdr) + ((or->sMax - 1) * sizeof(MsgSegment));
-    nr->resp = (BinResponseHdr *) malloc(s);
+    nr->resp = malloc(s);
     memcpy(nr->resp, or->resp, s);
   }
 

@@ -103,14 +103,14 @@ char *readLink(const char *path) {
   int len = BUFFER_SZ;
   char *buf = NULL;
   while (TRUE) {
-    buf = (char *) realloc(buf, len);
+    buf = realloc(buf, len);
     int num = readlink(path, buf, len);
     if (num < 0) {
       free(buf);
       return NULL;
     }
     if (num < len) {
-      buf = (char *) realloc(buf, num+1);
+      buf = realloc(buf, num+1);
       buf[num] = 0;
       break;
     }

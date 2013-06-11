@@ -155,8 +155,7 @@ removeChild(ClassRegister * cr, const char *pn, const char *chd)
 static ClassRegister *
 newClassRegister(char *fname)
 {
-  ClassRegister  *cr =
-      (ClassRegister *) malloc(sizeof(ClassRegister) + sizeof(ClassBase));
+  ClassRegister  *cr = malloc(sizeof(*cr) + sizeof(ClassBase));
   ClassBase      *cb = (ClassBase *) (cr + 1);
   FILE           *in;
   char            fin[1024];
@@ -222,7 +221,7 @@ newClassRegister(char *fname)
       return NULL;
     }
 
-    buf = (char *) malloc(hdr.size);
+    buf = malloc(hdr.size);
     if (buf == NULL) {
       mlogf(M_ERROR, M_SHOW,
             "--- %s contains record(s) that are too long - directory skipped\n",
@@ -495,7 +494,7 @@ gatherNameSpaces(char *dn, UtilHashTable * ns, int first)
       if (strcmp(de->d_name, "..") == 0)
         continue;
       l = strlen(dn) + strlen(de->d_name) + 4;
-      n = (char *) malloc(l + 8);
+      n = malloc(l + 8);
       strcpy(n, dn);
       strcat(n, "/");
       strcat(n, de->d_name);
@@ -531,7 +530,7 @@ buildClassRegisters()
     dir = "/var/lib/sfcb/registration";
   }
 
-  dn = (char *) alloca(strlen(dir) + 32);
+  dn = alloca(strlen(dir) + 32);
   strcpy(dn, dir);
   if (dir[strlen(dir) - 1] != '/')
     strcat(dn, "/");
@@ -602,7 +601,7 @@ removeClass(ClassRegister * cr, const char *clsName)
     char           *buf = NULL;
     char           *cn;
 
-    buf = (char *) malloc(hdr.size);
+    buf = malloc(hdr.size);
     *((ClObjectHdr *) buf) = hdr;
 
     if (fread(buf + sizeof(hdr), 1, hdr.size - sizeof(hdr), repold) ==

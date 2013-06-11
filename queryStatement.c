@@ -58,7 +58,7 @@ char           *
 sfcQueryStrcpy(char *txt, int n)
 {
   int             dummy;
-  char           *str = (char *) malloc(n + 1);
+  char           *str = malloc(n + 1);
   memAdd(str, &dummy);
   memcpy(str, txt, n);
   str[n] = 0;
@@ -94,12 +94,12 @@ newQLStatement(int fcm, int mode)
   QLStatement    *qs;
   int             x;
 
-  qs = (QLStatement *) calloc(1, sizeof(QLStatement));
+  qs = calloc(1, sizeof(*qs));
   if (mode == MEM_TRACKED) {
     qs->allocList = NULL;
     memAdd(qs, &x);
   } else {
-    qs->allocList = (void **) malloc(16 * sizeof(void *));
+    qs->allocList = malloc(16 * sizeof(void *));
     qs->allocMax = 16;
     qs->allocList[qs->allocNext++] = qs;
   }
@@ -233,8 +233,7 @@ qsAlloc(QLStatement * qs, unsigned int size)
     qs->allocList[qs->allocNext++] = ptr;
     if (qs->allocNext == qs->allocMax) {
       qs->allocMax *= 2;
-      qs->allocList =
-          (void **) realloc(qs->allocList, qs->allocMax * sizeof(void *));
+      qs->allocList = realloc(qs->allocList, qs->allocMax * sizeof(void *));
     }
   } else {
     int             x;

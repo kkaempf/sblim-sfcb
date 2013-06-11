@@ -137,7 +137,7 @@ int ipAddrCnt = 0;
 void
 addStartedAdapter(int pid)
 {
-  StartedAdapter *sa = (StartedAdapter *) malloc(sizeof(StartedAdapter));
+  StartedAdapter *sa = malloc(sizeof(*sa));
 
   sa->stopped = 0;
   sa->pid = pid;
@@ -759,7 +759,7 @@ main(int argc, char *argv[])
   struct timezone tz;
   gettimeofday(&tv, &tz);
   struct tm cttm;
-  sfcBrokerStart = (char *) malloc(15 * sizeof(char));
+  sfcBrokerStart = malloc(15 * sizeof(char));
   memset((void *)sfcBrokerStart, 0, 15 * sizeof(char));
   if (gmtime_r(&tv.tv_sec, &cttm) != NULL) {
     strftime((char *)sfcBrokerStart, 15, "%Y%m%d%H%M%S", &cttm);

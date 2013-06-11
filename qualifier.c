@@ -89,8 +89,7 @@ CMPIQualifierDecl_FT *CMPIQualifierDeclFT = &ift;
 static CMPIQualifierDecl *
 qual_clone(CMPIQualifierDecl * cq, CMPIStatus *rc)
 {
-  CMPIQualifierDecl *q =
-      (CMPIQualifierDecl *) malloc(getQualifierSerializedSize(cq));
+  CMPIQualifierDecl *q = malloc(getQualifierSerializedSize(cq));
   q->hdl = q + 1;
   q->ft = &ift;
   ClQualifierRebuildQualifier((ClQualifierDeclaration *) cq->hdl, q->hdl);

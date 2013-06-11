@@ -157,8 +157,7 @@ removeChild(ClassRegister * cr, const char *pn, const char *chd)
 static ClassRegister *
 newClassRegister(ClassSchema * cs, const char *ns)
 {
-  ClassRegister  *cr =
-      (ClassRegister *) malloc(sizeof(ClassRegister) + sizeof(ClassBase));
+  ClassRegister  *cr = malloc(sizeof(*cr) + sizeof(ClassBase));
   ClassBase      *cb = (ClassBase *) (cr + 1);
   long            s,
                   total = 0;

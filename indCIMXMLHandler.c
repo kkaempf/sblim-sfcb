@@ -366,7 +366,7 @@ IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
     if (strstr(ds, "://") == NULL) {
       char           *prefix = "http://";
       int             n = strlen(ds) + strlen(prefix) + 1;
-      char           *newdest = (char *) malloc(n * sizeof(char));
+      char           *newdest = malloc(n * sizeof(*newdest));
       strcpy(newdest, prefix);
       strcat(newdest, ds);
       CMSetProperty(ciLocal, "destination", newdest, CMPI_chars);
@@ -397,7 +397,7 @@ IndCIMXMLHandlerCreateInstance(CMPIInstanceMI * mi,
     char   context[100];
     gettimeofday(&tv, &tz);
     struct tm cttm;
-    char * gtime = (char *) malloc(15 * sizeof(char));
+    char * gtime = malloc(15 * sizeof(*gtime));
     memset(gtime, 0, 15 * sizeof(char));
     if (gmtime_r(&tv.tv_sec, &cttm) != NULL) {
       strftime(gtime, 15, "%Y%m%d%H%M%S", &cttm);
@@ -979,7 +979,7 @@ IndCIMXMLHandlerInvokeMethod(CMPIMethodMI * mi,
         // Indication delivery failed, send to retry queue
         // build an element
         RTElement      *element;
-        element = (RTElement *) malloc(sizeof(*element));
+        element = malloc(sizeof(*element));
         element->ref=ref->ft->clone(ref,NULL);
         // Get the OP of the subscription and indication
         subop=CMGetObjectPath(sub,NULL);

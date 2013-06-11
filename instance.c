@@ -199,7 +199,7 @@ __ift_clone(const CMPIInstance *instance, CMPIStatus *rc)
     return NULL;
   }
 
-  new = (struct native_instance*) malloc(sizeof(struct native_instance));
+  new = malloc(sizeof(*new));
 
   new->refCount = 0;
   new->mem_state = MEM_NOT_TRACKED;
@@ -738,7 +738,7 @@ add(char **buf, unsigned int *p, unsigned int *m, char *data)
   unsigned int    ds = strlen(data) + 1;
 
   if (*buf == NULL) {
-    *buf = (char *) malloc(1024);
+    *buf = malloc(1024);
     *p = 0;
     *m = 1024;
   }
@@ -747,7 +747,7 @@ add(char **buf, unsigned int *p, unsigned int *m, char *data)
     char           *nb;
     while ((ds + (*p)) >= nm)
       nm *= 2;
-    nb = (char *) malloc(nm);
+    nb = malloc(nm);
     memcpy(nb, *buf, *p);
     free(*buf);
     *buf = nb;

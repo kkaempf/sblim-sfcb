@@ -723,8 +723,7 @@ CMPIConstClass_FT *CMPIConstClassFT = &ift;
 static CMPIConstClass *
 cls_clone(CMPIConstClass * cc, CMPIStatus *rc)
 {
-  CMPIConstClass *cl =
-      (CMPIConstClass *) malloc(getConstClassSerializedSize(cc));
+  CMPIConstClass *cl = malloc(getConstClassSerializedSize(cc));
   cl->hdl = cl + 1;
   cl->ft = &ift;
   cl->refCount = 0;

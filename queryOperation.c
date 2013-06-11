@@ -128,7 +128,7 @@ propToString(QLOperand * op)
       s++;
     pd = pd->nextPart;
   }
-  str = (char *) malloc(s + 8);
+  str = malloc(s + 8);
   str[0] = 0;
   pd = op->propertyName;
   while (pd) {
@@ -567,7 +567,7 @@ opnToChars(QLOperation * op, char *opr, char *rh)
   } else
     rn = rh;
 
-  str = (char *) malloc(32 + strlen(ln) + strlen(rn));
+  str = malloc(32 + strlen(ln) + strlen(rn));
 
   strcpy(str, "[");
   strcat(str, ln);
@@ -1393,7 +1393,7 @@ match_re(char *str, char *re)
   if (re == NULL || str == NULL || re[0] == '\0' || str[0] == '\0')
     return 0;
   int             re_len = strlen(re);
-  char           *str_to_match = (char *) malloc(re_len + 1);
+  char           *str_to_match = malloc(re_len + 1);
   if (re[0] == '%') {
     strcpy(str_to_match, &re[1]);
     if (re[re_len - 1] == '%') {

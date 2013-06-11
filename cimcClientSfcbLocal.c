@@ -149,8 +149,7 @@ static ClientConnectionFT conFt = {
 ClientConnection *
 initConnection(ClientData __attribute__ ((unused)) *cld)
 {
-  ClientConnection *c =
-      (ClientConnection *) calloc(1, sizeof(ClientConnection));
+  ClientConnection *c = calloc(1, sizeof(*c));
   c->ft = &conFt;
   return c;
 }
@@ -2012,7 +2011,7 @@ CMPIConnect2(ClientEnv *ce, const char *hn, const char *scheme,
   if (localConnect(ce, rc) < 0)
     return NULL;
 
-  cc = (ClientEnc *) calloc(1, sizeof(ClientEnc));
+  cc = calloc(1, sizeof(*cc));
 
   cc->enc.hdl = &cc->data;
   cc->enc.ft = &clientFt;
@@ -2114,7 +2113,7 @@ _Create_SfcbLocal_Env(char __attribute__ ((unused)) *id, unsigned int options,
   // localClientMode=1;
   setInstanceLocalMode(1);
 
-  ClientEnv      *env = (ClientEnv *) malloc(sizeof(ClientEnv));
+  ClientEnv      *env = malloc(sizeof(*env));
   env->hdl = NULL;
   env->ft = &localFT;
   env->options = options;

@@ -34,7 +34,7 @@ newAvlTree(int  (*compar) (const void *, const void *))
 {
   AvlTree        *this;
 
-  this = (AvlTree *) calloc(1, sizeof(AvlTree));
+  this = calloc(1, sizeof(*this));
   this->root = NULL;
   this->compar = compar;
   this->stack = malloc(AVL_STACK_SIZE * sizeof(AvlNode *));

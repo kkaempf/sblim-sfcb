@@ -99,7 +99,7 @@ XMLEscape(char *in, int *outlen)
   if (in == NULL)
     return (NULL);
   l = strlen(in);
-  out = (char *) malloc((l * 6) + 1);
+  out = malloc((l * 6) + 1);
   o = 0;
 
   for (i = 0; i < l; i++) {

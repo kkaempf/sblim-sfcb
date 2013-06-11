@@ -449,8 +449,7 @@ uninitGarbageCollector()
 static managed_thread *
 __init_mt()
 {
-  managed_thread *mt =
-      (managed_thread *) calloc(1, sizeof(managed_thread) + 8);
+  managed_thread *mt = calloc(1, sizeof(managed_thread) + 8);
 
   // fprintf(stderr,"---- %d/%d init_mt \n", getpid(), pthread_self());
 
@@ -458,8 +457,8 @@ __init_mt()
 
   mt->hc.memEncUsed = mt->hc.memUsed = 0;
   mt->hc.memEncSize = mt->hc.memSize = MT_SIZE_STEP;
-  mt->hc.memObjs = (void **) malloc(MT_SIZE_STEP * sizeof(void *));
-  mt->hc.memEncObjs = (Object **) malloc(MT_SIZE_STEP * sizeof(void *));
+  mt->hc.memObjs = malloc(MT_SIZE_STEP * sizeof(void *));
+  mt->hc.memEncObjs = malloc(MT_SIZE_STEP * sizeof(void *));
 
   mt->data = NULL;
 
@@ -550,8 +549,7 @@ memAdd(void *ptr, int *memId)
 
   if (mt->hc.memUsed == mt->hc.memSize) {
     mt->hc.memSize += MT_SIZE_STEP;
-    mt->hc.memObjs =
-        (void **) realloc(mt->hc.memObjs, mt->hc.memSize * sizeof(void *));
+    mt->hc.memObjs = realloc(mt->hc.memObjs, mt->hc.memSize * sizeof(void *));
     __ALLOC_ERROR(!mt->hc.memObjs);
   }
 
@@ -582,9 +580,7 @@ memAddEncObj(int mode, void *ptr, size_t size, int *memId)
 
   if (mt->hc.memEncUsed == mt->hc.memEncSize) {
     mt->hc.memEncSize += MT_SIZE_STEP;
-    mt->hc.memEncObjs =
-        (Object **) realloc(mt->hc.memEncObjs,
-                            mt->hc.memEncSize * sizeof(void *));
+    mt->hc.memEncObjs = realloc(mt->hc.memEncObjs,mt->hc.memEncSize * sizeof(void *));
     __ALLOC_ERROR(!mt->hc.memEncObjs);
   }
 
@@ -614,9 +610,7 @@ memLinkEncObj(void *object, int *memId)
 
   if (mt->hc.memEncUsed == mt->hc.memEncSize) {
     mt->hc.memEncSize += MT_SIZE_STEP;
-    mt->hc.memEncObjs =
-        (Object **) realloc(mt->hc.memEncObjs,
-                            mt->hc.memEncSize * sizeof(void *));
+    mt->hc.memEncObjs = realloc(mt->hc.memEncObjs,mt->hc.memEncSize * sizeof(void *));
     __ALLOC_ERROR(!mt->hc.memEncObjs);
   }
 
@@ -697,8 +691,8 @@ markHeap()
 
   mt->hc.memEncUsed = mt->hc.memUsed = 0;
   mt->hc.memEncSize = mt->hc.memSize = MT_SIZE_STEP;
-  mt->hc.memObjs = (void **) malloc(MT_SIZE_STEP * sizeof(void *));
-  mt->hc.memEncObjs = (Object **) malloc(MT_SIZE_STEP * sizeof(void *));
+  mt->hc.memObjs = malloc(MT_SIZE_STEP * sizeof(void *));
+  mt->hc.memEncObjs = malloc(MT_SIZE_STEP * sizeof(void *));
 
   _SFCB_RETURN(hc);
 }
@@ -772,7 +766,7 @@ encode64(char *data)
                   o = 0;
   char            c;
   int             len = strlen(data);
-  char           *ret = (char *) malloc(len * 2);
+  char           *ret = malloc(len * 2);
 
   for (i = 0; i < len; ++i) {
     c = (data[i] >> 2) & 0x3f;
@@ -821,7 +815,7 @@ decode64(char *din)
                   c1;
   unsigned char  *ret = NULL;
   if (len > 0) {
-    ret = (unsigned char *) malloc(len * 2);
+    ret = malloc(len * 2);
   }
 
   for (i = 0; i < len; ++i) {
@@ -989,7 +983,7 @@ buildArgList(char *str, char *pgm, int *argc)
   }
 
   l = ((s + 2) * sizeof(char *)) + strlen(str) + strlen(pgm) + 2;
-  argv = (char **) calloc(l, 1);
+  argv = calloc(l, 1);
   ps = (char *) argv + (s + 2) * sizeof(char *);
   strcpy(ps, str);
   p = ps + strlen(str) + 1;
@@ -1077,7 +1071,7 @@ sfcb_snprintf(const char *fmt, ...)
   if (len <= 0) {
     return NULL;
   }
-  char           *str = (char *) malloc(len + 1);
+  char *str = malloc(len + 1);
   if (str == NULL) {
     return NULL;
   }

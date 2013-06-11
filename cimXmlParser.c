@@ -54,7 +54,7 @@ Throw(XmlBuffer __attribute__ ((unused)) *xb, char *msg)
 static XmlBuffer *
 newXmlBuffer(char *s)
 {
-  XmlBuffer      *xb = (XmlBuffer *) malloc(sizeof(XmlBuffer));
+  XmlBuffer      *xb = malloc(sizeof(*xb));
   xb->base = xb->cur = (char *) strdup(s);
   xb->last = xb->cur + strlen(xb->cur);
   xb->nulledChar = 0;
@@ -242,9 +242,7 @@ attrsOk(XmlBuffer * xb, const XmlElement * e, XmlAttr * r,
     }
     strncpy(word, xb->cur, WORDLEN);
     word[WORDLEN] = 0;
-    ptr =
-        (char *) alloca(strlen(tag) + strlen(msg1) + WORDLEN +
-                        sizeof(char) * 4);
+    ptr = alloca(strlen(tag) + strlen(msg1) + WORDLEN + sizeof(char) * 4);
     strcpy(ptr, msg1);
     strcat(ptr, tag);
     strcat(ptr, " (");          /* 2 chars */
@@ -273,9 +271,7 @@ attrsOk(XmlBuffer * xb, const XmlElement * e, XmlAttr * r,
    * build error message for Throw(): "Bad attribute list for: <TAG>:
    * <chars...> 
    */
-  ptr =
-      (char *) alloca(strlen(msg2) + strlen(tag) + sizeof(char) * 3 +
-                      strlen(word));
+  ptr = alloca(strlen(msg2) + strlen(tag) + sizeof(char) * 3 + strlen(word));
   strcpy(ptr, msg2);
   strcat(ptr, tag);
   strcat(ptr, ": ");

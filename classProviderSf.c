@@ -297,9 +297,7 @@ pruneRCache(ClassRegister * cr)
 static ClassRegister *
 newClassRegister(char *fname)
 {
-  ClassRegister  *cr = (ClassRegister *) calloc(1,
-                                                sizeof(ClassRegister) +
-                                                sizeof(ClassBase));
+  ClassRegister  *cr = calloc(1, sizeof(*cr) + sizeof(ClassBase));
   ClassBase      *cb = (ClassBase *) (cr + 1);
   char            fin[1024];
   long            s,
@@ -367,7 +365,7 @@ newClassRegister(char *fname)
       return NULL;
     }
 
-    buf = (char *) malloc(hdr.size);
+    buf = malloc(hdr.size);
     if (buf == NULL) {
       mlogf(M_ERROR, M_SHOW,
             "--- %s contains record(s) that are too long - directory skipped\n",
@@ -415,7 +413,7 @@ newClassRegister(char *fname)
 
       if (strncmp(cn, "DMY_", 4) != 0) {
         total += sizeof(ClassRecord);
-        crec = (ClassRecord *) calloc(1, sizeof(ClassRecord));
+        crec = calloc(1, sizeof(*crec));
 
         if ((pn = cc->ft->getCharSuperClassName(cc))) {
           crec->parent = strdup(pn);
@@ -483,7 +481,7 @@ gatherNameSpaces(char *dn, UtilHashTable * ns, int first)
       if (strcmp(de->d_name, "..") == 0)
         continue;
       l = strlen(dn) + strlen(de->d_name) + 4;
-      n = (char *) malloc(l + 8);
+      n = malloc(l + 8);
       strcpy(n, dn);
       strcat(n, "/");
       strcat(n, de->d_name);
@@ -518,7 +516,7 @@ buildClassRegisters()
     dir = "/var/lib/sfcb/registration";
   }
 
-  dn = (char *) alloca(strlen(dir) + 32);
+  dn = alloca(strlen(dir) + 32);
   strcpy(dn, dir);
   if (dir[strlen(dir) - 1] != '/')
     strcat(dn, "/");
@@ -807,7 +805,7 @@ getClass(ClassRegister * cr, const char *clsName, ReadCtl *ctl)
   /* class is not cached */
   if (crec->cachedCCls == NULL) {
     gzseek(cr->f, crec->position, SEEK_SET);
-    buf = (char *) malloc(crec->length);
+    buf = malloc(crec->length);
     gzread(cr->f, buf, crec->length);
 
     cc = NEW(CMPIConstClass);

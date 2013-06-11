@@ -533,7 +533,7 @@ refLookAhead(char *u, char **nu)
 static char    *
 strnDup(const char *n, int l)
 {
-  char           *tmp = (char *) malloc(l + 2);
+  char           *tmp = malloc(l + 2);
   strncpy(tmp, n, l);
   tmp[l] = 0;
   return tmp;
@@ -703,7 +703,7 @@ normalizeObjectPathStrBuf(const CMPIObjectPath * cop)
   //  UtilStringBuffer *sb = newStringBuffer(512);
   UtilStringBuffer *sb = UtilFactory->newStrinBuffer(512);
 
-  KeyIds         *ids = (KeyIds *) malloc(sizeof(KeyIds) * c);
+  KeyIds         *ids = malloc(sizeof(*ids) * c);
 
   for (i = 0; i < c; i++) {
     ids[i].data = CMGetKeyAt(cop, i, &ids[i].key, NULL);

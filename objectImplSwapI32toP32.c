@@ -516,7 +516,7 @@ swapI32toP32Class(ClClass * cls, unsigned int *size)
 
   // cn=(char*)ClObjectGetClString(&cls->hdr, &cls->name);
 
-  CLP32_ClClass  *nc = (CLP32_ClClass *) calloc(1, sz);
+  CLP32_ClClass  *nc = calloc(1, sz);
 
   nc->hdr.size = bswap_32(sz);
   nc->hdr.flags = bswap_16(hdr->flags);
@@ -557,7 +557,7 @@ swapI32toP32Instance(ClInstance * inst, int *size)
               "--- swapI32toP32Instance can only execute on ix86 built 32bit binary\n");
 #endif // __i386__
 
-  CLP32_ClInstance *ni = (CLP32_ClInstance *) calloc(1, sz);
+  CLP32_ClInstance *ni = calloc(1, sz);
 
   ni->hdr.size = bswap_32(sz);
   ni->hdr.flags = bswap_16(hdr->flags);
@@ -597,8 +597,7 @@ swapI32toP32QualifierDeclaration(ClQualifierDeclaration * qual, int *size)
       exit(16);
 #endif // __i386 __
 
-  CLP32_ClQualifierDeclaration *nq =
-      (CLP32_ClQualifierDeclaration *) calloc(1, sz);
+  CLP32_ClQualifierDeclaration *nq = calloc(1, sz);
 
   nq->hdr.size = bswap_32(sz);
   nq->hdr.flags = bswap_16(hdr->flags);

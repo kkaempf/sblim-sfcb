@@ -428,7 +428,7 @@ add2buffer(Buffer * b, char *str, size_t len)
     b->data = (char *) malloc(b->size);
   } else if (b->length + len >= b->size) {
     b->size = b->length + len + 500;
-    b->data = (char *) realloc((void *) b->data, b->size);
+    b->data = realloc((void *) b->data, b->size);
   }
   memmove(&((b->data)[b->length]), str, len);
   b->length += len;
@@ -524,7 +524,7 @@ getPayload(CommHndl conn_fd, Buffer * b)
     return -1;
   }
 
-  b->content = (char *) malloc(b->content_length + 8);
+  b->content = malloc(b->content_length + 8);
   if (c)
     memcpy(b->content, (b->data) + b->ptr, c);
 
@@ -1186,7 +1186,7 @@ doHttpRequest(CommHndl conn_fd)
     exit(1);
   }
 
-  hdr = (char *) malloc(strlen(inBuf.authorization) + 64);
+  hdr = malloc(strlen(inBuf.authorization) + 64);
   len += hl =
       sprintf(hdr, "<!-- xml -->\n<!-- auth: %s -->\n",
               inBuf.authorization);

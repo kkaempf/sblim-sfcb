@@ -124,7 +124,7 @@ addProviderToHT(ProviderInfo * info, UtilHashTable * ht)
       }
       /* additional namespace for existing classname and provider name */
       mlogf(M_INFO,M_SHOW,"--- Collating namespaces for registration of class %s, provider %s; consider single providerRegister entry\n", info->className, info->providerName);
-      checkDummy->ns=(char**)realloc(checkDummy->ns,sizeof(char*)*(idx+2));
+      checkDummy->ns=realloc(checkDummy->ns,sizeof(char*)*(idx+2));
       checkDummy->ns[idx] = strdup(info->ns[0]);
       checkDummy->ns[++idx] = NULL;
       freeInfoPtr(info);
@@ -158,10 +158,8 @@ newProviderRegister()
   int             interopFound = 0;
   struct passwd  *passwd;
 
-  ProviderRegister *br =
-      (ProviderRegister *) malloc(sizeof(ProviderRegister) +
-                                  sizeof(ProviderBase));
-  ProviderBase   *bb = (ProviderBase *) (br + 1);
+  ProviderRegister *br = malloc(sizeof(*br) + sizeof(ProviderBase));
+  ProviderBase *bb = (br + 1);
 
   setupControl(configfile);
 
@@ -242,7 +240,7 @@ newProviderRegister()
           err = addProviderToHT(info, ((ProviderBase *) br->hdl)->ht);
 	  if (err)  break;
         }
-        info = (ProviderInfo *) calloc(1, sizeof(ProviderInfo));
+        info = calloc(1, sizeof(*info));
         info->className = strdup(rv.id);
         info->id = ++id;
         // Set the default provider uid
@@ -318,12 +316,11 @@ newProviderRegister()
           int             max = 1,
               next = 0;
           char           *t;
-          info->ns = (char **) malloc(sizeof(char *) * (max + 1));
+          info->ns = malloc(sizeof(char *) * (max + 1));
           while ((t = cntlGetVal(&rv)) != NULL) {
             if (next == max) {
               max++;
-              info->ns =
-                  (char **) realloc(info->ns, sizeof(char *) * (max + 1));
+              info->ns = realloc(info->ns, sizeof(char *) * (max + 1));
             }
             info->ns[next] = strdup(t);
             info->ns[++next] = NULL;

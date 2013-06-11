@@ -52,7 +52,7 @@ void
 useAlternateRepository(const char *inAltRepos)
 {
   int             keyl = strlen(inAltRepos) + 1;
-  repfn = (char *) malloc(keyl);
+  repfn = malloc(keyl);
   strncpy(repfn, inAltRepos, keyl);
 }
 
@@ -69,7 +69,7 @@ getRepDir()
     dir = "/var/lib/sfcb/registration";
   }
   keyl = strlen(BASE) + strlen(dir);
-  repfn = (char *) malloc(keyl + 64);
+  repfn = malloc(keyl + 64);
 
   strcpy(repfn, dir);
   strcat(repfn, "/");
@@ -334,7 +334,7 @@ getFirst(BlobIndex * bi, int *len, char **keyb, size_t * keybl)
       return (void *) buf;
     }
     fseek(bi->fd, bi->bofs, SEEK_SET);
-    buf = (char *) malloc(bi->blen + 8);
+    buf = malloc(bi->blen + 8);
     fread(buf, bi->blen, 1, bi->fd);
     buf[bi->blen] = 0;
     if (len)
@@ -353,7 +353,7 @@ getNext(BlobIndex * bi, int *len, char **keyb, size_t * keybl)
 
   if (getIndexRecord(bi, NULL, 0, keyb, keybl) == 0) {
     fseek(bi->fd, bi->bofs, SEEK_SET);
-    buf = (char *) malloc(bi->blen + 8);
+    buf = malloc(bi->blen + 8);
     fread(buf, bi->blen, 1, bi->fd);
     buf[bi->blen] = 0;
     if (len)
@@ -371,7 +371,7 @@ getNext(BlobIndex * bi, int *len, char **keyb, size_t * keybl)
 static void
 copy(FILE * o, FILE * i, int len, unsigned long ofs)
 {
-  char           *buf = (char *) malloc(len);
+  char           *buf = malloc(len);
   fseek(i, ofs, SEEK_SET);
   fread(buf, len, 1, i);
   fwrite(buf, len, 1, o);
@@ -696,7 +696,7 @@ getBlob(const char *ns, const char *cls, const char *id, int *len)
         exit(5);
       }
       fseek(bi->fd, bi->bofs, SEEK_SET);
-      buf = (char *) malloc(bi->blen + 8);
+      buf = malloc(bi->blen + 8);
       fread(buf, bi->blen, 1, bi->fd);
       if (len)
         *len = bi->blen;

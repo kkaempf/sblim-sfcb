@@ -1582,7 +1582,7 @@ updateMethodParamTypes(RequestHdr * hdr)
 static void addProperty(XtokProperties *ps, XtokProperty *p)
 {
    XtokProperty *np;
-   np=(XtokProperty*)malloc(sizeof(XtokProperty));
+   np=malloc(sizeof(*np));
    memcpy(np,p,sizeof(XtokProperty));
    np->next=NULL;
    if (ps->last) {
@@ -1595,7 +1595,7 @@ static void addProperty(XtokProperties *ps, XtokProperty *p)
 static void addParamValue(XtokParamValues *vs, XtokParamValue *v)
 {
    XtokParamValue *nv;
-   nv=(XtokParamValue*)malloc(sizeof(XtokParamValue));
+   nv=malloc(sizeof(*nv));
    memcpy(nv,v,sizeof(XtokParamValue));
    nv->next=NULL;
    if (vs->last) {
@@ -1608,7 +1608,7 @@ static void addParamValue(XtokParamValues *vs, XtokParamValue *v)
 static void addQualifier(XtokQualifiers *qs, XtokQualifier *q)
 {
    XtokQualifier *nq;
-   nq=(XtokQualifier*)malloc(sizeof(XtokQualifier));
+   nq=malloc(sizeof(*nq));
    memcpy(nq,q,sizeof(XtokQualifier));
    nq->next=NULL;
    if (qs->last) {
@@ -1621,7 +1621,7 @@ static void addQualifier(XtokQualifiers *qs, XtokQualifier *q)
 static void addMethod(XtokMethods *ms, XtokMethod *m)
 {
    XtokMethod *nm;
-   nm=(XtokMethod*)malloc(sizeof(XtokMethod));
+   nm=malloc(sizeof(*nm));
    memcpy(nm,m,sizeof(XtokMethod));
    nm->next=NULL;
    if (ms->last) {
@@ -1634,7 +1634,7 @@ static void addMethod(XtokMethods *ms, XtokMethod *m)
 static void addParam(XtokParams *ps, XtokParam *p)
 {
    XtokParam *np;
-   np=(XtokParam*)malloc(sizeof(XtokParam));
+   np=malloc(sizeof(*np));
    memcpy(np,p,sizeof(XtokParam));
    np->next=NULL;
    if (ps->last) {
@@ -4486,7 +4486,7 @@ namespaces
     | namespaces XTOK_NAMESPACE ZTOK_NAMESPACE
     {
        int l=strlen($1.cns)+strlen($2.ns)+2;
-       $$.cns=(char*)malloc(l);
+       $$.cns=malloc(l);
        strcpy($$.cns,$1.cns);
        strcat($$.cns,"/");
        strcat($$.cns,$2.ns);
@@ -4577,7 +4577,7 @@ value
 valueArray
     : XTOK_VALUEARRAY ZTOK_VALUEARRAY
 	{
-	  $$.values=(XtokValue*)malloc(sizeof(XtokValue));
+	  $$.values=malloc(sizeof(XtokValue));
 	  $$.next=0;
 	} 
     | XTOK_VALUEARRAY valueList ZTOK_VALUEARRAY
@@ -4594,14 +4594,14 @@ valueList
         {
           $$.next=1;
           $$.max=VALUEARRAY_MAX_START;
-          $$.values=(XtokValue*)malloc(sizeof(XtokValue)*($$.max));
+          $$.values=malloc(sizeof(XtokValue)*($$.max));
           $$.values[0]=$1;
         }
         | valueList value
         {
           if ($$.next == $$.max) { /* max was hit; let's bump it up 50% */
             $$.max = (int)($$.max * ((float)3)/2);
-            $$.values=(XtokValue*)realloc(($$.values), sizeof(XtokValue)*($$.max));
+            $$.values=realloc(($$.values), sizeof(XtokValue)*($$.max));
           }
           $$.values[$$.next]=$2;
           $$.next++;
@@ -4638,14 +4638,14 @@ valueRefList
     {
        $$.next=1;
        $$.max=VALUEREFARRAY_MAX_START;
-       $$.values=(XtokValueReference*)malloc(sizeof(XtokValueReference)*($$.max));
+       $$.values=malloc(sizeof(XtokValueReference)*($$.max));
        $$.values[0]=$1;
     }
     | valueRefList valueReference
     {
        if ($$.next == $$.max) { /* max was hit; let's bump it up 50% */
          $$.max = (int)($$.max * ((float)3)/2);
-         $$.values=(XtokValueReference*)realloc(($$.values), sizeof(XtokValueReference)*($$.max));
+         $$.values=realloc(($$.values), sizeof(XtokValueReference)*($$.max));
        }
        $$.values[$$.next]=$2;
        $$.next++;
@@ -6054,7 +6054,7 @@ keyBindings
     {
        $$.next=1;
        $$.max=KEYBINDING_MAX_START;
-       $$.keyBindings=(XtokKeyBinding*)calloc(($$.max),sizeof(XtokKeyBinding));
+       $$.keyBindings=calloc(($$.max),sizeof(XtokKeyBinding));
        $$.keyBindings[0].name=$1.name;
        $$.keyBindings[0].value=$1.value;
        $$.keyBindings[0].type=$1.type;
@@ -6064,7 +6064,7 @@ keyBindings
     {
        if ($$.next == $$.max) { /* max was hit; let's bump it up 50% */
          $$.max = (int)($$.max * ((float)3)/2);
-         $$.keyBindings=(XtokKeyBinding*)realloc(($$.keyBindings), sizeof(XtokKeyBinding)*($$.max));
+         $$.keyBindings=realloc(($$.keyBindings), sizeof(XtokKeyBinding)*($$.max));
        }
        $$.keyBindings[$$.next].name=$2.name;
        $$.keyBindings[$$.next].value=$2.value;

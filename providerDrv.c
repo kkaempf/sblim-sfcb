@@ -510,7 +510,7 @@ initProvProcCtl(int p)
 
   mlogf(M_INFO, M_SHOW, "--- Max provider procs: %d\n", p);
   provProcMax = p;
-  provProc = (ProviderProcess *) calloc(p, sizeof(*provProc));
+  provProc = calloc(p, sizeof(*provProc));
   for (i = 0; i < p; i++)
     provProc[i].id = i;
 }
@@ -1242,8 +1242,7 @@ static BinResponseHdr *
 errorResp(CMPIStatus *rci)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "errorResp");
-  BinResponseHdr *resp =
-      (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
+  BinResponseHdr *resp = calloc(1, sizeof(*resp));
   resp->moreChunks = 0;
   resp->rc = rci->rc + 1;
   resp->count = 1;
@@ -1256,9 +1255,7 @@ static BinResponseHdr *
 errorCharsResp(int rc, char *msg)
 {
   _SFCB_ENTER(TRACE_PROVIDERDRV, "errorCharsResp");
-  BinResponseHdr *resp = (BinResponseHdr *) calloc(1,
-                                                   sizeof(BinResponseHdr) +
-                                                   strlen(msg) + 4);
+  BinResponseHdr *resp = calloc(1, sizeof(*resp) + strlen(msg) + 4);
   strcpy((char *) (resp + 1), msg ? msg : "");
   resp->rc = rc + 1;
   resp->count = 1;
@@ -1273,7 +1270,7 @@ makePropertyList(int n, MsgSegment * ms)
   int             i;
 
   // if (n==1 && ms[0].data==NULL) return NULL;
-  l = (char **) malloc(sizeof(char *) * (n + 1));
+  l = malloc(sizeof(*l) * (n + 1));
 
   for (i = 0; i < n; i++)
     l[i] = (char *) ms[i].data;
@@ -1312,7 +1309,7 @@ deleteClass(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
   if (rci.rc == CMPI_RC_OK) {
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
+    resp = calloc(1, sizeof(*resp));
     resp->count = 0;
     resp->moreChunks = 0;
     resp->rc = 1;
@@ -1373,8 +1370,7 @@ getClass(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) 
   r = native_result2array(result);
   if (rci.rc == CMPI_RC_OK) {
     count = 1;
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-                                     ((count - 1) * sizeof(MsgSegment)));
+    resp = calloc(1, sizeof(*resp) + ((count - 1) * sizeof(MsgSegment)));
     resp->moreChunks = 0;
     resp->rc = 1;
     resp->count = count;
@@ -1422,7 +1418,7 @@ createClass(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
   if (rci.rc == CMPI_RC_OK) {
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
+    resp = calloc(1, sizeof(*resp));
     resp->count = 0;
     resp->moreChunks = 0;
     resp->rc = 1;
@@ -1476,9 +1472,7 @@ enumClassNames(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unu
       count = CMGetArrayCount(r, NULL);
     else
       count = 0;
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-                                     ((count ? count -
-                                       1 : 0) * sizeof(MsgSegment)));
+    resp = calloc(1, sizeof(*resp) + ((count ? count - 1 : 0) * sizeof(MsgSegment)));
     resp->moreChunks = 0;
     resp->rc = 1;
     resp->count = count;
@@ -1579,9 +1573,7 @@ enumQualifiers(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
       count = CMGetArrayCount(r, NULL);
     else
       count = 0;
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-                                     ((count ? count -
-                                       1 : 0) * sizeof(MsgSegment)));
+    resp = calloc(1, sizeof(*resp) + ((count ? count - 1 : 0) * sizeof(MsgSegment)));
     resp->moreChunks = 0;
     resp->rc = 1;
     resp->count = count;
@@ -1626,7 +1618,7 @@ setQualifier(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unuse
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
   if (rci.rc == CMPI_RC_OK) {
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
+    resp = calloc(1, sizeof(*resp));
     resp->count = 0;
     resp->moreChunks = 0;
     resp->rc = 1;
@@ -1671,8 +1663,7 @@ getQualifier(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unuse
 
   if (rci.rc == CMPI_RC_OK) {
     count = 1;
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-                                     ((count - 1) * sizeof(MsgSegment)));
+    resp = calloc(1, sizeof(*resp) + ((count - 1) * sizeof(MsgSegment)));
     resp->moreChunks = 0;
     resp->rc = 1;
     resp->count = count;
@@ -1715,7 +1706,7 @@ deleteQualifier(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((un
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
   if (rci.rc == CMPI_RC_OK) {
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
+    resp = calloc(1, sizeof(*resp));
     resp->count = 0;
     resp->moreChunks = 0;
     resp->rc = 1;
@@ -1769,8 +1760,7 @@ getProperty(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused
 
   if (rci.rc == CMPI_RC_OK) {
     count = 1;
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-                                     ((count - 1) * sizeof(MsgSegment)));
+    resp = calloc(1, sizeof(*resp) + ((count - 1) * sizeof(MsgSegment)));
     resp->moreChunks = 0;
     resp->rc = 1;
     resp->count = count;
@@ -1825,7 +1815,7 @@ setProperty(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
   if (rci.rc == CMPI_RC_OK) {
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
+    resp = calloc(1, sizeof(*resp));
     resp->count = 0;
     resp->moreChunks = 0;
     resp->rc = 1;
@@ -1896,7 +1886,7 @@ invokeMethod(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unuse
 
   r = native_result2array(result);
   if (rci.rc == CMPI_RC_OK) {
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
+    resp = calloc(1, sizeof(*resp)); 
     memset(&resp->rv, 0, sizeof(resp->rv));
     if (r) {
       count = CMGetArrayCount(r, NULL);
@@ -1966,8 +1956,7 @@ getInstance(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused
     if (r && CMGetArrayCount(r, NULL) > 0) {
       count = 1;
 
-      resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-                                       ((count - 1) * sizeof(MsgSegment)));
+      resp = calloc(1, sizeof(*resp) + ((count - 1) * sizeof(MsgSegment)));
       resp->moreChunks = 0;
       resp->rc = 1;
       resp->count = count;
@@ -2020,7 +2009,7 @@ deleteInstance(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unu
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
   if (rci.rc == CMPI_RC_OK) {
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
+    resp = calloc(1, sizeof(*resp));
     resp->count = 0;
     resp->moreChunks = 0;
     resp->rc = 1;
@@ -2067,8 +2056,8 @@ createInstance(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unu
 
   if (rci.rc == CMPI_RC_OK) {
     count = 1;
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr) +
-                                     ((count - 1) * sizeof(MsgSegment)));
+    resp = calloc(1, sizeof(BinResponseHdr) +
+                 ((count - 1) * sizeof(MsgSegment)));
     resp->moreChunks = 0;
     resp->rc = 1;
     resp->count = count;
@@ -2121,10 +2110,7 @@ modifyInstance(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unu
       _SFCB_TRACE(1, ("--- Back from provider rc: %d", rci.rc));
 
   if (rci.rc == CMPI_RC_OK) {
-    resp =
-        (BinResponseHdr *) calloc(1,
-                                  sizeof(BinResponseHdr) -
-                                  sizeof(MsgSegment));
+    resp = calloc(1, sizeof(BinResponseHdr) - sizeof(MsgSegment));
     resp->moreChunks = 0;
     resp->rc = 1;
     resp->count = 0;
@@ -2381,7 +2367,7 @@ execQuery(BinRequestHdr * hdr, ProviderInfo * info, int requestor)
 
     if (ok) {
       c = kar->ft->getSize(kar, NULL);
-      qs->keys = (char **) malloc((c + 1) * sizeof(char *));
+      qs->keys = malloc((c + 1) * sizeof(char *));
 
       for (i = 0; i < c; i++)
         qs->keys[i] =
@@ -2790,7 +2776,7 @@ activateFilter(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unu
 
     if (rci.rc == CMPI_RC_OK) {
       increaseInUseSem(info->provIds.procId);
-      resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
+      resp = calloc(1, sizeof(*resp));
       resp->rc = 1;
     }
   }
@@ -2833,7 +2819,7 @@ deactivateFilter(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((u
   ctx->ft->addEntry(ctx, "CMPISessionId", (CMPIValue *) & hdr->sessionId,
                     CMPI_uint32);
 
-  resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
+  resp = calloc(1, sizeof(*resp));
   resp->rc = 1;
 
   _SFCB_TRACE(1,
@@ -2934,7 +2920,7 @@ enableIndications(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((
   }
 
   if (rci.rc == CMPI_RC_OK) {
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
+    resp = calloc(1, sizeof(*resp));
     resp->rc = 1;
   }
   if (rci.rc != CMPI_RC_OK) {
@@ -2982,7 +2968,7 @@ disableIndications(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ (
   }
 
   if (rci.rc == CMPI_RC_OK) {
-    resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
+    resp = calloc(1, sizeof(*resp));
     resp->rc = 1;
   }
   if (rci.rc != CMPI_RC_OK) {
@@ -3198,7 +3184,7 @@ loadProvider(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unuse
                (char *) req->className.data, (char *) req->provName.data,
                (char *) req->libName.data));
 
-  info = (ProviderInfo *) calloc(1, sizeof(*info));
+  info = calloc(1, sizeof(*info));
 
   info->className = strdup((char *) req->className.data);
   info->location = strdup((char *) req->libName.data);
@@ -3227,7 +3213,7 @@ loadProvider(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unuse
     break;
   }
 
-  resp = (BinResponseHdr *) calloc(1, sizeof(BinResponseHdr));
+  resp = calloc(1, sizeof(*resp));
   resp->rc = 1;
   resp->count = 0;
 
@@ -3593,7 +3579,7 @@ processProviderInvocationRequests(char *name)
     _SFCB_TRACE(1, ("--- Waiting for provider request to R%d-%lu",
                     providerSockets.receive,
                     getInode(providerSockets.receive)));
-    parms = (Parms *) malloc(sizeof(*parms));
+    parms = malloc(sizeof(*parms));
     memset(parms, 0, sizeof(*parms));
 
     rc = spRecvReq(&providerSockets.receive, &parms->requestor,

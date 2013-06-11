@@ -541,12 +541,12 @@ replaceClStringN(ClObjectHdr * hdr, int id, const char *str, unsigned int length
   int            *oldIndexPtr;
 
   fb = getStrBufPtr(hdr);
-  ts = (char *) malloc(fb->bUsed);
+  ts = malloc(fb->bUsed);
   fs = &fb->buf[0];
 
   /* Copy indexPtr from the buffer, so we can compute lengths of items in it.*/
- oldIndexPtr = (int*) malloc(sizeof(int)*fb->iUsed);
- memcpy(oldIndexPtr, fb->indexPtr, sizeof(int)*fb->iUsed);
+ oldIndexPtr = malloc(sizeof(*oldIndexPtr)*fb->iUsed);
+ memcpy(oldIndexPtr, fb->indexPtr, sizeof(*oldIndexPtr)*fb->iUsed);
 
   for (u = i = 0; i < fb->iUsed; i++) {
     if (i != id - 1) {
@@ -587,11 +587,11 @@ removeClObject(ClObjectHdr * hdr, int id)
    int *oldIndexPtr;
 
    fb = getStrBufPtr(hdr);   
-   ts = (char *) malloc(fb->bUsed); /* tmp string buffer */
+   ts = malloc(fb->bUsed); /* tmp string buffer */
    fs = &fb->buf[0];
    /* Copy indexPtr from the buffer, so we can compute lengths of items in it.*/
-   oldIndexPtr = (int*) malloc(sizeof(int)*fb->iUsed);
-   memcpy(oldIndexPtr, fb->indexPtr, sizeof(int)*fb->iUsed);
+   oldIndexPtr = malloc(sizeof(*oldIndexPtr)*fb->iUsed);
+   memcpy(oldIndexPtr, fb->indexPtr, sizeof(*oldIndexPtr)*fb->iUsed);
 
    for (u = i = 0; i < fb->iUsed; i++) {
       if (i != id - 1) {    /* loop through and copy over all _other_ properties */
@@ -655,7 +655,7 @@ replaceClArray(ClObjectHdr * hdr, int id, CMPIData d)
   ClArrayBuf     *fb;  /* the arrayBuf of this object (hdr) */
 
   fb = getArrayBufPtr(hdr);
-  ts = (CMPIData *) malloc(fb->bUsed * sizeof(CMPIData));
+  ts = malloc(fb->bUsed * sizeof(*ts));
   fs = &fb->buf[0];
 
   /* copy the arrays in fb that /aren't/ being replaced */
@@ -752,10 +752,10 @@ cat2string(stringControl * sc, const char *str)
   if (str) {
     if (sc->str == NULL) {
       for (nmax = sc->max; nmax <= sc->used + l; nmax *= 2);
-      sc->str = (char *) malloc((sc->max = nmax));
+      sc->str = malloc((sc->max = nmax));
     } else if (l + sc->used >= sc->max) {
       for (nmax = sc->max; nmax <= sc->used + l; nmax *= 2);
-      sc->str = (char *) realloc(sc->str, (sc->max = nmax));
+      sc->str = realloc(sc->str, (sc->max = nmax));
     }
     strcpy(sc->str + sc->used, str);
     sc->used += l - 1;
@@ -835,7 +835,7 @@ fmtstr(const char *fmt, ...)
   if (len <= 0) {
     return NULL;
   }
-  str = (char *) malloc(len + 1);
+  str = malloc(len + 1);
   if (str == NULL) {
     return NULL;
   }
@@ -1807,7 +1807,7 @@ ClObjectRelocateArrayBuffer(ClObjectHdr * hdr, ClArrayBuf * buf)
 static ClClass *
 newClassH(ClObjectHdr * hdr, const char *cn, const char *pa)
 {
-  ClClass        *cls = (ClClass *) malloc(sizeof(ClClass));
+  ClClass        *cls = malloc(sizeof(*cls));
   if (hdr == NULL)
     hdr = &cls->hdr;
 
@@ -1877,7 +1877,7 @@ rebuildClassH(ClObjectHdr * hdr, ClClass * cls, void *area)
   int             sz = ClSizeClass(cls);
 
   sz = ALIGN(sz, CLALIGN) + CLEXTRA;
-  ClClass        *nc = area ? (ClClass *) area : (ClClass *) malloc(sz);
+  ClClass        *nc = area ? (ClClass *) area : malloc(sz);
 
   *nc = *cls;
 
@@ -2214,7 +2214,7 @@ isInstance(const CMPIInstance *ci)
 static ClInstance *
 newInstanceH(const char *ns, const char *cn)
 {
-  ClInstance     *inst = (ClInstance *) malloc(sizeof(ClInstance));
+  ClInstance     *inst = malloc(sizeof(*inst));
 
   memset(inst, 0, sizeof(ClInstance));
   inst->hdr.type = HDR_Instance;
@@ -2276,8 +2276,7 @@ rebuildInstanceH(ClObjectHdr * hdr, ClInstance * inst, void *area)
 {
   int             ofs = sizeof(ClInstance);
   int             sz = ClSizeInstance(inst);
-  ClInstance     *ni =
-      area ? (ClInstance *) area : (ClInstance *) malloc(sz);
+  ClInstance     *ni = area ? (ClInstance *) area : malloc(sz);
 
   *ni = *inst;
   ni->hdr.flags &= ~HDR_Rebuild;
@@ -2496,7 +2495,7 @@ newObjectPathH(const char *ns, const char *cn)
 {
   _SFCB_ENTER(TRACE_OBJECTIMPL, "newObjectPathH");
 
-  ClObjectPath   *op = (ClObjectPath *) malloc(sizeof(ClObjectPath));
+  ClObjectPath   *op = malloc(sizeof(*op));
 
   memset(op, 0, sizeof(ClObjectPath));
   op->hdr.type = HDR_ObjectPath;
@@ -2548,8 +2547,7 @@ rebuildObjectPathH(ClObjectHdr * hdr, ClObjectPath * op, void *area)
 
   int             ofs = sizeof(ClObjectPath);
   int             sz = ClSizeObjectPath(op);
-  ClObjectPath   *nop = area ? (ClObjectPath *) area :
-      (ClObjectPath *) malloc(sz);
+  ClObjectPath   *nop = area ? (ClObjectPath *) area : malloc(sz);
 
   *nop = *op;
   nop->hdr.flags &= ~HDR_Rebuild;
@@ -2713,7 +2711,7 @@ static ClArgs  *
 newArgsH()
 {
   _SFCB_ENTER(TRACE_OBJECTIMPL, "newArgsH");
-  ClArgs         *arg = (ClArgs *) malloc(sizeof(ClArgs));
+  ClArgs         *arg = malloc(sizeof(*arg));
 
   memset(arg, 0, sizeof(ClArgs));
   arg->hdr.type = HDR_Args;
@@ -2753,7 +2751,7 @@ rebuildArgsH(ClObjectHdr * hdr, ClArgs * arg, void *area)
   _SFCB_ENTER(TRACE_OBJECTIMPL, "rebuildArgsH");
   int             ofs = sizeof(ClArgs);
   int             sz = ClSizeArgs(arg);
-  ClArgs         *nop = area ? (ClArgs *) area : (ClArgs *) malloc(sz);
+  ClArgs         *nop = area ? (ClArgs *) area : malloc(sz);
 
   *nop = *arg;
   nop->hdr.flags &= ~HDR_Rebuild;
@@ -2865,8 +2863,7 @@ static ClQualifierDeclaration *
 newQualifierDeclarationH(ClObjectHdr * hdr, const char *ns,
                          const char *name)
 {
-  ClQualifierDeclaration *q =
-      (ClQualifierDeclaration *) malloc(sizeof(ClQualifierDeclaration));
+  ClQualifierDeclaration *q = malloc(sizeof(*q));
   if (hdr == NULL)
     hdr = &q->hdr;
 

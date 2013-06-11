@@ -177,7 +177,7 @@ addSubscription(const CMPIInstance *ci,
     pthread_mutex_unlock(&subHTlock);
     _SFCB_RETURN(NULL);
   }
-  su = (Subscription *) malloc(sizeof(Subscription));
+  su = malloc(sizeof(*su));
   su->sci = CMClone(ci, NULL);
   su->fi = fi;
   fi->useCount++;
@@ -267,7 +267,7 @@ addFilter(const CMPIInstance *ci,
     _SFCB_RETURN(NULL);
   }
 
-  fi = (Filter *) malloc(sizeof(Filter));
+  fi = malloc(sizeof(*fi));
   fi->fci = CMClone(ci, NULL);
   fi->useCount = 0;
   fi->qs = qs;
@@ -358,7 +358,7 @@ addHandler(CMPIInstance *ci, CMPIObjectPath * op)
     _SFCB_RETURN(NULL);
   }
 
-  ha = (Handler *) malloc(sizeof(Handler));
+  ha = malloc(sizeof(*ha));
   ha->hci = CMClone(ci, NULL);
   ha->hop = CMClone(op, NULL);
   ha->useCount = 0;
