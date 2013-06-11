@@ -181,6 +181,7 @@ typedef struct _buffer {
   unsigned int    length,
                   size,
                   ptr;
+  unsigned int    header_length;
   unsigned int    content_length;
   int             trailers;
   char           *httpHdr,
@@ -386,7 +387,7 @@ static void
 freeBuffer(Buffer * b)
 {
   Buffer          emptyBuf =
-      { NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL,
+      { NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL,
     NULL
   };
   if (b->data)
@@ -549,6 +550,21 @@ dumpResponse(RespSegments * rs)
     }
     printf("<\n");
   }
+}
+
+static void
+write100ContResponse(CommHndl conn_fd)
+{
+  static char     head[] = { "HTTP/1.1 100 Continue\r\n" };
+  static char     end[] = { "\r\n" };
+
+  _SFCB_ENTER(TRACE_HTTPDAEMON, "write100ContResponse");
+
+  commWrite(conn_fd, head, strlen(head));
+  commWrite(conn_fd, end, strlen(end));
+  commFlush(conn_fd);
+
+  _SFCB_EXIT();
 }
 
 static void
@@ -819,9 +835,13 @@ getHdrs(CommHndl conn_fd, Buffer * b)
     /*
      * success condition: end of header 
      */
-    if (strstr(b->data, "\r\n\r\n") != NULL ||
-        strstr(b->data, "\n\n") != NULL) {
-      break;
+    char *eoh;
+    if ((eoh = strstr(b->data, "\r\n\r\n")) != NULL) {
+      b->header_length = (unsigned int)(eoh - b->data + 4);
+      break; 
+    } else if ((eoh = strstr(b->data, "\n\n")) != NULL) {
+      b->header_length = (unsigned int)(eoh - b->data + 2);
+      break; 
     }
 
     if (total >= hdrLimmit) {
@@ -1041,9 +1061,14 @@ doHttpRequest(CommHndl conn_fd)
       cp += strspn(cp, " \t");
       if (strncasecmp(cp, "trailers", 8) == 0)
         inBuf.trailers = 1;
-    } else if (strncasecmp(hdr, "Expect:", 7) == 0) {
-      if (!discardInput) {
-        genError(conn_fd, &inBuf, 417, "Expectation Failed", NULL);     // more);
+    } else if (!discardInput && !strncasecmp(hdr, "Expect:", 7)) {
+      if (!strncasecmp(inBuf.protocol, "HTTP/1.1", 8) &&
+          !strncasecmp(hdr+8 + strspn(hdr+8, " \t"), "100-continue", 12)) {
+        // Send the reply only if we have not yet received any of the payload
+        if (inBuf.length == inBuf.header_length)
+          write100ContResponse(conn_fd);
+      } else {
+        genError(conn_fd, &inBuf, 417, "Expectation Failed", NULL);
         discardInput = 2;
       }
     }
