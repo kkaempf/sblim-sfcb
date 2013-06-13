@@ -24,4 +24,6 @@ MAINTAINERCLEANFILES = Makefile.in
 
 #Some wbemcat tests
 export SRCDIR=$(srcdir)
+export SFCB_REPODIR=$(localstatedir)/lib/sfcb/registration/repository/
+
 TESTS = cmdusage.sh sfcbdump.sh
