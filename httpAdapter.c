@@ -72,9 +72,10 @@
 #include <grp.h>
 #endif
 
-/* should go into cimRequest.h */
-#define REQ_STDHTTP 0
-#define REQ_REST 1
+/* should probably go into cimRequest.h */
+#define CIM_PROTOCOL_ANY     0
+#define CIM_PROTOCOL_CIM_XML 1
+#define CIM_PROTOCOL_CIM_RS  2
 
 unsigned long   exFlags = 0;
 static char    *name;
@@ -122,6 +123,24 @@ static void	print_cert(const char *cert_file, const STACK_OF(X509_NAME) *);
 #define AUTH_SERVTEMP -2
 #define AUTH_SERVPERM -3
 
+/* return codes for HTTP operations. */
+enum {
+  HTTP_ERROR_NOERROR,
+  HTTP_ERROR_BADVERB,
+  HTTP_ERROR_BADVERSION,
+  HTTP_ERROR_DOS_ATTACK,
+  HTTP_ERROR_CLIENT_ABORT_HDR,
+  HTTP_ERROR_CLIENT_ABORT_REQ,
+  HTTP_ERROR_TIMEOUT_HDR,
+  HTTP_ERROR_TIMEOUT_REQ,
+  HTTP_ERROR_READCOUNT_EXCEED_HDR,
+  HTTP_ERROR_READCOUNT_EXCEED_REQ,
+  HTTP_ERROR_LENGTH_EXCEED_HDR,
+  HTTP_ERROR_LENGTH_EXCEED_REQ,
+  HTTP_ERROR_READERROR,
+  HTTP_ERROR_LAST  /* never use, keep last */
+};
+  
 static key_t    httpProcSemKey;
 static key_t    httpWorkSemKey;
 static int      httpProcSem;
@@ -180,7 +199,9 @@ typedef struct _buffer {
                  *content;
   unsigned int    length,
                   size,
-                  ptr;
+                  ptr,
+                  read_count;
+  unsigned long   wait_time;
   unsigned int    header_length;
   unsigned int    content_length;
   int             trailers;
@@ -202,6 +223,8 @@ extern int fallback_ipv4;
 #endif
 
 #define SET_HDR_CP(member, val)   member = val + strspn(val, " \t"); \
+
+#define TERMINATE(x) { if (!doFork) _SFCB_RETURN(x); commClose(conn_fd); exit(x); }
 
 void
 initHttpProcCtl(int p)
@@ -386,10 +409,8 @@ static void handleSigPipe(int __attribute__ ((unused)) sig)
 static void
 freeBuffer(Buffer * b)
 {
-  Buffer          emptyBuf =
-      { NULL, NULL, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL
-  };
+  Buffer emptyBuf = { NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL,
+                      NULL, NULL, NULL, NULL, NULL, NULL };
   if (b->data)
     free(b->data);
   if (b->content)
@@ -426,7 +447,7 @@ add2buffer(Buffer * b, char *str, size_t len)
   if (b->size == 0) {
     b->size = len + 500;
     b->length = 0;
-    b->data = (char *) malloc(b->size);
+    b->data = malloc(b->size);
   } else if (b->length + len >= b->size) {
     b->size = b->length + len + 500;
     b->data = realloc((void *) b->data, b->size);
@@ -768,26 +789,68 @@ static ChunkFunctions httpChunkFunctions = {
   writeChunkResponse,
 };
 
+static int
+chkHttpVerb (char *pVerb, int pProtocol) {
+
+  int i;
+
+  typedef struct {
+    char *verb;
+    int protocol;
+  } httpVerb;
+
+  /* Enable verbs by protocol by adding to this list */
+  httpVerb vList[] = {
+    { "POST",    CIM_PROTOCOL_CIM_XML },
+//  { "M-POST",  CIM_PROTOCOL_CIM_XML },
+//  { "POST",    CIM_PROTOCOL_CIM_RS },
+//  { "PUT",     CIM_PROTOCOL_CIM_RS },
+//  { "GET",     CIM_PROTOCOL_CIM_RS },
+//  { "DELETE",  CIM_PROTOCOL_CIM_RS },
+    { NULL,      CIM_PROTOCOL_ANY },
+  };
+
+  for (i=0; vList[i].verb; i++) {
+    if (!strncasecmp(pVerb, vList[i].verb, strlen(vList[i].verb))
+        && (pProtocol ? pProtocol == vList[i].protocol : 1)) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 #define hdrBufsize 5000
 #define hdrLimmit 5000
 
+#define TV_TO_MS(x) ( (int) x.tv_sec * 1000 + (int) x.tv_usec / 1000 )
+
 static int
-getHdrs(CommHndl conn_fd, Buffer * b)
+getHdrs(CommHndl conn_fd, Buffer * b, int to)
 {
   int             total = 0,
                   isReady;
   fd_set          httpfds;
-  int             state = 0;
+  int             state = HTTP_ERROR_NOERROR;
+  int             vChecked = 0;
+  unsigned int    pass = 1;
+  struct timeval  initialTV = { 0, 0 },
+                  currentTV,
+                  cumTV;
 
   FD_ZERO(&httpfds);
   FD_SET(conn_fd.socket, &httpfds);
 
-  for (;;) {
-    isReady =
-        select(conn_fd.socket + 1, &httpfds, NULL, NULL,
-               &httpSelectTimeout);
-    if (isReady == 0)
-      return 3;
+  initialTV.tv_sec = to;
+  currentTV = initialTV;
+
+  for (;; pass++) {
+    isReady = select(conn_fd.socket + 1, &httpfds, NULL, NULL, &currentTV);
+
+    if (isReady == 0) {
+      mlogf(M_ERROR, M_SHOW, "-#- timeout waiting for HTTP headers\n");
+      state = HTTP_ERROR_TIMEOUT_HDR;
+      break;
+    }
 
     char            buf[hdrBufsize];
     int             r = commRead(conn_fd, buf, sizeof(buf));
@@ -798,39 +861,32 @@ getHdrs(CommHndl conn_fd, Buffer * b)
       } else {
         mlogf(M_INFO, M_SHOW, "--- getHdrs: read() error %s\n",
               strerror(errno));
-        state = 3;
+        state = HTTP_ERROR_READERROR;
         break;
       }
     }
     if (r == 0) {
-      if (b->size == 0)
-        break;
-      if (strstr(b->data, "\r\n\r\n") == NULL &&
-          strstr(b->data, "\n\n") == NULL) {
-        mlogf(M_ERROR, M_SHOW, "-#- HTTP header ended prematurely\n");
-        state = 3;
+      if (b->size == 0) {
+        state = HTTP_ERROR_NOERROR;
         break;
       }
+      mlogf(M_ERROR, M_SHOW, "-#- HTTP header ended prematurely\n");
+      state = HTTP_ERROR_CLIENT_ABORT_HDR;
+      break;
     }
 
     add2buffer(b, buf, r);
     total += r;
 
-    /* DO THIS IN THE ReqHandler
-     * on first run through, ensure that this is a POST req. if cimxml req
-     */
-//     if (first)
-//       fprintf(stderr, "buf is '%s', cmd is '%s'\n", buf, cmd);
-//     if (r && first) {
-//       if (strncasecmp(buf, cmd, strlen(cmd)) != 0) {
-//         /*
-//          * not what we expected - still continue to read to not confuse
-//          * the client 
-//          */
-//         state = 1;
-//       }
-//       first = 0;
-//     }
+    if (!vChecked && strstr(b->data, "\n")) {
+      if (chkHttpVerb(b->data, CIM_PROTOCOL_CIM_XML)) {
+        vChecked=1;
+      }
+      else {
+        state = HTTP_ERROR_BADVERB;
+        break;
+      }
+    }
 
     /*
      * success condition: end of header 
@@ -844,12 +900,15 @@ getHdrs(CommHndl conn_fd, Buffer * b)
       break; 
     }
 
-    if (total >= hdrLimmit) {
-      mlogf(M_ERROR, M_SHOW, "-#- Possible DOS attempt detected\n");
-      state = 2;
+    if (total >= hdrLimmit) { /* may indicate DOS attack */
+      mlogf(M_ERROR, M_SHOW, "-#- HTTP header length exceeded\n");
+      state = HTTP_ERROR_LENGTH_EXCEED_HDR;
       break;
     }
   }
+  timersub(&initialTV, &currentTV, &cumTV);
+  b->wait_time = (unsigned long) TV_TO_MS(cumTV);
+  b->read_count = pass;
   return state;
 }
 
@@ -891,11 +950,48 @@ pauseCodec(char *name)
   return 0;
 }
 
+/* Human readable error codes, for trace only */
+_SFCB_TRACE_VAR(
+static char *error_str(int rc)
+{
+   switch (rc) {
+   case HTTP_ERROR_NOERROR:
+      return "HTTP_ERROR_NOERROR";
+   case HTTP_ERROR_BADVERB:
+      return "HTTP_ERROR_BADVERB";
+   case HTTP_ERROR_BADVERSION:
+      return "HTTP_ERROR_BADVERSION";
+   case HTTP_ERROR_DOS_ATTACK:
+      return "HTTP_ERROR_DOS_ATTACK";
+   case HTTP_ERROR_CLIENT_ABORT_HDR:
+      return "HTTP_ERROR_CLIENT_ABORT_HDR";
+   case HTTP_ERROR_CLIENT_ABORT_REQ:
+      return "HTTP_ERROR_CLIENT_ABORT_REQ";
+   case HTTP_ERROR_TIMEOUT_HDR:
+      return "HTTP_ERROR_TIMEOUT_HDR";
+   case HTTP_ERROR_TIMEOUT_REQ:
+      return "HTTP_ERROR_TIMEOUT_REQ";
+   case HTTP_ERROR_READCOUNT_EXCEED_HDR:
+      return "HTTP_ERROR_READCOUNT_EXCEED_HDR";
+   case HTTP_ERROR_READCOUNT_EXCEED_REQ:
+      return "HTTP_ERROR_READCOUNT_EXCEED_REQ";
+   case HTTP_ERROR_LENGTH_EXCEED_HDR:
+      return "HTTP_ERROR_LENGTH_EXCEED_HDR";
+   case HTTP_ERROR_LENGTH_EXCEED_REQ:
+      return "HTTP_ERROR_LENGTH_EXCEED_REQ";
+   case HTTP_ERROR_READERROR:
+      return "HTTP_ERROR_READERROR";
+   }
+   return "HTTP_ERROR_INVALID";
+}
+)
+
 static int
 doHttpRequest(CommHndl conn_fd)
 {
   char           *cp;
-  Buffer          inBuf = { NULL, NULL, 0, 0, 0, 0, 0, 0 };
+  Buffer          inBuf = { NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL,
+                            NULL, NULL, NULL, NULL, NULL, NULL };
   RespSegments    response;
   static RespSegments nullResponse = { NULL, 0, 0, NULL, {{0, NULL}} };
   unsigned long   len;
@@ -932,26 +1028,33 @@ doHttpRequest(CommHndl conn_fd)
   inBuf.useragent = "";
   int             badReq = 0;
 
-  /* get everything */
-  rc = getHdrs(conn_fd, &inBuf);
+  /* 
+   * read the entire header block, and some or all of the payload
+   */
+  rc = getHdrs(conn_fd, &inBuf, selectTimeout);
+  _SFCB_TRACE(2, ("get HTTP hdrs in %lums (%lu%% of timeout) in %u passes (%s)",
+      inBuf.wait_time, (inBuf.wait_time / selectTimeout / 10), inBuf.read_count,
+      error_str(rc)));
 
-  if (rc == 1) { /* 1 indicates bad HTTP verb.  may no longer be needed */
+  if (rc == HTTP_ERROR_BADVERB) {
+    _SFCB_TRACE(1, ("--- bad HTTP verb"));
     genError(conn_fd, &inBuf, 501, "Not Implemented", NULL);
-    /*
-     * we continue to parse headers and empty the socket to be graceful
-     * with the client 
-     */
-    discardInput = 1;
-  } else if (rc == 2) {
+    TERMINATE(1);
+  }
+  else if (rc == HTTP_ERROR_LENGTH_EXCEED_HDR) {
+    _SFCB_TRACE(1, ("--- HTTP header length exceeded"));
     genError(conn_fd, &inBuf, 400, "Bad Request", NULL);
-    discardInput = 2;
-    _SFCB_TRACE(1, ("--- potential DOS attempt discovered."));
-  } else if (rc == 3) {
+    TERMINATE(1);
+  }
+  else if (rc == HTTP_ERROR_CLIENT_ABORT_HDR) {
+    _SFCB_TRACE(1, ("--- client aborted prior to EOH"));
     genError(conn_fd, &inBuf, 400, "Bad Request", NULL);
-    _SFCB_TRACE(1, ("--- exiting after request timeout."));
-    if (!doFork) _SFCB_RETURN(1);
-    commClose(conn_fd);
-    exit(1);
+    TERMINATE(1);
+  }
+  else if (rc == HTTP_ERROR_TIMEOUT_HDR) {
+    _SFCB_TRACE(1, ("--- timeout waiting for EOH"));
+    genError(conn_fd, &inBuf, 400, "Bad Request", NULL);
+    TERMINATE(1);
   }
 
   if (inBuf.size == 0) {
@@ -991,11 +1094,9 @@ doHttpRequest(CommHndl conn_fd)
   }
 
   if (badReq) {
-    genError(conn_fd, &inBuf, 400, "Bad Request", NULL);
     _SFCB_TRACE(1, ("--- exiting after malformed header."));
-    if (!doFork) _SFCB_RETURN(1);
-    commClose(conn_fd);
-    exit(1);
+    genError(conn_fd, &inBuf, 400, "Bad Request", NULL);
+    TERMINATE(1);
   }
 
   /* parse rest of headers */
@@ -1003,65 +1104,62 @@ doHttpRequest(CommHndl conn_fd)
     _SFCB_TRACE(1, ("--- Header: %s", hdr));
     if (hdr[0] == 0)
       break;
-    else if (strncasecmp(hdr, "Authorization:", 14) == 0) {
+
+    if (strncasecmp(hdr, "Authorization:", 14) == 0) {
       SET_HDR_CP(inBuf.authorization, &hdr[14]);
-    } else if (strncasecmp(hdr, "Content-Length:", 15) == 0) {
+    }
+    else if (strncasecmp(hdr, "Content-Length:", 15) == 0) {
       cp = &hdr[15];
       cp += strspn(cp, " \t");
       if (cp[0] == '-') {
-        genError(conn_fd, &inBuf, 400, "Negative Content-Length", NULL);
         _SFCB_TRACE(1, ("--- exiting: content-length too big"));
-        if (!doFork) _SFCB_RETURN(1);
-        commClose(conn_fd);
-        exit(1);
+        genError(conn_fd, &inBuf, 400, "Negative Content-Length", NULL);
+        TERMINATE(1);
       }
       errno = 0;
       unsigned long   clen = strtoul(cp, NULL, 10);
       if (errno != 0) {
+        _SFCB_TRACE(1, ("--- exiting: content-length conversion error"));
         genError(conn_fd, &inBuf, 400,
                  "Error converting Content-Length to a decimal value",
                  NULL);
-        _SFCB_TRACE(1, ("--- exiting: content-length conversion error"));
-        if (!doFork) _SFCB_RETURN(1);
-        commClose(conn_fd);
-        exit(1);
+        TERMINATE(1);
       }
       unsigned int    maxLen;
       if ((getControlUNum("httpMaxContentLength", &maxLen) != 0) || maxLen == 0) {
+        _SFCB_TRACE(1, ("--- exiting: bad config httpMaxContentLength"));
         genError(conn_fd, &inBuf, 501,
                  "Server misconfigured (httpMaxContentLength)", NULL);
-        _SFCB_TRACE(1, ("--- exiting: bad config httpMaxContentLength"));
-        if (!doFork) _SFCB_RETURN(1);
-        commClose(conn_fd);
-        exit(1);
+        TERMINATE(1);
       }
       if ((clen >= UINT_MAX) || ((maxLen) && (clen > maxLen))) {
-        genError(conn_fd, &inBuf, 413, "Request Entity Too Large", NULL);
         _SFCB_TRACE(1, ("--- exiting: content-length too big"));
-        if (!doFork) _SFCB_RETURN(1);
-        commClose(conn_fd);
-        exit(1);
+        genError(conn_fd, &inBuf, 413, "Request Entity Too Large", NULL);
+        TERMINATE(1);
       }
       inBuf.content_length = clen;
-    } else if (strncasecmp(hdr, "Content-Type:", 13) == 0) {
+    }
+    else if (strncasecmp(hdr, "Content-Type:", 13) == 0) {
       SET_HDR_CP(inBuf.content_type, &hdr[13]);
-    } else if (strncasecmp(hdr, "Host:", 5) == 0) {
+    }
+    else if (strncasecmp(hdr, "Host:", 5) == 0) {
       SET_HDR_CP(inBuf.host, &hdr[5]);
-
       if (strchr(inBuf.host, '/') != NULL || inBuf.host[0] == '.') {
-        if (!discardInput) {
-          genError(conn_fd, &inBuf, 400, "Bad Request", NULL);
-          discardInput = 2;
-        }
+        _SFCB_TRACE(1, ("--- exiting: bad HTTP host"));
+        genError(conn_fd, &inBuf, 400, "Bad Request", NULL);
+        TERMINATE(1);
       }
-    } else if (strncasecmp(hdr, "User-Agent:", 11) == 0) {
+    }
+    else if (strncasecmp(hdr, "User-Agent:", 11) == 0) {
       SET_HDR_CP(inBuf.useragent, &hdr[11]);
-    } else if (strncasecmp(hdr, "TE:", 3) == 0) {
+    }
+    else if (strncasecmp(hdr, "TE:", 3) == 0) {
       char           *cp = &hdr[3];
       cp += strspn(cp, " \t");
       if (strncasecmp(cp, "trailers", 8) == 0)
         inBuf.trailers = 1;
-    } else if (!discardInput && !strncasecmp(hdr, "Expect:", 7)) {
+    }
+    else if (strncasecmp(hdr, "Expect:", 7) == 0) {
       if (!strncasecmp(inBuf.protocol, "HTTP/1.1", 8) &&
           !strncasecmp(hdr+8 + strspn(hdr+8, " \t"), "100-continue", 12)) {
         // Send the reply only if we have not yet received any of the payload
@@ -1069,7 +1167,7 @@ doHttpRequest(CommHndl conn_fd)
           write100ContResponse(conn_fd);
       } else {
         genError(conn_fd, &inBuf, 417, "Expectation Failed", NULL);
-        discardInput = 2;
+        TERMINATE(1);
       }
     }
 #ifdef ALLOW_UPDATE_EXPIRED_PW
@@ -1095,9 +1193,7 @@ doHttpRequest(CommHndl conn_fd)
          */
         mlogf(M_ERROR, M_SHOW,
               "\n--- Client certificate not accessible - closing connection\n");
-        if (!doFork) _SFCB_RETURN(1);
-        commClose(conn_fd);
-        exit(1);
+        TERMINATE(1);
       }
     }
   }
@@ -1206,9 +1302,7 @@ doHttpRequest(CommHndl conn_fd)
        free(more);
        more=NULL;
     }
-    if (!doFork) _SFCB_RETURN(1);
-    commClose(conn_fd);
-    exit(1);
+    TERMINATE(1);
   }
 
   hdr = malloc(strlen(inBuf.authorization) + 64);
@@ -1224,9 +1318,7 @@ doHttpRequest(CommHndl conn_fd)
        free(more);
        more=NULL;
     }
-    if (!doFork) _SFCB_RETURN(1);
-    commClose(conn_fd);
-    exit(1);
+    TERMINATE(1);
   }
   if (discardInput) {
     releaseAuthHandle();
