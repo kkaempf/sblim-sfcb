@@ -159,7 +159,7 @@ newProviderRegister()
   struct passwd  *passwd;
 
   ProviderRegister *br = malloc(sizeof(*br) + sizeof(ProviderBase));
-  ProviderBase *bb = (br + 1);
+  ProviderBase *bb = (ProviderBase *) (br + 1);
 
   setupControl(configfile);
 
