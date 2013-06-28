@@ -2,9 +2,31 @@ Changes in 1.4.5
 ================
 
 New features:
+- [sfcb-tix:#44] Escape XML for Embedded Instances Instead of Using CDATA
+- [sfcb-tix:#48] mofc: Allow absoltute paths in #pragma include
+- [sfcb-tix:#52] ABT core check
+- [sfcb-tix:#55] make install should not overwrite sfcb.cfg
+- [sfcb-tix:#59] Improve httpAdapter error handling
 
 Bugs fixed:
-
+- [sfcb-tix:#31] TestAssociationProvider can cause some queries to fail
+- [sfcb-tix:#32] Provider Mgr trace should id the provider being called
+- [sfcb-tix:#36] Add Pulled Enums test provider
+- [sfcb-tix:#38] providerRegister:locateProvider() is unused
+- [sfcb-tix:#40] Add valgrind test (implemented only for the "none" init script at this time)
+- [sfcb-tix:#41] Global IndicationService
+- [sfcb-tix:#46] Error parsing CDATA with no whitespace
+- [sfcb-tix:#47] Pulled Enumeration support - CIMXML parser
+- [sfcb-tix:#37] indCIMXmlHandler coredumps in IndCIMXMLHandlerInvokeMethod
+- [sfbb-tix:#51] Malformed OP causes segfault
+- [sfcb-tix:#49] Cannot return EmbeddedInstance property from provider
+- [sfcb-tix:#53] SFCB may not start if runtime does not support IPv6
+- [sfcb-tix:#54] Fix for sfcbproc.c
+- [sfcb-tix:#18] disable default properties breaks test. Modified failing tests, also made test case insensitive and fixed result file naming.
+- [sfcb-tix:#56] Intermittent segfault at shutdown Relocate trace_stop due to timing issue on shmdt() call
+- [sfcb-tix:#12] Support HTTP Expect: 100-continue header
+- [sfcb-tix:#11] Remove unnecessary casts for allocs
+- [sfcb-tix:#58] sfcbdump test fails. Remove local test classSchemas file and use installed one instead.
 
 Changes in 1.4.4
 ================
