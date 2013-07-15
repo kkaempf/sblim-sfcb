@@ -493,7 +493,9 @@ gatherNameSpaces(char *dn, UtilHashTable * ns, int first)
       closedir(dir_test);
       cr = newClassRegister(n);
       if (cr) {
-        ns->ft->put(ns, strdup(n + nsBaseLen), cr);
+	/* couldn't open classSchemas, don't put it in the ht */
+        if (cr->f)
+          ns->ft->put(ns, strdup(n + nsBaseLen), cr);
         gatherNameSpaces(n, ns, 0);
       }
       free(n);
@@ -1485,7 +1487,7 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
 
   else if (strcasecmp(methodName, "_startup") == 0) {
 
-    /* let providerMgr know that we're odne init'ing  */
+    /* let providerMgr know that we're done init'ing  */
     semRelease(sfcbSem,INIT_CLASS_PROV_ID);
 
     st.rc = CMPI_RC_OK;
