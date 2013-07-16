@@ -35,6 +35,8 @@
 #include <providerMgr.h>
 #include "cimRequest.h"
 
+#define YYPARSE_PARAM parm
+
 // TODO these need to be defined in cmpidt.h in cmpi-base...
 #   define CMPI_FLAG_ContinueOnError        16
 #   define CMPI_FLAG_ReturnQueryResultClass 32
