@@ -103,55 +103,36 @@ getSfcbUuid()
 // ------------------------------------------------------------------
 
 static int
-genNameSpaceData(const char *ns, int dbl,
-                 const CMPIResult *rslt, CMPIObjectPath * op,
+genNameSpaceData(const char *ns, const CMPIResult *rslt, CMPIObjectPath * op,
                  CMPIInstance *ci)
 {
   if (ci) {
-    CMSetProperty(ci, "Name", ns + dbl + 1, CMPI_chars);
+    CMSetProperty(ci, "Name", ns, CMPI_chars);
     CMReturnInstance(rslt, ci);
   } else if (op) {
-    CMAddKey(op, "Name", ns + dbl + 1, CMPI_chars);
+    CMAddKey(op, "Name", ns, CMPI_chars);
     CMReturnObjectPath(rslt, op);
   }
   return 0;
 }
 
 static void
-gatherNameSpacesData(const char *dn, int dbl,
-                     const CMPIResult *rslt,
+gatherNameSpacesData(const CMPIResult *rslt, const CMPIContext* ctx,
                      CMPIObjectPath * op, CMPIInstance *ci)
 {
-  DIR            *dir,
-                 *de_test;
-  struct dirent  *de;
-  char           *n;
-  int             l;
+  /* get the namespaces */
+  CMPIObjectPath* cpop = CMNewObjectPath(_broker, "root/interop", "$ClassProvider$", NULL);
+  CMPIArgs* outarg = CMNewArgs(_broker, NULL);
+  CBInvokeMethod(_broker, ctx, cpop, "listnamespaces", NULL, outarg, NULL);
+  CMPIData nsd = CMGetArgAt(outarg, 0, NULL, NULL);
+  CMPIArray* nsarray = nsd.value.array;
 
-  dir = opendir(dn);
-  if (dir) {
-    while ((de = readdir(dir)) != NULL) {
-      if (strcmp(de->d_name, ".") == 0)
-        continue;
-      if (strcmp(de->d_name, "..") == 0)
-        continue;
-      l = strlen(dn) + strlen(de->d_name) + 4;
-      n = malloc(l + 8);
-      strcpy(n, dn);
-      strcat(n, "/");
-      strcat(n, de->d_name);
-      de_test = opendir(n);
-      if (de_test == NULL) {
-        free(n);
-        continue;
-      }
-      closedir(de_test);
-
-      genNameSpaceData(n,dbl,rslt,op,ci);
-      gatherNameSpacesData(n,dbl,rslt,op,ci);
-      free(n);
-    }
-    closedir(dir);
+  int i = 0;
+  int ac = CMGetArrayCount(nsarray, NULL);
+  CMPIData ns; 
+  for (; i < ac; i++) {
+    ns = CMGetArrayElementAt(nsarray, i, NULL);
+    genNameSpaceData(CMGetCharPtr(ns.value.string), rslt, op, ci);
   }
 }
 
@@ -163,34 +144,27 @@ NameSpaceProviderGetInstance(CMPIInstanceMI * mi,
                              const char **properties)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
-  char           *dirn,
-                 *dn,
-                  hostName[512];
-  DIR            *dir;
+  char            hostName[512];
   CMPIObjectPath *op;
   CMPIInstance   *ci;
   CMPIString     *name;
-  unsigned short  info = 0,
-      dbl;
+  unsigned short  info = 0;
 
   _SFCB_ENTER(TRACE_PROVIDERS, "NameSpaceProviderGetInstance");
-
-  if (getControlChars("registrationDir", &dirn)) {
-    dirn = "/var/lib/sfcb/registration";
-  }
 
   name = CMGetKey(cop, "name", NULL).value.string;
 
   if (name && name->hdl) {
-    dn = alloca(strlen(dirn) + 32 + strlen((char *) name->hdl));
-    strcpy(dn, dirn);
-    if (dirn[strlen(dirn) - 1] != '/')
-      strcat(dn, "/");
-    strcat(dn, "repository/");
-    dbl = strlen(dn);
-    strcat(dn, (char *) name->hdl);
 
-    if ((dir = opendir(dn)) != NULL) {
+    /* ask ClassProvider if ns exists */
+    CMPIObjectPath* cpop = CMNewObjectPath(_broker, "root/interop", "$ClassProvider$", NULL);
+    CMPIArgs* inarg = CMNewArgs(_broker, NULL);
+    CMPIValue nameval;
+    nameval.string = name;
+    CMAddArg(inarg, "ns", &nameval, CMPI_string);
+    CBInvokeMethod(_broker, ctx, cpop, "listnamespaces", inarg, NULL, &st);
+
+    if (st.rc == CMPI_RC_OK) {
       op=CMNewObjectPath(_broker,"root/interop","CIM_Namespace",NULL);
       ci=CMNewInstance(_broker,op,NULL);
         
@@ -202,13 +176,16 @@ NameSpaceProviderGetInstance(CMPIInstanceMI * mi,
       gethostname(hostName,511);
       CMSetProperty(ci,"SystemName",hostName,CMPI_chars);
       CMSetProperty(ci,"ClassInfo",&info,CMPI_uint16);
-      CMSetProperty(ci,"Name",dn+dbl,CMPI_chars);
+      CMSetProperty(ci,"Name",&nameval,CMPI_string);
       CMReturnInstance(rslt,ci);
-      closedir(dir);
-    } else
+    } 
+    else {
       st.rc = CMPI_RC_ERR_NOT_FOUND;
-  } else
+    }
+  } 
+  else {
     st.rc = CMPI_RC_ERR_INVALID_PARAMETER;
+  }
 
   _SFCB_RETURN(st);
 }
@@ -221,24 +198,12 @@ NameSpaceProviderEnumInstances(CMPIInstanceMI * mi,
                                const char **properties)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
-  char           *dir,
-                 *dn,
-                  hostName[512];
+  char            hostName[512];
   CMPIObjectPath *op;
   CMPIInstance   *ci;
   unsigned short  info = 0;
 
   _SFCB_ENTER(TRACE_PROVIDERS, "NameSpaceProviderEnumInstances");
-
-  if (getControlChars("registrationDir", &dir)) {
-    dir = "/var/lib/sfcb/registration";
-  }
-
-  dn = alloca(strlen(dir) + 32);
-  strcpy(dn, dir);
-  if (dir[strlen(dir) - 1] != '/')
-    strcat(dn, "/");
-  strcat(dn, "repository");
 
   op = CMNewObjectPath(_broker, "root/interop", "CIM_Namespace", NULL);
   ci = CMNewInstance(_broker, op, NULL);
@@ -254,7 +219,7 @@ NameSpaceProviderEnumInstances(CMPIInstanceMI * mi,
   CMSetProperty(ci, "SystemName", hostName, CMPI_chars);
   CMSetProperty(ci, "ClassInfo", &info, CMPI_uint16);
 
-  gatherNameSpacesData(dn, strlen(dn), rslt, NULL, ci);
+  gatherNameSpacesData(rslt, ctx, NULL, ci);
 
   _SFCB_RETURN(st);
 }
@@ -266,22 +231,10 @@ NameSpaceProviderEnumInstanceNames(CMPIInstanceMI * mi,
                                    const CMPIObjectPath * ref)
 {
   CMPIStatus      st = { CMPI_RC_OK, NULL };
-  char           *dir,
-                 *dn,
-                  hostName[512];
+  char            hostName[512];
   CMPIObjectPath *op;
 
   _SFCB_ENTER(TRACE_PROVIDERS, "NameSpaceProviderEnumInstanceNames");
-
-  if (getControlChars("registrationDir", &dir)) {
-    dir = "/var/lib/sfcb/registration";
-  }
-
-  dn = alloca(strlen(dir) + 32);
-  strcpy(dn, dir);
-  if (dir[strlen(dir) - 1] != '/')
-    strcat(dn, "/");
-  strcat(dn, "repository");
 
   op = CMNewObjectPath(_broker, "root/interop", "CIM_Namespace", NULL);
 
@@ -295,7 +248,7 @@ NameSpaceProviderEnumInstanceNames(CMPIInstanceMI * mi,
   gethostname(hostName, 511);
   CMAddKey(op, "SystemName", hostName, CMPI_chars);
 
-  gatherNameSpacesData(dn, strlen(dn), rslt, op, NULL);
+  gatherNameSpacesData(rslt, ctx, op, NULL);
 
   _SFCB_RETURN(st);
 }
@@ -838,6 +791,7 @@ ServerProviderInitInstances(const CMPIContext *ctx)
   ISinst = CMNewInstance(_broker, ISop, &st);
   makeIndService(ISinst);
   memUnlinkInstance(ISinst); // Prevent cleanup of the instance
+
   return;
 }
 

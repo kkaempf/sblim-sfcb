@@ -1078,6 +1078,38 @@ ClassProviderInvokeMethod(CMPIMethodMI * mi,
     st.rc = traverseChildren(cReg, parent, chldn);
   }
 
+  else if (strcasecmp(methodName, "listnamespaces") == 0) {
+
+    HashTableIterator *hit;
+    char           *key;
+    ClassRegister  *cReg;
+
+    CMPIArray* ar = CMNewArray(_broker, nsHt->ft->size(nsHt), CMPI_string, NULL);
+    int i = 0;
+
+    /* req for specific ns */
+    CMPIData nsd = CMGetArg(in, "ns", &st);
+    if (st.rc == CMPI_RC_OK) {
+      char* ns = CMGetCharPtr(nsd.value.string);
+        ClassRegister  *cReg = NULL;
+        cReg = nsHt->ft->get(nsHt, ns);
+        st.rc = (cReg) ? CMPI_RC_OK : CMPI_RC_ERR_NOT_FOUND;
+    }
+    else {
+      for (hit = nsHt->ft->getFirst(nsHt, (void **) &key, (void **) &cReg);
+           key && hit;
+           hit =
+             nsHt->ft->getNext(nsHt, hit, (void **) &key, (void **) &cReg)) {
+
+        CMSetArrayElementAt(ar, i++, key, CMPI_chars);
+      }
+  
+      CMAddArg(out, "nslist", &ar, CMPI_stringA);
+      st.rc = CMPI_RC_OK;
+    }
+
+  }
+
   else if (strcasecmp(methodName, "_startup") == 0) {
 
     /*
