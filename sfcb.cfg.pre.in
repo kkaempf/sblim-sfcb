@@ -77,6 +77,12 @@ useChunking:    true
 ## Default is 50000
 #chunkSize: 50000
 
+## Maximum number of objects to return per chunk. Note the actual number of
+## objects returned may be limited by chunkSize.  If 0, the maximum number of   
+## objects is unlimited.
+## Default is 0
+#maxChunkObjCount: 0
+
 ## Maximum ContentLength of an HTTP request allowed.
 ## Default is 100000000
 #httpMaxContentLength: 100000000

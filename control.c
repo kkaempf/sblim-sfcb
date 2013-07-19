@@ -96,8 +96,9 @@ Control         init[] = {
   {"doBasicAuth", CTL_BOOL, NULL, {.b=0}},
   {"doUdsAuth", CTL_BOOL, NULL, {.b=0}},
 
-  {"useChunking", CTL_BOOL, NULL, {.b=1}},
+  {"useChunking", CTL_STRING, "true", {0}},
   {"chunkSize", CTL_LONG, NULL, {.slong=50000}},
+  {"maxChunkObjCount", CTL_ULONG, NULL, {.ulong=0}},
 
   {"trimWhitespace", CTL_BOOL, NULL, {.b=1}},
 
@@ -167,7 +168,7 @@ sunsetControl()
 }
 
 static int 
-getUNum(char* str, unsigned long *val, unsigned int max) {
+getUNum(char* str, unsigned long *val, unsigned long max) {
 
   if (isdigit(str[0])) {
     unsigned long   tmp = strtoul(str, NULL, 0);
