@@ -610,7 +610,6 @@ main(int argc, char *argv[])
 #endif
   int             enableHttp = 0,
       enableHttps = 0,
-      useChunking = 0,
       doBa = 0,
       enableInterOp = 0,
       httpLocalOnly = 0;
@@ -825,11 +824,6 @@ main(int argc, char *argv[])
   enableHttps = 0;
   sslMode = 0;
 #endif
-
-  if (getControlBool("useChunking", &useChunking))
-    useChunking = 0;
-  if (useChunking == 0)
-    mlogf(M_INFO, M_SHOW, "--- Chunking disabled\n");
 
   if (getControlBool("doBasicAuth", &doBa))
     doBa = 0;

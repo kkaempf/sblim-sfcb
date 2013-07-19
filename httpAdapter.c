@@ -2155,8 +2155,13 @@ httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr,
 
   char* chunkStr;
   if (getControlChars("useChunking", &chunkStr) == 0) {
-    if (strcmp(chunkStr, "false") == 0)  chunkMode = CHUNK_NEVER;
-    else if (strcmp(chunkStr, "always") == 0)  chunkMode = CHUNK_FORCE;
+    if (strcmp(chunkStr, "false") == 0) {
+      chunkMode = CHUNK_NEVER;
+      mlogf(M_INFO, M_SHOW, "--- HTTP chunking disabled\n");
+    } else if (strcmp(chunkStr, "always") == 0) {
+      mlogf(M_INFO, M_SHOW, "--- HTTP chunking always\n");
+      chunkMode = CHUNK_FORCE;
+    }
   }
 
   name = argv[0];

@@ -38,6 +38,7 @@ extern int      spRcvAck(int from);
 extern int      getConstClassSerializedSize(CMPIConstClass *);
 extern void     getSerializedConstClass(CMPIConstClass * cl, void *area);
 extern int      getControlNum(char *id, long *val);
+extern int      getControlULong(char *id, unsigned long *val);
 extern int      spSendResult2(int *to, int *from,
                               void *d1, unsigned long s1, void *d2,
                               unsigned long s2);
@@ -154,6 +155,18 @@ nextResultBufferPos(NativeResult * nr, int type, unsigned long length)
   _SFCB_ENTER(TRACE_PROVIDERDRV, "nextResultBufferPos");
   if (nr->data == NULL)
     prepResultBuffer(nr, length);
+
+  unsigned long maxChunkObjCount;
+  if (getControlULong("maxChunkObjCount", &maxChunkObjCount))
+    maxChunkObjCount = 0;
+  if (maxChunkObjCount && nr->sNext > maxChunkObjCount && nr->requestor) {
+    /*
+     * hit maxChunkObjCount, send what we have
+     */
+    xferResultBuffer(nr, nr->requestor, 1, 1, length);
+    nr->dNext = 0;
+    nr->sNext = 0;
+  }
 
   /*
    * if there won't be enough room, send it off or make nr->data bigger 
