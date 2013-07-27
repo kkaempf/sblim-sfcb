@@ -1508,7 +1508,8 @@ invokeProviders(BinRequestContext * binCtx, int *err, int *count)
   _SFCB_TRACE(1, ("--- %d providers", binCtx->pCount));
   for (i = 0; i < binCtx->pCount; i++, binCtx->pDone++) {
     binCtx->provA = binCtx->pAs[i];
-    _SFCB_TRACE_VAR(ProviderInfo *info = pReg->ft->getProviderById(pReg, binCtx->provA.ids.provId));
+    _SFCB_TRACE_VAR_PTR(ProviderInfo *info, pReg->ft->getProviderById(pReg, binCtx->provA.ids.provId));
+
     _SFCB_TRACE(1, ("--- Calling provider id: %d type=%lu %s (%s)",
         info->id, info->type, info->providerName, info->className));
     resp[i] = intInvokeProvider(binCtx, sockets);

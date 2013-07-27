@@ -1338,8 +1338,8 @@ getClass(BinRequestHdr * hdr, ProviderInfo * info, int __attribute__ ((unused)) 
 
   _SFCB_ENTER(TRACE_PROVIDERDRV, "getClass");
 
-  _SFCB_TRACE_VAR(char *cn = CMGetClassName(path, NULL)->hdl);
-  _SFCB_TRACE_VAR(char *ns = CMGetNameSpace(path, NULL)->hdl);
+  _SFCB_TRACE_VAR_PTR(char *cn, CMGetClassName(path, NULL)->hdl);
+  _SFCB_TRACE_VAR_PTR(char *ns, CMGetNameSpace(path, NULL)->hdl);
   _SFCB_TRACE(1, ("--- Namespace %s ClassName %s", ns, cn));
 
   if (req->hdr.flags & FL_localOnly)

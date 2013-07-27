@@ -34,6 +34,10 @@ extern unsigned long *_ptr_sfcb_trace_mask;
 /* to wrap variables used only in trace statements */
 #define _SFCB_TRACE_VAR(f) f;
 
+/* we want the scope of variable v outside the if block */
+#define _SFCB_TRACE_VAR_PTR(v,f) \
+  v = ((*_ptr_sfcb_trace_mask & __traceMask)) ? f : NULL;
+
 #define _SFCB_TRACE(LEVEL,STR) \
   if ((*_ptr_sfcb_trace_mask & __traceMask) && (LEVEL<=_sfcb_debug) && (LEVEL>0) ) \
   _sfcb_trace(LEVEL,__FILE__,__LINE__,_sfcb_format_trace STR);
