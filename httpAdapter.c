@@ -688,6 +688,8 @@ static ChunkFunctions httpChunkFunctions = {
 #define hdrBufsize 5000
 #define hdrLimmit 5000
 
+#define TV_TO_MS(x) ( (int) x.tv_sec * 1000 + (int) x.tv_usec / 1000 )
+
 static int getHdrs(CommHndl conn_fd, Buffer * b, char *cmd)
 {
    int checked=0,total=0,isReady;
@@ -1266,6 +1268,8 @@ static void handleHttpRequest(int connFd, int sslMode)
 	  intSSLerror("Error creating SSL object");
 	SSL_set_bio(conn_fd.ssl, sb, sb);
 	char *error_string;
+	httpSelectTimeout.tv_sec = selectTimeout;
+	httpSelectTimeout.tv_usec = 0;
 	while(1) {
 	  int sslacc, sslerr;
 	  sslacc = SSL_accept(conn_fd.ssl);
@@ -1282,13 +1286,13 @@ static void handleHttpRequest(int connFd, int sslMode)
 	    FD_SET(connFd,&httpfds);
 	    if (sslerr == SSL_ERROR_WANT_WRITE) {
 	      _SFCB_TRACE(2, (
-	          "---  Waiting for SSL handshake (WANT_WRITE): timeout=%ld",
-	          httpSelectTimeout.tv_sec));
+	          "---  Waiting for SSL handshake (WANT_WRITE): timeout=%lums",
+	          TV_TO_MS(httpSelectTimeout)));
 	      isReady = select(connFd+1,NULL,&httpfds,NULL,&httpSelectTimeout);
 	    } else {
 	      _SFCB_TRACE(2, (
-	          "---  Waiting for SSL handshake (WANT_READ): timeout=%ld",
-	          httpSelectTimeout.tv_sec));
+	          "---  Waiting for SSL handshake (WANT_READ): timeout=%lums",
+	          TV_TO_MS(httpSelectTimeout)));
 	      isReady = select(connFd+1,&httpfds,NULL,NULL,&httpSelectTimeout);
 	    }
 	    if (isReady == 0) {
