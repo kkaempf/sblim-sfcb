@@ -723,7 +723,7 @@ getResolvedClass(ClassRegister * cr, const char *clsName,
   _SFCB_TRACE(1, ("--- classname %s cReg %p", clsName, cr));
 
   /* if standard repo, skip straight to normal gc */
-  if (cr->vr->options != ClTypeClassReducedRep) {
+  if (cr->vr && cr->vr->options != ClTypeClassReducedRep) {
     return getClass(cr, clsName, rctl);
   }
 
