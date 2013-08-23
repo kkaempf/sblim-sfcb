@@ -253,9 +253,10 @@ static void stopBroker(void *p)
    free((void *)sfcBrokerStart);
 
    pthread_mutex_unlock(&syncMtx);
-   _SFCB_TRACE_STOP();
 
    unloadHostnameLib();
+
+   _SFCB_TRACE_STOP();
  
    if (restartBroker) {
       char *emsg=strerror(errno);

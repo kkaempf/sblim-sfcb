@@ -4,7 +4,7 @@ Changes in 1.3.18
 New features:
 
 Bugs fixed:
-
+- [sfcb-tix:#56] Intermittent segfault at shutdown
 
 Changes in 1.3.17
 ================
