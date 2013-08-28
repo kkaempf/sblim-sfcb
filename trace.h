@@ -132,7 +132,7 @@ typedef struct traceId {
 void            changeTextColor(int reset);
 int             colorTrace;
 
-#define MAX_MSG_SIZE 1024       /* max length of trace message */
+#define MAX_MSG_SIZE 4096       /* max length of trace message */
 
 #define TRACE_PROVIDERMGR       1
 #define TRACE_PROVIDERDRV       2
