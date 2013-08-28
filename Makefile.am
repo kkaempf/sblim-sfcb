@@ -650,7 +650,7 @@ endif
 test: testprep check testreport
 endif
 
-postinstall: install-cimschema create-sslkeys
+postinstall: #install-cimschema create-sslkeys
 	test -f $(DESTDIR)$(sfcbstatedir)/registration/providerRegister || $(INSTALL_DATA) $(DESTDIR)$(sfcbstatedir)/stage/default.reg $(DESTDIR)$(sfcbstatedir)/registration/providerRegister 
 if TEST_ENABLED
 	$(srcdir)/test/stageschema.sh -d $(srcdir)/test/schema -p $(prefix)
