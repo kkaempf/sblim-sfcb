@@ -675,7 +675,7 @@ int main(int argc, char *argv[])
 	       if (*optarg == '?') {
 		   fprintf(stdout, "---   Traceable Components:     Int       Hex\n");
 		   for (i = 0; traceIds[i].id; i++)
-		       fprintf(stdout, "--- \t%18s:    %d\t0x%05X\n", traceIds[i].id, traceIds[i].code, traceIds[i].code);
+		       fprintf(stdout, "--- \t%18s:    %d\t0x%07X\n", traceIds[i].id, traceIds[i].code, traceIds[i].code);
 		   exit(0);
 	       } else if (isdigit(*optarg)) {
 		   char *ep;
