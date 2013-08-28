@@ -895,6 +895,42 @@ static int getProcess(ProviderInfo * info, ProviderProcess ** proc)
    _SFCB_RETURN(-1);
 }
 
+static int *origArgcPtr;
+static char ***origArgvPtr;
+void passOrigArgPtrs(int *argc, char ***argv)
+{
+  origArgcPtr = argc;
+  origArgvPtr = argv;
+}
+
+/* Reflect provider in argv (restartArgv) for 'ps'
+ * if argvDebug=true in sfcb.conf
+ */
+  
+void providerStarted(ProviderInfo * info)
+{
+  char **argv;
+  char *ptr;
+
+  if (origArgvPtr == NULL)
+    return; /* disabled in conf */
+
+  argv = *origArgvPtr;
+  ptr = argv[0];
+  
+  argv[0] = strcpy(ptr,"sfcbd "); ptr += (strlen(argv[0]));
+  argv[1] = strcpy(ptr,"provider:"); ptr += (strlen(argv[1]));
+  argv[2] = strcpy(ptr,info->providerName); ptr += (strlen(argv[2]));
+  argv[3] = strcpy(ptr," -class:"); ptr += (strlen(argv[3]));
+  argv[4] = strcpy(ptr,info->className); ptr += (strlen(argv[4]));
+  argv[5] = strcpy(ptr," -location:"); ptr += (strlen(argv[5]));
+  argv[6] = strcpy(ptr,info->location); ptr += (strlen(argv[6]));
+//  *origArgvPtr = argv;
+  *origArgcPtr = 7;
+
+  fprintf(stderr, "Provider %s started for %s from %s\n", info->providerName, info->className, info->location);
+}
+
 // I think we should break this function into two subfunctions:
 // something like isLoaded() and doForkProvider()
 int forkProvider(ProviderInfo * info, OperationHdr * req, char **msg)
@@ -946,6 +982,8 @@ int forkProvider(ProviderInfo * info, OperationHdr * req, char **msg)
 
       BinRequestContext binCtx;
       BinResponseHdr *resp;
+
+      providerStarted(info);
 
       memset(&binCtx,0,sizeof(BinRequestContext));
       sreq.className = setCharsMsgSegment(info->className);
