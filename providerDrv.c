@@ -3039,6 +3039,7 @@ static void *processProviderInvocationRequestsThread(void *prms)
 #endif
    }  
     
+   if (pInfo)
    tool_mm_flush();
    
    if (pInfo && idleThreadStartHandled==0) {
