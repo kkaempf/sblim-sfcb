@@ -249,7 +249,7 @@ static void stopBroker(void *p)
    uninitSocketPairs();
    sunsetControl();
    uninitGarbageCollector();
-   closeLogging();
+   closeLogging(1);
    free((void *)sfcBrokerStart);
 
    pthread_mutex_unlock(&syncMtx);
