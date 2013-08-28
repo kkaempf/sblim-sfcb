@@ -39,6 +39,7 @@
 #include "config.h"
 
 #include <pthread.h>
+#include <sys/resource.h>
 
 #ifdef HAVE_QUALREP
 #include "qualifier.h"

@@ -46,6 +46,8 @@
 #include "config.h"
 #include "control.h"
 
+#include <sys/resource.h>
+
 #ifdef SFCB_IX86
 #define SFCB_ASM(x) asm(x)
 #else
