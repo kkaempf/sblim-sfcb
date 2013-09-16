@@ -291,6 +291,8 @@ setSignal(int sn, sigHandler * sh, int flags)
 
   if (sn == SIGALRM)
     newh.sa_flags |= SA_INTERRUPT;
+  else if (sn == SIGUSR2)
+    newh.sa_flags |= SA_NODEFER;
 
   if (sigaction(sn, &newh, &oldh) < 0)
     return SIG_ERR;

@@ -73,7 +73,7 @@ char           *ip6List= NULL;
 
 /* Control initial values
  { property, type, string value, numeric value} */
-Control         init[] = {
+static Control init[] = {
   {"ip4AddrList", CTL_STRING, NULL, {0}},
   {"ip6AddrList", CTL_STRING, NULL, {0}},
   {"httpPort", CTL_LONG, NULL, {.slong=5988}},
@@ -149,22 +149,25 @@ Control         init[] = {
   {"indicationCurlTimeout", CTL_LONG, NULL, {.slong=10}},
 };
 
+static Control *cache;
+
 void
 sunsetControl()
 {
   int             i,
                   m;
   for (i = 0, m = sizeof(init) / sizeof(Control); i < m; i++) {
-    if (init[i].dupped)
-      if(init[i].dupped) {
-        free(init[i].strValue);
-        init[i].dupped = 0;
-      }
+    if(cache[i].dupped) {
+      free(cache[i].strValue);
+      cache[i].dupped = 0;
+    }
   }
   if (ct) {
     ct->ft->release(ct);
     ct=NULL;
   }
+  if (cache)
+    free(cache);
 }
 
 static int 
@@ -225,8 +228,11 @@ setupControl(char *fn)
   ct = UtilFactory->newHashTable(61, UtilHashTable_charKey |
                                  UtilHashTable_ignoreKeyCase);
 
+  cache = malloc(sizeof(init));
+  memcpy(cache, init, sizeof(init));
+
   for (i = 0, m = sizeof(init) / sizeof(Control); i < m; i++) {
-    ct->ft->put(ct, init[i].id, &init[i]);
+    ct->ft->put(ct, cache[i].id, &cache[i]);
   }
 
   /* run through the config file lines */
@@ -244,18 +250,18 @@ setupControl(char *fn)
       break;
     case 2:
       for (i = 0; i < sizeof(init) / sizeof(Control); i++) {
-        if (strcmp(rv.id, init[i].id) == 0) {
+        if (strcmp(rv.id, cache[i].id) == 0) {
           /* unstripped character string */
-          if (init[i].type == CTL_USTRING) {
-            init[i].strValue = strdup(rv.val);
-            if (strchr(init[i].strValue, '\n'))
-              *(strchr(init[i].strValue, '\n')) = 0;
-            init[i].dupped = 1;
+          if (cache[i].type == CTL_USTRING) {
+            cache[i].strValue = strdup(rv.val);
+            if (strchr(cache[i].strValue, '\n'))
+              *(strchr(cache[i].strValue, '\n')) = 0;
+            cache[i].dupped = 1;
           }
           /* string */
-          else if (init[i].type == CTL_STRING) {
-            init[i].strValue = strdup(cntlGetVal(&rv));
-            init[i].dupped = 1;
+          else if (cache[i].type == CTL_STRING) {
+            cache[i].strValue = strdup(cntlGetVal(&rv));
+            cache[i].dupped = 1;
           }
           /* numeric */
           else {
@@ -264,14 +270,14 @@ setupControl(char *fn)
             long slval;
             unsigned long ulval;
 
-            switch (init[i].type) {
+            switch (cache[i].type) {
 
             case CTL_BOOL:
               if (strcasecmp(val, "true") == 0) {
-                init[i].intValue.b = 1;
+                cache[i].intValue.b = 1;
               }
               else if (strcasecmp(val, "false") == 0) {
-                init[i].intValue.b = 0;
+                cache[i].intValue.b = 0;
               }
               else {
                 err = 1;
@@ -280,12 +286,12 @@ setupControl(char *fn)
 
             case CTL_LONG:
               slval = strtol(val, NULL, 0);
-              init[i].intValue.slong = slval;
+              cache[i].intValue.slong = slval;
               break;
 
             case CTL_ULONG:
               if (getUNum(val, &ulval, ULONG_MAX) == 0) {
-                init[i].intValue.ulong = ulval;
+                cache[i].intValue.ulong = ulval;
               }
               else {
                 err = 1;
@@ -294,7 +300,7 @@ setupControl(char *fn)
 
             case CTL_UINT:
               if (getUNum(val, &ulval, UINT_MAX) == 0) {
-                init[i].intValue.uint = (unsigned int)ulval;
+                cache[i].intValue.uint = (unsigned int)ulval;
               }
               else {
                 err = 1;
@@ -303,7 +309,7 @@ setupControl(char *fn)
             }
 
             if (!err) {
-              ct->ft->put(ct, init[i].id, &init[i]);
+              ct->ft->put(ct, cache[i].id, &cache[i]);
             }
 
           }

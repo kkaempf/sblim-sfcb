@@ -394,6 +394,12 @@ handleSigChld(int __attribute__ ((unused)) sig)
   errno = oerrno;
 }
 
+static int 
+reStartHttpd(void)
+{
+   return startHttpd(restartArgc, restartArgv, sslMode);
+}
+
 static void
 handleSigUsr2(int __attribute__ ((unused)) sig)
 {
@@ -401,7 +407,15 @@ handleSigUsr2(int __attribute__ ((unused)) sig)
    struct timespec waitTime;
    int sa=0;
 
-   inaHttpdRestart=1;
+   if (inaHttpdRestart) {
+     mlogf(M_ERROR,M_SHOW,"--- %s (%d): HTTP daemon restart already in progress\n",
+         processName,getpid());
+     return;
+   } else {
+     mlogf(M_ERROR,M_SHOW,"--- %s (%d): HTTP daemon restart requested\n",
+         processName,getpid());
+     inaHttpdRestart = 1;
+   }
    while(!adaptersStopped) {
        pthread_mutex_lock(&sdMtx);
        waitTime.tv_sec=time(NULL)+1; //5
@@ -420,7 +434,11 @@ handleSigUsr2(int __attribute__ ((unused)) sig)
    }
 
    fprintf(stderr,"--- Restarting http adapters...\n");
-   startHttpd(restartArgc, restartArgv, sslMode);
+   pthread_t       t;
+   pthread_attr_t  tattr;
+   pthread_attr_init(&tattr);
+   pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
+   pthread_create(&t, &tattr, (void *(*)(void *)) reStartHttpd, NULL);
    adaptersStopped=0;
    inaHttpdRestart=0;
 #endif // LOCAL_CONNECT_ONLY_ENABLE
