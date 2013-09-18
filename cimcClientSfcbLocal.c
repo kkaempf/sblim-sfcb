@@ -1968,7 +1968,7 @@ localConnect(ClientEnv *ce, CMPIStatus *st)
 static void    *
 release(ClientEnv *ce)
 {
-  closeLogging();
+  closeLogging(0);
   CONNECT_LOCK();
   if (localConnectCount > 0)
     localConnectCount -= 1;

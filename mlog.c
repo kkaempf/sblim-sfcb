@@ -129,11 +129,12 @@ startLogging(int level, int thread)
  * the syslog services that are created in startLogging.
  */
 void
-closeLogging()
+closeLogging(int thread)
 {
   int wstat;
   closelog();
-  close(logfds[1]);
+  if (thread)
+    close(logfds[1]);
   wait(&wstat);
 }
 
