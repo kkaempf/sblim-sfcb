@@ -132,6 +132,7 @@ releaseConnection(ClientConnection *con)
 {
   CMPIStatus      rc = { CMPI_RC_OK, NULL };
   free(con);
+  con = NULL;
   return rc;
 }
 
@@ -202,6 +203,7 @@ releaseClient(Client * mb)
     CMRelease(cl->connection);
 
   free(cl);
+  cl = NULL;
   return rc;
 }
 
@@ -1962,10 +1964,10 @@ localConnect(ClientEnv *ce, CMPIStatus *st)
   return (rc == 0) ? rc : sfcbSocket;
 }
 
+/* ReleaseCIMCEnv() in SFCC will take care of the dlclose() */
 static void    *
 release(ClientEnv *ce)
 {
-  void           *lib = ce->hdl;
   closeLogging();
   CONNECT_LOCK();
   if (localConnectCount > 0)
@@ -1975,10 +1977,9 @@ release(ClientEnv *ce)
     sfcbSockets.send = -1;
   }
   CONNECT_UNLOCK();
-  free(ce);
   sunsetControl();
   uninitGarbageCollector();
-  return lib;
+  return NULL;
 }
 
 static Client  *CMPIConnect2(ClientEnv *ce, const char *hn,
@@ -2090,6 +2091,7 @@ void _Cleanup_SfcbLocal_Env(void)
     _SFCB_TRACE_STOP();
 }
 
+/* called by SFCC's NewCIMCEnv() */
 ClientEnv      *
 _Create_SfcbLocal_Env(char __attribute__ ((unused)) *id, unsigned int options, 
                       int __attribute__ ((unused)) *rc, char __attribute__ ((unused)) **msg)
