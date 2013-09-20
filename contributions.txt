@@ -122,6 +122,7 @@ Klaus Kampf, Novell
 09/18/2013 [sfcb-tix:#69] Fix logger for long-lived clients, was: "#2347 Don't spawn logger for clients" 
 09/20/2013 [sfcb-tix:#72] Make systemddir configurable
 09/20/2013 [sfcb-tix:#74] providerRegister: check for and prevent buffer overflows
+09/20/2013 [sfcb-tix:#75] fileRepository: show which directory could not be opened 
 
 Mike Brasher, Inova
 -------------------
