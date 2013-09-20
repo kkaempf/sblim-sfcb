@@ -158,6 +158,11 @@ AC_SUBST(CIMSCHEMA_SUBDIRS)
 
 AC_DISABLE_STATIC
 
+if test "$SYSTEMDDIR" == "" ; then
+  SYSTEMDDIR=$(prefix)/share/systemd
+fi
+AC_SUBST(SYSTEMDDIR)
+
 if test "$enable_debug" != "yes" ; then
    CFLAGS="`echo $CFLAGS | sed -e 's/-g//'`"
    CXXFLAGS="`echo $CXXFLAGS | sed -e 's/-g//'`"

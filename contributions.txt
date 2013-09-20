@@ -120,6 +120,7 @@ Klaus Kampf, Novell
 01/05/2013 [ 3599329 ] dlopen failed for sfcbCustomLib
 01/15/2013 [ 3599437 ] missing include of <sys/resource.h>
 09/18/2013 [sfcb-tix:#69] Fix logger for long-lived clients, was: "#2347 Don't spawn logger for clients" 
+09/20/2013 [sfcb-tix:#72] Make systemddir configurable 
 
 Mike Brasher, Inova
 -------------------

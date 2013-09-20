@@ -30,7 +30,7 @@ initdir=$(sysconfdir)/init.d
 pamdir=$(sysconfdir)/pam.d
 sfcblibdir=$(libdir)/sfcb
 cmpilibdir=$(libdir)/cmpi
-systemddir=$(prefix)/share/systemd
+systemddir=$(DESTDIR)@SYSTEMDDIR@
 
 MANFILES=man/genSslCert.1 man/getSchema.1 man/sfcbd.1 man/sfcbmof.1 \
 	man/sfcbrepos.1 man/sfcbstage.1 man/sfcbunstage.1 man/sfcbuuid.1 \
