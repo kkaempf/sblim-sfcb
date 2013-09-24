@@ -513,10 +513,10 @@ memAlloc(int add, size_t size, int *memId)
   _SFCB_ENTER(TRACE_MEMORYMGR, "mem_alloc");
   void           *result = calloc(1, size);
   if (!result) {
-    _SFCB_TRACE(1, ("--- memAlloc %u %d\n", size, currentProc))
-        abort();
+    __ALLOC_ERROR(!result);
+    abort();
   }
-  __ALLOC_ERROR(!result);
+  _SFCB_TRACE(1, ("--- memAlloc %u %d\n", size, currentProc));
 
   if (add != MEM_TRACKED) {
     memAdd(result, memId);
