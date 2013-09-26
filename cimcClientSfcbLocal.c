@@ -1866,8 +1866,7 @@ static pthread_mutex_t lcc_mutex = PTHREAD_MUTEX_INITIALIZER;
 int
 localConnect(ClientEnv *ce, CMPIStatus *st)
 {
-  static struct sockaddr_un serverAddr;
-  serverAddr.sun_path[0] = '\0';
+  static struct sockaddr_un serverAddr = {AF_UNIX, {'\0'}};
   int             sock,
                   rc = 0,
       sfcbSocket;
@@ -1914,8 +1913,7 @@ localConnect(ClientEnv *ce, CMPIStatus *st)
       }
     }
 
-    serverAddr.sun_family = AF_UNIX;
-    if (serverAddr.sun_path == '\0')
+    if (serverAddr.sun_path[0] == '\0')
       strcpy(serverAddr.sun_path, socketName);
 
     if (connect(sock, (struct sockaddr *) &serverAddr,
