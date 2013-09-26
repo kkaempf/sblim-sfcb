@@ -188,7 +188,7 @@ static int      stopping = 0;
 extern int      remSem();
 
 static void
-stopBroker()
+stopBroker(void *p)
 {
   struct timespec waitTime;
   int sa=0,sp=0, count = 0;
