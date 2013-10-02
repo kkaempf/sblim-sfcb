@@ -2,9 +2,24 @@ Changes in 1.4.6
 ================
 
 New features:
+- [sfcb-tix:#64] Support maxObjCount for HTTP chunking
+- [sfcb-tix:#70] Reload SSL context-without restarting httpd
 
 Bugs fixed:
-
+- [sfcb-tix:#61] classProviderSf.c SIGSEGV if repo is not initialized
+- [sfcb-tix:#63] Improve NamespaceProvider and ClassProvider Consistency
+- [sfcb-tix:#66] SFCB_TRACE_VAR should be more restrictive
+- [sfcb-tix:#60] fix providerMgr trace for localconnect
+- [sfcb-tix:#68] reinitialize select timeout in SSL handshake
+- [sfcb-tix:#79] sfcc cannot reconnect with sfcb if sfcb restarts [bugs:#2663]
+- [sfcb-tix:#69] Fix logger for long-lived clients, was: "#2347 Don't spawn logger for clients"
+- [sfcb-tix:#72] Make systemddir configurable
+- [sfcb-tix:#74] providerRegister: check for and prevent buffer overflows
+- [sfcb-tix:#75] fileRepository: show which directory could not be opened
+- [sfcb-tix:#78] Missing null check in ift_getObjectPath, transposed debug stmts in memAlloc
+- [sfcb-tix:#78] Simplify mutex handling in instance.c
+- [sfcb-tix:#77] Fix prototype for stopBroker
+- [sfcb-tix:#80] sfcc cannot reconnect with sfcb
 
 Changes in 1.4.5
 ================
