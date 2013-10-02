@@ -123,6 +123,7 @@ Klaus Kampf, Novell
 09/20/2013 [sfcb-tix:#72] Make systemddir configurable
 09/20/2013 [sfcb-tix:#74] providerRegister: check for and prevent buffer overflows
 09/20/2013 [sfcb-tix:#75] fileRepository: show which directory could not be opened 
+10/01/2013 [sfcb-tix:#62] SIGSEGV in ClassProvider, return of 0 from addClParameter() not checked
 
 Mike Brasher, Inova
 -------------------

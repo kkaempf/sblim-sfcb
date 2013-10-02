@@ -1185,7 +1185,7 @@ addClParameter(ClObjectHdr * hdr, ClSection * prms, ClParameter * np)
     *p = *np;
     return prms->used;
   }
-  return 0;
+  return i;
 }
 
 static          ClParameter
