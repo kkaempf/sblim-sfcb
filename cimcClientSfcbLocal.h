@@ -83,305 +83,65 @@ extern          "C" {
                     (Client * cl);
     Client         *(*clone) (Client * cl, CMPIStatus *st);
     CMPIConstClass *(*getClass)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, CMPIFlags flags, char **properties,
          CMPIStatus *rc);
     CMPIEnumeration *(*enumClassNames)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, CMPIFlags flags, CMPIStatus *rc);
     CMPIEnumeration *(*enumClasses)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, CMPIFlags flags, CMPIStatus *rc);
     CMPIInstance   *(*getInstance)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, CMPIFlags flags, char **properties,
          CMPIStatus *rc);
     CMPIObjectPath *(*createInstance)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, CMPIInstance *inst, CMPIStatus *rc);
     CMPIStatus      (*setInstance)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, CMPIInstance *inst, CMPIFlags flags,
          char **properties);
     CMPIStatus      (*deleteInstance)
                     (Client * cl, CMPIObjectPath * op);
     CMPIEnumeration *(*execQuery)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, const char *query, const char *lang,
          CMPIStatus *rc);
     CMPIEnumeration *(*enumInstanceNames)
                     (Client * cl, CMPIObjectPath * op, CMPIStatus *rc);
     CMPIEnumeration *(*enumInstances)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, CMPIFlags flags, char **properties,
          CMPIStatus *rc);
     CMPIEnumeration *(*associators)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, const char *assocClass,
          const char *resultClass, const char *role, const char *resultRole,
          CMPIFlags flags, char **properties, CMPIStatus *rc);
     CMPIEnumeration *(*associatorNames)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, const char *assocClass,
          const char *resultClass, const char *role, const char *resultRole,
          CMPIStatus *rc);
     CMPIEnumeration *(*references)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, const char *resultClass, const char *role,
          CMPIFlags flags, char **properties, CMPIStatus *rc);
     CMPIEnumeration *(*referenceNames)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, const char *resultClass, const char *role,
          CMPIStatus *rc);
     CMPIData        (*invokeMethod)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, const char *method,
          CMPIArgs * in, CMPIArgs * out, CMPIStatus *rc);
     CMPIStatus      (*setProperty)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, const char *name, CMPIValue * value,
          CMPIType type);
     CMPIData        (*getProperty)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (Client * cl,
          CMPIObjectPath * op, const char *name, CMPIStatus *rc);
   } ClientFT;
@@ -390,107 +150,27 @@ extern          "C" {
     char           *env;
     void           *(*release) (ClientEnv *ce);
     Client         *(*connect)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (ClientEnv *ce, const char *hn, const char *scheme,
          const char *port, const char *user, const char *pwd,
          CMPIStatus *rc);
     Client         *(*connect2)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (ClientEnv *ce, const char *hn, const char *scheme,
          const char *port, const char *user, const char *pwd,
          int verifyMode, const char *trustStore, const char *certFile,
          const char *keyFile, CMPIStatus *rc);
     CMPIInstance   *(*newInstance)
-
-     
-        
-        
-        
-        
-        
-        
                 (ClientEnv *ce, const CMPIObjectPath * op, CMPIStatus *rc);
     CMPIObjectPath *(*newObjectPath)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
            (ClientEnv *ce, const char *ns, const char *cn, CMPIStatus *rc);
     CMPIArgs       *(*newArgs)
                     (ClientEnv *ce, CMPIStatus *rc);
     CMPIString     *(*newString)
                     (ClientEnv *ce, const char *data, CMPIStatus *rc);
     CMPIArray      *(*newArray)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
              (ClientEnv *ce, CMPICount max, CMPIType type, CMPIStatus *rc);
     CMPIDateTime   *(*newDateTime)
                     (ClientEnv *ce, CMPIStatus *rc);
     CMPIDateTime   *(*newDateTimeFromBinary)
-
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         (ClientEnv *ce, CMPIUint64 binTime, CMPIBoolean interval,
          CMPIStatus *rc);
     CMPIDateTime   *(*newDateTimeFromChars)
