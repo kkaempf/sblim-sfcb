@@ -237,3 +237,7 @@ Jan Safranek, Red Hat
 Rusty Peng
 ----------
 09/26/2013 [sfcb-tix:#80] sfcc cannot reconnect with sfcb
+
+Ting Wang
+----------
+10/13/2013 [sfcb-tix:#81] Bad CMPIType assignment in cimXmlOps
