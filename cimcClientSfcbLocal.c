@@ -2089,6 +2089,14 @@ void _Cleanup_SfcbLocal_Env(void)
     _SFCB_TRACE_STOP();
 }
 
+void *
+newIndicationListener(ClientEnv *ce, int sslMode, int *portNumber, char **socketName,
+                     void (*fp) (CMPIInstance *indInstance), CMPIStatus* rc)
+{
+  fprintf(stderr, "*** newIndicationListener not supported for SfcbLocal\n");
+  return NULL;
+}
+
 /* called by SFCC's NewCIMCEnv() */
 ClientEnv      *
 _Create_SfcbLocal_Env(char __attribute__ ((unused)) *id, unsigned int options, 
@@ -2108,6 +2116,7 @@ _Create_SfcbLocal_Env(char __attribute__ ((unused)) *id, unsigned int options,
     newDateTime,
     newDateTimeFromBinary,
     newDateTimeFromChars,
+    newIndicationListener,
   };
 
   // localClientMode=1;
