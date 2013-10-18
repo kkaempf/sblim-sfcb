@@ -576,6 +576,80 @@ __ift_getObjectPath(const CMPIInstance *instance, CMPIStatus *rc)
   return cop;
 }
 
+/* same as ift_gOP(), but used for SfcbLocal clients
+   eliminated klt hashtable, call mm to release tracked
+   CMPI objects before exiting */
+static CMPIObjectPath *
+__iftLocal_getObjectPath(const CMPIInstance *instance, CMPIStatus *rc)
+{
+  int             j,
+                  f = 0;
+  CMPIStatus      tmp;
+  const char     *cn;
+  const char     *ns;
+  void*           hc;
+
+  if (!instance->hdl) {
+    if (rc)
+      CMSetStatus(rc, CMPI_RC_ERR_INVALID_HANDLE);
+    return NULL;
+  }
+
+  cn = ClInstanceGetClassName((ClInstance *) instance->hdl);
+  ns = ClInstanceGetNameSpace((ClInstance *) instance->hdl);
+
+  CMPIObjectPath *cop = TrackedCMPIObjectPath(ns, cn, rc);
+
+  if (rc && rc->rc != CMPI_RC_OK)
+    return NULL;
+
+  j = __ift_getPropertyCount(instance, NULL);
+
+  hc = markHeap();
+  while (j--) {
+    char           *keyName;
+    CMPIData        d =
+      __ift_internal_getPropertyAt(instance, j, &keyName, &tmp, 1, NULL);
+    if (d.state & CMPI_keyValue) {
+      CMAddKey(cop, keyName, &d.value, d.type);
+      f++;
+    }
+    if (d.type & CMPI_ARRAY && (d.state & CMPI_nullValue) == 0) {
+      d.value.array->ft->release(d.value.array);
+    }
+  }
+
+  if (f == 0) {
+    CMPIArray      *kl;
+    CMPIData        d;
+    unsigned int    e,
+                    m;
+
+    CMPIConstClass *cc = getConstClass(ns, cn);
+    if (cc) {
+      kl = cc->ft->getKeyList(cc);
+    } else {
+      if (rc) {
+	CMSetStatus(rc, CMPI_RC_ERR_INVALID_CLASS);
+      }
+      releaseHeap(hc);
+      return NULL;
+    }
+    m = kl->ft->getSize(kl, NULL);
+
+    for (e = 0; e < m; e++) {
+      CMPIString     *n = kl->ft->getElementAt(kl, e, NULL).value.string;
+      d = __ift_getProperty(instance, CMGetCharPtr(n), &tmp);
+      if (tmp.rc == CMPI_RC_OK) {
+        CMAddKey(cop, CMGetCharPtr(n), &d.value, d.type);
+      }
+    }
+    CMRelease(kl);
+  }
+  releaseHeap(hc);
+  return cop;
+}
+
 static CMPIStatus
 __ift_internal_setPropertyFilter(CMPIInstance *instance,
                                  const char **propertyList, const char **keys)
@@ -852,7 +926,7 @@ NATIVE_FT_VERSION,
       __ift_getPropertyAt,
       __ift_getPropertyCount,
       __ift_setProperty,
-      __ift_getObjectPath,
+      __iftLocal_getObjectPath,
       __ift_setPropertyFilter,
       __ift_getQualifier,
       __ift_getQualifierAt,
