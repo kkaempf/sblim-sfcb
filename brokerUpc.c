@@ -67,10 +67,18 @@ void            closeProviderContext(BinRequestContext * ctx);
 static CMPI_MUTEX_TYPE mtx = NULL;
 
 void
+freeUpCallMtx()
+{
+  free(mtx);
+}
+
+void
 lockUpCall(const CMPIBroker * mb)
 {
-  if (mtx == NULL)
+  if (mtx == NULL) {
     mtx = mb->xft->newMutex(0);
+    atexit(freeUpCallMtx);
+  }
   mb->xft->lockMutex(mtx);
 }
 
