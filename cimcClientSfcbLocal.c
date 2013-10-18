@@ -168,6 +168,7 @@ cloneClient(Client __attribute__ ((unused)) *cl, CMPIStatus *st)
   return NULL;
 }
 
+/* releases the Client created in CMPIConnect2() */
 static CMPIStatus
 releaseClient(Client * mb)
 {
@@ -2097,6 +2098,15 @@ newIndicationListener(ClientEnv *ce, int sslMode, int *portNumber, char **socket
   return NULL;
 }
 
+void * _markHeap() {
+  return markHeap();
+}
+
+void _releaseHeap(void* heap) {
+  releaseHeap(heap);
+  return;
+}
+
 /* called by SFCC's NewCIMCEnv() */
 ClientEnv      *
 _Create_SfcbLocal_Env(char __attribute__ ((unused)) *id, unsigned int options, 
@@ -2117,6 +2127,8 @@ _Create_SfcbLocal_Env(char __attribute__ ((unused)) *id, unsigned int options,
     newDateTimeFromBinary,
     newDateTimeFromChars,
     newIndicationListener,
+    _markHeap,
+    _releaseHeap
   };
 
   // localClientMode=1;

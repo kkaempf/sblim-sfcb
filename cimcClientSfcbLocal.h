@@ -178,6 +178,8 @@ extern          "C" {
     void           *(*newIndicationListener)
                     (ClientEnv *ce, int sslMode, int *portNumber, char **socketName,
                      void (*fp) (CMPIInstance *indInstance), CMPIStatus* rc);
+    void           *(*markHeap)();
+    void            (*releaseHeap) (void* heap);
   } ClientEnvFT;
 
   struct _ClientEnv {
