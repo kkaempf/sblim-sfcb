@@ -2015,6 +2015,7 @@ initSSL()
                  *fnt,
                  *fnl,
                  *fcert,
+                 *fdhp,
                  *sslCiphers;
   int             rc;
 
@@ -2073,6 +2074,29 @@ initSSL()
   _SFCB_TRACE(1, ("---  sslCiphers = %s", sslCiphers));
   if (SSL_CTX_set_cipher_list(ctx, sslCiphers) != 1)
     intSSLerror("Error setting cipher list (no valid ciphers)");
+
+#if (defined HEADER_DH_H && !defined OPENSSL_NO_DH)
+  /*
+   * Set DH parameters file for ephemeral key generation
+   */
+  getControlChars("sslDhParamsFilePath", &fdhp);
+  if (fdhp) {
+    _SFCB_TRACE(1, ("---  sslDhParamsFilePath = %s", fdhp));
+    BIO *dhpbio = BIO_new_file(fdhp, "r");
+    DH *dh_tmp = PEM_read_bio_DHparams(dhpbio, NULL, NULL, NULL);
+    BIO_free(dhpbio);
+    if (dh_tmp) {
+      SSL_CTX_set_tmp_dh(ctx, dh_tmp);
+      DH_free(dh_tmp);
+    } else {
+      unsigned long sslqerr = ERR_get_error();
+      mlogf(M_ERROR,M_SHOW,"--- Failure reading DH params file: %s (%s)\n",
+          fdhp, sslqerr != 0 ? ERR_error_string(sslqerr, NULL) :
+              "unknown openssl error");
+      intSSLerror("Error setting DH params for SSL");
+    }
+  }
+#endif                          // HEADER_DH_H
 
   sslReloadRequested = 0;
 }

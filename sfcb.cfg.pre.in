@@ -271,6 +271,17 @@ certificateAuthLib:   sfcCertificateAuthentication
 ##      weak ciphers.
 sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 
+## Optionally configure a DH parameters file for ephemeral key generation.
+## See man SSL_CTX_set_tmp_dh_callback(3) for details. The value should be
+## the full path to the file. Note that ephemeral key generation will still
+## proceed, where applicable, without this file; it is only required when the
+## user desires a key length greater than the (openssl) default. If this
+## value is not set, no DH parameters file is configured. If the value is set
+## but the file is unreadable or contains bad data, and https is configured,
+## SFCB will abort. The data is expected to be in PEM format.
+## Default is: not set
+#sslDhParamsFilePath: @sysconfdir@/sfcb/dh_param_file.pem
+
 ##---------------------------------- UDS --------------------------------------
 ## These options only apply if configured with --enable-uds
 
