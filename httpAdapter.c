@@ -2098,6 +2098,28 @@ initSSL()
   }
 #endif                          // HEADER_DH_H
 
+#if (defined HEADER_EC_H && !defined OPENSSL_NO_EC)
+  /*
+   * Set ECDH curve name for ephemeral key generation
+   */
+  char *ecdh_curve_name;
+  getControlChars("sslEcDhCurveName", &ecdh_curve_name);
+  if (ecdh_curve_name) {
+    _SFCB_TRACE(1, ("---  sslEcDhCurveName = %s", ecdh_curve_name));
+    EC_KEY *ecdh = EC_KEY_new_by_curve_name(OBJ_sn2nid(ecdh_curve_name));
+    if (ecdh) {
+      SSL_CTX_set_tmp_ecdh(ctx, ecdh);
+      EC_KEY_free(ecdh);
+    } else {
+      unsigned long sslqerr = ERR_get_error();
+      mlogf(M_ERROR, M_SHOW, "--- Failure setting ECDH curve name (%s): %s\n",
+          ecdh_curve_name, sslqerr != 0 ?
+              ERR_error_string(sslqerr, NULL ) : "unknown openssl error");
+      intSSLerror("Error setting ECDH curve name for SSL");
+    }
+  }
+#endif                          // HEADER_EC_H
+
   sslReloadRequested = 0;
 }
 #endif                          // USE_SSL

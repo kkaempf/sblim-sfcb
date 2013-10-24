@@ -282,6 +282,15 @@ sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 ## Default is: not set
 #sslDhParamsFilePath: @sysconfdir@/sfcb/dh_param_file.pem
 
+## Configure a curve name for ECDH ephemeral key generation. See man
+## SSL_CTX_set_tmp_ecdh(3) for details. The value should be a curve name
+## listed by the "openssl ecparam -list_curves" command in the SFCB runtime
+## environment. If this value is not set, the indicated default is in effect.
+## If the value is set but the curve name is not recognized by the underlying
+## openssl implementation, SFCB will abort.
+## Default is secp224r1
+#sslEcDhCurveName: secp224r1
+
 ##---------------------------------- UDS --------------------------------------
 ## These options only apply if configured with --enable-uds
 

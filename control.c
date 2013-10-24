@@ -118,6 +118,7 @@ static Control init[] = {
   {"sslCertList", CTL_STRING, SFCB_CONFDIR "/clist.pem", {0}},
   {"sslCiphers", CTL_STRING, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH", {0}},
   {"sslDhParamsFilePath", CTL_STRING, NULL, {0}},
+  {"sslEcDhCurveName", CTL_STRING, "secp224r1", {0}},
 
   {"registrationDir", CTL_STRING, SFCB_STATEDIR "/registration", {0}},
   {"providerDirs", CTL_USTRING, SFCB_LIBDIR " " CMPI_LIBDIR " " LIBDIR, {0}},
