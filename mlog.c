@@ -109,6 +109,13 @@ startLogging(int level, int thread)
     setSignal(SIGHUP, SIG_IGN, 0);
     setSignal(SIGUSR2, SIG_IGN, 0);
 
+    /* Label the process by modifying the cmdline */
+    extern void append2Argv(char *appendstr);
+    extern unsigned int labelProcs;
+    if (labelProcs) {
+      append2Argv("-proc:Logger");
+    }
+
     runLogger(logfds[0], level);
 
     close(logfds[0]);

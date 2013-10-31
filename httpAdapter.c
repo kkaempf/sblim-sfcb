@@ -2282,6 +2282,26 @@ httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr,
           keepaliveMaxRequest);
   }
 
+  /* Label the process by modifying the cmdline */
+  extern void append2Argv(char *appendstr);
+  extern unsigned int labelProcs;
+  if (labelProcs) {
+    append2Argv(NULL);
+    append2Argv("-proc:HttpDaemon ");
+    append2Argv("-ip:");
+    char *l = "";
+    char *r = "";
+#ifdef HAVE_IPV6
+    if (ipAddrFam == AF_INET6) {
+      l = "[";
+      r = "]";
+    }
+#endif
+    append2Argv(l);
+    append2Argv(ipAddr);
+    append2Argv(r);
+  }
+
   if (enableHttp) {
     httpListenFd = getSocket(ipAddrFam);
   }

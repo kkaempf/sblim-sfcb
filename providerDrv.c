@@ -896,6 +896,19 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
 
         setSignal(SIGSEGV, handleSigSegv, SA_ONESHOT);
 
+        /* Label the process by modifying the cmdline */
+        extern void append2Argv(char *appendstr);
+        extern unsigned int labelProcs;
+        if (labelProcs) {
+          append2Argv(NULL);
+          append2Argv("-proc:");
+          append2Argv(info->providerName);;
+          append2Argv(" -class:");
+          append2Argv(info->className);
+          append2Argv(" -location:");
+          append2Argv(info->location);
+        }
+
         // If requested, change the uid of the provider
 	if (info->uid != -1) {
           _SFCB_TRACE(1,

@@ -23,7 +23,7 @@
 #define ERROR -1
 
 #define BUFFER_SZ       32
-#define MAX_CMD_SZ      64
+#define MAX_CMD_SZ     256
 #define MAX_PATH_SZ     64
 #define MAX_PATTERN_SZ  32
 #define MAX_PORTS        6

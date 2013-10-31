@@ -125,6 +125,7 @@ Klaus Kampf, Novell
 09/20/2013 [sfcb-tix:#75] fileRepository: show which directory could not be opened 
 09/30/2013 [sfcb-tix:#77] Fix prototype for stopBroker
 10/01/2013 [sfcb-tix:#62] SIGSEGV in ClassProvider, return of 0 from addClParameter() not checked
+10/31/2013 [sfcb-tix:#76] Identify running SFCB processes in ps output (contributions)
 
 Mike Brasher, Inova
 -------------------

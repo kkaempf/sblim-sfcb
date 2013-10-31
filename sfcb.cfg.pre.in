@@ -313,7 +313,7 @@ sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 #slpRefreshInterval: 600
 
 
-##------------------------------------ Trace ----------------------------------
+##------------------------------- Trace and Debug -----------------------------
 
 ## Location of the trace file.
 ## Can be overriden by setting environment variable SFCB_TRACE_FILE
@@ -330,6 +330,15 @@ sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 ## Can be overriden by setting environment variable SFCB_TRACE_LEVEL. 
 ## Default is 0. If trace mask is set (by any method) the default is 1.
 #traceLevel: 0
+
+## Label each process by adding identifying information to the process cmdline
+## so that it appears in 'ps' output. The identifying info will be appended to
+## the original argv data, following any passed arguments. The number of bytes
+## appended is limited by the value of labelProcs. A value of about 100 should
+## be enough in most cases. A smaller value may truncate the data, but this may
+## be desired. A value of 0 means the feature is disabled.
+## Default is 0
+#labelProcs: 100
 
 ##---------------------------- Indications ----------------------------
 

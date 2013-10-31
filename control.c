@@ -71,9 +71,60 @@ char           *configfile = NULL;
 char           *ip4List= NULL;
 char           *ip6List= NULL;
 
+char          **origArgv;
+int             origArgc;
+unsigned int    labelProcs;
+
+/**
+ * Kindly null terminate, always, even if might overwrite
+ * the last char of the truncated string. 
+*/
+inline char *strncpy_kind(char *to, char *from, size_t size) {
+  strncpy(to, from, size);
+  *(to + size - 1) = '\0';
+  return to;
+}
+
+/**
+ * Helper functions for labeling a process by modifying the process argv string.
+ * On the first call, convert the original argv[] to a contiguous string by
+ * replacing inter-arg nulls with spaces and adding a trailing space; then
+ * append appendstr.  On subsequent calls only append appendstr.  Passing
+ * NULL for appendstr forces the function to act as if called for the first
+ * time, i.e. reset the static ptr and prepare the argv[] string.
+ */
+void append2Argv(char *appendstr) {
+  int i;
+  static char *ptr = NULL;
+  if (!ptr || !appendstr) { /* called for the 1st time or intentionally reset */ 
+    for (i=1 ; i < origArgc ; i++)
+      *(*(origArgv+i) - 1) = ' ';  /* replace inter-arg nulls with spaces */
+    ptr = origArgv[origArgc - 1];
+  }
+  if (appendstr)
+    /* Enforce limit of appending no more than labelProcs chars */
+    ptr += strlen(strncpy_kind(ptr, appendstr,
+        labelProcs - (ptr - origArgv[origArgc - 1])  + 1));
+}
+
+/**
+ * Restore the process argv[] to its original form by replacing inter-arg spaces
+ * with nulls. May be required prior to spawning a child process. To prepare for
+ * a full restart, additionally remove the pad argument.
+ */
+void restoreOrigArgv(int removePad) {
+  int i;
+  for (i=1 ; i < origArgc ; i++)
+    *(*(origArgv+i) - 1) = '\0';  /* restore inter-arg nulls */
+
+  if (removePad)
+    origArgv[origArgc - 1] = NULL;
+}
+
 /* Control initial values
  { property, type, string value, numeric value} */
 static Control init[] = {
+  {"labelProcs", CTL_UINT, NULL, {.uint=0}},
   {"ip4AddrList", CTL_STRING, NULL, {0}},
   {"ip6AddrList", CTL_STRING, NULL, {0}},
   {"httpPort", CTL_LONG, NULL, {.slong=5988}},

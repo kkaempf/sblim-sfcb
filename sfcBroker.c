@@ -104,6 +104,12 @@ extern char    *configfile;
 extern char    *ip4List;
 extern char    *ip6List;
 
+extern char   **origArgv;
+extern int      origArgc;
+extern unsigned int labelProcs;
+extern void     append2Argv(char *appendstr);
+extern void     restoreOrigArgv(int removePad);
+
 #ifdef HAVE_IPV6
 int fallback_ipv4 = 1;
 #endif
@@ -338,6 +344,8 @@ handleSigHup(int sig)
 
   if (sfcBrokerPid == currentProc) {
     restartBroker = 1;
+    if (labelProcs)
+      restoreOrigArgv(1);
     fprintf(stderr, "--- Restarting %s\n", processName);
     pthread_attr_init(&tattr);
     pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
@@ -397,7 +405,17 @@ handleSigChld(int __attribute__ ((unused)) sig)
 static int 
 reStartHttpd(void)
 {
-   return startHttpd(restartArgc, restartArgv, sslMode);
+   /* Restore orig argv or startup banner will be hosed on httpd restart */
+   if (labelProcs)
+     restoreOrigArgv(0);
+
+   int rc = startHttpd(restartArgc, restartArgv, sslMode);
+  
+   /* Relabel the process */
+   if (labelProcs)
+     append2Argv(NULL);
+
+   return rc;
 }
 
 static void
@@ -637,8 +655,6 @@ main(int argc, char *argv[])
   char           *pauseStr;
   int             daemonize=0;
 
-  sfcbUseSyslog=1;
-
   name = strrchr(argv[0], '/');
   if (name != NULL)
     ++name;
@@ -651,8 +667,8 @@ main(int argc, char *argv[])
   provPauseStr = getenv("SFCB_PAUSE_PROVIDER");
   httpPauseStr = getenv("SFCB_PAUSE_CODEC");
   currentProc = sfcBrokerPid = getpid();
-  restartArgc = argc;
-  restartArgv = argv;
+  restartArgc = origArgc = argc;
+  restartArgv = origArgv = argv;
 
   exFlags = 0;
 
@@ -748,7 +764,7 @@ main(int argc, char *argv[])
     }
   }
 
-  if (optind < argc) {
+  if (optind < argc && *argv[optind] != 'X') { /* Ignore the pad argument */
     fprintf(stderr, "SFCB not started: unrecognized config property %s\n",
             argv[optind]);
     usage(1);
@@ -766,6 +782,36 @@ main(int argc, char *argv[])
       currentProc=sfcBrokerPid=getpid(); /* req. on some systems */
   }
 
+  setupControl(configfile); /* enable reading the config file */
+  if ((getControlUNum("labelProcs", &labelProcs) == 0) && (labelProcs > 0)) {
+    if (*argv[argc-1] != 'X') {
+      /* Create an expanded argv */
+      char **newArgv = malloc(sizeof(char*) * (argc + 2));
+      memcpy(newArgv, argv, sizeof(char*) * argc);
+
+      /* Create a pad argument of appropriate length */
+      char *padArg = malloc(labelProcs + 1);
+      for (i=0; i < labelProcs; i++)
+        padArg[i] = 'X';
+      padArg[i] = '\0';
+
+      /* Add pad argument and null terminator */
+      newArgv[argc] = padArg;
+      newArgv[argc + 1] = NULL;
+
+      /* Restart with expanded argv */
+      fprintf(stderr,
+          "--- %s V" sfcHttpDaemonVersion " performing labelProcs allocation - %d\n",
+          name, currentProc);
+      execvp(newArgv[0], newArgv);
+      fprintf(stderr, "--- failed to execv for labelProcs allocation: %s\n",
+          strerror(errno));
+      exit(1);
+    }
+  }
+  sunsetControl(); /* ensures setupControl() is re-run after startLogging() */
+
+  sfcbUseSyslog=1;
   startLogging(syslogLevel,1);
 
   mlogf(M_NOTICE, M_SHOW, "--- %s V" sfcHttpDaemonVersion " started - %d\n",
@@ -1005,6 +1051,11 @@ mlogf(M_INFO, M_SHOW, "--- Request handlers enabled:%s\n",rtmsg);
   setSignal(SIGSEGV, handleSigSegv, SA_ONESHOT);
   setSignal(SIGCHLD, handleSigChld, 0);
   setSignal(SIGUSR2, handleSigUsr2, 0);
+
+  /* Label the process by modifying the cmdline */
+  if (labelProcs) {
+    append2Argv("-proc:Main");
+  }
 
   processProviderMgrRequests();
 
