@@ -229,10 +229,15 @@ extern int fallback_ipv4;
 #define TERMINATE(x) { if (!doFork) _SFCB_RETURN(x); commClose(conn_fd); exit(x); }
 
 void
-initHttpProcCtl(int p)
+initHttpProcCtl(int p, int adapterNum)
 {
-  httpProcSemKey = ftok(SFCB_BINARY, 'H');
-  httpWorkSemKey = ftok(SFCB_BINARY, 'W');
+  /*
+   * ftok uses only the lowest 8 bits of proj_id, for 256 possible keys per
+   * pathname.  We need two keys per pathname per process, so we can support
+   * up to 128 adapters before colliding.
+   * */
+  httpProcSemKey = ftok(SFCB_BINARY, adapterNum + 0);
+  httpWorkSemKey = ftok(SFCB_BINARY, adapterNum + 127);
   union semun     sun;
   int             i;
 
@@ -264,7 +269,7 @@ initHttpProcCtl(int p)
        semget(httpWorkSemKey, 1, IPC_CREAT | IPC_EXCL | 0600)) == -1) {
     char           *emsg = strerror(errno);
     mlogf(M_ERROR, M_SHOW,
-          "\n--- Http ProcWork semaphore create key: 0x%x failed: %s\n",
+          "\n--- Http Work semaphore create key: 0x%x failed: %s\n",
           httpWorkSemKey, emsg);
     mlogf(M_ERROR, M_SHOW,
           "     use \"ipcrm -S 0x%x\" to remove semaphore\n\n",
@@ -1444,7 +1449,6 @@ handleHttpRequest(int connFd, int __attribute__ ((unused)) sslMode)
   CommHndl        conn_fd;
   int             isReady;
   fd_set          httpfds;
-  //  struct sembuf   procReleaseUnDo = { 0, 1, SEM_UNDO };
   struct timeval  httpTimeout;
   int             breakloop;
 
@@ -1454,10 +1458,16 @@ handleHttpRequest(int connFd, int __attribute__ ((unused)) sslMode)
     _SFCB_TRACE(1, ("--- Forking request processor"));
     semAcquire(httpWorkSem, 0);
     semAcquire(httpProcSem, 0);
-    for (httpProcIdX = 0; httpProcIdX < hMax; httpProcIdX++)
-      if (semGetValue(httpProcSem, httpProcIdX + 1) == 0)
+    for (httpProcIdX = 1; httpProcIdX <= hMax; httpProcIdX++)
+      if (semGetValue(httpProcSem, httpProcIdX) == 0)
         break;
-    //    procReleaseUnDo.sem_num = httpProcIdX + 1;
+
+    /* This should not happen, but if it does exit the req handler gracefully */
+    if (httpProcIdX > hMax) {
+      semRelease(httpProcSem, 0);
+      semRelease(httpWorkSem, 0);
+      return; 
+    }
 
     sessionId++;
     r = fork();
@@ -1470,7 +1480,7 @@ handleHttpRequest(int connFd, int __attribute__ ((unused)) sslMode)
       processName = "CIMREQ-Processor";
       semRelease(httpProcSem, 0);
       semAcquireUnDo(httpProcSem, 0);
-      semReleaseUnDo(httpProcSem, httpProcIdX + 1);
+      semReleaseUnDo(httpProcSem, httpProcIdX);
       semRelease(httpWorkSem, 0);
       atexit(releaseAuthHandle);
       atexit(uninitGarbageCollector);
@@ -1482,7 +1492,7 @@ handleHttpRequest(int connFd, int __attribute__ ((unused)) sslMode)
       if (labelProcs) {
         append2Argv(" -reqhandler: ");
         char handlerId[8];
-        sprintf(handlerId, "%d", httpProcIdX + 1);
+        sprintf(handlerId, "%d", httpProcIdX);
         append2Argv(handlerId);
       }
     }
@@ -2135,7 +2145,7 @@ initSSL()
 #endif                          // USE_SSL
 
 int
-httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr,
+httpDaemon(int argc, char *argv[], int sslMode, int adapterNum, char *ipAddr,
     sa_family_t ipAddrFam, int sfcbPid)
 {
 
@@ -2215,7 +2225,7 @@ httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr,
     doFork = 0;
   }
 
-  initHttpProcCtl(hMax);
+  initHttpProcCtl(hMax, adapterNum);
 
   if (getControlBool("doBasicAuth", &doBa))
     doBa = 0;

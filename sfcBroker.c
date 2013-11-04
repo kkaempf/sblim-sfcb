@@ -62,7 +62,7 @@ extern int      init_sfcBroker();
 extern CMPIBroker *Broker;
 extern void     initProvProcCtl(int);
 extern void     processTerminated(int pid);
-extern int      httpDaemon(int argc, char *argv[], int sslMode, char *ipAddr, sa_family_t ipAddrFam);
+extern int      httpDaemon(int argc, char *argv[], int sslMode, int adapterNum, char *ipAddr, sa_family_t ipAddrFam);
 extern void     processProviderMgrRequests();
 
 extern int      stopNextProc();
@@ -532,10 +532,10 @@ startHttpd(int argc, char *argv[], int sslMode)
           exit(2);
         }
       }
-      if (httpDaemon(argc, argv, sslMode, (ipAddrList + i)->addrStr,
+      if (httpDaemon(argc, argv, sslMode, i+1, (ipAddrList + i)->addrStr,
           (ipAddrList + i)->addrFam)) {
         //kill(sfcPid, 3);          /* if port in use, shutdown */
-                                    /* (don't do this anymore - xxxxxxx) */
+                                    /* (don't do this anymore - 3597806) */
       }
       closeSocket(&sfcbSockets,cRcv,"startHttpd");
       closeSocket(&resultSockets,cAll,"startHttpd");
