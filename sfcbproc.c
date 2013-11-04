@@ -336,8 +336,21 @@ static int getProcStat(int pid, ProcStat *p) {
     }
     int pass = 0;
     *p->cmd = '\0';
+    /* 
+     * Note getdelim() will normally return 0 if there is no data to be read
+     * other than a delim char.  But when the delim char is NULL, getdelim()
+     * will always return at least one.  Therefore, read=1 => no more data.
+     */
     while ((read = getdelim(&line, &len, 0, fp)) != -1) {
-      if (strlen(p->cmd) + strlen(line) > MAX_CMD_SZ-2) {
+      if ((read <= 1) || strlen(p->cmd) + (read-1) > MAX_CMD_SZ-2) {
+        /*
+         * Breaking when no data has been read is akin to breaking on the first
+         * occurrence of a double-null.  The intent is to clean up --raw output
+         * by discarding the trailing nulls in argv when labelProcs is in effect
+         * [sfcb-tix:#76].  If for some strange reason there is an occurrence of
+         * a double-null somewhere in argv and there is additional data beyond
+         * that, this would hide the additional data.
+         */
         break;
       }
       else {

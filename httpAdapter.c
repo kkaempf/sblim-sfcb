@@ -1475,6 +1475,16 @@ handleHttpRequest(int connFd, int __attribute__ ((unused)) sslMode)
       atexit(releaseAuthHandle);
       atexit(uninitGarbageCollector);
       atexit(sunsetControl);
+
+      /* Label the process by modifying the cmdline */
+      extern void append2Argv(char *appendstr);
+      extern unsigned int labelProcs;
+      if (labelProcs) {
+        append2Argv(" -reqhandler: ");
+        char handlerId[8];
+        sprintf(handlerId, "%d", httpProcIdX + 1);
+        append2Argv(handlerId);
+      }
     }
     /*
      * parent's thread of execution 
