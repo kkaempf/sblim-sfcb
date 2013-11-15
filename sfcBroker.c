@@ -262,7 +262,9 @@ stopBroker(void *p)
       if (stopNextProc()) {
         pthread_cond_timedwait(&sdCnd, &sdMtx, &waitTime);
       }
-      // else providersStopped=1;
+      else {
+        providersStopped=1;
+      }
       pthread_mutex_unlock(&sdMtx);
     }
     if (providersStopped)
