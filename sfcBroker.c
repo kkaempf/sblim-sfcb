@@ -655,6 +655,12 @@ main(int argc, char *argv[])
   char           *pauseStr;
   int             daemonize=0;
 
+  /* Note we will see no mlogf() output prior to this flag being set. If the
+   * flag is set but startLogging() has not yet been called, mlogf() will write
+   * to syslog directly. After startLogging(), mlogf() will write through the
+   * the logging facility. */
+  sfcbUseSyslog=1;
+
   name = strrchr(argv[0], '/');
   if (name != NULL)
     ++name;
@@ -782,8 +788,15 @@ main(int argc, char *argv[])
       currentProc=sfcBrokerPid=getpid(); /* req. on some systems */
   }
 
-  setupControl(configfile); /* enable reading the config file */
-  if ((getControlUNum("labelProcs", &labelProcs) == 0) && (labelProcs > 0)) {
+  char *envLabelProcs = getenv("SFCB_LABELPROCS");
+  if (envLabelProcs && *envLabelProcs) {
+    char *endptr;
+    long val = strtol(envLabelProcs, &endptr, 10);
+    if ((*endptr =='\0') && (val > 0) && (val < 1024))
+      labelProcs = (unsigned int) val;
+  }
+
+  if (labelProcs) {
     if (*argv[argc-1] != 'X') {
       /* Create an expanded argv */
       char **newArgv = malloc(sizeof(char*) * (argc + 2));
@@ -809,9 +822,7 @@ main(int argc, char *argv[])
       exit(1);
     }
   }
-  sunsetControl(); /* ensures setupControl() is re-run after startLogging() */
 
-  sfcbUseSyslog=1;
   startLogging(syslogLevel,1);
 
   mlogf(M_NOTICE, M_SHOW, "--- %s V" sfcHttpDaemonVersion " started - %d\n",

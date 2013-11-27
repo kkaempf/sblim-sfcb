@@ -124,7 +124,6 @@ void restoreOrigArgv(int removePad) {
 /* Control initial values
  { property, type, string value, numeric value} */
 static Control init[] = {
-  {"labelProcs", CTL_UINT, NULL, {.uint=0}},
   {"ip4AddrList", CTL_STRING, NULL, {0}},
   {"ip6AddrList", CTL_STRING, NULL, {0}},
   {"httpPort", CTL_LONG, NULL, {.slong=5988}},
