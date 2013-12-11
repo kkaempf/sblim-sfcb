@@ -1605,6 +1605,7 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
           di->ctx = native_clone_CMPIContext(ctx);
           di->hop = CMClone(su->ha->hop, NULL);
           di->hin = CMClone(hin, NULL);
+          errno = 0;
 	  if (IND_THREAD_TO > 0) {
 	    availThreadWait.tv_sec = time(NULL) + IND_THREAD_TO;
 	    while ((sem_timedwait(&availThreadsSem, &availThreadWait)) == -1) {
@@ -1618,6 +1619,14 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
 	  }
 	  else {
 	    sem_wait(&availThreadsSem);
+	  }
+	  /* 
+	   * This is a shortcut, but errno is thread-safe and this could only
+	   * be true if set by sem_timedwait().
+	   */
+	  if (errno == ETIMEDOUT) {
+	    _SFCB_TRACE(2,("--- Timedout waiting to create indication delivery thread"));
+	    break;
 	  }
 	  int pcrc = pthread_create(&ind_thread, &it_attr,&sendIndForDelivery,(void *) di);
 	  
