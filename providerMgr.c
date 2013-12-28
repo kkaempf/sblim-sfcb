@@ -198,6 +198,15 @@ lookupProvider(long type, char *className, char *nameSpace, CMPIStatus *st)
   ProviderInfo   *info;
   UtilHashTable **ht = provHt(type, 0);
 
+  /* enforce enableInterOp = false [sfcb#90] */
+  if (!(exFlags & 2)) {
+    if (strcasecmp(nameSpace, "root/interop") == 0) {
+      st->msg = sfcb_native_new_CMPIString("Interop namespace disabled",NULL,0);
+      st->rc = CMPI_RC_ERR_INVALID_NAMESPACE;
+      _SFCB_RETURN(NULL);
+    }
+  }
+
   if (*ht == NULL) {
     *ht = UtilFactory->newHashTable(61,
                                     UtilHashTable_charKey |
@@ -1007,27 +1016,41 @@ processProviderMgrRequests()
   sigfillset(&mask);
   sigprocmask(SIG_SETMASK, &mask, &old_mask);
 
-  rc=startUpProvider("root/interop", "$ClassProvider$",0);
-  if (rc != 0 ) {
-    mlogf(M_ERROR,M_SHOW,"--- ClassProvider failed to start, rc:%d\n",rc);
-    sigprocmask(SIG_SETMASK, &old_mask, NULL);
-    _SFCB_RETURN();
+  /* enforce enableInterOp = false [sfcb#90] */
+  if (exFlags & 2) {
+    rc=startUpProvider("root/interop", "$ClassProvider$",0);
+    if (rc != 0 ) {
+      mlogf(M_ERROR,M_SHOW,"--- ClassProvider failed to start, rc:%d\n",rc);
+      sigprocmask(SIG_SETMASK, &old_mask, NULL);
+      _SFCB_RETURN();
+    }
+      
+    /* wait until classProvider is finished init'ing */
+    semAcquire(sfcbSem,INIT_CLASS_PROV_ID);
   }
-    
-  /* wait until classProvider is finished init'ing */
-  semAcquire(sfcbSem,INIT_CLASS_PROV_ID);
+  else {
+    interOpProvInfoPtr = forceNoProvInfoPtr;
+  }
 
 #ifdef SFCB_INCL_INDICATION_SUPPORT
-  if (interOpProvInfoPtr != forceNoProvInfoPtr) {
+  if (exFlags & 2) {
     startUpProvider("root/interop", "$InterOpProvider$",1);
     /* note: we don't wait here for interopProvider to finish init'ing, 
        because its init has some reqs that providerMgr will need to process.
        httpAdapter waits for interop to init before accepting HTTP requests */
+  } else {
+    mlogf(M_INFO, M_SHOW,
+        "--- No indication support because InterOp namespace disabled\n");
   }
 
 #endif
 #ifdef HAVE_SLP
-  startUpProvider("root/interop", "$ProfileProvider$",1);
+  if (exFlags & 2) {
+    startUpProvider("root/interop", "$ProfileProvider$",1);
+  } else {
+    mlogf(M_INFO, M_SHOW,
+        "--- No SLP support because InterOp namespace disabled\n");
+  }
 #endif
    sigprocmask(SIG_SETMASK, &old_mask, NULL);
 

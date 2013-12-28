@@ -101,6 +101,8 @@ int             traverseChildren(ClassRegister * cReg, const char *parent,
 
 static int      nsBaseLen;
 
+extern unsigned long exFlags;
+
 static void
 buildInheritanceTable(ClassRegister * cr)
 {
@@ -458,6 +460,12 @@ gatherNameSpaces(char *dn, UtilHashTable * ns, int first)
         continue;
       if (strcmp(de->d_name, "..") == 0)
         continue;
+      if (!(exFlags & 2)) {
+        /* enforce enableInterOp = false [sfcb#90] */
+        if (strncmp(de->d_name, "interop", 7) == 0) {
+          continue;
+        }
+      }
       l = strlen(dn) + strlen(de->d_name) + 4;
       n = malloc(l + 8);
       strcpy(n, dn);
