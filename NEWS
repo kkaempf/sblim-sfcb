@@ -1,10 +1,21 @@
-Changes in 1.4.7
+hanges in 1.4.7
 ================
 
 New features:
+- [sfcb-tix:#86] Support configurable SSL Diffie Hellman parameters file
+- [sfcb-tix:#87] Support configurable SSL ECDH elliptic curve name
+- [sfcb-tix:#76] Identify running SFCB processes in ps output
 
 Bugs fixed:
-
+- [sfcb-tix:#81] Bad CMPIType assignment in cimXmlOps
+- [sfcb-tix:#82] ClientEnvFT for SfcbLocal doesn't match SFCC
+- [sfcb-tix:#83] Add Alternate getObjectPath() for SfcbLocal Connections
+- [sfcb-tix:#84] Upcall mutex not freed on shutdown
+- [sfcb-tix:#85] SFCB: SfcbLocal interface should expose markHeap() and releaseHeap()
+- [sfcb-tix:#88] Ensure unique semaphore keys across multiple http adapters
+- [sfcb-tix:#92] indicationDeliveryThreadLimit not properly enforced
+- [sfcb-tix:#93] ProfileProvider segfault while stopping slpUpdate thread
+- [sfcb-tix:#90] Problems with enableInteroOp=false
 
 Changes in 1.4.6
 ================
