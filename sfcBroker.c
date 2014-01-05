@@ -193,6 +193,9 @@ static pthread_cond_t sdCnd = PTHREAD_COND_INITIALIZER;
 static int      stopping = 0;
 extern int      remSem();
 
+/* secs to wait for a process to die during shutdown [sfcb#94] */
+static int      sigChldWaitTime = 3;
+
 static void
 stopBroker(void *p)
 {
@@ -232,7 +235,7 @@ stopBroker(void *p)
 
     if (adaptersStopped == 0) {
       pthread_mutex_lock(&sdMtx);
-      waitTime.tv_sec = time(NULL) + 1; //5
+      waitTime.tv_sec = time(NULL) + sigChldWaitTime;
       waitTime.tv_nsec = 0;
       if (sa == 0)
         fprintf(stderr, "--- Stopping adapters\n");
@@ -251,7 +254,7 @@ stopBroker(void *p)
 
     if (adaptersStopped) {
       pthread_mutex_lock(&sdMtx);
-      waitTime.tv_sec = time(NULL) + 1; //5
+      waitTime.tv_sec = time(NULL) + sigChldWaitTime;
       waitTime.tv_nsec = 0;
       if (sp == 0)
         fprintf(stderr, "--- Stopping providers\n");
@@ -436,7 +439,7 @@ handleSigUsr2(int __attribute__ ((unused)) sig)
    }
    while(!adaptersStopped) {
        pthread_mutex_lock(&sdMtx);
-       waitTime.tv_sec=time(NULL)+1; //5
+       waitTime.tv_sec=time(NULL) + sigChldWaitTime;
        waitTime.tv_nsec=0;
        if (sa==0) fprintf(stderr,"--- Stopping http adapters\n");
        sa++;
