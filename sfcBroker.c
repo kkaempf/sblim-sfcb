@@ -281,7 +281,7 @@ stopBroker(void *p)
   closeLogging(1);
   free((void *)sfcBrokerStart);
 
-  pthread_mutex_unlock(&syncMtx);
+//  pthread_mutex_unlock(&syncMtx); /* [sfcb#95] */
 
   unloadHostnameLib();
 
