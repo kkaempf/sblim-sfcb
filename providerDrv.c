@@ -522,10 +522,27 @@ handleSigError(int sig)
 static void
 handleSigUsr1(int __attribute__ ((unused)) sig)
 {
+  Parms *threads = activeThreadsFirst;
+  int dmy = -1;
+  stopping = 1;
+
+  if (threads) {
+    char msg[1024];
+    snprintf(msg, 1023, "*** Provider %s(%d) exiting due to a shutdown request",
+        processName, currentProc);
+    BinResponseHdr *buf = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
+    BinResponseHdr *resp;
+    long rlen = makeSafeResponse(buf, &resp);
+
+    while (threads) {
+      spSendResult(&threads->requestor, &dmy, resp, rlen);
+      threads = threads->next;
+    }
+  }
+
   pthread_t       t;
   pthread_attr_t  tattr;
 
-  stopping = 1;
   pthread_attr_init(&tattr);
   pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_DETACHED);
   pthread_create(&t, &tattr, (void *(*)(void *)) stopProc, NULL);
