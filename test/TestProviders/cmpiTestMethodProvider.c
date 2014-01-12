@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <signal.h>
 #include "cmpi/cmpidt.h"
 #include "cmpi/cmpift.h"
 #include "cmpi/cmpimacs.h"
@@ -121,10 +122,85 @@ TestMethodProviderInvokeMethod(CMPIMethodMI * mi,
        * Adds a value of str2 string to out array argument 
        */
       rc = CMAddArg(out, argName, &val2, CMPI_string);
+
+    /*
+     * For: 3048960 method array types not filled in Test provider. 
+     */
     } else if (!strcmp("CheckArrayNoType", methodName)) {
       data = CMGetArg(in, "IntArray", &rc);
       CMPIType atype=data.value.array->ft->getSimpleType(data.value.array,&rc); 
       sprintf(result,"Datatype is %s",paramType(atype));
+      str1 = CMNewString(_broker, result, &rc);
+      val1.string = str1;
+
+    /*
+     * This method simulates various provider problems for testing. 
+     */
+    } else if (!strcmp("Misbehave", methodName)) {
+      data = CMGetArg(in, "Action", &rc);
+
+      const char *strval = NULL;
+      if (data.type == CMPI_string && !(CMIsNullValue(data))) {
+        strval = CMGetCharsPtr(data.value.string, &rc);
+        sprintf(result, "data type is %s, value = %s", paramType(data.type),
+            strval);
+        
+        if (!strcmp(strval,"hang")) {
+          while(sleep(60)); /* to test req handler timeout, etc. */
+        }
+        else if (!strcmp(strval,"abort")) {
+          abort();
+        }
+        else if (!strcmp(strval,"fpe")) {
+          #pragma GCC diagnostic ignored "-Wdiv-by-zero"
+          fprintf(stderr,"ouch! %d\n",1/0);
+          #pragma GCC diagnostic warning "-Wdiv-by-zero"
+        }
+        else if (!strcmp(strval,"segfault")) {
+          void (*crashme)(void) = NULL;
+          crashme();
+        }
+        /*
+         * These tend to behave as if the condition were raised internally
+         */
+        else if (!strcmp(strval,"sigabrt")) {
+          kill(getpid(), SIGABRT);
+          while(sleep(3)); /* slight pause to ensure we catch signal */
+        }
+        else if (!strcmp(strval,"sigfpe")) {
+          kill(getpid(), SIGFPE);
+          while(sleep(3));
+        }
+        else if (!strcmp(strval,"sigsegv")) {
+          kill(getpid(), SIGSEGV);
+          while(sleep(3));
+        }
+        else if (!strcmp(strval,"sigusr1")) {
+          kill(getpid(), SIGUSR1); /* as if we received a signal from stopBroker() */
+          while(sleep(3));
+        }
+        else if (!strcmp(strval,"sigkill")) {
+          kill(getpid(), SIGKILL); /* this is currently not handled by providerDrv*/
+          while(sleep(3));
+        } else {
+          sprintf(result, "Action not recognized: %s", strval);
+          fprintf(stderr,
+              "+++ cmpiTestMethodProvider: Action not recognized \"%s\"\n",
+              strval);
+        }
+        /*
+         * create the new string to return to client 
+         */
+        str1 = CMNewString(_broker, result, &rc);
+        val1.string = str1;
+      }
+
+    } else {
+      sprintf(result, "Unknown method name: %s", methodName);
+      fprintf(stderr,
+          "+++ cmpiTestMethodProvider: Unknown method name \"%s\"\n",
+          methodName);
+      
       str1 = CMNewString(_broker, result, &rc);
       val1.string = str1;
     }

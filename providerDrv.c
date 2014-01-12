@@ -165,14 +165,13 @@ unsigned long   provSampleInterval = 10;
 unsigned long   provTimeoutInterval = 25;
 unsigned        provAutoGroup = 0;
 static int      stopping = 0;
+static int      handlingError = 0;
 
 void            uninitProvProcCtl();
 extern void     uninitSocketPairs();
 extern void     sunsetControl();
 extern void     uninitGarbageCollector();
 
-static BinResponseHdr *err_crash_resp; /* holds generic "we crashed" response */
-static long ecr_len;
 static long makeSafeResponse(BinResponseHdr *hdr, BinResponseHdr **out);
 
 typedef struct parms {
@@ -472,19 +471,52 @@ static void handleSigPipe(int __attribute__ ((unused)) sig)
 
 
 static void
-handleSigSegv(int __attribute__ ((unused)) sig)
+handleSigError(int sig)
 {
-  Parms          *threads = activeThreadsFirst;
+  Parms *threads = activeThreadsFirst;
   int dmy = -1;
+  /* prevent value from being optimized out so we can see it in call stack */
+  char * volatile signame; 
 
-  mlogf(M_ERROR, M_SHOW,
-        "-#- %s - %d provider exiting due to a SIGSEGV signal\n",
-        processName, currentProc);
-  while (threads) {
-    spSendResult(&threads->requestor, &dmy, err_crash_resp, ecr_len);
-    threads=threads->next;
+  if (handlingError)
+    goto end;
+  else
+    handlingError = 1;
+
+  switch (sig) {
+    case (SIGABRT):
+      signame = "SIGABRT";
+      break;
+    case (SIGSEGV):
+      signame = "SIGSEGV";
+      break;
+    case (SIGFPE):
+      signame = "SIGFPE";
+      break;
+    default:
+      signame = "UNKNOWN";
+      break;
   }
-  abort(); /* force cord dump */
+        
+  mlogf(M_ERROR, M_SHOW, "-#- %s - %d provider exiting due to a %s signal\n",
+      processName, currentProc, signame);
+
+  if (threads) {
+    char msg[1024];
+    snprintf(msg, 1023, "*** Provider %s(%d) exiting due to a %s signal",
+        processName, currentProc, signame);
+    BinResponseHdr *buf = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
+    BinResponseHdr *resp;
+    long rlen = makeSafeResponse(buf, &resp);
+
+    while (threads) {
+      spSendResult(&threads->requestor, &dmy, resp, rlen);
+      threads = threads->next;
+    }
+  }
+  abort(); /* force core dump */
+
+  end:;
 }
 
 static void
@@ -894,7 +926,9 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
         setSignal(SIGUSR1, handleSigUsr1, 0);
         setSignal(SIGUSR2, SIG_IGN,0);
 
-        setSignal(SIGSEGV, handleSigSegv, SA_ONESHOT);
+        setSignal(SIGSEGV, handleSigError, SA_ONESHOT);
+        setSignal(SIGABRT, handleSigError, SA_ONESHOT);
+        setSignal(SIGFPE, handleSigError, SA_ONESHOT);
 
         /* Label the process by modifying the cmdline */
         extern void append2Argv(char *appendstr);
@@ -969,14 +1003,6 @@ getProcess(ProviderInfo * info, ProviderProcess ** proc)
                 (*proc)->id, strerror(errno));
           _SFCB_ABORT();
         }
-
-        char msg[1024];
-        snprintf(msg,1023, "*** Provider %s(%d) exiting due to a SIGSEGV signal",
-                 processName, currentProc);
-        BinResponseHdr* buf = errorCharsResp(CMPI_RC_ERR_FAILED, msg);
-
-        ecr_len = makeSafeResponse(buf, &err_crash_resp);
-	free(buf);
 
         processProviderInvocationRequests(info->providerName);
         _SFCB_RETURN(0);

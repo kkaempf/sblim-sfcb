@@ -126,6 +126,8 @@ Klaus Kampf, Novell
 09/30/2013 [sfcb-tix:#77] Fix prototype for stopBroker
 10/01/2013 [sfcb-tix:#62] SIGSEGV in ClassProvider, return of 0 from addClParameter() not checked
 10/31/2013 [sfcb-tix:#76] Identify running SFCB processes in ps output (contributions)
+12/29/2013 [sfcb-tix:#90] Problems with enableInteroOp=false (contributions)
+01/12/2014 [sfcb-tix:#89] Gracefully handle providers doing abort() (contributions)
 
 Mike Brasher, Inova
 -------------------
