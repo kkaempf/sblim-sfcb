@@ -244,3 +244,7 @@ Rusty Peng
 Ting Wang
 ----------
 10/13/2013 [sfcb-tix:#81] Bad CMPIType assignment in cimXmlOps
+
+Vitezslav Crhonek, Red Hat
+----------
+02/07/2014 [sfcb-tix:#98] sfcbmofpp segfaults if mof file ends with block comment without newline

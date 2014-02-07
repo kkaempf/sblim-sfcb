@@ -128,7 +128,10 @@ processFile(char *fn, FILE * in, FILE * out)
 	}
       } else if (comment == 2) { /* check for block comment */
         if ((e = strstr(s, "*/"))) {
-          strcpy(s, getLineEnding(e));
+          if (getLineEnding(e) != NULL)
+            strcpy(s, getLineEnding(e));
+          else
+            strcpy(s, e + 2);
           comment = 0;
         } else {
           continue;
