@@ -2037,7 +2037,8 @@ initSSL()
                  *fcert,
                  *fdhp,
                  *sslCiphers;
-  int             rc;
+  int             rc,
+                  escsp;
 
   if (ctx)
     SSL_CTX_free(ctx);
@@ -2083,10 +2084,17 @@ initSSL()
   }
 
   /*
-   * SSLv2 is pretty old; no one should be needing it any more 
+   * Set options
    */
-  SSL_CTX_set_options(ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2 |
-                      SSL_OP_SINGLE_DH_USE);
+  SSL_CTX_set_options(ctx, SSL_OP_ALL | 
+                           SSL_OP_NO_SSLv2 |
+                           SSL_OP_SINGLE_DH_USE);
+
+  if (!getControlBool("enableSslCipherServerPref", &escsp) && escsp) {
+    _SFCB_TRACE(1, ("---  enableSslCipherServerPref = true"));
+    SSL_CTX_set_options(ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
+  }
+
   /*
    * Set valid ciphers
    */

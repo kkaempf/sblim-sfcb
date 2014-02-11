@@ -291,6 +291,12 @@ sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 ## Default is secp224r1
 #sslEcDhCurveName: secp224r1
 
+## When set to true, sets the SSL_OP_CIPHER_SERVER_PREFERENCE flag for the ssl
+## context, to enforce server's preference instead of the client preference for
+## selection of cipher suite. See man SSL_CTX_set_options(3) for details.
+## Default is false
+#enableSslCipherServerPref: false
+
 ##---------------------------------- UDS --------------------------------------
 ## These options only apply if configured with --enable-uds
 
