@@ -52,7 +52,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-extern int queryInput(char* buffer, int* numRead, int numRequested);
+extern int queryInput(char* buffer, void* numRead, int numRequested);
 extern int yyErr(const char*);
 extern char * yyStrcpy(char *txt, int len);
 

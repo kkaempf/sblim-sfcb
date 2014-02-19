@@ -1696,8 +1696,12 @@ yylex(YYSTYPE * lvalp, ParserControl * parm)
   _SFCB_RETURN(0);
 }
 
+/*
+ * The bison %parse-param directive modifies the yyerror() signature as well as
+ * yyparse(), so we must handle the extra parm even though we don't use it.
+ */
 int
-yyerror(char *s)
+yyerror(void __attribute__ ((unused)) *parm, char *s)
 {
   printf("*-* yyerror: %s\n", s);
   return 5;

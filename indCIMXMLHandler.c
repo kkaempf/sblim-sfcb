@@ -737,8 +737,8 @@ retryExport(void *lctx)
   struct timezone tz;
   int             rint,
                   maxcount,
-                  ract,
-                  rtint;
+                  ract;
+  CMPIUint32      rtint;
   CMPIUint64      sfc = 0;
   CMPIObjectPath *op;
   CMPIEnumeration *isenm = NULL;
@@ -834,7 +834,7 @@ retryExport(void *lctx)
           CMSetProperty(sub, "DeliveryFailureTime", &sfc, CMPI_uint64);
           CBModifyInstance(_broker, ctxLocal, cur->sub, sub, NULL);
           cur = cur->next;
-        } else if (sfc + rtint < tv.tv_sec) {
+        } else if (sfc + rtint < (CMPIUint64) tv.tv_sec) {
           // Exceeded subscription removal threshold, if action is:
           // 2, delete the sub; 3, disable the sub; otherwise, nothing
           if (ract == 2) {

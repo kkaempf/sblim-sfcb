@@ -32,4 +32,4 @@ endif
 
 #Some wbemcat tests
 export SRCDIR=$(srcdir)
-TESTS = $(srcdir)/xmltest.sh $(srcdir)/IndRetryTest.sh $(srcdir)/limitTest.sh
+TESTS = xmltest.sh IndRetryTest.sh limitTest.sh

@@ -3064,7 +3064,7 @@ oi_test()
     printf("Failed isInstance check, rc=%d\n",i);
     fail = 1;
   }
-  i=isInstance(cop);
+  i=isInstance((CMPIInstance *)cop);
   if (i) {
     printf("Failed negative isInstance check, rc=%d\n",i);
     fail = 1;
@@ -3178,7 +3178,7 @@ oi_test()
     printf("Failed to create ClClass.\n");
     fail = 1;
   }
-  unsigned char cch=ClClassAddGrandParent(clc, "myGClass");
+  //unsigned char cch=ClClassAddGrandParent(clc, "myGClass");
   // not sure of the failure case here
 
   i=ClClassAddProperty(clc,"tprop" ,d,"testref");

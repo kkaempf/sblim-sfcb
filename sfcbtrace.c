@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
 
   vpDP = shmat( shmid, NULL, 0 );
   if ( (vpDP == (void*)-1) || (vpDP == NULL) ) {  /* shmat returns an error */
-    printf( "shmat(%x,) returned %08X with errno = %s(%u) in %s at line %d\n", shmid, (unsigned int)vpDP, strerror(errno), errno, __FILE__, __LINE__ );
+    printf( "shmat(%x,) returned %p with errno = %s(%u) in %s at line %d\n", shmid, vpDP, strerror(errno), errno, __FILE__, __LINE__ );
     exit(4);
   }
 

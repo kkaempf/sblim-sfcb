@@ -72,7 +72,7 @@ extern int      noChunking;
 
 
 
-extern int yyerror(const char*);
+extern int yyerror(void* parm, const char*);
 extern int yylex (void *lvalp, ParserControl *parm);
 //extern MsgSegment setInstanceMsgSegment(const CMPIInstance *ci);
 
@@ -1797,6 +1797,7 @@ buildEnumerationCountRequest(void *parm)
 %}
 
 %pure_parser
+%parse-param { void* parm }
 
 /*
 **==============================================================================
@@ -3300,7 +3301,7 @@ modifyInstance
        $$.properties=0;
 
        setRequest(parm,&$$,sizeof(XtokModifyInstance),OPS_ModifyInstance);
-       if (buildModifyInstanceRequest(parm)) yyerror("Invalid Parameter");
+       if (buildModifyInstanceRequest(parm)) yyerror(parm, "Invalid Parameter");
     }
     | localNameSpacePath modifyInstanceParmsList
     {
@@ -3314,7 +3315,7 @@ modifyInstance
        $$.properties=$2.properties;
 
        setRequest(parm,&$$,sizeof(XtokModifyInstance),OPS_ModifyInstance);
-       if (buildModifyInstanceRequest(parm)) yyerror("Invalid Parameter");
+       if (buildModifyInstanceRequest(parm)) yyerror(parm, "Invalid Parameter");
     }
 ;
 

@@ -807,7 +807,7 @@ main(int argc, char *argv[])
 
       /* Create a pad argument of appropriate length */
       char *padArg = malloc(labelProcs + 1);
-      for (i=0; i < labelProcs; i++)
+      for (i=0; i < (int)labelProcs; i++)
         padArg[i] = 'X';
       padArg[i] = '\0';
 

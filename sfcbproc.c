@@ -522,7 +522,7 @@ static void usage(int status) {
     int i;
 
     fprintf(stdout, "Usage: %s [options]\n", name);
-    for (i=0; i < sizeof(help) / sizeof(char*); i++)
+    for (i=0; i < (int) (sizeof(help) / sizeof(char*)); i++)
       fprintf(stdout, "%s\n", help[i]);
   }
   exit(status);
