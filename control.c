@@ -201,6 +201,7 @@ static Control init[] = {
   {"MaxActiveSubscriptions", CTL_LONG, NULL, {.slong=100}},
   {"indicationCurlTimeout", CTL_LONG, NULL, {.slong=10}},
   {"indicationCurlUseExpect100", CTL_BOOL, NULL, {.b=0}},
+  {"indicationCurlHonorRedirect", CTL_BOOL, NULL, {.b=0}},
 };
 
 static Control *cache;

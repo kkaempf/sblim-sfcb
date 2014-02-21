@@ -238,6 +238,16 @@ genRequest(CurlData * cd, char *url, char **msg)
         indicationCurlTimeout = 10;
   rv = curl_easy_setopt(cd->mHandle, CURLOPT_TIMEOUT, indicationCurlTimeout);
 
+  /* Honor a HTTP 3xx style redirect */
+  int opt;
+  if (!getControlBool("indicationCurlHonorRedirect", &opt) && opt) {
+    fprintf(stderr, "--> indCIMXMLExport.genRequest(): indicationCurlHonorRedirect = true\n");
+    rv = curl_easy_setopt(cd->mHandle, CURLOPT_FOLLOWLOCATION, 1);
+    rv = curl_easy_setopt(cd->mHandle, CURLOPT_UNRESTRICTED_AUTH, 0); // off for now
+    rv = curl_easy_setopt(cd->mHandle, CURLOPT_MAXREDIRS, 3); // prevent loop
+    rv = curl_easy_setopt(cd->mHandle, CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL);
+  }
+
   /*
    * Set username and password * / if (url.user.length() > 0 &&
    * url.password.length() > 0) { mUserPass = url.user + ":" +
@@ -249,7 +259,6 @@ genRequest(CurlData * cd, char *url, char **msg)
   initializeHeaders(cd);
 
   /* Curl does Expect:100-continue unless we tell it not to */
-  int opt;
   if (getControlBool("indicationCurlUseExpect100", &opt) || !opt)
     cd->mHeaders = curl_slist_append(cd->mHeaders, "Expect: ");
 

@@ -376,6 +376,16 @@ sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 ## Default is false
 #indicationCurlUseExpect100: false
 
+## If true, instruct curl to honor a HTTP 3xx redirect if it receives such a
+## response from the indication handler, and attempt delivery to the URI listed
+## in the HTTP Location header of the response. This allows handler to redirect
+## indications to a different handler, e.g. based on source IP or resource part
+## of the URI. Because this introduces a potential security vulnerability it is
+## recommended to use only secure (https) indications and to set the
+## sslIndicationReceiverCert property to 'verify' when this is enabled.
+## Default is false
+#indicationCurlHonorRedirect: false
+
 ##----------------------------Reliable Indications ----------------------------
 ## Interval between indication retry attempts
 ## Default is 20 seconds
