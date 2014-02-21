@@ -361,6 +361,21 @@ sslCiphers: ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH
 ## Default is 10 seconds
 #indicationCurlTimeout: 10
 
+## If true, instruct curl to use HTTP/1.1 Expect:100-continue behavior when
+## delivering indications. This means that curl will send the header and wait
+## up to 1s for a 100-continue reply (or other response code) before sending
+## the indication payload. This can in limited circumstances save network
+## bandwidth, etc. by allowing the destination handler to refuse delivery and
+## potentially redirect the indication to a different handler, before curl
+## delivers the payload.  Otherwise the payload is delivered as normal, once
+## the handler sends the 100-continue or the 1s timeout expires. Note that if
+## the destination is not coded to handle HTTP/1.1 Expect:100-continue, this
+## will cause an unnecessary 1s delay in delivering each indication. For that
+## reason it recommnded to leave this off unless you understand your handlers'
+## behavior in this regard. May be useful with indicationCurlHonorRedirect.
+## Default is false
+#indicationCurlUseExpect100: false
+
 ##----------------------------Reliable Indications ----------------------------
 ## Interval between indication retry attempts
 ## Default is 20 seconds

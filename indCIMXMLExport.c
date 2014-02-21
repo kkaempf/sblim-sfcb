@@ -248,6 +248,11 @@ genRequest(CurlData * cd, char *url, char **msg)
   // Initialize default headers
   initializeHeaders(cd);
 
+  /* Curl does Expect:100-continue unless we tell it not to */
+  int opt;
+  if (getControlBool("indicationCurlUseExpect100", &opt) || !opt)
+    cd->mHeaders = curl_slist_append(cd->mHeaders, "Expect: ");
+
   // Set all of the headers for the request
   rv = curl_easy_setopt(cd->mHandle, CURLOPT_HTTPHEADER, cd->mHeaders);
 
