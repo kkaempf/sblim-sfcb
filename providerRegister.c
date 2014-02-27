@@ -34,6 +34,7 @@
 static ProviderInfo forceNotFound = { "", FORCE_PROVIDER_NOTFOUND };
 extern unsigned long exFlags;
 extern char    *configfile;
+extern char    *strncpy_kind(char *to, char *from, size_t size);
 extern int      setupControl(char *fn);
 extern int      getControlChars(char *id, char **val);
 extern int      getControlBool(char *id, int *val);
@@ -191,7 +192,7 @@ newProviderRegister()
     dir = "/var/lib/sfcb/registration";
   }
 
-  strncpy(fin, dir, sizeof(fin)-18); /* 18 = strlen("/providerRegister")+1 */
+  strncpy_kind(fin, dir, sizeof(fin)-18); /* 18 = strlen("/providerRegister")+1 */
   strcat(fin, "/providerRegister");
   in = fopen(fin, "r");
   if (in == NULL)

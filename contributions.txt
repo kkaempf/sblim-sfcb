@@ -248,3 +248,7 @@ Ting Wang
 Vitezslav Crhonek, Red Hat
 ----------
 02/07/2014 [sfcb-tix:#98] sfcbmofpp segfaults if mof file ends with block comment without newline
+
+dcb314
+----------
+02/27/2014 [sfcb-tix:#103] Unsafe usage of strncpy in providerRegister.c
