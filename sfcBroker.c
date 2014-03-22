@@ -957,6 +957,15 @@ main(int argc, char *argv[])
     trimws = 0;
   }
 
+  char *eoe;
+  extern int useCDATA;
+  if (!getControlChars("embeddedObjEncoding",&eoe) && !strcasecmp(eoe,"CDATA")) {
+    useCDATA = 1;
+    mlogf(M_INFO,M_SHOW,"--- Use CDATA for EmbeddedObject encoding\n");
+  } else {
+    mlogf(M_INFO,M_SHOW,"--- Use XML escaping for EmbeddedObject encoding\n");
+  }
+    
   if ((enableHttp || enableHttps) && dSockets > 0) {
     startHttp = 1;
   }

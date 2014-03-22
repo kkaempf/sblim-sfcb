@@ -73,6 +73,7 @@ char           *ip6List= NULL;
 
 char          **origArgv;
 int             origArgc;
+int             useCDATA;
 unsigned int    labelProcs;
 
 /**
@@ -149,6 +150,7 @@ static Control init[] = {
   {"useChunking", CTL_STRING, "true", {0}},
   {"chunkSize", CTL_LONG, NULL, {.slong=50000}},
   {"maxChunkObjCount", CTL_ULONG, NULL, {.ulong=0}},
+  {"embeddedObjEncoding", CTL_STRING, "xmlescape", {0}},
 
   {"trimWhitespace", CTL_BOOL, NULL, {.b=1}},
 

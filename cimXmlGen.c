@@ -611,10 +611,14 @@ value2xml(CMPIData d, UtilStringBuffer * sb, int wv)
         splen = 0;
       }
     } else if (d.type == CMPI_instance) {
-      // SFCB_APPENDCHARS_BLOCK(sb, "<![CDATA[");
-      // instance2xml(d.value.inst, sb, 0);
-      // SFCB_APPENDCHARS_BLOCK(sb, "]]>");
-      add_escaped_instance(sb, d.value.inst);
+      extern int useCDATA;
+      if (useCDATA) {
+        SFCB_APPENDCHARS_BLOCK(sb, "<![CDATA[");
+        instance2xml(d.value.inst, sb, 0);
+        SFCB_APPENDCHARS_BLOCK(sb, "]]>");
+      } else {
+        add_escaped_instance(sb, d.value.inst);
+      }
       splen = 0;
     } else {
       mlogf(M_ERROR, M_SHOW, "%s(%d): invalid value2xml %d-%x\n", __FILE__,
@@ -773,6 +777,7 @@ data2xml(CMPIData *data, CMPIString *name,
       if (embInst == 1) {
         SFCB_APPENDCHARS_BLOCK(sb, "\" EmbeddedObject=\"instance");
       } else {
+        SFCB_APPENDCHARS_BLOCK(sb, "string");
         SFCB_APPENDCHARS_BLOCK(sb, "\" EmbeddedObject=\"object");
       }
     } else {
@@ -836,12 +841,17 @@ data2xml(CMPIData *data, CMPIString *name,
         SFCB_APPENDCHARS_BLOCK(sb, "\" PARAMTYPE=\"string\">\n");
       else
         SFCB_APPENDCHARS_BLOCK(sb, "\" TYPE=\"string\">\n");
+
       if (data->value.inst) {
         SFCB_APPENDCHARS_BLOCK(sb, "<VALUE>");
-        // SFCB_APPENDCHARS_BLOCK(sb, "<![CDATA[");
-        // instance2xml(data->value.inst, sb, 0);
-        // SFCB_APPENDCHARS_BLOCK(sb, "]]>");
-        add_escaped_instance(sb, data->value.inst);
+        extern int useCDATA;
+        if (useCDATA) {
+          SFCB_APPENDCHARS_BLOCK(sb, "<![CDATA[");
+          instance2xml(data->value.inst, sb, 0);
+          SFCB_APPENDCHARS_BLOCK(sb, "]]>");
+        } else {
+          add_escaped_instance(sb, data->value.inst);
+        }
         SFCB_APPENDCHARS_BLOCK(sb, "</VALUE>\n");
       }
     }

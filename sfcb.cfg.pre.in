@@ -144,6 +144,11 @@ basicAuthEntry: _sfcBasicAuthenticate
 ## Default is true
 #trimWhitespace:      true
 
+## Sets the encoding style to be used for returning an EmbeddedObject over
+## CIM-XML. Choices are "CDATA" or "xmlescape"
+## Default is xmlescape
+# embeddedObjEncoding: xmlescape
+
 ##---------------------------- Provider-Related -------------------------------
 
 ## Max number of provider processes.  
