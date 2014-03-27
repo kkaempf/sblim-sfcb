@@ -2,9 +2,19 @@ Changes in 1.4.8
 ================
 
 New features:
+- [sfcb-tix:#99] Add config property enableSslCipherServerPref
+- [sfcb-tix:#101] Add config property indicationCurlUseExpect100
+- [sfcb-tix:#102] Add config property indicationCurlHonorRedirect
+- [sfcb-tix:#105] Add config property embeddedObjectEncoding
 
 Bugs fixed:
-
+- [sfcb-tix:#94] Increase sigChldWaitTime
+- [sfcb-tix:#95] Do not release pthread lock prior to stopBroker() exit
+- [sfcb-tix:#89] Gracefully handle providers doing abort()
+- [sfcb-tix:#96] Provider should close req handler on shutdown
+- [sfcb-tix:#98] sfcbmofpp segfaults if mof file ends with block comment without newline
+- [sfcb-tix:#100] Fix some compiler warnings & errors on newer distros
+- [sfcb-tix:#103] Unsafe usage of strncpy in providerRegister.c
 
 Changes in 1.4.7
 ================
