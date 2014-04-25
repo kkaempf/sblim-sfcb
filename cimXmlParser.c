@@ -1724,7 +1724,7 @@ scanCimXmlRequest(CimRequestContext *ctx, char *xmlData, int *rc)
   control.reqHdr.binCtx = calloc(1, sizeof(BinRequestContext));
   control.reqHdr.principal = ctx->principal;
   control.reqHdr.sessionId = ctx->sessionId;
-  control.reqHdr.role = NULL;
+  control.reqHdr.role = ctx->role;
   control.paramValues.last = control.paramValues.first = NULL;
   control.properties.last = control.properties.first = NULL;
   control.qualifiers.last = control.qualifiers.first = NULL;
