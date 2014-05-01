@@ -73,9 +73,12 @@ char           *ip6List= NULL;
 
 char          **origArgv;
 int             origArgc;
-int             useCDATA;
 unsigned int    labelProcs;
 
+int             useCDATA;
+int             httpProcIdX;
+long            httpReqHandlerTimeout;
+ 
 /**
  * Kindly null terminate, always, even if might overwrite
  * the last char of the truncated string. 
@@ -158,6 +161,7 @@ static Control init[] = {
   {"keepaliveMaxRequest", CTL_LONG, NULL, {.slong=10}},
   {"selectTimeout", CTL_LONG, NULL, {.slong=5}},
   {"maxBindAttempts", CTL_LONG, NULL, {.slong=8}},
+  {"httpReqHandlerTimeout", CTL_LONG, NULL, {.slong=40}},
 
   {"providerSampleInterval", CTL_LONG, NULL, {.slong=30}},
   {"providerTimeoutInterval", CTL_LONG, NULL, {.slong=60}},

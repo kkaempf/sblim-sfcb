@@ -216,6 +216,20 @@ spGetMsg(int *s, int *from, void *data, unsigned length, MqgStat * mqg)
   struct iovec    iov;
   struct msghdr   msg;
 
+  extern int httpProcIdX;
+  int isReady;
+  fd_set          fds;
+  struct timeval  initialTV = { 0, 0 },
+                  currentTV;
+
+  if (httpProcIdX) { /* we are a req handler */
+    FD_ZERO(&fds);
+    FD_SET(*s, &fds);
+    extern long httpReqHandlerTimeout;
+    initialTV.tv_sec = httpReqHandlerTimeout;
+    currentTV = initialTV;
+  }
+
   _SFCB_ENTER(TRACE_MSGQUEUE, "spGetMsg");
   _SFCB_TRACE(1, ("--- Receiving from %d length %d", *s, length));
 
@@ -235,6 +249,21 @@ spGetMsg(int *s, int *from, void *data, unsigned length, MqgStat * mqg)
     iov.iov_base = data + r;
     iov.iov_len = length - r;
 
+    /* SFCB-0097: Add a select timeout for req handlers */
+    if (httpProcIdX) {
+      isReady = select(*s+1, &fds, NULL, NULL, &currentTV);
+
+      if (isReady == 0) /* timeout */
+        return -2;
+      
+      if (isReady < 0) {
+        if (errno == EINTR)
+          continue;
+        else
+          return spHandleError(s, em);
+      }
+    }
+ 
     if ((n = recvmsg(*s, &msg, 0)) < 0) {
       if (errno == EINTR) {
         _SFCB_TRACE(1, (" Receive interrupted %d", currentProc));
@@ -294,7 +323,7 @@ spRcvMsg(int *s, int *from, void **data, unsigned long *length,
   SpMessageHdr    spMsg;
   static char    *em = "rcvMsg receiving from";
   MqgStat         imqg;
-  int             fromfd;
+  int             fromfd, rc;
   unsigned long   maxlen;
   int             partRecvd = 0,
       totalRecvd = 0;
@@ -305,8 +334,10 @@ spRcvMsg(int *s, int *from, void **data, unsigned long *length,
   if (mqg == NULL)
     mqg = &imqg;
   do {
-    if ((spGetMsg(s, &fromfd, &spMsg, sizeof(spMsg), mqg)) == -1)
+    if ((rc = spGetMsg(s, &fromfd, &spMsg, sizeof(spMsg), mqg)) == -1)
       return spHandleError(s, em);
+    if (rc < 0)
+      _SFCB_RETURN(rc);
 
     if (mqg && mqg->teintr) {
       mqg->eintr = 1;
@@ -476,7 +507,14 @@ spSendMsg(int *to, int *from, int n, struct iovec *iov, int size)
   iov[0].iov_base = &spMsg;
   iov[0].iov_len = sizeof(spMsg);
 
-  if ((rc = sendmsg(*to, &msg, 0)) < 0) {
+  /* SFCB-0097: Suppress SIGPIPE for provider processes, since it probably just
+   * means the req handler went away, and we handle that error here */
+  int flags = 0;
+  extern int httpProcIdX;
+  if (httpProcIdX == 0)  /* not a req handler */
+    flags = MSG_NOSIGNAL;
+  
+  if ((rc = sendmsg(*to, &msg, flags)) < 0) {
     return spHandleError(to, em);
   }
 

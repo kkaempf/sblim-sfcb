@@ -1277,6 +1277,11 @@ getProviderContext(BinRequestContext * ctx)
   else if (ctx->rc == MSG_X_EXTENDED_CTL_MSG) {
     ctx->rc = ctx->ctlXdata->code;
   }
+  else if (ctx->rc == -2) {
+    extern int httpProcIdX;
+    if (httpProcIdX)
+      exit(1);
+  }
 
   if (!localMode) {
     closeSocket(&sockets, COM_ALL, "getProviderContext");
@@ -1301,6 +1306,7 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
   BinResponseHdr *resp = NULL;
   int             fromS;
   void           *heapCtl = markHeap();
+  extern int      httpProcIdX;
 #ifdef SFCB_DEBUG
   struct rusage   us,
                   ue;
@@ -1412,7 +1418,7 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
         free(resp);
       resp = NULL;
 
-      if (spRecvResult(&sockets.receive, &fromS, (void**) &resp, &size) < 0) {
+      if ((rc = spRecvResult(&sockets.receive, &fromS, (void**) &resp, &size)) < 0) {
         size = 0; /* force failure handling */
       }
 
@@ -1422,6 +1428,13 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
       if (resp == NULL || size == 0) {
         resp = calloc(sizeof(BinResponseHdr), 1);
         resp->rc = CMPI_RC_ERR_FAILED + 1;
+        if (rc == -2) {
+          mlogf(M_ERROR, M_SHOW,
+              "--- req hander %d timed out waiting for provider response\n",
+              httpProcIdX);
+          resp->object[0] = setCharsMsgSegment(
+              "Req handler timed out waiting for provider response");
+        }
       }
       for (i = 0; i < resp->count; i++) {
         resp->object[i].data =
@@ -1444,7 +1457,7 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
 
   else if ((ctx->noResp & 1) == 0) {
 
-    if (spRecvResult(&sockets.receive, &fromS, (void **) &resp, &size) < 0) {
+    if ((rc = spRecvResult(&sockets.receive, &fromS, (void**) &resp, &size)) < 0) {
       size = 0; /* force failure case */
     }
 
@@ -1454,6 +1467,13 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
     if (resp == NULL || size == 0) {
       resp = calloc(sizeof(BinResponseHdr), 1);
       resp->rc = CMPI_RC_ERR_FAILED + 1;
+      if (rc == -2) {
+        mlogf(M_ERROR, M_SHOW,
+            "--- req hander %d timed out waiting for provider response\n",
+            httpProcIdX);
+        resp->object[0] = setCharsMsgSegment(
+            "Req handler timed out waiting for provider response");
+      }
     }
 
     ctx->rCount = ctx->pCount;

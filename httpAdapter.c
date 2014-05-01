@@ -94,11 +94,12 @@ int             sfcbSSLMode = 0;        /* used as a global sslMode */
 int             httpLocalOnly = 0;      /* 1 = only listen on loopback
                                          * interface */
 static long     hMax;
-static int      httpProcIdX;
+extern int      httpProcIdX;
 static int      stopAccepting = 0;
 static int      running = 0;
 static long     keepaliveTimeout = 15;
 static long     keepaliveMaxRequest = 10;
+extern long     httpReqHandlerTimeout;
 static long     numRequest;
 static long     selectTimeout = 5; /* default 5 sec. timeout for select() before read() */
 struct timeval  httpSelectTimeout = { 0, 0 };   
@@ -2254,6 +2255,9 @@ httpDaemon(int argc, char *argv[], int sslMode, int adapterNum, char *ipAddr,
   if (getControlNum("keepaliveMaxRequest", &keepaliveMaxRequest))
     keepaliveMaxRequest = 10;
 
+  if (getControlNum("httpReqHandlerTimeout", &httpReqHandlerTimeout))
+    httpReqHandlerTimeout = 40;
+
   char* chunkStr;
   if (getControlChars("useChunking", &chunkStr) == 0) {
     if (strcmp(chunkStr, "false") == 0) {
@@ -2308,6 +2312,14 @@ httpDaemon(int argc, char *argv[], int sslMode, int adapterNum, char *ipAddr,
           keepaliveTimeout);
     mlogf(M_INFO, M_SHOW, "--- Maximum requests per connection: %ld\n",
           keepaliveMaxRequest);
+  }
+
+  if (httpReqHandlerTimeout == 0) {
+    mlogf(M_INFO, M_SHOW, "--- Request handler timeout disabled\n");
+    httpReqHandlerTimeout = LONG_MAX;
+  } else {
+    mlogf(M_INFO, M_SHOW, "--- Request handler timeout: %ld seconds\n",
+          httpReqHandlerTimeout);
   }
 
   /* Label the process by modifying the cmdline */

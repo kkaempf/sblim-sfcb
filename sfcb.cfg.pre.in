@@ -122,6 +122,18 @@ basicAuthEntry: _sfcBasicAuthenticate
 ## Default is 10
 #keepaliveMaxRequest: 10
 
+## Maximum time in seconds a HTTP process (i.e request handler) will wait for
+## a provider response before giving up. A timeout implies the provider is hung
+## or has crashed. The timeout prevents the handler from waiting indefinitely.
+## A value too short may allow insufficient time for long-running processes to
+## complete; a value too long may allow handlers to be tied up longer than
+## necessary. A value of 0 implies no timeout (wait indefinitely). Note this
+## property has no effect on the time a handler will wait on a HTTP client;
+## that is governed by selectTimeout or keepaliveTimeout, depending on whether
+## or not the handler is in a request.
+## Default is 40
+#httpReqHandlerTimeout: 40
+
 ## The location of the HTTP named socket. This should be someplace writable
 ## by the user that sfcb runs under.
 ## Default is /tmp/sfcbHttpSocket
