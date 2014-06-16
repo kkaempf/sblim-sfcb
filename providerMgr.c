@@ -1026,7 +1026,7 @@ processProviderMgrRequests()
   if (exFlags & 2) {
     rc=startUpProvider("root/interop", "$ClassProvider$",0);
     if (rc != 0 ) {
-      mlogf(M_ERROR,M_SHOW,"--- ClassProvider failed to start, rc:%d\n",rc);
+      mlogf(M_ERROR,M_SHOW,"--- ClassProvider failed to start for root/interop, rc:%d\n",rc);
       sigprocmask(SIG_SETMASK, &old_mask, NULL);
       _SFCB_RETURN();
     }
