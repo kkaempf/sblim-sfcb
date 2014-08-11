@@ -109,7 +109,8 @@ then
     fi
     if [ $? = 0 ]; then
 	fetch_mof &&
-	unzip $ZIPFLAGS -d $sfcbdir/CIM $TMPZIP &&
+	echo "Unpacking CIM Schema to $sfcbdir/CIM/ ..." &&
+	unzip -q $ZIPFLAGS -d $sfcbdir/CIM $TMPZIP &&
 	fixschema &&
 	exit 0
     fi
