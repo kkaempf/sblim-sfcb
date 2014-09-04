@@ -145,7 +145,7 @@ buildAssociatorNamesRequest(void *parm)
 
   binCtx->oHdr = (OperationHdr *) req;
   binCtx->bHdr = &sreq->hdr;
-  binCtx->bHdr->flags = req->flags;
+  binCtx->bHdr->flags = 0;
   binCtx->rHdr = hdr;
   binCtx->bHdrSize = sizeof(*sreq); 
   binCtx->type = CMPI_ref;
