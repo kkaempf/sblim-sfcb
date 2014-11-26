@@ -2,9 +2,12 @@ Changes in 1.4.9
 ================
 
 New features:
+- [sfcb-tix:#97] Add a select timeout for req handlers
 
 Bugs fixed:
-
+- [sfcb-tix:#106] CMPIRole not passed to provider context
+- [sfcb-tix:#107] Quietly unpack schema at make postinstall
+- [sfcb-tix:#108] Some associatorname CIM operations hang
 
 Changes in 1.4.8
 ================
