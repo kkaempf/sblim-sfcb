@@ -93,7 +93,7 @@ sfcbCustomLib:   sfcCustomLib
 
 ## Enable basic authentication for HTTP and HTTPS connections
 ## Default is false
-doBasicAuth:    false
+doBasicAuth:    true
 
 ## Name of of the authenticaion library. Leave off the ".so"
 ## Default is: sfcBasicAuthentication
