@@ -2039,7 +2039,7 @@ initSSL()
                  *fdhp,
                  *sslCiphers;
   int             rc,
-                  escsp;
+                  sslopt;
 
   if (ctx)
     SSL_CTX_free(ctx);
@@ -2087,14 +2087,21 @@ initSSL()
   /*
    * Set options
    */
-  SSL_CTX_set_options(ctx, SSL_OP_ALL | 
-                           SSL_OP_NO_SSLv2 |
-                           SSL_OP_SINGLE_DH_USE);
+  long options = SSL_OP_ALL | SSL_OP_SINGLE_DH_USE | SSL_OP_NO_SSLv2;
 
-  if (!getControlBool("enableSslCipherServerPref", &escsp) && escsp) {
+  if (!getControlBool("sslNoSSLv3", &sslopt) && sslopt)
+    options |= SSL_OP_NO_SSLv3;
+  if (!getControlBool("sslNoTLSv1", &sslopt) && sslopt)
+    options |= SSL_OP_NO_TLSv1;
+  _SFCB_TRACE(1, ("---  sslNoSSLv3=%s, sslNoTLSv1=%s",
+      (options & SSL_OP_NO_SSLv3 ? "true" : "false"),
+      (options & SSL_OP_NO_TLSv1 ? "true" : "false")));
+
+  if (!getControlBool("enableSslCipherServerPref", &sslopt) && sslopt) {
     _SFCB_TRACE(1, ("---  enableSslCipherServerPref = true"));
-    SSL_CTX_set_options(ctx, SSL_OP_CIPHER_SERVER_PREFERENCE);
+    options |= SSL_OP_CIPHER_SERVER_PREFERENCE;
   }
+  SSL_CTX_set_options(ctx, options);
 
   /*
    * Set valid ciphers
