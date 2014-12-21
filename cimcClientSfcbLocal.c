@@ -73,6 +73,9 @@ extern int      localClientMode;
 
 extern void     sunsetControl();
 
+int             httpProcIdX;
+long            httpReqHandlerTimeout;
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -2032,6 +2035,16 @@ CMPIConnect2(ClientEnv *ce, const char *hn, const char *scheme,
   cc->certData.certFile = certFile ? strdup(certFile) : NULL;
   cc->certData.keyFile = keyFile ? strdup(keyFile) : NULL;
 
+  char *lcto_env = getenv("SFCC_LOCALCONNECT_CLIENT_TIMEOUT");
+  if (lcto_env) {
+    long lcto = (long) atoi(lcto_env);
+    if (lcto > 0) {
+      /* Of course we are not using http here, but this is
+       * a simple way to make spGetMsg() obey the timeout */
+      httpReqHandlerTimeout = (lcto < 5) ? 5 : lcto;
+      httpProcIdX = 1;
+    }
+  }
   return (Client *) cc;
 }
 
