@@ -662,6 +662,19 @@ int dbpDaemon(int argc, char *argv[], int sslMode, int sfcbPid) {//int argc, cha
        getControlChars("sslKeyFilePath", &fnk);
        if (SSL_CTX_use_PrivateKey_file(ctx, fnk, SSL_FILETYPE_PEM) != 1)
            intSSLerror("Error loading private key from file");
+
+       long options = SSL_OP_ALL | SSL_OP_SINGLE_DH_USE | SSL_OP_NO_SSLv2;
+       int sslopt;
+
+       if (!getControlBool("sslNoSSLv3", &sslopt) && sslopt)
+         options |= SSL_OP_NO_SSLv3;
+       if (!getControlBool("sslNoTLSv1", &sslopt) && sslopt)
+         options |= SSL_OP_NO_TLSv1;
+       _SFCB_TRACE(1, ("---  sslNoSSLv3=%s, sslNoTLSv1=%s",
+           (options & SSL_OP_NO_SSLv3 ? "true" : "false"),
+           (options & SSL_OP_NO_TLSv1 ? "true" : "false")));
+
+        SSL_CTX_set_options(ctx, options);
     }
 #endif
 
