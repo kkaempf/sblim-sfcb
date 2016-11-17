@@ -184,6 +184,13 @@ sslClientTrustStore: @sysconfdir@/sfcb/client.pem
 ## Default is sfcCertificateAuthentication
 certificateAuthLib:   sfcCertificateAuthentication
 
+## When set to true, disable the indicated SSL/TLS protocol. This sets
+## the corresponding openssl option SSL_OP_NO_SSLv3 or SSL_OP_NO_TLSv1.
+## See man SSL_CTX_set_options(3) for details.
+## Default is false for both
+#sslNoSSLv3: false
+#sslNoTLSv1: false
+
 ##---------------------------------- UDS --------------------------------------
 ## These options only apply if configured with --enable-uds
 
