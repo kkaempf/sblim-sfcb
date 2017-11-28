@@ -53,15 +53,15 @@ done
 if [ "$help" = "1" ]
 then
     usage
-    echo -e "\t-h display help message"
-    echo -e "\t-f force repository creation"
-    echo -e "\t-i do not migrate instances from previous repository (default=do migrate)"
-    echo -e "\t-X create repository in non-native format as specifed by argument"
-    echo -e "\t-s specify staging directory [@localstatedir@/lib/sfcb/stage]"
-    echo -e "\t-r specify repository directory [@localstatedir@/lib/sfcb/registration]"
-    echo -e "\t-c specify directory containing CIM Schema MOFs [@datadir@/sfcb/CIM]"
-    echo -e "\t-t create tiny class repository by omitting inheritance information"
-    echo -e "\t-z compress repository with gzip"
+    echo "	-h display help message"
+    echo "	-f force repository creation"
+    echo "	-i do not migrate instances from previous repository (default=do migrate)"
+    echo "	-X create repository in non-native format as specifed by argument"
+    echo "	-s specify staging directory [@localstatedir@/lib/sfcb/stage]"
+    echo "	-r specify repository directory [@localstatedir@/lib/sfcb/registration]"
+    echo "	-c specify directory containing CIM Schema MOFs [@datadir@/sfcb/CIM]"
+    echo "	-t create tiny class repository by omitting inheritance information"
+    echo "	-z compress repository with gzip"
     echo
     echo "Use to create sfcb provider registration and class repository."
     exit 0

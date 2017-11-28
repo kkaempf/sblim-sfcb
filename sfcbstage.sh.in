@@ -40,10 +40,10 @@ done
 if [ "$help" = "1" ]
 then
     usage
-    echo -e "\t-h display help message"
-    echo -e "\t-n specify CIM namespace [root/cimv2]"
-    echo -e "\t-s specify staging directory [@localstatedir@/lib/sfcb/stage]"
-    echo -e "\t-r specify sfcb registration file"
+    echo "	-h display help message"
+    echo "	-n specify CIM namespace [root/cimv2]"
+    echo "	-s specify staging directory [@localstatedir@/lib/sfcb/stage]"
+    echo "	-r specify sfcb registration file"
     echo
     echo Use this command to copy registration files to the sfcb staging area.
     exit 0

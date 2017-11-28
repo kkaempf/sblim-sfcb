@@ -30,8 +30,8 @@ if ! which wbemcat > /dev/null; then
 fi
 
 # ----------------------------------------------------------------------------
-function _runxmltest {
-   typeset _TESTXML=$1
+_runxmltest() {
+   _TESTXML=$1
 
    _TEST=${_TESTXML%.xml}
    _TESTDIR=$( dirname $_TEST)
@@ -41,8 +41,9 @@ function _runxmltest {
    echo -n "Running test $_TESTXML ... "
 
    # Make sure we will be able to write the result file
-   if [[ ! -w $_TESTDIR ]]; then
-      echo "FAILED"; echo -e "\tCannot write to $_TESTDIR"
+   if [ ! -w $_TESTDIR ]; then
+      echo "FAILED"
+      echo "	Cannot write to $_TESTDIR"
       continue
    fi
 
@@ -52,21 +53,24 @@ function _runxmltest {
    # Send the test CIM-XML to the CIMOM and save the response, 
    # stripping off the http header
    wbemcat $_TESTXML | awk '/<\?xml.*/{xml=1} {if (xml) print}' > $_TESTRESULT
-   if [[ $? -ne 0 ]]; then
-      echo "FAILED"; echo -e "\twbemcat failed to send CIM-XML request"
+   if [ $? -ne 0 ]; then
+      echo "FAILED"
+      echo "	wbemcat failed to send CIM-XML request"
       _RC=1
       continue
    fi
 
    # If we dont yet have the expected result file, then save this response 
    # as the (new) expected result
-   if [[ ! -f $_TESTOK ]]; then
-      echo "OK"; echo -e "\tSaving response as $_TESTOK"
+   if [ ! -f $_TESTOK ]; then
+      echo "OK"
+      echo "	Saving response as $_TESTOK"
       mv $_TESTRESULT $_TESTOK
  
    # Compare the response XML against the expected XML for differences
    elif ! diff --brief $_TESTOK $_TESTRESULT > /dev/null; then
-      echo "FAILED"; echo -e "\tCheck $_TESTRESULT for errors"
+      echo "FAILED"
+      echo "	Check $_TESTRESULT for errors"
       _RC=1;
       continue
 
@@ -78,10 +82,10 @@ function _runxmltest {
 }
 # ----------------------------------------------------------------------------
 
-if [[ -f $1 ]]; then
+if [ -f $1 ]; then
    _runxmltest $1
 else
-   if [[ -d $1 ]]; then
+   if [ -d $1 ]; then
       _DIR=$1
    else
       _DIR=./
