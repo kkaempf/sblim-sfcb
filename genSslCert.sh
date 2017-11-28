@@ -14,6 +14,13 @@ then
     echo "WARNING: server.pem SSL Certificate file already exists."
     echo "         old file will be kept intact."
     DO_SERVER=no
+
+    # On updates from older versions that did not use clist.pem, we
+    # need to properly link the file here or service will not start
+    if [ ! -e $TARGETDIR/clist.pem ]
+    then
+        ln -s server.pem $TARGETDIR/clist.pem
+    fi
 fi
 
 if [ -f $TARGETDIR/client.pem ]
