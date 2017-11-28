@@ -6,7 +6,8 @@
 **==============================================================================
 */
 
-
+%parse-param { void *parm };
+%lex-param { void *parm };
 %{
 
 /*
@@ -67,15 +68,13 @@
 #include "queryOperation.h"
 #include "mlog.h"
 
-#define YYPARSE_PARAM parm
-#define YYLEX_PARAM parm
 #define YYERROR_VERBOSE 1 
  
 extern int yylex(void *);
 extern void sfcQueryErr(char*,char*,char*);
 extern void yyError(char*);
 extern void yyerror(char*);
-extern void sfcQueryError(const char* s1);
+extern void sfcQueryError(void *, const char* s1);
 extern char * qsStrDup(QLStatement *qs, char *str);
 extern QLOperand* newNameQueryOperand(QLStatement *qs, char* val);
 

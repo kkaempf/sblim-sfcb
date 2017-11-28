@@ -72,7 +72,7 @@ sfcQueryErr(char *s1, char *s2, char *s3)
 }
 
 void
-sfcQueryError(char *s1)
+sfcQueryError(void __attribute__ ((unused)) *unused, char *s1)
 {
   mlogf(M_ERROR, M_SHOW, "--- %s\n", s1);
 }

@@ -54,8 +54,6 @@ int updateMethodParamTypes(RequestHdr * hdr);
 // Define the global parser state object:
 //
 
-#define YYPARSE_PARAM parm
-#define YYLEX_PARAM parm
 #define YYERROR_VERBOSE 1
 
 
@@ -72,7 +70,7 @@ extern int      noChunking;
 
 
 
-extern int yyerror(void* parm, const char*);
+extern int yyerror(void *, const char *);
 extern int yylex (void *lvalp, ParserControl *parm);
 //extern MsgSegment setInstanceMsgSegment(const CMPIInstance *ci);
 
@@ -1796,8 +1794,9 @@ buildEnumerationCountRequest(void *parm)
 
 %}
 
-%pure_parser
-%parse-param { void* parm }
+%pure-parser
+%parse-param { void* parm };
+%lex-param { void *parm };
 
 /*
 **==============================================================================
