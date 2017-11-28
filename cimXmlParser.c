@@ -54,7 +54,7 @@ Throw(XmlBuffer __attribute__ ((unused)) *xb, char *msg)
 static XmlBuffer *
 newXmlBuffer(char *s)
 {
-  XmlBuffer      *xb = malloc(sizeof(*xb));
+  XmlBuffer      *xb = calloc(1, sizeof(*xb));
   xb->base = xb->cur = (char *) strdup(s);
   xb->last = xb->cur + strlen(xb->cur);
   xb->nulledChar = 0;
@@ -1713,6 +1713,8 @@ scanCimXmlRequest(CimRequestContext *ctx, char *xmlData, int *rc)
 {
   ParserControl   control;
   *rc=0;
+
+  memset(&control, 0, sizeof(control));
 
   XmlBuffer      *xmb = newXmlBuffer(xmlData);
   control.xmb = xmb;

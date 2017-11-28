@@ -1341,7 +1341,7 @@ intInvokeProvider(BinRequestContext * ctx, ComSockets sockets)
           object[i].length);
   }
 
-  buf = malloc(l + 8);
+  buf = calloc(1, l + 8);
 
   if (ctx->noResp & 1) {
     hdr->options |= BRH_NoResp;

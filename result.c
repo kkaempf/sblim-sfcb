@@ -91,7 +91,7 @@ prepResultBuffer(NativeResult * nr, unsigned long length)
     nr->dMax *= 2;
 
   nr->dNext = 0;
-  nr->data = malloc(nr->dMax);
+  nr->data = calloc(1, nr->dMax);
 
   nr->sMax = nr->dMax / 400;
   nr->sNext = 0;

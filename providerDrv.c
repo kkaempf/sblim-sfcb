@@ -1177,7 +1177,7 @@ makeSafeResponse(BinResponseHdr* hdr, BinResponseHdr** out)
     len += (hdr->object[i].type == MSG_SEG_CHARS ? PADDED_LEN(hdr->object[i].length) : hdr->object[i].length);
   }
 
-  outHdr = malloc(len +rvl + 8);
+  outHdr = calloc(1, len +rvl + 8);
   memcpy(outHdr, hdr, size);
 
   if (rvl) {

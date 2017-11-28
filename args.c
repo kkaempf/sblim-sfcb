@@ -207,6 +207,7 @@ __new_empty_args(int mm_add, CMPIStatus *rc)
                  *tArgs;
   int             state;
 
+  memset(&args, 0, sizeof(args));
   args.args = a;
   tArgs = memAddEncObj(mm_add, &args, sizeof(args), &state);
   tArgs->mem_state = state;

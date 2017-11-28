@@ -225,12 +225,12 @@ addClStringN(ClObjectHdr * hdr, const char *str, unsigned int length)
     for (; nmax <= l; nmax *= 2);
     buf =
         setStrBufPtr(hdr,
-                     malloc(((nmax - 1) * sizeof(char)) +
-                            sizeof(ClStrBuf)));
+                     calloc(1, ((nmax - 1) * sizeof(char)) +
+                               sizeof(ClStrBuf)));
     buf->bMax = nmax;
     buf->bUsed = buf->iUsed = 0;
     buf->iMax = 16;
-    setStrIndexPtr(buf, malloc(sizeof(*buf->indexPtr) * 16));
+    setStrIndexPtr(buf, calloc(1, sizeof(*buf->indexPtr) * 16));
     hdr->flags |= HDR_Rebuild;
   }
 
