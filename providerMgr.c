@@ -361,6 +361,9 @@ lookupProviders(long type, char *className, char *nameSpace,
 
   _SFCB_ENTER(TRACE_PROVIDERMGR, "lookupProviders");
 
+  if (className == NULL)
+    _SFCB_RETURN(NULL);
+
   id = malloc(strlen(nameSpace) + strlen(className) + 8);
   strcpy(id, nameSpace);
   strcat(id, "|");
