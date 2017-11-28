@@ -83,7 +83,7 @@ long            httpReqHandlerTimeout;
  * Kindly null terminate, always, even if might overwrite
  * the last char of the truncated string. 
 */
-inline char *strncpy_kind(char *to, char *from, size_t size) {
+char *strncpy_kind(char *to, char *from, size_t size) {
   strncpy(to, from, size);
   *(to + size - 1) = '\0';
   return to;
