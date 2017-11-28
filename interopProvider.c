@@ -1667,11 +1667,12 @@ InteropProviderInvokeMethod(CMPIMethodMI * mi,
     if (ha) {
       if (ha->useCount) {
         setStatus(&st, CMPI_RC_ERR_FAILED, "Handler in use");
-      } else
+      } else {
         removeHandler(ha, key);
         LDcount--;
         sfcbIndAuditLog("RemoveHandler-> ", 
                         CMGetCharPtr(CMObjectPathToString(op, NULL)));
+      }
     } else {
       setStatus(&st, CMPI_RC_ERR_NOT_FOUND, "Handler object not found");
     }
