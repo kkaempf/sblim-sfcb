@@ -7,3 +7,5 @@ ExecStart=${exec_prefix}/sbin/sfcbd
 
 [Install]
 WantedBy=multi-user.target
+Alias=sfcbd
+Alias=sfcb
