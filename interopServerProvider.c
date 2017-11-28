@@ -60,6 +60,10 @@ static const CMPIBroker *_broker;
 static CMPIStatus invClassSt = { CMPI_RC_ERR_INVALID_CLASS, NULL };
 static CMPIInstance *ISinst; //Global instance for IndicationService
 
+#ifndef UINT16_MAX
+#define UINT16_MAX             (65535U)
+#endif
+
 // ------------------------------------------------------------------
 
 static char    *
