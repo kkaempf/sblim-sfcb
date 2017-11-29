@@ -245,7 +245,9 @@ genRequest(CurlData * cd, char *url, char **msg)
     rv = curl_easy_setopt(cd->mHandle, CURLOPT_FOLLOWLOCATION, 1);
     rv = curl_easy_setopt(cd->mHandle, CURLOPT_UNRESTRICTED_AUTH, 0); // off for now
     rv = curl_easy_setopt(cd->mHandle, CURLOPT_MAXREDIRS, 3); // prevent loop
+#ifdef CURLOPT_POSTREDIR
     rv = curl_easy_setopt(cd->mHandle, CURLOPT_POSTREDIR, CURL_REDIR_POST_ALL);
+#endif
   }
 
   /*
